@@ -1,0 +1,248 @@
+{
+  "classification": "COORDINATE_CONTRACT_VERIFIED_NATIVE_SIMULATE_UNSUITABLE_EXTERNAL_SKIP_SIM_EXPORTABLE_MIMIC_BLOCKED",
+  "coordinate_transform": {
+    "application_formula": "T_W_G = T_W_O @ T_O_G",
+    "cad_contact_helper_is_gripper_frame": false,
+    "contact_run_closure_max_abs": 2.220446049250313e-16,
+    "gripper_frame": "/World/follower_left/vx300s_left/follower_left_ee_gripper_link",
+    "inverse_placement_formula": "T_W_O = T_W_G @ inverse(T_O_G)",
+    "object_frame": "/World/ALOHA1GraspEditorSession/Bottle500",
+    "object_frame_semantics": "BOTTLE_BOTTOM_CENTER_LOCAL_PLUS_Z_TO_MOUTH",
+    "status": "PASS",
+    "stored_transform": "T_O_G"
+  },
+  "external_programmatic_close_skip_sim": {
+    "bilateral_contact": "PASS",
+    "contact_point_count": 125,
+    "derived_export": {
+      "active_joints": [
+        "left_finger"
+      ],
+      "classification": "DIAGNOSTIC_ONLY_NOT_FINAL_CONTROL_MAPPING",
+      "grasp_name": "grasp_0",
+      "gripper_frame": "/World/follower_left/vx300s_left/follower_left_ee_gripper_link",
+      "object_frame": "/World/ALOHA1GraspEditorSession/Bottle500",
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-grasp-editor-ik-evidence/frame_contract_correction/external_contact_skip_sim_run03_cross_axis/grasp_editor_variant_b_skip_sim_derived.yaml",
+      "right_finger_policy": "RUNTIME_OBSERVER_NOT_NATIVE_EXPORT_FIELD",
+      "sha256": "071da82aecf3cc983a93dc76eef482ff65873d866a69e8ff8be5c6ebbae2d793",
+      "size_bytes": 570,
+      "status": "PASS"
+    },
+    "derived_yaml_policy": "RESTORE_ONLY_VERIFIED_OPEN_PREGRASP_0.057_M",
+    "execution_mode": "EXTERNAL_CONTACT_SKIP_SIM",
+    "failure_reasons": [
+      "MIMIC_ACCURACY_FAILED"
+    ],
+    "ik_promotion_allowed": false,
+    "maximum_impulse_ns": 0.0005472996575105919,
+    "mimic_accuracy": "FAIL",
+    "mimic_residual_m": 0.0017794594168663025,
+    "mimic_tolerance_m": 0.001,
+    "minimum_separation_m": -0.00012263594544492662,
+    "native_raw_export": {
+      "active_joints": [
+        "left_finger"
+      ],
+      "grasp_name": "grasp_0",
+      "gripper_frame": "/World/follower_left/vx300s_left/follower_left_ee_gripper_link",
+      "object_frame": "/World/ALOHA1GraspEditorSession/Bottle500",
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-grasp-editor-ik-evidence/frame_contract_correction/external_contact_skip_sim_run03_cross_axis/grasp_editor_variant_b_native_raw.yaml",
+      "right_finger_policy": "RUNTIME_OBSERVER_NOT_NATIVE_EXPORT_FIELD",
+      "sha256": "044663262242f3127b649b0df03f66faa71679ca17e5c9691423854b9f6f782f",
+      "size_bytes": 563,
+      "status": "PASS"
+    },
+    "run_report": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-grasp-editor-ik-evidence/frame_contract_correction/external_contact_skip_sim_run03_cross_axis/grasp_editor_variant_b_gui_report.json",
+      "cleanup_errors": [],
+      "sha256": "74b5c655c0f49da1149ba63ae1359ec69d43e1b337673d1ba516dec9fa203738"
+    },
+    "screenshot_review": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_grasp_editor_external_skip_sim_screenshot_review.json",
+      "all_raw_and_annotated_visual_reviews": "PASS",
+      "numeric_failure_preserved": true,
+      "sha256": "c5b72f744dc6a08be99cc020fc542a4086e6c3c2e2a964f103fa07235068f32c",
+      "status": "PARTIAL_NUMERIC_MIMIC_FAIL"
+    },
+    "status": "FAIL",
+    "unexpected_robot_contact": false
+  },
+  "hard_blockers": [
+    {
+      "id": "HARD_BLOCKER_MIMIC_ACCURACY",
+      "reason": "The right-finger mimic relation exceeds the 1 mm gate without object contact and is amplified under bilateral bottle contact.",
+      "status": "OPEN"
+    },
+    {
+      "id": "HARD_BLOCKER_UNCALIBRATED_MIMIC_PARAMETERS",
+      "reason": "No measured or supplier-confirmed mimic stiffness/damping data authorizes parameter tuning.",
+      "status": "OPEN"
+    }
+  ],
+  "joint_settings": {
+    "active_joint": "left_finger",
+    "cad_contact_candidate_position_m": 0.048316874538855845,
+    "cad_contact_candidate_source": "SUPPLIER_CAD_CLEARANCE_GRASP_CANDIDATE",
+    "fully_closed_position_m": 0.021,
+    "fully_closed_source": "USD_AND_RUNTIME_LEFT_FINGER_LOWER_LIMIT_READBACK",
+    "mimic_observer_joint": "right_finger",
+    "official_semantics": "Position When Closed is the DOF position considered fully closed",
+    "open_position_m": 0.057,
+    "previous_conflation_status": "CORRECTED",
+    "previous_error": "CAD contact candidate was incorrectly used as Position When Closed",
+    "status": "PASS"
+  },
+  "local_physx_schema": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/extscache/omni.usd.schema.physx-107.3.26+107.3.3.lx64.r.cp311.u353/plugins/PhysxSchema/resources/schema.usda",
+    "custom_property_effect_status": "INCONCLUSIVE",
+    "custom_property_schema_status": "NOT_DECLARED_BY_LOCAL_PHYSX_MIMIC_SCHEMA",
+    "declared_mimic_properties": [
+      "gearing",
+      "offset",
+      "referenceJoint",
+      "referenceJointAxis"
+    ],
+    "parameter_tuning_performed": false,
+    "runtime_custom_properties_seen": [
+      "naturalFrequency",
+      "dampingRatio"
+    ],
+    "sha256": "fe075bce4bde5ba7db69c6ccef0c4c26909336ab34c619129fc276f7cb4d7abc",
+    "version": "107.3.26"
+  },
+  "local_source_evidence": {
+    "grasp_tester": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.robot_setup.grasp_editor/isaacsim/robot_setup/grasp_editor/grasp_tester.py",
+      "sha256": "457b2ab0dba87eae51d5c1d2114c981379f3242511611a6b6c280065a2a46fe3"
+    },
+    "ui_builder": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.robot_setup.grasp_editor/isaacsim/robot_setup/grasp_editor/ui_builder.py",
+      "sha256": "bd48e3c3c0e5587d9f790e86a5b1b843aa4b64cde26420af09f5f1f4dbf29823"
+    }
+  },
+  "mimic_load_comparison": {
+    "amplification_ratio": 14.624382324244364,
+    "classification": "OBJECT_CONTACT_AMPLIFIES_PERSISTENT_MIMIC_ERROR",
+    "contact_minus_no_contact_m": 0.01935117319226265,
+    "contact_residual_m": 0.020771507173776627,
+    "no_contact_residual_m": 0.001420333981513977,
+    "status": "FAIL",
+    "tolerance_m": 0.001
+  },
+  "native_raw_yaml": {
+    "active_joints": [
+      "left_finger"
+    ],
+    "grasp_name": "grasp_0",
+    "gripper_frame": "/World/follower_left/vx300s_left/follower_left_ee_gripper_link",
+    "object_frame": "/World/ALOHA1GraspEditorSession/Bottle500",
+    "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-grasp-editor-ik-evidence/frame_contract_correction/native_grasp_editor_variant_b_fully_closed_contact/grasp_editor_variant_b_native_raw.yaml",
+    "right_finger_policy": "RUNTIME_OBSERVER_NOT_NATIVE_EXPORT_FIELD",
+    "sha256": "8a477af435b24e7c93a2d60ddfea6f1213097967f52a124b001c73a2a60b41fc",
+    "size_bytes": 545,
+    "status": "PASS"
+  },
+  "native_simulate_suitability": {
+    "classification": "NATIVE_SIMULATE_NOT_ACCEPTABLE_AS_SOLE_ALOHA_GRASP_GATE",
+    "contact_case": {
+      "bilateral_physical_contact": true,
+      "mimic_residual_m": 0.020771507173776627,
+      "native_success": true,
+      "physical_contact_point_count": 316
+    },
+    "local_tester_logic": {
+      "consequence": "A drive that stops short of the closed target can produce native success without object contact.",
+      "direct_contact_pair_requirement": false,
+      "failure_if_active_joint_reaches_fully_closed": true,
+      "stability_threshold_m": 0.0001
+    },
+    "no_contact_control": {
+      "false_positive_verified": true,
+      "mimic_residual_m": 0.001420333981513977,
+      "native_success": true,
+      "physical_contact_point_count": 0,
+      "placement_classification": "NO_OBJECT_CONTACT_CONTROL_NOT_TASK_PLACEMENT"
+    },
+    "official_supported_fallback": "EXTERNAL_PROGRAMMATIC_COUPLED_MOTION_THEN_SKIP_SIM",
+    "status": "FAIL"
+  },
+  "next_gates": {
+    "external_programmatic_grasp_then_skip_sim": "FAIL_MIMIC_ACCURACY",
+    "five_random_bottle_videos": "NOT_RUN",
+    "ik": "NOT_RUN"
+  },
+  "official_source": {
+    "confirmed_points": [
+      "Grasp position/orientation is gripper relative to object.",
+      "Position When Closed means fully closed.",
+      "Only active gripper DOFs are exported.",
+      "Complicated coupled grippers may be driven programmatically and exported with Skip Sim."
+    ],
+    "url": "https://docs.isaacsim.omniverse.nvidia.com/5.1.0/robot_simulation/grasp_editor.html",
+    "version_scope": "Isaac Sim 5.1.0"
+  },
+  "real_robot_connected": false,
+  "remote_192_168_1_103_accessed": false,
+  "runtime": {
+    "grasp_editor": "2.0.20",
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physx": "107.3.26"
+  },
+  "schema_version": 1,
+  "scope": "follower_left Grasp Editor authoring before IK; no dynamic task acceptance",
+  "screenshot_evidence": {
+    "contact_run": [
+      {
+        "capture_method": "KIT_SWAPCHAIN_CAPTURE",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-grasp-editor-ik-evidence/frame_contract_correction/native_grasp_editor_variant_b_fully_closed_contact/grasp_editor_variant_b_configured_raw.png",
+        "phase": "CONFIGURED_BEFORE_SIMULATE",
+        "sha256": "31eec12aa77baf43067a95eafeb0b7cdd222f7315f6ae380c9e3811d7fecf90f",
+        "sha256_readback": "31eec12aa77baf43067a95eafeb0b7cdd222f7315f6ae380c9e3811d7fecf90f",
+        "size_bytes": 999602,
+        "visual_model_review_note": "Full arm and GUI are visible, but the fingertip contact region is too small for final contact review.",
+        "visual_model_review_status": "PARTIAL"
+      },
+      {
+        "capture_method": "KIT_SWAPCHAIN_CAPTURE",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-grasp-editor-ik-evidence/frame_contract_correction/native_grasp_editor_variant_b_fully_closed_contact/grasp_editor_variant_b_simulated_raw.png",
+        "phase": "SIMULATED_RESULT",
+        "sha256": "43fa1e665db4bb9164294ca11e14b6a02fd9f36fee20c5e0475190ed614b4178",
+        "sha256_readback": "43fa1e665db4bb9164294ca11e14b6a02fd9f36fee20c5e0475190ed614b4178",
+        "size_bytes": 1089631,
+        "visual_model_review_note": "Full arm and GUI are visible, but the fingertip contact region is too small for final contact review.",
+        "visual_model_review_status": "PARTIAL"
+      }
+    ],
+    "no_contact_control": [
+      {
+        "capture_method": "KIT_SWAPCHAIN_CAPTURE",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-grasp-editor-ik-evidence/frame_contract_correction/native_grasp_editor_variant_b_fully_closed_no_contact/grasp_editor_variant_b_configured_raw.png",
+        "phase": "CONFIGURED_BEFORE_SIMULATE",
+        "sha256": "e67bbe43929aa3e078a3094543afd0d94d9cb6b171858767181ba082157478fe",
+        "sha256_readback": "e67bbe43929aa3e078a3094543afd0d94d9cb6b171858767181ba082157478fe",
+        "size_bytes": 674835,
+        "visual_model_review_note": "Control-only bottle relocation is not task geometry and must not be used as grasp visual evidence.",
+        "visual_model_review_status": "REJECTED"
+      },
+      {
+        "capture_method": "KIT_SWAPCHAIN_CAPTURE",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-grasp-editor-ik-evidence/frame_contract_correction/native_grasp_editor_variant_b_fully_closed_no_contact/grasp_editor_variant_b_simulated_raw.png",
+        "phase": "SIMULATED_RESULT",
+        "sha256": "76e229dc8842b35326fff7d7f8c9ef0299d676bec3c3f7e87f0e1757d0ee86a9",
+        "sha256_readback": "76e229dc8842b35326fff7d7f8c9ef0299d676bec3c3f7e87f0e1757d0ee86a9",
+        "size_bytes": 674569,
+        "visual_model_review_note": "Control-only bottle relocation is not task geometry and must not be used as grasp visual evidence.",
+        "visual_model_review_status": "REJECTED"
+      }
+    ],
+    "status": "PARTIAL"
+  },
+  "stage": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/table_support_alignment/1.0/aloha1_table_support_aligned_workcell.usda",
+    "sha256": "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c",
+    "source_modified": false
+  },
+  "status": "PARTIAL",
+  "task8": "NOT_RUN"
+}

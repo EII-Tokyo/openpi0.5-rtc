@@ -6,11 +6,11 @@ isaac:
   grasp_editor_extension: isaacsim.robot_setup.grasp_editor
   grasp_editor_version: 2.0.20
 stage:
-  path: /home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/aloha1_signal_correspondence_workcell.usda
-  sha256: d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf
+  path: /home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/table_support_alignment/1.0/aloha1_table_support_aligned_workcell.usda
+  sha256: 2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c
 prims:
   articulation: /World/follower_left/vx300s_left/root_joint
-  gripper_frame: /World/follower_left/vx300s_left/follower_left_gripper_link
+  gripper_frame: /World/follower_left/vx300s_left/follower_left_ee_gripper_link
   object: /World/ALOHA1GraspEditorSession/Bottle500
 bottle:
   usd_path: /home/eii/project/openpi0.5-rtc-reward-learning/assets/bottle_500ml/isaac/bottle_500ml_sim.usd
@@ -20,12 +20,24 @@ variant_b:
   active_joint: left_finger
   observer_joint: right_finger
   open_position_m: 0.057
-  closed_position_m: 0.021
+  fully_closed_position_m: 0.021
+  fully_closed_source: USD_AND_RUNTIME_LEFT_FINGER_LOWER_LIMIT_READBACK
+  cad_contact_candidate_position_m: 0.048316874538855845
+  cad_contact_candidate_source: SUPPLIER_CAD_CLEARANCE_GRASP_CANDIDATE
   observer_setup_position_m: -0.057
+  observer_cad_contact_candidate_position_m: -0.048316874538855845
   max_speed_m_s: 0.02
   max_effort_n: 5.0
 output:
-  root: /home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-grasp-editor-ik-evidence/grasp_editor_gui_raw
+  root: /home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-grasp-editor-ik-evidence/frame_contract_correction/external_contact_skip_sim_run03_cross_axis
+  native_skip_sim_yaml: /home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-grasp-editor-ik-evidence/frame_contract_correction/external_contact_skip_sim_run03_cross_axis/grasp_editor_variant_b_native_raw.yaml
+  derived_pregrasp_yaml: /home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-grasp-editor-ik-evidence/frame_contract_correction/external_contact_skip_sim_run03_cross_axis/grasp_editor_variant_b_skip_sim_derived.yaml
 status:
+  coordinate_contract: PASS
+  external_programmatic_close: PASS_BILATERAL_CONTACT
+  native_skip_sim_export: PASS
+  mimic_accuracy: FAIL
+  promotion: BLOCKED
   ik: NOT_RUN
+  five_random_horizontal_bottle_videos: NOT_RUN
   task8: NOT_RUN

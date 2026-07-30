@@ -1,0 +1,234 @@
+{
+  "annotation_history": [
+    {
+      "attempt": "draft_full_image_color_detection",
+      "reason": "Isaac UI borders and follower_right colors were mistaken for follower_left fingers, producing oversized boxes and a cross-image line.",
+      "status": "REJECTED_FALSE_COLOR_COMPONENTS"
+    },
+    {
+      "attempt": "retake_follower_left_viewport_roi",
+      "reason": "Color detection is bounded to the follower_left viewport-center ROI; labels and inward-surface band do not obscure the gripper.",
+      "status": "PASS"
+    }
+  ],
+  "camera": {
+    "distance_m": 0.44324244025917725,
+    "eye_world_m": [
+      0.19731211766852225,
+      -0.01906493306159973,
+      0.5048666514390573
+    ],
+    "policy": "RUNTIME_GRIPPER_BOTTLE_AABB_OBLIQUE_CLOSEUP",
+    "status": "PASS",
+    "subject_aabb_max_m": [
+      -0.19275535643100739,
+      0.03793700784444809,
+      0.39596131443977356
+    ],
+    "subject_aabb_min_m": [
+      -0.24933657050132751,
+      -0.07606687396764755,
+      0.3209213316440582
+    ],
+    "subject_paths": [
+      "/World/follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh",
+      "/World/ALOHA1GraspEditorSession/Bottle500"
+    ],
+    "subject_world_positions_m": [
+      [
+        -0.24931342899799347,
+        0.03793700784444809,
+        0.32104355096817017
+      ],
+      [
+        -0.24933657050132751,
+        -0.07606687396764755,
+        0.3209213316440582
+      ],
+      [
+        -0.19275535643100739,
+        -0.019095847383141518,
+        0.39596131443977356
+      ]
+    ],
+    "target_world_m": [
+      -0.22104596346616745,
+      -0.01906493306159973,
+      0.3584413230419159
+    ],
+    "viewport_camera_path": "/OmniverseKit_Persp"
+  },
+  "numeric_failure_reasons": [
+    "MIMIC_ACCURACY_FAILED"
+  ],
+  "numeric_gate": "FAIL",
+  "records": [
+    {
+      "acceptance": "PASS_CONTEXT_ONLY",
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-grasp-editor-ik-evidence/frame_contract_correction/external_contact_skip_sim_run03_cross_axis/annotated/grasp_editor_variant_b_configured_annotated.png",
+      "annotated_resolution": [
+        3500,
+        1800
+      ],
+      "annotated_sha256": "9e15c49671bd40dae0224628b186d11fe4e7e819ff7f0b182b1433f45bc87d6c",
+      "finger_bbox_xyxy": {
+        "left": [
+          1496,
+          577,
+          1508,
+          596
+        ],
+        "right": [
+          1385,
+          582,
+          1437,
+          635
+        ]
+      },
+      "follower_left_detection_roi_xyxy": [
+        1036,
+        270,
+        1728,
+        1260
+      ],
+      "phase": "CONFIGURED_BEFORE_SIMULATE",
+      "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-grasp-editor-ik-evidence/frame_contract_correction/external_contact_skip_sim_run03_cross_axis/grasp_editor_variant_b_configured_raw.png",
+      "raw_resolution": [
+        2880,
+        1800
+      ],
+      "raw_sha256": "a9e89e93555c83c1e094efa8e06f0f46596368b52959e43fedeecab6c1055754",
+      "visual_model_review": "PASS",
+      "visual_model_review_note": "Reviewed from actual pixels; geometry is visible and the open/contact pair is distinct. Numeric mimic failure remains.",
+      "visual_scope": "FULL_ARM_CONTEXT_OPEN"
+    },
+    {
+      "acceptance": "PASS_VISUAL_OPEN_STATE",
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-grasp-editor-ik-evidence/frame_contract_correction/external_contact_skip_sim_run03_cross_axis/annotated/grasp_editor_variant_b_configured_closeup_annotated.png",
+      "annotated_resolution": [
+        3500,
+        1800
+      ],
+      "annotated_sha256": "96830e3717bc09668365fafc71836e49b04bcc15f209a9433bd953792d53f179",
+      "finger_bbox_xyxy": {
+        "left": [
+          1445,
+          669,
+          1525,
+          807
+        ],
+        "right": [
+          1211,
+          670,
+          1286,
+          808
+        ]
+      },
+      "follower_left_detection_roi_xyxy": [
+        1036,
+        270,
+        1728,
+        1260
+      ],
+      "phase": "CONFIGURED_OPEN_CLOSEUP",
+      "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-grasp-editor-ik-evidence/frame_contract_correction/external_contact_skip_sim_run03_cross_axis/grasp_editor_variant_b_configured_closeup_raw.png",
+      "raw_resolution": [
+        2880,
+        1800
+      ],
+      "raw_sha256": "8378801fcc6e6240f9fd1f14d071e416ed04ddb47a943dd3000a06ed6cfe6d7b",
+      "visual_model_review": "PASS",
+      "visual_model_review_note": "Reviewed from actual pixels; geometry is visible and the open/contact pair is distinct. Numeric mimic failure remains.",
+      "visual_scope": "BILATERAL_FINGER_OPEN_GEOMETRY"
+    },
+    {
+      "acceptance": "PASS_CONTEXT_ONLY",
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-grasp-editor-ik-evidence/frame_contract_correction/external_contact_skip_sim_run03_cross_axis/annotated/grasp_editor_variant_b_external_contact_annotated.png",
+      "annotated_resolution": [
+        3500,
+        1800
+      ],
+      "annotated_sha256": "ce45bf720925d21651fd965ce141ba23e56d07c30acc8819a164a0c036ea1208",
+      "finger_bbox_xyxy": {
+        "left": [
+          1496,
+          582,
+          1504,
+          598
+        ],
+        "right": [
+          1387,
+          580,
+          1436,
+          634
+        ]
+      },
+      "follower_left_detection_roi_xyxy": [
+        1036,
+        270,
+        1728,
+        1260
+      ],
+      "phase": "EXTERNAL_CONTACT_SKIP_SIM_RESULT",
+      "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-grasp-editor-ik-evidence/frame_contract_correction/external_contact_skip_sim_run03_cross_axis/grasp_editor_variant_b_external_contact_raw.png",
+      "raw_resolution": [
+        2880,
+        1800
+      ],
+      "raw_sha256": "7fded0192be812e79b914ac5222611949c76abb666d9bbffc861e449bab5f992",
+      "visual_model_review": "PASS",
+      "visual_model_review_note": "Reviewed from actual pixels; geometry is visible and the open/contact pair is distinct. Numeric mimic failure remains.",
+      "visual_scope": "FULL_ARM_CONTEXT_EXTERNAL_CONTACT"
+    },
+    {
+      "acceptance": "PASS_VISUAL_CONTACT_STATE_NUMERIC_MIMIC_FAIL",
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-grasp-editor-ik-evidence/frame_contract_correction/external_contact_skip_sim_run03_cross_axis/annotated/grasp_editor_variant_b_external_contact_closeup_annotated.png",
+      "annotated_resolution": [
+        3500,
+        1800
+      ],
+      "annotated_sha256": "a923d276582070f746b5752218d7b0a2a5b5da509c351716a37204057d9afc69",
+      "finger_bbox_xyxy": {
+        "left": [
+          1445,
+          671,
+          1508,
+          807
+        ],
+        "right": [
+          1223,
+          671,
+          1283,
+          808
+        ]
+      },
+      "follower_left_detection_roi_xyxy": [
+        1036,
+        270,
+        1728,
+        1260
+      ],
+      "phase": "EXTERNAL_CONTACT_SKIP_SIM_RESULT_CLOSEUP",
+      "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-grasp-editor-ik-evidence/frame_contract_correction/external_contact_skip_sim_run03_cross_axis/grasp_editor_variant_b_external_contact_closeup_raw.png",
+      "raw_resolution": [
+        2880,
+        1800
+      ],
+      "raw_sha256": "b35ca179dc95901c8c57c3f25f7196433ab63c182cb25051c5def8b8861738b6",
+      "visual_model_review": "PASS",
+      "visual_model_review_note": "Reviewed from actual pixels; geometry is visible and the open/contact pair is distinct. Numeric mimic failure remains.",
+      "visual_scope": "BILATERAL_CONTACT_CLOSEUP"
+    }
+  ],
+  "run_report_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-grasp-editor-ik-evidence/frame_contract_correction/external_contact_skip_sim_run03_cross_axis/grasp_editor_variant_b_gui_report.json",
+  "run_report_sha256": "74b5c655c0f49da1149ba63ae1359ec69d43e1b337673d1ba516dec9fa203738",
+  "schema_version": 1,
+  "stage": {
+    "path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/table_support_alignment/1.0/aloha1_table_support_aligned_workcell.usda",
+    "sha256": "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c",
+    "size_bytes": 245
+  },
+  "status": "PARTIAL_NUMERIC_MIMIC_FAIL",
+  "task8": "NOT_RUN"
+}
