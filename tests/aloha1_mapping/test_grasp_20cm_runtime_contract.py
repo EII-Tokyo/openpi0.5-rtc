@@ -6,8 +6,11 @@ from pathlib import Path
 import pytest
 import yaml
 
+from tools.aloha1_mapping.grasp_20cm_controller import Phase
+from tools.aloha1_mapping.grasp_20cm_controller import RunObservation
 from tools.aloha1_mapping.grasp_20cm_runtime import EXPECTED_DOF_ORDER
 from tools.aloha1_mapping.grasp_20cm_runtime import FrozenInputError
+from tools.aloha1_mapping.grasp_20cm_runtime import Grasp20cmRuntimeAdapter
 from tools.aloha1_mapping.grasp_20cm_runtime import load_and_verify_config
 from tools.aloha1_mapping.grasp_20cm_runtime import validate_composed_stage
 from tools.aloha1_mapping.grasp_20cm_runtime import verify_frozen_file
@@ -44,6 +47,68 @@ class _FakeStage:
 
     def GetRootLayer(self) -> _FakeLayer:  # noqa: N802
         return self._layer
+
+
+class _FakeBindings:
+    def __init__(self) -> None:
+        self.prepared = 0
+        self.observed = 0
+        self.applied_phases: list[Phase] = []
+        self.kinematic_updates: list[bool] = []
+        self.finalized: list[tuple[Phase, str]] = []
+        self.reset_count = 0
+        self.observation = RunObservation(
+            frame=1,
+            time_s=1.0 / 60.0,
+            clearance_m=0.0,
+            bottle_dynamic=True,
+            support_contact=True,
+            bottle_linear_speed_m_s=0.0,
+            bottle_angular_speed_rad_s=0.0,
+            stage_contract_valid=True,
+            setup_complete=True,
+            open_target_reached=True,
+            descent_complete=True,
+            bilateral_contact=True,
+            preload_complete=True,
+            lift_waypoint_exhausted=False,
+            hold_drop_m=0.0,
+            finite_state=True,
+            persistent_penetration=False,
+            numerical_ejection=False,
+            forbidden_constraint=False,
+            ee_vertical_displacement_m=0.0,
+        )
+
+    def prepare_run(self) -> None:
+        self.prepared += 1
+
+    def read_observation(
+        self,
+        *,
+        frame: int,
+        time_s: float,
+    ) -> RunObservation:
+        self.observed += 1
+        return RunObservation(
+            **{
+                **self.observation.__dict__,
+                "frame": frame,
+                "time_s": time_s,
+            }
+        )
+
+    def apply_phase_target(self, phase: Phase) -> None:
+        self.applied_phases.append(phase)
+
+    def set_bottle_kinematic(self, *, enabled: bool) -> None:
+        self.kinematic_updates.append(enabled)
+
+    def finalize_run(self, phase: Phase, reason: str) -> None:
+        self.finalized.append((phase, reason))
+
+    def reset_session(self) -> None:
+        self.reset_count += 1
 
 
 def test_config_freezes_local_runtime_and_height_semantics() -> None:
@@ -157,3 +222,56 @@ def test_validate_composed_stage_fails_on_missing_prim() -> None:
             expected_root_prim="/World",
             required_prims=["/World/robot", "/World/table"],
         )
+
+
+def test_runtime_adapter_advances_exactly_one_physics_step() -> None:
+    bindings = _FakeBindings()
+    adapter = Grasp20cmRuntimeAdapter(bindings=bindings)
+    adapter.start()
+
+    transition = adapter.on_physics_step(1.0 / 60.0)
+
+    assert transition is not None
+    assert transition.current is Phase.SETUP_KINEMATIC
+    assert adapter.physics_step_count == 1
+    assert bindings.observed == 1
+    assert bindings.applied_phases == [Phase.SETUP_KINEMATIC]
+
+
+def test_release_transition_makes_bottle_dynamic_once() -> None:
+    bindings = _FakeBindings()
+    adapter = Grasp20cmRuntimeAdapter(bindings=bindings)
+    adapter.start()
+    adapter.on_physics_step(1.0 / 60.0)
+    adapter.on_physics_step(1.0 / 60.0)
+
+    assert adapter.phase is Phase.RELEASE_DYNAMIC
+    assert bindings.kinematic_updates == [False]
+
+
+def test_abort_stops_new_targets_without_freezing_bottle() -> None:
+    bindings = _FakeBindings()
+    adapter = Grasp20cmRuntimeAdapter(bindings=bindings)
+    adapter.start()
+    adapter.on_physics_step(1.0 / 60.0)
+    applied_before_abort = len(bindings.applied_phases)
+
+    transition = adapter.abort()
+    assert transition.current is Phase.ABORTED
+    assert adapter.on_physics_step(1.0 / 60.0) is None
+    assert len(bindings.applied_phases) == applied_before_abort
+    assert bindings.kinematic_updates == []
+    assert bindings.finalized == [(Phase.ABORTED, "user_abort")]
+
+
+def test_reset_calls_session_cleanup_and_returns_idle() -> None:
+    bindings = _FakeBindings()
+    adapter = Grasp20cmRuntimeAdapter(bindings=bindings)
+    adapter.start()
+    adapter.abort()
+
+    transition = adapter.reset()
+
+    assert transition.current is Phase.IDLE
+    assert bindings.reset_count == 1
+    assert adapter.physics_step_count == 0

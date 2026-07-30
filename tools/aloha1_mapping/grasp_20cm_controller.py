@@ -93,6 +93,7 @@ class RunObservation:
     stage_contract_valid: bool
     setup_complete: bool
     open_target_reached: bool
+    descent_complete: bool
     bilateral_contact: bool
     preload_complete: bool
     lift_waypoint_exhausted: bool
@@ -289,10 +290,10 @@ class Grasp20cmController:
                     frame=observation.frame,
                 )
         elif self.phase is Phase.VERTICAL_DESCENT:
-            if observation.bilateral_contact:
+            if observation.descent_complete:
                 return self._transition(
                     Phase.BILATERAL_CONTACT,
-                    "bilateral_contact_established",
+                    "vertical_descent_complete",
                     frame=observation.frame,
                 )
         elif self.phase is Phase.BILATERAL_CONTACT:

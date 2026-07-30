@@ -46,6 +46,7 @@ def _observation(**updates: object) -> RunObservation:
         "stage_contract_valid": True,
         "setup_complete": True,
         "open_target_reached": True,
+        "descent_complete": True,
         "bilateral_contact": True,
         "preload_complete": True,
         "lift_waypoint_exhausted": False,
@@ -159,6 +160,33 @@ def test_height_transition_uses_measured_bottle_clearance() -> None:
         replace(_observation(clearance_m=0.2000), frame=2)
     )
     assert transition.current is Phase.HEIGHT_REACHED
+
+
+def test_descent_completes_before_bilateral_contact_is_required() -> None:
+    controller = _controller_at(Phase.VERTICAL_DESCENT)
+    transition = controller.observe(
+        _observation(
+            descent_complete=True,
+            bilateral_contact=False,
+        )
+    )
+    assert transition.current is Phase.BILATERAL_CONTACT
+
+    transition = controller.observe(
+        replace(
+            _observation(bilateral_contact=False),
+            frame=2,
+        )
+    )
+    assert transition.current is Phase.BILATERAL_CONTACT
+
+    transition = controller.observe(
+        replace(
+            _observation(bilateral_contact=True),
+            frame=3,
+        )
+    )
+    assert transition.current is Phase.CLOSE_PRELOAD
 
 
 def test_lift_waypoint_exhaustion_fails_below_target() -> None:

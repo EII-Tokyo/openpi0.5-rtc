@@ -4,10 +4,18 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 import hashlib
+import math
 from pathlib import Path
-from typing import Any
+from typing import Any, Protocol
 
 import yaml
+
+from tools.aloha1_mapping.grasp_20cm_controller import ACTIVE_PHASES
+from tools.aloha1_mapping.grasp_20cm_controller import Grasp20cmController
+from tools.aloha1_mapping.grasp_20cm_controller import Grasp20cmThresholds
+from tools.aloha1_mapping.grasp_20cm_controller import Phase
+from tools.aloha1_mapping.grasp_20cm_controller import RunObservation
+from tools.aloha1_mapping.grasp_20cm_controller import TransitionRecord
 
 EXPECTED_DOF_ORDER = [
     "waist",
@@ -24,6 +32,111 @@ EXPECTED_DOF_ORDER = [
 
 class FrozenInputError(RuntimeError):
     """Raised before runtime mutation when a frozen input contract fails."""
+
+
+class RuntimeBindings(Protocol):
+    """Isaac-facing operations consumed by the one-step adapter."""
+
+    def prepare_run(self) -> None:
+        """Validate and prepare session-owned runtime state."""
+
+    def read_observation(
+        self,
+        *,
+        frame: int,
+        time_s: float,
+    ) -> RunObservation:
+        """Read one post-physics-step observation."""
+
+    def apply_phase_target(self, phase: Phase) -> None:
+        """Apply only the target associated with the current phase."""
+
+    def set_bottle_kinematic(self, *, enabled: bool) -> None:
+        """Set up or release the session-owned Bottle500."""
+
+    def finalize_run(self, phase: Phase, reason: str) -> None:
+        """Persist terminal runtime evidence."""
+
+    def reset_session(self) -> None:
+        """Remove and recreate only session-owned state."""
+
+
+class Grasp20cmRuntimeAdapter:
+    """Advance the pure controller exactly once per physics callback."""
+
+    def __init__(
+        self,
+        *,
+        bindings: RuntimeBindings,
+        thresholds: Grasp20cmThresholds | None = None,
+    ) -> None:
+        self.bindings = bindings
+        self.controller = Grasp20cmController(thresholds)
+        self.physics_step_count = 0
+        self._elapsed_s = 0.0
+        self._running = False
+
+    @property
+    def phase(self) -> Phase:
+        return self.controller.phase
+
+    @property
+    def is_running(self) -> bool:
+        return self._running
+
+    def start(self) -> TransitionRecord:
+        self.bindings.prepare_run()
+        transition = self.controller.start()
+        self._running = True
+        return transition
+
+    def on_physics_step(
+        self,
+        step_s: float,
+    ) -> TransitionRecord | None:
+        if not self._running:
+            return None
+        step_s = float(step_s)
+        if not math.isfinite(step_s) or step_s <= 0.0:
+            raise ValueError("physics step must be finite and positive")
+        self.physics_step_count += 1
+        self._elapsed_s += step_s
+        observation = self.bindings.read_observation(
+            frame=self.physics_step_count,
+            time_s=self._elapsed_s,
+        )
+        transition = self.controller.observe(observation)
+        if transition.current is Phase.RELEASE_DYNAMIC:
+            self.bindings.set_bottle_kinematic(enabled=False)
+        if transition.current in ACTIVE_PHASES:
+            self.bindings.apply_phase_target(transition.current)
+        else:
+            self._running = False
+            self.bindings.finalize_run(
+                transition.current,
+                transition.reason,
+            )
+        return transition
+
+    def abort(self) -> TransitionRecord:
+        if not self._running:
+            raise RuntimeError("cannot abort an inactive run")
+        transition = self.controller.request_abort()
+        self._running = False
+        self.bindings.finalize_run(
+            transition.current,
+            transition.reason,
+        )
+        return transition
+
+    def reset(self) -> TransitionRecord:
+        if self._running:
+            raise RuntimeError("cannot reset an active run")
+        self.bindings.reset_session()
+        transition = self.controller.reset()
+        self.physics_step_count = 0
+        self._elapsed_s = 0.0
+        return transition
 
 
 def sha256_file(path: Path) -> str:
