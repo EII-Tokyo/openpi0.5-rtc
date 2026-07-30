@@ -27,7 +27,7 @@ _GRASP_FIELDS = {
     "pregrasp_cspace_position",
 }
 _ORIENTATION_FIELDS = {"w", "xyz"}
-_FINGER_NAMES = {"left_finger", "right_finger"}
+_ACTIVE_FINGER_NAMES = {"left_finger"}
 
 
 class _StrictSafeLoader(yaml.SafeLoader):
@@ -99,11 +99,13 @@ def _nonempty_string(value: Any, *, label: str) -> str:
 
 def _finger_state(value: Any, *, label: str) -> dict[str, float]:
     mapping = _require_mapping(value, label=label)
-    if set(mapping) != _FINGER_NAMES:
-        raise ValueError(f"{label} requires exact left_finger/right_finger states")
+    if set(mapping) != _ACTIVE_FINGER_NAMES:
+        raise ValueError(
+            f"{label} requires exact active left_finger state; "
+            "right_finger is mimic-only"
+        )
     return {
         "left_finger": _finite_float(mapping["left_finger"], label=f"{label}.left_finger"),
-        "right_finger": _finite_float(mapping["right_finger"], label=f"{label}.right_finger"),
     }
 
 

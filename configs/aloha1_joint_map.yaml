@@ -72,7 +72,7 @@ robots:
     side: left
     robot_prefix: follower_left
     base_frame: follower_left_base_link
-    end_effector_frame: follower_left_gripper_link
+    end_effector_frame: follower_left_ee_gripper_link
     urdf_nonfixed_joint_order:
     - waist
     - shoulder
@@ -385,7 +385,7 @@ robots:
     side: right
     robot_prefix: follower_right
     base_frame: follower_right_base_link
-    end_effector_frame: follower_right_gripper_link
+    end_effector_frame: follower_right_ee_gripper_link
     urdf_nonfixed_joint_order:
     - waist
     - shoulder

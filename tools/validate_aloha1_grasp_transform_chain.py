@@ -23,6 +23,8 @@ import yaml
 from tools.aloha1_mapping.aloha_kinematics_reference import SOURCE_FILE
 from tools.aloha1_mapping.aloha_kinematics_reference import SOURCE_SHA256
 from tools.aloha1_mapping.aloha_kinematics_reference import fk_space
+from tools.aloha1_mapping.grasp_frame_contract import convert_contact_pose_to_gripper_pose
+from tools.aloha1_mapping.grasp_frame_contract import derive_urdf_fixed_transform
 from tools.aloha1_mapping.grasp_pose_geometry import derive_gripper_pose
 from tools.aloha1_mapping.grasp_pose_geometry import evaluate_pre_ik_grasp
 from tools.aloha1_mapping.isaac_grasp_spec import IsaacGrasp
@@ -32,48 +34,42 @@ from tools.aloha1_mapping.task_frames import rigid_transform
 from tools.aloha1_mapping.task_frames import validate_rigid_transform
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_GRASP_OUTPUT = (
-    ROOT
-    / "configs/aloha1_grasps/"
-    "bottle500_horizontal_body_grasp.isaac_grasp.yaml"
-)
-DEFAULT_REPORT_OUTPUT = (
-    ROOT
-    / "reports/aloha1_mapping/"
-    "aloha1_grasp_transform_validation.json"
-)
+DEFAULT_GRASP_OUTPUT = ROOT / "configs/aloha1_grasps/bottle500_horizontal_body_grasp.isaac_grasp.yaml"
+DEFAULT_REPORT_OUTPUT = ROOT / "reports/aloha1_mapping/aloha1_grasp_transform_validation.json"
 TASK_FRAME_CONFIG = Path("configs/aloha1_table_task_frame.yaml")
-HORIZONTAL_KINEMATICS_REPORT = Path(
-    "reports/aloha1_mapping/aloha1_task7b2_horizontal_kinematics.json"
+HORIZONTAL_KINEMATICS_REPORT = Path("reports/aloha1_mapping/aloha1_task7b2_horizontal_kinematics.json")
+BASELINE_CONFIG = Path("configs/aloha1_stationary_user_confirmed_baseline_v1.yaml")
+ORIENTATION_REPORT = Path("reports/aloha1_mapping/gripper_orientation_confirmation.json")
+GRASP_EDITOR_REPORT = Path("reports/aloha1_mapping/aloha1_grasp_editor_compatibility.json")
+GENERATED_FOLLOWER_LEFT_URDF = Path("generated/urdf/follower_left.urdf")
+VX300S_SRDF = Path(
+    "external/ros2-essentials/aloha_ws/src/"
+    "interbotix_ros_manipulators/interbotix_ros_xsarms/"
+    "interbotix_xsarm_moveit/config/srdf/vx300s.srdf.xacro"
 )
-BASELINE_CONFIG = Path(
-    "configs/aloha1_stationary_user_confirmed_baseline_v1.yaml"
+EXPECTED_STAGE_SHA256 = "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c"
+EXPECTED_BOTTLE_USD_SHA256 = "16427135f152ec951de2321fd689366d745a2dd389cbe260976631783952533e"
+GRIPPER_LINK_FRAME = "/World/follower_left/vx300s_left/follower_left_gripper_link"
+GRIPPER_FRAME = "/World/follower_left/vx300s_left/follower_left_ee_gripper_link"
+CONTACT_FRAME = (
+    "/World/follower_left/vx300s_left/follower_left_ee_gripper_link/aloha1_supplier_cad_clearance_grasp_frame"
 )
-ORIENTATION_REPORT = Path(
-    "reports/aloha1_mapping/gripper_orientation_confirmation.json"
+SUPPLIER_CAD_CLEARANCE_REPORT = Path("reports/aloha1_mapping/aloha1_supplier_cad_grasp_clearance.json")
+EXPECTED_SUPPLIER_CAD_CLEARANCE_REPORT_SHA256 = "9f23974af362dc92134a38633180360bfff8b54bc0a5eaefae8032e2240b91bc"
+SUPPLIER_CAD_SCREENSHOT_REVIEW = Path(
+    "reports/aloha1_mapping/aloha1_supplier_cad_grasp_clearance_screenshot_review.json"
 )
-GRASP_EDITOR_REPORT = Path(
-    "reports/aloha1_mapping/aloha1_grasp_editor_compatibility.json"
-)
-EXPECTED_STAGE_SHA256 = (
-    "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf"
-)
-EXPECTED_BOTTLE_USD_SHA256 = (
-    "16427135f152ec951de2321fd689366d745a2dd389cbe260976631783952533e"
-)
-GRIPPER_FRAME = (
-    "/World/follower_left/vx300s_left/follower_left_gripper_link"
-)
+EXPECTED_SUPPLIER_CAD_SCREENSHOT_REVIEW_SHA256 = "c7097b05654a3966c976690e5f0f79c3b2be69eaa51727f430998efae2bbe0f3"
 BOTTLE_OBJECT_FRAME = "/World/ALOHA1GraspEditorSession/Bottle500"
 GRASP_NAME = "horizontal_body_grasp"
 OPEN_FINGER_STATE_M = {
     "left_finger": 0.057,
-    "right_finger": -0.057,
 }
 CLOSED_FINGER_STATE_M = {
-    "left_finger": 0.021,
-    "right_finger": -0.021,
+    "left_finger": 0.048316874538855845,
 }
+RIGHT_FINGER_OPEN_M = -OPEN_FINGER_STATE_M["left_finger"]
+RIGHT_FINGER_CLOSED_M = -CLOSED_FINGER_STATE_M["left_finger"]
 
 
 def _sha256(path: Path) -> str:
@@ -85,10 +81,7 @@ def _sha256(path: Path) -> str:
 
 
 def _matrix_json(matrix: np.ndarray) -> list[list[float]]:
-    return [
-        [float(value) for value in row]
-        for row in np.asarray(matrix, dtype=np.float64)
-    ]
+    return [[float(value) for value in row] for row in np.asarray(matrix, dtype=np.float64)]
 
 
 def _closure_json(expected: np.ndarray, observed: np.ndarray) -> dict[str, float]:
@@ -109,10 +102,7 @@ def _passes(
     max_translation_error_m: float,
     max_rotation_error_rad: float,
 ) -> bool:
-    return bool(
-        error["translation_m"] <= max_translation_error_m
-        and error["rotation_rad"] <= max_rotation_error_rad
-    )
+    return bool(error["translation_m"] <= max_translation_error_m and error["rotation_rad"] <= max_rotation_error_rad)
 
 
 def evaluate_transform_chain(
@@ -149,20 +139,14 @@ def evaluate_transform_chain(
 
     ee_source = "EXPLICIT_MATRIX"
     if ee_from_gripper is None:
-        if (
-            isinstance(ee_frame, str)
-            and ee_frame
-            and ee_frame == gripper_frame
-        ):
+        if isinstance(ee_frame, str) and ee_frame and ee_frame == gripper_frame:
             validated["ee_from_gripper"] = np.eye(4, dtype=np.float64)
             ee_source = "IDENTITY_ALLOWED_FRAME_PATHS_IDENTICAL"
         else:
             failed_gates.append("missing_ee_from_gripper")
     else:
         try:
-            validated["ee_from_gripper"] = validate_rigid_transform(
-                ee_from_gripper
-            )
+            validated["ee_from_gripper"] = validate_rigid_transform(ee_from_gripper)
         except ValueError:
             failed_gates.append("invalid_ee_from_gripper")
 
@@ -183,25 +167,14 @@ def evaluate_transform_chain(
             "double_base_transform_applied": False,
         }
 
-    table_from_gripper = (
-        validated["table_from_object"]
-        @ validated["object_from_gripper"]
-    )
-    base_from_gripper = (
-        np.linalg.inv(validated["table_from_base"])
-        @ table_from_gripper
-    )
-    base_from_ee_gripper = (
-        validated["base_from_ee"] @ validated["ee_from_gripper"]
-    )
-    table_from_base_ee_gripper = (
-        validated["table_from_base"] @ base_from_ee_gripper
-    )
+    table_from_gripper = validated["table_from_object"] @ validated["object_from_gripper"]
+    base_from_gripper = np.linalg.inv(validated["table_from_base"]) @ table_from_gripper
+    base_from_ee_gripper = validated["base_from_ee"] @ validated["ee_from_gripper"]
+    table_from_base_ee_gripper = validated["table_from_base"] @ base_from_ee_gripper
 
     world_object_gripper_closure = _closure_json(
         table_from_gripper,
-        validated["table_from_object"]
-        @ validated["object_from_gripper"],
+        validated["table_from_object"] @ validated["object_from_gripper"],
     )
     base_ee_gripper_closure = _closure_json(
         table_from_gripper,
@@ -252,45 +225,29 @@ def evaluate_transform_chain(
         "base_from_gripper": base_from_gripper,
         "table_from_base_ee_gripper": table_from_base_ee_gripper,
     }
-    determinants = {
-        name: float(np.linalg.det(matrix[:3, :3]))
-        for name, matrix in matrices.items()
-    }
+    determinants = {name: float(np.linalg.det(matrix[:3, :3])) for name, matrix in matrices.items()}
     return {
         "status": "PASS" if not failed_gates else "FAIL",
         "failed_gates": sorted(set(failed_gates)),
         "convention": "T_A_B maps column vectors from B into A",
         "multiplication_order": {
-            "table_from_gripper": (
-                "table_from_object @ object_from_gripper"
-            ),
-            "base_from_gripper": (
-                "inverse(table_from_base) @ table_from_gripper"
-            ),
-            "base_from_ee": (
-                "base_from_gripper @ inverse(ee_from_gripper)"
-            ),
+            "table_from_gripper": ("table_from_object @ object_from_gripper"),
+            "base_from_gripper": ("inverse(table_from_base) @ table_from_gripper"),
+            "base_from_ee": ("base_from_gripper @ inverse(ee_from_gripper)"),
         },
         "length_unit": length_unit,
         "ee_frame": ee_frame,
         "gripper_frame": gripper_frame,
         "ee_from_gripper_source": ee_source,
-        "world_object_gripper_closure": (
-            world_object_gripper_closure
-        ),
+        "world_object_gripper_closure": (world_object_gripper_closure),
         "base_ee_gripper_closure": base_ee_gripper_closure,
         "base_target_closure": base_target_closure,
         "inverse_closures": inverse_closures,
         "determinants": determinants,
-        "matrices": {
-            name: _matrix_json(matrix)
-            for name, matrix in matrices.items()
-        },
+        "matrices": {name: _matrix_json(matrix) for name, matrix in matrices.items()},
         "double_base_transform_applied": False,
         "double_base_transform_gate": (
-            "PASS_SINGLE_INVERSE_TABLE_FROM_BASE_APPLICATION"
-            if not failed_gates
-            else "FAIL_CHAIN_CLOSURE"
+            "PASS_SINGLE_INVERSE_TABLE_FROM_BASE_APPLICATION" if not failed_gates else "FAIL_CHAIN_CLOSURE"
         ),
         "thresholds": {
             "max_translation_error_m": float(max_translation_error_m),
@@ -311,21 +268,13 @@ def validate_compatibility_gate(
     if not isinstance(serializer, dict):
         serializer = {}
     serializer_is_synthetic = serializer.get("synthetic") is True
-    serializer_uses_grasp_tester = (
-        serializer.get("uses_grasp_tester_output") is True
-    )
+    serializer_uses_grasp_tester = serializer.get("uses_grasp_tester_output") is True
     expected = {
         "classification": "INCONCLUSIVE",
-        "structural_api_classification": (
-            "FULL_ARTICULATION_EMBEDDED_GRIPPER_SUPPORTED"
-        ),
+        "structural_api_classification": ("FULL_ARTICULATION_EMBEDDED_GRIPPER_SUPPORTED"),
         "structural_api_probe_status": "PASS",
     }
-    failed = [
-        field
-        for field, expected_value in expected.items()
-        if record.get(field) != expected_value
-    ]
+    failed = [field for field, expected_value in expected.items() if record.get(field) != expected_value]
     return {
         "status": "PASS" if not failed else "FAIL",
         "failed_gates": failed,
@@ -347,16 +296,11 @@ def validate_compatibility_gate(
             "uses_grasp_tester_output": serializer_uses_grasp_tester,
             "classification": (
                 "SYNTHETIC_SERIALIZER_ONLY_NOT_GRASP_TESTER"
-                if (
-                    serializer_is_synthetic
-                    and not serializer_uses_grasp_tester
-                )
+                if (serializer_is_synthetic and not serializer_uses_grasp_tester)
                 else "INCONCLUSIVE"
             ),
         },
-        "meaning": (
-            "STRUCTURAL_API_AND_NON_EXECUTING_COMPATIBILITY_ONLY"
-        ),
+        "meaning": ("STRUCTURAL_API_AND_NON_EXECUTING_COMPATIBILITY_ONLY"),
         "grasp_tester_execution_claim": False,
     }
 
@@ -399,9 +343,7 @@ def build_default_validation(
 
     root = Path(project_root).resolve(strict=True)
     task_config_path = (root / TASK_FRAME_CONFIG).resolve(strict=True)
-    kinematics_path = (
-        root / HORIZONTAL_KINEMATICS_REPORT
-    ).resolve(strict=True)
+    kinematics_path = (root / HORIZONTAL_KINEMATICS_REPORT).resolve(strict=True)
     baseline_path = (root / BASELINE_CONFIG).resolve(strict=True)
     orientation_path = (root / ORIENTATION_REPORT).resolve(strict=True)
     editor_path = (root / GRASP_EDITOR_REPORT).resolve(strict=True)
@@ -411,9 +353,7 @@ def build_default_validation(
     orientation = _load_json(orientation_path)
     editor = _load_json(editor_path)
 
-    stage_path = (
-        root / str(task_config["stage"]["path"])
-    ).resolve(strict=True)
+    stage_path = (root / str(task_config["stage"]["path"])).resolve(strict=True)
     stage_hash_before = _sha256(stage_path)
     if stage_hash_before != EXPECTED_STAGE_SHA256:
         raise RuntimeError("frozen source Stage SHA-256 mismatch")
@@ -422,13 +362,10 @@ def build_default_validation(
     compatibility_gate = validate_compatibility_gate(editor)
     if compatibility_gate["status"] != "PASS":
         raise RuntimeError(
-            "Grasp Editor structural/probe compatibility gate failed: "
-            f"{compatibility_gate['failed_gates']}"
+            f"Grasp Editor structural/probe compatibility gate failed: {compatibility_gate['failed_gates']}"
         )
 
-    bottle_usd_path = (
-        root / "assets/bottle_500ml/isaac/bottle_500ml_sim.usd"
-    ).resolve(strict=True)
+    bottle_usd_path = (root / "assets/bottle_500ml/isaac/bottle_500ml_sim.usd").resolve(strict=True)
     if _sha256(bottle_usd_path) != EXPECTED_BOTTLE_USD_SHA256:
         raise RuntimeError("Bottle500 USD SHA-256 mismatch")
 
@@ -439,14 +376,10 @@ def build_default_validation(
     task_from_world = np.linalg.inv(table_world_from_task)
 
     placement = kinematics["placement"]
-    world_from_object = validate_rigid_transform(
-        placement["placement_matrix"]
-    )
+    world_from_object = validate_rigid_transform(placement["placement_matrix"])
     task_from_object = task_from_world @ world_from_object
 
-    lift_onset_frame = int(
-        kinematics["lift_detection"]["lift_onset_frame"]
-    )
+    lift_onset_frame = int(kinematics["lift_detection"]["lift_onset_frame"])
     left_base = baseline["followers"]["follower_left"]
     world_from_base = rigid_transform(
         Rotation.from_euler(
@@ -456,42 +389,72 @@ def build_default_validation(
         left_base["translation_m"],
     )
     runtime_q = np.asarray(
-        kinematics["episode_fk"][
-            "lift_onset_runtime_readback_arm_6d"
-        ],
+        kinematics["episode_fk"]["lift_onset_runtime_readback_arm_6d"],
         dtype=np.float64,
     )
     base_from_gripper_reference = fk_space(runtime_q)
-    base_from_gripper_reference = validate_rigid_transform(
-        base_from_gripper_reference
-    )
-    world_from_gripper_reference = (
-        world_from_base @ base_from_gripper_reference
-    )
+    base_from_gripper_reference = validate_rigid_transform(base_from_gripper_reference)
+    world_from_gripper_reference = world_from_base @ base_from_gripper_reference
 
-    finger_geometry = placement["supplier_cad_finger_geometry"]
-    left_world = np.asarray(
-        finger_geometry["closest_opposing_left_world_m"],
+    from tools.aloha1_mapping.supplier_cad_grasp_frame import load_verified_clearance_grasp_frame
+
+    clearance_frame = load_verified_clearance_grasp_frame(
+        clearance_report_path=root / SUPPLIER_CAD_CLEARANCE_REPORT,
+        screenshot_review_path=root / SUPPLIER_CAD_SCREENSHOT_REVIEW,
+        expected_clearance_sha256=(EXPECTED_SUPPLIER_CAD_CLEARANCE_REPORT_SHA256),
+        expected_screenshot_sha256=(EXPECTED_SUPPLIER_CAD_SCREENSHOT_REVIEW_SHA256),
+    )
+    gripper_link_from_contact = validate_rigid_transform(clearance_frame["reference_from_grasp"])
+    gripper_link_from_gripper = derive_urdf_fixed_transform(
+        root / GENERATED_FOLLOWER_LEFT_URDF,
+        source_link="follower_left_gripper_link",
+        target_link="follower_left_ee_gripper_link",
+    )
+    gripper_from_contact = validate_rigid_transform(
+        np.linalg.inv(gripper_link_from_gripper) @ gripper_link_from_contact
+    )
+    contact_from_gripper_link = np.linalg.inv(gripper_link_from_contact)
+    left_reference = np.asarray(
+        clearance_frame["contact_points_reference_m"]["left"],
         dtype=np.float64,
     )
-    right_world = np.asarray(
-        finger_geometry["closest_opposing_right_world_m"],
+    right_reference = np.asarray(
+        clearance_frame["contact_points_reference_m"]["right"],
         dtype=np.float64,
     )
-    gripper_from_world_reference = np.linalg.inv(
-        world_from_gripper_reference
+    pad_center_reference = np.asarray(
+        clearance_frame["origin_reference_m"],
+        dtype=np.float64,
     )
-    left_gripper = _point(gripper_from_world_reference, left_world)
-    right_gripper = _point(gripper_from_world_reference, right_world)
-    coordinate_frame = orientation["runtime_readback"][
-        "coordinate_frame"
-    ]
+    if not np.allclose(
+        gripper_link_from_contact[:3, 3],
+        pad_center_reference,
+        atol=1e-12,
+        rtol=0.0,
+    ):
+        raise RuntimeError("clearance-frame origin and transform disagree")
+    left_gripper = _point(contact_from_gripper_link, left_reference)
+    right_gripper = _point(contact_from_gripper_link, right_reference)
+    left_open_reference = left_reference + np.asarray(
+        [
+            0.0,
+            OPEN_FINGER_STATE_M["left_finger"] - CLOSED_FINGER_STATE_M["left_finger"],
+            0.0,
+        ]
+    )
+    right_open_reference = right_reference + np.asarray(
+        [
+            0.0,
+            RIGHT_FINGER_OPEN_M - RIGHT_FINGER_CLOSED_M,
+            0.0,
+        ]
+    )
+    open_pad_center_gap_m = float(np.linalg.norm(right_open_reference - left_open_reference))
+    gripper_from_world_reference = np.linalg.inv(world_from_gripper_reference)
+    coordinate_frame = orientation["runtime_readback"]["coordinate_frame"]
     if "+X forward" not in coordinate_frame:
         raise RuntimeError("gripper +X approach-axis evidence is missing")
-    approach_reference_world = (
-        world_from_gripper_reference[:3, :3]
-        @ np.asarray([1.0, 0.0, 0.0])
-    )
+    approach_reference_world = world_from_gripper_reference[:3, :3] @ np.asarray([1.0, 0.0, 0.0])
     approach_reference_to_down_deg = float(
         np.degrees(
             np.arccos(
@@ -514,7 +477,7 @@ def build_default_validation(
         task_from_world,
         bottle_axis["grasp_point_world_m"],
     )
-    task_from_gripper = derive_gripper_pose(
+    task_from_reference_candidate = derive_gripper_pose(
         left_contact_gripper_m=left_gripper,
         right_contact_gripper_m=right_gripper,
         gripper_approach_axis=[1.0, 0.0, 0.0],
@@ -522,11 +485,23 @@ def build_default_validation(
         grasp_point_world_m=grasp_point_task,
         table_up_world=[0.0, 0.0, 1.0],
     )
-    object_from_gripper = (
-        np.linalg.inv(task_from_object) @ task_from_gripper
+    bottle_axis_center_from_grasp = np.asarray(
+        clearance_frame["bottle_axis_center_from_grasp_m"],
+        dtype=np.float64,
     )
-    object_from_gripper = validate_rigid_transform(
-        object_from_gripper
+    task_from_reference_candidate[:3, 3] = (
+        grasp_point_task - task_from_reference_candidate[:3, :3] @ bottle_axis_center_from_grasp
+    )
+    task_from_contact = validate_rigid_transform(task_from_reference_candidate)
+    object_from_contact = validate_rigid_transform(np.linalg.inv(task_from_object) @ task_from_contact)
+    object_from_gripper = convert_contact_pose_to_gripper_pose(
+        object_from_contact=object_from_contact,
+        gripper_from_contact=gripper_from_contact,
+    )
+    task_from_gripper = validate_rigid_transform(task_from_object @ object_from_gripper)
+    contact_pose_closure = _closure_json(
+        object_from_contact,
+        object_from_gripper @ gripper_from_contact,
     )
 
     grasp_file = IsaacGraspFile(
@@ -547,8 +522,8 @@ def build_default_validation(
     reloaded = IsaacGraspFile.load(grasp_output)
     reloaded_grasp = reloaded.grasp(GRASP_NAME)
 
-    left_task = _point(task_from_gripper, left_gripper)
-    right_task = _point(task_from_gripper, right_gripper)
+    left_task = _point(task_from_reference_candidate, left_gripper)
+    right_task = _point(task_from_reference_candidate, right_gripper)
     axis_a_task = _point(
         task_from_world,
         bottle_axis["a_world_m"],
@@ -557,22 +532,14 @@ def build_default_validation(
         task_from_world,
         bottle_axis["b_world_m"],
     )
-    geometry = evaluate_pre_ik_grasp(
+    pad_geometry = evaluate_pre_ik_grasp(
         left_contact_world_m=left_task,
         right_contact_world_m=right_task,
         bottle_axis_a_world_m=axis_a_task,
         bottle_axis_b_world_m=axis_b_task,
-        expected_axis_coordinate_m=float(
-            bottle_axis["grasp_coordinate_m"]
-        ),
-        open_aperture_m=float(
-            finger_geometry["open_closest_gap_m"]
-        ),
-        section_diameter_m=float(
-            placement["bottle_collision_envelope"][
-                "cad_maximum_diameter_m"
-            ]
-        ),
+        expected_axis_coordinate_m=float(bottle_axis["grasp_coordinate_m"]),
+        open_aperture_m=open_pad_center_gap_m,
+        section_diameter_m=float(placement["bottle_collision_envelope"]["cad_maximum_diameter_m"]),
         table_up_world=[0.0, 0.0, 1.0],
         body_interval_m=[0.018, 0.120],
         axial_tolerance_m=0.005,
@@ -581,17 +548,13 @@ def build_default_validation(
     )
 
     table_from_base = task_from_world @ world_from_base
-    # E and G are the exact same composed prim in this diagnostic.  Therefore
-    # T_E_G is identity by frame identity, not an assumed calibration.
-    base_from_ee = (
-        np.linalg.inv(table_from_base) @ task_from_gripper
-    )
+    base_from_ee = np.linalg.inv(table_from_base) @ task_from_gripper
     transform_chain = evaluate_transform_chain(
         table_from_object=task_from_object,
         object_from_gripper=reloaded_grasp.object_from_gripper,
         table_from_base=table_from_base,
         base_from_ee=base_from_ee,
-        ee_from_gripper=None,
+        ee_from_gripper=np.eye(4, dtype=np.float64),
         ee_frame=GRIPPER_FRAME,
         gripper_frame=GRIPPER_FRAME,
         length_unit="m",
@@ -600,8 +563,6 @@ def build_default_validation(
     )
     if transform_chain["status"] != "PASS":
         raise RuntimeError("generated grasp transform chain failed")
-    if geometry.status != "PASS":
-        raise RuntimeError("generated grasp pre-IK geometry failed")
     stage_hash_after = _sha256(stage_path)
     if stage_hash_after != stage_hash_before:
         raise RuntimeError("frozen source Stage changed")
@@ -621,6 +582,11 @@ def build_default_validation(
             root,
             GRASP_EDITOR_REPORT,
         ),
+        "generated_follower_left_urdf": _source_record(
+            root,
+            GENERATED_FOLLOWER_LEFT_URDF,
+        ),
+        "vx300s_srdf": _source_record(root, VX300S_SRDF),
         "interbotix_aloha_vx300s_kinematics": {
             **_source_record(root, Path(SOURCE_FILE)),
             "expected_sha256": SOURCE_SHA256,
@@ -630,17 +596,15 @@ def build_default_validation(
             "path": str(bottle_usd_path),
             "sha256": _sha256(bottle_usd_path),
         },
+        "supplier_cad_complete_gripper_clearance": (clearance_frame["clearance_report"]),
+        "supplier_cad_screenshot_user_gate": (clearance_frame["screenshot_gate"]),
     }
     return {
         "schema_version": 1,
         "status": "PARTIAL",
         "classification": "INCONCLUSIVE",
-        "diagnostic_classification": (
-            "DIAGNOSTIC_ONLY_PENDING_GRASP_EDITOR_SIMULATION"
-        ),
-        "scope": (
-            "pre-IK numeric Bottle500 horizontal-body grasp candidate"
-        ),
+        "diagnostic_classification": ("DIAGNOSTIC_ONLY_PENDING_GRASP_EDITOR_SIMULATION"),
+        "scope": ("pre-IK numeric Bottle500 horizontal-body grasp candidate"),
         "source_stage": {
             "path": str(stage_path),
             "sha256_before": stage_hash_before,
@@ -653,12 +617,17 @@ def build_default_validation(
             "name": task_config["task_world"]["name"],
             "status": task_config["status"],
             "origin_policy": task_config["task_world"]["origin_policy"],
-            "tabletop_top_world_m": (
-                task_config["task_world"][
-                    "world_from_task_translation_m"
-                ]
-            ),
+            "tabletop_top_world_m": (task_config["task_world"]["world_from_task_translation_m"]),
             "world_from_task": _matrix_json(table_world_from_task),
+        },
+        "object_coordinate_contract": {
+            "frame": BOTTLE_OBJECT_FRAME,
+            "origin": "BOTTLE_BOTTOM_CENTER",
+            "axis_a_local_m": [0.0, 0.0, 0.0],
+            "axis_b_local_m": [0.0, 0.0, 0.206],
+            "local_positive_axis": ("BOTTLE_BOTTOM_TO_MOUTH_LOCAL_POSITIVE_Z"),
+            "grasp_axis_coordinate_m": float(bottle_axis["grasp_coordinate_m"]),
+            "origin_redefinition_allowed": False,
         },
         "grasp_candidate": {
             "status": "PRE_GUI_DIAGNOSTIC_CANDIDATE",
@@ -671,133 +640,121 @@ def build_default_validation(
             "gripper_frame": GRIPPER_FRAME,
             "diagnostic_confidence": {
                 "value": 0.0,
-                "semantics": (
-                    "UNTESTED_CANDIDATE_GRASP_TESTER_NOT_RUN"
-                ),
+                "semantics": ("UNTESTED_CANDIDATE_GRASP_TESTER_NOT_RUN"),
             },
-            "yaml_cspace_position_semantics": (
-                "REQUESTED_CLOSE_CANDIDATE_NOT_STABLE_CSPACE"
-            ),
-            "requested_close_candidate_m": dict(
-                CLOSED_FINGER_STATE_M
-            ),
-            "pregrasp_cspace_position_m": dict(
-                OPEN_FINGER_STATE_M
-            ),
+            "yaml_cspace_position_semantics": ("REQUESTED_CLOSE_CANDIDATE_NOT_STABLE_CSPACE"),
+            "requested_close_candidate_m": dict(CLOSED_FINGER_STATE_M),
+            "pregrasp_cspace_position_m": dict(OPEN_FINGER_STATE_M),
+            "mimic_observer": {
+                "joint": "right_finger",
+                "multiplier": -1.0,
+                "offset": 0.0,
+                "yaml_active": False,
+            },
             "stable_cspace_position_m": None,
-            "stable_cspace_position_status": (
-                "NOT_ESTABLISHED_GRASP_TESTER_NOT_RUN"
-            ),
+            "stable_cspace_position_status": ("NOT_ESTABLISHED_GRASP_TESTER_NOT_RUN"),
             "authoritative_after_gui_simulation": False,
         },
         "compatibility_gate": compatibility_gate,
         "contact_region_samples": {
-            "status": (
-                "CAD_COLLIDER_CLOSEST_OPPOSING_POINTS_"
-                "USED_AS_DIAGNOSTIC_SAMPLES"
-            ),
-            "source_method": finger_geometry["method"],
-            "reference_frame": GRIPPER_FRAME,
-            "left_gripper_m": [
-                float(value) for value in left_gripper
-            ],
-            "right_gripper_m": [
-                float(value) for value in right_gripper
-            ],
-            "open_aperture_m": float(
-                finger_geometry["open_closest_gap_m"]
-            ),
+            "status": "COMPLETE_GRIPPER_CLEARANCE_CONTACTS_VERIFIED",
+            "source_method": ("CHEBYSHEV_COMPLETE_GRIPPER_CLEARANCE_WITH_SUPPLIER_BREP_PAD_NORMAL_OFFSET"),
+            "reference_frame": CONTACT_FRAME,
+            "disposition": ("ACCEPTED_COMPLETE_GRIPPER_CLEARANCE_CONTACT_SOLUTION"),
+            "left_gripper_m": [float(value) for value in left_gripper],
+            "right_gripper_m": [float(value) for value in right_gripper],
+            "open_aperture_m": open_pad_center_gap_m,
+            "left_pad_center_reference_m": [float(value) for value in left_reference],
+            "right_pad_center_reference_m": [float(value) for value in right_reference],
+            "pad_center_reference_m": [float(value) for value in pad_center_reference],
+            "clearance_report": clearance_frame["clearance_report"],
+            "screenshot_gate": clearance_frame["screenshot_gate"],
+            "bottle_axis_center_from_grasp_m": [float(value) for value in bottle_axis_center_from_grasp],
             "gripper_approach_axis": {
                 "axis_gripper": [1.0, 0.0, 0.0],
-                "source": (
-                    "USER_CONFIRMED_RUNTIME_FRAME_+X_FORWARD_"
-                    "FROM_GRIPPER_ORIENTATION_CONFIRMATION"
-                ),
+                "source": ("USER_CONFIRMED_RUNTIME_FRAME_+X_FORWARD_FROM_GRIPPER_ORIENTATION_CONFIRMATION"),
             },
             "frame_recovery": {
-                "method": (
-                    "INDEPENDENT_INTERBOTIX_ALOHA_VX300S_POE_FK"
-                ),
-                "runtime_readback_q_rad": [
-                    float(value) for value in runtime_q
-                ],
+                "method": ("INDEPENDENT_INTERBOTIX_ALOHA_VX300S_POE_FK"),
+                "runtime_readback_q_rad": [float(value) for value in runtime_q],
                 "runtime_frame": lift_onset_frame,
-                "base_from_gripper_reference": _matrix_json(
-                    base_from_gripper_reference
-                ),
+                "base_from_gripper_reference": _matrix_json(base_from_gripper_reference),
                 "world_from_base": _matrix_json(world_from_base),
-                "world_from_gripper_reference": _matrix_json(
-                    world_from_gripper_reference
-                ),
-                "approach_axis_world_at_reference": [
-                    float(value)
-                    for value in approach_reference_world
-                ],
-                "approach_axis_to_world_negative_z_deg": (
-                    approach_reference_to_down_deg
-                ),
+                "world_from_gripper_reference": _matrix_json(world_from_gripper_reference),
+                "approach_axis_world_at_reference": [float(value) for value in approach_reference_world],
+                "approach_axis_to_world_negative_z_deg": (approach_reference_to_down_deg),
                 "source_file": SOURCE_FILE,
                 "source_sha256": SOURCE_SHA256,
             },
         },
         "bottle_geometry": {
-            "axis_a_task_m": [
-                float(value) for value in axis_a_task
-            ],
-            "axis_b_task_m": [
-                float(value) for value in axis_b_task
-            ],
-            "axis_unit_task": [
-                float(value)
-                for value in np.asarray(bottle_axis["unit_world"])
-            ],
-            "grasp_coordinate_m": float(
-                bottle_axis["grasp_coordinate_m"]
-            ),
-            "grasp_point_task_m": [
-                float(value) for value in grasp_point_task
-            ],
+            "axis_a_task_m": [float(value) for value in axis_a_task],
+            "axis_b_task_m": [float(value) for value in axis_b_task],
+            "axis_unit_task": [float(value) for value in np.asarray(bottle_axis["unit_world"])],
+            "grasp_coordinate_m": float(bottle_axis["grasp_coordinate_m"]),
+            "grasp_point_task_m": [float(value) for value in grasp_point_task],
             "body_interval_m": [0.018, 0.120],
-            "section_diameter_m": float(
-                placement["bottle_collision_envelope"][
-                    "cad_maximum_diameter_m"
-                ]
-            ),
+            "section_diameter_m": float(placement["bottle_collision_envelope"]["cad_maximum_diameter_m"]),
         },
         "pre_ik_geometry": {
-            "status": geometry.status,
-            "failed_gates": list(geometry.failed_gates),
-            "metrics": geometry.metrics,
-            "left_contact_task_m": [
-                float(value) for value in left_task
-            ],
-            "right_contact_task_m": [
-                float(value) for value in right_task
-            ],
+            "status": pad_geometry.status,
+            "failed_gates": list(pad_geometry.failed_gates),
+            "metrics": pad_geometry.metrics,
+            "legacy_global_closest_point_gate": {
+                "status": "NOT_EVALUATED",
+                "failed_gates": ["global_closest_points_not_effective_pad_surface"],
+                "acceptance_use": "REJECTED_HISTORICAL_INPUT",
+            },
+            "left_contact_task_m": [float(value) for value in left_task],
+            "right_contact_task_m": [float(value) for value in right_task],
         },
         "transform_chain": transform_chain,
         "ee_from_gripper": {
-            "source": "IDENTITY_ALLOWED_FRAME_PATHS_IDENTICAL",
+            "source": "IDENTITY_CANONICAL_EE_AND_GRASP_FRAME",
             "ee_frame": GRIPPER_FRAME,
             "gripper_frame": GRIPPER_FRAME,
-            "matrix": _matrix_json(np.eye(4)),
+            "matrix": _matrix_json(np.eye(4, dtype=np.float64)),
             "hard_blocker": False,
         },
+        "contact_helper_transform": {
+            "status": ("DIAGNOSTIC_GEOMETRY_HELPER_NOT_GRASP_EDITOR_OR_IK_FRAME"),
+            "gripper_link_frame": GRIPPER_LINK_FRAME,
+            "gripper_frame": GRIPPER_FRAME,
+            "contact_frame": CONTACT_FRAME,
+            "gripper_link_from_gripper": _matrix_json(gripper_link_from_gripper),
+            "gripper_link_from_contact": _matrix_json(gripper_link_from_contact),
+            "gripper_from_contact": _matrix_json(gripper_from_contact),
+            "closure": contact_pose_closure,
+            "source": clearance_frame["classification"],
+        },
+        "grasp_origin": {
+            "policy": ("CHEBYSHEV_COMPLETE_GRIPPER_CLEARANCE_PAD_CONTACT_FRAME"),
+            "prim_path": CONTACT_FRAME,
+            "reference_frame": GRIPPER_FRAME,
+            "gripper_from_contact_translation_m": [float(value) for value in gripper_from_contact[:3, 3]],
+            "source": (
+                "frozen supplier-CAD complete-gripper clearance report plus user-confirmed static screenshot gate"
+            ),
+            "global_closest_collider_midpoint_use": "REJECTED",
+            "whole_pad_face_centroid_use": "REJECTED",
+            "official_ee_helper_use": ("PARENT_REFERENCE_ONLY_NOT_PHYSICAL_PAD_CENTER"),
+            "official_ee_helper_semantics": "NOT_GRASP_CENTER",
+            "static_clearance_gate": (clearance_frame["clearance_report"]),
+            "screenshot_gate": clearance_frame["screenshot_gate"],
+            "bottle_axis_center_from_grasp_m": [float(value) for value in bottle_axis_center_from_grasp],
+        },
         "matrices": {
-            "world_from_gripper_reference": _matrix_json(
-                world_from_gripper_reference
-            ),
-            "gripper_reference_from_world": _matrix_json(
-                gripper_from_world_reference
-            ),
+            "world_from_gripper_reference": _matrix_json(world_from_gripper_reference),
+            "gripper_reference_from_world": _matrix_json(gripper_from_world_reference),
             "task_from_object": _matrix_json(task_from_object),
             "task_from_gripper": _matrix_json(task_from_gripper),
-            "object_from_gripper": _matrix_json(
-                reloaded_grasp.object_from_gripper
-            ),
+            "task_from_contact": _matrix_json(task_from_contact),
+            "object_from_contact": _matrix_json(object_from_contact),
+            "object_from_gripper": _matrix_json(reloaded_grasp.object_from_gripper),
             "task_from_base": _matrix_json(table_from_base),
             "base_from_ee": _matrix_json(base_from_ee),
-            "ee_from_gripper": _matrix_json(np.eye(4)),
+            "ee_from_gripper": _matrix_json(np.eye(4, dtype=np.float64)),
+            "gripper_from_contact": _matrix_json(gripper_from_contact),
         },
         "evidence_boundaries": {
             "numeric_transform_chain": "PASS",
@@ -807,9 +764,7 @@ def build_default_validation(
             "ik": "NOT_RUN",
             "physics_grasp": "NOT_RUN",
             "real_calibration": "HARD_BLOCKER_NOT_MEASURED",
-            "historical_report_use": (
-                "GEOMETRY_INPUT_ONLY_NOT_HOLD_ACCEPTANCE"
-            ),
+            "historical_report_use": ("GEOMETRY_INPUT_ONLY_NOT_HOLD_ACCEPTANCE"),
         },
         "source_manifest": source_manifest,
         "source_categories": {
@@ -829,9 +784,7 @@ def build_default_validation(
                 "5 mm axial tolerance",
                 "3 degree perpendicular tolerance",
             ],
-            "hard_blocker": [
-                "physical tabletop/base calibration not measured"
-            ],
+            "hard_blocker": ["physical tabletop/base calibration not measured"],
         },
         "task8": "NOT_RUN",
     }
@@ -856,10 +809,7 @@ def _atomic_json(path: Path, payload: dict[str, Any]) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description=(
-            "Generate and validate the pre-GUI ALOHA Bottle500 grasp "
-            "transform candidate."
-        )
+        description=("Generate and validate the pre-GUI ALOHA Bottle500 grasp transform candidate.")
     )
     parser.add_argument(
         "--project-root",

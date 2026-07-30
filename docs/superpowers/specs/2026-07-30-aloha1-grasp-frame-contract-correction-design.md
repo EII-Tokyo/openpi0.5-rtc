@@ -96,9 +96,16 @@ translation(gripper_link -> ee_gripper_link) = 0.1072 m along local +X
 rotation(gripper_link -> ee_gripper_link) = identity
 ```
 
-The current supplier-CAD pad-center mapping is 0.11127188479610935 m from
-`gripper_link`, so the diagnostic pad center is 0.00407188479610935 m ahead
-of `ee_gripper_link` along the same local axis. These numbers must be
+Two helper frames exist in the historical evidence:
+
+- the older whole-pad-face center is 0.11127188479610935 m from
+  `gripper_link`; and
+- the later user-approved complete-gripper clearance frame is
+  0.13552080444282988 m from `gripper_link`.
+
+Only the user-approved clearance frame is the current `C`, so it is
+0.02832080444282989 m ahead of `ee_gripper_link` along the same local axis.
+The older helper remains immutable superseded evidence. These numbers must be
 re-derived from frozen evidence at runtime; this document does not authorize
 hard-coded use without hash and closure checks.
 
@@ -108,13 +115,13 @@ The Bottle500 object origin remains at the bottle-bottom center. The default
 body grasp coordinate remains 0.069 m along the Bottle500 local axis. It is a
 grasp offset, not an object-origin replacement.
 
-The current CAD candidate expresses `T_O_C`. Before native Grasp Editor use it
-must be converted to `T_O_G`. For the frozen current candidate, the expected
-translation is approximately:
+The user-approved complete-gripper clearance candidate expresses `T_O_C`.
+Before native Grasp Editor use it must be converted to `T_O_G`. For the
+frozen current candidate, the expected translation is approximately:
 
 ```text
-T_O_C translation = [0.0, 0.0, 0.069] m
-T_O_G translation = [-0.0040364494, 0.0005360242, 0.069] m
+T_O_C translation = [0.0033365257, 0.0004430772, 0.069] m
+T_O_G translation = [-0.0247378183, -0.0032850828, 0.069] m
 ```
 
 The orientation is unchanged because the frozen `G -> C` transform has

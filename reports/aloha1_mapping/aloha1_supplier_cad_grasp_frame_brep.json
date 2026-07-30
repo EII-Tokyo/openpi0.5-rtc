@@ -1,0 +1,459 @@
+{
+  "classification": "SUPPLIER_STEP_BREP_INNER_PAD_FACE_CROSSCHECK",
+  "fingers": {
+    "left": {
+      "brep_valid": true,
+      "candidate_faces": [
+        {
+          "area_mm2": 2020.8974087124623,
+          "center_finger_link_m": [
+            0.04257188479610935,
+            -0.013744605352510061,
+            5.133620537850492e-05
+          ],
+          "center_global_mm": [
+            7.355284905152715,
+            -541.5718845300294,
+            426.8526699371185
+          ],
+          "face_index_1_based": 117,
+          "inward_normal_dot": 0.9945218953682733,
+          "is_planar": true,
+          "normal_finger_link": [
+            -0.10452846326765405,
+            -0.9945218953682733,
+            5.701881674690907e-16
+          ],
+          "normal_global": [
+            -0.9945218953682733,
+            0.10452846326765405,
+            5.701881674690907e-16
+          ],
+          "normal_parameter_source": "SURFACE_PARAMETER_AT_FACE_CENTER_OF_MASS",
+          "orientation": "Forward",
+          "surface_type": "Plane"
+        },
+        {
+          "area_mm2": 215.99999999999994,
+          "center_finger_link_m": [
+            0.005700000000000094,
+            -0.010288610792010705,
+            5.133620537894901e-05
+          ],
+          "center_global_mm": [
+            10.81127946565207,
+            -504.6999997339201,
+            426.85266993711895
+          ],
+          "face_index_1_based": 140,
+          "inward_normal_dot": 1.0,
+          "is_planar": true,
+          "normal_finger_link": [
+            -2.0627899721144475e-17,
+            -1.0,
+            6.207057437478038e-18
+          ],
+          "normal_global": [
+            -1.0,
+            2.0627899721144475e-17,
+            6.207057437478038e-18
+          ],
+          "normal_parameter_source": "SURFACE_PARAMETER_AT_FACE_CENTER_OF_MASS",
+          "orientation": "Reversed",
+          "surface_type": "Plane"
+        },
+        {
+          "area_mm2": 43.85219806184636,
+          "center_finger_link_m": [
+            0.00048228195468841273,
+            -0.008788610792010706,
+            0.012301777764151756
+          ],
+          "center_global_mm": [
+            12.31127946565207,
+            -499.4822816886084,
+            439.10311149589177
+          ],
+          "face_index_1_based": 24,
+          "inward_normal_dot": 1.0,
+          "is_planar": true,
+          "normal_finger_link": [
+            9.713484228155188e-18,
+            -1.0,
+            2.008484524529207e-17
+          ],
+          "normal_global": [
+            -1.0,
+            -9.713484228155188e-18,
+            2.008484524529207e-17
+          ],
+          "normal_parameter_source": "SURFACE_PARAMETER_AT_FACE_CENTER_OF_MASS",
+          "orientation": "Reversed",
+          "surface_type": "Plane"
+        },
+        {
+          "area_mm2": 43.85219806184526,
+          "center_finger_link_m": [
+            0.00048228195468807966,
+            -0.008788610792010704,
+            -0.01219822223584821
+          ],
+          "center_global_mm": [
+            12.311279465652072,
+            -499.48228168860805,
+            414.60311149589177
+          ],
+          "face_index_1_based": 79,
+          "inward_normal_dot": 1.0,
+          "is_planar": true,
+          "normal_finger_link": [
+            9.713484228155188e-18,
+            -1.0,
+            2.008484524529207e-17
+          ],
+          "normal_global": [
+            -1.0,
+            -9.713484228155188e-18,
+            2.008484524529207e-17
+          ],
+          "normal_parameter_source": "SURFACE_PARAMETER_AT_FACE_CENTER_OF_MASS",
+          "orientation": "Reversed",
+          "surface_type": "Plane"
+        },
+        {
+          "area_mm2": 3.799075323682102,
+          "center_finger_link_m": [
+            0.0006787349144309895,
+            -0.005588610792010704,
+            -0.012198222235848266
+          ],
+          "center_global_mm": [
+            15.511279465652072,
+            -499.678734648351,
+            414.6031114958917
+          ],
+          "face_index_1_based": 69,
+          "inward_normal_dot": 1.0,
+          "is_planar": true,
+          "normal_finger_link": [
+            9.713484228155188e-18,
+            -1.0,
+            2.008484524529207e-17
+          ],
+          "normal_global": [
+            -1.0,
+            -9.713484228155188e-18,
+            2.008484524529207e-17
+          ],
+          "normal_parameter_source": "SURFACE_PARAMETER_AT_FACE_CENTER_OF_MASS",
+          "orientation": "Reversed",
+          "surface_type": "Plane"
+        },
+        {
+          "area_mm2": 3.7990753236819836,
+          "center_finger_link_m": [
+            0.0006787349144318222,
+            -0.005588610792010704,
+            0.012301777764151756
+          ],
+          "center_global_mm": [
+            15.511279465652072,
+            -499.6787346483518,
+            439.10311149589177
+          ],
+          "face_index_1_based": 14,
+          "inward_normal_dot": 1.0,
+          "is_planar": true,
+          "normal_finger_link": [
+            9.713484228155188e-18,
+            -1.0,
+            2.008484524529207e-17
+          ],
+          "normal_global": [
+            -1.0,
+            -9.713484228155188e-18,
+            2.008484524529207e-17
+          ],
+          "normal_parameter_source": "SURFACE_PARAMETER_AT_FACE_CENTER_OF_MASS",
+          "orientation": "Reversed",
+          "surface_type": "Plane"
+        }
+      ],
+      "face_count": 149,
+      "label": "Aloha VX Fingers 2024-4-21 v2",
+      "object_name": "Part__Feature007",
+      "selected_inner_pad": {
+        "area_mm2": 2020.8974087124623,
+        "area_ratio_to_next_candidate": 9.356006521816957,
+        "center_finger_link_m": [
+          0.04257188479610935,
+          -0.013744605352510061,
+          5.133620537850492e-05
+        ],
+        "center_global_mm": [
+          7.355284905152715,
+          -541.5718845300294,
+          426.8526699371185
+        ],
+        "face_index_1_based": 117,
+        "inward_normal_dot": 0.9945218953682733,
+        "is_planar": true,
+        "normal_finger_link": [
+          -0.10452846326765405,
+          -0.9945218953682733,
+          5.701881674690907e-16
+        ],
+        "normal_global": [
+          -0.9945218953682733,
+          0.10452846326765405,
+          5.701881674690907e-16
+        ],
+        "normal_parameter_source": "SURFACE_PARAMETER_AT_FACE_CENTER_OF_MASS",
+        "orientation": "Forward",
+        "selection_rule": "LARGEST_PLANAR_INWARD_FACING_BREP_FACE",
+        "surface_type": "Plane"
+      }
+    },
+    "right": {
+      "brep_valid": true,
+      "candidate_faces": [
+        {
+          "area_mm2": 2020.897408712456,
+          "center_finger_link_m": [
+            0.04257188479610935,
+            0.01374460535250998,
+            -5.133620538150252e-05
+          ],
+          "center_global_mm": [
+            -7.155504389827247,
+            -541.5718845300294,
+            426.74999752635847
+          ],
+          "face_index_1_based": 128,
+          "inward_normal_dot": 0.9945218953682733,
+          "is_planar": true,
+          "normal_finger_link": [
+            -0.10452846326765403,
+            0.9945218953682733,
+            -1.7271893908441104e-15
+          ],
+          "normal_global": [
+            0.9945218953682733,
+            0.10452846326765403,
+            -1.7271893908441104e-15
+          ],
+          "normal_parameter_source": "SURFACE_PARAMETER_AT_FACE_CENTER_OF_MASS",
+          "orientation": "Forward",
+          "surface_type": "Plane"
+        },
+        {
+          "area_mm2": 216.0,
+          "center_finger_link_m": [
+            0.005700000000000094,
+            0.0102886107920106,
+            -5.1336205380836386e-05
+          ],
+          "center_global_mm": [
+            -10.611498950326627,
+            -504.6999997339201,
+            426.74999752635915
+          ],
+          "face_index_1_based": 121,
+          "inward_normal_dot": 1.0,
+          "is_planar": true,
+          "normal_finger_link": [
+            2.0545631168600127e-17,
+            1.0,
+            -6.207057437478036e-18
+          ],
+          "normal_global": [
+            1.0,
+            -2.0545631168600127e-17,
+            -6.207057437478036e-18
+          ],
+          "normal_parameter_source": "SURFACE_PARAMETER_AT_FACE_CENTER_OF_MASS",
+          "orientation": "Reversed",
+          "surface_type": "Plane"
+        },
+        {
+          "area_mm2": 43.85219806184489,
+          "center_finger_link_m": [
+            0.00048228195468807966,
+            0.008788610792010597,
+            -0.012300894646607996
+          ],
+          "center_global_mm": [
+            -12.111498950326629,
+            -499.48228168860805,
+            414.50043908513203
+          ],
+          "face_index_1_based": 64,
+          "inward_normal_dot": 1.0,
+          "is_planar": true,
+          "normal_finger_link": [
+            -9.713484228155188e-18,
+            1.0,
+            -2.008484524529207e-17
+          ],
+          "normal_global": [
+            1.0,
+            9.713484228155188e-18,
+            -2.008484524529207e-17
+          ],
+          "normal_parameter_source": "SURFACE_PARAMETER_AT_FACE_CENTER_OF_MASS",
+          "orientation": "Forward",
+          "surface_type": "Plane"
+        },
+        {
+          "area_mm2": 43.85219806184443,
+          "center_finger_link_m": [
+            0.00048228195468841273,
+            0.008788610792010598,
+            0.012199105353392026
+          ],
+          "center_global_mm": [
+            -12.111498950326627,
+            -499.4822816886084,
+            439.00043908513203
+          ],
+          "face_index_1_based": 9,
+          "inward_normal_dot": 1.0,
+          "is_planar": true,
+          "normal_finger_link": [
+            -9.713484228155188e-18,
+            1.0,
+            -2.008484524529207e-17
+          ],
+          "normal_global": [
+            1.0,
+            9.713484228155188e-18,
+            -2.008484524529207e-17
+          ],
+          "normal_parameter_source": "SURFACE_PARAMETER_AT_FACE_CENTER_OF_MASS",
+          "orientation": "Forward",
+          "surface_type": "Plane"
+        },
+        {
+          "area_mm2": 3.7990753236815147,
+          "center_finger_link_m": [
+            0.0006787349144314336,
+            0.0055886107920105985,
+            0.012199105353392081
+          ],
+          "center_global_mm": [
+            -15.311498950326628,
+            -499.67873464835145,
+            439.0004390851321
+          ],
+          "face_index_1_based": 13,
+          "inward_normal_dot": 1.0,
+          "is_planar": true,
+          "normal_finger_link": [
+            -9.713484228155188e-18,
+            1.0,
+            -2.008484524529207e-17
+          ],
+          "normal_global": [
+            1.0,
+            9.713484228155188e-18,
+            -2.008484524529207e-17
+          ],
+          "normal_parameter_source": "SURFACE_PARAMETER_AT_FACE_CENTER_OF_MASS",
+          "orientation": "Forward",
+          "surface_type": "Plane"
+        },
+        {
+          "area_mm2": 3.7990753236812997,
+          "center_finger_link_m": [
+            0.000678734914430712,
+            0.0055886107920106,
+            -0.012300894646607885
+          ],
+          "center_global_mm": [
+            -15.311498950326627,
+            -499.6787346483507,
+            414.5004390851321
+          ],
+          "face_index_1_based": 68,
+          "inward_normal_dot": 1.0,
+          "is_planar": true,
+          "normal_finger_link": [
+            -9.713484228155188e-18,
+            1.0,
+            -2.008484524529207e-17
+          ],
+          "normal_global": [
+            1.0,
+            9.713484228155188e-18,
+            -2.008484524529207e-17
+          ],
+          "normal_parameter_source": "SURFACE_PARAMETER_AT_FACE_CENTER_OF_MASS",
+          "orientation": "Forward",
+          "surface_type": "Plane"
+        }
+      ],
+      "face_count": 149,
+      "label": "Aloha VX Fingers 2024-4-21 v001",
+      "object_name": "Part__Feature008",
+      "selected_inner_pad": {
+        "area_mm2": 2020.897408712456,
+        "area_ratio_to_next_candidate": 9.356006521816925,
+        "center_finger_link_m": [
+          0.04257188479610935,
+          0.01374460535250998,
+          -5.133620538150252e-05
+        ],
+        "center_global_mm": [
+          -7.155504389827247,
+          -541.5718845300294,
+          426.74999752635847
+        ],
+        "face_index_1_based": 128,
+        "inward_normal_dot": 0.9945218953682733,
+        "is_planar": true,
+        "normal_finger_link": [
+          -0.10452846326765403,
+          0.9945218953682733,
+          -1.7271893908441104e-15
+        ],
+        "normal_global": [
+          0.9945218953682733,
+          0.10452846326765403,
+          -1.7271893908441104e-15
+        ],
+        "normal_parameter_source": "SURFACE_PARAMETER_AT_FACE_CENTER_OF_MASS",
+        "orientation": "Forward",
+        "selection_rule": "LARGEST_PLANAR_INWARD_FACING_BREP_FACE",
+        "surface_type": "Plane"
+      }
+    }
+  },
+  "schema_version": 1,
+  "selection": {
+    "minimum_inward_normal_dot": 0.9781476007338057,
+    "no_mirror_applied": true,
+    "no_shape_change": true
+  },
+  "source": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/gdrive_source_readonly/Simple Aloha Viper 2024-5-13.step",
+    "read_only": true,
+    "sha256": "337862418769d4ea8b801d26e68930c4412f870050e60769bbf91765194dc571"
+  },
+  "status": "PASS",
+  "task8": "NOT_RUN",
+  "toolchain": {
+    "freecad": [
+      "1",
+      "1",
+      "1",
+      "20260414 (Git shallow)",
+      "Unknown",
+      "2026/04/14 22:09:59",
+      "(HEAD detached at 0108fd4b4)",
+      "0108fd4b4850cc46e625b60e53cea7a7bbe69f8d"
+    ],
+    "opencascade": "7.8.1",
+    "required_freecad": "1.1.1",
+    "required_opencascade": "7.8.1"
+  }
+}

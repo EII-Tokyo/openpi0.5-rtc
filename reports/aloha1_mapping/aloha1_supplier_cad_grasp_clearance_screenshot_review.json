@@ -1,0 +1,228 @@
+{
+  "schema_version": 1,
+  "status": "PASS",
+  "classification": "STATIC_SUPPLIER_CAD_COMPLETE_GRIPPER_VISUAL_EVIDENCE",
+  "capture_count": 4,
+  "all_individually_visually_reviewed": true,
+  "task8": "NOT_RUN",
+  "scope": {
+    "is_isaac_runtime_evidence": false,
+    "is_static_hold_evidence": false,
+    "is_collision_validation": false,
+    "accepted_claim": "The final screenshots clearly expose the rejected run13 frame and the CAD-derived corrected complete-gripper clearance candidate.",
+    "forbidden_claim": "Static CAD screenshot quality does not prove IK feasibility, collision-free motion, bilateral runtime contact, or bottle hold."
+  },
+  "source_geometry_report": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_supplier_cad_grasp_clearance.json",
+    "status": "PASS"
+  },
+  "visual_encoding": {
+    "blue": "supplier-assembly embedded v2 left_finger / CAD +X side",
+    "orange": "supplier-assembly embedded v2 right_finger / CAD -X side",
+    "cyan": "project Bottle500",
+    "dark_transparent": "complete supplier gripper shell",
+    "red_wireframe": "runtime URDF gripper-bar conservative AABB",
+    "axes": "gripper_link frame: +X red, +Y green, +Z blue"
+  },
+  "retake_history": [
+    {
+      "batch": "static_visual_evidence_engine_probe",
+      "status": "REJECTED_RUNTIME_EXCEPTION",
+      "reason": "The local Blender build rejected BLENDER_EEVEE_NEXT even though Blender returned process exit code 0. The log, not the exit code, established failure.",
+      "log_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-grasp-editor-five-position/full_gripper_cad_clearance/static_visual_evidence/blender_render_attempt1_failed_engine.log"
+    },
+    {
+      "batch": "static_visual_evidence",
+      "status": "REJECTED_OVEREXPOSURE_AND_INSUFFICIENT_FINGER_VISIBILITY",
+      "reason": "All four raw views were overexposed; the bottle, shell, blue/orange fingers, and inward surfaces could not be separated visually."
+    },
+    {
+      "batch": "static_visual_evidence_attempt2",
+      "status": "REJECTED_CROPPING",
+      "reason": "Exposure and color separation were corrected, but bottle ends and proximal gripper structure were clipped."
+    },
+    {
+      "batch": "static_visual_evidence_attempt3",
+      "status": "REJECTED_PROXIMAL_SHELL_CROPPING",
+      "reason": "Bottle framing improved, but the world-side views still clipped the proximal shell/axis region."
+    },
+    {
+      "batch": "static_visual_evidence_attempt4_raw",
+      "status": "PASS",
+      "reason": "All four raw images show the complete bottle and complete relevant gripper geometry without cropping, with distinct rejected/corrected states."
+    },
+    {
+      "batch": "static_visual_evidence_attempt4_annotated_first",
+      "status": "REJECTED_LABEL_OVERLAP",
+      "reason": "Long local labels obscured the side-view gripper and bottle. They were replaced by short EE/GF/RF/BC/LR labels; complete meanings remain in the information panel.",
+      "rejected_directory_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-grasp-editor-five-position/full_gripper_cad_clearance/static_visual_evidence_attempt4/screenshots_annotated_rejected_label_overlap"
+    },
+    {
+      "batch": "static_visual_evidence_attempt4_annotated_final",
+      "status": "PASS",
+      "reason": "All four final annotated images were individually reviewed; short labels and arrows remain legible without hiding the inward finger surfaces or bottle/gripper relationship."
+    }
+  ],
+  "captures": [
+    {
+      "state": "rejected_run13",
+      "view": "true_world_top",
+      "geometry_state": "FAIL",
+      "visual_review": "PASS",
+      "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-grasp-editor-five-position/full_gripper_cad_clearance/static_visual_evidence_attempt4/screenshots_raw/rejected_run13_true_world_top_raw.png",
+      "raw_sha256": "587a8e036e5b62bcbf537b9cea5f5d5cdbbb58b122d24eed4b9a9e72518db10b",
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-grasp-editor-five-position/full_gripper_cad_clearance/static_visual_evidence_attempt4/screenshots_annotated/rejected_run13_true_world_top_annotated.png",
+      "annotated_sha256": "36a10dd6844807f48cc007eee3839140c725e10a00dea0826fce2530c15247f7",
+      "width_px": 1600,
+      "height_px": 1000,
+      "annotated_width_px": 2260,
+      "annotated_height_px": 1000,
+      "camera_projection": "ORTHOGRAPHIC",
+      "camera_matrix": [[0.0, -0.0, -1.0, -1.3169224262237549], [-1.0, 0.0, -0.0, 1.0803341865539551e-07], [0.0, 1.0, -0.0, 0.03399999812245369], [0.0, 0.0, 0.0, 1.0]],
+      "complete_gripper_visible": true,
+      "left_right_fingers_visible": true,
+      "bottle_visible": true,
+      "coordinate_axes_visible": true,
+      "ee_and_grasp_frames_distinguished": false,
+      "ee_grasp_frame_projection_status": "NOT_OBSERVABLE_DUE_TO_PROJECTION_ALONG_GRIPPER_X",
+      "same_camera_as_paired_state": true,
+      "geometry_signature": "df08c6401d399f81233221d981cc82c4c9fd4a717e3af41fdb823804564c2a22",
+      "camera": {
+        "projection": "ORTHOGRAPHIC",
+        "camera_forward_gripper": [1.0, 0.0, 0.0],
+        "image_right_gripper": [0.0, -1.0, 0.0],
+        "image_up_gripper": [0.0, 0.0, 1.0],
+        "location_m": [-1.3169224262237549, 1.0803341865539551e-07, 0.03399999812245369],
+        "target_m": [0.08307749032974243, 1.0803341865539551e-07, 0.03399999812245369],
+        "ortho_width_m": 0.6921600008010865,
+        "ortho_height_m": 0.43260000050067904
+      },
+      "vision_conclusion": "PASS_IMAGE_QUALITY: both handed fingers, inward sides, complete bottle, shell, and bar envelope are visible. The image correctly documents the rejected geometry rather than claiming a grasp pass."
+    },
+    {
+      "state": "corrected_cad",
+      "view": "true_world_top",
+      "geometry_state": "PASS",
+      "visual_review": "PASS",
+      "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-grasp-editor-five-position/full_gripper_cad_clearance/static_visual_evidence_attempt4/screenshots_raw/corrected_cad_true_world_top_raw.png",
+      "raw_sha256": "3b4dae1addec6b79204c0bca34ab4b9690040474943b9513620c6d3580c78a12",
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-grasp-editor-five-position/full_gripper_cad_clearance/static_visual_evidence_attempt4/screenshots_annotated/corrected_cad_true_world_top_annotated.png",
+      "annotated_sha256": "0108b0d4e52725f0651204171a5f331cdc7d9ecd7f71b2638c9f81e121437805",
+      "width_px": 1600,
+      "height_px": 1000,
+      "annotated_width_px": 2260,
+      "annotated_height_px": 1000,
+      "camera_projection": "ORTHOGRAPHIC",
+      "camera_matrix": [[0.0, -0.0, -1.0, -1.3169224262237549], [-1.0, 0.0, -0.0, 1.0803341865539551e-07], [0.0, 1.0, -0.0, 0.03399999812245369], [0.0, 0.0, 0.0, 1.0]],
+      "complete_gripper_visible": true,
+      "left_right_fingers_visible": true,
+      "bottle_visible": true,
+      "coordinate_axes_visible": true,
+      "ee_and_grasp_frames_distinguished": false,
+      "ee_grasp_frame_projection_status": "NOT_OBSERVABLE_DUE_TO_PROJECTION_ALONG_GRIPPER_X",
+      "same_camera_as_paired_state": true,
+      "geometry_signature": "fa572a7842b4c9035db0ffbe6ae6c6eb1c6aba8663419ad436b288599ae03fb7",
+      "camera": {
+        "projection": "ORTHOGRAPHIC",
+        "camera_forward_gripper": [1.0, 0.0, 0.0],
+        "image_right_gripper": [0.0, -1.0, 0.0],
+        "image_up_gripper": [0.0, 0.0, 1.0],
+        "location_m": [-1.3169224262237549, 1.0803341865539551e-07, 0.03399999812245369],
+        "target_m": [0.08307749032974243, 1.0803341865539551e-07, 0.03399999812245369],
+        "ortho_width_m": 0.6921600008010865,
+        "ortho_height_m": 0.43260000050067904
+      },
+      "vision_conclusion": "PASS_STATIC_CAD_VISUAL_GATE: blue left and orange right supplier v2 fingers are complete and distinguishable, inward surfaces face the bottle, L/R CAD-derived contact samples are visible, and the corrected state is visibly distinct from run13."
+    },
+    {
+      "state": "rejected_run13",
+      "view": "world_side",
+      "geometry_state": "FAIL",
+      "visual_review": "PASS",
+      "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-grasp-editor-five-position/full_gripper_cad_clearance/static_visual_evidence_attempt4/screenshots_raw/rejected_run13_world_side_raw.png",
+      "raw_sha256": "2a2a553701819802a54e0f68ae08b636a2337f534422c2b7d1df09e544a7b9ed",
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-grasp-editor-five-position/full_gripper_cad_clearance/static_visual_evidence_attempt4/screenshots_annotated/rejected_run13_world_side_annotated.png",
+      "annotated_sha256": "3cb42cde61cbfdc37298c421275e58bb52be05b62b911ec55fba5305d3eea323",
+      "width_px": 1600,
+      "height_px": 1000,
+      "annotated_width_px": 2260,
+      "annotated_height_px": 1000,
+      "camera_projection": "ORTHOGRAPHIC",
+      "camera_matrix": [[-0.0, -1.0, -0.0, 0.08307749032974243], [-0.0, 0.0, 1.0, 1.4000000953674316], [-1.0, 0.0, -0.0, 0.03399999812245369], [0.0, 0.0, 0.0, 1.0]],
+      "complete_gripper_visible": true,
+      "left_right_fingers_visible": true,
+      "bottle_visible": true,
+      "coordinate_axes_visible": true,
+      "ee_and_grasp_frames_distinguished": true,
+      "ee_grasp_frame_projection_status": "VISIBLE_IN_WORLD_SIDE",
+      "same_camera_as_paired_state": true,
+      "geometry_signature": "df08c6401d399f81233221d981cc82c4c9fd4a717e3af41fdb823804564c2a22",
+      "camera": {
+        "projection": "ORTHOGRAPHIC",
+        "camera_forward_gripper": [0.0, -1.0, 0.0],
+        "image_right_gripper": [-0.0, -0.0, -1.0],
+        "image_up_gripper": [-1.0, 0.0, 0.0],
+        "location_m": [0.08307749032974243, 1.4000000953674316, 0.03399999812245369],
+        "target_m": [0.08307749032974243, 1.0803341865539551e-07, 0.03399999812245369],
+        "ortho_width_m": 0.5582807350158692,
+        "ortho_height_m": 0.3489254593849182
+      },
+      "vision_conclusion": "PASS_IMAGE_QUALITY: the full bottle and relevant complete gripper geometry are uncropped. EE helper, rejected frame, and bottle-axis center are separated by short labels. This view records the failed old placement."
+    },
+    {
+      "state": "corrected_cad",
+      "view": "world_side",
+      "geometry_state": "PASS",
+      "visual_review": "PASS",
+      "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-grasp-editor-five-position/full_gripper_cad_clearance/static_visual_evidence_attempt4/screenshots_raw/corrected_cad_world_side_raw.png",
+      "raw_sha256": "68a70bcbb4b52eecc7c9cc1040c5086be22d3d798f6bdaaedf91d8208becf6e0",
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-grasp-editor-five-position/full_gripper_cad_clearance/static_visual_evidence_attempt4/screenshots_annotated/corrected_cad_world_side_annotated.png",
+      "annotated_sha256": "e8579c5b7933e8bdbffbe79e0781c4c595061b6809c556e338784e4470cdace6",
+      "width_px": 1600,
+      "height_px": 1000,
+      "annotated_width_px": 2260,
+      "annotated_height_px": 1000,
+      "camera_projection": "ORTHOGRAPHIC",
+      "camera_matrix": [[-0.0, -1.0, -0.0, 0.08307749032974243], [-0.0, 0.0, 1.0, 1.4000000953674316], [-1.0, 0.0, -0.0, 0.03399999812245369], [0.0, 0.0, 0.0, 1.0]],
+      "complete_gripper_visible": true,
+      "left_right_fingers_visible": true,
+      "bottle_visible": true,
+      "coordinate_axes_visible": true,
+      "ee_and_grasp_frames_distinguished": true,
+      "ee_grasp_frame_projection_status": "VISIBLE_IN_WORLD_SIDE",
+      "same_camera_as_paired_state": true,
+      "geometry_signature": "fa572a7842b4c9035db0ffbe6ae6c6eb1c6aba8663419ad436b288599ae03fb7",
+      "camera": {
+        "projection": "ORTHOGRAPHIC",
+        "camera_forward_gripper": [0.0, -1.0, 0.0],
+        "image_right_gripper": [-0.0, -0.0, -1.0],
+        "image_up_gripper": [-1.0, 0.0, 0.0],
+        "location_m": [0.08307749032974243, 1.4000000953674316, 0.03399999812245369],
+        "target_m": [0.08307749032974243, 1.0803341865539551e-07, 0.03399999812245369],
+        "ortho_width_m": 0.5582807350158692,
+        "ortho_height_m": 0.3489254593849182
+      },
+      "vision_conclusion": "PASS_STATIC_CAD_VISUAL_GATE: the complete uncropped side view distinguishes the official EE helper from the CAD pad-contact frame and bottle-axis center. L/R contacts coincide in this projection and are honestly labeled LR rather than being visually separated."
+    }
+  ],
+  "pairwise_review": {
+    "true_world_top": {
+      "same_camera": true,
+      "different_state_visible": true,
+      "difference": "Corrected CAD uses symmetric finger positions and moves the bottle body station distally relative to the rejected run13 placement."
+    },
+    "world_side": {
+      "same_camera": true,
+      "different_state_visible": true,
+      "difference": "The corrected pad-contact frame and bottle axis are visibly farther from the proximal bar envelope than the rejected run13 frame."
+    }
+  },
+  "user_review": {
+    "status": "PASS",
+    "confirmed_on": "2026-07-30",
+    "confirmation": "确认，通过。继续。",
+    "scope": "STATIC_CAD_SCREENSHOT_AND_GRASP_FRAME_VISUAL_GATE_ONLY"
+  },
+  "final_visual_judgment": "PASS",
+  "next_gate": "User review, followed by direct NVIDIA MCP API verification and isolated Isaac 5.1 runtime integration. No runtime mutation has been performed by this static evidence step."
+}

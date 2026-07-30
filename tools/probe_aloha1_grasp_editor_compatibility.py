@@ -27,7 +27,7 @@ EXPECTED_EXTENSION_VERSION = "2.0.20"
 OFFICIAL_MCP_INDEX_VERSION = "2.2.0"
 ARTICULATION_PATH = "/World/follower_left/vx300s_left/root_joint"
 GRIPPER_FRAME_PATH = (
-    "/World/follower_left/vx300s_left/follower_left_gripper_link"
+    "/World/follower_left/vx300s_left/follower_left_ee_gripper_link"
 )
 LEFT_FINGER_PATH = (
     "/World/follower_left/vx300s_left/follower_left_left_finger_link"

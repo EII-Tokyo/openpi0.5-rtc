@@ -112,8 +112,12 @@ def test_frozen_tabletop_config_marks_digital_calibration_boundary() -> None:
     config = yaml.safe_load((PROJECT_ROOT / "configs/aloha1_table_task_frame.yaml").read_text(encoding="utf-8"))
 
     assert config["status"] == "DIGITAL_STAGE_READBACK_NOT_REAL_CALIBRATION"
-    assert config["stage"]["sha256"] == "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf"
-    assert config["table"]["center_world_m"] == [0.0, 0.0, -0.0984000015258789]
+    assert config["stage"]["sha256"] == ("2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c")
+    assert config["table"]["center_world_m"] == [0.0, 0.0, -0.0075]
     assert config["table"]["size_world_m"] == [1.1, 0.6, 0.015]
-    assert config["task_world"]["world_from_task_translation_m"] == [0.0, 0.0, -0.0909000015258789]
+    assert config["task_world"]["world_from_task_translation_m"] == [
+        0.0,
+        0.0,
+        0.0,
+    ]
     assert config["boundaries"]["task8"] == "NOT_RUN"

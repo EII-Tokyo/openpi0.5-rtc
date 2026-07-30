@@ -22,12 +22,8 @@ from typing import Any
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
-EXPECTED_STAGE_SHA256 = (
-    "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf"
-)
-EXPECTED_URDF_SHA256 = (
-    "d9e4b32723ee71dfce26fb4e78546cfcfef147b2d7dbf5e53e3620e3d8aa96bd"
-)
+EXPECTED_STAGE_SHA256 = "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c"
+EXPECTED_URDF_SHA256 = "d9e4b32723ee71dfce26fb4e78546cfcfef147b2d7dbf5e53e3620e3d8aa96bd"
 EXPECTED_MOTION_GENERATION_VERSION = "8.0.26"
 EXPECTED_ISAAC_SIM_VERSION = "5.1.0.0"
 EXPECTED_KIT_VERSION = "107.3.3"
@@ -43,20 +39,20 @@ EXPECTED_CSPACE = [
 DEFAULT_Q = np.asarray([0.0, -0.96, 1.16, 0.0, -0.3, 0.0])
 ARTICULATION_PATH = "/World/follower_left/vx300s_left/root_joint"
 BASE_LINK_PATH = "/World/follower_left/vx300s_left/follower_left_base_link"
-END_EFFECTOR_PATH = (
-    "/World/follower_left/vx300s_left/follower_left_gripper_link"
-)
-END_EFFECTOR_FRAME = "follower_left_gripper_link"
+END_EFFECTOR_PATH = "/World/follower_left/vx300s_left/follower_left_ee_gripper_link"
+END_EFFECTOR_FRAME = "follower_left_ee_gripper_link"
 TRANSLATION_GATE_M = 0.001
 ROTATION_GATE_RAD = 0.005
-EXPECTED_EPISODE_SHA256 = (
-    "f073a21c6a790e738e36085d791482924a82832ca6d80cece04a26353b9fc745"
+EXPECTED_EPISODE_SHA256 = "f073a21c6a790e738e36085d791482924a82832ca6d80cece04a26353b9fc745"
+EXPECTED_JOINT_MAP_SHA256 = "f56be097d859f7361b804705af6659e0d51d9e480d1c721a60040ab787530308"
+EXPECTED_BOTTLE_USD_SHA256 = "16427135f152ec951de2321fd689366d745a2dd389cbe260976631783952533e"
+SUPPLIER_CAD_CLEARANCE_REPORT = ROOT / "reports/aloha1_mapping/aloha1_supplier_cad_grasp_clearance.json"
+EXPECTED_SUPPLIER_CAD_CLEARANCE_REPORT_SHA256 = "9f23974af362dc92134a38633180360bfff8b54bc0a5eaefae8032e2240b91bc"
+SUPPLIER_CAD_CLEARANCE_SCREENSHOT_REVIEW = (
+    ROOT / "reports/aloha1_mapping/aloha1_supplier_cad_grasp_clearance_screenshot_review.json"
 )
-EXPECTED_JOINT_MAP_SHA256 = (
-    "2c40a637d95d0ae960d11ae4f120f0ca06a77146917ef50051baca1d3a8c496d"
-)
-EXPECTED_BOTTLE_USD_SHA256 = (
-    "16427135f152ec951de2321fd689366d745a2dd389cbe260976631783952533e"
+EXPECTED_SUPPLIER_CAD_CLEARANCE_SCREENSHOT_REVIEW_SHA256 = (
+    "c7097b05654a3966c976690e5f0f79c3b2be69eaa51727f430998efae2bbe0f3"
 )
 
 
@@ -96,14 +92,10 @@ def detect_lift_onset(
     if baseline.size < 2:
         raise ValueError("lift-onset baseline must contain at least two values")
     raw_baseline_median = float(np.median(baseline))
-    raw_baseline_mad = float(
-        np.median(np.abs(baseline - raw_baseline_median))
-    )
+    raw_baseline_mad = float(np.median(np.abs(baseline - raw_baseline_median)))
     upward_noise = np.maximum(baseline, 0.0)
     baseline_median = float(np.median(upward_noise))
-    baseline_mad = float(
-        np.median(np.abs(upward_noise - baseline_median))
-    )
+    baseline_mad = float(np.median(np.abs(upward_noise - baseline_median)))
     scale = max(1.0, float(np.max(np.abs(delta_values))))
     threshold = baseline_median + 5.0 * baseline_mad
     if baseline_mad == 0.0:
@@ -115,10 +107,7 @@ def detect_lift_onset(
         frame = int(frame_values[index])
         if frame <= readback_response_start_frame:
             continue
-        two_above = bool(
-            delta_values[index] > threshold
-            and delta_values[index + 1] > threshold
-        )
+        two_above = bool(delta_values[index] > threshold and delta_values[index + 1] > threshold)
         previous_z = z_values[index - 1] if index > 0 else z_values[index]
         cumulative_to_end = float(z_values[-1] - previous_z)
         positive_cumulative = cumulative_to_end > 0.0
@@ -253,18 +242,12 @@ def _bottle_collision_points_local(
             {
                 "prim_path": prim.GetPath().pathString,
                 "point_count": int(transformed.shape[0]),
-                "contact_offset_authored_m": (
-                    float(contact_offset) if contact_offset is not None else None
-                ),
-                "rest_offset_authored_m": (
-                    float(rest_offset) if rest_offset is not None else None
-                ),
+                "contact_offset_authored_m": (float(contact_offset) if contact_offset is not None else None),
+                "rest_offset_authored_m": (float(rest_offset) if rest_offset is not None else None),
             }
         )
     if len(meshes) != 41:
-        raise RuntimeError(
-            f"expected 41 Bottle500 collision meshes, found {len(meshes)}"
-        )
+        raise RuntimeError(f"expected 41 Bottle500 collision meshes, found {len(meshes)}")
     combined = np.concatenate(points, axis=0)
     extents = np.max(combined, axis=0) - np.min(combined, axis=0)
     if (
@@ -331,36 +314,19 @@ def _solve_adaptive_linear_ik(
             )
             solution = np.asarray(solution, dtype=np.float64)
             finite = bool(np.isfinite(solution).all())
-            within_limits = bool(
-                finite
-                and np.all(solution >= lower_limits)
-                and np.all(solution <= upper_limits)
-            )
+            within_limits = bool(finite and np.all(solution >= lower_limits) and np.all(solution <= upper_limits))
             delta = solution - previous if finite else np.full(6, np.nan)
-            velocity_ok = bool(
-                finite
-                and np.all(np.abs(delta) <= velocity_limits * physics_dt)
-            )
-            waypoint_status = (
-                "PASS"
-                if success and finite and within_limits and velocity_ok
-                else "FAIL"
-            )
+            velocity_ok = bool(finite and np.all(np.abs(delta) <= velocity_limits * physics_dt))
+            waypoint_status = "PASS" if success and finite and within_limits and velocity_ok else "FAIL"
             waypoints.append(
                 {
                     "phase": phase,
                     "segment": segment,
                     "segment_count": segment_count,
                     "fraction": fraction,
-                    "target_position_world_m": [
-                        float(value) for value in target
-                    ],
-                    "target_orientation_world_wxyz": [
-                        float(value) for value in orientation_wxyz
-                    ],
-                    "joint_positions_rad": [
-                        float(value) for value in solution
-                    ],
+                    "target_position_world_m": [float(value) for value in target],
+                    "target_orientation_world_wxyz": [float(value) for value in orientation_wxyz],
+                    "joint_positions_rad": [float(value) for value in solution],
                     "joint_delta_rad": [float(value) for value in delta],
                     "solver_success": bool(success),
                     "finite": finite,
@@ -410,26 +376,12 @@ def _source_inventory(
     paths = {
         "extension_toml": extension_root / "config/extension.toml",
         "articulation_kinematics_solver": (
-            extension_root
-            / "isaacsim/robot_motion/motion_generation/"
-            "articulation_kinematics_solver.py"
+            extension_root / "isaacsim/robot_motion/motion_generation/articulation_kinematics_solver.py"
         ),
-        "lula_kinematics": (
-            extension_root
-            / "isaacsim/robot_motion/motion_generation/lula/kinematics.py"
-        ),
-        "nvidia_test_kinematics": (
-            extension_root
-            / "isaacsim/robot_motion/motion_generation/tests/"
-            "test_kinematics.py"
-        ),
-        "physics_context": (
-            core_api_root
-            / "isaacsim/core/api/physics_context/physics_context.py"
-        ),
-        "physics_rules": (
-            validation_root / "isaacsim/asset/validation/physics_rules.py"
-        ),
+        "lula_kinematics": (extension_root / "isaacsim/robot_motion/motion_generation/lula/kinematics.py"),
+        "nvidia_test_kinematics": (extension_root / "isaacsim/robot_motion/motion_generation/tests/test_kinematics.py"),
+        "physics_context": (core_api_root / "isaacsim/core/api/physics_context/physics_context.py"),
+        "physics_rules": (validation_root / "isaacsim/asset/validation/physics_rules.py"),
     }
     records = {}
     for name, path in paths.items():
@@ -439,9 +391,7 @@ def _source_inventory(
             "sha256": _sha256(resolved),
         }
     extension_data = tomllib.loads(paths["extension_toml"].read_text())
-    records["extension_toml"]["declared_version"] = extension_data["package"][
-        "version"
-    ]
+    records["extension_toml"]["declared_version"] = extension_data["package"]["version"]
     return records
 
 
@@ -451,10 +401,9 @@ def _parse_args() -> argparse.Namespace:
         "--stage",
         type=Path,
         default=(
-            ROOT
-            / "assets/Trossen/ALOHA1/1.0/diagnostics/"
-            "signal_correspondence/1.0/"
-            "aloha1_signal_correspondence_workcell.usda"
+            ROOT / "assets/Trossen/ALOHA1/1.0/diagnostics/"
+            "table_support_alignment/1.0/"
+            "aloha1_table_support_aligned_workcell.usda"
         ),
     )
     parser.add_argument(
@@ -486,9 +435,7 @@ def main() -> int:
     stage_hash_before = _sha256(stage_path)
     urdf_hash = _sha256(urdf_path)
     if stage_hash_before != EXPECTED_STAGE_SHA256:
-        raise RuntimeError(
-            f"frozen Stage SHA-256 mismatch: {stage_hash_before}"
-        )
+        raise RuntimeError(f"frozen Stage SHA-256 mismatch: {stage_hash_before}")
     if urdf_hash != EXPECTED_URDF_SHA256:
         raise RuntimeError(f"frozen URDF SHA-256 mismatch: {urdf_hash}")
 
@@ -523,20 +470,24 @@ def main() -> int:
         from pxr import UsdGeom
         import yaml
 
+        from tools.aloha1_mapping.aloha_kinematics_reference import SOURCE_CLASS as POE_SOURCE_CLASS
+        from tools.aloha1_mapping.aloha_kinematics_reference import SOURCE_FILE as POE_SOURCE_FILE
+        from tools.aloha1_mapping.aloha_kinematics_reference import SOURCE_SHA256 as POE_SOURCE_SHA256
+        from tools.aloha1_mapping.aloha_kinematics_reference import fk_space
         from tools.aloha1_mapping.episode18_grasp_window import detect_gripper_phases
         from tools.aloha1_mapping.episode18_grasp_window import load_episode_window
+        from tools.aloha1_mapping.grasp_frame_contract import derive_urdf_fixed_transform
         from tools.aloha1_mapping.horizontal_bottle_geometry import canonical_bottle_axis
         from tools.aloha1_mapping.horizontal_bottle_geometry import derive_horizontal_support_placement
         from tools.aloha1_mapping.horizontal_bottle_geometry import evaluate_geometry
         from tools.aloha1_mapping.horizontal_bottle_geometry import point_on_axis
         from tools.aloha1_mapping.horizontal_bottle_geometry import shortest_arc_rotation
         from tools.aloha1_mapping.horizontal_bottle_geometry import transform_points
+        from tools.aloha1_mapping.supplier_cad_grasp_frame import load_verified_clearance_grasp_frame
 
-        extension_root = Path(
-            importlib.import_module(
-                "isaacsim.robot_motion.motion_generation"
-            ).__path__[0]
-        ).resolve().parents[2]
+        extension_root = (
+            Path(importlib.import_module("isaacsim.robot_motion.motion_generation").__path__[0]).resolve().parents[2]
+        )
         extensions_root = extension_root.parent
         core_api_root = extensions_root / "isaacsim.core.api"
         validation_root = extensions_root / "isaacsim.asset.validation"
@@ -548,70 +499,33 @@ def main() -> int:
         source_version = sources["extension_toml"]["declared_version"]
 
         manager = omni.kit.app.get_app().get_extension_manager()
-        motion_extension_id = manager.get_enabled_extension_id(
-            "isaacsim.robot_motion.motion_generation"
-        )
+        motion_extension_id = manager.get_enabled_extension_id("isaacsim.robot_motion.motion_generation")
         physx_extension_id = manager.get_enabled_extension_id("omni.physx")
-        motion_extension = (
-            manager.get_extension_dict(motion_extension_id)
-            if motion_extension_id
-            else None
-        )
-        physx_extension = (
-            manager.get_extension_dict(physx_extension_id)
-            if physx_extension_id
-            else None
-        )
-        motion_runtime_version = (
-            motion_extension.get("package", {}).get("version")
-            if motion_extension
-            else None
-        )
-        physx_runtime_version = (
-            physx_extension.get("package", {}).get("version")
-            if physx_extension
-            else None
-        )
+        motion_extension = manager.get_extension_dict(motion_extension_id) if motion_extension_id else None
+        physx_extension = manager.get_extension_dict(physx_extension_id) if physx_extension_id else None
+        motion_runtime_version = motion_extension.get("package", {}).get("version") if motion_extension else None
+        physx_runtime_version = physx_extension.get("package", {}).get("version") if physx_extension else None
         if physx_runtime_version is None:
             physx_module_path = Path(next(iter(omni.physx.__path__))).resolve()
             extension_directory = next(
-                (
-                    parent
-                    for parent in physx_module_path.parents
-                    if parent.name.startswith("omni.physx-")
-                ),
+                (parent for parent in physx_module_path.parents if parent.name.startswith("omni.physx-")),
                 None,
             )
-            version_match = (
-                re.match(r"omni\.physx-([^+]+)", extension_directory.name)
-                if extension_directory
-                else None
-            )
-            physx_runtime_version = (
-                version_match.group(1) if version_match else None
-            )
+            version_match = re.match(r"omni\.physx-([^+]+)", extension_directory.name) if extension_directory else None
+            physx_runtime_version = version_match.group(1) if version_match else None
         if source_version != EXPECTED_MOTION_GENERATION_VERSION:
-            raise RuntimeError(
-                "motion-generation source version mismatch: "
-                f"{source_version}"
-            )
+            raise RuntimeError(f"motion-generation source version mismatch: {source_version}")
         if (
             motion_runtime_version is not None
-            and str(motion_runtime_version).split("+", maxsplit=1)[0]
-            != EXPECTED_MOTION_GENERATION_VERSION
+            and str(motion_runtime_version).split("+", maxsplit=1)[0] != EXPECTED_MOTION_GENERATION_VERSION
         ):
-            raise RuntimeError(
-                "motion-generation runtime version mismatch: "
-                f"{motion_runtime_version}"
-            )
+            raise RuntimeError(f"motion-generation runtime version mismatch: {motion_runtime_version}")
         isaac_runtime_version = version("isaacsim")
-        kit_runtime_version = str(
-            carb.tokens.get_tokens_interface().resolve("${kit_version}")
-        ).split("+", maxsplit=1)[0]
+        kit_runtime_version = str(carb.tokens.get_tokens_interface().resolve("${kit_version}")).split("+", maxsplit=1)[
+            0
+        ]
         normalized_physx_version = (
-            str(physx_runtime_version).split("+", maxsplit=1)[0]
-            if physx_runtime_version
-            else None
+            str(physx_runtime_version).split("+", maxsplit=1)[0] if physx_runtime_version else None
         )
         expected_runtime = {
             "isaac_sim": EXPECTED_ISAAC_SIM_VERSION,
@@ -624,10 +538,7 @@ def main() -> int:
             "physx": normalized_physx_version,
         }
         if actual_runtime != expected_runtime:
-            raise RuntimeError(
-                "Isaac runtime boundary mismatch: "
-                f"expected={expected_runtime}, actual={actual_runtime}"
-            )
+            raise RuntimeError(f"Isaac runtime boundary mismatch: expected={expected_runtime}, actual={actual_runtime}")
 
         solver = LulaKinematicsSolver(
             robot_description_path=str(descriptor_path),
@@ -636,13 +547,9 @@ def main() -> int:
         solver_joint_names = list(solver.get_joint_names())
         solver_frames = list(solver.get_all_frame_names())
         if solver_joint_names != EXPECTED_CSPACE:
-            raise RuntimeError(
-                f"Lula cspace mismatch: {solver_joint_names}"
-            )
+            raise RuntimeError(f"Lula cspace mismatch: {solver_joint_names}")
         if END_EFFECTOR_FRAME not in solver_frames:
-            raise RuntimeError(
-                f"missing Lula frame: {END_EFFECTOR_FRAME}"
-            )
+            raise RuntimeError(f"missing Lula frame: {END_EFFECTOR_FRAME}")
 
         if not open_stage(str(stage_path)):
             raise RuntimeError(f"failed to open frozen Stage: {stage_path}")
@@ -655,9 +562,7 @@ def main() -> int:
         )
         physics_context = world.get_physics_context()
         physics_context.set_solve_articulation_contact_last(True)
-        solve_contact_last_readback = (
-            physics_context.get_solve_articulation_contact_last()
-        )
+        solve_contact_last_readback = physics_context.get_solve_articulation_contact_last()
         articulation = SingleArticulation(
             prim_path=ARTICULATION_PATH,
             name="task7b2_horizontal_kinematics_follower_left",
@@ -673,9 +578,7 @@ def main() -> int:
             "right_finger",
         ]
         if runtime_dof_order != expected_runtime_order:
-            raise RuntimeError(
-                f"runtime DOF order mismatch: {runtime_dof_order}"
-            )
+            raise RuntimeError(f"runtime DOF order mismatch: {runtime_dof_order}")
 
         cases = [
             ("approved_home", DEFAULT_Q.copy()),
@@ -712,22 +615,40 @@ def main() -> int:
                 END_EFFECTOR_FRAME,
                 readback[:6],
             )
-            usd_rotation = quats_to_rot_matrices(
-                np.asarray(usd_orientation, dtype=np.float64)
+            usd_rotation = quats_to_rot_matrices(np.asarray(usd_orientation, dtype=np.float64))
+            base_rotation = quats_to_rot_matrices(np.asarray(base_orientation, dtype=np.float64))
+            world_from_base = np.eye(4, dtype=np.float64)
+            world_from_base[:3, :3] = base_rotation
+            world_from_base[:3, 3] = np.asarray(
+                base_position,
+                dtype=np.float64,
             )
-            translation_residual = float(
-                np.linalg.norm(
-                    np.asarray(lula_position) - np.asarray(usd_position)
-                )
-            )
+            world_from_interbotix_poe = world_from_base @ fk_space(readback[:6])
+            poe_position = world_from_interbotix_poe[:3, 3]
+            poe_rotation = world_from_interbotix_poe[:3, :3]
+            translation_residual = float(np.linalg.norm(np.asarray(lula_position) - np.asarray(usd_position)))
             rotation_residual = _rotation_residual_rad(
                 np.asarray(lula_rotation),
+                np.asarray(usd_rotation),
+            )
+            poe_lula_translation_residual = float(np.linalg.norm(poe_position - np.asarray(lula_position)))
+            poe_lula_rotation_residual = _rotation_residual_rad(
+                poe_rotation,
+                np.asarray(lula_rotation),
+            )
+            poe_usd_translation_residual = float(np.linalg.norm(poe_position - np.asarray(usd_position)))
+            poe_usd_rotation_residual = _rotation_residual_rad(
+                poe_rotation,
                 np.asarray(usd_rotation),
             )
             case_status = (
                 "PASS"
                 if translation_residual <= TRANSLATION_GATE_M
                 and rotation_residual <= ROTATION_GATE_RAD
+                and poe_lula_translation_residual <= TRANSLATION_GATE_M
+                and poe_lula_rotation_residual <= ROTATION_GATE_RAD
+                and poe_usd_translation_residual <= TRANSLATION_GATE_M
+                and poe_usd_rotation_residual <= ROTATION_GATE_RAD
                 else "FAIL"
             )
             fk_records.append(
@@ -735,48 +656,33 @@ def main() -> int:
                     "case": case_name,
                     "status": case_status,
                     "arm_target_rad": [float(value) for value in arm_q],
-                    "arm_readback_rad": [
-                        float(value) for value in readback[:6]
-                    ],
+                    "arm_readback_rad": [float(value) for value in readback[:6]],
                     "finger_readback_m": [
                         float(readback[7]),
                         float(readback[8]),
                     ],
-                    "base_position_world_m": [
-                        float(value) for value in base_position
-                    ],
-                    "base_orientation_world_wxyz": [
-                        float(value) for value in base_orientation
-                    ],
-                    "usd_position_world_m": [
-                        float(value) for value in usd_position
-                    ],
-                    "usd_orientation_world_wxyz": [
-                        float(value) for value in usd_orientation
-                    ],
-                    "lula_position_world_m": [
-                        float(value) for value in lula_position
-                    ],
-                    "lula_rotation_world": [
-                        [float(value) for value in row]
-                        for row in lula_rotation
-                    ],
+                    "base_position_world_m": [float(value) for value in base_position],
+                    "base_orientation_world_wxyz": [float(value) for value in base_orientation],
+                    "usd_position_world_m": [float(value) for value in usd_position],
+                    "usd_orientation_world_wxyz": [float(value) for value in usd_orientation],
+                    "lula_position_world_m": [float(value) for value in lula_position],
+                    "lula_rotation_world": [[float(value) for value in row] for row in lula_rotation],
+                    "interbotix_poe_position_world_m": [float(value) for value in poe_position],
+                    "interbotix_poe_rotation_world": [[float(value) for value in row] for row in poe_rotation],
                     "translation_residual_m": translation_residual,
                     "rotation_angle_residual_rad": rotation_residual,
+                    "interbotix_poe_to_lula_translation_residual_m": (poe_lula_translation_residual),
+                    "interbotix_poe_to_lula_rotation_residual_rad": (poe_lula_rotation_residual),
+                    "interbotix_poe_to_usd_translation_residual_m": (poe_usd_translation_residual),
+                    "interbotix_poe_to_usd_rotation_residual_rad": (poe_usd_rotation_residual),
                 }
             )
 
-        correspondence_pass = all(
-            record["status"] == "PASS" for record in fk_records
-        )
+        correspondence_pass = all(record["status"] == "PASS" for record in fk_records)
         if not correspondence_pass:
-            report["hard_blockers"].append(
-                "HARD_BLOCKER_LULA_USD_FRAME_CORRESPONDENCE"
-            )
+            report["hard_blockers"].append("HARD_BLOCKER_LULA_USD_FRAME_CORRESPONDENCE")
 
-        episode_path = Path(
-            "/home/eii/project/bottles_data/episode_18.hdf5"
-        ).resolve(strict=True)
+        episode_path = Path("/home/eii/project/bottles_data/episode_18.hdf5").resolve(strict=True)
         episode_window = load_episode_window(
             episode_path,
             208,
@@ -806,11 +712,7 @@ def main() -> int:
             position = np.asarray(position, dtype=np.float64)
             rotation = np.asarray(rotation, dtype=np.float64)
             orientation = rot_matrices_to_quats(rotation)
-            delta = (
-                np.zeros(3, dtype=np.float64)
-                if previous_position is None
-                else position - previous_position
-            )
+            delta = np.zeros(3, dtype=np.float64) if previous_position is None else position - previous_position
             episode_positions.append(position)
             episode_rotations.append(rotation)
             episode_records.append(
@@ -818,17 +720,11 @@ def main() -> int:
                     "frame": int(frame_value),
                     "qpos_arm_6d": [float(value) for value in qpos_arm],
                     "action_arm_6d": [float(value) for value in action_arm],
-                    "ee_position_robot_base_m": [
-                        float(value) for value in position
-                    ],
-                    "ee_orientation_wxyz": [
-                        float(value) for value in orientation
-                    ],
+                    "ee_position_robot_base_m": [float(value) for value in position],
+                    "ee_orientation_wxyz": [float(value) for value in orientation],
                     "ee_delta_m": [float(value) for value in delta],
                     "ee_delta_z_m": float(delta[2]),
-                    "gripper_action": float(
-                        episode_window.action[index, 6]
-                    ),
+                    "gripper_action": float(episode_window.action[index, 6]),
                     "gripper_qpos": float(episode_window.qpos[index, 6]),
                 }
             )
@@ -842,18 +738,10 @@ def main() -> int:
             frames=episode_window.frames,
             delta_z=episode_delta_z,
             z_positions=episode_position_array[:, 2],
-            close_command_start_frame=(
-                gripper_phases.close_command_start_frame
-            ),
-            readback_response_start_frame=(
-                gripper_phases.readback_response_start_frame
-            ),
+            close_command_start_frame=(gripper_phases.close_command_start_frame),
+            readback_response_start_frame=(gripper_phases.readback_response_start_frame),
         )
-        lift_index = int(
-            np.flatnonzero(
-                episode_window.frames == lift_detection.lift_onset_frame
-            )[0]
-        )
+        lift_index = int(np.flatnonzero(episode_window.frames == lift_detection.lift_onset_frame)[0])
 
         full_q = np.asarray(
             articulation.get_joint_positions(),
@@ -870,51 +758,42 @@ def main() -> int:
             dtype=np.float64,
         )
         base_position, base_orientation = get_world_pose(BASE_LINK_PATH)
-        current_ee_position, current_ee_orientation = get_world_pose(
-            END_EFFECTOR_PATH
-        )
+        current_ee_position, current_ee_orientation = get_world_pose(END_EFFECTOR_PATH)
         base_position_array = np.asarray(base_position, dtype=np.float64)
         base_orientation_array = np.asarray(
             base_orientation,
             dtype=np.float64,
         )
         base_rotation = quats_to_rot_matrices(base_orientation_array)
-        target_world_rotation = base_rotation @ episode_rotations[lift_index]
-        target_world_orientation = rot_matrices_to_quats(
-            target_world_rotation
+        exact_lift_q = np.asarray(
+            episode_window.qpos[lift_index, :6],
+            dtype=np.float64,
         )
+        world_from_base = np.eye(4, dtype=np.float64)
+        world_from_base[:3, :3] = base_rotation
+        world_from_base[:3, 3] = base_position_array
+        world_from_ee_exact = world_from_base @ fk_space(exact_lift_q)
+        target_world_rotation = world_from_ee_exact[:3, :3]
+        target_world_orientation = rot_matrices_to_quats(target_world_rotation)
         solver.set_robot_base_pose(
             np.zeros(3, dtype=np.float64),
             np.asarray([1.0, 0.0, 0.0, 0.0], dtype=np.float64),
         )
-        readback_position_base, readback_rotation_base = (
-            solver.compute_forward_kinematics(
-                END_EFFECTOR_FRAME,
-                onset_readback[:6],
-            )
+        readback_position_base, readback_rotation_base = solver.compute_forward_kinematics(
+            END_EFFECTOR_FRAME,
+            onset_readback[:6],
         )
-        predicted_world_position = (
-            base_position_array
-            + base_rotation
-            @ np.asarray(readback_position_base, dtype=np.float64)
+        predicted_world_position = base_position_array + base_rotation @ np.asarray(
+            readback_position_base, dtype=np.float64
         )
         onset_usd_translation_residual = float(
-            np.linalg.norm(
-                predicted_world_position
-                - np.asarray(current_ee_position, dtype=np.float64)
-            )
+            np.linalg.norm(predicted_world_position - np.asarray(current_ee_position, dtype=np.float64))
         )
         onset_usd_rotation_residual = _rotation_residual_rad(
-            base_rotation
-            @ np.asarray(readback_rotation_base, dtype=np.float64),
-            quats_to_rot_matrices(
-                np.asarray(current_ee_orientation, dtype=np.float64)
-            ),
+            base_rotation @ np.asarray(readback_rotation_base, dtype=np.float64),
+            quats_to_rot_matrices(np.asarray(current_ee_orientation, dtype=np.float64)),
         )
-        if (
-            onset_usd_translation_residual > TRANSLATION_GATE_M
-            or onset_usd_rotation_residual > ROTATION_GATE_RAD
-        ):
+        if onset_usd_translation_residual > TRANSLATION_GATE_M or onset_usd_rotation_residual > ROTATION_GATE_RAD:
             raise RuntimeError(
                 "episode lift-onset FK does not match composed USD pose: "
                 f"translation={onset_usd_translation_residual}, "
@@ -956,27 +835,68 @@ def main() -> int:
             UsdGeom,
             Gf,
         )
-        left_inner_point, right_inner_point, open_gap = (
-            _closest_opposing_points(left_points, right_points)
+        rejected_left_point, rejected_right_point, rejected_open_gap = _closest_opposing_points(
+            left_points, right_points
         )
-        contact_midpoint = (left_inner_point + right_inner_point) / 2.0
-        gripper_line_world = right_inner_point - left_inner_point
+        clearance_frame = load_verified_clearance_grasp_frame(
+            clearance_report_path=SUPPLIER_CAD_CLEARANCE_REPORT,
+            screenshot_review_path=(SUPPLIER_CAD_CLEARANCE_SCREENSHOT_REVIEW),
+            expected_clearance_sha256=(EXPECTED_SUPPLIER_CAD_CLEARANCE_REPORT_SHA256),
+            expected_screenshot_sha256=(EXPECTED_SUPPLIER_CAD_CLEARANCE_SCREENSHOT_REVIEW_SHA256),
+        )
+        gripper_link_from_contact = np.asarray(
+            clearance_frame["reference_from_grasp"],
+            dtype=np.float64,
+        )
+        gripper_link_from_ee = derive_urdf_fixed_transform(
+            urdf_path,
+            source_link="follower_left_gripper_link",
+            target_link=END_EFFECTOR_FRAME,
+        )
+        ee_from_contact = np.linalg.inv(gripper_link_from_ee) @ gripper_link_from_contact
+        world_from_contact = world_from_ee_exact @ ee_from_contact
+        contact_midpoint = world_from_contact[:3, 3]
+        gripper_line_world = world_from_ee_exact[:3, :3] @ np.asarray(
+            clearance_frame["finger_line_axis_reference"],
+            dtype=np.float64,
+        )
         gripper_line_xy = gripper_line_world.copy()
         gripper_line_xy[2] = 0.0
         bottle_axis_world = canonical_bottle_axis(gripper_line_xy)
+        left_contact_reference = np.asarray(
+            clearance_frame["contact_points_reference_m"]["left"],
+            dtype=np.float64,
+        )
+        right_contact_reference = np.asarray(
+            clearance_frame["contact_points_reference_m"]["right"],
+            dtype=np.float64,
+        )
+        left_open_reference = left_contact_reference + np.asarray(
+            [
+                0.0,
+                0.057 - clearance_frame["finger_targets_m"]["left_finger"],
+                0.0,
+            ],
+            dtype=np.float64,
+        )
+        right_open_reference = right_contact_reference + np.asarray(
+            [
+                0.0,
+                -0.057 - clearance_frame["finger_targets_m"]["right_finger"],
+                0.0,
+            ],
+            dtype=np.float64,
+        )
+        open_gap = float(np.linalg.norm(right_open_reference - left_open_reference))
 
-        bottle_usd_path = (
-            ROOT / "assets/bottle_500ml/isaac/bottle_500ml_sim.usd"
-        ).resolve(strict=True)
+        bottle_usd_path = (ROOT / "assets/bottle_500ml/isaac/bottle_500ml_sim.usd").resolve(strict=True)
         if _sha256(bottle_usd_path) != EXPECTED_BOTTLE_USD_SHA256:
             raise RuntimeError("Bottle500 USD SHA-256 mismatch")
-        bottle_points_local, bottle_collision_records = (
-            _bottle_collision_points_local(
-                bottle_usd_path,
-                Usd,
-                UsdGeom,
-                Gf,
-            )
+        bottle_points_local, bottle_collision_records = _bottle_collision_points_local(
+            bottle_usd_path,
+            Usd,
+            UsdGeom,
+            Gf,
         )
         authored_offsets = [
             record["contact_offset_authored_m"]
@@ -984,9 +904,7 @@ def main() -> int:
             if record["contact_offset_authored_m"] is not None
         ]
         for finger_path in (left_finger_collider, right_finger_collider):
-            value = stage.GetPrimAtPath(finger_path).GetAttribute(
-                "physxCollision:contactOffset"
-            ).Get()
+            value = stage.GetPrimAtPath(finger_path).GetAttribute("physxCollision:contactOffset").Get()
             if value is not None:
                 authored_offsets.append(float(value))
         setup_gap_m = max(authored_offsets, default=0.0)
@@ -1022,45 +940,22 @@ def main() -> int:
             gripper_perpendicular_gate_deg=3.0,
             approach_direction_gate_deg=3.0,
         )
-        current_ee_position_array = np.asarray(
-            current_ee_position,
-            dtype=np.float64,
-        )
-        link_to_contact_midpoint = (
-            contact_midpoint - current_ee_position_array
-        )
-        grasp_ee_position = (
-            np.asarray(bottle_grasp_point, dtype=np.float64)
-            - link_to_contact_midpoint
-        )
+        current_ee_position_array = world_from_ee_exact[:3, 3].copy()
+        link_to_contact_midpoint = contact_midpoint - current_ee_position_array
+        grasp_ee_position = np.asarray(bottle_grasp_point, dtype=np.float64) - link_to_contact_midpoint
         finger_points = np.concatenate([left_points, right_points], axis=0)
-        finger_relative_min_z = float(
-            np.min(finger_points[:, 2] - current_ee_position_array[2])
-        )
+        finger_relative_min_z = float(np.min(finger_points[:, 2] - current_ee_position_array[2]))
         bottle_top_z = float(np.max(bottle_points_world[:, 2]))
         pregrasp_ee_position = grasp_ee_position.copy()
-        pregrasp_ee_position[2] = (
-            bottle_top_z + setup_gap_m - finger_relative_min_z
-        )
+        pregrasp_ee_position[2] = bottle_top_z + setup_gap_m - finger_relative_min_z
         if pregrasp_ee_position[2] <= grasp_ee_position[2]:
-            raise RuntimeError(
-                "derived pregrasp is not above the final grasp pose"
-            )
-        lift_distance_m = float(
-            episode_position_array[-1, 2]
-            - episode_position_array[lift_index, 2]
-        )
+            raise RuntimeError("derived pregrasp is not above the final grasp pose")
+        lift_distance_m = float(episode_position_array[-1, 2] - episode_position_array[lift_index, 2])
         if lift_distance_m <= 0.0:
-            raise RuntimeError(
-                "episode-derived lift distance is not positive"
-            )
-        lift_ee_position = grasp_ee_position + np.asarray(
-            [0.0, 0.0, lift_distance_m]
-        )
+            raise RuntimeError("episode-derived lift distance is not positive")
+        lift_ee_position = grasp_ee_position + np.asarray([0.0, 0.0, lift_distance_m])
 
-        joint_map_path = (
-            ROOT / "configs/aloha1_joint_map.yaml"
-        ).resolve(strict=True)
+        joint_map_path = (ROOT / "configs/aloha1_joint_map.yaml").resolve(strict=True)
         if _sha256(joint_map_path) != EXPECTED_JOINT_MAP_SHA256:
             raise RuntimeError("joint-map SHA-256 mismatch")
         joint_map = yaml.safe_load(joint_map_path.read_text())
@@ -1129,9 +1024,7 @@ def main() -> int:
                 dtype=np.float64,
             )
         if ik_status != "PASS":
-            report["hard_blockers"].append(
-                "HARD_BLOCKER_HORIZONTAL_GRASP_IK_FEASIBILITY"
-            )
+            report["hard_blockers"].append("HARD_BLOCKER_HORIZONTAL_GRASP_IK_FEASIBILITY")
 
         descriptor_hash = _sha256(descriptor_path)
         kinematics_sections = {
@@ -1169,25 +1062,12 @@ def main() -> int:
                 "status": "PASS",
                 "record_count": len(episode_records),
                 "records": episode_records,
-                "lift_onset_usd_translation_residual_m": (
-                    onset_usd_translation_residual
-                ),
-                "lift_onset_usd_rotation_residual_rad": (
-                    onset_usd_rotation_residual
-                ),
-                "lift_onset_requested_qpos_arm_6d": [
-                    float(value)
-                    for value in episode_window.qpos[lift_index, :6]
-                ],
-                "lift_onset_runtime_readback_arm_6d": [
-                    float(value) for value in onset_readback[:6]
-                ],
+                "lift_onset_usd_translation_residual_m": (onset_usd_translation_residual),
+                "lift_onset_usd_rotation_residual_rad": (onset_usd_rotation_residual),
+                "lift_onset_requested_qpos_arm_6d": [float(value) for value in episode_window.qpos[lift_index, :6]],
+                "lift_onset_runtime_readback_arm_6d": [float(value) for value in onset_readback[:6]],
                 "lift_onset_requested_readback_error_rad": [
-                    float(value)
-                    for value in (
-                        onset_readback[:6]
-                        - episode_window.qpos[lift_index, :6]
-                    )
+                    float(value) for value in (onset_readback[:6] - episode_window.qpos[lift_index, :6])
                 ],
             },
             "lift_detection": {
@@ -1196,34 +1076,20 @@ def main() -> int:
                 "threshold_m": lift_detection.threshold,
                 "baseline_median_m": lift_detection.baseline_median,
                 "baseline_mad_m": lift_detection.baseline_mad,
-                "raw_baseline_median_m": (
-                    lift_detection.raw_baseline_median
-                ),
+                "raw_baseline_median_m": (lift_detection.raw_baseline_median),
                 "raw_baseline_mad_m": lift_detection.raw_baseline_mad,
-                "directional_baseline": (
-                    "median(max(delta_z,0)) + "
-                    "5 * MAD(max(delta_z,0))"
-                ),
+                "directional_baseline": ("median(max(delta_z,0)) + 5 * MAD(max(delta_z,0))"),
                 "directional_baseline_reason": (
-                    "frames 208-222 contain intentional downward approach; "
-                    "negative descent is not upward lift noise"
+                    "frames 208-222 contain intentional downward approach; negative descent is not upward lift noise"
                 ),
-                "close_command_start_frame": (
-                    gripper_phases.close_command_start_frame
-                ),
-                "readback_response_start_frame": (
-                    gripper_phases.readback_response_start_frame
-                ),
+                "close_command_start_frame": (gripper_phases.close_command_start_frame),
+                "readback_response_start_frame": (gripper_phases.readback_response_start_frame),
                 "candidates": list(lift_detection.candidates),
                 "lift_distance_m": lift_distance_m,
             },
             "placement": {
-                "status": (
-                    "PASS" if geometry_gate["status"] == "PASS" else "FAIL"
-                ),
-                "source": (
-                    "CAD_COLLISION_GEOMETRY_AND_RUNTIME_STAGE_TRANSFORMS"
-                ),
+                "status": ("PASS" if geometry_gate["status"] == "PASS" else "FAIL"),
+                "source": ("FROZEN_SUPPLIER_CAD_CLEARANCE_FRAME_AND_EXACT_EPISODE18_POE"),
                 "table": {
                     "prim_path": table_path,
                     "top_z_world_m": table_top_z,
@@ -1232,87 +1098,53 @@ def main() -> int:
                     "value_m": setup_gap_m,
                     "authored_value_count": len(authored_offsets),
                     "status": (
-                        "RUNTIME_AUTHORED_READBACK"
-                        if authored_offsets
-                        else "UNAUTHORED_READBACK_NONE_ZERO_SETUP"
+                        "RUNTIME_AUTHORED_READBACK" if authored_offsets else "UNAUTHORED_READBACK_NONE_ZERO_SETUP"
                     ),
                 },
                 "supplier_cad_finger_geometry": {
+                    "ee_frame": END_EFFECTOR_FRAME,
                     "left_collider": left_finger_collider,
                     "right_collider": right_finger_collider,
                     "left_point_count": int(left_points.shape[0]),
                     "right_point_count": int(right_points.shape[0]),
-                    "closest_opposing_left_world_m": [
-                        float(value) for value in left_inner_point
-                    ],
-                    "closest_opposing_right_world_m": [
-                        float(value) for value in right_inner_point
-                    ],
-                    "open_closest_gap_m": open_gap,
-                    "contact_midpoint_world_m": [
-                        float(value) for value in contact_midpoint
-                    ],
-                    "method": (
-                        "MINIMUM_EUCLIDEAN_DISTANCE_BETWEEN_COMPOSED_"
-                        "SUPPLIER_CAD_COLLIDER_VERTICES"
-                    ),
+                    "open_contact_region_gap_m": open_gap,
+                    "contact_midpoint_world_m": [float(value) for value in contact_midpoint],
+                    "method": ("USER_APPROVED_COMPLETE_GRIPPER_CLEARANCE_FRAME"),
+                    "clearance_report": (clearance_frame["clearance_report"]),
+                    "screenshot_gate": clearance_frame["screenshot_gate"],
+                    "rejected_method": ("MINIMUM_COLLIDER_VERTEX_DISTANCE"),
+                    "rejected_closest_left_world_m": [float(value) for value in rejected_left_point],
+                    "rejected_closest_right_world_m": [float(value) for value in rejected_right_point],
+                    "rejected_closest_gap_m": rejected_open_gap,
                 },
                 "bottle_collision_meshes": bottle_collision_records,
                 "bottle_collision_envelope": {
-                    "combined_point_count": int(
-                        bottle_points_local.shape[0]
-                    ),
+                    "combined_point_count": int(bottle_points_local.shape[0]),
                     "combined_extents_m": [
                         float(value)
-                        for value in (
-                            np.max(bottle_points_local, axis=0)
-                            - np.min(bottle_points_local, axis=0)
-                        )
+                        for value in (np.max(bottle_points_local, axis=0) - np.min(bottle_points_local, axis=0))
                     ],
                     "cad_maximum_diameter_m": 0.068,
                     "collision_is_exact_cad": False,
                 },
                 "bottle_axis": {
                     "status": geometry_gate["status"],
-                    "a_world_m": [
-                        float(value) for value in placement.a_world
-                    ],
-                    "b_world_m": [
-                        float(value) for value in placement.b_world
-                    ],
-                    "unit_world": [
-                        float(value) for value in placement.axis_unit
-                    ],
+                    "a_world_m": [float(value) for value in placement.a_world],
+                    "b_world_m": [float(value) for value in placement.b_world],
+                    "unit_world": [float(value) for value in placement.axis_unit],
                     "length_m": 0.206,
                     "grasp_coordinate_m": 0.069,
-                    "grasp_point_world_m": [
-                        float(value) for value in bottle_grasp_point
-                    ],
-                    "lowest_point_world_z_m": (
-                        placement.lowest_point_world_z
-                    ),
-                    "lowest_point_to_table_gap_m": (
-                        placement.lowest_point_world_z - table_top_z
-                    ),
+                    "grasp_point_world_m": [float(value) for value in bottle_grasp_point],
+                    "lowest_point_world_z_m": (placement.lowest_point_world_z),
+                    "lowest_point_to_table_gap_m": (placement.lowest_point_world_z - table_top_z),
                 },
                 "geometry_gate": geometry_gate,
-                "placement_matrix": [
-                    [float(value) for value in row]
-                    for row in placement.matrix
-                ],
+                "placement_matrix": [[float(value) for value in row] for row in placement.matrix],
                 "target_poses": {
-                    "pregrasp_ee_position_world_m": [
-                        float(value) for value in pregrasp_ee_position
-                    ],
-                    "grasp_ee_position_world_m": [
-                        float(value) for value in grasp_ee_position
-                    ],
-                    "lift_ee_position_world_m": [
-                        float(value) for value in lift_ee_position
-                    ],
-                    "orientation_world_wxyz": [
-                        float(value) for value in target_world_orientation
-                    ],
+                    "pregrasp_ee_position_world_m": [float(value) for value in pregrasp_ee_position],
+                    "grasp_ee_position_world_m": [float(value) for value in grasp_ee_position],
+                    "lift_ee_position_world_m": [float(value) for value in lift_ee_position],
+                    "orientation_world_wxyz": [float(value) for value in target_world_orientation],
                     "approach_direction_world": [0.0, 0.0, -1.0],
                     "lift_direction_world": [0.0, 0.0, 1.0],
                 },
@@ -1325,15 +1157,9 @@ def main() -> int:
                 "physics_dt_s": physics_dt,
                 "velocity_limit_source": str(joint_map_path),
                 "joint_order": EXPECTED_CSPACE,
-                "joint_lower_limits_rad": [
-                    float(value) for value in lower_limits
-                ],
-                "joint_upper_limits_rad": [
-                    float(value) for value in upper_limits
-                ],
-                "joint_velocity_limits_rad_s": [
-                    float(value) for value in velocity_limits
-                ],
+                "joint_lower_limits_rad": [float(value) for value in lower_limits],
+                "joint_upper_limits_rad": [float(value) for value in upper_limits],
+                "joint_velocity_limits_rad_s": [float(value) for value in velocity_limits],
                 "phase_summaries": ik_phase_summaries,
                 "waypoints": ik_waypoints,
                 "diagnostic_only": True,
@@ -1346,9 +1172,7 @@ def main() -> int:
             {
                 "status": (
                     "PASS"
-                    if correspondence_pass
-                    and stage_immutable
-                    and solve_contact_last_readback is True
+                    if correspondence_pass and stage_immutable and solve_contact_last_readback is True
                     else "FAIL"
                 ),
                 "runtime": {
@@ -1388,14 +1212,8 @@ def main() -> int:
                             "ArticulationKinematicsSolver."
                             "compute_inverse_kinematics"
                         ),
-                        (
-                            "isaacsim.robot_motion.motion_generation.lula."
-                            "kinematics.LulaKinematicsSolver"
-                        ),
-                        (
-                            "isaacsim.core.api.physics_context.PhysicsContext."
-                            "set_solve_articulation_contact_last"
-                        ),
+                        ("isaacsim.robot_motion.motion_generation.lula.kinematics.LulaKinematicsSolver"),
+                        ("isaacsim.core.api.physics_context.PhysicsContext.set_solve_articulation_contact_last"),
                         "PhysxSchema.PhysxContactReportAPI",
                         "PhysicsSchemaTools.intToSdfPath",
                     ],
@@ -1404,34 +1222,20 @@ def main() -> int:
                 "api_readback": {
                     "motion_generation_extension_id": motion_extension_id,
                     "physx_extension_id": physx_extension_id,
-                    "lula_constructor_signature": str(
-                        inspect.signature(LulaKinematicsSolver)
-                    ),
-                    "lula_fk_signature": str(
-                        inspect.signature(
-                            LulaKinematicsSolver.compute_forward_kinematics
-                        )
-                    ),
+                    "lula_constructor_signature": str(inspect.signature(LulaKinematicsSolver)),
+                    "lula_fk_signature": str(inspect.signature(LulaKinematicsSolver.compute_forward_kinematics)),
                     "articulation_ik_signature": str(
-                        inspect.signature(
-                            ArticulationKinematicsSolver.compute_inverse_kinematics
-                        )
+                        inspect.signature(ArticulationKinematicsSolver.compute_inverse_kinematics)
                     ),
                     "contact_report_schema_attributes": list(
                         PhysxSchema.PhysxContactReportAPI.GetSchemaAttributeNames()
                     ),
-                    "int_to_sdf_path_callable": callable(
-                        PhysicsSchemaTools.intToSdfPath
-                    ),
-                    "get_contact_report_callable": callable(
-                        get_physx_simulation_interface().get_contact_report
-                    ),
+                    "int_to_sdf_path_callable": callable(PhysicsSchemaTools.intToSdfPath),
+                    "get_contact_report_callable": callable(get_physx_simulation_interface().get_contact_report),
                     "subscribe_contact_report_events_callable": callable(
                         get_physx_simulation_interface().subscribe_contact_report_events
                     ),
-                    "solve_articulation_contact_last": (
-                        solve_contact_last_readback
-                    ),
+                    "solve_articulation_contact_last": (solve_contact_last_readback),
                 },
                 "constructor_probe": {
                     "status": "PASS",
@@ -1446,6 +1250,12 @@ def main() -> int:
                     "status": "PASS" if correspondence_pass else "FAIL",
                     "translation_gate_m": TRANSLATION_GATE_M,
                     "rotation_gate_rad": ROTATION_GATE_RAD,
+                    "source_contract": {
+                        "interbotix_product": POE_SOURCE_CLASS,
+                        "source_file": POE_SOURCE_FILE,
+                        "source_sha256": POE_SOURCE_SHA256,
+                        "frame": END_EFFECTOR_FRAME,
+                    },
                     "cases": fk_records,
                 },
                 **kinematics_sections,
@@ -1453,9 +1263,7 @@ def main() -> int:
         )
         report["status"] = (
             "PASS"
-            if report["status"] == "PASS"
-            and geometry_gate["status"] == "PASS"
-            and ik_status == "PASS"
+            if report["status"] == "PASS" and geometry_gate["status"] == "PASS" and ik_status == "PASS"
             else "PARTIAL"
             if correspondence_pass and stage_immutable
             else "FAIL"
@@ -1479,9 +1287,7 @@ def main() -> int:
         report["error_type"] = type(exc).__name__
         report["error"] = str(exc)
         if not report["hard_blockers"]:
-            report["hard_blockers"].append(
-                "HARD_BLOCKER_KINEMATICS_PROBE_EXECUTION"
-            )
+            report["hard_blockers"].append("HARD_BLOCKER_KINEMATICS_PROBE_EXECUTION")
         _atomic_json(output_path, report)
         print(
             json.dumps(

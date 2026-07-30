@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "status": "FAIL",
+  "classification": "REJECTED_WHOLE_PAD_FACE_CENTROID_NOT_EFFECTIVE_GRASP_CENTER",
+  "scope": "static rejection boundary for native Grasp Editor run13",
+  "task8": "NOT_RUN",
+  "rejected_frame": {
+    "prim_path": "/World/follower_left/vx300s_left/follower_left_ee_gripper_link/aloha1_supplier_cad_pad_center",
+    "selection_rule": "MIDPOINT_OF_WHOLE_LARGEST_INWARD_PLANAR_FACE_CENTROIDS",
+    "translation_from_gripper_link_m": [
+      0.11127188479610935,
+      -4.0766001685454967e-17,
+      -1.4988010832439613e-15
+    ],
+    "offset_from_official_ee_helper_m": 0.004071884796109357,
+    "ee_endpoint_is_grasp_center": false,
+    "complete_gripper_clearance_was_evaluated": false,
+    "rejection_reason": "The centroid of the complete inward pad plane is not evidence of a usable distal Bottle500 contact station. Run13 placed the bottle in the gripper-bar contact envelope and established no nonpositive-separation finger contact."
+  },
+  "supplier_cad_use": {
+    "source_step": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/gdrive_source_readonly/Simple Aloha Viper 2024-5-13.step",
+    "source_step_sha256": "337862418769d4ea8b801d26e68930c4412f870050e60769bbf91765194dc571",
+    "handed_finger_brep_used": true,
+    "left_face_index_1_based": 117,
+    "right_face_index_1_based": 128,
+    "complete_gripper_envelope_used": false,
+    "project_bottle_brep_clearance_used": false,
+    "boundary": "PARTIAL_GEOMETRY_USE_REJECTED"
+  },
+  "runtime_evidence": {
+    "native_grasp_editor_success": true,
+    "native_suggested_confidence": 1.0,
+    "native_result_interpretation": "FALSE_POSITIVE_REJECTED_BY_CONTACT_GATE",
+    "bilateral_finger_contact": false,
+    "left_finger_contact": false,
+    "right_finger_contact": false,
+    "left_finger_pair_event_count": 7523,
+    "right_finger_pair_event_count": 2176,
+    "left_finger_nonpositive_separation_count": 0,
+    "right_finger_nonpositive_separation_count": 0,
+    "left_finger_minimum_separation_m": 0.005912351422011852,
+    "right_finger_minimum_separation_m": 0.004222278017550707,
+    "gripper_bar_pair_event_count": 14774,
+    "minimum_gripper_bar_separation_m": 4.206951871310594e-06,
+    "maximum_gripper_bar_impulse_ns": 0.0003058832405266519,
+    "mimic_error_abs_m": 0.00967225432395935,
+    "gui_report": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-grasp-editor-five-position/grasp_editor_gui_variant_b_run13/grasp_editor_variant_b_gui_report.json",
+      "sha256": "0084df8f22899ea3aeb81ce290eed1f9c79a9357febebcf785b958ab26bd203d"
+    },
+    "contact_report": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-grasp-editor-five-position/grasp_editor_gui_variant_b_run13/grasp_editor_variant_b_contacts.json",
+      "sha256": "c39c275622b923019e0dd10056bf5af0a03248ccd1cdefadc5d6664b99b9cd22"
+    },
+    "native_yaml": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-grasp-editor-five-position/grasp_editor_gui_variant_b_run13/grasp_editor_variant_b_native_raw.yaml",
+      "sha256": "ec5a88d3b6a99865a3fc9051e51d0d680ce07c52c61ebafa59522d366b657892"
+    }
+  },
+  "screenshots": {
+    "configured_raw": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-grasp-editor-five-position/grasp_editor_gui_variant_b_run13/grasp_editor_variant_b_configured_raw.png",
+      "sha256": "36fd470fa72c7dc120574bf878800ebf374fb83f207d56cd2da1c92cede7cf3f",
+      "width_px": 2880,
+      "height_px": 1800,
+      "visual_review": "FAIL",
+      "reason": "Full-arm view is too distant to establish that the bottle lies between the effective distal pad regions."
+    },
+    "simulated_raw": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-grasp-editor-five-position/grasp_editor_gui_variant_b_run13/grasp_editor_variant_b_simulated_raw.png",
+      "sha256": "c6e2d429e24cec5403123eb90464ef47449899bceaf58892ef7003bc1450d22d",
+      "width_px": 2880,
+      "height_px": 1800,
+      "visual_review": "FAIL",
+      "reason": "The bottle is not visibly captured between both distal finger pads; runtime data confirms zero bilateral physical finger contact."
+    }
+  },
+  "next_gate": {
+    "status": "NOT_RUN",
+    "required": "FULL_SUPPLIER_GRIPPER_AND_PROJECT_BOTTLE_BREP_CLEARANCE",
+    "isaac_grasp_editor_authorized": false,
+    "ik_authorized": false
+  }
+}

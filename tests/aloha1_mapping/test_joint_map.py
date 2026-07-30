@@ -51,8 +51,8 @@ def test_joint_map_names_robot_frames_and_prefixes_explicitly() -> None:
     assert right["robot_prefix"] == "follower_right"
     assert left["base_frame"] == "follower_left_base_link"
     assert right["base_frame"] == "follower_right_base_link"
-    assert left["end_effector_frame"] == "follower_left_gripper_link"
-    assert right["end_effector_frame"] == "follower_right_gripper_link"
+    assert left["end_effector_frame"] == "follower_left_ee_gripper_link"
+    assert right["end_effector_frame"] == "follower_right_ee_gripper_link"
 
 
 def test_joint_map_can_select_the_frozen_signal_runtime_inventory() -> None:

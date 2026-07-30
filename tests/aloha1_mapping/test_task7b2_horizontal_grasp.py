@@ -22,12 +22,8 @@ CONFIG = ROOT / "configs/aloha1_task7b2_horizontal_grasp.yaml"
 DESCRIPTOR = ROOT / "configs/aloha1_lula_follower_left.yaml"
 URDF = ROOT / "generated/urdf/follower_left.urdf"
 JOINT_MAP = ROOT / "configs/aloha1_joint_map.yaml"
-KINEMATICS_PROBE = (
-    ROOT / "tools/probe_aloha1_task7b2_horizontal_kinematics.py"
-)
-KINEMATICS_REPORT = (
-    ROOT / "reports/aloha1_mapping/aloha1_task7b2_horizontal_kinematics.json"
-)
+KINEMATICS_PROBE = ROOT / "tools/probe_aloha1_task7b2_horizontal_kinematics.py"
+KINEMATICS_REPORT = ROOT / "reports/aloha1_mapping/aloha1_task7b2_horizontal_kinematics.json"
 RUNTIME_SCRIPT = ROOT / "tools/validate_aloha1_task7b2_horizontal_grasp.py"
 EXPECTED_CSPACE = [
     "waist",
@@ -106,9 +102,7 @@ def test_horizontal_config_freezes_geometry_and_task_boundaries() -> None:
     assert config["episode18"]["frames_inclusive"] == [208, 244]
     assert config["episode18"]["use_action_as_command"] is True
     assert config["episode18"]["use_qpos_as_readback"] is True
-    assert config["robot"]["articulation_path"] == (
-        "/World/follower_left/vx300s_left/root_joint"
-    )
+    assert config["robot"]["articulation_path"] == ("/World/follower_left/vx300s_left/root_joint")
     assert config["motion"]["approach_direction_world"] == [0.0, 0.0, -1.0]
     assert config["motion"]["lift_direction_world"] == [0.0, 0.0, 1.0]
     assert config["physics"]["mass_kg"] == 0.020
@@ -117,10 +111,7 @@ def test_horizontal_config_freezes_geometry_and_task_boundaries() -> None:
     assert config["physics"]["hold_interval_s"] == 2.0
     assert config["physics"]["drop_gate_m"] == 0.010
     assert config["boundaries"]["task8"] == "NOT_RUN"
-    assert (
-        config["legacy"]["upright_shoulder_sweep"]["acceptance_eligible"]
-        is False
-    )
+    assert config["legacy"]["upright_shoulder_sweep"]["acceptance_eligible"] is False
 
 
 def test_horizontal_config_freezes_exact_sources() -> None:
@@ -128,9 +119,8 @@ def test_horizontal_config_freezes_exact_sources() -> None:
     config = yaml.safe_load(CONFIG.read_text(encoding="utf-8"))
     sources = config["frozen_inputs"]
 
-    assert sources["task7a_stage"]["sha256"] == (
-        "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf"
-    )
+    assert sources["task7a_stage"]["sha256"] == ("2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c")
+    assert sources["task7a_stage"]["classification"] == ("USER_CONFIRMED_TABLE_SUPPORT_ALIGNED_DIAGNOSTIC")
     assert sources["project_bottle_cad"]["sha256"] == (
         "3594f60200e54181bc8480a229484293a0d386c146d3f235b32e31a0c16bbf8a"
     )
@@ -140,12 +130,8 @@ def test_horizontal_config_freezes_exact_sources() -> None:
     assert sources["follower_left_urdf"]["sha256"] == (
         "d9e4b32723ee71dfce26fb4e78546cfcfef147b2d7dbf5e53e3620e3d8aa96bd"
     )
-    assert sources["joint_map"]["sha256"] == (
-        "2c40a637d95d0ae960d11ae4f120f0ca06a77146917ef50051baca1d3a8c496d"
-    )
-    assert sources["episode18"]["sha256"] == (
-        "f073a21c6a790e738e36085d791482924a82832ca6d80cece04a26353b9fc745"
-    )
+    assert sources["joint_map"]["sha256"] == ("f56be097d859f7361b804705af6659e0d51d9e480d1c721a60040ab787530308")
+    assert sources["episode18"]["sha256"] == ("f073a21c6a790e738e36085d791482924a82832ca6d80cece04a26353b9fc745")
 
 
 def test_lula_descriptor_matches_explicit_urdf_and_joint_map_order() -> None:
@@ -163,18 +149,12 @@ def test_lula_descriptor_matches_explicit_urdf_and_joint_map_order() -> None:
     ]
 
     urdf_root = ET.parse(URDF).getroot()
-    urdf_nonfixed = [
-        joint.attrib["name"]
-        for joint in urdf_root.findall("joint")
-        if joint.attrib["type"] != "fixed"
-    ]
+    urdf_nonfixed = [joint.attrib["name"] for joint in urdf_root.findall("joint") if joint.attrib["type"] != "fixed"]
     assert urdf_nonfixed[:6] == EXPECTED_CSPACE
     assert {"gripper", "left_finger", "right_finger"} <= set(urdf_nonfixed)
     assert urdf_root.find("link[@name='follower_left_base_link']") is not None
-    assert (
-        urdf_root.find("link[@name='follower_left_gripper_link']")
-        is not None
-    )
+    assert urdf_root.find("link[@name='follower_left_gripper_link']") is not None
+    assert urdf_root.find("link[@name='follower_left_ee_gripper_link']") is not None
 
     joint_map = yaml.safe_load(JOINT_MAP.read_text(encoding="utf-8"))
     left = joint_map["robots"]["follower_left"]
@@ -182,23 +162,19 @@ def test_lula_descriptor_matches_explicit_urdf_and_joint_map_order() -> None:
     assert [record["name"] for record in left["dofs"][:6]] == EXPECTED_CSPACE
 
 
-def test_kinematics_probe_obeys_isaac51_startup_and_frozen_stage_contract() -> (
-    None
-):
+def test_kinematics_probe_obeys_isaac51_startup_and_frozen_stage_contract() -> None:
     source = KINEMATICS_PROBE.read_text(encoding="utf-8")
     required = {
         "SimulationApp",
         "LulaKinematicsSolver",
         "compute_forward_kinematics",
         "set_robot_base_pose",
-        "follower_left_gripper_link",
-        "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf",
+        "follower_left_ee_gripper_link",
+        "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c",
         "8.0.26",
         "HARD_BLOCKER_LULA_USD_FRAME_CORRESPONDENCE",
     }
-    assert required <= set(source.split()) | {
-        token for token in required if token in source
-    }
+    assert required <= set(source.split()) | {token for token in required if token in source}
 
     tree = ast.parse(source)
     simulation_app_line = min(
@@ -207,10 +183,7 @@ def test_kinematics_probe_obeys_isaac51_startup_and_frozen_stage_contract() -> (
         if isinstance(node, ast.Call)
         and (
             (isinstance(node.func, ast.Name) and node.func.id == "SimulationApp")
-            or (
-                isinstance(node.func, ast.Attribute)
-                and node.func.attr == "SimulationApp"
-            )
+            or (isinstance(node.func, ast.Attribute) and node.func.attr == "SimulationApp")
         )
     )
     forbidden_imports = []
@@ -221,10 +194,7 @@ def test_kinematics_probe_obeys_isaac51_startup_and_frozen_stage_contract() -> (
             modules = [node.module or ""]
         else:
             continue
-        if any(
-            module.startswith(("pxr", "omni", "isaacsim"))
-            for module in modules
-        ):
+        if any(module.startswith(("pxr", "omni", "isaacsim")) for module in modules):
             forbidden_imports.append(node.lineno)
     assert forbidden_imports
     assert min(forbidden_imports) > simulation_app_line
@@ -249,11 +219,7 @@ def test_lift_onset_requires_two_positive_fk_steps_after_readback() -> None:
     assert result.lift_onset_frame == 237
     assert result.threshold > 0.0
     assert result.candidates
-    selected = next(
-        candidate
-        for candidate in result.candidates
-        if candidate["frame"] == 237
-    )
+    selected = next(candidate for candidate in result.candidates if candidate["frame"] == 237)
     assert selected["two_consecutive_above_threshold"] is True
     assert selected["positive_cumulative_z_to_end"] is True
 
@@ -283,9 +249,7 @@ def test_lift_onset_uses_directional_noise_not_downward_approach() -> None:
 
 
 def test_kinematics_report_binds_episode_fk_placement_and_ik() -> None:
-    assert KINEMATICS_REPORT.is_file(), (
-        f"missing kinematics report: {KINEMATICS_REPORT}"
-    )
+    assert KINEMATICS_REPORT.is_file(), f"missing kinematics report: {KINEMATICS_REPORT}"
     report = json.loads(KINEMATICS_REPORT.read_text(encoding="utf-8"))
 
     assert report["status"] in {"PASS", "PARTIAL", "FAIL"}
@@ -293,19 +257,11 @@ def test_kinematics_report_binds_episode_fk_placement_and_ik() -> None:
     assert report["bindings"]["episode"]["sha256"] == (
         "f073a21c6a790e738e36085d791482924a82832ca6d80cece04a26353b9fc745"
     )
-    assert report["bindings"]["urdf"]["sha256"] == (
-        "d9e4b32723ee71dfce26fb4e78546cfcfef147b2d7dbf5e53e3620e3d8aa96bd"
-    )
-    assert report["bindings"]["stage"]["sha256"] == (
-        "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf"
-    )
-    assert report["bindings"]["articulation_path"] == (
-        "/World/follower_left/vx300s_left/root_joint"
-    )
+    assert report["bindings"]["urdf"]["sha256"] == ("d9e4b32723ee71dfce26fb4e78546cfcfef147b2d7dbf5e53e3620e3d8aa96bd")
+    assert report["bindings"]["stage"]["sha256"] == ("2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c")
+    assert report["bindings"]["articulation_path"] == ("/World/follower_left/vx300s_left/root_joint")
     assert report["bindings"]["base_frame"] == "follower_left_base_link"
-    assert report["bindings"]["end_effector_frame"] == (
-        "follower_left_gripper_link"
-    )
+    assert report["bindings"]["end_effector_frame"] == ("follower_left_ee_gripper_link")
 
     records = report["episode_fk"]["records"]
     assert len(records) == 37
@@ -321,18 +277,28 @@ def test_kinematics_report_binds_episode_fk_placement_and_ik() -> None:
         "gripper_qpos",
     }
     assert all(required <= record.keys() for record in records)
+    assert all(np.isfinite(record["ee_position_robot_base_m"]).all() for record in records)
+    correspondence = report["fk_correspondence"]
+    assert correspondence["source_contract"]["frame"] == ("follower_left_ee_gripper_link")
+    assert correspondence["source_contract"]["interbotix_product"] == ("aloha_vx300s")
     assert all(
-        np.isfinite(record["ee_position_robot_base_m"]).all()
-        for record in records
+        case["interbotix_poe_to_lula_translation_residual_m"] < 0.001
+        and case["interbotix_poe_to_lula_rotation_residual_rad"] < 0.005
+        and case["interbotix_poe_to_usd_translation_residual_m"] < 0.001
+        and case["interbotix_poe_to_usd_rotation_residual_rad"] < 0.005
+        for case in correspondence["cases"]
     )
+    placement = report["placement"]
+    assert placement["source"] == ("FROZEN_SUPPLIER_CAD_CLEARANCE_FRAME_AND_EXACT_EPISODE18_POE")
+    assert placement["supplier_cad_finger_geometry"]["method"] == ("USER_APPROVED_COMPLETE_GRIPPER_CLEARANCE_FRAME")
+    assert placement["supplier_cad_finger_geometry"]["rejected_method"] == "MINIMUM_COLLIDER_VERTEX_DISTANCE"
+    assert placement["supplier_cad_finger_geometry"]["ee_frame"] == "follower_left_ee_gripper_link"
 
     lift = report["lift_detection"]
     assert 226 < lift["lift_onset_frame"] <= 244
     assert lift["candidates"]
     assert report["placement"]["bottle_axis"]["status"] == "PASS"
-    assert report["placement"]["bottle_axis"]["a_world_m"] != (
-        report["placement"]["bottle_axis"]["b_world_m"]
-    )
+    assert report["placement"]["bottle_axis"]["a_world_m"] != (report["placement"]["bottle_axis"]["b_world_m"])
     assert report["ik"]["position_tolerance_m"] == pytest.approx(0.001)
     assert report["ik"]["orientation_tolerance_rad"] == pytest.approx(0.005)
     assert report["ik"]["waypoints"]
@@ -427,9 +393,7 @@ def test_horizontal_failure_precedence_is_fail_closed() -> None:
         }
     )
 
-    assert evaluate_horizontal_trial(trial)["failure_mode"] == (
-        "horizontal_geometry_failed"
-    )
+    assert evaluate_horizontal_trial(trial)["failure_mode"] == ("horizontal_geometry_failed")
 
 
 def test_horizontal_signature_excludes_runtime_and_artifact_path() -> None:
@@ -438,14 +402,10 @@ def test_horizontal_signature_excludes_runtime_and_artifact_path() -> None:
     second["runtime_seconds"] = 1.0
     second["artifact_absolute_path"] = "/different/attempt"
 
-    assert canonical_horizontal_signature(first) == (
-        canonical_horizontal_signature(second)
-    )
+    assert canonical_horizontal_signature(first) == (canonical_horizontal_signature(second))
 
     second["bottle_poses"][-1]["position_m"][2] = 0.019
-    assert canonical_horizontal_signature(first) != (
-        canonical_horizontal_signature(second)
-    )
+    assert canonical_horizontal_signature(first) != (canonical_horizontal_signature(second))
 
 
 def test_horizontal_summary_requires_twenty_fresh_deterministic_passes() -> None:
@@ -454,9 +414,7 @@ def test_horizontal_summary_requires_twenty_fresh_deterministic_passes() -> None
     assert smoke["trial_count"] == 1
     assert smoke["pass_count"] == 1
 
-    trials = [
-        _passing_horizontal_trial(trial_index=index) for index in range(20)
-    ]
+    trials = [_passing_horizontal_trial(trial_index=index) for index in range(20)]
     accepted = summarize_horizontal_trials(trials)
     assert accepted["status"] == "PASS"
     assert accepted["trial_count"] == 20
@@ -471,9 +429,7 @@ def test_horizontal_summary_requires_twenty_fresh_deterministic_passes() -> None
 
 
 def test_horizontal_runtime_source_contract() -> None:
-    assert RUNTIME_SCRIPT.is_file(), (
-        f"missing Isaac 5.1 horizontal runtime: {RUNTIME_SCRIPT}"
-    )
+    assert RUNTIME_SCRIPT.is_file(), f"missing Isaac 5.1 horizontal runtime: {RUNTIME_SCRIPT}"
     source = RUNTIME_SCRIPT.read_text(encoding="utf-8")
     required = {
         "SimulationApp",
@@ -520,14 +476,8 @@ def test_horizontal_runtime_constructs_simulation_app_before_isaac_imports() -> 
         for node in ast.walk(tree)
         if isinstance(node, ast.Call)
         and (
-            (
-                isinstance(node.func, ast.Name)
-                and node.func.id == "SimulationApp"
-            )
-            or (
-                isinstance(node.func, ast.Attribute)
-                and node.func.attr == "SimulationApp"
-            )
+            (isinstance(node.func, ast.Name) and node.func.id == "SimulationApp")
+            or (isinstance(node.func, ast.Attribute) and node.func.attr == "SimulationApp")
         )
     ]
     assert simulation_app_lines, "SimulationApp construction not found"
@@ -539,8 +489,7 @@ def test_horizontal_runtime_constructs_simulation_app_before_isaac_imports() -> 
             protected_import_lines.extend(
                 node.lineno
                 for alias in node.names
-                if alias.name.split(".", maxsplit=1)[0]
-                in {"pxr", "omni", "isaacsim"}
+                if alias.name.split(".", maxsplit=1)[0] in {"pxr", "omni", "isaacsim"}
             )
         elif (
             isinstance(node, ast.ImportFrom)
@@ -573,22 +522,14 @@ def test_horizontal_runtime_requires_complete_two_view_frame_streams() -> None:
 
 def test_horizontal_runtime_full_arm_links_resolve_to_real_stage_prims() -> None:
     expected = {
-        "base": (
-            "/World/follower_left/vx300s_left/follower_left_base_link",
-        ),
+        "base": ("/World/follower_left/vx300s_left/follower_left_base_link",),
         "shoulder": (
             "/World/follower_left/vx300s_left/follower_left_shoulder_link",
             "/World/follower_left/vx300s_left/follower_left_upper_arm_link",
         ),
-        "elbow": (
-            "/World/follower_left/vx300s_left/follower_left_upper_forearm_link",
-        ),
-        "forearm": (
-            "/World/follower_left/vx300s_left/follower_left_lower_forearm_link",
-        ),
-        "wrist": (
-            "/World/follower_left/vx300s_left/follower_left_wrist_link",
-        ),
+        "elbow": ("/World/follower_left/vx300s_left/follower_left_upper_forearm_link",),
+        "forearm": ("/World/follower_left/vx300s_left/follower_left_lower_forearm_link",),
+        "wrist": ("/World/follower_left/vx300s_left/follower_left_wrist_link",),
         "gripper": (
             "/World/follower_left/vx300s_left/follower_left_gripper_link",
             "/World/follower_left/vx300s_left/follower_left_left_finger_link",
@@ -599,17 +540,13 @@ def test_horizontal_runtime_full_arm_links_resolve_to_real_stage_prims() -> None
     assert expected == horizontal_runtime.FULL_ARM_LINK_PRIMS
 
 
-def test_horizontal_runtime_full_arm_contract_uses_actual_bottle_and_table_paths() -> (
-    None
-):
+def test_horizontal_runtime_full_arm_contract_uses_actual_bottle_and_table_paths() -> None:
     config = yaml.safe_load(CONFIG.read_text(encoding="utf-8"))
     bottle_path = config["bottle"]["session_path"]
     table_path = config["frozen_inputs"]["task7a_stage"]["support_path"]
-    required_prims, required_links = (
-        horizontal_runtime._required_full_arm_contract(  # noqa: SLF001
-            bottle_path=bottle_path,
-            table_path=table_path,
-        )
+    required_prims, required_links = horizontal_runtime._required_full_arm_contract(  # noqa: SLF001
+        bottle_path=bottle_path,
+        table_path=table_path,
     )
 
     assert required_links == (
@@ -627,9 +564,7 @@ def test_horizontal_runtime_full_arm_contract_uses_actual_bottle_and_table_paths
     assert bottle_path == "/World/Task7B2HorizontalSession/Bottle500"
     assert table_path == "/World/environment/worldBody/user_confirmed_table"
     assert set(required_prims[:-2]) == {
-        prim_path
-        for prim_paths in horizontal_runtime.FULL_ARM_LINK_PRIMS.values()
-        for prim_path in prim_paths
+        prim_path for prim_paths in horizontal_runtime.FULL_ARM_LINK_PRIMS.values() for prim_path in prim_paths
     }
 
 
@@ -715,41 +650,23 @@ def test_horizontal_runtime_framing_evidence_uses_projection_and_fails_closed(
         required_scene_prims=("/World/Bottle500", "/World/Table"),
     )
 
-    assert evidence["method"] == (
-        "WORLD_AABB_27_POINT_USD_CAMERA_CLIPPED_PROJECTION_IN_FRAME"
-    )
+    assert evidence["method"] == ("WORLD_AABB_27_POINT_USD_CAMERA_CLIPPED_PROJECTION_IN_FRAME")
     assert evidence["projected_in_frame_prims"] == [
         "/World/visible",
         "/World/Bottle500",
         "/World/Table",
     ]
     assert evidence["projected_in_frame_links"] == ["base"]
-    assert evidence["numeric_evidence_scope"] == (
-        "WORLD_AABB_CAMERA_FRUSTUM_AND_IMAGE_BOUNDS_ONLY"
-    )
-    assert evidence["occlusion_evaluation_status"] == (
-        "NOT_EVALUATED_REQUIRES_VISUAL_REVIEW"
-    )
+    assert evidence["numeric_evidence_scope"] == ("WORLD_AABB_CAMERA_FRUSTUM_AND_IMAGE_BOUNDS_ONLY")
+    assert evidence["occlusion_evaluation_status"] == ("NOT_EVALUATED_REQUIRES_VISUAL_REVIEW")
     assert "visible_prims" not in evidence
     assert "visible_links" not in evidence
-    assert evidence["projection_by_prim"]["/World/visible"][
-        "in_frame_sample_count"
-    ] == 27
-    assert evidence["projection_by_prim"]["/World/offscreen"]["status"] == (
-        "OUTSIDE_IMAGE"
-    )
-    assert evidence["projection_by_prim"]["/World/behind"]["status"] == (
-        "BEHIND_CAMERA"
-    )
-    assert evidence["projection_by_prim"]["/World/near_clipped"]["status"] == (
-        "OUTSIDE_CLIPPING_RANGE"
-    )
-    assert evidence["projection_by_prim"]["/World/far_clipped"]["status"] == (
-        "OUTSIDE_CLIPPING_RANGE"
-    )
-    assert evidence["projection_by_prim"]["/World/missing"]["status"] == (
-        "MISSING_STAGE_PRIM"
-    )
+    assert evidence["projection_by_prim"]["/World/visible"]["in_frame_sample_count"] == 27
+    assert evidence["projection_by_prim"]["/World/offscreen"]["status"] == ("OUTSIDE_IMAGE")
+    assert evidence["projection_by_prim"]["/World/behind"]["status"] == ("BEHIND_CAMERA")
+    assert evidence["projection_by_prim"]["/World/near_clipped"]["status"] == ("OUTSIDE_CLIPPING_RANGE")
+    assert evidence["projection_by_prim"]["/World/far_clipped"]["status"] == ("OUTSIDE_CLIPPING_RANGE")
+    assert evidence["projection_by_prim"]["/World/missing"]["status"] == ("MISSING_STAGE_PRIM")
 
 
 def test_horizontal_runtime_finalizes_synchronized_view_manifest_fields() -> None:
@@ -768,12 +685,8 @@ def test_horizontal_runtime_finalizes_synchronized_view_manifest_fields() -> Non
                             "/World/Table",
                         ],
                         "projected_in_frame_links": ["base", "gripper"],
-                        "numeric_evidence_scope": (
-                            "WORLD_AABB_CAMERA_FRUSTUM_AND_IMAGE_BOUNDS_ONLY"
-                        ),
-                        "occlusion_evaluation_status": (
-                            "NOT_EVALUATED_REQUIRES_VISUAL_REVIEW"
-                        ),
+                        "numeric_evidence_scope": ("WORLD_AABB_CAMERA_FRUSTUM_AND_IMAGE_BOUNDS_ONLY"),
+                        "occlusion_evaluation_status": ("NOT_EVALUATED_REQUIRES_VISUAL_REVIEW"),
                     },
                 },
                 "gripper_closeup": {"absolute_path": "/tmp/closeup.png"},
@@ -801,11 +714,7 @@ def test_horizontal_runtime_finalizes_synchronized_view_manifest_fields() -> Non
     assert manifest["required_full_arm_links"] == ["base", "gripper"]
     for view in ("overview", "gripper_closeup"):
         assert manifest["records"][0]["views"][view] == {
-            "absolute_path": (
-                "/tmp/overview.png"
-                if view == "overview"
-                else "/tmp/closeup.png"
-            ),
+            "absolute_path": ("/tmp/overview.png" if view == "overview" else "/tmp/closeup.png"),
             **(
                 {
                     "framing_evidence": {
@@ -815,12 +724,8 @@ def test_horizontal_runtime_finalizes_synchronized_view_manifest_fields() -> Non
                             "/World/Table",
                         ],
                         "projected_in_frame_links": ["base", "gripper"],
-                        "numeric_evidence_scope": (
-                            "WORLD_AABB_CAMERA_FRUSTUM_AND_IMAGE_BOUNDS_ONLY"
-                        ),
-                        "occlusion_evaluation_status": (
-                            "NOT_EVALUATED_REQUIRES_VISUAL_REVIEW"
-                        ),
+                        "numeric_evidence_scope": ("WORLD_AABB_CAMERA_FRUSTUM_AND_IMAGE_BOUNDS_ONLY"),
+                        "occlusion_evaluation_status": ("NOT_EVALUATED_REQUIRES_VISUAL_REVIEW"),
                     }
                 }
                 if view == "overview"
@@ -832,9 +737,7 @@ def test_horizontal_runtime_finalizes_synchronized_view_manifest_fields() -> Non
         }
 
 
-def test_horizontal_runtime_manifest_fails_closed_on_missing_full_arm_framing() -> (
-    None
-):
+def test_horizontal_runtime_manifest_fails_closed_on_missing_full_arm_framing() -> None:
     records = [
         {
             "physics_frame": 12,
@@ -845,12 +748,8 @@ def test_horizontal_runtime_manifest_fails_closed_on_missing_full_arm_framing() 
                     "framing_evidence": {
                         "projected_in_frame_prims": ["/World/arm"],
                         "projected_in_frame_links": ["base"],
-                        "numeric_evidence_scope": (
-                            "WORLD_AABB_CAMERA_FRUSTUM_AND_IMAGE_BOUNDS_ONLY"
-                        ),
-                        "occlusion_evaluation_status": (
-                            "NOT_EVALUATED_REQUIRES_VISUAL_REVIEW"
-                        ),
+                        "numeric_evidence_scope": ("WORLD_AABB_CAMERA_FRUSTUM_AND_IMAGE_BOUNDS_ONLY"),
+                        "occlusion_evaluation_status": ("NOT_EVALUATED_REQUIRES_VISUAL_REVIEW"),
                     }
                 },
                 "gripper_closeup": {},

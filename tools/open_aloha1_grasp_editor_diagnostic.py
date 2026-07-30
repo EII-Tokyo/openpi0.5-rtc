@@ -14,16 +14,28 @@ import traceback
 ROOT = Path(__file__).resolve().parents[1]
 STAGE_PATH = (
     ROOT
-    / "assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0"
-    / "aloha1_signal_correspondence_workcell.usda"
+    / "assets/Trossen/ALOHA1/1.0/diagnostics/table_support_alignment/1.0"
+    / "aloha1_table_support_aligned_workcell.usda"
 )
 BOTTLE_USD = ROOT / "assets/bottle_500ml/isaac/bottle_500ml_sim.usd"
 EXPECTED_STAGE_SHA256 = (
-    "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf"
+    "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c"
 )
 EXPECTED_BOTTLE_SHA256 = (
     "16427135f152ec951de2321fd689366d745a2dd389cbe260976631783952533e"
 )
+EXPECTED_ROOT_PRIM = "/World"
+EXPECTED_SUBLAYERS = (
+    "configuration/aloha1_tabletop_world_zero.usda",
+    "../../signal_correspondence/1.0/"
+    "aloha1_signal_correspondence_workcell.usda",
+)
+REQUIRED_PRIM_PATHS = (
+    "/World/follower_left/vx300s_left/root_joint",
+    "/World/follower_right/vx300s_right/root_joint",
+    "/World/environment/worldBody/user_confirmed_table",
+)
+TASK_FRAME_TRANSLATION_WORLD_M = (0.0, 0.0, 0.0)
 EXTENSION_ID = "isaacsim.robot_setup.grasp_editor"
 EXTENSION_VERSION = "2.0.20"
 WINDOW_TITLE = "Grasp Editor"
@@ -110,6 +122,41 @@ def _add_external_reference(
         str(asset_path.resolve()),
         prim_path,
     )
+
+
+def _validate_loaded_stage_contract(stage) -> dict[str, object]:
+    """Fail closed unless the composed Stage matches the approved contract."""
+    default_prim = stage.GetDefaultPrim()
+    if not default_prim or not default_prim.IsValid():
+        raise RuntimeError("approved Stage has no valid default/root prim")
+    root_prim = str(default_prim.GetPath())
+    if root_prim != EXPECTED_ROOT_PRIM:
+        raise RuntimeError(
+            f"approved Stage root prim mismatch: {root_prim}"
+        )
+
+    sublayers = tuple(stage.GetRootLayer().subLayerPaths)
+    if sublayers != EXPECTED_SUBLAYERS:
+        raise RuntimeError(
+            "approved Stage sublayers mismatch: "
+            f"expected {EXPECTED_SUBLAYERS}, got {sublayers}"
+        )
+
+    missing_required_prims = [
+        path
+        for path in REQUIRED_PRIM_PATHS
+        if not stage.GetPrimAtPath(path).IsValid()
+    ]
+    if missing_required_prims:
+        raise RuntimeError(
+            "approved Stage required prim missing: "
+            + ", ".join(missing_required_prims)
+        )
+    return {
+        "root_prim": root_prim,
+        "sublayers": list(sublayers),
+        "required_prim_paths": list(REQUIRED_PRIM_PATHS),
+    }
 
 
 def _move_isaac_to_workspace_two() -> None:
@@ -370,6 +417,10 @@ def main() -> int:
     args = parse_args()
     stage_path = args.stage.resolve()
     bottle_path = args.bottle_usd.resolve()
+    if stage_path != STAGE_PATH.resolve():
+        raise RuntimeError(
+            "Stage path is not the user-approved aligned review Stage"
+        )
     source_stage_sha256_before = _sha256(stage_path)
     if source_stage_sha256_before != EXPECTED_STAGE_SHA256:
         raise RuntimeError("approved Stage hash no longer matches")
@@ -428,6 +479,7 @@ def main() -> int:
             return omni.usd.get_context().get_stage()
 
         stage = get_current_stage()
+        stage_contract = _validate_loaded_stage_contract(stage)
         root_layer = stage.GetRootLayer()
         session_layer = stage.GetSessionLayer()
         previous_edit_target = stage.GetEditTarget()
@@ -456,7 +508,7 @@ def main() -> int:
             "/World/ALOHA1GraspEditorSession/W_T",
         )
         task_frame.AddTranslateOp().Set(
-            Gf.Vec3d(0.0, 0.0, -0.0909000015258789)
+            Gf.Vec3d(*TASK_FRAME_TRANSLATION_WORLD_M)
         )
         bottle = stage.DefinePrim(
             "/World/ALOHA1GraspEditorSession/Bottle500",
@@ -517,6 +569,11 @@ def main() -> int:
 
         print(f"Stage: {stage_path}")
         print(f"Stage SHA-256: {EXPECTED_STAGE_SHA256}")
+        print(f"Stage contract: {stage_contract}")
+        print(
+            "Task frame W_T translation (world m): "
+            f"{TASK_FRAME_TRANSLATION_WORLD_M}"
+        )
         print(f"Extension: {enabled_id}")
         print(f"Extension version: {version}")
         print(

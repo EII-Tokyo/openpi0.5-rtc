@@ -237,7 +237,7 @@ def build_joint_map(
             "side": side,
             "robot_prefix": name,
             "base_frame": f"{name}_base_link",
-            "end_effector_frame": f"{name}_gripper_link",
+            "end_effector_frame": f"{name}_ee_gripper_link",
             "urdf_nonfixed_joint_order": urdf_order,
             "isaac_dof_order": isaac_order,
             "ros_joint_state_order": list(ros_order),

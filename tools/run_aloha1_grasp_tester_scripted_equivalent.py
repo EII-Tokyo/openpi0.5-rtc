@@ -58,13 +58,13 @@ FROZEN_INPUTS = {
     "candidate": {
         "path": CANDIDATE_PATH,
         "sha256": (
-            "3b14e643570d963f6abb53c0a26128c76de93b83069e98defe8cec1db098237a"
+            "5d60a5c3b38e7145cde13ee88bfebc1f3e430d3c8d5fc73ad1badf5023a7f137"
         ),
     },
     "transform_report": {
         "path": TRANSFORM_REPORT_PATH,
         "sha256": (
-            "9e680dadea6b2c08bac7a44bc50202bc7d4135ae184409fb36a422ebb56f3e31"
+            "056573c6f698d87baac7e863df3cef042b004503f251d1795f9cb6efe1fd23f2"
         ),
     },
 }
@@ -98,7 +98,7 @@ INITIAL_ARM_Q_RAD = (
 
 ARTICULATION_PATH = "/World/follower_left/vx300s_left/root_joint"
 GRIPPER_FRAME_PATH = (
-    "/World/follower_left/vx300s_left/follower_left_gripper_link"
+    "/World/follower_left/vx300s_left/follower_left_ee_gripper_link"
 )
 LEFT_FINGER_PATH = (
     "/World/follower_left/vx300s_left/"

@@ -1,0 +1,329 @@
+{
+  "bottle_section": {
+    "axial_station_mm": 69.0,
+    "cad_long_axis": "+Z",
+    "evidence": "PROJECT_BOTTLE_BREP_SECTION_READBACK",
+    "outer_diameter_mm": 64.4,
+    "outer_radius_mm": 32.2,
+    "section_bbox_mm": {
+      "x_max": 32.2,
+      "x_min": -32.2,
+      "y_max": 32.2,
+      "y_min": -32.2
+    },
+    "section_edge_count": 2
+  },
+  "classification": "COMPLETE_SUPPLIER_GRIPPER_PROJECT_BOTTLE_CLEARANCE",
+  "contact_solution": {
+    "left_contact_reference_m": [
+      0.13552080444282988,
+      0.03202360503085841,
+      -1.8360058992504723e-17
+    ],
+    "left_finger_q_m": 0.048316874538855845,
+    "left_translation_from_closed_m": 0.027316874538855885,
+    "legal_range_m": [
+      0.021,
+      0.057
+    ],
+    "right_contact_reference_m": [
+      0.13552080444282988,
+      -0.03202360503085841,
+      5.561549838518037e-17
+    ],
+    "right_finger_q_m": -0.048316874538855845,
+    "right_translation_from_closed_m": 0.027316874538855805,
+    "symmetric": true
+  },
+  "coordinate_contract": {
+    "approach_axis": "+X",
+    "bottle_axis": "+Z",
+    "cad_to_reference": {
+      "x_from_global_y_offset_m": -0.43029999973392,
+      "y_from_global_x_offset_m": -9.98902576627736e-05,
+      "z_from_global_z_offset_m": -0.42680133373174
+    },
+    "closing_axis": "+Y toward left_finger",
+    "gripper_reference": "follower_left_gripper_link",
+    "mirror_used": false
+  },
+  "determinism": {
+    "fresh_run_count": 2,
+    "run_a": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-grasp-editor-five-position/full_gripper_cad_clearance/run_a/raw_clearance.json",
+      "sha256": "e61c1a7974e4c6f937aa68d2402d8ee22e028acb90896187dc9595b1083f862c"
+    },
+    "run_b": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-grasp-editor-five-position/full_gripper_cad_clearance/run_b/raw_clearance.json",
+      "sha256": "e61c1a7974e4c6f937aa68d2402d8ee22e028acb90896187dc9595b1083f862c"
+    },
+    "semantic_signature": "e3130d9c5646f48e0fc2494bf85dd82dd31c6c1256f807ceee6f94eb71c03c9e",
+    "semantic_signature_match": true,
+    "status": "PASS"
+  },
+  "fingers": {
+    "left": {
+      "approach_interval_gripper_reference_m": [
+        0.07739999999999964,
+        0.15895079542019913
+      ],
+      "area_mm2": 2020.8974087124623,
+      "brep_valid": true,
+      "center_cad_global_mm": [
+        7.355284905152715,
+        -541.5718845300294,
+        426.8526699371185
+      ],
+      "center_gripper_reference_m": [
+        0.11127188479610933,
+        0.007255394647489941,
+        5.133620537850492e-05
+      ],
+      "face_index_1_based": 117,
+      "label": "Aloha VX Fingers 2024-4-21 v2",
+      "normal_cad_global": [
+        -0.9945218953682733,
+        0.10452846326765405,
+        5.701881674690907e-16
+      ],
+      "normal_gripper_reference": [
+        -0.10452846326765405,
+        -0.9945218953682733,
+        5.701881674690907e-16
+      ],
+      "object_name": "Part__Feature007",
+      "surface_type": "Plane"
+    },
+    "right": {
+      "approach_interval_gripper_reference_m": [
+        0.07739999999999975,
+        0.15895079542019913
+      ],
+      "area_mm2": 2020.897408712456,
+      "brep_valid": true,
+      "center_cad_global_mm": [
+        -7.155504389827247,
+        -541.5718845300294,
+        426.74999752635847
+      ],
+      "center_gripper_reference_m": [
+        0.11127188479610933,
+        -0.007255394647490021,
+        -5.133620538150252e-05
+      ],
+      "face_index_1_based": 128,
+      "label": "Aloha VX Fingers 2024-4-21 v001",
+      "normal_cad_global": [
+        0.9945218953682733,
+        0.10452846326765403,
+        -1.7271893908441104e-15
+      ],
+      "normal_gripper_reference": [
+        -0.10452846326765403,
+        0.9945218953682733,
+        -1.7271893908441104e-15
+      ],
+      "object_name": "Part__Feature008",
+      "surface_type": "Plane"
+    }
+  },
+  "forbidden_envelopes": {
+    "runtime_urdf_gripper_bar": {
+      "gripper_reference_aabb_m": {
+        "max": [
+          0.07652499694824219,
+          0.0750009994506836,
+          0.035250000000000004
+        ],
+        "min": [
+          0.017325000000000004,
+          -0.07499900054931641,
+          -0.03504999160766602
+        ]
+      },
+      "maximum_approach_x_m": 0.07652499694824219,
+      "source_type": "URDF_COLLISION_STL_CONSERVATIVE_AABB",
+      "triangle_count": 7588,
+      "urdf_transform": {
+        "collision_origin_rpy_rad": [
+          0.0,
+          0.0,
+          1.5707963267948966
+        ],
+        "collision_origin_translation_m": [
+          -0.063,
+          0.0,
+          0.0
+        ],
+        "gripper_link_to_ee_arm_translation_m": [
+          0.042825,
+          0.0,
+          0.0
+        ],
+        "mesh_scale": [
+          0.001,
+          0.001,
+          0.001
+        ]
+      }
+    },
+    "supplier_gripper_shell": {
+      "brep_valid": true,
+      "label": "Aloha VX Gripper 2024-4-19 v4",
+      "maximum_approach_x_m": 0.06910000000000205,
+      "object_name": "Part__Feature006",
+      "old_station_clearance": {
+        "bottle_center_x_m": 0.11127188479610935,
+        "common_volume_mm3": 0.0,
+        "intersects": false,
+        "minimum_distance_mm": 10.071884796107724
+      },
+      "selected_station_clearance": {
+        "bottle_center_x_m": 0.13215498792561142,
+        "common_volume_mm3": 0.0,
+        "intersects": false,
+        "minimum_distance_mm": 30.954987925609828
+      },
+      "source_type": "SUPPLIER_STEP_BREP"
+    }
+  },
+  "grasp_frame": {
+    "approach_axis_reference": [
+      1.0,
+      0.0,
+      0.0
+    ],
+    "bottle_axis_alignment_dot": 1.0,
+    "bottle_axis_center_from_grasp_m": [
+      -0.003365816517218456,
+      0.0,
+      0.0
+    ],
+    "bottle_axis_reference": [
+      -0.0,
+      1.1550160780836694e-15,
+      1.0
+    ],
+    "classification": "SUPPLIER_CAD_EFFECTIVE_PAD_CONTACT_FRAME",
+    "ee_endpoint_is_grasp_center": false,
+    "finger_line_axis_reference": [
+      0.0,
+      1.0,
+      -1.1550160780836694e-15
+    ],
+    "object_placement_must_apply_normal_offset": true,
+    "official_ee_helper": "follower_left_ee_gripper_link_NOT_GRASP_CENTER",
+    "origin_reference_m": [
+      0.13552080444282988,
+      0.0,
+      1.8627719696337822e-17
+    ],
+    "reference_from_grasp": [
+      [
+        1.0,
+        0.0,
+        -0.0,
+        0.13552080444282988
+      ],
+      [
+        0.0,
+        1.0,
+        1.1550160780836694e-15,
+        0.0
+      ],
+      [
+        0.0,
+        -1.1550160780836694e-15,
+        1.0,
+        1.8627719696337822e-17
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "rotation_determinant": 1.0,
+    "status": "PASS"
+  },
+  "pad_interval_gripper_reference_m": [
+    0.07739999999999975,
+    0.15895079542019913
+  ],
+  "rejected_run13": {
+    "classification": "REJECTED_WHOLE_PAD_FACE_CENTROID_NOT_EFFECTIVE_GRASP_CENTER",
+    "report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_grasp_frame_run13_rejection.json"
+  },
+  "schema_version": 1,
+  "semantic_signature": "e3130d9c5646f48e0fc2494bf85dd82dd31c6c1256f807ceee6f94eb71c03c9e",
+  "sources": {
+    "project_bottle_fcstd": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/bottle_500ml/cad/bottle_500ml.FCStd",
+      "read_only": true,
+      "sha256": "3594f60200e54181bc8480a229484293a0d386c146d3f235b32e31a0c16bbf8a",
+      "size_bytes": 9282
+    },
+    "runtime_gripper_bar_stl": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_bar.stl",
+      "read_only": true,
+      "sha256": "a4de62c9a2ed2c78433010e4c05530a1254b1774a7651967f406120c9bf8973e",
+      "size_bytes": 379484
+    },
+    "supplier_viper_step": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/gdrive_source_readonly/Simple Aloha Viper 2024-5-13.step",
+      "read_only": true,
+      "sha256": "337862418769d4ea8b801d26e68930c4412f870050e60769bbf91765194dc571",
+      "size_bytes": 2539555
+    }
+  },
+  "station_selection": {
+    "bottle_center_pad_interval_m": [
+      0.07403418348278129,
+      0.15558497890298068
+    ],
+    "bottle_radius_m": 0.032200000000000006,
+    "classification": "COMPLETE_GRIPPER_FEASIBLE_INTERVAL_EXISTS",
+    "controlling_forbidden_envelope": "runtime_urdf_gripper_bar",
+    "feasible_interval_m": [
+      0.1087249969482422,
+      0.15558497890298068
+    ],
+    "forbidden_max_x_m": {
+      "runtime_urdf_gripper_bar": 0.07652499694824219,
+      "supplier_gripper_shell": 0.06910000000000205
+    },
+    "pad_interval_m": [
+      0.07739999999999975,
+      0.15895079542019913
+    ],
+    "pad_inward_normal_x": -0.10452846326765404,
+    "pad_normal_bottle_center_offset_m": -0.0033658165172184605,
+    "rejected_station": {
+      "hard_clearance_m": 0.002546887847867149,
+      "inside_hard_feasible_interval": true,
+      "reason": "RUN13_GRIPPER_BAR_CONTACT_ENVELOPE_AND_NO_BILATERAL_CONTACT",
+      "runtime_rejected": true,
+      "station_m": 0.11127188479610935
+    },
+    "selected_clearance_by_envelope_m": {
+      "runtime_urdf_gripper_bar": 0.023429990977369225,
+      "supplier_gripper_shell": 0.030854987925609367
+    },
+    "selected_minimum_margin_m": 0.023429990977369225,
+    "selected_pad_contact_station_m": 0.13552080444282988,
+    "selected_station_m": 0.13215498792561142,
+    "selection_rule": "CHEBYSHEV_CENTER_OF_COMPLETE_GRIPPER_FEASIBLE_INTERVAL",
+    "status": "PASS"
+  },
+  "status": "PASS",
+  "task8": "NOT_RUN",
+  "toolchain": {
+    "angular_deflection_deg": 20.0,
+    "freecad": "1.1.1",
+    "freecad_build": "20260414 (Git shallow)",
+    "linear_deflection_mm": 0.2,
+    "opencascade": "7.8.1",
+    "relative": false
+  }
+}

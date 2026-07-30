@@ -11,14 +11,14 @@ VALID_GRASP_YAML = """\
 format: isaac_grasp
 format_version: 1.0
 object_frame: /World/Bottle500/grasp_reference
-gripper_frame: /World/follower_left/gripper_link
+gripper_frame: /World/follower_left/follower_left_ee_gripper_link
 grasps:
   horizontal_body_grasp:
     confidence: 1.0
     position: [0.0, 0.0, 0.1]
     orientation: {w: 1.0, xyz: [0.0, 0.0, 0.0]}
-    cspace_position: {left_finger: 0.021, right_finger: -0.021}
-    pregrasp_cspace_position: {left_finger: 0.057, right_finger: -0.057}
+    cspace_position: {left_finger: 0.021}
+    pregrasp_cspace_position: {left_finger: 0.057}
 """
 
 
@@ -33,7 +33,7 @@ def test_loads_exact_isaac_grasp_1_format(tmp_path: Path) -> None:
     grasp = spec.grasp("horizontal_body_grasp")
 
     assert spec.object_frame == "/World/Bottle500/grasp_reference"
-    assert spec.gripper_frame == "/World/follower_left/gripper_link"
+    assert spec.gripper_frame == ("/World/follower_left/follower_left_ee_gripper_link")
     assert grasp.confidence == 1.0
     assert grasp.object_from_gripper == pytest.approx(
         np.array(
@@ -45,8 +45,8 @@ def test_loads_exact_isaac_grasp_1_format(tmp_path: Path) -> None:
             ]
         )
     )
-    assert grasp.cspace_position == {"left_finger": 0.021, "right_finger": -0.021}
-    assert grasp.pregrasp_cspace_position == {"left_finger": 0.057, "right_finger": -0.057}
+    assert grasp.cspace_position == {"left_finger": 0.021}
+    assert grasp.pregrasp_cspace_position == {"left_finger": 0.057}
 
 
 @pytest.mark.parametrize(
@@ -75,13 +75,13 @@ def test_loads_exact_isaac_grasp_1_format(tmp_path: Path) -> None:
             "unit quaternion",
         ),
         (
-            "    cspace_position: {left_finger: 0.021, right_finger: -0.021}",
             "    cspace_position: {left_finger: 0.021}",
-            "exact left_finger/right_finger",
+            ("    cspace_position: {left_finger: 0.021, right_finger: -0.021}"),
+            "active left_finger",
         ),
         (
-            "    pregrasp_cspace_position: {left_finger: 0.057, right_finger: -0.057}",
-            "    pregrasp_cspace_position: {left_finger: true, right_finger: -0.057}",
+            "    pregrasp_cspace_position: {left_finger: 0.057}",
+            "    pregrasp_cspace_position: {left_finger: true}",
             "left_finger",
         ),
     ],

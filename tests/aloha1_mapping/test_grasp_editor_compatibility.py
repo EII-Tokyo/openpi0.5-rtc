@@ -217,6 +217,69 @@ def test_launcher_never_saves_the_source_stage() -> None:
     assert "save_stage" not in source
 
 
+def test_launcher_uses_user_confirmed_aligned_stage_and_world_zero() -> None:
+    module = _load_launcher_module()
+
+    assert module.STAGE_PATH.resolve() == Path(
+        "assets/Trossen/ALOHA1/1.0/diagnostics/table_support_alignment/1.0/"
+        "aloha1_table_support_aligned_workcell.usda"
+    ).resolve()
+    assert (
+        module.EXPECTED_STAGE_SHA256
+        == "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c"
+    )
+    assert module.EXPECTED_ROOT_PRIM == "/World"
+    assert module.EXPECTED_SUBLAYERS == (
+        "configuration/aloha1_tabletop_world_zero.usda",
+        "../../signal_correspondence/1.0/"
+        "aloha1_signal_correspondence_workcell.usda",
+    )
+    assert module.REQUIRED_PRIM_PATHS == (
+        "/World/follower_left/vx300s_left/root_joint",
+        "/World/follower_right/vx300s_right/root_joint",
+        "/World/environment/worldBody/user_confirmed_table",
+    )
+    assert module.TASK_FRAME_TRANSLATION_WORLD_M == (0.0, 0.0, 0.0)
+    assert "-0.0909000015258789" not in LAUNCHER.read_text(encoding="utf-8")
+
+
+def test_launcher_rejects_loaded_stage_contract_mismatch() -> None:
+    module = _load_launcher_module()
+
+    class _FakePathPrim:
+        def __init__(self, path: str, *, valid: bool = True) -> None:
+            self._path = path
+            self._valid = valid
+
+        def GetPath(self) -> str:  # noqa: N802 - mirrors USD API.
+            return self._path
+
+        def IsValid(self) -> bool:  # noqa: N802 - mirrors USD API.
+            return self._valid
+
+    class _FakeContractRootLayer:
+        def __init__(self) -> None:
+            self.subLayerPaths = list(module.EXPECTED_SUBLAYERS)
+
+    class _FakeContractStage:
+        def GetDefaultPrim(self) -> _FakePathPrim:  # noqa: N802
+            return _FakePathPrim(module.EXPECTED_ROOT_PRIM)
+
+        def GetRootLayer(self) -> _FakeContractRootLayer:  # noqa: N802
+            return _FakeContractRootLayer()
+
+        def GetPrimAtPath(self, path: str) -> _FakePathPrim:  # noqa: N802
+            return _FakePathPrim(
+                path,
+                valid=path != module.REQUIRED_PRIM_PATHS[-1],
+            )
+
+    with pytest.raises(RuntimeError, match="required prim"):
+        module._validate_loaded_stage_contract(  # noqa: SLF001
+            _FakeContractStage()
+        )
+
+
 def test_launcher_enables_exact_runtime_extension_path_and_version(
     tmp_path: Path,
 ) -> None:

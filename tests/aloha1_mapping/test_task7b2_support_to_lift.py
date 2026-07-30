@@ -11,6 +11,7 @@ import yaml
 ROOT = Path(__file__).resolve().parents[2]
 CONFIG = ROOT / "configs/aloha1_task7b2_support_to_lift.yaml"
 MODULE = ROOT / "tools/aloha1_mapping/task7b2_support_to_lift.py"
+RUNTIME = ROOT / "tools/validate_aloha1_task7b2_support_to_lift.py"
 
 
 def _load_module() -> ModuleType:
@@ -262,3 +263,35 @@ def test_markdown_preserves_task_boundaries() -> None:
     assert "Asset promotion: `PARTIAL`" in markdown
     assert "Task 8: `NOT_RUN`" in markdown
     json.dumps(report, allow_nan=False)
+
+
+def test_runtime_source_contract_isolated_dynamic_pickup() -> None:
+    assert RUNTIME.is_file(), f"missing Task 7B.2 runtime: {RUNTIME}"
+    source = RUNTIME.read_text(encoding="utf-8")
+    required = [
+        "open_stage",
+        "set_solve_articulation_contact_last(True)",
+        '"/Bottle500"',
+        "user_confirmed_table",
+        "derive_supported_bottle_translation",
+        "GetKinematicEnabledAttr().Set(False)",
+        "APPROACH_FRAME",
+        "SWEEP_STEPS",
+        "LIFT_DELTA",
+        "support_settle",
+        "bilateral_contact_on_support",
+        "support_clear",
+        "hold_end",
+        "subscribe_contact_report_events",
+    ]
+    for token in required:
+        assert token in source
+
+    forbidden = [
+        "SurfaceGripper",
+        "CreateFixedJoint",
+        "parent_attachment_used = True",
+        "source_layer.Save",
+    ]
+    for token in forbidden:
+        assert token not in source
