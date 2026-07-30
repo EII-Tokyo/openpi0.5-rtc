@@ -1,6 +1,6 @@
 # `codex-isaac` MCP Configuration — 2026-07-30
 
-Status: `CONFIGURED_NEW_CODEX_ISAAC_SESSION_REQUIRED`
+Status: `PASS_CURRENT_SESSION_DIRECT_NVIDIA_MCP`
 
 ## Result
 
@@ -33,6 +33,9 @@ operations.
 - Server readback: `NeMo Agent Toolkit MCP 1.25.0`
 - `tools/list`: exactly five Isaac documentation/search tools
 - Read-only call: `get_isaac_sim_instructions`
+- Instruction set: `robot_setup`
+- Current-session namespace: `mcp__isaac_sim_mcp`
+- MCPJungle used for this call: `false`
 - Result: non-empty content and `isError=false`
 
 This call went directly to the NVIDIA endpoint, not through MCPJungle.
@@ -107,7 +110,8 @@ Full evidence:
 
 `/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-direct-nvidia-mcp-config`
 
-The current conversation predates this profile, so it cannot hot-load the new
-direct tool namespace. Start a new process with `codex-isaac`; its first Isaac
-action should be one read-only `isaac-sim-mcp` query before resuming GUI/Stage
-changes.
+The current session discovered the direct five-tool NVIDIA surface and
+successfully called `get_isaac_sim_instructions("robot_setup")`. The
+current-session direct-tool gate is therefore complete. Future Isaac work
+should still start through `codex-isaac` so the same isolated routing policy is
+reconstructed.

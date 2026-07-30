@@ -1,6 +1,6 @@
 {
   "schema_version": "aloha1-codex-isaac-mcp-configuration/v2",
-  "status": "CONFIGURED_NEW_CODEX_ISAAC_SESSION_REQUIRED",
+  "status": "PASS_CURRENT_SESSION_DIRECT_NVIDIA_MCP",
   "configured_at_local_date": "2026-07-30",
   "codex": {
     "version": "0.145.0",
@@ -12,7 +12,7 @@
     "approval_policy_readback": "never",
     "launcher_permission_flag": "--dangerously-bypass-approvals-and-sandbox",
     "launcher_live_mcp_list": "PASS",
-    "tool_registry_reload_required_for_current_conversation": true,
+    "tool_registry_reload_required_for_current_conversation": false,
     "session_resume": {
       "thread_name": "bee",
       "thread_id": "019fa738-940b-7960-b831-f3a07329028f",
@@ -50,8 +50,12 @@
     ],
     "read_only_query": {
       "tool": "get_isaac_sim_instructions",
+      "instruction_set": "robot_setup",
       "is_error": false,
-      "content_nonempty": true
+      "content_nonempty": true,
+      "current_session_namespace": "mcp__isaac_sim_mcp",
+      "mcpjungle_used": false,
+      "status": "PASS"
     }
   },
   "mcpjungle": {
@@ -124,7 +128,6 @@
     "/home/eii/mcpjungle-lab/backups/codex-isaac-session-bridge-20260730"
   ],
   "limitations": [
-    "The current conversation loaded its MCP tool registry before codex-isaac was created, so a new codex-isaac process is required for an in-conversation direct tool call.",
     "Full local machine permission does not authorize real-robot control, remote 192.168.1.103 mutation, secret disclosure, or unrelated destructive operations."
   ]
 }

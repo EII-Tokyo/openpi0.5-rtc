@@ -63,11 +63,11 @@ The 2026-07-29 signal-correspondence priority is the current handoff:
   and zero NVIDIA tools. Direct NVIDIA and Jungle read-only SDK calls passed,
   deterministic profile generation passed, and Codex read back exactly the
   two approved MCP server entries. The old runtime group is absent and its
-  profile home was moved to a recoverable backup. The current conversation
-  predates this change, so start a new `codex-isaac` process and perform one
-  in-session direct NVIDIA read-only query before resuming the Visual Tutor
-  live attempt. Full local permission does not authorize real-robot/103
-  mutation. Report:
+  profile home was moved to a recoverable backup. Current-session discovery
+  exposed the five direct `mcp__isaac_sim_mcp` tools, and a read-only
+  `get_isaac_sim_instructions("robot_setup")` call passed without using
+  MCPJungle. Full local permission does not authorize real-robot/103 mutation.
+  Report:
   `reports/aloha1_mapping/codex_isaac_mcp_configuration_20260730.json`.
   The `bee` session store is bridged into the new isolated home through
   `/home/eii/mcpjungle-lab/state/codex-session-home`; `session_index` readback
