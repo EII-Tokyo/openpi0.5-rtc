@@ -1,0 +1,628 @@
+{
+  "audit_generated_utc": "2026-07-30T07:24:05.360821+00:00",
+  "remote_host_alias": "aloha",
+  "remote_repository": {
+    "path": "/home/eii/openpi0.5-rlt",
+    "branch": "codex/rlt",
+    "commit": "c90f1854f351575fef3b3520eb638ad18006d8de"
+  },
+  "deployed_baseline_checkpoint": {
+    "format": "Orbax OCDBT params-only checkpoint",
+    "checkpoint_path": "/data/openpi0.5-rtc/checkpoints/eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo/no_rinse_cam3_fullft_return_home_29repo_bs256_nw64_fsdp4_20260520/19000",
+    "directory_step": 19000,
+    "metadata_metrics": {},
+    "custom_metadata": {},
+    "init_time_utc": "2026-05-21T00:02:04.513388+00:00",
+    "commit_time_utc": "2026-05-21T00:02:26.864338+00:00",
+    "parameter_leaf_count": 51,
+    "total_parameter_count": 838358468,
+    "trainable_parameter_count": null,
+    "trainable_parameter_count_reason": "The params-only checkpoint has no optimizer or trainability mask; full-finetune config is supporting evidence but not a per-leaf proof.",
+    "optimizer_state_present": false,
+    "ema_present": false,
+    "top_parameter_groups": {
+      "img": 103700924,
+      "llm": 734116096,
+      "bias": 776,
+      "kernel": 540672
+    },
+    "normalization_fields": {
+      "state": {
+        "mean": 14,
+        "std": 14,
+        "q01": 14,
+        "q99": 14
+      },
+      "actions": {
+        "mean": 14,
+        "std": 14,
+        "q01": 14,
+        "q99": 14
+      }
+    },
+    "parameter_leaves": [
+      {
+        "path": "params/PaliGemma/img/Transformer/encoder_norm/bias/value",
+        "shape": [
+          288
+        ],
+        "parameter_count": 288
+      },
+      {
+        "path": "params/PaliGemma/img/Transformer/encoder_norm/scale/value",
+        "shape": [
+          288
+        ],
+        "parameter_count": 288
+      },
+      {
+        "path": "params/PaliGemma/img/Transformer/encoderblock/LayerNorm_0/bias/value",
+        "shape": [
+          27,
+          288
+        ],
+        "parameter_count": 7776
+      },
+      {
+        "path": "params/PaliGemma/img/Transformer/encoderblock/LayerNorm_0/scale/value",
+        "shape": [
+          27,
+          288
+        ],
+        "parameter_count": 7776
+      },
+      {
+        "path": "params/PaliGemma/img/Transformer/encoderblock/LayerNorm_1/bias/value",
+        "shape": [
+          27,
+          288
+        ],
+        "parameter_count": 7776
+      },
+      {
+        "path": "params/PaliGemma/img/Transformer/encoderblock/LayerNorm_1/scale/value",
+        "shape": [
+          27,
+          288
+        ],
+        "parameter_count": 7776
+      },
+      {
+        "path": "params/PaliGemma/img/Transformer/encoderblock/MlpBlock_0/Dense_0/bias/value",
+        "shape": [
+          27,
+          1076
+        ],
+        "parameter_count": 29052
+      },
+      {
+        "path": "params/PaliGemma/img/Transformer/encoderblock/MlpBlock_0/Dense_0/kernel/value",
+        "shape": [
+          27,
+          1152,
+          1076
+        ],
+        "parameter_count": 33467904
+      },
+      {
+        "path": "params/PaliGemma/img/Transformer/encoderblock/MlpBlock_0/Dense_1/bias/value",
+        "shape": [
+          27,
+          288
+        ],
+        "parameter_count": 7776
+      },
+      {
+        "path": "params/PaliGemma/img/Transformer/encoderblock/MlpBlock_0/Dense_1/kernel/value",
+        "shape": [
+          27,
+          1076,
+          1152
+        ],
+        "parameter_count": 33467904
+      },
+      {
+        "path": "params/PaliGemma/img/Transformer/encoderblock/MultiHeadDotProductAttention_0/key/bias/value",
+        "shape": [
+          27,
+          4,
+          72
+        ],
+        "parameter_count": 7776
+      },
+      {
+        "path": "params/PaliGemma/img/Transformer/encoderblock/MultiHeadDotProductAttention_0/key/kernel/value",
+        "shape": [
+          27,
+          288,
+          16,
+          72
+        ],
+        "parameter_count": 8957952
+      },
+      {
+        "path": "params/PaliGemma/img/Transformer/encoderblock/MultiHeadDotProductAttention_0/out/bias/value",
+        "shape": [
+          27,
+          288
+        ],
+        "parameter_count": 7776
+      },
+      {
+        "path": "params/PaliGemma/img/Transformer/encoderblock/MultiHeadDotProductAttention_0/out/kernel/value",
+        "shape": [
+          27,
+          16,
+          72,
+          288
+        ],
+        "parameter_count": 8957952
+      },
+      {
+        "path": "params/PaliGemma/img/Transformer/encoderblock/MultiHeadDotProductAttention_0/query/bias/value",
+        "shape": [
+          27,
+          4,
+          72
+        ],
+        "parameter_count": 7776
+      },
+      {
+        "path": "params/PaliGemma/img/Transformer/encoderblock/MultiHeadDotProductAttention_0/query/kernel/value",
+        "shape": [
+          27,
+          288,
+          16,
+          72
+        ],
+        "parameter_count": 8957952
+      },
+      {
+        "path": "params/PaliGemma/img/Transformer/encoderblock/MultiHeadDotProductAttention_0/value/bias/value",
+        "shape": [
+          27,
+          4,
+          72
+        ],
+        "parameter_count": 7776
+      },
+      {
+        "path": "params/PaliGemma/img/Transformer/encoderblock/MultiHeadDotProductAttention_0/value/kernel/value",
+        "shape": [
+          27,
+          288,
+          16,
+          72
+        ],
+        "parameter_count": 8957952
+      },
+      {
+        "path": "params/PaliGemma/img/embedding/bias/value",
+        "shape": [
+          288
+        ],
+        "parameter_count": 288
+      },
+      {
+        "path": "params/PaliGemma/img/embedding/kernel/value",
+        "shape": [
+          14,
+          14,
+          3,
+          288
+        ],
+        "parameter_count": 169344
+      },
+      {
+        "path": "params/PaliGemma/img/head/bias/value",
+        "shape": [
+          512
+        ],
+        "parameter_count": 512
+      },
+      {
+        "path": "params/PaliGemma/img/head/kernel/value",
+        "shape": [
+          1152,
+          512
+        ],
+        "parameter_count": 589824
+      },
+      {
+        "path": "params/PaliGemma/img/pos_embedding/value",
+        "shape": [
+          1,
+          64,
+          1152
+        ],
+        "parameter_count": 73728
+      },
+      {
+        "path": "params/PaliGemma/llm/embedder/input_embedding/value",
+        "shape": [
+          64288,
+          2048
+        ],
+        "parameter_count": 131661824
+      },
+      {
+        "path": "params/PaliGemma/llm/final_norm/scale/value",
+        "shape": [
+          512
+        ],
+        "parameter_count": 512
+      },
+      {
+        "path": "params/PaliGemma/llm/final_norm_1/Dense_0/bias/value",
+        "shape": [
+          768
+        ],
+        "parameter_count": 768
+      },
+      {
+        "path": "params/PaliGemma/llm/final_norm_1/Dense_0/kernel/value",
+        "shape": [
+          1024,
+          768
+        ],
+        "parameter_count": 786432
+      },
+      {
+        "path": "params/PaliGemma/llm/layers/attn/attn_vec_einsum/w/value",
+        "shape": [
+          18,
+          8,
+          256,
+          512
+        ],
+        "parameter_count": 18874368
+      },
+      {
+        "path": "params/PaliGemma/llm/layers/attn/attn_vec_einsum_1/w/value",
+        "shape": [
+          18,
+          8,
+          256,
+          256
+        ],
+        "parameter_count": 9437184
+      },
+      {
+        "path": "params/PaliGemma/llm/layers/attn/kv_einsum/w/value",
+        "shape": [
+          18,
+          2,
+          1,
+          512,
+          256
+        ],
+        "parameter_count": 4718592
+      },
+      {
+        "path": "params/PaliGemma/llm/layers/attn/kv_einsum_1/w/value",
+        "shape": [
+          18,
+          2,
+          1,
+          256,
+          256
+        ],
+        "parameter_count": 2359296
+      },
+      {
+        "path": "params/PaliGemma/llm/layers/attn/q_einsum/w/value",
+        "shape": [
+          18,
+          8,
+          512,
+          256
+        ],
+        "parameter_count": 18874368
+      },
+      {
+        "path": "params/PaliGemma/llm/layers/attn/q_einsum_1/w/value",
+        "shape": [
+          18,
+          8,
+          256,
+          256
+        ],
+        "parameter_count": 9437184
+      },
+      {
+        "path": "params/PaliGemma/llm/layers/mlp/gating_einsum/value",
+        "shape": [
+          18,
+          2,
+          2048,
+          4096
+        ],
+        "parameter_count": 301989888
+      },
+      {
+        "path": "params/PaliGemma/llm/layers/mlp/linear/value",
+        "shape": [
+          18,
+          4096,
+          2048
+        ],
+        "parameter_count": 150994944
+      },
+      {
+        "path": "params/PaliGemma/llm/layers/mlp_1/gating_einsum/value",
+        "shape": [
+          18,
+          2,
+          1024,
+          1024
+        ],
+        "parameter_count": 37748736
+      },
+      {
+        "path": "params/PaliGemma/llm/layers/mlp_1/linear/value",
+        "shape": [
+          18,
+          1024,
+          1024
+        ],
+        "parameter_count": 18874368
+      },
+      {
+        "path": "params/PaliGemma/llm/layers/pre_attention_norm/scale/value",
+        "shape": [
+          18,
+          512
+        ],
+        "parameter_count": 9216
+      },
+      {
+        "path": "params/PaliGemma/llm/layers/pre_attention_norm_1/Dense_0/bias/value",
+        "shape": [
+          18,
+          768
+        ],
+        "parameter_count": 13824
+      },
+      {
+        "path": "params/PaliGemma/llm/layers/pre_attention_norm_1/Dense_0/kernel/value",
+        "shape": [
+          18,
+          1024,
+          768
+        ],
+        "parameter_count": 14155776
+      },
+      {
+        "path": "params/PaliGemma/llm/layers/pre_ffw_norm/scale/value",
+        "shape": [
+          18,
+          512
+        ],
+        "parameter_count": 9216
+      },
+      {
+        "path": "params/PaliGemma/llm/layers/pre_ffw_norm_1/Dense_0/bias/value",
+        "shape": [
+          18,
+          768
+        ],
+        "parameter_count": 13824
+      },
+      {
+        "path": "params/PaliGemma/llm/layers/pre_ffw_norm_1/Dense_0/kernel/value",
+        "shape": [
+          18,
+          1024,
+          768
+        ],
+        "parameter_count": 14155776
+      },
+      {
+        "path": "params/action_in_proj/bias/value",
+        "shape": [
+          256
+        ],
+        "parameter_count": 256
+      },
+      {
+        "path": "params/action_in_proj/kernel/value",
+        "shape": [
+          8,
+          1024
+        ],
+        "parameter_count": 8192
+      },
+      {
+        "path": "params/action_out_proj/bias/value",
+        "shape": [
+          8
+        ],
+        "parameter_count": 8
+      },
+      {
+        "path": "params/action_out_proj/kernel/value",
+        "shape": [
+          256,
+          32
+        ],
+        "parameter_count": 8192
+      },
+      {
+        "path": "params/time_mlp_in/bias/value",
+        "shape": [
+          256
+        ],
+        "parameter_count": 256
+      },
+      {
+        "path": "params/time_mlp_in/kernel/value",
+        "shape": [
+          1024,
+          256
+        ],
+        "parameter_count": 262144
+      },
+      {
+        "path": "params/time_mlp_out/bias/value",
+        "shape": [
+          256
+        ],
+        "parameter_count": 256
+      },
+      {
+        "path": "params/time_mlp_out/kernel/value",
+        "shape": [
+          1024,
+          256
+        ],
+        "parameter_count": 262144
+      }
+    ],
+    "remote_size_bytes": 12440702849,
+    "can_read_metadata": true,
+    "full_array_load_tested": false
+  },
+  "training_data_recipe": {
+    "config": {
+      "name": "eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo",
+      "repo_ids": "_EII_DATA_SYSTEM_WITHOUT_RINSE_RETURN_HOME_TURN_OVER_X5_FREE_SPIN_PLUS10_REPO_IDS",
+      "lora": false,
+      "batch_size": 256,
+      "num_workers": 64,
+      "fsdp_devices": 4,
+      "include_low": false,
+      "include_subtask": false,
+      "gradient_accumulation_steps": 1,
+      "exp_name": "no_rinse_cam3_fullft_return_home_29repo_bs256_nw64_fsdp4_20260520",
+      "checkpoint_base_dir": "/workspace/openpi0.5-rtc/checkpoints",
+      "wandb_enabled": true,
+      "overwrite": false,
+      "resume": true,
+      "num_train_steps": 60000
+    },
+    "base_entries": 29,
+    "base_unique_repositories": 25,
+    "effective_entries": 51,
+    "effective_unique_repositories": 25,
+    "repository_weights": [
+      {
+        "repo_id": "lyl472324464/2026-05-11_free-spinning-lerobot-without-rinse-merged-adjust-pickup",
+        "weight": 15
+      },
+      {
+        "repo_id": "lyl472324464/2026-05-04_turn_over-lerobot-without-rinse",
+        "weight": 5
+      },
+      {
+        "repo_id": "lyl472324464/2026-05-03_turn_over-lerobot-without-rinse",
+        "weight": 5
+      },
+      {
+        "repo_id": "lyl472324464/2026-05-01_turn_over-lerobot-without-rinse",
+        "weight": 5
+      },
+      {
+        "repo_id": "lyl472324464/2025-09-15-twist-one-bottle-no-box-in-the-front-without-rinse-merged-adjust-pickup",
+        "weight": 1
+      },
+      {
+        "repo_id": "lyl472324464/2025-12-10-twist-one-bottle-merged-adjust-pickup",
+        "weight": 1
+      },
+      {
+        "repo_id": "lyl472324464/2025-12-23-twist-one-bottle-without-rinse-merged-adjust-pickup",
+        "weight": 1
+      },
+      {
+        "repo_id": "lyl472324464/2026-01-20-twist-one-bottle-merged-adjust-pickup",
+        "weight": 1
+      },
+      {
+        "repo_id": "lyl472324464/2026-02-03-no-cap-and-direction-without-rinse-merged-adjust-pickup",
+        "weight": 1
+      },
+      {
+        "repo_id": "lyl472324464/2026-03-04-one-direction-lerobot-without-rinse-merged-adjust-pickup",
+        "weight": 1
+      },
+      {
+        "repo_id": "lyl472324464/2026.03.12_one_have_cap-lerobot-without-rinse-merged-adjust-pickup",
+        "weight": 1
+      },
+      {
+        "repo_id": "lyl472324464/2026.03.12_one_have_cap_direction-lerobot-without-rinse-merged-adjust-pickup",
+        "weight": 1
+      },
+      {
+        "repo_id": "lyl472324464/2026-03-12-one-havent-cap-merged-adjust-pickup",
+        "weight": 1
+      },
+      {
+        "repo_id": "lyl472324464/2026-03-12-one-havent-cap-direction-merged-adjust-pickup",
+        "weight": 1
+      },
+      {
+        "repo_id": "lyl472324464/2026-04-21_direction-lerobot-without-rinse-merged-adjust-pickup",
+        "weight": 1
+      },
+      {
+        "repo_id": "lyl472324464/2026-04-21_direction_2-lerobot-without-rinse-merged-adjust-pickup",
+        "weight": 1
+      },
+      {
+        "repo_id": "lyl472324464/2026-04-21_direction_haven-t_cap-lerobot-without-rinse-merged-adjust-pickup",
+        "weight": 1
+      },
+      {
+        "repo_id": "lyl472324464/2026-04-21_direction_havent_cap_water-lerobot-without-rinse-merged-adjust-pickup",
+        "weight": 1
+      },
+      {
+        "repo_id": "lyl472324464/2026-04-23_direction_havent_cap_water-lerobot-without-rinse-merged-adjust-pickup",
+        "weight": 1
+      },
+      {
+        "repo_id": "lyl472324464/2026-04-28_direction_have_cap_water-lerobot-without-rinse-merged-adjust-pickup",
+        "weight": 1
+      },
+      {
+        "repo_id": "lyl472324464/2026-04-28_direction_have_cap_water2-lerobot-without-rinse-merged-adjust-pickup",
+        "weight": 1
+      },
+      {
+        "repo_id": "lyl472324464/2026-05-11_cap-lerobot-without-rinse-merged-adjust-pickup",
+        "weight": 1
+      },
+      {
+        "repo_id": "lyl472324464/2026-05-11_twist-lerobot-truncated-return-home-exp-truncated-return-home-20260520-095140",
+        "weight": 1
+      },
+      {
+        "repo_id": "lyl472324464/2026-05-12_twist-lerobot-truncated-return-home-exp-truncated-return-home-20260520-095140",
+        "weight": 1
+      },
+      {
+        "repo_id": "lyl472324464/2026-05-12_twist2-lerobot-truncated-return-home-exp-truncated-return-home-20260520-095140",
+        "weight": 1
+      }
+    ],
+    "duplicate_note": "effective_entries are sampler entries, not independent datasets; repetition changes sampling weight",
+    "evidence_kind": "current remote worktree configuration at audit time",
+    "historical_run_warning": "This is not substituted for the W&B run configuration. The deployed step-19000 checkpoint belongs to an earlier run recipe."
+  },
+  "evidence_scope": {
+    "supports": [
+      "checkpoint existence and directory step",
+      "parameter structure and total count",
+      "normalization dimensions",
+      "effective data-repository sampling weights"
+    ],
+    "does_not_support": [
+      "the historical sampling weights used before this current code revision",
+      "formal robot success rate",
+      "training duration",
+      "best checkpoint ranking",
+      "per-dataset episode/frame counts"
+    ]
+  }
+}

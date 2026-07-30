@@ -1,0 +1,3736 @@
+{
+  "audit_generated_utc": "2026-07-30T07:24:46.660487+00:00",
+  "source": "Public Hugging Face Hub dataset API and immutable revision URLs",
+  "recipe_source": "W&B immutable run configuration for the deployed checkpoint's training run",
+  "recipe_config": "eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo",
+  "totals": {
+    "unique_repositories_audited": 25,
+    "repositories_failed": 0,
+    "unique_episodes": 1051,
+    "unique_frames": 879852,
+    "unique_duration_sec_at_declared_fps": 17597.040000000005,
+    "trainable_frames": 844102,
+    "sampling_entries_after_weights": 29,
+    "weighted_episode_exposure": 1495,
+    "weighted_frame_exposure": 978792
+  },
+  "camera_set_counts": [
+    {
+      "camera_keys": [
+        "observation.images.cam_high",
+        "observation.images.cam_low",
+        "observation.images.cam_left_wrist",
+        "observation.images.cam_right_wrist"
+      ],
+      "repository_count": 25
+    }
+  ],
+  "repositories": [
+    {
+      "repo_id": "lyl472324464/2026-05-11_free-spinning-lerobot-without-rinse-merged-adjust-pickup",
+      "sampling_weight": 5,
+      "hub_revision": "a7c6c4a48bb6031d83189f6b033b4e1cd54bcc8b",
+      "hub_private": false,
+      "hub_created_at": "2026-05-14T04:42:28.000Z",
+      "hub_last_modified": "2026-05-14T04:42:31.000Z",
+      "hub_used_storage_bytes": 2366014808,
+      "info_codebase_version": "v3.0",
+      "robot_type": "aloha",
+      "fps": 50,
+      "declared_total_episodes": 111,
+      "declared_total_frames": 24735,
+      "declared_total_tasks": 1,
+      "splits": {
+        "train": "0:111"
+      },
+      "episode_metadata_rows": 111,
+      "episode_length_frames": {
+        "min": 131,
+        "q25": 190.5,
+        "median": 211,
+        "q75": 236.0,
+        "max": 716,
+        "mean": 222.83783783783784
+      },
+      "episode_length_seconds": {
+        "min": 3,
+        "q25": 4.0,
+        "median": 4,
+        "q75": 5.0,
+        "max": 14,
+        "mean": 4.486486486486487
+      },
+      "trainable_frames_from_episode_metadata": 19185,
+      "excluded_frames_from_episode_metadata": 5550,
+      "unique_tasks": [
+        "Twist off the bottle cap"
+      ],
+      "features": {
+        "state_shape": [
+          14
+        ],
+        "action_shape": [
+          14
+        ],
+        "camera_features": [
+          {
+            "key": "observation.images.cam_high",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_low",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_left_wrist",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_right_wrist",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          }
+        ],
+        "has_language_task_index": true,
+        "has_training_mask": true,
+        "has_reward": false,
+        "has_success": false,
+        "feature_keys": [
+          "action",
+          "episode_index",
+          "frame_index",
+          "index",
+          "is_for_training",
+          "observation.effort",
+          "observation.images.cam_high",
+          "observation.images.cam_left_wrist",
+          "observation.images.cam_low",
+          "observation.images.cam_right_wrist",
+          "observation.state",
+          "observation.velocity",
+          "subtask",
+          "task_index",
+          "timestamp"
+        ]
+      },
+      "cross_checks": {
+        "episode_rows_match_declared": true,
+        "length_sum_matches_declared_frames": true,
+        "training_mask_count_matches_length": true
+      }
+    },
+    {
+      "repo_id": "lyl472324464/2025-09-15-twist-one-bottle-no-box-in-the-front-without-rinse-merged-adjust-pickup",
+      "sampling_weight": 1,
+      "hub_revision": "d29e4f22005d04f22d6c6cf1b4fa73ab18e0ffcb",
+      "hub_private": false,
+      "hub_created_at": "2026-05-14T04:06:58.000Z",
+      "hub_last_modified": "2026-05-15T01:31:35.000Z",
+      "hub_used_storage_bytes": 2523057331,
+      "info_codebase_version": "v3.0",
+      "robot_type": "aloha",
+      "fps": 50,
+      "declared_total_episodes": 98,
+      "declared_total_frames": 55356,
+      "declared_total_tasks": 1,
+      "splits": {
+        "train": "0:98"
+      },
+      "episode_metadata_rows": 98,
+      "episode_length_frames": {
+        "min": 341,
+        "q25": 426.5,
+        "median": 554.0,
+        "q75": 690.25,
+        "max": 833,
+        "mean": 564.8571428571429
+      },
+      "episode_length_seconds": {
+        "min": 7,
+        "q25": 8.25,
+        "median": 11.0,
+        "q75": 14.0,
+        "max": 17,
+        "mean": 11.316326530612244
+      },
+      "trainable_frames_from_episode_metadata": 55356,
+      "excluded_frames_from_episode_metadata": 0,
+      "unique_tasks": [
+        "Twist off the bottle cap"
+      ],
+      "features": {
+        "state_shape": [
+          14
+        ],
+        "action_shape": [
+          14
+        ],
+        "camera_features": [
+          {
+            "key": "observation.images.cam_high",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_low",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_left_wrist",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_right_wrist",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          }
+        ],
+        "has_language_task_index": true,
+        "has_training_mask": true,
+        "has_reward": false,
+        "has_success": false,
+        "feature_keys": [
+          "action",
+          "episode_index",
+          "frame_index",
+          "index",
+          "is_for_training",
+          "observation.effort",
+          "observation.images.cam_high",
+          "observation.images.cam_left_wrist",
+          "observation.images.cam_low",
+          "observation.images.cam_right_wrist",
+          "observation.state",
+          "observation.velocity",
+          "subtask",
+          "task_index",
+          "timestamp"
+        ]
+      },
+      "cross_checks": {
+        "episode_rows_match_declared": true,
+        "length_sum_matches_declared_frames": true,
+        "training_mask_count_matches_length": true
+      }
+    },
+    {
+      "repo_id": "lyl472324464/2025-12-10-twist-one-bottle-merged-adjust-pickup",
+      "sampling_weight": 1,
+      "hub_revision": "72ccaa21bcf858418bb1220a6b9dcf4fe05e7d3a",
+      "hub_private": false,
+      "hub_created_at": "2026-05-14T04:11:26.000Z",
+      "hub_last_modified": "2026-05-15T01:23:08.000Z",
+      "hub_used_storage_bytes": 993549870,
+      "info_codebase_version": "v3.0",
+      "robot_type": "aloha",
+      "fps": 50,
+      "declared_total_episodes": 19,
+      "declared_total_frames": 23142,
+      "declared_total_tasks": 1,
+      "splits": {
+        "train": "0:19"
+      },
+      "episode_metadata_rows": 19,
+      "episode_length_frames": {
+        "min": 994,
+        "q25": 1103.0,
+        "median": 1182,
+        "q75": 1302.0,
+        "max": 1746,
+        "mean": 1218.0
+      },
+      "episode_length_seconds": {
+        "min": 20,
+        "q25": 22.0,
+        "median": 24,
+        "q75": 26.0,
+        "max": 35,
+        "mean": 24.31578947368421
+      },
+      "trainable_frames_from_episode_metadata": 23142,
+      "excluded_frames_from_episode_metadata": 0,
+      "unique_tasks": [
+        "Do the followings: 1. If the bottle cap is facing left, rotate the bottle 180 degrees. 2. Pick up the bottle. 3. Twist off the bottle cap if the bottle has a cap. 4. Put the bottle into the box on the left. 5. Put the cap into the box on the right. If the bottle cap falls onto the table, pick it up. 6. Return to home position."
+      ],
+      "features": {
+        "state_shape": [
+          14
+        ],
+        "action_shape": [
+          14
+        ],
+        "camera_features": [
+          {
+            "key": "observation.images.cam_high",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_low",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_left_wrist",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_right_wrist",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          }
+        ],
+        "has_language_task_index": true,
+        "has_training_mask": true,
+        "has_reward": false,
+        "has_success": false,
+        "feature_keys": [
+          "action",
+          "episode_index",
+          "frame_index",
+          "index",
+          "is_for_training",
+          "observation.effort",
+          "observation.images.cam_high",
+          "observation.images.cam_left_wrist",
+          "observation.images.cam_low",
+          "observation.images.cam_right_wrist",
+          "observation.state",
+          "observation.velocity",
+          "subtask",
+          "task_index",
+          "timestamp"
+        ]
+      },
+      "cross_checks": {
+        "episode_rows_match_declared": true,
+        "length_sum_matches_declared_frames": true,
+        "training_mask_count_matches_length": true
+      }
+    },
+    {
+      "repo_id": "lyl472324464/2025-12-23-twist-one-bottle-without-rinse-merged-adjust-pickup",
+      "sampling_weight": 1,
+      "hub_revision": "1295c953d709ceb84a0444a5039dcae94072987f",
+      "hub_private": false,
+      "hub_created_at": "2026-05-14T04:13:31.000Z",
+      "hub_last_modified": "2026-05-15T01:23:19.000Z",
+      "hub_used_storage_bytes": 5730714890,
+      "info_codebase_version": "v3.0",
+      "robot_type": "aloha",
+      "fps": 50,
+      "declared_total_episodes": 91,
+      "declared_total_frames": 122038,
+      "declared_total_tasks": 1,
+      "splits": {
+        "train": "0:91"
+      },
+      "episode_metadata_rows": 91,
+      "episode_length_frames": {
+        "min": 797,
+        "q25": 1125.0,
+        "median": 1253,
+        "q75": 1461.0,
+        "max": 2906,
+        "mean": 1341.076923076923
+      },
+      "episode_length_seconds": {
+        "min": 16,
+        "q25": 22.5,
+        "median": 25,
+        "q75": 29.0,
+        "max": 58,
+        "mean": 26.791208791208792
+      },
+      "trainable_frames_from_episode_metadata": 122038,
+      "excluded_frames_from_episode_metadata": 0,
+      "unique_tasks": [
+        "Twist off the bottle cap"
+      ],
+      "features": {
+        "state_shape": [
+          14
+        ],
+        "action_shape": [
+          14
+        ],
+        "camera_features": [
+          {
+            "key": "observation.images.cam_high",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_low",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_left_wrist",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_right_wrist",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          }
+        ],
+        "has_language_task_index": true,
+        "has_training_mask": true,
+        "has_reward": false,
+        "has_success": false,
+        "feature_keys": [
+          "action",
+          "episode_index",
+          "frame_index",
+          "index",
+          "is_for_training",
+          "observation.effort",
+          "observation.images.cam_high",
+          "observation.images.cam_left_wrist",
+          "observation.images.cam_low",
+          "observation.images.cam_right_wrist",
+          "observation.state",
+          "observation.velocity",
+          "subtask",
+          "task_index",
+          "timestamp"
+        ]
+      },
+      "cross_checks": {
+        "episode_rows_match_declared": true,
+        "length_sum_matches_declared_frames": true,
+        "training_mask_count_matches_length": true
+      }
+    },
+    {
+      "repo_id": "lyl472324464/2026-01-20-twist-one-bottle-merged-adjust-pickup",
+      "sampling_weight": 1,
+      "hub_revision": "8e7f2358d62be9baab0ca68bcfb69c60399846b7",
+      "hub_private": false,
+      "hub_created_at": "2026-05-14T04:14:23.000Z",
+      "hub_last_modified": "2026-05-15T01:23:27.000Z",
+      "hub_used_storage_bytes": 1892719740,
+      "info_codebase_version": "v3.0",
+      "robot_type": "aloha",
+      "fps": 50,
+      "declared_total_episodes": 32,
+      "declared_total_frames": 40172,
+      "declared_total_tasks": 1,
+      "splits": {
+        "train": "0:32"
+      },
+      "episode_metadata_rows": 32,
+      "episode_length_frames": {
+        "min": 865,
+        "q25": 1141.0,
+        "median": 1221.0,
+        "q75": 1379.75,
+        "max": 1662,
+        "mean": 1255.375
+      },
+      "episode_length_seconds": {
+        "min": 17,
+        "q25": 22.75,
+        "median": 24.5,
+        "q75": 27.25,
+        "max": 33,
+        "mean": 25.03125
+      },
+      "trainable_frames_from_episode_metadata": 40172,
+      "excluded_frames_from_episode_metadata": 0,
+      "unique_tasks": [
+        "Do the followings: 1. If the bottle cap is facing left, rotate the bottle 180 degrees. 2. Pick up the bottle. 3. Twist off the bottle cap. 4. Put the bottle into the box on the left. 5. Put the cap into the box on the right. If the bottle cap falls onto the table, pick it up. 6. Return to home position."
+      ],
+      "features": {
+        "state_shape": [
+          14
+        ],
+        "action_shape": [
+          14
+        ],
+        "camera_features": [
+          {
+            "key": "observation.images.cam_high",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_low",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_left_wrist",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_right_wrist",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          }
+        ],
+        "has_language_task_index": true,
+        "has_training_mask": true,
+        "has_reward": false,
+        "has_success": false,
+        "feature_keys": [
+          "action",
+          "episode_index",
+          "frame_index",
+          "index",
+          "is_for_training",
+          "observation.effort",
+          "observation.images.cam_high",
+          "observation.images.cam_left_wrist",
+          "observation.images.cam_low",
+          "observation.images.cam_right_wrist",
+          "observation.state",
+          "observation.velocity",
+          "subtask",
+          "task_index",
+          "timestamp"
+        ]
+      },
+      "cross_checks": {
+        "episode_rows_match_declared": true,
+        "length_sum_matches_declared_frames": true,
+        "training_mask_count_matches_length": true
+      }
+    },
+    {
+      "repo_id": "lyl472324464/2026-02-03-no-cap-and-direction-without-rinse-merged-adjust-pickup",
+      "sampling_weight": 1,
+      "hub_revision": "8c2ec6feb82c792f4c5bc19a7b532161892ba809",
+      "hub_private": false,
+      "hub_created_at": "2026-05-14T04:16:33.000Z",
+      "hub_last_modified": "2026-05-15T01:23:45.000Z",
+      "hub_used_storage_bytes": 3348490514,
+      "info_codebase_version": "v3.0",
+      "robot_type": "aloha",
+      "fps": 50,
+      "declared_total_episodes": 12,
+      "declared_total_frames": 70849,
+      "declared_total_tasks": 1,
+      "splits": {
+        "train": "0:12"
+      },
+      "episode_metadata_rows": 12,
+      "episode_length_frames": {
+        "min": 712,
+        "q25": 5146.5,
+        "median": 6468.0,
+        "q75": 7821.5,
+        "max": 8675,
+        "mean": 5904.083333333333
+      },
+      "episode_length_seconds": {
+        "min": 14,
+        "q25": 103.0,
+        "median": 129.5,
+        "q75": 156.5,
+        "max": 174,
+        "mean": 118.16666666666667
+      },
+      "trainable_frames_from_episode_metadata": 70249,
+      "excluded_frames_from_episode_metadata": 600,
+      "unique_tasks": [
+        "Twist off the bottle cap"
+      ],
+      "features": {
+        "state_shape": [
+          14
+        ],
+        "action_shape": [
+          14
+        ],
+        "camera_features": [
+          {
+            "key": "observation.images.cam_high",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_low",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_left_wrist",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_right_wrist",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          }
+        ],
+        "has_language_task_index": true,
+        "has_training_mask": true,
+        "has_reward": false,
+        "has_success": false,
+        "feature_keys": [
+          "action",
+          "episode_index",
+          "frame_index",
+          "index",
+          "is_for_training",
+          "observation.effort",
+          "observation.images.cam_high",
+          "observation.images.cam_left_wrist",
+          "observation.images.cam_low",
+          "observation.images.cam_right_wrist",
+          "observation.state",
+          "observation.velocity",
+          "subtask",
+          "task_index",
+          "timestamp"
+        ]
+      },
+      "cross_checks": {
+        "episode_rows_match_declared": true,
+        "length_sum_matches_declared_frames": true,
+        "training_mask_count_matches_length": true
+      }
+    },
+    {
+      "repo_id": "lyl472324464/2026-03-04-one-direction-lerobot-without-rinse-merged-adjust-pickup",
+      "sampling_weight": 1,
+      "hub_revision": "06282e0ba401e8b2b8728d5ae6df1821706a4477",
+      "hub_private": false,
+      "hub_created_at": "2026-05-14T04:17:42.000Z",
+      "hub_last_modified": "2026-05-15T01:23:53.000Z",
+      "hub_used_storage_bytes": 3496786563,
+      "info_codebase_version": "v3.0",
+      "robot_type": "aloha",
+      "fps": 50,
+      "declared_total_episodes": 32,
+      "declared_total_frames": 48111,
+      "declared_total_tasks": 1,
+      "splits": {
+        "train": "0:32"
+      },
+      "episode_metadata_rows": 32,
+      "episode_length_frames": {
+        "min": 914,
+        "q25": 1367.25,
+        "median": 1460.5,
+        "q75": 1553.5,
+        "max": 2299,
+        "mean": 1503.46875
+      },
+      "episode_length_seconds": {
+        "min": 18,
+        "q25": 27.75,
+        "median": 29.0,
+        "q75": 31.0,
+        "max": 46,
+        "mean": 30.03125
+      },
+      "trainable_frames_from_episode_metadata": 48111,
+      "excluded_frames_from_episode_metadata": 0,
+      "unique_tasks": [
+        "Twist off the bottle cap"
+      ],
+      "features": {
+        "state_shape": [
+          14
+        ],
+        "action_shape": [
+          14
+        ],
+        "camera_features": [
+          {
+            "key": "observation.images.cam_high",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_low",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_left_wrist",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_right_wrist",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          }
+        ],
+        "has_language_task_index": true,
+        "has_training_mask": true,
+        "has_reward": false,
+        "has_success": false,
+        "feature_keys": [
+          "action",
+          "episode_index",
+          "frame_index",
+          "index",
+          "is_for_training",
+          "observation.effort",
+          "observation.images.cam_high",
+          "observation.images.cam_left_wrist",
+          "observation.images.cam_low",
+          "observation.images.cam_right_wrist",
+          "observation.state",
+          "observation.velocity",
+          "subtask",
+          "task_index",
+          "timestamp"
+        ]
+      },
+      "cross_checks": {
+        "episode_rows_match_declared": true,
+        "length_sum_matches_declared_frames": true,
+        "training_mask_count_matches_length": true
+      }
+    },
+    {
+      "repo_id": "lyl472324464/2026.03.12_one_have_cap-lerobot-without-rinse-merged-adjust-pickup",
+      "sampling_weight": 1,
+      "hub_revision": "f82b19b7b9263452442bdc34161964850301c34d",
+      "hub_private": false,
+      "hub_created_at": "2026-05-14T04:19:32.000Z",
+      "hub_last_modified": "2026-05-15T01:24:10.000Z",
+      "hub_used_storage_bytes": 1551381936,
+      "info_codebase_version": "v3.0",
+      "robot_type": "aloha",
+      "fps": 50,
+      "declared_total_episodes": 16,
+      "declared_total_frames": 21164,
+      "declared_total_tasks": 1,
+      "splits": {
+        "train": "0:16"
+      },
+      "episode_metadata_rows": 16,
+      "episode_length_frames": {
+        "min": 967,
+        "q25": 1134.0,
+        "median": 1232.0,
+        "q75": 1346.5,
+        "max": 2117,
+        "mean": 1322.75
+      },
+      "episode_length_seconds": {
+        "min": 19,
+        "q25": 22.75,
+        "median": 24.5,
+        "q75": 27.0,
+        "max": 42,
+        "mean": 26.5
+      },
+      "trainable_frames_from_episode_metadata": 21164,
+      "excluded_frames_from_episode_metadata": 0,
+      "unique_tasks": [
+        "Twist off the bottle cap"
+      ],
+      "features": {
+        "state_shape": [
+          14
+        ],
+        "action_shape": [
+          14
+        ],
+        "camera_features": [
+          {
+            "key": "observation.images.cam_high",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_low",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_left_wrist",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_right_wrist",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          }
+        ],
+        "has_language_task_index": true,
+        "has_training_mask": true,
+        "has_reward": false,
+        "has_success": false,
+        "feature_keys": [
+          "action",
+          "episode_index",
+          "frame_index",
+          "index",
+          "is_for_training",
+          "observation.effort",
+          "observation.images.cam_high",
+          "observation.images.cam_left_wrist",
+          "observation.images.cam_low",
+          "observation.images.cam_right_wrist",
+          "observation.state",
+          "observation.velocity",
+          "subtask",
+          "task_index",
+          "timestamp"
+        ]
+      },
+      "cross_checks": {
+        "episode_rows_match_declared": true,
+        "length_sum_matches_declared_frames": true,
+        "training_mask_count_matches_length": true
+      }
+    },
+    {
+      "repo_id": "lyl472324464/2026.03.12_one_have_cap_direction-lerobot-without-rinse-merged-adjust-pickup",
+      "sampling_weight": 1,
+      "hub_revision": "7134d95bf08eb1cd4a215ddc1daf2e8b75ffd462",
+      "hub_private": false,
+      "hub_created_at": "2026-05-14T04:20:23.000Z",
+      "hub_last_modified": "2026-05-15T01:24:17.000Z",
+      "hub_used_storage_bytes": 1622940546,
+      "info_codebase_version": "v3.0",
+      "robot_type": "aloha",
+      "fps": 50,
+      "declared_total_episodes": 15,
+      "declared_total_frames": 22994,
+      "declared_total_tasks": 1,
+      "splits": {
+        "train": "0:15"
+      },
+      "episode_metadata_rows": 15,
+      "episode_length_frames": {
+        "min": 1124,
+        "q25": 1362.5,
+        "median": 1462,
+        "q75": 1563.0,
+        "max": 2643,
+        "mean": 1532.9333333333334
+      },
+      "episode_length_seconds": {
+        "min": 22,
+        "q25": 27.0,
+        "median": 29,
+        "q75": 31.0,
+        "max": 53,
+        "mean": 30.533333333333335
+      },
+      "trainable_frames_from_episode_metadata": 22994,
+      "excluded_frames_from_episode_metadata": 0,
+      "unique_tasks": [
+        "Twist off the bottle cap"
+      ],
+      "features": {
+        "state_shape": [
+          14
+        ],
+        "action_shape": [
+          14
+        ],
+        "camera_features": [
+          {
+            "key": "observation.images.cam_high",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_low",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_left_wrist",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_right_wrist",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          }
+        ],
+        "has_language_task_index": true,
+        "has_training_mask": true,
+        "has_reward": false,
+        "has_success": false,
+        "feature_keys": [
+          "action",
+          "episode_index",
+          "frame_index",
+          "index",
+          "is_for_training",
+          "observation.effort",
+          "observation.images.cam_high",
+          "observation.images.cam_left_wrist",
+          "observation.images.cam_low",
+          "observation.images.cam_right_wrist",
+          "observation.state",
+          "observation.velocity",
+          "subtask",
+          "task_index",
+          "timestamp"
+        ]
+      },
+      "cross_checks": {
+        "episode_rows_match_declared": true,
+        "length_sum_matches_declared_frames": true,
+        "training_mask_count_matches_length": true
+      }
+    },
+    {
+      "repo_id": "lyl472324464/2026-03-12-one-havent-cap-merged-adjust-pickup",
+      "sampling_weight": 1,
+      "hub_revision": "4947ed91865b9a72972166c94e7bb69ff7fa1c61",
+      "hub_private": false,
+      "hub_created_at": "2026-05-14T04:20:55.000Z",
+      "hub_last_modified": "2026-05-15T01:24:24.000Z",
+      "hub_used_storage_bytes": 521699642,
+      "info_codebase_version": "v3.0",
+      "robot_type": "aloha",
+      "fps": 50,
+      "declared_total_episodes": 15,
+      "declared_total_frames": 7217,
+      "declared_total_tasks": 1,
+      "splits": {
+        "train": "0:15"
+      },
+      "episode_metadata_rows": 15,
+      "episode_length_frames": {
+        "min": 373,
+        "q25": 444.0,
+        "median": 467,
+        "q75": 522.0,
+        "max": 615,
+        "mean": 481.1333333333333
+      },
+      "episode_length_seconds": {
+        "min": 7,
+        "q25": 9.0,
+        "median": 9,
+        "q75": 10.5,
+        "max": 12,
+        "mean": 9.6
+      },
+      "trainable_frames_from_episode_metadata": 7217,
+      "excluded_frames_from_episode_metadata": 0,
+      "unique_tasks": [
+        "Do the followings: 1. If the bottle cap is facing left, rotate the bottle 180 degrees. 2. Pick up the bottle. 3. Twist off the bottle cap. 4. Put the bottle into the box on the left. 5. Put the cap into the box on the right. If the bottle cap falls onto the table, pick it up. 6. Return to home position."
+      ],
+      "features": {
+        "state_shape": [
+          14
+        ],
+        "action_shape": [
+          14
+        ],
+        "camera_features": [
+          {
+            "key": "observation.images.cam_high",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_low",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_left_wrist",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_right_wrist",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          }
+        ],
+        "has_language_task_index": true,
+        "has_training_mask": true,
+        "has_reward": false,
+        "has_success": false,
+        "feature_keys": [
+          "action",
+          "episode_index",
+          "frame_index",
+          "index",
+          "is_for_training",
+          "observation.effort",
+          "observation.images.cam_high",
+          "observation.images.cam_left_wrist",
+          "observation.images.cam_low",
+          "observation.images.cam_right_wrist",
+          "observation.state",
+          "observation.velocity",
+          "subtask",
+          "task_index",
+          "timestamp"
+        ]
+      },
+      "cross_checks": {
+        "episode_rows_match_declared": true,
+        "length_sum_matches_declared_frames": true,
+        "training_mask_count_matches_length": true
+      }
+    },
+    {
+      "repo_id": "lyl472324464/2026-03-12-one-havent-cap-direction-merged-adjust-pickup",
+      "sampling_weight": 1,
+      "hub_revision": "d83f7c766ec87610ee95894e5f34123c09787d69",
+      "hub_private": false,
+      "hub_created_at": "2026-05-14T04:21:16.000Z",
+      "hub_last_modified": "2026-05-15T01:24:31.000Z",
+      "hub_used_storage_bytes": 643867631,
+      "info_codebase_version": "v3.0",
+      "robot_type": "aloha",
+      "fps": 50,
+      "declared_total_episodes": 15,
+      "declared_total_frames": 9051,
+      "declared_total_tasks": 1,
+      "splits": {
+        "train": "0:15"
+      },
+      "episode_metadata_rows": 15,
+      "episode_length_frames": {
+        "min": 512,
+        "q25": 563.0,
+        "median": 588,
+        "q75": 649.0,
+        "max": 728,
+        "mean": 603.4
+      },
+      "episode_length_seconds": {
+        "min": 10,
+        "q25": 11.0,
+        "median": 12,
+        "q75": 13.0,
+        "max": 15,
+        "mean": 12.133333333333333
+      },
+      "trainable_frames_from_episode_metadata": 9051,
+      "excluded_frames_from_episode_metadata": 0,
+      "unique_tasks": [
+        "Do the followings: 1. If the bottle cap is facing left, rotate the bottle 180 degrees. 2. Pick up the bottle. 3. Twist off the bottle cap. 4. Put the bottle into the box on the left. 5. Put the cap into the box on the right. If the bottle cap falls onto the table, pick it up. 6. Return to home position."
+      ],
+      "features": {
+        "state_shape": [
+          14
+        ],
+        "action_shape": [
+          14
+        ],
+        "camera_features": [
+          {
+            "key": "observation.images.cam_high",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_low",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_left_wrist",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_right_wrist",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          }
+        ],
+        "has_language_task_index": true,
+        "has_training_mask": true,
+        "has_reward": false,
+        "has_success": false,
+        "feature_keys": [
+          "action",
+          "episode_index",
+          "frame_index",
+          "index",
+          "is_for_training",
+          "observation.effort",
+          "observation.images.cam_high",
+          "observation.images.cam_left_wrist",
+          "observation.images.cam_low",
+          "observation.images.cam_right_wrist",
+          "observation.state",
+          "observation.velocity",
+          "subtask",
+          "task_index",
+          "timestamp"
+        ]
+      },
+      "cross_checks": {
+        "episode_rows_match_declared": true,
+        "length_sum_matches_declared_frames": true,
+        "training_mask_count_matches_length": true
+      }
+    },
+    {
+      "repo_id": "lyl472324464/2026-04-21_direction-lerobot-without-rinse-merged-adjust-pickup",
+      "sampling_weight": 1,
+      "hub_revision": "eadc280f4f5698a0bcfacb53fa389373d050c97d",
+      "hub_private": false,
+      "hub_created_at": "2026-05-14T04:27:14.000Z",
+      "hub_last_modified": "2026-05-15T01:25:12.000Z",
+      "hub_used_storage_bytes": 5743594595,
+      "info_codebase_version": "v3.0",
+      "robot_type": "aloha",
+      "fps": 50,
+      "declared_total_episodes": 104,
+      "declared_total_frames": 61435,
+      "declared_total_tasks": 1,
+      "splits": {
+        "train": "0:104"
+      },
+      "episode_metadata_rows": 104,
+      "episode_length_frames": {
+        "min": 311,
+        "q25": 451.75,
+        "median": 600.5,
+        "q75": 715.5,
+        "max": 949,
+        "mean": 590.7211538461538
+      },
+      "episode_length_seconds": {
+        "min": 6,
+        "q25": 9.0,
+        "median": 12.0,
+        "q75": 14.0,
+        "max": 19,
+        "mean": 11.875
+      },
+      "trainable_frames_from_episode_metadata": 56235,
+      "excluded_frames_from_episode_metadata": 5200,
+      "unique_tasks": [
+        "Twist off the bottle cap"
+      ],
+      "features": {
+        "state_shape": [
+          14
+        ],
+        "action_shape": [
+          14
+        ],
+        "camera_features": [
+          {
+            "key": "observation.images.cam_high",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_low",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_left_wrist",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_right_wrist",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          }
+        ],
+        "has_language_task_index": true,
+        "has_training_mask": true,
+        "has_reward": false,
+        "has_success": false,
+        "feature_keys": [
+          "action",
+          "episode_index",
+          "frame_index",
+          "index",
+          "is_for_training",
+          "observation.effort",
+          "observation.images.cam_high",
+          "observation.images.cam_left_wrist",
+          "observation.images.cam_low",
+          "observation.images.cam_right_wrist",
+          "observation.state",
+          "observation.velocity",
+          "subtask",
+          "task_index",
+          "timestamp"
+        ]
+      },
+      "cross_checks": {
+        "episode_rows_match_declared": true,
+        "length_sum_matches_declared_frames": true,
+        "training_mask_count_matches_length": true
+      }
+    },
+    {
+      "repo_id": "lyl472324464/2026-04-21_direction_2-lerobot-without-rinse-merged-adjust-pickup",
+      "sampling_weight": 1,
+      "hub_revision": "ce9cc4a738209a348b133919d21ef0d197062eef",
+      "hub_private": false,
+      "hub_created_at": "2026-05-14T04:28:32.000Z",
+      "hub_last_modified": "2026-05-15T01:25:20.000Z",
+      "hub_used_storage_bytes": 2961136519,
+      "info_codebase_version": "v3.0",
+      "robot_type": "aloha",
+      "fps": 50,
+      "declared_total_episodes": 61,
+      "declared_total_frames": 31777,
+      "declared_total_tasks": 1,
+      "splits": {
+        "train": "0:61"
+      },
+      "episode_metadata_rows": 61,
+      "episode_length_frames": {
+        "min": 290,
+        "q25": 449.0,
+        "median": 547,
+        "q75": 611.0,
+        "max": 878,
+        "mean": 520.9344262295082
+      },
+      "episode_length_seconds": {
+        "min": 6,
+        "q25": 9.0,
+        "median": 11,
+        "q75": 12.0,
+        "max": 18,
+        "mean": 10.37704918032787
+      },
+      "trainable_frames_from_episode_metadata": 28727,
+      "excluded_frames_from_episode_metadata": 3050,
+      "unique_tasks": [
+        "Twist off the bottle cap"
+      ],
+      "features": {
+        "state_shape": [
+          14
+        ],
+        "action_shape": [
+          14
+        ],
+        "camera_features": [
+          {
+            "key": "observation.images.cam_high",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_low",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_left_wrist",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_right_wrist",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          }
+        ],
+        "has_language_task_index": true,
+        "has_training_mask": true,
+        "has_reward": false,
+        "has_success": false,
+        "feature_keys": [
+          "action",
+          "episode_index",
+          "frame_index",
+          "index",
+          "is_for_training",
+          "observation.effort",
+          "observation.images.cam_high",
+          "observation.images.cam_left_wrist",
+          "observation.images.cam_low",
+          "observation.images.cam_right_wrist",
+          "observation.state",
+          "observation.velocity",
+          "subtask",
+          "task_index",
+          "timestamp"
+        ]
+      },
+      "cross_checks": {
+        "episode_rows_match_declared": true,
+        "length_sum_matches_declared_frames": true,
+        "training_mask_count_matches_length": true
+      }
+    },
+    {
+      "repo_id": "lyl472324464/2026-04-21_direction_haven-t_cap-lerobot-without-rinse-merged-adjust-pickup",
+      "sampling_weight": 1,
+      "hub_revision": "346ccdd14f83a9563b16f81e2bfcc133f1f009c9",
+      "hub_private": false,
+      "hub_created_at": "2026-05-14T04:29:18.000Z",
+      "hub_last_modified": "2026-05-15T01:25:30.000Z",
+      "hub_used_storage_bytes": 1118776788,
+      "info_codebase_version": "v3.0",
+      "robot_type": "aloha",
+      "fps": 50,
+      "declared_total_episodes": 29,
+      "declared_total_frames": 12025,
+      "declared_total_tasks": 1,
+      "splits": {
+        "train": "0:29"
+      },
+      "episode_metadata_rows": 29,
+      "episode_length_frames": {
+        "min": 203,
+        "q25": 314.0,
+        "median": 370,
+        "q75": 511.0,
+        "max": 772,
+        "mean": 414.6551724137931
+      },
+      "episode_length_seconds": {
+        "min": 4,
+        "q25": 6.0,
+        "median": 7,
+        "q75": 10.0,
+        "max": 15,
+        "mean": 8.275862068965518
+      },
+      "trainable_frames_from_episode_metadata": 10575,
+      "excluded_frames_from_episode_metadata": 1450,
+      "unique_tasks": [
+        "Twist off the bottle cap"
+      ],
+      "features": {
+        "state_shape": [
+          14
+        ],
+        "action_shape": [
+          14
+        ],
+        "camera_features": [
+          {
+            "key": "observation.images.cam_high",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_low",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_left_wrist",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_right_wrist",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          }
+        ],
+        "has_language_task_index": true,
+        "has_training_mask": true,
+        "has_reward": false,
+        "has_success": false,
+        "feature_keys": [
+          "action",
+          "episode_index",
+          "frame_index",
+          "index",
+          "is_for_training",
+          "observation.effort",
+          "observation.images.cam_high",
+          "observation.images.cam_left_wrist",
+          "observation.images.cam_low",
+          "observation.images.cam_right_wrist",
+          "observation.state",
+          "observation.velocity",
+          "subtask",
+          "task_index",
+          "timestamp"
+        ]
+      },
+      "cross_checks": {
+        "episode_rows_match_declared": true,
+        "length_sum_matches_declared_frames": true,
+        "training_mask_count_matches_length": true
+      }
+    },
+    {
+      "repo_id": "lyl472324464/2026-04-21_direction_havent_cap_water-lerobot-without-rinse-merged-adjust-pickup",
+      "sampling_weight": 1,
+      "hub_revision": "75ea95625c0bac75e085d93e1405acc57f3f3b6d",
+      "hub_private": false,
+      "hub_created_at": "2026-05-14T04:30:03.000Z",
+      "hub_last_modified": "2026-05-15T01:25:36.000Z",
+      "hub_used_storage_bytes": 1287619276,
+      "info_codebase_version": "v3.0",
+      "robot_type": "aloha",
+      "fps": 50,
+      "declared_total_episodes": 26,
+      "declared_total_frames": 11666,
+      "declared_total_tasks": 1,
+      "splits": {
+        "train": "0:26"
+      },
+      "episode_metadata_rows": 26,
+      "episode_length_frames": {
+        "min": 340,
+        "q25": 397.5,
+        "median": 451.5,
+        "q75": 486.0,
+        "max": 612,
+        "mean": 448.6923076923077
+      },
+      "episode_length_seconds": {
+        "min": 7,
+        "q25": 8.0,
+        "median": 9.0,
+        "q75": 10.0,
+        "max": 12,
+        "mean": 8.961538461538462
+      },
+      "trainable_frames_from_episode_metadata": 10366,
+      "excluded_frames_from_episode_metadata": 1300,
+      "unique_tasks": [
+        "Do the followings: 1. If the bottle cap is facing left, rotate the bottle 180 degrees. 2. Pick up the bottle. 3. Twist off the bottle cap. 4. Put the bottle into the box on the left. 5. Put the cap into the box on the right. If the bottle cap falls onto the table, pick it up. 6. Return to home position."
+      ],
+      "features": {
+        "state_shape": [
+          14
+        ],
+        "action_shape": [
+          14
+        ],
+        "camera_features": [
+          {
+            "key": "observation.images.cam_high",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_low",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_left_wrist",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_right_wrist",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          }
+        ],
+        "has_language_task_index": true,
+        "has_training_mask": true,
+        "has_reward": false,
+        "has_success": false,
+        "feature_keys": [
+          "action",
+          "episode_index",
+          "frame_index",
+          "index",
+          "is_for_training",
+          "observation.effort",
+          "observation.images.cam_high",
+          "observation.images.cam_left_wrist",
+          "observation.images.cam_low",
+          "observation.images.cam_right_wrist",
+          "observation.state",
+          "observation.velocity",
+          "subtask",
+          "task_index",
+          "timestamp"
+        ]
+      },
+      "cross_checks": {
+        "episode_rows_match_declared": true,
+        "length_sum_matches_declared_frames": true,
+        "training_mask_count_matches_length": true
+      }
+    },
+    {
+      "repo_id": "lyl472324464/2026-04-23_direction_havent_cap_water-lerobot-without-rinse-merged-adjust-pickup",
+      "sampling_weight": 1,
+      "hub_revision": "ee61aacfb58f6b34de3cb81a448038698830d1b8",
+      "hub_private": false,
+      "hub_created_at": "2026-05-14T04:30:59.000Z",
+      "hub_last_modified": "2026-05-15T01:25:43.000Z",
+      "hub_used_storage_bytes": 2922949759,
+      "info_codebase_version": "v3.0",
+      "robot_type": "aloha",
+      "fps": 50,
+      "declared_total_episodes": 61,
+      "declared_total_frames": 26859,
+      "declared_total_tasks": 1,
+      "splits": {
+        "train": "0:61"
+      },
+      "episode_metadata_rows": 61,
+      "episode_length_frames": {
+        "min": 186,
+        "q25": 345.0,
+        "median": 450,
+        "q75": 525.0,
+        "max": 712,
+        "mean": 440.3114754098361
+      },
+      "episode_length_seconds": {
+        "min": 4,
+        "q25": 7.0,
+        "median": 9,
+        "q75": 10.0,
+        "max": 14,
+        "mean": 8.737704918032787
+      },
+      "trainable_frames_from_episode_metadata": 23809,
+      "excluded_frames_from_episode_metadata": 3050,
+      "unique_tasks": [
+        "Twist off the bottle cap"
+      ],
+      "features": {
+        "state_shape": [
+          14
+        ],
+        "action_shape": [
+          14
+        ],
+        "camera_features": [
+          {
+            "key": "observation.images.cam_high",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_low",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_left_wrist",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_right_wrist",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          }
+        ],
+        "has_language_task_index": true,
+        "has_training_mask": true,
+        "has_reward": false,
+        "has_success": false,
+        "feature_keys": [
+          "action",
+          "episode_index",
+          "frame_index",
+          "index",
+          "is_for_training",
+          "observation.effort",
+          "observation.images.cam_high",
+          "observation.images.cam_left_wrist",
+          "observation.images.cam_low",
+          "observation.images.cam_right_wrist",
+          "observation.state",
+          "observation.velocity",
+          "subtask",
+          "task_index",
+          "timestamp"
+        ]
+      },
+      "cross_checks": {
+        "episode_rows_match_declared": true,
+        "length_sum_matches_declared_frames": true,
+        "training_mask_count_matches_length": true
+      }
+    },
+    {
+      "repo_id": "lyl472324464/2026-04-28_direction_have_cap_water-lerobot-without-rinse-merged-adjust-pickup",
+      "sampling_weight": 1,
+      "hub_revision": "cd49bb0e3c4cdb82919c5659ee8a114365d1f373",
+      "hub_private": false,
+      "hub_created_at": "2026-05-14T04:35:27.000Z",
+      "hub_last_modified": "2026-05-15T01:25:51.000Z",
+      "hub_used_storage_bytes": 3025827298,
+      "info_codebase_version": "v3.0",
+      "robot_type": "aloha",
+      "fps": 50,
+      "declared_total_episodes": 27,
+      "declared_total_frames": 31252,
+      "declared_total_tasks": 1,
+      "splits": {
+        "train": "0:27"
+      },
+      "episode_metadata_rows": 27,
+      "episode_length_frames": {
+        "min": 895,
+        "q25": 1035.0,
+        "median": 1100,
+        "q75": 1251.5,
+        "max": 1700,
+        "mean": 1157.4814814814815
+      },
+      "episode_length_seconds": {
+        "min": 18,
+        "q25": 21.0,
+        "median": 22,
+        "q75": 25.0,
+        "max": 34,
+        "mean": 23.185185185185187
+      },
+      "trainable_frames_from_episode_metadata": 29902,
+      "excluded_frames_from_episode_metadata": 1350,
+      "unique_tasks": [
+        "Twist off the bottle cap"
+      ],
+      "features": {
+        "state_shape": [
+          14
+        ],
+        "action_shape": [
+          14
+        ],
+        "camera_features": [
+          {
+            "key": "observation.images.cam_high",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_low",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_left_wrist",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_right_wrist",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          }
+        ],
+        "has_language_task_index": true,
+        "has_training_mask": true,
+        "has_reward": false,
+        "has_success": false,
+        "feature_keys": [
+          "action",
+          "episode_index",
+          "frame_index",
+          "index",
+          "is_for_training",
+          "observation.effort",
+          "observation.images.cam_high",
+          "observation.images.cam_left_wrist",
+          "observation.images.cam_low",
+          "observation.images.cam_right_wrist",
+          "observation.state",
+          "observation.velocity",
+          "subtask",
+          "task_index",
+          "timestamp"
+        ]
+      },
+      "cross_checks": {
+        "episode_rows_match_declared": true,
+        "length_sum_matches_declared_frames": true,
+        "training_mask_count_matches_length": true
+      }
+    },
+    {
+      "repo_id": "lyl472324464/2026-04-28_direction_have_cap_water2-lerobot-without-rinse-merged-adjust-pickup",
+      "sampling_weight": 1,
+      "hub_revision": "e39b52096c602b5003ce1d9ecbc32a200580b0a8",
+      "hub_private": false,
+      "hub_created_at": "2026-05-14T04:36:08.000Z",
+      "hub_last_modified": "2026-05-15T01:25:58.000Z",
+      "hub_used_storage_bytes": 2191762583,
+      "info_codebase_version": "v3.0",
+      "robot_type": "aloha",
+      "fps": 50,
+      "declared_total_episodes": 22,
+      "declared_total_frames": 24288,
+      "declared_total_tasks": 1,
+      "splits": {
+        "train": "0:22"
+      },
+      "episode_metadata_rows": 22,
+      "episode_length_frames": {
+        "min": 627,
+        "q25": 963.75,
+        "median": 1061.0,
+        "q75": 1261.0,
+        "max": 1635,
+        "mean": 1104.0
+      },
+      "episode_length_seconds": {
+        "min": 13,
+        "q25": 19.25,
+        "median": 21.5,
+        "q75": 25.5,
+        "max": 33,
+        "mean": 22.181818181818183
+      },
+      "trainable_frames_from_episode_metadata": 23188,
+      "excluded_frames_from_episode_metadata": 1100,
+      "unique_tasks": [
+        "Twist off the bottle cap"
+      ],
+      "features": {
+        "state_shape": [
+          14
+        ],
+        "action_shape": [
+          14
+        ],
+        "camera_features": [
+          {
+            "key": "observation.images.cam_high",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_low",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_left_wrist",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_right_wrist",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          }
+        ],
+        "has_language_task_index": true,
+        "has_training_mask": true,
+        "has_reward": false,
+        "has_success": false,
+        "feature_keys": [
+          "action",
+          "episode_index",
+          "frame_index",
+          "index",
+          "is_for_training",
+          "observation.effort",
+          "observation.images.cam_high",
+          "observation.images.cam_left_wrist",
+          "observation.images.cam_low",
+          "observation.images.cam_right_wrist",
+          "observation.state",
+          "observation.velocity",
+          "subtask",
+          "task_index",
+          "timestamp"
+        ]
+      },
+      "cross_checks": {
+        "episode_rows_match_declared": true,
+        "length_sum_matches_declared_frames": true,
+        "training_mask_count_matches_length": true
+      }
+    },
+    {
+      "repo_id": "lyl472324464/2026-05-11_cap-lerobot-without-rinse-merged-adjust-pickup",
+      "sampling_weight": 1,
+      "hub_revision": "84d6016fd66d9588713d47cf9aa0794a8a6ac9de",
+      "hub_private": false,
+      "hub_created_at": "2026-05-14T04:42:58.000Z",
+      "hub_last_modified": "2026-05-14T04:43:13.000Z",
+      "hub_used_storage_bytes": 1679452367,
+      "info_codebase_version": "v3.0",
+      "robot_type": "aloha",
+      "fps": 50,
+      "declared_total_episodes": 3,
+      "declared_total_frames": 19708,
+      "declared_total_tasks": 1,
+      "splits": {
+        "train": "0:3"
+      },
+      "episode_metadata_rows": 3,
+      "episode_length_frames": {
+        "min": 3247,
+        "q25": 4359.0,
+        "median": 5471,
+        "q75": 8230.5,
+        "max": 10990,
+        "mean": 6569.333333333333
+      },
+      "episode_length_seconds": {
+        "min": 65,
+        "q25": 87.0,
+        "median": 109,
+        "q75": 164.5,
+        "max": 220,
+        "mean": 131.33333333333334
+      },
+      "trainable_frames_from_episode_metadata": 19708,
+      "excluded_frames_from_episode_metadata": 0,
+      "unique_tasks": [
+        "Twist off the bottle cap"
+      ],
+      "features": {
+        "state_shape": [
+          14
+        ],
+        "action_shape": [
+          14
+        ],
+        "camera_features": [
+          {
+            "key": "observation.images.cam_high",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_low",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_left_wrist",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_right_wrist",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          }
+        ],
+        "has_language_task_index": true,
+        "has_training_mask": true,
+        "has_reward": false,
+        "has_success": false,
+        "feature_keys": [
+          "action",
+          "episode_index",
+          "frame_index",
+          "index",
+          "is_for_training",
+          "observation.effort",
+          "observation.images.cam_high",
+          "observation.images.cam_left_wrist",
+          "observation.images.cam_low",
+          "observation.images.cam_right_wrist",
+          "observation.state",
+          "observation.velocity",
+          "subtask",
+          "task_index",
+          "timestamp"
+        ]
+      },
+      "cross_checks": {
+        "episode_rows_match_declared": true,
+        "length_sum_matches_declared_frames": true,
+        "training_mask_count_matches_length": true
+      }
+    },
+    {
+      "repo_id": "lyl472324464/2026-05-11_twist-lerobot-truncated-return-home-exp-truncated-return-home-20260520-095140",
+      "sampling_weight": 1,
+      "hub_revision": "6119fe55d48a3f420acb8ed24b4f79934d7edb79",
+      "hub_private": false,
+      "hub_created_at": "2026-05-20T05:47:57.000Z",
+      "hub_last_modified": "2026-05-20T05:48:38.000Z",
+      "hub_used_storage_bytes": 4710288057,
+      "info_codebase_version": "v3.0",
+      "robot_type": "aloha",
+      "fps": 50,
+      "declared_total_episodes": 45,
+      "declared_total_frames": 52398,
+      "declared_total_tasks": 1,
+      "splits": {
+        "train": "0:45"
+      },
+      "episode_metadata_rows": 45,
+      "episode_length_frames": {
+        "min": 417,
+        "q25": 1039.0,
+        "median": 1158,
+        "q75": 1322.0,
+        "max": 2747,
+        "mean": 1164.4
+      },
+      "episode_length_seconds": {
+        "min": 8,
+        "q25": 21.0,
+        "median": 23,
+        "q75": 26.0,
+        "max": 55,
+        "mean": 23.244444444444444
+      },
+      "trainable_frames_from_episode_metadata": 50148,
+      "excluded_frames_from_episode_metadata": 2250,
+      "unique_tasks": [
+        "Twist off the bottle cap"
+      ],
+      "features": {
+        "state_shape": [
+          14
+        ],
+        "action_shape": [
+          14
+        ],
+        "camera_features": [
+          {
+            "key": "observation.images.cam_high",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_low",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_left_wrist",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_right_wrist",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          }
+        ],
+        "has_language_task_index": true,
+        "has_training_mask": true,
+        "has_reward": false,
+        "has_success": false,
+        "feature_keys": [
+          "action",
+          "episode_index",
+          "frame_index",
+          "index",
+          "is_for_training",
+          "observation.effort",
+          "observation.images.cam_high",
+          "observation.images.cam_left_wrist",
+          "observation.images.cam_low",
+          "observation.images.cam_right_wrist",
+          "observation.state",
+          "observation.velocity",
+          "subtask",
+          "task_index",
+          "timestamp"
+        ]
+      },
+      "cross_checks": {
+        "episode_rows_match_declared": true,
+        "length_sum_matches_declared_frames": true,
+        "training_mask_count_matches_length": true
+      }
+    },
+    {
+      "repo_id": "lyl472324464/2026-05-12_twist-lerobot-truncated-return-home-exp-truncated-return-home-20260520-095140",
+      "sampling_weight": 1,
+      "hub_revision": "550ea3dcc705df5bda5b0403b09e0e7973ae95e7",
+      "hub_private": false,
+      "hub_created_at": "2026-05-20T04:00:48.000Z",
+      "hub_last_modified": "2026-05-20T04:01:29.000Z",
+      "hub_used_storage_bytes": 6145442373,
+      "info_codebase_version": "v3.0",
+      "robot_type": "aloha",
+      "fps": 50,
+      "declared_total_episodes": 57,
+      "declared_total_frames": 70749,
+      "declared_total_tasks": 1,
+      "splits": {
+        "train": "0:57"
+      },
+      "episode_metadata_rows": 57,
+      "episode_length_frames": {
+        "min": 644,
+        "q25": 1136.0,
+        "median": 1269,
+        "q75": 1367.0,
+        "max": 1966,
+        "mean": 1241.2105263157894
+      },
+      "episode_length_seconds": {
+        "min": 13,
+        "q25": 23.0,
+        "median": 25,
+        "q75": 27.0,
+        "max": 39,
+        "mean": 24.789473684210527
+      },
+      "trainable_frames_from_episode_metadata": 67899,
+      "excluded_frames_from_episode_metadata": 2850,
+      "unique_tasks": [
+        "Twist off the bottle cap"
+      ],
+      "features": {
+        "state_shape": [
+          14
+        ],
+        "action_shape": [
+          14
+        ],
+        "camera_features": [
+          {
+            "key": "observation.images.cam_high",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_low",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_left_wrist",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_right_wrist",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          }
+        ],
+        "has_language_task_index": true,
+        "has_training_mask": true,
+        "has_reward": false,
+        "has_success": false,
+        "feature_keys": [
+          "action",
+          "episode_index",
+          "frame_index",
+          "index",
+          "is_for_training",
+          "observation.effort",
+          "observation.images.cam_high",
+          "observation.images.cam_left_wrist",
+          "observation.images.cam_low",
+          "observation.images.cam_right_wrist",
+          "observation.state",
+          "observation.velocity",
+          "subtask",
+          "task_index",
+          "timestamp"
+        ]
+      },
+      "cross_checks": {
+        "episode_rows_match_declared": true,
+        "length_sum_matches_declared_frames": true,
+        "training_mask_count_matches_length": true
+      }
+    },
+    {
+      "repo_id": "lyl472324464/2026-05-12_twist2-lerobot-truncated-return-home-exp-truncated-return-home-20260520-095140",
+      "sampling_weight": 1,
+      "hub_revision": "2853693164efbe4fe52b5963d374e3dc2761f94a",
+      "hub_private": false,
+      "hub_created_at": "2026-05-20T01:57:25.000Z",
+      "hub_last_modified": "2026-05-20T01:57:55.000Z",
+      "hub_used_storage_bytes": 3205714642,
+      "info_codebase_version": "v3.0",
+      "robot_type": "aloha",
+      "fps": 50,
+      "declared_total_episodes": 33,
+      "declared_total_frames": 38823,
+      "declared_total_tasks": 1,
+      "splits": {
+        "train": "0:33"
+      },
+      "episode_metadata_rows": 33,
+      "episode_length_frames": {
+        "min": 786,
+        "q25": 985.0,
+        "median": 1225,
+        "q75": 1307.0,
+        "max": 1590,
+        "mean": 1176.4545454545455
+      },
+      "episode_length_seconds": {
+        "min": 16,
+        "q25": 20.0,
+        "median": 24,
+        "q75": 26.0,
+        "max": 32,
+        "mean": 23.606060606060606
+      },
+      "trainable_frames_from_episode_metadata": 37173,
+      "excluded_frames_from_episode_metadata": 1650,
+      "unique_tasks": [
+        "Twist off the bottle cap"
+      ],
+      "features": {
+        "state_shape": [
+          14
+        ],
+        "action_shape": [
+          14
+        ],
+        "camera_features": [
+          {
+            "key": "observation.images.cam_high",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_low",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_left_wrist",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_right_wrist",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          }
+        ],
+        "has_language_task_index": true,
+        "has_training_mask": true,
+        "has_reward": false,
+        "has_success": false,
+        "feature_keys": [
+          "action",
+          "episode_index",
+          "frame_index",
+          "index",
+          "is_for_training",
+          "observation.effort",
+          "observation.images.cam_high",
+          "observation.images.cam_left_wrist",
+          "observation.images.cam_low",
+          "observation.images.cam_right_wrist",
+          "observation.state",
+          "observation.velocity",
+          "subtask",
+          "task_index",
+          "timestamp"
+        ]
+      },
+      "cross_checks": {
+        "episode_rows_match_declared": true,
+        "length_sum_matches_declared_frames": true,
+        "training_mask_count_matches_length": true
+      }
+    },
+    {
+      "repo_id": "lyl472324464/2026-05-04_turn_over-lerobot-without-rinse",
+      "sampling_weight": 1,
+      "hub_revision": "30bb4b203f6659e7481a273ecccf24b18f52f105",
+      "hub_private": false,
+      "hub_created_at": "2026-05-08T09:35:06.000Z",
+      "hub_last_modified": "2026-05-20T00:58:12.000Z",
+      "hub_used_storage_bytes": 5250746744,
+      "info_codebase_version": "v3.0",
+      "robot_type": "aloha",
+      "fps": 50,
+      "declared_total_episodes": 45,
+      "declared_total_frames": 21787,
+      "declared_total_tasks": 1,
+      "splits": {
+        "train": "0:45"
+      },
+      "episode_metadata_rows": 45,
+      "episode_length_frames": {
+        "min": 300,
+        "q25": 414.0,
+        "median": 443,
+        "q75": 543.0,
+        "max": 814,
+        "mean": 484.15555555555557
+      },
+      "episode_length_seconds": {
+        "min": 6,
+        "q25": 8.0,
+        "median": 9,
+        "q75": 11.0,
+        "max": 16,
+        "mean": 9.71111111111111
+      },
+      "trainable_frames_from_episode_metadata": 19537,
+      "excluded_frames_from_episode_metadata": 2250,
+      "unique_tasks": [
+        "Twist off the bottle cap"
+      ],
+      "features": {
+        "state_shape": [
+          14
+        ],
+        "action_shape": [
+          14
+        ],
+        "camera_features": [
+          {
+            "key": "observation.images.cam_high",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_low",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_left_wrist",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_right_wrist",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          }
+        ],
+        "has_language_task_index": true,
+        "has_training_mask": true,
+        "has_reward": false,
+        "has_success": false,
+        "feature_keys": [
+          "action",
+          "episode_index",
+          "frame_index",
+          "index",
+          "is_for_training",
+          "observation.effort",
+          "observation.images.cam_high",
+          "observation.images.cam_left_wrist",
+          "observation.images.cam_low",
+          "observation.images.cam_right_wrist",
+          "observation.state",
+          "observation.velocity",
+          "subtask",
+          "task_index",
+          "timestamp"
+        ]
+      },
+      "cross_checks": {
+        "episode_rows_match_declared": true,
+        "length_sum_matches_declared_frames": true,
+        "training_mask_count_matches_length": true
+      }
+    },
+    {
+      "repo_id": "lyl472324464/2026-05-03_turn_over-lerobot-without-rinse",
+      "sampling_weight": 1,
+      "hub_revision": "a47f7e0733121908c3d2f653d3b2f87f34b6cbaf",
+      "hub_private": false,
+      "hub_created_at": "2026-05-08T03:37:38.000Z",
+      "hub_last_modified": "2026-05-19T08:12:25.000Z",
+      "hub_used_storage_bytes": 5654917778,
+      "info_codebase_version": "v3.0",
+      "robot_type": "aloha",
+      "fps": 50,
+      "declared_total_episodes": 68,
+      "declared_total_frames": 27061,
+      "declared_total_tasks": 1,
+      "splits": {
+        "train": "0:68"
+      },
+      "episode_metadata_rows": 68,
+      "episode_length_frames": {
+        "min": 227,
+        "q25": 318.0,
+        "median": 381.5,
+        "q75": 453.25,
+        "max": 637,
+        "mean": 397.95588235294116
+      },
+      "episode_length_seconds": {
+        "min": 5,
+        "q25": 6.0,
+        "median": 8.0,
+        "q75": 9.0,
+        "max": 13,
+        "mean": 7.955882352941177
+      },
+      "trainable_frames_from_episode_metadata": 23661,
+      "excluded_frames_from_episode_metadata": 3400,
+      "unique_tasks": [
+        "Twist off the bottle cap"
+      ],
+      "features": {
+        "state_shape": [
+          14
+        ],
+        "action_shape": [
+          14
+        ],
+        "camera_features": [
+          {
+            "key": "observation.images.cam_high",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_low",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_left_wrist",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_right_wrist",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          }
+        ],
+        "has_language_task_index": true,
+        "has_training_mask": true,
+        "has_reward": false,
+        "has_success": false,
+        "feature_keys": [
+          "action",
+          "episode_index",
+          "frame_index",
+          "index",
+          "is_for_training",
+          "observation.effort",
+          "observation.images.cam_high",
+          "observation.images.cam_left_wrist",
+          "observation.images.cam_low",
+          "observation.images.cam_right_wrist",
+          "observation.state",
+          "observation.velocity",
+          "subtask",
+          "task_index",
+          "timestamp"
+        ]
+      },
+      "cross_checks": {
+        "episode_rows_match_declared": true,
+        "length_sum_matches_declared_frames": true,
+        "training_mask_count_matches_length": true
+      }
+    },
+    {
+      "repo_id": "lyl472324464/2026-05-01_turn_over-lerobot-without-rinse",
+      "sampling_weight": 1,
+      "hub_revision": "9f869793b17cbeb3fbf08a9aae3f2aa0c89b58c4",
+      "hub_private": false,
+      "hub_created_at": "2026-05-08T02:39:29.000Z",
+      "hub_last_modified": "2026-05-19T07:02:59.000Z",
+      "hub_used_storage_bytes": 1158956788,
+      "info_codebase_version": "v3.0",
+      "robot_type": "aloha",
+      "fps": 50,
+      "declared_total_episodes": 14,
+      "declared_total_frames": 5195,
+      "declared_total_tasks": 1,
+      "splits": {
+        "train": "0:14"
+      },
+      "episode_metadata_rows": 14,
+      "episode_length_frames": {
+        "min": 80,
+        "q25": 362.5,
+        "median": 404.0,
+        "q75": 419.75,
+        "max": 613,
+        "mean": 371.07142857142856
+      },
+      "episode_length_seconds": {
+        "min": 2,
+        "q25": 7.0,
+        "median": 8.0,
+        "q75": 8.0,
+        "max": 12,
+        "mean": 7.285714285714286
+      },
+      "trainable_frames_from_episode_metadata": 4495,
+      "excluded_frames_from_episode_metadata": 700,
+      "unique_tasks": [
+        "Twist off the bottle cap"
+      ],
+      "features": {
+        "state_shape": [
+          14
+        ],
+        "action_shape": [
+          14
+        ],
+        "camera_features": [
+          {
+            "key": "observation.images.cam_high",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_low",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_left_wrist",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          },
+          {
+            "key": "observation.images.cam_right_wrist",
+            "shape": [
+              3,
+              480,
+              640
+            ],
+            "video_info": {
+              "video.height": 480,
+              "video.width": 640,
+              "video.codec": "av1",
+              "video.pix_fmt": "yuv420p",
+              "video.is_depth_map": false,
+              "video.fps": 50,
+              "video.channels": 3,
+              "has_audio": false
+            }
+          }
+        ],
+        "has_language_task_index": true,
+        "has_training_mask": true,
+        "has_reward": false,
+        "has_success": false,
+        "feature_keys": [
+          "action",
+          "episode_index",
+          "frame_index",
+          "index",
+          "is_for_training",
+          "observation.effort",
+          "observation.images.cam_high",
+          "observation.images.cam_left_wrist",
+          "observation.images.cam_low",
+          "observation.images.cam_right_wrist",
+          "observation.state",
+          "observation.velocity",
+          "subtask",
+          "task_index",
+          "timestamp"
+        ]
+      },
+      "cross_checks": {
+        "episode_rows_match_declared": true,
+        "length_sum_matches_declared_frames": true,
+        "training_mask_count_matches_length": true
+      }
+    }
+  ],
+  "failures": [],
+  "interpretation_limits": [
+    "Unique counts count each repository once; weighted exposure is not additional collected data.",
+    "The Hub metadata proves dataset contents, not that every frame was sampled equally during training.",
+    "Repository names are not used as success labels."
+  ]
+}

@@ -1,0 +1,179 @@
+{
+  "run": {
+    "id": "nx2zkxvt",
+    "name": "no_rinse_cam3_fullft_return_home_29repo_bs256_nw64_fsdp4_20260520",
+    "state": "finished",
+    "created_at": "2026-05-20T07:54:38Z",
+    "last_history_step": 59990,
+    "history_rows": 6059,
+    "config": {
+      "name": "eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo",
+      "exp_name": "no_rinse_cam3_fullft_return_home_29repo_bs256_nw64_fsdp4_20260520",
+      "batch_size": 256,
+      "num_workers": 64,
+      "fsdp_devices": 4,
+      "gradient_accumulation_steps": 1,
+      "num_train_steps": 40000,
+      "seed": 42,
+      "save_interval": 1000,
+      "keep_period": 5000,
+      "ema_decay": 0.99,
+      "lr_schedule": {
+        "peak_lr": 2.5e-05,
+        "decay_lr": 2.5e-06,
+        "decay_steps": 40000,
+        "warmup_steps": 10000
+      },
+      "optimizer": {
+        "b1": 0.9,
+        "b2": 0.95,
+        "eps": 1e-08,
+        "weight_decay": 1e-10,
+        "clip_gradient_norm": 1
+      },
+      "freeze_filter": "Nothing()",
+      "model": {
+        "pi05": true,
+        "dtype": "bfloat16",
+        "action_dim": 32,
+        "max_token_len": 200,
+        "action_horizon": 50,
+        "image_resolution": [
+          224,
+          224
+        ],
+        "paligemma_variant": "gemma_2b",
+        "discrete_state_input": true,
+        "action_expert_variant": "gemma_300m"
+      },
+      "data": {
+        "assets": {
+          "asset_id": "trossen",
+          "assets_dir": null
+        },
+        "repo_id": null,
+        "repo_ids": [
+          "lyl472324464/2025-09-15-twist-one-bottle-no-box-in-the-front-without-rinse-merged-adjust-pickup",
+          "lyl472324464/2025-12-10-twist-one-bottle-merged-adjust-pickup",
+          "lyl472324464/2025-12-23-twist-one-bottle-without-rinse-merged-adjust-pickup",
+          "lyl472324464/2026-01-20-twist-one-bottle-merged-adjust-pickup",
+          "lyl472324464/2026-02-03-no-cap-and-direction-without-rinse-merged-adjust-pickup",
+          "lyl472324464/2026-03-04-one-direction-lerobot-without-rinse-merged-adjust-pickup",
+          "lyl472324464/2026.03.12_one_have_cap-lerobot-without-rinse-merged-adjust-pickup",
+          "lyl472324464/2026.03.12_one_have_cap_direction-lerobot-without-rinse-merged-adjust-pickup",
+          "lyl472324464/2026-03-12-one-havent-cap-merged-adjust-pickup",
+          "lyl472324464/2026-03-12-one-havent-cap-direction-merged-adjust-pickup",
+          "lyl472324464/2026-04-21_direction-lerobot-without-rinse-merged-adjust-pickup",
+          "lyl472324464/2026-04-21_direction_2-lerobot-without-rinse-merged-adjust-pickup",
+          "lyl472324464/2026-04-21_direction_haven-t_cap-lerobot-without-rinse-merged-adjust-pickup",
+          "lyl472324464/2026-04-21_direction_havent_cap_water-lerobot-without-rinse-merged-adjust-pickup",
+          "lyl472324464/2026-04-23_direction_havent_cap_water-lerobot-without-rinse-merged-adjust-pickup",
+          "lyl472324464/2026-04-28_direction_have_cap_water-lerobot-without-rinse-merged-adjust-pickup",
+          "lyl472324464/2026-04-28_direction_have_cap_water2-lerobot-without-rinse-merged-adjust-pickup",
+          "lyl472324464/2026-05-11_free-spinning-lerobot-without-rinse-merged-adjust-pickup",
+          "lyl472324464/2026-05-11_free-spinning-lerobot-without-rinse-merged-adjust-pickup",
+          "lyl472324464/2026-05-11_free-spinning-lerobot-without-rinse-merged-adjust-pickup",
+          "lyl472324464/2026-05-11_free-spinning-lerobot-without-rinse-merged-adjust-pickup",
+          "lyl472324464/2026-05-11_free-spinning-lerobot-without-rinse-merged-adjust-pickup",
+          "lyl472324464/2026-05-11_cap-lerobot-without-rinse-merged-adjust-pickup",
+          "lyl472324464/2026-05-11_twist-lerobot-truncated-return-home-exp-truncated-return-home-20260520-095140",
+          "lyl472324464/2026-05-12_twist-lerobot-truncated-return-home-exp-truncated-return-home-20260520-095140",
+          "lyl472324464/2026-05-12_twist2-lerobot-truncated-return-home-exp-truncated-return-home-20260520-095140",
+          "lyl472324464/2026-05-04_turn_over-lerobot-without-rinse",
+          "lyl472324464/2026-05-03_turn_over-lerobot-without-rinse",
+          "lyl472324464/2026-05-01_turn_over-lerobot-without-rinse"
+        ],
+        "image_size": [
+          224,
+          224
+        ],
+        "adapt_to_pi": true,
+        "base_config": {
+          "repo_id": null,
+          "asset_id": null,
+          "repo_ids": null,
+          "norm_stats": null,
+          "action_space": null,
+          "rlds_data_dir": null,
+          "data_transforms": {
+            "inputs": [],
+            "outputs": []
+          },
+          "filter_dict_path": null,
+          "model_transforms": {
+            "inputs": [],
+            "outputs": []
+          },
+          "prompt_from_task": true,
+          "repack_transforms": {
+            "inputs": [],
+            "outputs": []
+          },
+          "use_quantile_norm": false,
+          "action_sequence_keys": [
+            "actions"
+          ],
+          "video_memory_num_frames": 1,
+          "video_memory_stride_seconds": 1
+        },
+        "default_prompt": null,
+        "repack_transforms": {
+          "inputs": [
+            {
+              "structure": {
+                "state": "observation.state",
+                "images": {
+                  "cam_high": "observation.images.cam_high",
+                  "cam_left_wrist": "observation.images.cam_left_wrist",
+                  "cam_right_wrist": "observation.images.cam_right_wrist"
+                },
+                "prompt": "prompt",
+                "actions": "action"
+              }
+            }
+          ],
+          "outputs": []
+        },
+        "action_sequence_keys": [
+          "action"
+        ],
+        "use_delta_joint_actions": true,
+        "video_memory_num_frames": 1,
+        "video_memory_stride_seconds": 1
+      },
+      "resume": false,
+      "overwrite": true
+    },
+    "summary": {
+      "loss": 0.0006710937595926225,
+      "grad_norm": 0.013140857219696043,
+      "param_norm": 1807.5654296875,
+      "data_wait_time": 0.03405557442456484,
+      "train_step_time": 2.7445853024721147,
+      "train_block_time": 0.13493537586182355,
+      "train_dispatch_time": 2.609647967107594,
+      "effective_batch_size": 256,
+      "gradient_accumulation_steps": 1
+    }
+  },
+  "audit_generated_utc": "2026-07-30T07:20:10.866827+00:00",
+  "history_analysis": {
+    "first_logged_step": 0,
+    "last_logged_step": 59990,
+    "first_timestamp_utc": "2026-05-20T08:05:45.543240+00:00",
+    "last_timestamp_utc": "2026-05-22T11:29:28.127922+00:00",
+    "wall_span_sec": 185022.58468174934,
+    "pause_gaps_over_one_hour": [],
+    "loss_min": 0.0004988103173673153,
+    "loss_max": 0.06770342588424683,
+    "loss_first": 0.06770342588424683,
+    "loss_last": 0.0006710937595926225,
+    "loss_median": 0.0012569366954267025
+  },
+  "evidence_limits": [
+    "The W&B run proves optimization history, not robot task success.",
+    "The run continued to step 59990, while the inspected/deployed checkpoint directory contains step 19000 only.",
+    "Wall span includes pauses and resume gaps and is not equal to active accelerator time.",
+    "No validation or robot evaluation metric is present in this run history."
+  ]
+}
