@@ -1,0 +1,21 @@
+#usda 1.0
+(
+    metersPerUnit = 1
+    upAxis = "Z"
+)
+
+over "World"
+{
+    over "environment"
+    {
+        over "worldBody"
+        {
+            over "user_confirmed_table"
+            {
+                double3 xformOp:scale = (1.1, 0.6, 0.015)
+                double3 xformOp:translate = (0, 0, -0.0075)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+        }
+    }
+}
