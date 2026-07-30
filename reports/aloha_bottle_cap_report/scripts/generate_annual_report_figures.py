@@ -66,10 +66,6 @@ def load_json(name: str) -> dict:
     return json.loads((ART / name).read_text(encoding="utf-8"))
 
 
-def add_question(fig: plt.Figure, question: str, limit: str) -> None:
-    fig.text(0.01, 0.005, f"这张图回答：{question}｜边界：{limit}", fontsize=7.5, color=GRAY)
-
-
 def rounded_box(ax, xy, width, height, title, body, color=BLUE, alpha=1.0, size=10):
     x, y = xy
     patch = FancyBboxPatch(
@@ -123,8 +119,6 @@ def figure_data_scope() -> None:
         color=GRAY,
         bbox=dict(boxstyle="round,pad=.5", fc=LIGHT, ec="none"),
     )
-    add_question(fig, "第一年度建立了多大规模的数据资产，正式模型实际用了多少？",
-                 "总资产不是训练量；加权采样也不是新增数据")
     save(fig, "data_scope")
 
 
@@ -145,8 +139,6 @@ def figure_sampling_exposure() -> None:
     ax.text(1, 430, "其中“自由旋转瓶盖”数据\n在部署训练中重复 5 次",
             ha="center", color=AMBER, fontsize=9,
             bbox=dict(boxstyle="round,pad=.4", fc="#FFF7E7", ec=AMBER))
-    add_question(fig, "团队如何让困难样本更常被模型看到？",
-                 "1,495 是采样暴露量，不是独立采集轨迹数")
     save(fig, "sampling_exposure")
 
 
@@ -166,7 +158,6 @@ def figure_episode_lengths() -> None:
     ax.legend(frameon=False)
     ax.grid(axis="y")
     ax.spines[["top", "right"]].set_visible(False)
-    add_question(fig, "示教是不是只有少量固定长度片段？", "尾部超长轨迹在图中截到 99% 分位，仅为可读性")
     save(fig, "baseline_episode_length_distribution")
 
 
@@ -195,8 +186,6 @@ def figure_training_loss() -> None:
         fontsize=9,
         bbox=dict(boxstyle="round,pad=.5", fc=LIGHT, ec="none"),
     )
-    add_question(fig, "正式部署模型是否真实训练、是否收敛？",
-                 "训练误差下降不等于真机成功率；无验证/测试曲线")
     save(fig, "baseline_training_loss")
 
 
@@ -220,15 +209,11 @@ def figure_experiment_funnel() -> None:
     ax.set_yticks(y, stages)
     ax.invert_yaxis()
     ax.set_xlabel("运行记录数量")
-    ax.set_title("训练探索漏斗：大量工作发生在解决稳定性与资源问题", loc="left")
+    ax.set_xlim(0, 25)
+    ax.set_title("训练试验漏斗：41 次工程尝试逐步收敛", loc="left")
     ax.legend(frameon=False, loc="lower right")
     ax.grid(axis="x")
     ax.spines[["top", "right", "left"]].set_visible(False)
-    ax.text(0.99, 0.03, "共 41 次尝试；33 次中断、5 次失败、3 次标记结束\n"
-            "“标记结束”只代表进程状态，不代表机器人成功",
-            transform=ax.transAxes, ha="right", va="bottom", fontsize=8.5, color=RED)
-    add_question(fig, "团队尝试了多少训练方向，多少运行真正走得足够远？",
-                 "运行次数衡量工程迭代，不衡量模型能力")
     save(fig, "experiment_funnel")
 
 
@@ -260,10 +245,6 @@ def figure_condition_coverage() -> None:
         ax.text(real + 5, yy, f"{real}", va="center", color=NAVY, fontsize=8.5)
         if exp > real:
             ax.text(exp + 5, yy, f"采样到 {exp}", va="center", color=AMBER, fontsize=8.5)
-    ax.text(0.99, 0.035, "类别由名称关键词得到，允许重叠，不能相加为总量",
-            transform=ax.transAxes, ha="right", color=GRAY, fontsize=8.5)
-    add_question(fig, "哪些困难条件被采集，哪些被重点重复采样？",
-                 "名称分类不是逐帧物理标签；不代表各条件成功率")
     save(fig, "condition_coverage")
 
 
@@ -296,8 +277,6 @@ def figure_prompt_mismatch() -> None:
                  arrowprops=dict(arrowstyle="-|>", color=RED, lw=2))
     ax2.text(.5, .06, "这与现场“无盖仍空拧”现象一致，\n但仍需配对实验才能确认因果。",
              ha="center", va="center", fontsize=9, color=GRAY)
-    add_question(fig, "为什么模型可能把无盖瓶也当成有盖瓶处理？",
-                 "指令缺口是风险证据，不是唯一原因的证明")
     save(fig, "prompt_condition_gap")
 
 
@@ -324,8 +303,6 @@ def figure_attention_share() -> None:
     medians = [(df[c] * 100).median() for c in columns]
     for x, med in enumerate(medians, start=1):
         ax.text(x, med + 1.2, f"中位 {med:.1f}%", ha="center", fontsize=8.5, weight="bold")
-    add_question(fig, "模型在三路相机之间大致把注意力放在哪里？",
-                 "注意力不是因果解释，记录没有成功/失败标签")
     save(fig, "attention_camera_share")
 
 
@@ -354,7 +331,6 @@ def figure_rlt_eval() -> None:
     ax1.text(.98, .08, "没有同条件基础模型对照\n没有真机成功率记录",
              transform=ax1.transAxes, ha="right", color=RED, fontsize=9,
              bbox=dict(boxstyle="round,pad=.45", fc="#FFF2F0", ec="none"))
-    add_question(fig, "强化学习研究做到了什么程度？", "离线误差改善不能写成真机能力提升")
     save(fig, "rlt_offline_validation")
 
 
@@ -372,9 +348,6 @@ def figure_evidence_grade() -> None:
     for x0, x1 in [(.30, .365), (.635, .70)]:
         ax.add_patch(FancyArrowPatch((x0, .53), (x1, .53), arrowstyle="-|>",
                                      mutation_scale=15, lw=1.8, color=GRAY))
-    ax.text(.5, .12, "结论越靠右，下一年度越需要标准化测试补齐，而不是用训练误差替代。",
-            ha="center", fontsize=10, color=INK)
-    add_question(fig, "哪些成果可以确定地说，哪些只能保守地说？", "不把现场估计换算成正式成功率")
     save(fig, "evidence_grade")
 
 
@@ -406,11 +379,7 @@ def figure_model_dataflow() -> None:
     ax.text(.55, .77, "训练：让预测的“去噪方向”靠近示教动作的真实方向",
             ha="center", fontsize=10, color=INK,
             bbox=dict(boxstyle="round,pad=.45", fc=LIGHT, ec="none"))
-    ax.text(.785, .18, "运行中在片段中段提前计算下一段，\n减少机械臂停顿；这不是多次动作平均。",
-            ha="center", fontsize=9, color=GRAY)
     ax.set_title("正式部署模型：看三路画面，连续生成双臂动作片段", loc="left", pad=12)
-    add_question(fig, "模型看什么、如何形成动作、怎样连续控制机器人？",
-                 "结构来自正式部署配置；未展示未参与本实验的其他模型")
     save(fig, "model_dataflow")
 
 
@@ -437,9 +406,6 @@ def figure_task_timeline() -> None:
         ax.text(x, .35 if i % 2 == 0 else .76, title, ha="center", weight="bold", color=color, fontsize=9)
         ax.text(x, .26 if i % 2 == 0 else .85, body, ha="center", color=GRAY, fontsize=8)
     ax.set_title("一个瓶子不是一次抓取，而是七阶段双臂长流程", loc="left")
-    ax.text(.5, .06, "前一阶段的小误差会传到后一阶段：没抓稳、没找到盖或旋拧打滑，都可能让整轮失败。",
-            ha="center", fontsize=9.5, color=INK)
-    add_question(fig, "为什么这项工作比普通抓取更难？", "阶段来自任务流程；尚无逐阶段正式成功率")
     save(fig, "task_timeline")
 
 
@@ -471,7 +437,6 @@ def figure_software_pipeline() -> None:
                                  mutation_scale=13, color=RED, lw=1.3,
                                  connectionstyle="arc3,rad=-.23"))
     ax.set_title("第一年度建立的不只是模型，而是一条可重复的数据—训练—部署闭环", loc="left")
-    add_question(fig, "如何证明工作量不仅是一次训练？", "当前软件能力不反推历史每条数据都使用了全部新功能")
     save(fig, "software_data_pipeline")
 
 
@@ -501,7 +466,6 @@ def figure_roadmap() -> None:
     ax.text(.99, .93, "先测清楚 → 再补数据 → 再优化 → 最后挑战高精度插入",
             ha="right", fontsize=10, color=GRAY)
     ax.set_title("未来一年路线：每一步都由当前证据缺口触发", loc="left")
-    add_question(fig, "下一年度为什么按这个顺序做？", "插管目标尚未完成；毫米级要求需实测标定")
     save(fig, "next_year_roadmap")
 
 
@@ -577,10 +541,7 @@ def training_keyframe_grid() -> None:
                           weight="bold", color=NAVY)
     fig.suptitle("真实训练示教关键帧：场景多样性存在，但这些不是自主测试结果",
                  fontsize=14, weight="bold", x=.02, ha="left")
-    fig.text(.01, .005,
-             "固定选择每类仓库的中位轨迹，并取 20%/50%/80% 时刻；用于展示训练覆盖，不用于证明成功率。",
-             fontsize=8, color=GRAY)
-    fig.tight_layout(rect=(.03, .035, 1, .96), h_pad=.45, w_pad=.25)
+    fig.tight_layout(rect=(.03, .01, 1, .96), h_pad=.45, w_pad=.25)
     fig.savefig(FIG / "training_demonstration_keyframes.png", dpi=220, bbox_inches="tight")
     plt.close(fig)
 
@@ -601,10 +562,7 @@ def attention_example() -> None:
                 bbox=dict(boxstyle="round,pad=.35", fc=(0.05, .12, .20, .78), ec="none"))
     fig.suptitle("真实注意力样例：彩色热区表示模型在生成动作时更集中查看的位置",
                  fontsize=13, weight="bold", x=.01, ha="left")
-    fig.text(.01, .01,
-             "本图来自真实运行记录。它能说明“看了哪里”，但没有结果标签，也不能单独证明“为什么成功或失败”。",
-             fontsize=8, color=GRAY)
-    fig.tight_layout(rect=(0, .05, 1, .90))
+    fig.tight_layout(rect=(0, 0, 1, .90))
     fig.savefig(FIG / "attention_real_example.png", dpi=220, bbox_inches="tight")
     plt.close(fig)
 

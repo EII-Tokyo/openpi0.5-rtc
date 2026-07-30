@@ -1,0 +1,181 @@
+{
+  "status": "PASS",
+  "referenced_figure_count": 18,
+  "entries": [
+    {
+      "figure": "figures/aloha_formal_photo_annotated.png",
+      "question": "正式 ALOHA 工作站由哪些主要部分组成？",
+      "claim": "正式设备包含示教臂、工作臂、相机和任务工作区。",
+      "evidence_boundary": "照片拍摄时机器人处于静止休眠状态。",
+      "source_artifact": "artifacts/official_photo_provenance.json",
+      "dimensions_px": [
+        1702,
+        1276
+      ],
+      "visual_status": "PASS"
+    },
+    {
+      "figure": "figures/attention_camera_share.pdf",
+      "question": "8,223 个样本中三路视野的注意力份额如何分布？",
+      "claim": "腕部近景整体高于顶部总览。",
+      "evidence_boundary": "注意力份额不是失败原因的因果解释。",
+      "source_artifact": "artifacts/plot_data/attention_camera_share.csv",
+      "dimensions_px": null,
+      "visual_status": "PASS"
+    },
+    {
+      "figure": "figures/attention_real_example.png",
+      "question": "一次真实运行中三路视野的关注位置是什么样？",
+      "claim": "样例展示顶部和双腕视野的真实注意力热区。",
+      "evidence_boundary": "记录没有成功或失败标签。",
+      "source_artifact": "artifacts/attention_audit.json",
+      "dimensions_px": [
+        2368,
+        722
+      ],
+      "visual_status": "PASS"
+    },
+    {
+      "figure": "figures/baseline_episode_length_distribution.pdf",
+      "question": "正式训练轨迹的长度分布如何？",
+      "claim": "1,051 条轨迹覆盖短、中、长多种示教时长。",
+      "evidence_boundary": "极长尾只为绘图可读性截到 99% 分位。",
+      "source_artifact": "artifacts/plot_data/baseline_training_episode_lengths.csv",
+      "dimensions_px": null,
+      "visual_status": "PASS"
+    },
+    {
+      "figure": "figures/baseline_training_loss.pdf",
+      "question": "正式模型是否持续拟合示教动作？",
+      "claim": "完整训练历史显示动作拟合误差持续下降。",
+      "evidence_boundary": "训练误差下降不能代替真机成功率。",
+      "source_artifact": "artifacts/plot_data/baseline_training_history.csv",
+      "dimensions_px": null,
+      "visual_status": "PASS"
+    },
+    {
+      "figure": "figures/condition_coverage.pdf",
+      "question": "正式训练数据覆盖了哪些困难条件？",
+      "claim": "数据包含方向、无盖、翻转和自由旋转等条件。",
+      "evidence_boundary": "名称分类允许重叠且不表示各条件成功率。",
+      "source_artifact": "artifacts/plot_data/dataset_condition_coverage.csv",
+      "dimensions_px": null,
+      "visual_status": "PASS"
+    },
+    {
+      "figure": "figures/cover_concept.png",
+      "question": "报告面向的完整双臂瓶子分拣任务是什么？",
+      "claim": "封面概括取瓶、旋盖和分类投放的完整任务链。",
+      "evidence_boundary": "概念示意图不是实验照片。",
+      "source_artifact": "artifacts/cover_concept_provenance.json",
+      "dimensions_px": [
+        1536,
+        1024
+      ],
+      "visual_status": "PASS"
+    },
+    {
+      "figure": "figures/data_scope.pdf",
+      "question": "数据总资产、正式训练子集和过滤后输入分别有多大？",
+      "claim": "三层数据口径必须分开统计。",
+      "evidence_boundary": "总资产不能写成正式模型训练量。",
+      "source_artifact": "artifacts/dataset_statistics.json",
+      "dimensions_px": null,
+      "visual_status": "PASS"
+    },
+    {
+      "figure": "figures/evidence_grade.pdf",
+      "question": "当前成果分别具有怎样的证据强度？",
+      "claim": "可复核事实、现场观察和待量化指标需要分层陈述。",
+      "evidence_boundary": "证据等级不是任务成功率。",
+      "source_artifact": "artifacts/field_observation_claims.json",
+      "dimensions_px": null,
+      "visual_status": "PASS"
+    },
+    {
+      "figure": "figures/experiment_funnel.pdf",
+      "question": "41 次训练尝试中有多少留下历史并运行到较远阶段？",
+      "claim": "训练谱系体现工程迭代量和运行稳定性。",
+      "evidence_boundary": "运行状态不等同于模型真机任务成功。",
+      "source_artifact": "artifacts/plot_data/wandb_experiment_inventory.csv",
+      "dimensions_px": null,
+      "visual_status": "PASS"
+    },
+    {
+      "figure": "figures/model_dataflow.pdf",
+      "question": "三路视觉与机器人状态如何形成连续双臂动作？",
+      "claim": "正式部署模型输出未来 50 个控制时刻的双臂动作。",
+      "evidence_boundary": "示意图只描述正式部署模型，不代表其他候选模型。",
+      "source_artifact": "artifacts/checkpoint_metadata.json",
+      "dimensions_px": null,
+      "visual_status": "PASS"
+    },
+    {
+      "figure": "figures/next_year_roadmap.pdf",
+      "question": "下一年度工作为什么按当前优先级推进？",
+      "claim": "路线从可信评估到基础能力、强化学习和高精度插入逐级推进。",
+      "evidence_boundary": "插管目标尚未完成，毫米级要求仍需实测标定。",
+      "source_artifact": "artifacts/plot_manifest.json",
+      "dimensions_px": null,
+      "visual_status": "PASS"
+    },
+    {
+      "figure": "figures/prompt_condition_gap.pdf",
+      "question": "无盖数据的任务指令是否明确要求跳过旋拧？",
+      "claim": "无盖条件仍普遍使用无条件旋盖指令。",
+      "evidence_boundary": "指令缺口是风险证据，不是唯一原因证明。",
+      "source_artifact": "artifacts/dataset_condition_coverage.json",
+      "dimensions_px": null,
+      "visual_status": "PASS"
+    },
+    {
+      "figure": "figures/rlt_offline_validation.pdf",
+      "question": "强化学习研究闭环目前达到什么程度？",
+      "claim": "连续轮次形成了可比较的离线动作与价值指标。",
+      "evidence_boundary": "离线改善不能写成真机能力提升。",
+      "source_artifact": "artifacts/plot_data/round_eval.csv",
+      "dimensions_px": null,
+      "visual_status": "PASS"
+    },
+    {
+      "figure": "figures/sampling_exposure.pdf",
+      "question": "困难样本如何在训练中获得更多出现机会？",
+      "claim": "重复采样提高重点场景的训练暴露。",
+      "evidence_boundary": "等效采样数量不是新增独立轨迹。",
+      "source_artifact": "artifacts/dataset_statistics.json",
+      "dimensions_px": null,
+      "visual_status": "PASS"
+    },
+    {
+      "figure": "figures/software_data_pipeline.pdf",
+      "question": "第一年度形成了怎样的数据到部署闭环？",
+      "claim": "工作覆盖采集、编辑、训练、部署、观察和问题回流。",
+      "evidence_boundary": "当前软件能力不代表历史数据都使用了全部后来功能。",
+      "source_artifact": "artifacts/plot_manifest.json",
+      "dimensions_px": null,
+      "visual_status": "PASS"
+    },
+    {
+      "figure": "figures/task_timeline.pdf",
+      "question": "单个瓶子的完整处理链包含哪些阶段？",
+      "claim": "任务包含七个相互依赖的长流程阶段。",
+      "evidence_boundary": "阶段划分不能代替逐阶段成功率。",
+      "source_artifact": "artifacts/plot_manifest.json",
+      "dimensions_px": null,
+      "visual_status": "PASS"
+    },
+    {
+      "figure": "figures/training_demonstration_keyframes.png",
+      "question": "真实训练数据中的典型画面是什么样？",
+      "claim": "固定关键帧展示多种真实示教条件。",
+      "evidence_boundary": "示教关键帧不是自主测试结果。",
+      "source_artifact": "artifacts/hf_training_keyframe_manifest.json",
+      "dimensions_px": [
+        2184,
+        1952
+      ],
+      "visual_status": "PASS"
+    }
+  ],
+  "violations": []
+}
