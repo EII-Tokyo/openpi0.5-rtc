@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ast
 import hashlib
 from pathlib import Path
 
@@ -8,6 +9,8 @@ import yaml
 
 from tools.aloha1_mapping.grasp_20cm_controller import Phase
 from tools.aloha1_mapping.grasp_20cm_controller import RunObservation
+from tools.aloha1_mapping.grasp_20cm_isaac_bindings import physics_sample_duration_s
+from tools.aloha1_mapping.grasp_20cm_isaac_bindings import solver_active_contacts
 from tools.aloha1_mapping.grasp_20cm_runtime import EXPECTED_DOF_ORDER
 from tools.aloha1_mapping.grasp_20cm_runtime import FrozenInputError
 from tools.aloha1_mapping.grasp_20cm_runtime import Grasp20cmRuntimeAdapter
@@ -17,6 +20,7 @@ from tools.aloha1_mapping.grasp_20cm_runtime import verify_frozen_file
 
 ROOT = Path(__file__).resolve().parents[2]
 CONFIG = ROOT / "configs/aloha1_grasp_20cm_gui.yaml"
+GUI_SCRIPT = ROOT / "tools/run_aloha1_grasp_20cm_gui.py"
 
 
 class _FakePrim:
@@ -77,6 +81,7 @@ class _FakeBindings:
             persistent_penetration=False,
             numerical_ejection=False,
             forbidden_constraint=False,
+            phase_timed_out=False,
             ee_vertical_displacement_m=0.0,
         )
 
@@ -127,12 +132,17 @@ def test_config_freezes_local_runtime_and_height_semantics() -> None:
     assert config["target"]["clearance_m"] == pytest.approx(0.200)
     assert config["target"]["hold_duration_s"] == pytest.approx(2.0)
     assert config["target"]["hold_drop_gate_m"] == pytest.approx(0.010)
+    assert config["target"][
+        "support_contact_latch_clearance_m"
+    ] == pytest.approx(0.0005)
     assert config["physics"] == {
         "frequency_hz": 60,
         "mass_kg": 0.020,
         "friction": 0.7,
         "restitution": 0.0,
         "solve_articulation_contact_last": True,
+        "finger_drive_type": "force",
+        "preload_delta_m": 0.0,
     }
     assert config["boundaries"]["task8"] == "NOT_RUN"
     assert config["boundaries"]["real_robot"] is False
@@ -180,6 +190,8 @@ def test_all_frozen_files_match_config_hashes() -> None:
     assert set(profile["frozen_inputs"]) == {
         "stage",
         "bottle",
+        "task7b2_runtime_profile",
+        "lula_descriptor",
         "grasp_editor_semantics",
         "grasp_editor_variant_b_raw",
         "kinematics_report",
@@ -275,3 +287,74 @@ def test_reset_calls_session_cleanup_and_returns_idle() -> None:
     assert transition.current is Phase.IDLE
     assert bindings.reset_count == 1
     assert adapter.physics_step_count == 0
+
+
+def test_solver_active_contact_requires_matching_pair_and_finite_impulse() -> None:
+    contacts = [
+        {
+            "actor0_path": "/World/left_finger_link",
+            "actor1_path": "/World/Bottle500",
+            "collider0_path": "/World/left_finger_link/mesh",
+            "collider1_path": "/World/Bottle500/COL",
+            "separation_m": 0.000031,
+            "impulse_ns": 0.010,
+        },
+        {
+            "actor0_path": "/World/left_finger_link",
+            "actor1_path": "/World/Bottle500",
+            "collider0_path": "/World/left_finger_link/mesh",
+            "collider1_path": "/World/Bottle500/COL",
+            "separation_m": 0.009,
+            "impulse_ns": 0.0,
+        },
+        {
+            "actor0_path": "/World/right_finger_link",
+            "actor1_path": "/World/Bottle500",
+            "collider0_path": "/World/right_finger_link/mesh",
+            "collider1_path": "/World/Bottle500/COL",
+            "separation_m": 0.0,
+            "impulse_ns": float("nan"),
+        },
+    ]
+    assert solver_active_contacts(
+        contacts,
+        tokens=("Bottle500", "left_finger_link"),
+    ) == [contacts[0]]
+
+
+def test_hold_duration_counts_physics_samples_not_sample_intervals() -> None:
+    assert physics_sample_duration_s(
+        sample_count=120,
+        physics_dt_s=1.0 / 60.0,
+    ) == pytest.approx(2.0)
+
+
+def test_gui_exposes_run_abort_reset_and_workspace_two() -> None:
+    source = GUI_SCRIPT.read_text(encoding="utf-8")
+    assert 'ui.Button("Run: Grasp + Lift 20 cm"' in source
+    assert 'ui.Button("Abort"' in source
+    assert 'ui.Button("Reset"' in source
+    assert "_move_current_process_window_to_workspace(2)" in source
+    assert "subscribe_physics_on_step_events" in source
+    assert "DIAGNOSTIC_ONLY_NOT_FINAL_CONTROL_MAPPING" in source
+
+
+def test_button_callbacks_do_not_contain_blocking_loops() -> None:
+    tree = ast.parse(GUI_SCRIPT.read_text(encoding="utf-8"))
+    callback_names = {
+        "on_run_clicked",
+        "on_abort_clicked",
+        "on_reset_clicked",
+    }
+    callbacks = [
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef)
+        and node.name in callback_names
+    ]
+    assert {callback.name for callback in callbacks} == callback_names
+    for callback in callbacks:
+        assert not any(
+            isinstance(node, ast.For | ast.While)
+            for node in ast.walk(callback)
+        )

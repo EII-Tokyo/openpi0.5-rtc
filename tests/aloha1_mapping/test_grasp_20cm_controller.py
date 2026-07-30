@@ -55,6 +55,7 @@ def _observation(**updates: object) -> RunObservation:
         "persistent_penetration": False,
         "numerical_ejection": False,
         "forbidden_constraint": False,
+        "phase_timed_out": False,
         "ee_vertical_displacement_m": 0.0,
     }
     values.update(updates)
@@ -200,6 +201,73 @@ def test_lift_waypoint_exhaustion_fails_below_target() -> None:
     )
     assert transition.current is Phase.FAIL
     assert transition.reason == "gripper_moved_without_bottle_lift"
+
+
+def test_lift_waits_after_last_waypoint_while_bottle_is_still_moving() -> None:
+    controller = _controller_at(Phase.VERTICAL_LIFT)
+    transition = controller.observe(
+        _observation(
+            clearance_m=0.198,
+            lift_waypoint_exhausted=True,
+            ee_vertical_displacement_m=0.141,
+            bottle_linear_speed_m_s=0.302,
+            bottle_angular_speed_rad_s=3.75,
+        )
+    )
+    assert transition.current is Phase.VERTICAL_LIFT
+    assert transition.reason == "phase_in_progress"
+
+
+def test_phase_timeout_fails_closed() -> None:
+    controller = _controller_at(Phase.BILATERAL_CONTACT)
+    transition = controller.observe(
+        _observation(
+            bilateral_contact=False,
+            phase_timed_out=True,
+        )
+    )
+    assert transition.current is Phase.FAIL
+    assert transition.reason == "bilateral_contact_timeout"
+
+
+def test_close_preload_waits_for_bilateral_contact_to_restabilize() -> None:
+    controller = _controller_at(Phase.CLOSE_PRELOAD)
+    transition = controller.observe(
+        _observation(
+            bilateral_contact=False,
+            preload_complete=False,
+            phase_timed_out=False,
+        )
+    )
+    assert transition.current is Phase.CLOSE_PRELOAD
+    assert transition.reason == "phase_in_progress"
+
+
+def test_hold_records_transient_contact_loss_until_interval_end() -> None:
+    controller = _controller_at(Phase.HEIGHT_REACHED)
+    transition = controller.observe(_observation(frame=1, time_s=1.0))
+    assert transition.current is Phase.HOLD
+
+    transition = controller.observe(
+        _observation(
+            frame=2,
+            time_s=1.0 + 1.0 / 60.0,
+            bilateral_contact=False,
+            hold_drop_m=0.006,
+        )
+    )
+    assert transition.current is Phase.HOLD
+
+    transition = controller.observe(
+        _observation(
+            frame=3,
+            time_s=3.0,
+            bilateral_contact=True,
+            hold_drop_m=0.006,
+        )
+    )
+    assert transition.current is Phase.FAIL
+    assert transition.reason == "bilateral_contact_lost"
 
 
 def test_abort_is_reachable_from_every_active_phase() -> None:

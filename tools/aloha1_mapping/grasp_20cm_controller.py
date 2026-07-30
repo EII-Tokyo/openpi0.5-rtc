@@ -102,6 +102,7 @@ class RunObservation:
     persistent_penetration: bool
     numerical_ejection: bool
     forbidden_constraint: bool
+    phase_timed_out: bool
     ee_vertical_displacement_m: float
 
 
@@ -219,6 +220,7 @@ class Grasp20cmController:
         self.maximum_clearance_m = -math.inf
         self._settled_frames = 0
         self._hold_start_time_s: float | None = None
+        self._hold_bilateral_continuous = True
 
     def start(self) -> TransitionRecord:
         if self.phase is not Phase.IDLE:
@@ -304,12 +306,6 @@ class Grasp20cmController:
                     frame=observation.frame,
                 )
         elif self.phase is Phase.CLOSE_PRELOAD:
-            if not observation.bilateral_contact:
-                return self._transition(
-                    Phase.FAIL,
-                    "bilateral_contact_lost_before_lift",
-                    frame=observation.frame,
-                )
             if observation.preload_complete:
                 return self._transition(
                     Phase.VERTICAL_LIFT,
@@ -323,7 +319,13 @@ class Grasp20cmController:
                     "measured_clearance_target_reached",
                     frame=observation.frame,
                 )
-            if observation.lift_waypoint_exhausted:
+            bottle_settled = (
+                observation.bottle_linear_speed_m_s
+                <= self.thresholds.settle_linear_speed_gate_m_s
+                and observation.bottle_angular_speed_rad_s
+                <= self.thresholds.settle_angular_speed_gate_rad_s
+            )
+            if observation.lift_waypoint_exhausted and bottle_settled:
                 reason = (
                     "gripper_moved_without_bottle_lift"
                     if (
@@ -341,18 +343,18 @@ class Grasp20cmController:
                 )
         elif self.phase is Phase.HEIGHT_REACHED:
             self._hold_start_time_s = observation.time_s
+            self._hold_bilateral_continuous = (
+                observation.bilateral_contact
+            )
             return self._transition(
                 Phase.HOLD,
                 "hold_started",
                 frame=observation.frame,
             )
         elif self.phase is Phase.HOLD:
-            if not observation.bilateral_contact:
-                return self._transition(
-                    Phase.FAIL,
-                    "bilateral_contact_lost",
-                    frame=observation.frame,
-                )
+            self._hold_bilateral_continuous &= (
+                observation.bilateral_contact
+            )
             if observation.hold_drop_m > self.thresholds.hold_drop_gate_m:
                 return self._transition(
                     Phase.FAIL,
@@ -364,6 +366,12 @@ class Grasp20cmController:
                 and observation.time_s - self._hold_start_time_s
                 >= self.thresholds.hold_duration_s
             ):
+                if not self._hold_bilateral_continuous:
+                    return self._transition(
+                        Phase.FAIL,
+                        "bilateral_contact_lost",
+                        frame=observation.frame,
+                    )
                 return self._transition(
                     Phase.PASS,
                     "stable_20cm_hold",
@@ -389,6 +397,7 @@ class Grasp20cmController:
         self.maximum_clearance_m = -math.inf
         self._settled_frames = 0
         self._hold_start_time_s = None
+        self._hold_bilateral_continuous = True
         return TransitionRecord(
             frame=None,
             previous=previous,
@@ -402,6 +411,7 @@ class Grasp20cmController:
         self.maximum_clearance_m = -math.inf
         self._settled_frames = 0
         self._hold_start_time_s = None
+        self._hold_bilateral_continuous = True
 
     def _observation_failure(
         self,
@@ -426,6 +436,8 @@ class Grasp20cmController:
             return "numerical_penetration_or_ejection"
         if observation.forbidden_constraint:
             return "forbidden_constraint"
+        if observation.phase_timed_out:
+            return f"{self.phase.value.lower()}_timeout"
         if self.phase is Phase.VALIDATE and not observation.stage_contract_valid:
             return "stage_contract_invalid"
         return None

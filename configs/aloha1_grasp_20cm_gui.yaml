@@ -16,6 +16,12 @@ bottle:
   reference_prim: /Bottle500
   session_prim: /World/ALOHA1Grasp20cmSession/Bottle500
 frozen_inputs:
+  task7b2_runtime_profile:
+    path: configs/aloha1_task7b2_horizontal_grasp.yaml
+    sha256: 17597b120af46f0f2eed2dab7b8bbde754c97db48aa351f40c860d541f78b0bd
+  lula_descriptor:
+    path: configs/aloha1_lula_follower_left.yaml
+    sha256: 4038d3692693ae673be907b3088c5a2ba83790f14f1a26900aaeccadb564c031
   grasp_editor_semantics:
     path: reports/aloha1_mapping/aloha1_grasp_editor_semantics_audit_v2.json
     sha256: 61f2e23f54fca02d3b47b12a9f29f9b97446a1aa5e79049e73e7192db71416f9
@@ -58,12 +64,15 @@ target:
   clearance_m: 0.200
   hold_duration_s: 2.0
   hold_drop_gate_m: 0.010
+  support_contact_latch_clearance_m: 0.0005
 physics:
   frequency_hz: 60
   mass_kg: 0.020
   friction: 0.7
   restitution: 0.0
   solve_articulation_contact_last: true
+  finger_drive_type: force
+  preload_delta_m: 0.0
 evidence:
   full_arm_view: overview
   contact_view: gripper_closeup
