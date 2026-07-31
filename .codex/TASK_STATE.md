@@ -1,5 +1,42 @@
 # Task State
 
+## 2026-07-31 ALOHA 20 cm grasp button and five-position gate
+
+- The exact single-position annotated video was user-confirmed `PASS`:
+  `/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-20cm-button/final_candidate_001/video_attempt_001/video/aloha1_grasp_20cm_annotated_candidate.mp4`,
+  SHA-256
+  `70a1cb9b2267ec002a7f83de482cd1c7e33f5c06933a37247c9c3a47f6a651f0`.
+- The real Isaac GUI Abort-at-`VERTICAL_DESCENT` then Reset flow is machine
+  `PASS`; evidence:
+  `.codex/artifacts/20260731-aloha1-grasp-20cm-button/abort_reset_003/aloha1_grasp_20cm_abort_reset.json`.
+- The first five-position execution exposed two implementation errors:
+  preflight used an obsolete approximately 4.16 mm lift instead of the formal
+  210 mm lift, and preload completion incorrectly required five consecutive
+  negative-separation frames despite bilateral force-carrying solver contact.
+  Both have focused regression coverage.
+- Corrected fixed-seed preflight is `PASS`, uses 210 mm, and selects candidate
+  indices `1, 5, 9, 10, 11`:
+  `reports/aloha1_mapping/aloha1_grasp_20cm_five_position_preflight_v2.json`.
+- Corrected acceptance executed 10 fresh Isaac processes. Every primary/repeat
+  pair is deterministic. Positions 1/3/4/5 are machine `PASS`; position 2 is
+  deterministic `FAIL` at maximum clearance `0.19840033460203355 m`.
+  Aggregate acceptance is therefore **FAIL (4/5)**.
+- Position 2 has bilateral solver contact and approximately `0.901 N/0.894 N`
+  mean estimated left/right normal force, but accumulates
+  `0.011552821743005925 m` relative vertical slip. A one-variable,
+  diagnostic-only `+0.002 m` lift reached the height gate but failed hold
+  after `0.083333 s` with `0.01077557458159592 m` drop. It is not promoted.
+- All five raw and annotated videos passed visual-model evidence-quality
+  review: the complete arm, gripper/bottle inset, approach, contact, lift and
+  success/failure terminal state are visible. This does not override position
+  2's physical FAIL. Report:
+  `reports/aloha1_mapping/aloha1_grasp_20cm_five_position_video_review.json`.
+- Current root-cause boundary:
+  `POSITION_DEPENDENT_CONTINUOUS_SLIP_OR_ROTATIONAL_INSTABILITY_NOT_RESOLVED`.
+  No collider, friction, drive, mimic, bottle mass/diameter, timestep, solver,
+  final asset, or acceptance gate was changed.
+- No real robot or `192.168.1.103` access occurred. Task 8 remains `NOT_RUN`.
+
 ## Active Goal — 2026-07-28 ALOHA1 Isaac Sim 5.1 Mapping
 
 Build a source-pinned, machine-verifiable Stationary ALOHA 1 digital

@@ -17,7 +17,8 @@ sim-to-real dynamics model and it is not yet accepted for bottle insertion.
 | Task 7B.2 horizontal dynamic pickup smoke | **FAIL** | one fresh-reset Bottle500 trial established bilateral contact and held contact, but the actual contact-center line was `79.2245°` rather than `90°±3°` to `AB` and the bottle never left the table; 20-trial acceptance is blocked |
 | Task 7B.2 continuous video evidence | **PASS visual / FAIL physical** | two synchronized 60 fps streams, 288 frames/4.8 s each, no missing physics frames; raw and annotated overview/close-up videos were vision-reviewed; all labels retain `PHYSICAL FAIL` |
 | Task 7B.2 screenshot evidence | **PARTIAL** | seven side-oblique raw/annotated pairs pass; seven true-top pairs remain PARTIAL because the actual wrist/gripper pose occludes the finger inner surfaces; runtime A/B, L/R origins and contact-normal projections are auxiliary |
-| Grasp Editor pre-IK GUI/export | **PARTIAL / mimic-blocked** | actual Grasp Editor 2.0.20 GUI plus external close and native `Skip Sim` established 125 bilateral contact points and exported validated raw/derived YAML; right-finger mimic residual is `1.779459 mm > 1 mm`, so IK and five random-bottle videos remain `NOT_RUN` |
+| Grasp Editor / 20 cm single-position pickup | **PASS (diagnostic)** | the user confirmed the exact single-position annotated video; Variant B, local Lula IK, supplier-CAD fingers, dynamic horizontal Bottle500, 20 cm measured clearance, 2 s hold, and Abort/Reset machine gates pass |
+| Five fixed-seed random-position pickup | **FAIL (4/5 machine; 5/5 visual evidence)** | 10 fresh Isaac processes produced deterministic paired signatures; positions 1/3/4/5 pass, position 2 repeatedly slips and reaches only `0.198400335 m`; all five raw/annotated videos passed visual evidence review |
 | Current signal screenshots | **PASS (visual 24/24 PASS)** | 12 fresh raw + 12 annotated images match Stage SHA-256 `d8182a6c…c788cf`; the controlled OmniHydra screenshot process has zero `protoPath` errors |
 | Hydra protoPath controlled diagnosis | **PASS / `FSD_7_5_1_PRIMARY`** | A=29 errors, B OmniHydra=0, B repeat deterministic, D materialization=0; default delegate restored and final assets unchanged |
 | Source and environment audit | PARTIAL | `reports/aloha1_mapping/source_audit.md`, `source_manifest.json`, `missing_resources.json` |
@@ -50,6 +51,56 @@ sim-to-real dynamics model and it is not yet accepted for bottle insertion.
 
 `PASS`, `FAIL`, and `PARTIAL` are literal machine-report values. A clean
 viewport is not an acceptance criterion.
+
+## 2026-07-31 20 cm grasp button and five-position acceptance
+
+The user-confirmed single-position annotated video is:
+
+`/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-20cm-button/final_candidate_001/video_attempt_001/video/aloha1_grasp_20cm_annotated_candidate.mp4`
+
+Its SHA-256 is
+`70a1cb9b2267ec002a7f83de482cd1c7e33f5c06933a37247c9c3a47f6a651f0`.
+The associated Abort-at-`VERTICAL_DESCENT` then Reset test is machine
+`PASS`: target and telemetry writes stop after Abort, Bottle500 remains
+dynamic, Reset restores the session-owned kinematic setup, and the approved
+Stage hash remains unchanged.
+
+The fixed-seed five-position preflight now verifies the same formal lift used
+at runtime: `0.200 m` measured clearance plus the unchanged `0.010 m` drop
+allowance, rather than the obsolete approximately `0.00416 m` waypoint. The
+preload gate uses bilateral finite nonzero PhysX solver impulses plus completed
+closure and mimic residual, while retaining geometric `separation <= 0` as a
+separate reported quantity. This fixes a false timeout caused by micrometre
+scale separation-sign oscillation; it does not change friction, collision
+geometry, drive parameters, mimic mapping, bottle mass, timestep, or any
+acceptance threshold.
+
+The resulting five-position run is literal machine **FAIL (4/5)**:
+
+- positions 1, 3, 4 and 5: `PASS`, 20 cm clearance reached and 2 s hold;
+- position 2: deterministic `height_target_not_reached`, maximum clearance
+  `0.19840033460203355 m`;
+- position 2 retained roughly `0.901 N` left and `0.894 N` right mean
+  estimated normal force but accumulated `0.011552821743005925 m` relative
+  vertical slip;
+- a diagnostic-only `+0.002 m` lift reached `0.2038176271708078 m`, then
+  failed after `0.083333 s` because hold drop reached
+  `0.01077557458159592 m`. The extra lift is therefore **not promoted**.
+
+All five primary raw and annotated videos show the complete arm plus a
+synchronized gripper/bottle inset. They were reviewed through complete raw
+contact-sheet montages and annotated phase keyframes. Visual evidence quality
+is `PASS`; this does not override the 4/5 physical failure. Authoritative
+reports:
+
+- `reports/aloha1_mapping/aloha1_grasp_20cm_five_position_preflight_v2.json`;
+- `reports/aloha1_mapping/aloha1_grasp_20cm_five_position_results_v2.json`;
+- `reports/aloha1_mapping/aloha1_grasp_20cm_five_position_video_review.json`;
+- `reports/aloha1_mapping/aloha1_grasp_20cm_five_position_video_review.md`.
+
+The source Stage, default/final collider and protected USD layers were not
+modified. The real robot and `192.168.1.103` were not accessed. Task 8 remains
+`NOT_RUN`.
 
 ## 2026-07-29 kinematic and signal-correspondence baseline
 
