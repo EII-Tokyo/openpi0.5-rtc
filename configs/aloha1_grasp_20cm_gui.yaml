@@ -76,6 +76,20 @@ physics:
 evidence:
   full_arm_view: overview
   contact_view: gripper_closeup
+  collider_overlay:
+    display_setting: /persistent/physics/visualizationDisplayColliders
+    display_value: 2
+    authored_geometry_clone: true
+    semantics: ISAAC_PHYSICS_DEBUG_DISPLAY_PLUS_SESSION_AUTHORED_COLLIDER_CLONE_NOT_COOKED_HULL_READBACK
+    finger_colliders:
+      left:
+        link: /World/follower_left/vx300s_left/follower_left_left_finger_link
+        visual: /World/follower_left/vx300s_left/follower_left_left_finger_link/visuals/diagnostic_supplier_cad_left_finger/mesh
+        collider: /World/follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh
+      right:
+        link: /World/follower_left/vx300s_left/follower_left_right_finger_link
+        visual: /World/follower_left/vx300s_left/follower_left_right_finger_link/visuals/diagnostic_supplier_cad_right_finger/mesh
+        collider: /World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh
   collision_overlay_phases:
     - RELEASE_DYNAMIC
     - OPEN_PREGRASP

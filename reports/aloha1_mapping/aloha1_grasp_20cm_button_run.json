@@ -1,0 +1,60 @@
+{
+  "classification": "DIAGNOSTIC_ONLY_NOT_FINAL_CONTROL_MAPPING",
+  "collision_runtime_repeat": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-20cm-button/final_candidate_003/aloha1_grasp_20cm_runtime.json",
+    "sha256": "fe651a70b468dfb5a4e1e53f3023f42ef20aced2e92efc789c99a097176c3424"
+  },
+  "deterministic_signature": "47816590c7ec90ffcd725ec8f86f0c271e9ac76839d5fdcbffd6027eff6d832d",
+  "machine_status": "PASS",
+  "metrics": {
+    "aborted": false,
+    "bilateral_contact_before_lift": true,
+    "bilateral_contact_through_hold": true,
+    "dynamic_during_formal_phases": true,
+    "ee_vertical_displacement_m": 0.13910505175590515,
+    "finite_state": true,
+    "forbidden_constraint": false,
+    "height_reached": true,
+    "hold_bilateral_geometric_frame_count": 114,
+    "hold_bilateral_solver_active_frame_count": 120,
+    "hold_drop_m": 0.004496075901308544,
+    "hold_duration_s": 2.0,
+    "hold_physics_frame_count": 120,
+    "maximum_clearance_m": 0.2003351025549759,
+    "numerical_ejection": false,
+    "persistent_penetration": false,
+    "status": "PASS"
+  },
+  "paired_evidence": {
+    "physical_parameters_identical": true,
+    "purpose": "KEEP_PRIMARY_ACTION_VIDEO_CLEAN_WHILE_CAPTURING_AUTHORED_COLLIDER_GEOMETRY_IN_A_FRESH_REPEAT",
+    "source_stage_hash_identical": true,
+    "status": "PASS_IDENTICAL_MACHINE_SIGNATURE"
+  },
+  "primary_runtime_report": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-20cm-button/final_candidate_001/aloha1_grasp_20cm_runtime.json",
+    "sha256": "5f299fe9be5d7643a4420f4e16c452c148f6b4169ab04d1cba8c733620176cda"
+  },
+  "promotion_status": "USER_CONFIRMED_PASS",
+  "reason": "stable_20cm_hold",
+  "schema_version": 1,
+  "stage": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/table_support_alignment/1.0/aloha1_table_support_aligned_workcell.usda",
+    "root_prim": "/World",
+    "session_only": true,
+    "sha256_after": "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c",
+    "sha256_before": "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c",
+    "sublayers": [
+      "configuration/aloha1_tabletop_world_zero.usda",
+      "../../signal_correspondence/1.0/aloha1_signal_correspondence_workcell.usda"
+    ]
+  },
+  "status": "PASS",
+  "task8": "NOT_RUN",
+  "user_confirmation": {
+    "confirmed_annotated_sha256": "70a1cb9b2267ec002a7f83de482cd1c7e33f5c06933a37247c9c3a47f6a651f0",
+    "source": "USER_CONFIRMED_VIDEO_IN_CONVERSATION",
+    "status": "PASS"
+  },
+  "visual_model_review": "PASS"
+}

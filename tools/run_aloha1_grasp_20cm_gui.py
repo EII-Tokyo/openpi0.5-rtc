@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 from pathlib import Path
 import sys
 import traceback
@@ -20,6 +21,17 @@ DEFAULT_ARTIFACT_ROOT = (
     / ".codex/artifacts/20260731-aloha1-grasp-20cm-button/runtime"
 )
 CLASSIFICATION = "DIAGNOSTIC_ONLY_NOT_FINAL_CONTROL_MAPPING"
+ABORTABLE_PHASES = (
+    "RELEASE_DYNAMIC",
+    "SETTLE",
+    "OPEN_PREGRASP",
+    "VERTICAL_DESCENT",
+    "BILATERAL_CONTACT",
+    "CLOSE_PRELOAD",
+    "VERTICAL_LIFT",
+    "HEIGHT_REACHED",
+    "HOLD",
+)
 
 
 def _parse_args() -> argparse.Namespace:
@@ -57,6 +69,52 @@ def _parse_args() -> argparse.Namespace:
         action="store_true",
         help="Close after an autorun reaches PASS, FAIL, or ABORTED.",
     )
+    parser.add_argument(
+        "--autorun-abort-at-phase",
+        choices=ABORTABLE_PHASES,
+        default=None,
+        help=(
+            "Invoke the real Abort callback when autorun first reaches "
+            "this phase."
+        ),
+    )
+    parser.add_argument(
+        "--reset-after-abort",
+        action="store_true",
+        help=(
+            "After an automated Abort, invoke the real Reset callback, "
+            "write its audit report, and close."
+        ),
+    )
+    parser.add_argument(
+        "--bottle-offset-x-m",
+        type=float,
+        default=0.0,
+        help="Session-only Bottle500 world-X translation.",
+    )
+    parser.add_argument(
+        "--bottle-offset-y-m",
+        type=float,
+        default=0.0,
+        help="Session-only Bottle500 world-Y translation.",
+    )
+    parser.add_argument(
+        "--additional-lift-margin-m",
+        type=float,
+        default=0.0,
+        help=(
+            "Diagnostic-only extra vertical lift distance; does not alter "
+            "the 0.200 m measured bottle-clearance gate."
+        ),
+    )
+    parser.add_argument(
+        "--skip-collider-evidence",
+        action="store_true",
+        help=(
+            "Keep the primary video clean; capture collider overlays in "
+            "a separate deterministic repeat."
+        ),
+    )
     return parser.parse_args()
 
 
@@ -72,6 +130,73 @@ def _atomic_json(path: Path, payload: dict[str, Any]) -> None:
         encoding="utf-8",
     )
     temporary.replace(path)
+
+
+def evaluate_abort_reset_evidence(
+    *,
+    requested_abort_phase: str,
+    before_abort: dict[str, Any],
+    after_abort: dict[str, Any],
+    after_reset: dict[str, Any],
+    machine_report: dict[str, Any],
+    stage_sha256_before: str,
+    stage_sha256_after: str,
+) -> dict[str, Any]:
+    """Evaluate Abort/Reset without allowing Reset writes to mask Abort."""
+
+    gates = {
+        "requested_phase_reached": (
+            before_abort.get("phase") == requested_abort_phase
+        ),
+        "machine_report_is_aborted": (
+            machine_report.get("status") == "ABORTED"
+            and machine_report.get("reason") == "user_abort"
+        ),
+        "no_target_write_after_abort": (
+            after_abort.get("target_write_count")
+            == before_abort.get("target_write_count")
+        ),
+        "no_physics_sample_after_abort": (
+            after_abort.get("telemetry_count")
+            == before_abort.get("telemetry_count")
+        ),
+        "bottle_remained_dynamic_after_abort": (
+            before_abort.get("bottle_kinematic_enabled") is False
+            and after_abort.get("bottle_kinematic_enabled") is False
+        ),
+        "reset_returned_idle": after_reset.get("phase") == "IDLE",
+        "reset_restored_setup_kinematic": (
+            after_reset.get("bottle_kinematic_enabled") is True
+        ),
+        "stage_hash_unchanged": (
+            stage_sha256_before == stage_sha256_after
+            and before_abort.get("stage_sha256") == stage_sha256_before
+            and after_abort.get("stage_sha256") == stage_sha256_before
+            and after_reset.get("stage_sha256") == stage_sha256_before
+        ),
+    }
+    return {
+        "schema_version": 1,
+        "status": "PASS" if all(gates.values()) else "FAIL",
+        "classification": CLASSIFICATION,
+        "requested_abort_phase": requested_abort_phase,
+        "before_abort": before_abort,
+        "after_abort": after_abort,
+        "after_reset": after_reset,
+        "machine_report": machine_report,
+        "stage": {
+            "sha256_before": stage_sha256_before,
+            "sha256_after": stage_sha256_after,
+        },
+        "gates": gates,
+        "boundaries": {
+            "real_robot": False,
+            "remote_103": False,
+            "source_stage_modified": False,
+            "final_collider_modified": False,
+        },
+        "task8": "NOT_RUN",
+    }
 
 
 class DiagnosticWindowController:
@@ -271,6 +396,8 @@ class DiagnosticWindowController:
         except Exception:
             self.timeline.pause()
             self.last_error = _bounded_traceback()
+            if self.adapter.is_running:
+                self.adapter.fail_due_to_exception("runtime_exception")
             self._set_status("FAIL: runtime exception")
             self.bindings.save_exception(self.last_error)
         self.refresh_models()
@@ -290,6 +417,24 @@ def main() -> int:
         raise ValueError("window dimensions must be positive")
     if args.startup_workspace < 1:
         raise ValueError("startup workspace must be >= 1")
+    if not (
+        math.isfinite(args.bottle_offset_x_m)
+        and math.isfinite(args.bottle_offset_y_m)
+    ):
+        raise ValueError("Bottle500 XY offsets must be finite")
+    if (
+        not math.isfinite(args.additional_lift_margin_m)
+        or args.additional_lift_margin_m < 0.0
+    ):
+        raise ValueError(
+            "additional lift margin must be finite and non-negative"
+        )
+    if args.reset_after_abort and args.autorun_abort_at_phase is None:
+        raise ValueError(
+            "--reset-after-abort requires --autorun-abort-at-phase"
+        )
+    if args.autorun_abort_at_phase is not None and not args.autorun:
+        raise ValueError("--autorun-abort-at-phase requires --autorun")
 
     sys.path.insert(0, str(ROOT))
     from tools.aloha1_mapping.grasp_20cm_runtime import Grasp20cmRuntimeAdapter
@@ -367,6 +512,14 @@ def main() -> int:
                 "requested": requested_fabric,
                 "effective": delegate_effective,
             },
+            bottle_xy_offset_m=(
+                float(args.bottle_offset_x_m),
+                float(args.bottle_offset_y_m),
+            ),
+            additional_lift_margin_m=float(
+                args.additional_lift_margin_m
+            ),
+            capture_collider_evidence=not args.skip_collider_evidence,
         )
         adapter = Grasp20cmRuntimeAdapter(bindings=bindings)
         timeline = omni.timeline.get_timeline_interface()
@@ -437,13 +590,6 @@ def main() -> int:
             ):
                 autorun_state["issued"] = True
                 controller.on_run_clicked()
-            if (
-                args.close_after_terminal
-                and autorun_state["issued"]
-                and not adapter.is_running
-                and adapter.phase.value in {"PASS", "FAIL", "ABORTED"}
-            ):
-                omni.kit.app.get_app().post_quit()
 
         subscriptions.append(
             omni.kit.app.get_app()
@@ -454,8 +600,118 @@ def main() -> int:
             )
         )
 
+        video_state = {
+            "finalized": False,
+            "error": None,
+        }
+        abort_reset_state = {
+            "completed": False,
+            "report_path": (
+                artifact_root
+                / "aloha1_grasp_20cm_abort_reset.json"
+            ),
+        }
         while app.is_running():
             app.update()
+            try:
+                if (
+                    args.autorun_abort_at_phase is not None
+                    and not abort_reset_state["completed"]
+                    and adapter.is_running
+                    and adapter.phase.value
+                    == args.autorun_abort_at_phase
+                ):
+                    before_abort = bindings.abort_reset_snapshot(
+                        phase=adapter.phase.value
+                    )
+                    controller.on_abort_clicked()
+                    after_abort = bindings.abort_reset_snapshot(
+                        phase=adapter.phase.value
+                    )
+                    machine_report = json.loads(
+                        report_path.read_text(encoding="utf-8")
+                    )
+                    if args.reset_after_abort:
+                        controller.on_reset_clicked()
+                        after_reset = bindings.abort_reset_snapshot(
+                            phase=adapter.phase.value
+                        )
+                        evidence = evaluate_abort_reset_evidence(
+                            requested_abort_phase=(
+                                args.autorun_abort_at_phase
+                            ),
+                            before_abort=before_abort,
+                            after_abort=after_abort,
+                            after_reset=after_reset,
+                            machine_report=machine_report,
+                            stage_sha256_before=stage_hash_before,
+                            stage_sha256_after=sha256_file(stage_path),
+                        )
+                        evidence["stage"]["absolute_path"] = str(
+                            stage_path
+                        )
+                        _atomic_json(
+                            abort_reset_state["report_path"],
+                            evidence,
+                        )
+                        abort_reset_state["completed"] = True
+                        controller._set_status(  # noqa: SLF001
+                            "ABORT -> RESET "
+                            f"{evidence['status']}"
+                        )
+                        controller.refresh_models()
+                        omni.kit.app.get_app().post_quit()
+                        continue
+                captured = False
+                if bindings.has_pending_video_frame:
+                    timeline.pause()
+                    captured = bindings.capture_pending_render_frame()
+                terminal = (
+                    not adapter.is_running
+                    and adapter.phase.value
+                    in {"PASS", "FAIL", "ABORTED"}
+                )
+                if captured:
+                    bindings.capture_required_collider_evidence(
+                        terminal=terminal,
+                    )
+                    if adapter.is_running:
+                        timeline.play()
+                if (
+                    terminal
+                    and args.autorun_abort_at_phase is None
+                    and not bindings.has_pending_video_frame
+                    and not video_state["finalized"]
+                    and video_state["error"] is None
+                ):
+                    candidate = bindings.finalize_video_capture()
+                    video_state["finalized"] = True
+                    controller._set_status(  # noqa: SLF001
+                        f"{adapter.phase.value}; VIDEO "
+                        f"{candidate['promotion_status']}"
+                    )
+                    controller.refresh_models()
+                if (
+                    args.close_after_terminal
+                    and autorun_state["issued"]
+                    and terminal
+                    and (
+                        bool(video_state["finalized"])
+                        or video_state["error"] is not None
+                    )
+                ):
+                    omni.kit.app.get_app().post_quit()
+            except Exception:
+                video_state["error"] = _bounded_traceback()
+                bindings.save_video_capture_exception(
+                    str(video_state["error"])
+                )
+                controller._set_status(  # noqa: SLF001
+                    "VIDEO FAIL; machine report preserved"
+                )
+                controller.refresh_models()
+                if args.close_after_terminal:
+                    omni.kit.app.get_app().post_quit()
 
         if sha256_file(stage_path) != stage_hash_before:
             raise RuntimeError("approved Stage hash changed during GUI session")

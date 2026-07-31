@@ -6,7 +6,6 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-import copy
 from dataclasses import asdict
 import json
 import math
@@ -15,6 +14,7 @@ import time
 from typing import Any
 
 import numpy as np
+from PIL import Image
 
 from tools.aloha1_mapping.grasp_20cm_controller import Phase
 from tools.aloha1_mapping.grasp_20cm_controller import RunObservation
@@ -35,6 +35,83 @@ PHASE_TIMEOUT_FRAMES = {
     Phase.HEIGHT_REACHED: 60,
     Phase.HOLD: 240,
 }
+COLLIDER_OVERLAY_RENDER_FLUSH_UPDATES = 20
+
+
+def single_body_tensor_indices(*, count: int) -> np.ndarray:
+    """Return the explicit index required by local PhysX tensor setters."""
+
+    if int(count) != 1:
+        raise ValueError("diagnostic rigid-body view must contain exactly one")
+    return np.asarray([0], dtype=np.int32)
+
+
+def reset_body_transition_plan(
+    *,
+    initially_kinematic: bool,
+) -> tuple[str, ...]:
+    """Describe the local PhysX-safe Reset ordering."""
+
+    prefix = ("set_dynamic",) if initially_kinematic else ()
+    return (
+        *prefix,
+        "set_transform",
+        "set_velocity",
+        "set_kinematic",
+    )
+
+
+def derive_gripper_closeup_camera_geometry(
+    *,
+    grasp_point_world_m: Sequence[float],
+    bottle_axis_world: Sequence[float],
+    nominal_lift_m: float,
+    axial_distance_m: float = 1.25,
+    elevation_m: float = 0.75,
+) -> dict[str, list[float] | float | str]:
+    """Derive an evidence view along AB, centered on the lift interval."""
+
+    grasp = np.asarray(grasp_point_world_m, dtype=np.float64)
+    axis = np.asarray(bottle_axis_world, dtype=np.float64)
+    if grasp.shape != (3,) or axis.shape != (3,):
+        raise ValueError("grasp point and bottle axis must be 3-vectors")
+    if not np.isfinite(grasp).all() or not np.isfinite(axis).all():
+        raise ValueError("camera geometry inputs must be finite")
+    if abs(float(axis[2])) > 1e-6:
+        raise ValueError("Bottle500 AB must be horizontal")
+    norm = float(np.linalg.norm(axis))
+    if norm <= 0.0:
+        raise ValueError("bottle axis must be nonzero")
+    axis /= norm
+    if (
+        nominal_lift_m <= 0.0
+        or axial_distance_m <= 0.0
+        or elevation_m <= 0.0
+    ):
+        raise ValueError("camera distances must be positive")
+    target = grasp + np.asarray(
+        [0.0, 0.0, nominal_lift_m / 2.0],
+        dtype=np.float64,
+    )
+    position = (
+        target
+        + axis * float(axial_distance_m)
+        + np.asarray([0.0, 0.0, elevation_m])
+    )
+    forward = target - position
+    forward /= np.linalg.norm(forward)
+    return {
+        "position_world_m": position.tolist(),
+        "target_world_m": target.tolist(),
+        "camera_forward_world": forward.tolist(),
+        "bottle_axis_world": axis.tolist(),
+        "nominal_lift_m": float(nominal_lift_m),
+        "axial_distance_m": float(axial_distance_m),
+        "elevation_m": float(elevation_m),
+        "derivation": (
+            "LOOK_ALONG_BOTTLE_AB_AND_CENTER_NOMINAL_VERTICAL_LIFT"
+        ),
+    }
 
 
 def solver_active_contacts(
@@ -90,6 +167,29 @@ def physics_sample_duration_s(
     return float(sample_count) * float(physics_dt_s)
 
 
+def preload_solver_contact_ready(
+    *,
+    close_exhausted: bool,
+    left_solver_active: bool,
+    right_solver_active: bool,
+    coupling_residual_m: float,
+    coupling_gate_m: float,
+) -> bool:
+    """Require bilateral force-carrying PhysX contacts for preload."""
+
+    residual = float(coupling_residual_m)
+    gate = float(coupling_gate_m)
+    return bool(
+        close_exhausted
+        and left_solver_active
+        and right_solver_active
+        and math.isfinite(residual)
+        and math.isfinite(gate)
+        and gate >= 0.0
+        and residual <= gate
+    )
+
+
 def _atomic_json(path: Path, payload: Mapping[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(path.suffix + ".tmp")
@@ -110,7 +210,11 @@ class IsaacGrasp20cmBindings:
         profile: Mapping[str, Any],
         artifact_root: Path,
         delegate_readback: Mapping[str, Any],
+        bottle_xy_offset_m: Sequence[float] = (0.0, 0.0),
+        additional_lift_margin_m: float = 0.0,
+        capture_collider_evidence: bool = True,
     ) -> None:
+        import carb.settings
         from isaacsim.core.api import World
         from isaacsim.core.prims import SingleArticulation
         from isaacsim.core.simulation_manager import SimulationManager
@@ -120,15 +224,22 @@ class IsaacGrasp20cmBindings:
         from omni.physx import get_physx_simulation_interface
         from pxr import PhysxSchema
         from pxr import Usd
+        from pxr import UsdGeom
         from pxr import UsdPhysics
 
+        from tools.aloha1_mapping.grasp_20cm_sampling import translate_horizontal_bottle_profile
+        from tools.audit_aloha1_bottle_collision_runtime import _create_bottle_render_evidence
+        from tools.audit_aloha1_bottle_collision_runtime import _update_bottle_render_evidence
         from tools.run_aloha1_grasp_editor_variant_b_gui import build_external_close_targets
+        from tools.validate_aloha1_follower_finger_collision_runtime import _create_finger_render_evidence
+        from tools.validate_aloha1_follower_finger_collision_runtime import _update_finger_render_evidence
         from tools.validate_aloha1_gripper_coupling_ab import author_coupling_variant
         from tools.validate_aloha1_task7b2_horizontal_grasp import DIAGNOSTIC_COUPLING_CLASSIFICATION
         from tools.validate_aloha1_task7b2_horizontal_grasp import _author_session_finger_drive_type
         from tools.validate_aloha1_task7b2_horizontal_grasp import _command_positions
         from tools.validate_aloha1_task7b2_horizontal_grasp import _create_session_bottle
         from tools.validate_aloha1_task7b2_horizontal_grasp import _load_profile
+        from tools.validate_aloha1_task7b2_horizontal_grasp import _look_at_quaternion
         from tools.validate_aloha1_task7b2_horizontal_grasp import _physical_contacts
         from tools.validate_aloha1_task7b2_horizontal_grasp import _serialize_contacts
         from tools.validate_aloha1_task7b2_horizontal_grasp import _solve_settled_bottle_runtime_ik
@@ -164,6 +275,20 @@ class IsaacGrasp20cmBindings:
         )
         self._physx = get_physx_interface()
         self._physx_sim = get_physx_simulation_interface()
+        self._settings = carb.settings.get_settings()
+        self._collider_display_setting = str(
+            self.config["evidence"]["collider_overlay"][
+                "display_setting"
+            ]
+        )
+        self._collider_display_value = int(
+            self.config["evidence"]["collider_overlay"][
+                "display_value"
+            ]
+        )
+        self._collider_display_before = int(
+            self._settings.get(self._collider_display_setting) or 0
+        )
 
         task_profile_path = Path(
             self.profile["frozen_inputs"][
@@ -171,7 +296,26 @@ class IsaacGrasp20cmBindings:
             ]["absolute_path"]
         )
         self.task_profile = _load_profile(task_profile_path)
-        self.task_profile = copy.deepcopy(self.task_profile)
+        self.task_profile = translate_horizontal_bottle_profile(
+            self.task_profile,
+            offset_xy_m=bottle_xy_offset_m,
+        )
+        self.bottle_xy_offset_m = [
+            float(value) for value in bottle_xy_offset_m
+        ]
+        self.additional_lift_margin_m = float(
+            additional_lift_margin_m
+        )
+        if (
+            not math.isfinite(self.additional_lift_margin_m)
+            or self.additional_lift_margin_m < 0.0
+        ):
+            raise ValueError(
+                "additional lift margin must be finite and non-negative"
+            )
+        self.capture_collider_evidence_enabled = bool(
+            capture_collider_evidence
+        )
         self.task_profile["config"]["bottle"]["session_path"] = str(
             self.config["bottle"]["session_prim"]
         )
@@ -231,6 +375,82 @@ class IsaacGrasp20cmBindings:
                 self.bottle_session,
                 self.bottle_collision_points_local,
             ) = _create_session_bottle(self.stage, self.task_profile)
+            (
+                self._bottle_render_evidence,
+                self._bottle_render_handles,
+            ) = _create_bottle_render_evidence(
+                self.stage,
+                bottle_path=str(self.bottle_prim.GetPath()),
+            )
+            (
+                self._finger_render_evidence,
+                self._finger_render_handles,
+            ) = _create_finger_render_evidence(
+                self.stage,
+                finger_paths=self.config["evidence"][
+                    "collider_overlay"
+                ]["finger_colliders"],
+            )
+            UsdGeom.Imageable(
+                self.stage.GetPrimAtPath(
+                    self._bottle_render_evidence["visual_root"]
+                )
+            ).MakeInvisible()
+            UsdGeom.Imageable(
+                self.stage.GetPrimAtPath(
+                    self._bottle_render_evidence["collider_root"]
+                )
+            ).MakeInvisible()
+            pusher_visual = self.stage.GetPrimAtPath(
+                self._bottle_render_evidence["pusher_visual_prim"]
+            )
+            if pusher_visual.IsValid():
+                UsdGeom.Imageable(pusher_visual).MakeInvisible()
+            for side, paths in self.config["evidence"][
+                "collider_overlay"
+            ]["finger_colliders"].items():
+                clone_base = (
+                    f"{self._finger_render_evidence['root']}/{side}"
+                )
+                UsdGeom.Imageable(
+                    self.stage.GetPrimAtPath(
+                        f"{clone_base}/ExactVisualAtPhysxPose"
+                    )
+                ).MakeInvisible()
+                UsdGeom.Imageable(
+                    self.stage.GetPrimAtPath(
+                        f"{clone_base}/AuthoredColliderAtPhysxPose"
+                    )
+                ).MakeInvisible()
+                source_visual_parent = self.stage.GetPrimAtPath(
+                    str(paths["visual"])
+                ).GetParent()
+                if source_visual_parent.IsValid():
+                    UsdGeom.Imageable(
+                        source_visual_parent
+                    ).MakeVisible()
+            self._render_evidence = {
+                "authored_geometry_clone": bool(
+                    self.config["evidence"]["collider_overlay"][
+                        "authored_geometry_clone"
+                    ]
+                ),
+                "semantics": str(
+                    self.config["evidence"]["collider_overlay"][
+                        "semantics"
+                    ]
+                ),
+                "bottle": self._bottle_render_evidence,
+                "fingers": self._finger_render_evidence,
+                "physics_schemas_copied": False,
+                "collision_schemas_copied": False,
+            }
+            self._update_bottle_render_evidence = (
+                _update_bottle_render_evidence
+            )
+            self._update_finger_render_evidence = (
+                _update_finger_render_evidence
+            )
 
         World.clear_instance()
         self.world = World(
@@ -305,11 +525,12 @@ class IsaacGrasp20cmBindings:
             dtype=np.float64,
         )
         self.command = self.initial_command.copy()
+        self._target_write_count = 0
         self.articulation.set_joint_positions(self.command)
         self.articulation.set_joint_velocities(
             np.zeros_like(self.command)
         )
-        self._command_positions(self.articulation, self.command)
+        self._write_joint_command()
 
         simulation_view = SimulationManager.get_physics_sim_view()
         if simulation_view is None or not simulation_view.is_valid:
@@ -318,6 +539,22 @@ class IsaacGrasp20cmBindings:
         self.bottle = simulation_view.create_rigid_body_view(bottle_path)
         if self.bottle is None or int(self.bottle.count) != 1:
             raise RuntimeError("Bottle500 PhysX rigid-body view unavailable")
+        self._finger_link_views = {
+            side: simulation_view.create_rigid_body_view(
+                str(paths["link"])
+            )
+            for side, paths in self.config["evidence"][
+                "collider_overlay"
+            ]["finger_colliders"].items()
+        }
+        if any(
+            view is None or int(view.count) != 1
+            for view in self._finger_link_views.values()
+        ):
+            raise RuntimeError(
+                "finger PhysX rigid-body view unavailable for "
+                "collider evidence"
+            )
         table_bounds = _world_bounds(
             self.stage,
             str(self.config["stage"]["table_prim"]),
@@ -326,6 +563,9 @@ class IsaacGrasp20cmBindings:
         self.base_position, self.base_orientation = self._get_world_pose(
             "/World/follower_left/vx300s_left/follower_left_base_link"
         )
+        self._look_at_quaternion = _look_at_quaternion
+        self._capture_attempt_index = 0
+        self._initialize_video_capture()
 
         clearance_report = json.loads(
             self.task_profile["inputs"][
@@ -378,6 +618,108 @@ class IsaacGrasp20cmBindings:
         )
         self._reset_runtime_records()
 
+    def _initialize_video_capture(self) -> None:
+        """Create independent local-5.1 camera/render-product pairs."""
+
+        from isaacsim.core.utils.numpy.rotations import quats_to_rot_matrices
+        from isaacsim.sensors.camera import Camera
+
+        grasp = np.asarray(
+            self.task_profile["kinematics"]["placement"][
+                "bottle_axis"
+            ]["grasp_point_world_m"],
+            dtype=np.float64,
+        )
+        base = np.asarray(self.base_position, dtype=np.float64)
+        overview_target = (base + grasp) / 2.0
+        overview_target[2] += 0.08
+        specs = {
+            "overview": {
+                "position": (
+                    overview_target
+                    + np.asarray([1.85, -1.75, 1.45])
+                ),
+                "target": overview_target,
+            },
+        }
+        closeup = derive_gripper_closeup_camera_geometry(
+            grasp_point_world_m=grasp,
+            bottle_axis_world=self.task_profile["kinematics"][
+                "placement"
+            ]["bottle_axis"]["unit_world"],
+            nominal_lift_m=(
+                float(self.config["target"]["clearance_m"])
+                + float(self.config["target"]["hold_drop_gate_m"])
+            ),
+        )
+        specs["gripper_closeup"] = {
+            "position": np.asarray(
+                closeup["position_world_m"],
+                dtype=np.float64,
+            ),
+            "target": np.asarray(
+                closeup["target_world_m"],
+                dtype=np.float64,
+            ),
+            "derivation": closeup,
+        }
+        self.video_cameras: dict[str, dict[str, Any]] = {}
+        for view, spec in specs.items():
+            orientation = self._look_at_quaternion(
+                spec["position"],
+                spec["target"],
+            )
+            camera = Camera(
+                prim_path=(
+                    "/World/ALOHA1Grasp20cmSession/Cameras/"
+                    f"{view}"
+                ),
+                name=f"aloha1_grasp_20cm_{view}",
+                position=spec["position"],
+                orientation=orientation,
+                resolution=(960, 540),
+                annotator_device="cpu",
+            )
+            camera.initialize(attach_rgb_annotator=True)
+            camera.set_world_pose(
+                position=spec["position"],
+                orientation=orientation,
+                camera_axes="usd",
+            )
+            matrix = np.eye(4, dtype=np.float64)
+            matrix[:3, :3] = quats_to_rot_matrices(orientation)
+            matrix[:3, 3] = spec["position"]
+            self.video_cameras[view] = {
+                "camera": camera,
+                "position_world_m": spec["position"].tolist(),
+                "target_world_m": spec["target"].tolist(),
+                "orientation_wxyz": orientation.tolist(),
+                "camera_world_matrix": matrix.tolist(),
+                "resolution": [960, 540],
+                "render_product_path": str(
+                    camera.get_render_product_path()
+                ),
+                "view_status": (
+                    "ENGINEERING_EVIDENCE_VIEW_NOT_CALIBRATED"
+                ),
+                "derivation": spec.get(
+                    "derivation",
+                    {
+                        "derivation": (
+                            "FULL_ARM_OVERVIEW_FROM_FROZEN_BASE_AND_GRASP"
+                        )
+                    },
+                ),
+            }
+        render_products = {
+            record["render_product_path"]
+            for record in self.video_cameras.values()
+        }
+        if len(render_products) != 2:
+            raise RuntimeError(
+                "video views do not have independent render products"
+            )
+
     def _reset_runtime_records(self) -> None:
         self.started_at = time.perf_counter()
         self.observations: list[RunObservation] = []
@@ -408,6 +750,13 @@ class IsaacGrasp20cmBindings:
             "bottle_velocity": None,
             "hold_drop_m": 0.0,
         }
+        self._pending_capture_frames: list[dict[str, Any]] = []
+        self._captured_frame_records: list[dict[str, Any]] = []
+        self._video_capture_finalized = False
+        self._video_capture_error: str | None = None
+        self._video_attempt_root: Path | None = None
+        self._collider_overlay_records: list[dict[str, Any]] = []
+        self._captured_overlay_phases: set[str] = set()
 
     def prepare_run(self) -> None:
         if sha256_file(self.stage_path) != self.stage_hash_before:
@@ -419,6 +768,17 @@ class IsaacGrasp20cmBindings:
                 "solve_articulation_contact_last readback is false"
             )
         self._reset_runtime_records()
+        while True:
+            self._capture_attempt_index += 1
+            candidate = (
+                self.artifact_root
+                / f"video_attempt_{self._capture_attempt_index:03d}"
+            )
+            if not candidate.exists():
+                self._video_attempt_root = candidate
+                break
+        assert self._video_attempt_root is not None
+        self._video_attempt_root.mkdir(parents=True, exist_ok=False)
         self._phase = Phase.VALIDATE
 
     def _set_phase(self, phase: Phase) -> None:
@@ -439,19 +799,22 @@ class IsaacGrasp20cmBindings:
             self.articulation.get_joint_positions(),
             dtype=np.float64,
         )
-        extended_profile = copy.deepcopy(self.task_profile)
-        targets = extended_profile["kinematics"]["placement"][
-            "target_poses"
-        ]
-        original_grasp_z = float(
-            targets["grasp_ee_position_world_m"][2]
-        )
         nominal_lift_m = float(
             self.config["target"]["clearance_m"]
             + self.config["target"]["hold_drop_gate_m"]
+            + self.additional_lift_margin_m
         )
-        targets["lift_ee_position_world_m"][2] = (
-            original_grasp_z + nominal_lift_m
+        from tools.aloha1_mapping.grasp_20cm_sampling import extend_profile_for_clearance_lift
+
+        extended_profile = extend_profile_for_clearance_lift(
+            self.task_profile,
+            target_clearance_m=float(
+                self.config["target"]["clearance_m"]
+            ),
+            hold_drop_gate_m=float(
+                self.config["target"]["hold_drop_gate_m"]
+            ),
+            additional_lift_margin_m=self.additional_lift_margin_m,
         )
         result = self._solve_settled_ik(
             extended_profile,
@@ -516,7 +879,7 @@ class IsaacGrasp20cmBindings:
             return
         self.command[:6] = targets[cursor]
         self._trajectory_cursor[phase] = cursor + 1
-        self._command_positions(self.articulation, self.command)
+        self._write_joint_command()
 
     def _advance_close(self, phase: Phase) -> None:
         cursor = self._trajectory_cursor.get(
@@ -532,7 +895,11 @@ class IsaacGrasp20cmBindings:
             phase,
             0,
         ) + 1
+        self._write_joint_command()
+
+    def _write_joint_command(self) -> None:
         self._command_positions(self.articulation, self.command)
+        self._target_write_count += 1
 
     def apply_phase_target(self, phase: Phase) -> None:
         self._set_phase(phase)
@@ -544,7 +911,7 @@ class IsaacGrasp20cmBindings:
             Phase.HEIGHT_REACHED,
             Phase.HOLD,
         }:
-            self._command_positions(self.articulation, self.command)
+            self._write_joint_command()
         elif phase is Phase.OPEN_PREGRASP:
             self._build_runtime_trajectories()
             self._advance_arm(phase)
@@ -703,11 +1070,12 @@ class IsaacGrasp20cmBindings:
             )
             >= len(self.close_targets)
         )
-        if (
-            self._phase is Phase.CLOSE_PRELOAD
-            and close_exhausted
-            and bilateral
-            and coupling_residual <= 0.001
+        if self._phase is Phase.CLOSE_PRELOAD and preload_solver_contact_ready(
+            close_exhausted=close_exhausted,
+            left_solver_active=bool(left_solver_contacts),
+            right_solver_active=bool(right_solver_contacts),
+            coupling_residual_m=coupling_residual,
+            coupling_gate_m=0.001,
         ):
             self._preload_stable_frames += 1
         elif self._phase is Phase.CLOSE_PRELOAD:
@@ -840,6 +1208,14 @@ class IsaacGrasp20cmBindings:
             "contacts": current_contacts,
         }
         self.telemetry.append(record)
+        self._pending_capture_frames.append(
+            {
+                "physics_frame": frame,
+                "time_s": time_s,
+                "phase": self._phase.value,
+                "telemetry_index": len(self.telemetry) - 1,
+            }
+        )
         self._last_snapshot = {
             "clearance_m": clearance_m,
             "maximum_clearance_m": self._maximum_clearance_m,
@@ -876,8 +1252,616 @@ class IsaacGrasp20cmBindings:
         }
         return observation
 
+    @staticmethod
+    def _jsonable_render_value(value: Any) -> Any:
+        if isinstance(value, Mapping):
+            return {
+                str(key): IsaacGrasp20cmBindings._jsonable_render_value(
+                    item
+                )
+                for key, item in value.items()
+            }
+        if isinstance(value, np.ndarray):
+            return value.tolist()
+        if isinstance(value, np.generic):
+            return value.item()
+        if isinstance(value, str | int | float | bool) or value is None:
+            return value
+        return str(value)
+
+    def capture_pending_render_frame(self) -> bool:
+        """Save both camera products after the enclosing app update."""
+
+        if not self._pending_capture_frames:
+            return False
+        if len(self._pending_capture_frames) != 1:
+            raise RuntimeError(
+                "render capture fell behind physics: "
+                f"{len(self._pending_capture_frames)} pending frames"
+            )
+        if self._video_attempt_root is None:
+            raise RuntimeError("video attempt root is not initialized")
+        from tools.validate_aloha1_task7b2_horizontal_grasp import FULL_ARM_LINK_PRIMS
+        from tools.validate_aloha1_task7b2_horizontal_grasp import _full_arm_framing_evidence
+
+        pending = self._pending_capture_frames[0]
+        frame = int(pending["physics_frame"])
+        telemetry = self.telemetry[int(pending["telemetry_index"])]
+        from isaacsim.core.utils.numpy.rotations import quats_to_rot_matrices
+
+        bottle = telemetry["bottle"]
+        bottle_position = np.asarray(
+            bottle["position_world_m"],
+            dtype=np.float64,
+        )
+        bottle_rotation = quats_to_rot_matrices(
+            np.asarray(
+                bottle["orientation_wxyz"],
+                dtype=np.float64,
+            )
+        )
+        bottle_axis_config = self.task_profile["config"]["bottle"][
+            "axis"
+        ]
+        a_world = (
+            bottle_rotation
+            @ np.asarray(
+                bottle_axis_config["a_local_m"],
+                dtype=np.float64,
+            )
+            + bottle_position
+        )
+        b_world = (
+            bottle_rotation
+            @ np.asarray(
+                bottle_axis_config["b_local_m"],
+                dtype=np.float64,
+            )
+            + bottle_position
+        )
+        left_origin, _ = self._get_world_pose(
+            str(
+                self.task_profile["config"]["robot"][
+                    "left_finger_collider"
+                ]
+            )
+        )
+        right_origin, _ = self._get_world_pose(
+            str(
+                self.task_profile["config"]["robot"][
+                    "right_finger_collider"
+                ]
+            )
+        )
+        projection_points = {
+            "bottle_a": a_world.tolist(),
+            "bottle_b": b_world.tolist(),
+            "left_finger_collider_origin": np.asarray(
+                left_origin,
+                dtype=np.float64,
+            ).tolist(),
+            "right_finger_collider_origin": np.asarray(
+                right_origin,
+                dtype=np.float64,
+            ).tolist(),
+        }
+        selected_contacts: dict[str, dict[str, Any] | None] = {}
+        for side, token in (
+            ("left", "diagnostic_supplier_cad_left_finger"),
+            ("right", "diagnostic_supplier_cad_right_finger"),
+        ):
+            candidates = [
+                item
+                for item in telemetry["contacts"]
+                if token
+                in (
+                    f"{item.get('collider0_path', '')} "
+                    f"{item.get('collider1_path', '')}"
+                )
+                and math.isfinite(float(item["impulse_ns"]))
+            ]
+            selected = (
+                max(candidates, key=lambda item: float(item["impulse_ns"]))
+                if candidates
+                else None
+            )
+            selected_contacts[side] = selected
+            if selected is not None:
+                point = np.asarray(
+                    selected["position_world_m"],
+                    dtype=np.float64,
+                )
+                normal = np.asarray(
+                    selected["normal_world"],
+                    dtype=np.float64,
+                )
+                projection_points[f"{side}_contact"] = point.tolist()
+                projection_points[f"{side}_normal_endpoint"] = (
+                    point + 0.030 * normal
+                ).tolist()
+        camera_samples: dict[str, tuple[np.ndarray, dict[str, Any]]] = {}
+        for view, camera_record in self.video_cameras.items():
+            camera = camera_record["camera"]
+            rgba = camera.get_rgba(device="cpu")
+            if rgba is None:
+                return False
+            pixels = np.asarray(rgba)
+            if pixels.size == 0:
+                return False
+            current = camera.get_current_frame(clone=True)
+            rendering_time = float(current.get("rendering_time", -1.0))
+            if rendering_time < 0.0:
+                return False
+            camera_samples[view] = (pixels, current)
+        view_records: dict[str, dict[str, Any]] = {}
+        rendering_times: list[float] = []
+        for view, camera_record in self.video_cameras.items():
+            camera = camera_record["camera"]
+            pixels, current = camera_samples[view]
+            if pixels.shape != (540, 960, 4):
+                raise RuntimeError(
+                    f"{view} unexpected RGBA shape {pixels.shape}"
+                )
+            if pixels.dtype != np.uint8:
+                if not np.isfinite(pixels).all():
+                    raise RuntimeError(f"{view} contains non-finite pixels")
+                pixels = np.clip(pixels, 0, 255).astype(np.uint8)
+            destination = (
+                self._video_attempt_root
+                / "frames"
+                / view
+                / f"{frame:06d}.png"
+            ).resolve()
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            Image.fromarray(pixels, mode="RGBA").convert("RGB").save(
+                destination
+            )
+            rendering_time = float(current.get("rendering_time", -1.0))
+            if not math.isfinite(rendering_time):
+                raise RuntimeError(
+                    f"{view} has invalid rendering_time"
+                )
+            rendering_times.append(rendering_time)
+            record = {
+                "absolute_path": str(destination),
+                "sha256": sha256_file(destination),
+                "resolution": [960, 540],
+                "physics_frame": frame,
+                "time_s": float(pending["time_s"]),
+                "runtime_signature": None,
+                "rendering_time_s": rendering_time,
+                "rendering_frame": self._jsonable_render_value(
+                    current.get("rendering_frame")
+                ),
+                "camera_prim_path": str(camera.prim_path),
+                "render_product_path": str(
+                    camera.get_render_product_path()
+                ),
+                "camera_world_matrix": camera_record[
+                    "camera_world_matrix"
+                ],
+                "camera_pose": {
+                    "position_world_m": camera_record[
+                        "position_world_m"
+                    ],
+                    "orientation_wxyz": camera_record[
+                        "orientation_wxyz"
+                    ],
+                    "target_world_m": camera_record["target_world_m"],
+                },
+                "view_status": camera_record["view_status"],
+                "camera_derivation": camera_record["derivation"],
+                "projection_world_points": projection_points,
+                "projection_pixels_xy": {
+                    label: pixel.tolist()
+                    for label, pixel in zip(
+                        projection_points,
+                        np.asarray(
+                            camera.get_image_coords_from_world_points(
+                                np.asarray(
+                                    list(projection_points.values()),
+                                    dtype=np.float64,
+                                )
+                            ),
+                            dtype=np.float64,
+                        ),
+                        strict=True,
+                    )
+                    if np.isfinite(pixel).all()
+                },
+                "selected_contact_records": selected_contacts,
+            }
+            if view == "overview":
+                framing = _full_arm_framing_evidence(
+                    stage=self.stage,
+                    camera=camera,
+                    camera_world_matrix=camera_record[
+                        "camera_world_matrix"
+                    ],
+                    resolution=(960, 540),
+                    required_link_prims=FULL_ARM_LINK_PRIMS,
+                    required_scene_prims=(
+                        str(self.config["bottle"]["session_prim"]),
+                        str(self.config["stage"]["table_prim"]),
+                    ),
+                )
+                record["framing_evidence"] = {
+                    **framing,
+                    "required_full_arm_links_in_frame": list(
+                        framing["projected_in_frame_links"]
+                    ),
+                    "occlusion_status": (
+                        "PENDING_VISUAL_MODEL_REVIEW"
+                    ),
+                }
+            view_records[view] = record
+        if max(rendering_times) - min(rendering_times) > 1e-9:
+            raise RuntimeError(
+                "two camera products are not from the same render time: "
+                f"{rendering_times}"
+            )
+        self._captured_frame_records.append(
+            {
+                "physics_frame": frame,
+                "time_s": float(pending["time_s"]),
+                "phase": str(pending["phase"]),
+                "telemetry_index": int(pending["telemetry_index"]),
+                "views": view_records,
+            }
+        )
+        self._pending_capture_frames.pop(0)
+        return True
+
+    @property
+    def video_capture_finalized(self) -> bool:
+        return self._video_capture_finalized
+
+    @property
+    def has_pending_video_frame(self) -> bool:
+        return bool(self._pending_capture_frames)
+
+    def capture_required_collider_evidence(
+        self,
+        *,
+        terminal: bool,
+    ) -> list[str]:
+        """Capture exact-pose viewport overlays for required milestones."""
+
+        if not self.capture_collider_evidence_enabled:
+            return []
+        if not self._captured_frame_records or self._video_attempt_root is None:
+            return []
+        frame_record = self._captured_frame_records[-1]
+        telemetry = self.telemetry[int(frame_record["telemetry_index"])]
+        phase = str(frame_record["phase"])
+        observation = telemetry["observation"]
+        contact = telemetry["contact_semantics"]
+        labels: list[str] = []
+        if (
+            phase == Phase.RELEASE_DYNAMIC.value
+            and "RELEASE_DYNAMIC" not in self._captured_overlay_phases
+        ):
+            labels.append("RELEASE_DYNAMIC")
+        if (
+            phase == Phase.OPEN_PREGRASP.value
+            and "OPEN_PREGRASP" not in self._captured_overlay_phases
+        ):
+            labels.append("OPEN_PREGRASP")
+        if (
+            phase == Phase.BILATERAL_CONTACT.value
+            and bool(contact["bilateral_geometric_contact"])
+            and "BILATERAL_CONTACT"
+            not in self._captured_overlay_phases
+        ):
+            labels.append("BILATERAL_CONTACT")
+        if (
+            phase == Phase.VERTICAL_LIFT.value
+            and float(observation["clearance_m"]) > 0.001
+            and "FIRST_SUPPORT_CLEARANCE"
+            not in self._captured_overlay_phases
+        ):
+            labels.append("FIRST_SUPPORT_CLEARANCE")
+        if (
+            phase == Phase.HEIGHT_REACHED.value
+            and "HEIGHT_REACHED" not in self._captured_overlay_phases
+        ):
+            labels.append("HEIGHT_REACHED")
+        if (
+            terminal
+            and phase == Phase.HOLD.value
+            and "HOLD_END" not in self._captured_overlay_phases
+        ):
+            labels.append("HOLD_END")
+        if not labels:
+            return []
+
+        from omni.kit.viewport.utility import get_active_viewport
+
+        from tools.validate_aloha1_task7b2_horizontal_grasp import _capture_viewport_png
+
+        viewport = get_active_viewport()
+        if viewport is None:
+            raise RuntimeError("active viewport unavailable for collider capture")
+        frame = int(frame_record["physics_frame"])
+        captured: list[str] = []
+        try:
+            from pxr import UsdGeom
+
+            bottle_state = self._read_bottle_state(self.bottle)
+            self._update_bottle_render_evidence(
+                self.stage,
+                handles=self._bottle_render_handles,
+                position_world=bottle_state["position_world_m"],
+                orientation_world_wxyz=bottle_state[
+                    "orientation_wxyz"
+                ],
+            )
+            self._update_finger_render_evidence(
+                self.stage,
+                handles=self._finger_render_handles,
+                link_transforms={
+                    side: np.asarray(
+                        view.get_transforms()[0],
+                        dtype=np.float64,
+                    ).tolist()
+                    for side, view in self._finger_link_views.items()
+                },
+            )
+            UsdGeom.Imageable(
+                self.stage.GetPrimAtPath(
+                    self._bottle_render_evidence["collider_root"]
+                )
+            ).MakeVisible()
+            for side in self._finger_link_views:
+                UsdGeom.Imageable(
+                    self.stage.GetPrimAtPath(
+                        f"{self._finger_render_evidence['root']}/"
+                        f"{side}/AuthoredColliderAtPhysxPose"
+                    )
+                ).MakeVisible()
+            self._settings.set_int(
+                self._collider_display_setting,
+                self._collider_display_value,
+            )
+            readback = int(
+                self._settings.get(self._collider_display_setting) or 0
+            )
+            if readback != self._collider_display_value:
+                raise RuntimeError(
+                    "collider visualization setting readback mismatch"
+                )
+            for label in labels:
+                for view, camera_record in self.video_cameras.items():
+                    destination = (
+                        self._video_attempt_root
+                        / "collider_overlay"
+                        / label
+                        / f"{view}_raw.png"
+                    ).resolve()
+                    width, height = _capture_viewport_png(
+                        self.app,
+                        viewport,
+                        camera_path=str(camera_record["camera"].prim_path),
+                        destination=destination,
+                    )
+                    normal = Path(
+                        frame_record["views"][view]["absolute_path"]
+                    )
+                    self._collider_overlay_records.append(
+                        {
+                            "phase_label": label,
+                            "runtime_phase": phase,
+                            "physics_frame": frame,
+                            "time_s": float(frame_record["time_s"]),
+                            "view": view,
+                            "normal_absolute_path": str(normal),
+                            "normal_sha256": sha256_file(normal),
+                            "collider_overlay_absolute_path": str(
+                                destination
+                            ),
+                            "collider_overlay_sha256": sha256_file(
+                                destination
+                            ),
+                            "resolution": [width, height],
+                            "camera_prim_path": str(
+                                camera_record["camera"].prim_path
+                            ),
+                            "camera_world_matrix": camera_record[
+                                "camera_world_matrix"
+                            ],
+                            "setting": {
+                                "path": self._collider_display_setting,
+                                "requested": (
+                                    self._collider_display_value
+                                ),
+                                "readback": readback,
+                            },
+                            "render_evidence": {
+                                "semantics": self._render_evidence[
+                                    "semantics"
+                                ],
+                                "authored_geometry_clone": True,
+                                "physics_schemas_copied": False,
+                                "collision_schemas_copied": False,
+                                "bottle_collider_mesh_count": (
+                                    self._bottle_render_evidence[
+                                        "collider_mesh_count"
+                                    ]
+                                ),
+                                "finger_collider_mesh_count": sum(
+                                    1
+                                    for record in (
+                                        self._finger_render_evidence[
+                                            "records"
+                                        ]
+                                    )
+                                    if record["category"]
+                                    == "collider"
+                                ),
+                            },
+                        }
+                    )
+                self._captured_overlay_phases.add(label)
+                captured.append(label)
+        finally:
+            from pxr import UsdGeom
+
+            UsdGeom.Imageable(
+                self.stage.GetPrimAtPath(
+                    self._bottle_render_evidence["collider_root"]
+                )
+            ).MakeInvisible()
+            for side in self._finger_link_views:
+                UsdGeom.Imageable(
+                    self.stage.GetPrimAtPath(
+                        f"{self._finger_render_evidence['root']}/"
+                        f"{side}/AuthoredColliderAtPhysxPose"
+                    )
+                ).MakeInvisible()
+            self._settings.set_int(
+                self._collider_display_setting,
+                self._collider_display_before,
+            )
+            for _ in range(COLLIDER_OVERLAY_RENDER_FLUSH_UPDATES):
+                self.app.update()
+            restored = int(
+                self._settings.get(self._collider_display_setting) or 0
+            )
+            if restored != self._collider_display_before:
+                raise RuntimeError(
+                    "collider visualization setting was not restored"
+                )
+        return captured
+
+    def finalize_video_capture(self) -> dict[str, Any]:
+        """Bind frames to the terminal signature and build candidates."""
+
+        if self._video_capture_finalized:
+            candidate_path = (
+                self._video_attempt_root / "video" / "candidate_manifest.json"
+            )
+            return json.loads(candidate_path.read_text(encoding="utf-8"))
+        if self._pending_capture_frames:
+            raise RuntimeError("cannot finalize with pending video frames")
+        if self._video_attempt_root is None:
+            raise RuntimeError("video attempt root is not initialized")
+        report = json.loads(self.report_path.read_text(encoding="utf-8"))
+        signature = str(report["deterministic_signature"])
+        for record in self._captured_frame_records:
+            for view_record in record["views"].values():
+                view_record["runtime_signature"] = signature
+        manifest = {
+            "schema_version": 1,
+            "runtime_signature": signature,
+            "required_full_arm_links": [
+                "base",
+                "shoulder",
+                "elbow",
+                "forearm",
+                "wrist",
+                "gripper",
+            ],
+            "capture_api": {
+                "class": "isaacsim.sensors.camera.Camera",
+                "extension": "isaacsim.sensors.camera",
+                "version_scope": "ISAAC_SIM_5_1_0_0_KIT_107_3_3",
+                "independent_render_products": True,
+                "capture_location": (
+                    "OUTER_APP_LOOP_AFTER_PHYSICS_AND_RENDER_UPDATE"
+                ),
+            },
+            "collision_evidence": {
+                "enabled": self.capture_collider_evidence_enabled,
+                "purpose": (
+                    "PAIRED_COLLIDER_SCREENSHOT_REPEAT"
+                    if self.capture_collider_evidence_enabled
+                    else "PRIMARY_CLEAN_VIDEO"
+                ),
+                "setting_path": self._collider_display_setting,
+                "setting_before": self._collider_display_before,
+                "setting_after": int(
+                    self._settings.get(
+                        self._collider_display_setting
+                    )
+                    or 0
+                ),
+                "required_phase_labels": (
+                    [
+                        "RELEASE_DYNAMIC",
+                        "OPEN_PREGRASP",
+                        "BILATERAL_CONTACT",
+                        "FIRST_SUPPORT_CLEARANCE",
+                        "HEIGHT_REACHED",
+                        "HOLD_END",
+                    ]
+                    if self.capture_collider_evidence_enabled
+                    else []
+                ),
+                "captured_phase_labels": sorted(
+                    self._captured_overlay_phases
+                ),
+                "render_evidence": self._render_evidence,
+                "records": self._collider_overlay_records,
+            },
+            "frames": self._captured_frame_records,
+        }
+        manifest_path = (
+            self._video_attempt_root / "frame_manifest.json"
+        )
+        _atomic_json(manifest_path, manifest)
+        from tools.build_aloha1_grasp_20cm_video import build_video_evidence
+
+        candidate = build_video_evidence(
+            report_path=self.report_path,
+            telemetry_path=self.telemetry_path,
+            frame_manifest_path=manifest_path,
+            output_root=self._video_attempt_root / "video",
+        )
+        self._video_capture_finalized = True
+        return candidate
+
+    def save_video_capture_exception(self, exception_text: str) -> None:
+        self._video_capture_error = exception_text[-12000:]
+        root = self._video_attempt_root or self.artifact_root
+        _atomic_json(
+            root / "video_capture_error.json",
+            {
+                "schema_version": 1,
+                "status": "FAIL",
+                "reason": "video_capture_exception",
+                "exception": self._video_capture_error,
+                "captured_frame_count": len(
+                    self._captured_frame_records
+                ),
+                "pending_frame_count": len(
+                    self._pending_capture_frames
+                ),
+                "machine_report_preserved": str(self.report_path),
+                "task8": "NOT_RUN",
+            },
+        )
+
     def ui_snapshot(self) -> dict[str, Any]:
         return dict(self._last_snapshot)
+
+    def abort_reset_snapshot(self, *, phase: str) -> dict[str, Any]:
+        """Read the minimal mutation audit state for Abort/Reset."""
+
+        from pxr import UsdPhysics
+
+        kinematic = bool(
+            UsdPhysics.RigidBodyAPI(self.bottle_prim)
+            .GetKinematicEnabledAttr()
+            .Get()
+        )
+        return {
+            "phase": str(phase),
+            "target_write_count": int(self._target_write_count),
+            "telemetry_count": len(self.telemetry),
+            "joint_target": self.command.tolist(),
+            "bottle_kinematic_enabled": kinematic,
+            "stage_sha256": sha256_file(self.stage_path),
+        }
 
     def _terminal_metrics(self, phase: Phase) -> dict[str, Any]:
         dynamic_formal = all(
@@ -975,6 +1959,17 @@ class IsaacGrasp20cmBindings:
                 "ik": self._ik_report,
                 "coupling": self.coupling_readback,
                 "finger_drive": self.drive_readback,
+                "trajectory": {
+                    "additional_lift_margin_m": (
+                        self.additional_lift_margin_m
+                    ),
+                    "classification": (
+                        "DIAGNOSTIC_CALCULATED_RUNTIME_CLEARANCE_"
+                        "COMPENSATION"
+                        if self.additional_lift_margin_m > 0.0
+                        else "BASELINE_ZERO_ADDITIONAL_MARGIN"
+                    ),
+                },
             },
             "stage": {
                 "absolute_path": str(self.stage_path),
@@ -989,6 +1984,14 @@ class IsaacGrasp20cmBindings:
                 "session_only": True,
             },
             "bottle": self.bottle_session,
+            "bottle_random_position": {
+                "offset_xy_m": self.bottle_xy_offset_m,
+                "changed_variable": (
+                    "BOTTLE_INITIAL_WORLD_XY_TRANSLATION_ONLY"
+                ),
+                "rotation_unchanged": True,
+                "object_from_gripper_unchanged": True,
+            },
             "table_top_z_m": self.table_top_z_m,
             "target_clearance_m": float(
                 self.config["target"]["clearance_m"]
@@ -1051,18 +2054,33 @@ class IsaacGrasp20cmBindings:
 
         self.world.pause()
         rigid = UsdPhysics.RigidBodyAPI(self.bottle_prim)
-        rigid.GetKinematicEnabledAttr().Set(True)
-        self._physx_sim.flush_changes()
-        self.bottle.set_transforms(
-            self._initial_bottle_transform.reshape(1, 7)
+        kinematic_attr = rigid.GetKinematicEnabledAttr()
+        initially_kinematic = bool(kinematic_attr.Get())
+        operation_plan = reset_body_transition_plan(
+            initially_kinematic=initially_kinematic
         )
-        self.bottle.set_velocities(np.zeros((1, 6), dtype=np.float32))
+        if operation_plan[0] == "set_dynamic":
+            kinematic_attr.Set(False)
+            self._physx_sim.flush_changes()
+        bottle_indices = single_body_tensor_indices(
+            count=int(self.bottle.count)
+        )
+        self.bottle.set_transforms(
+            self._initial_bottle_transform.reshape(1, 7),
+            bottle_indices,
+        )
+        self.bottle.set_velocities(
+            np.zeros((1, 6), dtype=np.float32),
+            bottle_indices,
+        )
+        kinematic_attr.Set(True)
+        self._physx_sim.flush_changes()
         self.command = self.initial_command.copy()
         self.articulation.set_joint_positions(self.command)
         self.articulation.set_joint_velocities(
             np.zeros_like(self.command)
         )
-        self._command_positions(self.articulation, self.command)
+        self._write_joint_command()
         self._contact_buffer = []
         self.all_contacts = []
         self._reset_runtime_records()

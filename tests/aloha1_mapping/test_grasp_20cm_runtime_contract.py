@@ -4,12 +4,17 @@ import ast
 import hashlib
 from pathlib import Path
 
+import numpy as np
 import pytest
 import yaml
 
 from tools.aloha1_mapping.grasp_20cm_controller import Phase
 from tools.aloha1_mapping.grasp_20cm_controller import RunObservation
+from tools.aloha1_mapping.grasp_20cm_isaac_bindings import derive_gripper_closeup_camera_geometry
 from tools.aloha1_mapping.grasp_20cm_isaac_bindings import physics_sample_duration_s
+from tools.aloha1_mapping.grasp_20cm_isaac_bindings import preload_solver_contact_ready
+from tools.aloha1_mapping.grasp_20cm_isaac_bindings import reset_body_transition_plan
+from tools.aloha1_mapping.grasp_20cm_isaac_bindings import single_body_tensor_indices
 from tools.aloha1_mapping.grasp_20cm_isaac_bindings import solver_active_contacts
 from tools.aloha1_mapping.grasp_20cm_runtime import EXPECTED_DOF_ORDER
 from tools.aloha1_mapping.grasp_20cm_runtime import FrozenInputError
@@ -17,6 +22,7 @@ from tools.aloha1_mapping.grasp_20cm_runtime import Grasp20cmRuntimeAdapter
 from tools.aloha1_mapping.grasp_20cm_runtime import load_and_verify_config
 from tools.aloha1_mapping.grasp_20cm_runtime import validate_composed_stage
 from tools.aloha1_mapping.grasp_20cm_runtime import verify_frozen_file
+from tools.run_aloha1_grasp_20cm_gui import evaluate_abort_reset_evidence
 
 ROOT = Path(__file__).resolve().parents[2]
 CONFIG = ROOT / "configs/aloha1_grasp_20cm_gui.yaml"
@@ -179,6 +185,51 @@ def test_config_freezes_approved_stage_bottle_and_joint_order() -> None:
         "session_prim": "/World/ALOHA1Grasp20cmSession/Bottle500",
     }
     assert config["robot"]["dof_order"] == EXPECTED_DOF_ORDER
+    assert config["evidence"]["collider_overlay"] == {
+        "display_setting": (
+            "/persistent/physics/visualizationDisplayColliders"
+        ),
+        "display_value": 2,
+        "authored_geometry_clone": True,
+        "semantics": (
+            "ISAAC_PHYSICS_DEBUG_DISPLAY_PLUS_SESSION_AUTHORED_"
+            "COLLIDER_CLONE_NOT_COOKED_HULL_READBACK"
+        ),
+        "finger_colliders": {
+            "left": {
+                "link": (
+                    "/World/follower_left/vx300s_left/"
+                    "follower_left_left_finger_link"
+                ),
+                "visual": (
+                    "/World/follower_left/vx300s_left/"
+                    "follower_left_left_finger_link/visuals/"
+                    "diagnostic_supplier_cad_left_finger/mesh"
+                ),
+                "collider": (
+                    "/World/follower_left/vx300s_left/"
+                    "follower_left_left_finger_link/collisions/"
+                    "diagnostic_supplier_cad_left_finger/mesh"
+                ),
+            },
+            "right": {
+                "link": (
+                    "/World/follower_left/vx300s_left/"
+                    "follower_left_right_finger_link"
+                ),
+                "visual": (
+                    "/World/follower_left/vx300s_left/"
+                    "follower_left_right_finger_link/visuals/"
+                    "diagnostic_supplier_cad_right_finger/mesh"
+                ),
+                "collider": (
+                    "/World/follower_left/vx300s_left/"
+                    "follower_left_right_finger_link/collisions/"
+                    "diagnostic_supplier_cad_right_finger/mesh"
+                ),
+            },
+        },
+    }
 
 
 def test_all_frozen_files_match_config_hashes() -> None:
@@ -276,6 +327,39 @@ def test_abort_stops_new_targets_without_freezing_bottle() -> None:
     assert bindings.finalized == [(Phase.ABORTED, "user_abort")]
 
 
+def test_runtime_exception_marks_adapter_terminal_without_finalizing() -> None:
+    bindings = _FakeBindings()
+    adapter = Grasp20cmRuntimeAdapter(bindings=bindings)
+    adapter.start()
+    adapter.on_physics_step(1.0 / 60.0)
+    applied_before_failure = len(bindings.applied_phases)
+
+    transition = adapter.fail_due_to_exception("runtime_exception")
+
+    assert transition.current is Phase.FAIL
+    assert adapter.is_running is False
+    assert adapter.on_physics_step(1.0 / 60.0) is None
+    assert len(bindings.applied_phases) == applied_before_failure
+    assert bindings.finalized == []
+
+
+def test_preload_uses_active_solver_contacts_not_penetration_sign() -> None:
+    assert preload_solver_contact_ready(
+        close_exhausted=True,
+        left_solver_active=True,
+        right_solver_active=True,
+        coupling_residual_m=0.0002,
+        coupling_gate_m=0.001,
+    )
+    assert not preload_solver_contact_ready(
+        close_exhausted=True,
+        left_solver_active=True,
+        right_solver_active=False,
+        coupling_residual_m=0.0002,
+        coupling_gate_m=0.001,
+    )
+
+
 def test_reset_calls_session_cleanup_and_returns_idle() -> None:
     bindings = _FakeBindings()
     adapter = Grasp20cmRuntimeAdapter(bindings=bindings)
@@ -287,6 +371,98 @@ def test_reset_calls_session_cleanup_and_returns_idle() -> None:
     assert transition.current is Phase.IDLE
     assert bindings.reset_count == 1
     assert adapter.physics_step_count == 0
+
+
+def test_abort_reset_evidence_requires_no_abort_target_write() -> None:
+    report = evaluate_abort_reset_evidence(
+        requested_abort_phase="VERTICAL_DESCENT",
+        before_abort={
+            "phase": "VERTICAL_DESCENT",
+            "target_write_count": 42,
+            "telemetry_count": 41,
+            "bottle_kinematic_enabled": False,
+            "stage_sha256": "a" * 64,
+        },
+        after_abort={
+            "phase": "ABORTED",
+            "target_write_count": 42,
+            "telemetry_count": 41,
+            "bottle_kinematic_enabled": False,
+            "stage_sha256": "a" * 64,
+        },
+        after_reset={
+            "phase": "IDLE",
+            "target_write_count": 43,
+            "telemetry_count": 0,
+            "bottle_kinematic_enabled": True,
+            "stage_sha256": "a" * 64,
+        },
+        machine_report={"status": "ABORTED", "reason": "user_abort"},
+        stage_sha256_before="a" * 64,
+        stage_sha256_after="a" * 64,
+    )
+
+    assert report["status"] == "PASS"
+    assert report["gates"]["no_target_write_after_abort"] is True
+    assert report["gates"]["bottle_remained_dynamic_after_abort"] is True
+    assert report["gates"]["reset_returned_idle"] is True
+    assert report["task8"] == "NOT_RUN"
+
+
+def test_abort_reset_evidence_fails_if_abort_writes_target() -> None:
+    report = evaluate_abort_reset_evidence(
+        requested_abort_phase="VERTICAL_DESCENT",
+        before_abort={
+            "phase": "VERTICAL_DESCENT",
+            "target_write_count": 42,
+            "telemetry_count": 41,
+            "bottle_kinematic_enabled": False,
+            "stage_sha256": "a" * 64,
+        },
+        after_abort={
+            "phase": "ABORTED",
+            "target_write_count": 43,
+            "telemetry_count": 41,
+            "bottle_kinematic_enabled": False,
+            "stage_sha256": "a" * 64,
+        },
+        after_reset={
+            "phase": "IDLE",
+            "target_write_count": 44,
+            "telemetry_count": 0,
+            "bottle_kinematic_enabled": True,
+            "stage_sha256": "a" * 64,
+        },
+        machine_report={"status": "ABORTED", "reason": "user_abort"},
+        stage_sha256_before="a" * 64,
+        stage_sha256_after="a" * 64,
+    )
+
+    assert report["status"] == "FAIL"
+    assert report["gates"]["no_target_write_after_abort"] is False
+
+
+def test_single_body_tensor_indices_are_explicit_int32() -> None:
+    indices = single_body_tensor_indices(count=1)
+
+    assert indices.tolist() == [0]
+    assert indices.dtype == np.int32
+    with pytest.raises(ValueError, match="exactly one"):
+        single_body_tensor_indices(count=2)
+
+
+def test_reset_body_transition_restores_state_while_dynamic() -> None:
+    assert reset_body_transition_plan(initially_kinematic=True) == (
+        "set_dynamic",
+        "set_transform",
+        "set_velocity",
+        "set_kinematic",
+    )
+    assert reset_body_transition_plan(initially_kinematic=False) == (
+        "set_transform",
+        "set_velocity",
+        "set_kinematic",
+    )
 
 
 def test_solver_active_contact_requires_matching_pair_and_finite_impulse() -> None:
@@ -329,6 +505,31 @@ def test_hold_duration_counts_physics_samples_not_sample_intervals() -> None:
     ) == pytest.approx(2.0)
 
 
+def test_closeup_camera_looks_along_ab_and_centers_lift_interval() -> None:
+    axis = np.asarray([0.9912548881, 0.1319611564, 0.0])
+    grasp = np.asarray([0.0049432018, -0.1597277926, 0.0329096618])
+    result = derive_gripper_closeup_camera_geometry(
+        grasp_point_world_m=grasp,
+        bottle_axis_world=axis,
+        nominal_lift_m=0.210,
+    )
+    target = np.asarray(result["target_world_m"])
+    position = np.asarray(result["position_world_m"])
+    forward = np.asarray(result["camera_forward_world"])
+    axis /= np.linalg.norm(axis)
+    finger_line = np.asarray([-axis[1], axis[0], 0.0])
+
+    assert target[2] == pytest.approx(grasp[2] + 0.105)
+    assert np.dot(forward[:2], axis[:2]) < 0.0
+    assert abs(float(np.dot(forward, finger_line))) < 1e-12
+    assert np.linalg.norm(position - target) == pytest.approx(
+        np.hypot(1.25, 0.75)
+    )
+    assert result["derivation"] == (
+        "LOOK_ALONG_BOTTLE_AB_AND_CENTER_NOMINAL_VERTICAL_LIFT"
+    )
+
+
 def test_gui_exposes_run_abort_reset_and_workspace_two() -> None:
     source = GUI_SCRIPT.read_text(encoding="utf-8")
     assert 'ui.Button("Run: Grasp + Lift 20 cm"' in source
@@ -337,6 +538,22 @@ def test_gui_exposes_run_abort_reset_and_workspace_two() -> None:
     assert "_move_current_process_window_to_workspace(2)" in source
     assert "subscribe_physics_on_step_events" in source
     assert "DIAGNOSTIC_ONLY_NOT_FINAL_CONTROL_MAPPING" in source
+
+
+def test_isaac_binding_uses_pose_synchronized_render_only_colliders() -> None:
+    source = (
+        ROOT / "tools/aloha1_mapping/grasp_20cm_isaac_bindings.py"
+    ).read_text(encoding="utf-8")
+
+    assert "_create_bottle_render_evidence" in source
+    assert "_update_bottle_render_evidence" in source
+    assert "_create_finger_render_evidence" in source
+    assert "_update_finger_render_evidence" in source
+    assert "authored_geometry_clone" in source
+    assert "physics_schemas_copied" in source
+    assert "collision_schemas_copied" in source
+    assert "COLLIDER_OVERLAY_RENDER_FLUSH_UPDATES = 20" in source
+    assert "for _ in range(COLLIDER_OVERLAY_RENDER_FLUSH_UPDATES)" in source
 
 
 def test_button_callbacks_do_not_contain_blocking_loops() -> None:

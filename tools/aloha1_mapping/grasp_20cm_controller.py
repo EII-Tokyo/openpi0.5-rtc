@@ -389,6 +389,15 @@ class Grasp20cmController:
             raise RuntimeError(f"cannot abort from {self.phase}")
         return self._transition(Phase.ABORTED, "user_abort")
 
+    def request_failure(self, reason: str) -> TransitionRecord:
+        """Move an active controller to FAIL after an external runtime error."""
+
+        if self.phase not in ACTIVE_PHASES:
+            raise RuntimeError(f"cannot fail from {self.phase}")
+        if not reason:
+            raise ValueError("failure reason must be non-empty")
+        return self._transition(Phase.FAIL, reason)
+
     def reset(self) -> TransitionRecord:
         if self.phase in ACTIVE_PHASES:
             raise RuntimeError(f"cannot reset active phase {self.phase}")

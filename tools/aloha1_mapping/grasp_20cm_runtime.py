@@ -129,6 +129,15 @@ class Grasp20cmRuntimeAdapter:
         )
         return transition
 
+    def fail_due_to_exception(self, reason: str) -> TransitionRecord:
+        """Stop target writes while a caller persists the exception report."""
+
+        if not self._running:
+            raise RuntimeError("cannot fail an inactive run")
+        transition = self.controller.request_failure(reason)
+        self._running = False
+        return transition
+
     def reset(self) -> TransitionRecord:
         if self._running:
             raise RuntimeError("cannot reset an active run")
