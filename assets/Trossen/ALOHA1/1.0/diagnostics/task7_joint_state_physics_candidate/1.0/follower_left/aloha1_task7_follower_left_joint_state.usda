@@ -1,0 +1,12 @@
+#usda 1.0
+(
+    customLayerData = {
+        string "aloha1:scope" = "TASK7_JOINT_STATE_PACKAGING_DIAGNOSTIC_ONLY"
+        string "aloha1:sourceStageSha256" = "34badd857a3327b3605dc4ffd2fc40eb9c4c72a31c427c20967a3273f003aa7c"
+    }
+    defaultPrim = "follower_left"
+    subLayers = [
+        @physics/aloha1_task7_follower_left_joint_state_physics.usd@,
+        @../../../signal_correspondence/1.0/follower_left_asset/aloha1_signal_follower_left.usda@
+    ]
+)

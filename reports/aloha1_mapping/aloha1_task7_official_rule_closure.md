@@ -29,3 +29,5 @@ The direct NVIDIA MCP probe was reachable, but its Asset Validation catalog repo
 ## Isolated candidate result
 
 The follower-right schema-only candidate passed `IsaacSim.RobotRules` twice in fresh processes with zero issues. Its physical diagnostic Stage was not composed or modified. This closes the right-side Robot Schema/package boundary only; it does not clear the six missing-source-collider findings or the two literal mimic-rule conflicts.
+
+A second isolated candidate applies only `PhysicsJointStateAPI:angular` to the two gripper joints in dedicated `_physics.usd` layers. It removes exactly the two `JointHasJointStateAPI` packaging findings without authoring state/drive values. Both candidate PhysicsRules results remain literal `FAIL/4` because the mimic and source-geometry findings remain unsuppressed.

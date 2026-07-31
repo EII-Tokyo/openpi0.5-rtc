@@ -1,0 +1,105 @@
+{
+  "candidates": {
+    "follower_left": {
+      "authored_drive_values": false,
+      "authored_state_values": false,
+      "collider_modified": false,
+      "drive_readback_after": {
+        "target_position": 0.0,
+        "target_velocity": 0.0
+      },
+      "drive_readback_before": {
+        "target_position": 0.0,
+        "target_velocity": 0.0
+      },
+      "geometry_modified": false,
+      "joint_path": "/follower_left/vx300s_left/joints/gripper",
+      "joint_state_api_readback": true,
+      "joint_state_axis": "angular",
+      "joint_type": "RevoluteJoint",
+      "mimic_modified": false,
+      "name": "follower_left",
+      "physics_layer": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task7_joint_state_physics_candidate/1.0/follower_left/physics/aloha1_task7_follower_left_joint_state_physics.usd",
+        "authored_properties": [],
+        "filename_ends_with_physics_usd": true,
+        "sha256": "2aa0f1cf720024ecfcc08760add48bf1cf5bce24eff8a7cdcd42102478ae6d43"
+      },
+      "source_stage": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/follower_left_asset/aloha1_signal_follower_left.usda",
+        "modified": false,
+        "sha256_after": "34badd857a3327b3605dc4ffd2fc40eb9c4c72a31c427c20967a3273f003aa7c",
+        "sha256_before": "34badd857a3327b3605dc4ffd2fc40eb9c4c72a31c427c20967a3273f003aa7c"
+      },
+      "wrapper": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task7_joint_state_physics_candidate/1.0/follower_left/aloha1_task7_follower_left_joint_state.usda",
+        "default_prim": "/follower_left",
+        "sha256": "53b7d78415165f46bc7314ab623cb35150017ad6da9ff5476476409d3d376df3",
+        "sublayers": [
+          "physics/aloha1_task7_follower_left_joint_state_physics.usd",
+          "../../../signal_correspondence/1.0/follower_left_asset/aloha1_signal_follower_left.usda"
+        ]
+      }
+    },
+    "follower_right": {
+      "authored_drive_values": false,
+      "authored_state_values": false,
+      "collider_modified": false,
+      "drive_readback_after": {
+        "target_position": 0.0,
+        "target_velocity": 0.0
+      },
+      "drive_readback_before": {
+        "target_position": 0.0,
+        "target_velocity": 0.0
+      },
+      "geometry_modified": false,
+      "joint_path": "/follower_right/vx300s_right/joints/gripper",
+      "joint_state_api_readback": true,
+      "joint_state_axis": "angular",
+      "joint_type": "RevoluteJoint",
+      "mimic_modified": false,
+      "name": "follower_right",
+      "physics_layer": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task7_joint_state_physics_candidate/1.0/follower_right/physics/aloha1_task7_follower_right_joint_state_physics.usd",
+        "authored_properties": [],
+        "filename_ends_with_physics_usd": true,
+        "sha256": "aaf265430e3db5c157d33a0bd85bcd4ac31b30c0e6ec5290ca9cc700b492a68c"
+      },
+      "source_stage": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/supplier_cad_follower_right.usda",
+        "modified": false,
+        "sha256_after": "95c7878f794f5f557b70997a2240b6476836b8ffbeed5a4992cb114a169487ea",
+        "sha256_before": "95c7878f794f5f557b70997a2240b6476836b8ffbeed5a4992cb114a169487ea"
+      },
+      "wrapper": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task7_joint_state_physics_candidate/1.0/follower_right/aloha1_task7_follower_right_joint_state.usda",
+        "default_prim": "/follower_right",
+        "sha256": "3a4ce3792ef7e0b9efe4e571a79ec63b77cb6f6036f028066b5d808e00e49fae",
+        "sublayers": [
+          "physics/aloha1_task7_follower_right_joint_state_physics.usd",
+          "../../../supplier_cad_follower_right/1.0/supplier_cad_follower_right.usda"
+        ]
+      }
+    }
+  },
+  "direct_nvidia_mcp_probe": {
+    "asset_validation_catalog_version": "1.2.1",
+    "local_source_remains_version_authority": true,
+    "status": "PASS",
+    "transport": "DIRECT_NOT_MCPJUNGLE"
+  },
+  "final_or_default_asset_modified": false,
+  "local_runtime": {
+    "asset_validation": "1.1.0",
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physx": "107.3.26"
+  },
+  "real_robot_connected": false,
+  "remote_192_168_1_103_accessed": false,
+  "schema_version": 1,
+  "scope": "TASK7_JOINT_STATE_PACKAGING_DIAGNOSTIC_ONLY",
+  "status": "PASS",
+  "task8": "NOT_RUN"
+}

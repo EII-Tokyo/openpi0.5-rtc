@@ -1,0 +1,62 @@
+{
+  "blocking_issue_count": 4,
+  "category": "IsaacSim.PhysicsRules",
+  "direct_nvidia_mcp_verified": true,
+  "issues": [
+    {
+      "at": "Prim </follower_left/vx300s_left/joints/right_finger>",
+      "message": "Joint /follower_left/vx300s_left/joints/right_finger's lower limit (-0.013799999840557575) should be > reference joint limits * gear ratio(0.020999999716877937)",
+      "rule": "MimicAPICheck",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </follower_left/vx300s_left/follower_left_ee_arm_link>",
+      "message": "Rigid body /follower_left/vx300s_left/follower_left_ee_arm_link has rigid body api but no collision api",
+      "rule": "RigidBodyHasCollider",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </follower_left/vx300s_left/follower_left_ee_gripper_link>",
+      "message": "Rigid body /follower_left/vx300s_left/follower_left_ee_gripper_link has rigid body api but no collision api",
+      "rule": "RigidBodyHasCollider",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </follower_left/vx300s_left/follower_left_fingers_link>",
+      "message": "Rigid body /follower_left/vx300s_left/follower_left_fingers_link has rigid body api but no collision api",
+      "rule": "RigidBodyHasCollider",
+      "severity": "ERROR"
+    }
+  ],
+  "official_status": "FAIL",
+  "official_status_suppressed": false,
+  "real_robot_connected": false,
+  "remote_192_168_1_103_accessed": false,
+  "rule_count": 12,
+  "rules": [
+    "DriveJointValueReasonable",
+    "HasArticulationRoot",
+    "InvisibleCollisionMeshHasPurposeGuide",
+    "JointHasCorrectTransformAndState",
+    "JointHasJointStateAPI",
+    "MimicAPICheck",
+    "NonAdjacentCollisionMeshesDoNotClash",
+    "PhysicsDriveAndJointState",
+    "PhysicsJointHasDriveOrMimicAPI",
+    "PhysicsJointMaxVelocity",
+    "RigidBodyHasCollider",
+    "RigidBodyHasMassAPI"
+  ],
+  "runtime": {
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physx": "107.3.26"
+  },
+  "schema_version": 1,
+  "target_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task7_joint_state_physics_candidate/1.0/follower_left/aloha1_task7_follower_left_joint_state.usda",
+  "target_immutable": true,
+  "target_name": "follower_left_joint_state_candidate",
+  "target_sha256_after": "53b7d78415165f46bc7314ab623cb35150017ad6da9ff5476476409d3d376df3",
+  "target_sha256_before": "53b7d78415165f46bc7314ab623cb35150017ad6da9ff5476476409d3d376df3",
+  "warning_count": 0
+}

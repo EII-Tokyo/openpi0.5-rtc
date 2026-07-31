@@ -33,6 +33,9 @@ RIGHT_SCHEMA_RULES_REPEAT = (
     / ".codex/artifacts/20260731-aloha1-post-grasp-task7/"
     "follower_right_schema_robot_rules_repeat.json"
 )
+JOINT_STATE_PHYSICS = (
+    REPORT_ROOT / "aloha1_task7_joint_state_physics_candidate.json"
+)
 
 FROZEN = {
     TRIAGE: "59c45343616cda2017344b1b0170697ee6b16c615fe4d7cfaa09b91bf373d53c",
@@ -46,6 +49,9 @@ FROZEN = {
     ),
     RIGHT_SCHEMA_RULES_REPEAT: (
         "b7898402e1044e6e04c5de6d778deadbf037511a187629856bd00b3a4a98e2f0"
+    ),
+    JOINT_STATE_PHYSICS: (
+        "f0a68e066dd1aa11adc4a1c5ceb810a3cf48aa30b182743191261518f6bcf283"
     ),
 }
 
@@ -134,6 +140,14 @@ def _markdown(report: dict[str, Any]) -> str:
             "not clear the six missing-source-collider findings or the two "
             "literal mimic-rule conflicts.",
             "",
+            "A second isolated candidate applies only "
+            "`PhysicsJointStateAPI:angular` to the two gripper joints in "
+            "dedicated `_physics.usd` layers. It removes exactly the two "
+            "`JointHasJointStateAPI` packaging findings without authoring "
+            "state/drive values. Both candidate PhysicsRules results remain "
+            "literal `FAIL/4` because the mimic and source-geometry findings "
+            "remain unsuppressed.",
+            "",
         ]
     )
     return "\n".join(lines)
@@ -156,6 +170,7 @@ def main() -> int:
     right_schema_asset = _load(RIGHT_SCHEMA_ASSET)
     right_rules = _load(RIGHT_SCHEMA_RULES)
     right_rules_repeat = _load(RIGHT_SCHEMA_RULES_REPEAT)
+    joint_state_physics = _load(JOINT_STATE_PHYSICS)
     first_signature = _rule_signature(right_rules)
     second_signature = _rule_signature(right_rules_repeat)
     right_candidate_checks = {
@@ -181,6 +196,37 @@ def main() -> int:
     if failed_candidate:
         raise ValueError(
             f"right schema candidate checks failed: {failed_candidate}"
+        )
+    joint_state_checks = {
+        "status": joint_state_physics["status"] == "PASS",
+        "task7_partial": joint_state_physics["task7"] == "PARTIAL",
+        "task8_not_run": joint_state_physics["task8"] == "NOT_RUN",
+        "literal_status_fail": joint_state_physics[
+            "literal_official_status_after_candidate"
+        ]
+        == "FAIL",
+        "both_candidates": set(joint_state_physics["candidates"])
+        == {"follower_left", "follower_right"},
+        "source_stages_unchanged": all(
+            candidate["source_stage_modified"] is False
+            for candidate in joint_state_physics["candidates"].values()
+        ),
+        "exact_single_rule_removed": all(
+            candidate["removed_issue_rules"] == ["JointHasJointStateAPI"]
+            for candidate in joint_state_physics["candidates"].values()
+        ),
+        "final_or_default_unchanged": joint_state_physics[
+            "final_or_default_asset_modified"
+        ]
+        is False,
+    }
+    failed_joint_state = [
+        name for name, passed in joint_state_checks.items() if not passed
+    ]
+    if failed_joint_state:
+        raise ValueError(
+            "joint-state candidate checks failed: "
+            f"{failed_joint_state}"
         )
     report = classify_official_rule_closure(triage["issues"])
     report.update(
@@ -221,7 +267,25 @@ def main() -> int:
                     "physical_stage_modified": False,
                     "checks": right_candidate_checks,
                     "scope": "ROBOTRULES_SCHEMA_ONLY_DIAGNOSTIC",
-                }
+                },
+                "gripper_joint_state_physics": {
+                    "status": "PASS",
+                    "validated_packaging_finding_count": 2,
+                    "source_stage_modified": False,
+                    "final_or_default_asset_modified": False,
+                    "task7": joint_state_physics["task7"],
+                    "task8": joint_state_physics["task8"],
+                    "literal_official_status_after_candidate": (
+                        joint_state_physics[
+                            "literal_official_status_after_candidate"
+                        ]
+                    ),
+                    "candidate_report": {
+                        "absolute_path": str(JOINT_STATE_PHYSICS.resolve()),
+                        "sha256": _sha256(JOINT_STATE_PHYSICS),
+                    },
+                    "checks": joint_state_checks,
+                },
             },
             "stage_mutated": False,
             "final_or_default_asset_modified": False,

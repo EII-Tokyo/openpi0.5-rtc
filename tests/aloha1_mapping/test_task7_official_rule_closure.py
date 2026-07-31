@@ -95,6 +95,15 @@ def test_generated_report_records_local_version_authority() -> None:
     assert right["warning_count"] == 0
     assert right["deterministic_repeat"] is True
     assert right["physical_stage_modified"] is False
+    joint_state = report["isolated_candidate_results"][
+        "gripper_joint_state_physics"
+    ]
+    assert joint_state["status"] == "PASS"
+    assert joint_state["validated_packaging_finding_count"] == 2
+    assert joint_state["source_stage_modified"] is False
+    assert joint_state["final_or_default_asset_modified"] is False
+    assert joint_state["task7"] == "PARTIAL"
+    assert joint_state["task8"] == "NOT_RUN"
 
 
 def test_official_runner_records_direct_nvidia_mcp_not_gateway() -> None:

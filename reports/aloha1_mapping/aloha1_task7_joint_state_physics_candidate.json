@@ -1,0 +1,200 @@
+{
+  "candidates": {
+    "follower_left": {
+      "added_issues": [],
+      "authored_drive_values": false,
+      "authored_state_values": false,
+      "baseline": {
+        "blocking_issue_count": 5,
+        "issue_rules": [
+          "JointHasJointStateAPI",
+          "MimicAPICheck",
+          "RigidBodyHasCollider",
+          "RigidBodyHasCollider",
+          "RigidBodyHasCollider"
+        ],
+        "official_status": "FAIL"
+      },
+      "checks": {
+        "baseline_blocking_five": true,
+        "candidate_blocking_four": true,
+        "candidate_immutable": true,
+        "candidate_warning_zero": true,
+        "deterministic_repeat": true,
+        "joint_state_api_readback": true,
+        "no_authored_drive_values": true,
+        "no_authored_state_values": true,
+        "no_issue_added": true,
+        "only_joint_state_removed": true,
+        "remaining_rules_exact": true,
+        "source_stage_unchanged": true
+      },
+      "joint_path": "/follower_left/vx300s_left/joints/gripper",
+      "joint_state_api_readback": true,
+      "joint_state_axis": "angular",
+      "joint_type": "RevoluteJoint",
+      "official_rules": {
+        "blocking_issue_count": 4,
+        "deterministic_repeat": true,
+        "deterministic_signature": "770cf3806f3e3f236b6cbc334531cc071c98f4c079147e163f1362ebda6e6d7a",
+        "official_status": "FAIL",
+        "primary_report": {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7_joint_state_physics_follower_left_official.json",
+          "sha256": "f70e5e3b72f05c0c2bda1ff4be4b2afc698d0f30fa9ab2ddea15f82be39c2657"
+        },
+        "repeat_report": {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-post-grasp-task7/joint_state_left_official_repeat.json",
+          "sha256": "39bdd6ab04cfa517970060fb7410cec62250e03998e4378b8c382ad2448d109e"
+        },
+        "warning_count": 0
+      },
+      "physics_layer": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task7_joint_state_physics_candidate/1.0/follower_left/physics/aloha1_task7_follower_left_joint_state_physics.usd",
+        "authored_properties": [],
+        "filename_ends_with_physics_usd": true,
+        "sha256": "2aa0f1cf720024ecfcc08760add48bf1cf5bce24eff8a7cdcd42102478ae6d43"
+      },
+      "remaining_issue_rule_counts": {
+        "MimicAPICheck": 1,
+        "RigidBodyHasCollider": 3
+      },
+      "removed_issue_rules": [
+        "JointHasJointStateAPI"
+      ],
+      "source_stage": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/follower_left_asset/aloha1_signal_follower_left.usda",
+        "modified": false,
+        "sha256_after": "34badd857a3327b3605dc4ffd2fc40eb9c4c72a31c427c20967a3273f003aa7c",
+        "sha256_before": "34badd857a3327b3605dc4ffd2fc40eb9c4c72a31c427c20967a3273f003aa7c"
+      },
+      "source_stage_modified": false,
+      "status": "PASS",
+      "wrapper": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task7_joint_state_physics_candidate/1.0/follower_left/aloha1_task7_follower_left_joint_state.usda",
+        "default_prim": "/follower_left",
+        "sha256": "53b7d78415165f46bc7314ab623cb35150017ad6da9ff5476476409d3d376df3",
+        "sublayers": [
+          "physics/aloha1_task7_follower_left_joint_state_physics.usd",
+          "../../../signal_correspondence/1.0/follower_left_asset/aloha1_signal_follower_left.usda"
+        ]
+      }
+    },
+    "follower_right": {
+      "added_issues": [],
+      "authored_drive_values": false,
+      "authored_state_values": false,
+      "baseline": {
+        "blocking_issue_count": 5,
+        "issue_rules": [
+          "JointHasJointStateAPI",
+          "MimicAPICheck",
+          "RigidBodyHasCollider",
+          "RigidBodyHasCollider",
+          "RigidBodyHasCollider"
+        ],
+        "official_status": "FAIL"
+      },
+      "checks": {
+        "baseline_blocking_five": true,
+        "candidate_blocking_four": true,
+        "candidate_immutable": true,
+        "candidate_warning_zero": true,
+        "deterministic_repeat": true,
+        "joint_state_api_readback": true,
+        "no_authored_drive_values": true,
+        "no_authored_state_values": true,
+        "no_issue_added": true,
+        "only_joint_state_removed": true,
+        "remaining_rules_exact": true,
+        "source_stage_unchanged": true
+      },
+      "joint_path": "/follower_right/vx300s_right/joints/gripper",
+      "joint_state_api_readback": true,
+      "joint_state_axis": "angular",
+      "joint_type": "RevoluteJoint",
+      "official_rules": {
+        "blocking_issue_count": 4,
+        "deterministic_repeat": true,
+        "deterministic_signature": "3f86fd4dd473373a8a5585aef0ac654da80a8a2efc11b794ab5683d8ef565372",
+        "official_status": "FAIL",
+        "primary_report": {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7_joint_state_physics_follower_right_official.json",
+          "sha256": "0097866bac5c36f100590279fd1accf465e24eed2ad11460c11d42548a7ce8d3"
+        },
+        "repeat_report": {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-post-grasp-task7/joint_state_right_official_repeat.json",
+          "sha256": "8649aac85632096085157cb29609e8d7467e54cdf9b5a6d8f47157193f7779eb"
+        },
+        "warning_count": 0
+      },
+      "physics_layer": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task7_joint_state_physics_candidate/1.0/follower_right/physics/aloha1_task7_follower_right_joint_state_physics.usd",
+        "authored_properties": [],
+        "filename_ends_with_physics_usd": true,
+        "sha256": "aaf265430e3db5c157d33a0bd85bcd4ac31b30c0e6ec5290ca9cc700b492a68c"
+      },
+      "remaining_issue_rule_counts": {
+        "MimicAPICheck": 1,
+        "RigidBodyHasCollider": 3
+      },
+      "removed_issue_rules": [
+        "JointHasJointStateAPI"
+      ],
+      "source_stage": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/supplier_cad_follower_right.usda",
+        "modified": false,
+        "sha256_after": "95c7878f794f5f557b70997a2240b6476836b8ffbeed5a4992cb114a169487ea",
+        "sha256_before": "95c7878f794f5f557b70997a2240b6476836b8ffbeed5a4992cb114a169487ea"
+      },
+      "source_stage_modified": false,
+      "status": "PASS",
+      "wrapper": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task7_joint_state_physics_candidate/1.0/follower_right/aloha1_task7_follower_right_joint_state.usda",
+        "default_prim": "/follower_right",
+        "sha256": "3a4ce3792ef7e0b9efe4e571a79ec63b77cb6f6036f028066b5d808e00e49fae",
+        "sublayers": [
+          "physics/aloha1_task7_follower_right_joint_state_physics.usd",
+          "../../../supplier_cad_follower_right/1.0/supplier_cad_follower_right.usda"
+        ]
+      }
+    }
+  },
+  "collider_modified": false,
+  "direct_nvidia_mcp_probe": {
+    "asset_validation_catalog_version": "1.2.1",
+    "local_source_remains_version_authority": true,
+    "status": "PASS",
+    "transport": "DIRECT_NOT_MCPJUNGLE"
+  },
+  "drive_modified": false,
+  "final_or_default_asset_modified": false,
+  "geometry_modified": false,
+  "input_manifest": {
+    "baseline_report": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_signal_correspondence_official_rules.json",
+      "sha256": "a7acb1e7363d1306b01b7f9609f9a5250f0b535771a3de8523246ae3cd31756f"
+    },
+    "build_report": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7_joint_state_physics_candidate_build.json",
+      "sha256": "97c241f974c10fbe23674050779dd9999e54ff186808ffdd59bd136f8816b4ca"
+    }
+  },
+  "literal_official_status_after_candidate": "FAIL",
+  "local_runtime": {
+    "asset_validation": "1.1.0",
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physx": "107.3.26"
+  },
+  "mimic_modified": false,
+  "real_robot_connected": false,
+  "remaining_boundaries": {
+    "HARD_BLOCKER_NO_SOURCE_COLLIDER_GEOMETRY": 6,
+    "ISAAC_5_1_VALIDATOR_SCHEMA_CONFLICT": 2
+  },
+  "remote_192_168_1_103_accessed": false,
+  "schema_version": 1,
+  "status": "PASS",
+  "task7": "PARTIAL",
+  "task8": "NOT_RUN"
+}
