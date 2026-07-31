@@ -11,11 +11,13 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 PDF = ROOT / "aloha_bottle_cap_report_ja.pdf"
-LOG = ROOT / "aloha_bottle_cap_report_ja.log"
 MAIN = ROOT / "aloha_bottle_cap_report_ja.tex"
 SECTIONS = sorted((ROOT / "sections").glob("*.tex"))
 ART = ROOT / "artifacts"
 BUILD = ROOT / "build"
+ACTIVE_LOG = ROOT / "aloha_bottle_cap_report_ja.log"
+ARCHIVED_LOG = ART / "latex_build.log"
+LOG = ACTIVE_LOG if ACTIVE_LOG.is_file() else ARCHIVED_LOG
 
 
 def run(*args: str) -> str:
@@ -38,6 +40,7 @@ fonts = run("pdffonts", str(PDF))
 require("NotoSerifCJKjp" in fonts, "Noto Serif CJK JP is not embedded")
 require("NotoSansCJKjp" in fonts, "Noto Sans CJK JP is not embedded")
 
+require(LOG.is_file(), "neither the active nor archived LaTeX build log exists")
 log = LOG.read_text(encoding="utf-8", errors="replace")
 for forbidden in [
     "Overfull \\\\hbox",
@@ -59,6 +62,7 @@ references = [name for name in references if not name.startswith("#")]
 missing = sorted({name for name in references if not (ROOT / "figures" / name).is_file()})
 require(not missing, f"missing figures: {missing}")
 
+BUILD.mkdir(exist_ok=True)
 text_path = BUILD / "report_ja_verification.txt"
 subprocess.run(["pdftotext", "-layout", str(PDF), str(text_path)], check=True)
 text = text_path.read_text(encoding="utf-8", errors="replace")

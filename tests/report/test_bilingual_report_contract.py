@@ -76,3 +76,9 @@ def test_japanese_tables_are_unbreakable_float_tables() -> None:
     )
     assert source.count("\\begin{table}[H]") == source.count("\\end{table}")
     assert "\\begin{table}[ht" not in source
+
+
+def test_japanese_verifier_supports_clean_checkout_build_log() -> None:
+    verifier = (JA_REPORT / "scripts" / "verify_japanese_report.py").read_text(encoding="utf-8")
+    assert 'ART / "latex_build.log"' in verifier
+    assert "BUILD.mkdir(exist_ok=True)" in verifier
