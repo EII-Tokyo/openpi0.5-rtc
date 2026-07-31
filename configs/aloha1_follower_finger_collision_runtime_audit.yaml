@@ -1,0 +1,57 @@
+schema_version: 1
+scope: DIAGNOSTIC_ONLY_FOLLOWER_LEFT_SUPPLIER_CAD_FINGER_BOTTLE500_COLLISION_REPLAY
+runtime:
+  isaac_sim: 5.1.0.0
+  kit: 107.3.3
+  physx: 107.3.26
+  physics_frequency_hz: 60
+stage:
+  absolute_path: /home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/table_support_alignment/1.0/aloha1_table_support_aligned_workcell.usda
+  sha256: 2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c
+  root_prim: /World
+bottle:
+  absolute_path: /home/eii/project/openpi0.5-rtc-reward-learning/assets/bottle_500ml/isaac/bottle_500ml_sim.usd
+  sha256: 16427135f152ec951de2321fd689366d745a2dd389cbe260976631783952533e
+  session_path: /World/Task7B2HorizontalSession/Bottle500
+  reference_prim: /Bottle500
+replay:
+  source_report: /home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7b2_horizontal_grasp_v2.json
+  source_report_sha256: a39cacdcfe552d96acdae3aa653bcccc3e1c68fcc79e3fddde34e72891c183af
+  source_trial_index: 0
+  source_runtime_signature: 4a68698de81e20875ee5a6d431a4c95d94e7adbdf2afd75287db8030ad0a78f7
+  semantics: EXACT_REPLAY_OF_RECORDED_JOINT_TARGETS_FRESH_WORLD_RESET
+finger_colliders:
+  left:
+    link: /World/follower_left/vx300s_left/follower_left_left_finger_link
+    visual: /World/follower_left/vx300s_left/follower_left_left_finger_link/visuals/diagnostic_supplier_cad_left_finger/mesh
+    collider: /World/follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh
+  right:
+    link: /World/follower_left/vx300s_left/follower_left_right_finger_link
+    visual: /World/follower_left/vx300s_left/follower_left_right_finger_link/visuals/diagnostic_supplier_cad_right_finger/mesh
+    collider: /World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh
+physics:
+  solve_articulation_contact_last: true
+  mass_kg: 0.020
+  friction: 0.7
+  restitution: 0.0
+capture:
+  phases: [open_pregrasp, bilateral_contact, maximum_closure, hold_end]
+  views: [true_top, contact_oblique]
+  paired_modes: [normal, physics_collider_overlay]
+  display_colliders_setting: /persistent/physics/visualizationDisplayColliders
+  display_colliders_values:
+    normal: 0
+    physics_collider_overlay: 2
+  overlay_semantics: AUTHORED_COLLIDER_GEOMETRY_NOT_COOKED_HULL_READBACK
+  same_camera_and_physics_frame_required: true
+limits:
+  maximum_registration_gap_m: 1.0e-9
+  minimum_bottle_response_m: 1.0e-4
+forbidden:
+  surface_gripper: true
+  fixed_joint: true
+  parent_attachment: true
+  runtime_bottle_teleport_after_release: true
+  source_or_final_asset_write: true
+boundaries:
+  task8: NOT_RUN

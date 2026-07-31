@@ -1,0 +1,2267 @@
+{
+  "bottle": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/bottle_500ml/isaac/bottle_500ml_sim.usd",
+    "collision_local_aabb": {
+      "maximum": [
+        0.03319999948143959,
+        0.03319999948143959,
+        0.20600000023841858
+      ],
+      "minimum": [
+        -0.03319999948143959,
+        -0.03319999948143959,
+        0.0
+      ]
+    },
+    "reference_prim": "/Bottle500",
+    "session_path": "/World/BottleCollisionDiagnosticSession/Bottle500",
+    "settled_collision_world_bounds": {
+      "maximum": [
+        0.14220131441774653,
+        -0.11625872014933711,
+        0.06512207935783104
+      ],
+      "minimum": [
+        -0.06785127204128505,
+        -0.19663176266336174,
+        -2.1693792853494376e-06
+      ],
+      "point_count": 384,
+      "source": "PHYSX_POSE_TRANSFORMED_FROZEN_LOCAL_COLLIDER_POINTS"
+    },
+    "settled_visual_world_bounds": {
+      "maximum": [
+        0.14216092923973253,
+        -0.11561950479484742,
+        0.06575110524421052
+      ],
+      "minimum": [
+        -0.06785845034677924,
+        -0.1995705133082199,
+        -0.0024921479718382836
+      ],
+      "point_count": 3151,
+      "source": "PHYSX_POSE_TRANSFORMED_FROZEN_LOCAL_COLLIDER_POINTS"
+    },
+    "sha256_after": "16427135f152ec951de2321fd689366d745a2dd389cbe260976631783952533e",
+    "sha256_before": "16427135f152ec951de2321fd689366d745a2dd389cbe260976631783952533e",
+    "visual_local_aabb": {
+      "maximum": [
+        0.03400000184774399,
+        0.03400000184774399,
+        0.20600001513957977
+      ],
+      "minimum": [
+        -0.03400000184774399,
+        -0.03400000184774399,
+        0.0
+      ]
+    }
+  },
+  "capture_manifest": [
+    {
+      "bottle_orientation_wxyz": [
+        0.7095710039138794,
+        -0.11483470350503922,
+        0.6948333978652954,
+        -0.02299094758927822
+      ],
+      "bottle_position_world_m": [
+        -0.06392059475183487,
+        -0.16689038276672363,
+        0.031434476375579834
+      ],
+      "camera_clipping_range_m": [
+        0.005,
+        5.0
+      ],
+      "camera_intrinsics_pixels": [
+        [
+          2290.622802734375,
+          0.0,
+          480.0
+        ],
+        [
+          0.0,
+          2290.622802734375,
+          360.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "camera_orientation_readback_wxyz": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "camera_orientation_wxyz": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "camera_position_readback_world_m": [
+        0.037175022065639496,
+        -0.1564452350139618,
+        0.8825599551200867
+      ],
+      "camera_position_world_m": [
+        0.03717502118823074,
+        -0.1564452414063494,
+        0.8825599549892729
+      ],
+      "normal_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-bottle-collision-runtime-gate/standard_pusher_run13/screenshots_raw/pre_contact/true_top_normal_raw.png",
+      "overlay_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-bottle-collision-runtime-gate/standard_pusher_run13/screenshots_raw/pre_contact/true_top_physics_collider_overlay_raw.png",
+      "phase": "pre_contact",
+      "physics_frame": 122,
+      "pusher_position_world_m": [
+        0.010874541476368904,
+        -0.20621682703495026,
+        0.03198917582631111
+      ],
+      "same_camera_pose": true,
+      "same_physics_frame": true,
+      "view": "true_top"
+    },
+    {
+      "bottle_orientation_wxyz": [
+        0.7095710039138794,
+        -0.11483470350503922,
+        0.6948333978652954,
+        -0.02299094758927822
+      ],
+      "bottle_position_world_m": [
+        -0.06392059475183487,
+        -0.16689038276672363,
+        0.031434476375579834
+      ],
+      "camera_clipping_range_m": [
+        0.005,
+        5.0
+      ],
+      "camera_intrinsics_pixels": [
+        [
+          2290.622802734375,
+          0.0,
+          480.0
+        ],
+        [
+          0.0,
+          2290.622802734375,
+          360.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "camera_orientation_readback_wxyz": [
+        0.7255247235298157,
+        0.5270701050758362,
+        0.2600805163383484,
+        0.3580071032047272
+      ],
+      "camera_orientation_wxyz": [
+        0.7255247235298157,
+        0.5270701050758362,
+        0.2600805163383484,
+        0.3580071032047272
+      ],
+      "camera_position_readback_world_m": [
+        0.7330436706542969,
+        -0.6898700594902039,
+        0.31754422187805176
+      ],
+      "camera_position_world_m": [
+        0.7330436462244209,
+        -0.6898700381851102,
+        0.31754421740012156
+      ],
+      "normal_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-bottle-collision-runtime-gate/standard_pusher_run13/screenshots_raw/pre_contact/contact_oblique_normal_raw.png",
+      "overlay_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-bottle-collision-runtime-gate/standard_pusher_run13/screenshots_raw/pre_contact/contact_oblique_physics_collider_overlay_raw.png",
+      "phase": "pre_contact",
+      "physics_frame": 122,
+      "pusher_position_world_m": [
+        0.010874541476368904,
+        -0.20621682703495026,
+        0.03198917582631111
+      ],
+      "same_camera_pose": true,
+      "same_physics_frame": true,
+      "view": "contact_oblique"
+    },
+    {
+      "bottle_orientation_wxyz": [
+        0.7095481753349304,
+        -0.11475635319948196,
+        0.6948381066322327,
+        -0.023926610127091408
+      ],
+      "bottle_position_world_m": [
+        -0.06392857432365417,
+        -0.16660170257091522,
+        0.031437359750270844
+      ],
+      "camera_clipping_range_m": [
+        0.005,
+        5.0
+      ],
+      "camera_intrinsics_pixels": [
+        [
+          2290.622802734375,
+          0.0,
+          480.0
+        ],
+        [
+          0.0,
+          2290.622802734375,
+          360.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "camera_orientation_readback_wxyz": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "camera_orientation_wxyz": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "camera_position_readback_world_m": [
+        0.037175022065639496,
+        -0.1564452350139618,
+        0.8825599551200867
+      ],
+      "camera_position_world_m": [
+        0.03717502118823074,
+        -0.1564452414063494,
+        0.8825599549892729
+      ],
+      "normal_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-bottle-collision-runtime-gate/standard_pusher_run13/screenshots_raw/first_contact/true_top_normal_raw.png",
+      "overlay_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-bottle-collision-runtime-gate/standard_pusher_run13/screenshots_raw/first_contact/true_top_physics_collider_overlay_raw.png",
+      "phase": "first_contact",
+      "physics_frame": 157,
+      "pusher_position_world_m": [
+        0.010110250674188137,
+        -0.20043377578258514,
+        0.03198917582631111
+      ],
+      "same_camera_pose": true,
+      "same_physics_frame": true,
+      "view": "true_top"
+    },
+    {
+      "bottle_orientation_wxyz": [
+        0.7095481753349304,
+        -0.11475635319948196,
+        0.6948381066322327,
+        -0.023926610127091408
+      ],
+      "bottle_position_world_m": [
+        -0.06392857432365417,
+        -0.16660170257091522,
+        0.031437359750270844
+      ],
+      "camera_clipping_range_m": [
+        0.005,
+        5.0
+      ],
+      "camera_intrinsics_pixels": [
+        [
+          2290.622802734375,
+          0.0,
+          480.0
+        ],
+        [
+          0.0,
+          2290.622802734375,
+          360.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "camera_orientation_readback_wxyz": [
+        0.7255247235298157,
+        0.5270701050758362,
+        0.2600805163383484,
+        0.3580071032047272
+      ],
+      "camera_orientation_wxyz": [
+        0.7255247235298157,
+        0.5270701050758362,
+        0.2600805163383484,
+        0.3580071032047272
+      ],
+      "camera_position_readback_world_m": [
+        0.7330436706542969,
+        -0.6898700594902039,
+        0.31754422187805176
+      ],
+      "camera_position_world_m": [
+        0.7330436462244209,
+        -0.6898700381851102,
+        0.31754421740012156
+      ],
+      "normal_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-bottle-collision-runtime-gate/standard_pusher_run13/screenshots_raw/first_contact/contact_oblique_normal_raw.png",
+      "overlay_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-bottle-collision-runtime-gate/standard_pusher_run13/screenshots_raw/first_contact/contact_oblique_physics_collider_overlay_raw.png",
+      "phase": "first_contact",
+      "physics_frame": 157,
+      "pusher_position_world_m": [
+        0.010110250674188137,
+        -0.20043377578258514,
+        0.03198917582631111
+      ],
+      "same_camera_pose": true,
+      "same_physics_frame": true,
+      "view": "contact_oblique"
+    },
+    {
+      "bottle_orientation_wxyz": [
+        0.7092770934104919,
+        -0.10936108231544495,
+        0.6957144141197205,
+        -0.030785130336880684
+      ],
+      "bottle_position_world_m": [
+        -0.06386930495500565,
+        -0.16350741684436798,
+        0.031452253460884094
+      ],
+      "camera_clipping_range_m": [
+        0.005,
+        5.0
+      ],
+      "camera_intrinsics_pixels": [
+        [
+          2290.622802734375,
+          0.0,
+          480.0
+        ],
+        [
+          0.0,
+          2290.622802734375,
+          360.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "camera_orientation_readback_wxyz": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "camera_orientation_wxyz": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "camera_position_readback_world_m": [
+        0.037175022065639496,
+        -0.1564452350139618,
+        0.8825599551200867
+      ],
+      "camera_position_world_m": [
+        0.03717502118823074,
+        -0.1564452414063494,
+        0.8825599549892729
+      ],
+      "normal_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-bottle-collision-runtime-gate/standard_pusher_run13/screenshots_raw/maximum_compression/true_top_normal_raw.png",
+      "overlay_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-bottle-collision-runtime-gate/standard_pusher_run13/screenshots_raw/maximum_compression/true_top_physics_collider_overlay_raw.png",
+      "phase": "maximum_compression",
+      "physics_frame": 169,
+      "pusher_position_world_m": [
+        0.009848208166658878,
+        -0.19845102727413177,
+        0.03198917582631111
+      ],
+      "same_camera_pose": true,
+      "same_physics_frame": true,
+      "view": "true_top"
+    },
+    {
+      "bottle_orientation_wxyz": [
+        0.7092770934104919,
+        -0.10936108231544495,
+        0.6957144141197205,
+        -0.030785130336880684
+      ],
+      "bottle_position_world_m": [
+        -0.06386930495500565,
+        -0.16350741684436798,
+        0.031452253460884094
+      ],
+      "camera_clipping_range_m": [
+        0.005,
+        5.0
+      ],
+      "camera_intrinsics_pixels": [
+        [
+          2290.622802734375,
+          0.0,
+          480.0
+        ],
+        [
+          0.0,
+          2290.622802734375,
+          360.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "camera_orientation_readback_wxyz": [
+        0.7255247235298157,
+        0.5270701050758362,
+        0.2600805163383484,
+        0.3580071032047272
+      ],
+      "camera_orientation_wxyz": [
+        0.7255247235298157,
+        0.5270701050758362,
+        0.2600805163383484,
+        0.3580071032047272
+      ],
+      "camera_position_readback_world_m": [
+        0.7330436706542969,
+        -0.6898700594902039,
+        0.31754422187805176
+      ],
+      "camera_position_world_m": [
+        0.7330436462244209,
+        -0.6898700381851102,
+        0.31754421740012156
+      ],
+      "normal_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-bottle-collision-runtime-gate/standard_pusher_run13/screenshots_raw/maximum_compression/contact_oblique_normal_raw.png",
+      "overlay_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-bottle-collision-runtime-gate/standard_pusher_run13/screenshots_raw/maximum_compression/contact_oblique_physics_collider_overlay_raw.png",
+      "phase": "maximum_compression",
+      "physics_frame": 169,
+      "pusher_position_world_m": [
+        0.009848208166658878,
+        -0.19845102727413177,
+        0.03198917582631111
+      ],
+      "same_camera_pose": true,
+      "same_physics_frame": true,
+      "view": "contact_oblique"
+    },
+    {
+      "bottle_orientation_wxyz": [
+        0.7092787027359009,
+        -0.10935163497924805,
+        0.6957147121429443,
+        -0.030773090198636055
+      ],
+      "bottle_position_world_m": [
+        -0.06386934220790863,
+        -0.16350805759429932,
+        0.03145303204655647
+      ],
+      "camera_clipping_range_m": [
+        0.005,
+        5.0
+      ],
+      "camera_intrinsics_pixels": [
+        [
+          2290.622802734375,
+          0.0,
+          480.0
+        ],
+        [
+          0.0,
+          2290.622802734375,
+          360.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "camera_orientation_readback_wxyz": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "camera_orientation_wxyz": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "camera_position_readback_world_m": [
+        0.037175022065639496,
+        -0.1564452350139618,
+        0.8825599551200867
+      ],
+      "camera_position_world_m": [
+        0.03717502118823074,
+        -0.1564452414063494,
+        0.8825599549892729
+      ],
+      "normal_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-bottle-collision-runtime-gate/standard_pusher_run13/screenshots_raw/post_contact/true_top_normal_raw.png",
+      "overlay_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-bottle-collision-runtime-gate/standard_pusher_run13/screenshots_raw/post_contact/true_top_physics_collider_overlay_raw.png",
+      "phase": "post_contact",
+      "physics_frame": 199,
+      "pusher_position_world_m": [
+        0.009848208166658878,
+        -0.19845102727413177,
+        0.03198917582631111
+      ],
+      "same_camera_pose": true,
+      "same_physics_frame": true,
+      "view": "true_top"
+    },
+    {
+      "bottle_orientation_wxyz": [
+        0.7092787027359009,
+        -0.10935163497924805,
+        0.6957147121429443,
+        -0.030773090198636055
+      ],
+      "bottle_position_world_m": [
+        -0.06386934220790863,
+        -0.16350805759429932,
+        0.03145303204655647
+      ],
+      "camera_clipping_range_m": [
+        0.005,
+        5.0
+      ],
+      "camera_intrinsics_pixels": [
+        [
+          2290.622802734375,
+          0.0,
+          480.0
+        ],
+        [
+          0.0,
+          2290.622802734375,
+          360.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "camera_orientation_readback_wxyz": [
+        0.7255247235298157,
+        0.5270701050758362,
+        0.2600805163383484,
+        0.3580071032047272
+      ],
+      "camera_orientation_wxyz": [
+        0.7255247235298157,
+        0.5270701050758362,
+        0.2600805163383484,
+        0.3580071032047272
+      ],
+      "camera_position_readback_world_m": [
+        0.7330436706542969,
+        -0.6898700594902039,
+        0.31754422187805176
+      ],
+      "camera_position_world_m": [
+        0.7330436462244209,
+        -0.6898700381851102,
+        0.31754421740012156
+      ],
+      "normal_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-bottle-collision-runtime-gate/standard_pusher_run13/screenshots_raw/post_contact/contact_oblique_normal_raw.png",
+      "overlay_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-bottle-collision-runtime-gate/standard_pusher_run13/screenshots_raw/post_contact/contact_oblique_physics_collider_overlay_raw.png",
+      "phase": "post_contact",
+      "physics_frame": 199,
+      "pusher_position_world_m": [
+        0.009848208166658878,
+        -0.19845102727413177,
+        0.03198917582631111
+      ],
+      "same_camera_pose": true,
+      "same_physics_frame": true,
+      "view": "contact_oblique"
+    }
+  ],
+  "classification": "DIAGNOSTIC_ONLY_NOT_FINAL_ASSET",
+  "collider_display_setting": {
+    "before": 0,
+    "normal": 0,
+    "path": "/persistent/physics/visualizationDisplayColliders",
+    "physics_collider_overlay": 2,
+    "restored": 0
+  },
+  "command": [
+    "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/bin/python",
+    "tools/audit_aloha1_bottle_collision_runtime.py",
+    "--artifact-root",
+    ".codex/artifacts/20260730-aloha1-bottle-collision-runtime-gate/standard_pusher_run13",
+    "--output",
+    "reports/aloha1_mapping/aloha1_bottle_collision_runtime_standard_pusher_run13.json"
+  ],
+  "contact_event_count": 2828,
+  "environment_allowlist": {
+    "DISPLAY": ":1",
+    "OMNI_KIT_ACCEPT_EULA": "YES",
+    "PYTHONPATH": "/home/eii/project/openpi0.5-rtc-reward-learning"
+  },
+  "evaluation": {
+    "deterministic_signature": "c8c897b89ef31b89f36dfd535df56e16b5a62fd54c6a8bc9c576ff43e8b433fd",
+    "gates": {
+      "bottle_visual_collider_registration": true,
+      "capture_pair_synchronization": true,
+      "colliders_present_and_enabled": true,
+      "collision_unfiltered": true,
+      "expected_direction_response": true,
+      "forbidden_helpers_absent": true,
+      "frozen_inputs": true,
+      "physical_contact": true,
+      "probe_visual_collider_registration": true,
+      "rigid_body_dynamic": true,
+      "trajectory_intersects_collision_envelope": true
+    },
+    "metrics": {
+      "bottle_max_aabb_surface_gap_m": 0.0008000023663043976,
+      "bottle_max_transform_residual_m": 0.0,
+      "physical_contact_count": 3,
+      "probe_max_aabb_surface_gap_m": 0.0,
+      "probe_max_transform_residual_m": 0.0,
+      "signed_response_m": 0.003346452882837009
+    },
+    "probe_kind": "STANDARD_KINEMATIC_PUSHER",
+    "root_cause": "COLLISION_PIPELINE_VERIFIED",
+    "schema_version": 1,
+    "status": "PASS"
+  },
+  "filtered_pairs": {
+    "filtered_pairs": [],
+    "pair_is_filtered": false
+  },
+  "first_contact_frame": 157,
+  "physical_pusher_contact_count": 15,
+  "probe": {
+    "captures": {
+      "paired_records": [
+        {
+          "bottle_orientation_wxyz": [
+            0.7095710039138794,
+            -0.11483470350503922,
+            0.6948333978652954,
+            -0.02299094758927822
+          ],
+          "bottle_position_world_m": [
+            -0.06392059475183487,
+            -0.16689038276672363,
+            0.031434476375579834
+          ],
+          "camera_clipping_range_m": [
+            0.005,
+            5.0
+          ],
+          "camera_intrinsics_pixels": [
+            [
+              2290.622802734375,
+              0.0,
+              480.0
+            ],
+            [
+              0.0,
+              2290.622802734375,
+              360.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "camera_orientation_readback_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "camera_orientation_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "camera_position_readback_world_m": [
+            0.037175022065639496,
+            -0.1564452350139618,
+            0.8825599551200867
+          ],
+          "camera_position_world_m": [
+            0.03717502118823074,
+            -0.1564452414063494,
+            0.8825599549892729
+          ],
+          "normal_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-bottle-collision-runtime-gate/standard_pusher_run13/screenshots_raw/pre_contact/true_top_normal_raw.png",
+          "overlay_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-bottle-collision-runtime-gate/standard_pusher_run13/screenshots_raw/pre_contact/true_top_physics_collider_overlay_raw.png",
+          "phase": "pre_contact",
+          "physics_frame": 122,
+          "pusher_position_world_m": [
+            0.010874541476368904,
+            -0.20621682703495026,
+            0.03198917582631111
+          ],
+          "same_camera_pose": true,
+          "same_physics_frame": true,
+          "view": "true_top"
+        },
+        {
+          "bottle_orientation_wxyz": [
+            0.7095481753349304,
+            -0.11475635319948196,
+            0.6948381066322327,
+            -0.023926610127091408
+          ],
+          "bottle_position_world_m": [
+            -0.06392857432365417,
+            -0.16660170257091522,
+            0.031437359750270844
+          ],
+          "camera_clipping_range_m": [
+            0.005,
+            5.0
+          ],
+          "camera_intrinsics_pixels": [
+            [
+              2290.622802734375,
+              0.0,
+              480.0
+            ],
+            [
+              0.0,
+              2290.622802734375,
+              360.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "camera_orientation_readback_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "camera_orientation_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "camera_position_readback_world_m": [
+            0.037175022065639496,
+            -0.1564452350139618,
+            0.8825599551200867
+          ],
+          "camera_position_world_m": [
+            0.03717502118823074,
+            -0.1564452414063494,
+            0.8825599549892729
+          ],
+          "normal_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-bottle-collision-runtime-gate/standard_pusher_run13/screenshots_raw/first_contact/true_top_normal_raw.png",
+          "overlay_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-bottle-collision-runtime-gate/standard_pusher_run13/screenshots_raw/first_contact/true_top_physics_collider_overlay_raw.png",
+          "phase": "first_contact",
+          "physics_frame": 157,
+          "pusher_position_world_m": [
+            0.010110250674188137,
+            -0.20043377578258514,
+            0.03198917582631111
+          ],
+          "same_camera_pose": true,
+          "same_physics_frame": true,
+          "view": "true_top"
+        },
+        {
+          "bottle_orientation_wxyz": [
+            0.7092770934104919,
+            -0.10936108231544495,
+            0.6957144141197205,
+            -0.030785130336880684
+          ],
+          "bottle_position_world_m": [
+            -0.06386930495500565,
+            -0.16350741684436798,
+            0.031452253460884094
+          ],
+          "camera_clipping_range_m": [
+            0.005,
+            5.0
+          ],
+          "camera_intrinsics_pixels": [
+            [
+              2290.622802734375,
+              0.0,
+              480.0
+            ],
+            [
+              0.0,
+              2290.622802734375,
+              360.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "camera_orientation_readback_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "camera_orientation_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "camera_position_readback_world_m": [
+            0.037175022065639496,
+            -0.1564452350139618,
+            0.8825599551200867
+          ],
+          "camera_position_world_m": [
+            0.03717502118823074,
+            -0.1564452414063494,
+            0.8825599549892729
+          ],
+          "normal_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-bottle-collision-runtime-gate/standard_pusher_run13/screenshots_raw/maximum_compression/true_top_normal_raw.png",
+          "overlay_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-bottle-collision-runtime-gate/standard_pusher_run13/screenshots_raw/maximum_compression/true_top_physics_collider_overlay_raw.png",
+          "phase": "maximum_compression",
+          "physics_frame": 169,
+          "pusher_position_world_m": [
+            0.009848208166658878,
+            -0.19845102727413177,
+            0.03198917582631111
+          ],
+          "same_camera_pose": true,
+          "same_physics_frame": true,
+          "view": "true_top"
+        },
+        {
+          "bottle_orientation_wxyz": [
+            0.7092787027359009,
+            -0.10935163497924805,
+            0.6957147121429443,
+            -0.030773090198636055
+          ],
+          "bottle_position_world_m": [
+            -0.06386934220790863,
+            -0.16350805759429932,
+            0.03145303204655647
+          ],
+          "camera_clipping_range_m": [
+            0.005,
+            5.0
+          ],
+          "camera_intrinsics_pixels": [
+            [
+              2290.622802734375,
+              0.0,
+              480.0
+            ],
+            [
+              0.0,
+              2290.622802734375,
+              360.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "camera_orientation_readback_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "camera_orientation_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "camera_position_readback_world_m": [
+            0.037175022065639496,
+            -0.1564452350139618,
+            0.8825599551200867
+          ],
+          "camera_position_world_m": [
+            0.03717502118823074,
+            -0.1564452414063494,
+            0.8825599549892729
+          ],
+          "normal_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-bottle-collision-runtime-gate/standard_pusher_run13/screenshots_raw/post_contact/true_top_normal_raw.png",
+          "overlay_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-bottle-collision-runtime-gate/standard_pusher_run13/screenshots_raw/post_contact/true_top_physics_collider_overlay_raw.png",
+          "phase": "post_contact",
+          "physics_frame": 199,
+          "pusher_position_world_m": [
+            0.009848208166658878,
+            -0.19845102727413177,
+            0.03198917582631111
+          ],
+          "same_camera_pose": true,
+          "same_physics_frame": true,
+          "view": "true_top"
+        }
+      ],
+      "required_phases": [
+        "pre_contact",
+        "first_contact",
+        "maximum_compression",
+        "post_contact"
+      ]
+    },
+    "colliders": {
+      "all_enabled": true,
+      "approximation_tokens": [
+        "convexHull"
+      ],
+      "count": 41,
+      "filtered_pair_with_probe": false
+    },
+    "contacts": [
+      {
+        "actor0_path": "/World/BottleCollisionDiagnosticSession/Bottle500",
+        "actor1_path": "/World/BottleCollisionDiagnosticSession/Pusher",
+        "collider0_path": "/World/BottleCollisionDiagnosticSession/Bottle500/Collisions/COL_Body_11/COL_Body_11Mesh",
+        "collider1_path": "/World/BottleCollisionDiagnosticSession/Pusher",
+        "estimated_normal_force_n": 0.01538977075312007,
+        "event_type": "ContactEventType.CONTACT_PERSIST",
+        "frame": 157,
+        "impulse_ns": 0.00025649617921866784,
+        "impulse_vector_ns": [
+          -1.9708000763785094e-05,
+          0.00025573791936039925,
+          -3.55089220249738e-08
+        ],
+        "material0_path": "/World/BottleCollisionDiagnosticSession/Materials/BottleTemporary",
+        "material1_path": "/World/BottleCollisionDiagnosticSession/Materials/PusherTemporary",
+        "normal_world": [
+          -0.07683545351028442,
+          0.997043788433075,
+          -0.0001384383940603584
+        ],
+        "phase": "slow_push",
+        "physical": true,
+        "position_world_m": [
+          0.00012689828872680664,
+          -0.1905996948480606,
+          0.038267869502305984
+        ],
+        "separation_m": -3.094942258030642e-08,
+        "time_s": 2.6166666666666667
+      },
+      {
+        "actor0_path": "/World/BottleCollisionDiagnosticSession/Bottle500",
+        "actor1_path": "/World/BottleCollisionDiagnosticSession/Pusher",
+        "collider0_path": "/World/BottleCollisionDiagnosticSession/Bottle500/Collisions/COL_Body_13/COL_Body_13Mesh",
+        "collider1_path": "/World/BottleCollisionDiagnosticSession/Pusher",
+        "estimated_normal_force_n": 0.13454276654910122,
+        "event_type": "ContactEventType.CONTACT_PERSIST",
+        "frame": 157,
+        "impulse_ns": 0.00224237944248502,
+        "impulse_vector_ns": [
+          -0.00017229469085577875,
+          0.0022357504349201918,
+          -3.1038123893267766e-07
+        ],
+        "material0_path": "/World/BottleCollisionDiagnosticSession/Materials/BottleTemporary",
+        "material1_path": "/World/BottleCollisionDiagnosticSession/Materials/PusherTemporary",
+        "normal_world": [
+          -0.07683565467596054,
+          0.997043788433075,
+          -0.0001384160277666524
+        ],
+        "phase": "slow_push",
+        "physical": true,
+        "position_world_m": [
+          0.0001319199800491333,
+          -0.19059836864471436,
+          0.025568077340722084
+        ],
+        "separation_m": -6.707850843667984e-07,
+        "time_s": 2.6166666666666667
+      },
+      {
+        "actor0_path": "/World/BottleCollisionDiagnosticSession/Bottle500",
+        "actor1_path": "/World/BottleCollisionDiagnosticSession/Pusher",
+        "collider0_path": "/World/BottleCollisionDiagnosticSession/Bottle500/Collisions/COL_Body_12/COL_Body_12Mesh",
+        "collider1_path": "/World/BottleCollisionDiagnosticSession/Pusher",
+        "estimated_normal_force_n": 0.0,
+        "event_type": "ContactEventType.CONTACT_PERSIST",
+        "frame": 157,
+        "impulse_ns": 0.0,
+        "impulse_vector_ns": [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        "material0_path": "/World/BottleCollisionDiagnosticSession/Materials/BottleTemporary",
+        "material1_path": "/World/BottleCollisionDiagnosticSession/Materials/PusherTemporary",
+        "normal_world": [
+          -0.12287959456443787,
+          0.9924216866493225,
+          1.469999369874131e-05
+        ],
+        "phase": "slow_push",
+        "physical": true,
+        "position_world_m": [
+          0.00017071515321731567,
+          -0.19059427082538605,
+          0.03826829791069031
+        ],
+        "separation_m": -2.3189841158455238e-08,
+        "time_s": 2.6166666666666667
+      }
+    ],
+    "explicit_product_prim": "/Bottle500",
+    "forbidden": {
+      "fixed_joint": false,
+      "parent_attachment": false,
+      "runtime_bottle_teleport": false,
+      "source_asset_modified": false,
+      "surface_gripper": false
+    },
+    "frozen_inputs_verified": true,
+    "limits": {
+      "maximum_aabb_surface_gap_m": 0.002,
+      "maximum_penetration_m": 0.002,
+      "maximum_transform_residual_m": 1e-06,
+      "minimum_response_m": 0.001
+    },
+    "probe_kind": "STANDARD_KINEMATIC_PUSHER",
+    "registration": {
+      "bottle_max_aabb_surface_gap_m": 0.0008000023663043976,
+      "bottle_max_transform_residual_m": 0.0,
+      "probe_max_aabb_surface_gap_m": 0.0,
+      "probe_max_transform_residual_m": 0.0
+    },
+    "response": {
+      "bottle_displacement_world_m": [
+        5.1252543926239014e-05,
+        0.0033823251724243164,
+        1.8555670976638794e-05
+      ],
+      "maximum_speed_m_s": 0.009064822870247118,
+      "maximum_travel_m": 0.03,
+      "negative_bottle_surface_projection_m": -0.032563176626482795,
+      "planned_trajectory_intersects_collision_envelope": true,
+      "push_direction_world": [
+        -0.1310212221309504,
+        0.9913795637147823,
+        0.0
+      ],
+      "pusher_maximum_readback_projection_m": -0.04095385669582989,
+      "pusher_pose_trace": [
+        {
+          "commanded_position_world_m": [
+            0.01085270434034701,
+            -0.20605159831869377,
+            0.03198917654710977
+          ],
+          "frame": 123,
+          "readback_center_projection_m": -0.048620522473660006,
+          "readback_error_m": 4.714933956537951e-09,
+          "readback_position_world_m": [
+            0.010852704755961895,
+            -0.20605160295963287,
+            0.03198917582631111
+          ]
+        },
+        {
+          "commanded_position_world_m": [
+            0.010830867469991852,
+            -0.20588636839140798,
+            0.03198917654710977
+          ],
+          "frame": 124,
+          "readback_center_projection_m": -0.048453846733431914,
+          "readback_error_m": 4.481744218675948e-09,
+          "readback_position_world_m": [
+            0.010830867104232311,
+            -0.2058863639831543,
+            0.03198917582631111
+          ]
+        },
+        {
+          "commanded_position_world_m": [
+            0.010809030599636693,
+            -0.20572113846412218,
+            0.03198917654710977
+          ],
+          "frame": 125,
+          "readback_center_projection_m": -0.04828718588793353,
+          "readback_error_m": 1.6280164265644157e-09,
+          "readback_position_world_m": [
+            0.010809030383825302,
+            -0.20572113990783691,
+            0.03198917582631111
+          ]
+        },
+        {
+          "commanded_position_world_m": [
+            0.010787193729281535,
+            -0.20555590853683636,
+            0.03198917654710977
+          ],
+          "frame": 126,
+          "readback_center_projection_m": -0.04812052504243515,
+          "readback_error_m": 7.3314992715362436e-09,
+          "readback_position_world_m": [
+            0.010787193663418293,
+            -0.20555591583251953,
+            0.03198917582631111
+          ]
+        },
+        {
+          "commanded_position_world_m": [
+            0.010765356858926376,
+            -0.20539067860955057,
+            0.03198917654710977
+          ],
+          "frame": 127,
+          "readback_center_projection_m": -0.04795384942423008,
+          "readback_error_m": 1.8977399575058986e-09,
+          "readback_position_world_m": [
+            0.010765356943011284,
+            -0.20539067685604095,
+            0.03198917582631111
+          ]
+        },
+        {
+          "commanded_position_world_m": [
+            0.010743519988571218,
+            -0.20522544868226478,
+            0.03198917654710977
+          ],
+          "frame": 128,
+          "readback_center_projection_m": -0.047787188578731696,
+          "readback_error_m": 4.167935540071249e-09,
+          "readback_position_world_m": [
+            0.010743520222604275,
+            -0.20522545278072357,
+            0.03198917582631111
+          ]
+        },
+        {
+          "commanded_position_world_m": [
+            0.01072168311821606,
+            -0.20506021875497898,
+            0.03198917654710977
+          ],
+          "frame": 129,
+          "readback_center_projection_m": -0.047620512960526634,
+          "readback_error_m": 5.017644796570393e-09,
+          "readback_position_world_m": [
+            0.010721683502197266,
+            -0.205060213804245,
+            0.03198917582631111
+          ]
+        },
+        {
+          "commanded_position_world_m": [
+            0.010699846247860901,
+            -0.2048949888276932,
+            0.03198917654710977
+          ],
+          "frame": 130,
+          "readback_center_projection_m": -0.047453851993005225,
+          "readback_error_m": 1.2205308496043752e-09,
+          "readback_position_world_m": [
+            0.010699845850467682,
+            -0.2048949897289276,
+            0.03198917582631111
+          ]
+        },
+        {
+          "commanded_position_world_m": [
+            0.010678009377505744,
+            -0.2047297589004074,
+            0.03198917654710977
+          ],
+          "frame": 131,
+          "readback_center_projection_m": -0.04728719114750684,
+          "readback_error_m": 6.796067115176304e-09,
+          "readback_position_world_m": [
+            0.010678009130060673,
+            -0.20472976565361023,
+            0.03198917582631111
+          ]
+        },
+        {
+          "commanded_position_world_m": [
+            0.010656172507150586,
+            -0.20456452897312158,
+            0.03198917654710977
+          ],
+          "frame": 132,
+          "readback_center_projection_m": -0.04712051552930178,
+          "readback_error_m": 2.408448897871288e-09,
+          "readback_position_world_m": [
+            0.010656172409653664,
+            -0.20456452667713165,
+            0.03198917582631111
+          ]
+        },
+        {
+          "commanded_position_world_m": [
+            0.010634335636795427,
+            -0.2043992990458358,
+            0.03198917654710977
+          ],
+          "frame": 133,
+          "readback_center_projection_m": -0.04695385468380339,
+          "readback_error_m": 3.6286753523726635e-09,
+          "readback_position_world_m": [
+            0.010634335689246655,
+            -0.20439930260181427,
+            0.03198917582631111
+          ]
+        },
+        {
+          "commanded_position_world_m": [
+            0.010612498766440269,
+            -0.20423406911855,
+            0.03198917654710977
+          ],
+          "frame": 134,
+          "readback_center_projection_m": -0.046787179065598324,
+          "readback_error_m": 5.543998517162353e-09,
+          "readback_position_world_m": [
+            0.010612498968839645,
+            -0.2042340636253357,
+            0.03198917582631111
+          ]
+        },
+        {
+          "commanded_position_world_m": [
+            0.01059066189608511,
+            -0.2040688391912642,
+            0.03198917654710977
+          ],
+          "frame": 135,
+          "readback_center_projection_m": -0.046620518220099945,
+          "readback_error_m": 8.788651740749017e-10,
+          "readback_position_world_m": [
+            0.010590662248432636,
+            -0.2040688395500183,
+            0.03198917582631111
+          ]
+        },
+        {
+          "commanded_position_world_m": [
+            0.010568825025729952,
+            -0.2039036092639784,
+            0.03198917654710977
+          ],
+          "frame": 136,
+          "readback_center_projection_m": -0.046453857252578536,
+          "readback_error_m": 6.2671116951450446e-09,
+          "readback_position_world_m": [
+            0.010568824596703053,
+            -0.20390361547470093,
+            0.03198917582631111
+          ]
+        },
+        {
+          "commanded_position_world_m": [
+            0.010546988155374793,
+            -0.20373837933669262,
+            0.03198917654710977
+          ],
+          "frame": 137,
+          "readback_center_projection_m": -0.04628718163437347,
+          "readback_error_m": 2.9418275092354202e-09,
+          "readback_position_world_m": [
+            0.010546987876296043,
+            -0.20373837649822235,
+            0.03198917582631111
+          ]
+        },
+        {
+          "commanded_position_world_m": [
+            0.010525151285019635,
+            -0.2035731494094068,
+            0.03198917654710977
+          ],
+          "frame": 138,
+          "readback_center_projection_m": -0.04612052078887509,
+          "readback_error_m": 3.101192779511159e-09,
+          "readback_position_world_m": [
+            0.010525151155889034,
+            -0.20357315242290497,
+            0.03198917582631111
+          ]
+        },
+        {
+          "commanded_position_world_m": [
+            0.010503314414664476,
+            -0.203407919482121,
+            0.03198917654710977
+          ],
+          "frame": 139,
+          "readback_center_projection_m": -0.04595384517067002,
+          "readback_error_m": 6.078617730094108e-09,
+          "readback_position_world_m": [
+            0.010503314435482025,
+            -0.2034079134464264,
+            0.03198917582631111
+          ]
+        },
+        {
+          "commanded_position_world_m": [
+            0.010481477544309318,
+            -0.2032426895548352,
+            0.03198917654710977
+          ],
+          "frame": 140,
+          "readback_center_projection_m": -0.045787184325171634,
+          "readback_error_m": 7.631952203879095e-10,
+          "readback_position_world_m": [
+            0.010481477715075016,
+            -0.203242689371109,
+            0.03198917582631111
+          ]
+        },
+        {
+          "commanded_position_world_m": [
+            0.010459640673954159,
+            -0.20307745962754942,
+            0.03198917654710977
+          ],
+          "frame": 141,
+          "readback_center_projection_m": -0.04562052347967325,
+          "readback_error_m": 5.7228819501265535e-09,
+          "readback_position_world_m": [
+            0.010459640994668007,
+            -0.20307746529579163,
+            0.03198917582631111
+          ]
+        },
+        {
+          "commanded_position_world_m": [
+            0.010437803803599,
+            -0.20291222970026362,
+            0.03198917654710977
+          ],
+          "frame": 142,
+          "readback_center_projection_m": -0.04545384773944516,
+          "readback_error_m": 3.487489879886899e-09,
+          "readback_position_world_m": [
+            0.010437803342938423,
+            -0.20291222631931305,
+            0.03198917582631111
+          ]
+        },
+        {
+          "commanded_position_world_m": [
+            0.010415966933243842,
+            -0.20274699977297783,
+            0.03198917654710977
+          ],
+          "frame": 143,
+          "readback_center_projection_m": -0.04528718689394678,
+          "readback_error_m": 2.592686262649961e-09,
+          "readback_position_world_m": [
+            0.010415966622531414,
+            -0.20274700224399567,
+            0.03198917582631111
+          ]
+        },
+        {
+          "commanded_position_world_m": [
+            0.010394130062888684,
+            -0.20258176984569204,
+            0.03198917654710977
+          ],
+          "frame": 144,
+          "readback_center_projection_m": -0.045120511275741716,
+          "readback_error_m": 6.6195000958779375e-09,
+          "readback_position_world_m": [
+            0.010394129902124405,
+            -0.2025817632675171,
+            0.03198917582631111
+          ]
+        },
+        {
+          "commanded_position_world_m": [
+            0.010372293192533525,
+            -0.20241653991840622,
+            0.03198917654710977
+          ],
+          "frame": 145,
+          "readback_center_projection_m": -0.04495385043024333,
+          "readback_error_m": 1.0232514792951134e-09,
+          "readback_position_world_m": [
+            0.010372293181717396,
+            -0.2024165391921997,
+            0.03198917582631111
+          ]
+        },
+        {
+          "commanded_position_world_m": [
+            0.010350456322178368,
+            -0.20225130999112043,
+            0.03198917654710977
+          ],
+          "frame": 146,
+          "readback_center_projection_m": -0.044787189584744945,
+          "readback_error_m": 5.178063678631564e-09,
+          "readback_position_world_m": [
+            0.010350456461310387,
+            -0.20225131511688232,
+            0.03198917582631111
+          ]
+        },
+        {
+          "commanded_position_world_m": [
+            0.01032861945182321,
+            -0.20208608006383463,
+            0.03198917654710977
+          ],
+          "frame": 147,
+          "readback_center_projection_m": -0.044620513966539876,
+          "readback_error_m": 3.999553470361442e-09,
+          "readback_position_world_m": [
+            0.010328619740903378,
+            -0.20208607614040375,
+            0.03198917582631111
+          ]
+        },
+        {
+          "commanded_position_world_m": [
+            0.010306782581468051,
+            -0.20192085013654884,
+            0.03198917654710977
+          ],
+          "frame": 148,
+          "readback_center_projection_m": -0.0444538531210415,
+          "readback_error_m": 2.1051255423300587e-09,
+          "readback_position_world_m": [
+            0.010306783020496368,
+            -0.20192085206508636,
+            0.03198917582631111
+          ]
+        },
+        {
+          "commanded_position_world_m": [
+            0.010284945711112893,
+            -0.20175562020926305,
+            0.03198917654710977
+          ],
+          "frame": 149,
+          "readback_center_projection_m": -0.044287177380813406,
+          "readback_error_m": 7.165227344014735e-09,
+          "readback_position_world_m": [
+            0.010284945368766785,
+            -0.2017556130886078,
+            0.03198917582631111
+          ]
+        },
+        {
+          "commanded_position_world_m": [
+            0.010263108840757734,
+            -0.20159039028197726,
+            0.03198917654710977
+          ],
+          "frame": 150,
+          "readback_center_projection_m": -0.04412051653531503,
+          "readback_error_m": 1.471779195961661e-09,
+          "readback_position_world_m": [
+            0.010263108648359776,
+            -0.2015903890132904,
+            0.03198917582631111
+          ]
+        },
+        {
+          "commanded_position_world_m": [
+            0.010241271970402576,
+            -0.20142516035469143,
+            0.03198917654710977
+          ],
+          "frame": 151,
+          "readback_center_projection_m": -0.04395385568981664,
+          "readback_error_m": 4.639808487555358e-09,
+          "readback_position_world_m": [
+            0.010241271927952766,
+            -0.20142516493797302,
+            0.03198917582631111
+          ]
+        },
+        {
+          "commanded_position_world_m": [
+            0.010219435100047417,
+            -0.20125993042740564,
+            0.03198917654710977
+          ],
+          "frame": 152,
+          "readback_center_projection_m": -0.04378718007161157,
+          "readback_error_m": 4.524982807817986e-09,
+          "readback_position_world_m": [
+            0.010219435207545757,
+            -0.20125992596149445,
+            0.03198917582631111
+          ]
+        },
+        {
+          "commanded_position_world_m": [
+            0.010197598229692259,
+            -0.20109470050011985,
+            0.03198917654710977
+          ],
+          "frame": 153,
+          "readback_center_projection_m": -0.04362051922611319,
+          "readback_error_m": 1.5833458237680373e-09,
+          "readback_position_world_m": [
+            0.010197598487138748,
+            -0.20109470188617706,
+            0.03198917582631111
+          ]
+        },
+        {
+          "commanded_position_world_m": [
+            0.0101757613593371,
+            -0.20092947057283406,
+            0.03198917654710977
+          ],
+          "frame": 154,
+          "readback_center_projection_m": -0.04345385838061481,
+          "readback_error_m": 7.285227245535438e-09,
+          "readback_position_world_m": [
+            0.010175761766731739,
+            -0.20092947781085968,
+            0.03198917582631111
+          ]
+        },
+        {
+          "commanded_position_world_m": [
+            0.010153924488981942,
+            -0.20076424064554826,
+            0.03198917654710977
+          ],
+          "frame": 155,
+          "readback_center_projection_m": -0.043287182640386716,
+          "readback_error_m": 1.9848773433985357e-09,
+          "readback_position_world_m": [
+            0.010153924115002155,
+            -0.2007642388343811,
+            0.03198917582631111
+          ]
+        },
+        {
+          "commanded_position_world_m": [
+            0.010132087618626783,
+            -0.20059901071826247,
+            0.03198917654710977
+          ],
+          "frame": 156,
+          "readback_center_projection_m": -0.04312052179488833,
+          "readback_error_m": 4.1106952712824556e-09,
+          "readback_position_world_m": [
+            0.010132087394595146,
+            -0.20059901475906372,
+            0.03198917582631111
+          ]
+        },
+        {
+          "commanded_position_world_m": [
+            0.010110250748271625,
+            -0.20043378079097668,
+            0.03198917654710977
+          ],
+          "frame": 157,
+          "readback_center_projection_m": -0.04295384617668327,
+          "readback_error_m": 5.060536022307663e-09,
+          "readback_position_world_m": [
+            0.010110250674188137,
+            -0.20043377578258514,
+            0.03198917582631111
+          ]
+        },
+        {
+          "commanded_position_world_m": [
+            0.010088413877916466,
+            -0.20026855086369086,
+            0.03198917654710977
+          ],
+          "frame": 158,
+          "readback_center_projection_m": -0.042787185331184883,
+          "readback_error_m": 1.112172712105629e-09,
+          "readback_position_world_m": [
+            0.010088413953781128,
+            -0.20026855170726776,
+            0.03198917582631111
+          ]
+        },
+        {
+          "commanded_position_world_m": [
+            0.010066577007561308,
+            -0.20010332093640507,
+            0.03198917654710977
+          ],
+          "frame": 159,
+          "readback_center_projection_m": -0.0426205244856865,
+          "readback_error_m": 6.738016708416932e-09,
+          "readback_position_world_m": [
+            0.010066577233374119,
+            -0.20010332763195038,
+            0.03198917582631111
+          ]
+        },
+        {
+          "commanded_position_world_m": [
+            0.010044740137206151,
+            -0.19993809100911927,
+            0.03198917654710977
+          ],
+          "frame": 160,
+          "readback_center_projection_m": -0.042453848867481436,
+          "readback_error_m": 2.490060927241424e-09,
+          "readback_position_world_m": [
+            0.01004474051296711,
+            -0.1999380886554718,
+            0.03198917582631111
+          ]
+        },
+        {
+          "commanded_position_world_m": [
+            0.010022903266850992,
+            -0.19977286108183348,
+            0.03198917654710977
+          ],
+          "frame": 161,
+          "readback_center_projection_m": -0.04228718789996003,
+          "readback_error_m": 3.594763187827967e-09,
+          "readback_position_world_m": [
+            0.010022902861237526,
+            -0.19977286458015442,
+            0.03198917582631111
+          ]
+        },
+        {
+          "commanded_position_world_m": [
+            0.010001066396495834,
+            -0.1996076311545477,
+            0.03198917654710977
+          ],
+          "frame": 162,
+          "readback_center_projection_m": -0.04212051228175496,
+          "readback_error_m": 5.603310959005682e-09,
+          "readback_position_world_m": [
+            0.010001066140830517,
+            -0.19960762560367584,
+            0.03198917582631111
+          ]
+        },
+        {
+          "commanded_position_world_m": [
+            0.009979229526140675,
+            -0.1994424012272619,
+            0.03198917654710977
+          ],
+          "frame": 163,
+          "readback_center_projection_m": -0.04195385143625658,
+          "readback_error_m": 7.882803843488078e-10,
+          "readback_position_world_m": [
+            0.009979229420423508,
+            -0.19944240152835846,
+            0.03198917582631111
+          ]
+        },
+        {
+          "commanded_position_world_m": [
+            0.009957392655785517,
+            -0.19927717129997607,
+            0.03198917654710977
+          ],
+          "frame": 164,
+          "readback_center_projection_m": -0.041787190590758194,
+          "readback_error_m": 6.1952978945165825e-09,
+          "readback_position_world_m": [
+            0.009957392700016499,
+            -0.19927717745304108,
+            0.03198917582631111
+          ]
+        },
+        {
+          "commanded_position_world_m": [
+            0.009935555785430358,
+            -0.19911194137269028,
+            0.03198917654710977
+          ],
+          "frame": 165,
+          "readback_center_projection_m": -0.041620514972553126,
+          "readback_error_m": 2.990787917689004e-09,
+          "readback_position_world_m": [
+            0.00993555597960949,
+            -0.1991119384765625,
+            0.03198917582631111
+          ]
+        },
+        {
+          "commanded_position_world_m": [
+            0.0099137189150752,
+            -0.1989467114454045,
+            0.03198917654710977
+          ],
+          "frame": 166,
+          "readback_center_projection_m": -0.04145385412705475,
+          "readback_error_m": 3.0618569702023465e-09,
+          "readback_position_world_m": [
+            0.00991371925920248,
+            -0.19894671440124512,
+            0.03198917582631111
+          ]
+        },
+        {
+          "commanded_position_world_m": [
+            0.009891882044720041,
+            -0.1987814815181187,
+            0.03198917654710977
+          ],
+          "frame": 167,
+          "readback_center_projection_m": -0.041287178386826655,
+          "readback_error_m": 6.151396286090769e-09,
+          "readback_position_world_m": [
+            0.009891881607472897,
+            -0.19878147542476654,
+            0.03198917582631111
+          ]
+        },
+        {
+          "commanded_position_world_m": [
+            0.009870045174364883,
+            -0.1986162515908329,
+            0.03198917654710977
+          ],
+          "frame": 168,
+          "readback_center_projection_m": -0.04112051754132827,
+          "readback_error_m": 8.126238548506907e-10,
+          "readback_position_world_m": [
+            0.009870044887065887,
+            -0.19861625134944916,
+            0.03198917582631111
+          ]
+        },
+        {
+          "commanded_position_world_m": [
+            0.009848208304009724,
+            -0.1984510216635471,
+            0.03198917654710977
+          ],
+          "frame": 169,
+          "readback_center_projection_m": -0.04095385669582989,
+          "readback_error_m": 5.6583633875234935e-09,
+          "readback_position_world_m": [
+            0.009848208166658878,
+            -0.19845102727413177,
+            0.03198917582631111
+          ]
+        }
+      ],
+      "pusher_start_center_projection_m": -0.04878718448494012,
+      "pusher_start_readback_world_m": [
+        0.010874541476368904,
+        -0.20621682703495026,
+        0.03198917582631111
+      ],
+      "pusher_support_projection_m": 0.011224007858457327,
+      "trajectory_intersects_collision_envelope": true
+    },
+    "rigid_body": {
+      "enabled": true,
+      "gravity_enabled": true,
+      "kinematic_during_push": false,
+      "mass_kg": 0.019999999552965164
+    }
+  },
+  "render_evidence": {
+    "classification": "AUTHORED_COLLIDER_GEOMETRY_OVERLAY",
+    "collider_mesh_count": 41,
+    "collider_root": "/World/BottleCollisionDiagnosticSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay",
+    "collision_schemas_copied": false,
+    "official_physics_debug_setting_also_enabled": true,
+    "physics_schemas_copied": false,
+    "pose_root": "/World/BottleCollisionDiagnosticSession/DiagnosticRenderEvidence/BottlePose",
+    "purpose": "SESSION_ONLY_RENDER_EVIDENCE",
+    "pusher_visual_prim": "/World/BottleCollisionDiagnosticSession/DiagnosticRenderEvidence/PusherVisual",
+    "records": [
+      {
+        "category": "visual",
+        "clone_prim_path": "/World/BottleCollisionDiagnosticSession/DiagnosticRenderEvidence/BottlePose/ExactVisualClones/mesh_000",
+        "collision_schema_applied": false,
+        "face_count": 6298,
+        "physics_schema_applied": false,
+        "point_count": 3151,
+        "source_instance_proxy": false,
+        "source_prim_path": "/World/BottleCollisionDiagnosticSession/Bottle500/Visuals/VIS_Bottle/VIS_BottleMesh"
+      },
+      {
+        "category": "collider",
+        "clone_prim_path": "/World/BottleCollisionDiagnosticSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_000",
+        "collision_schema_applied": false,
+        "face_count": 6,
+        "physics_schema_applied": false,
+        "point_count": 8,
+        "source_instance_proxy": false,
+        "source_prim_path": "/World/BottleCollisionDiagnosticSession/Bottle500/Collisions/COL_Shoulder_02/COL_Shoulder_02Mesh"
+      },
+      {
+        "category": "collider",
+        "clone_prim_path": "/World/BottleCollisionDiagnosticSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_001",
+        "collision_schema_applied": false,
+        "face_count": 6,
+        "physics_schema_applied": false,
+        "point_count": 8,
+        "source_instance_proxy": false,
+        "source_prim_path": "/World/BottleCollisionDiagnosticSession/Bottle500/Collisions/COL_Body_00/COL_Body_00Mesh"
+      },
+      {
+        "category": "collider",
+        "clone_prim_path": "/World/BottleCollisionDiagnosticSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_002",
+        "collision_schema_applied": false,
+        "face_count": 34,
+        "physics_schema_applied": false,
+        "point_count": 64,
+        "source_instance_proxy": false,
+        "source_prim_path": "/World/BottleCollisionDiagnosticSession/Bottle500/Collisions/COL_Bottom/COL_BottomMesh"
+      },
+      {
+        "category": "collider",
+        "clone_prim_path": "/World/BottleCollisionDiagnosticSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_003",
+        "collision_schema_applied": false,
+        "face_count": 6,
+        "physics_schema_applied": false,
+        "point_count": 8,
+        "source_instance_proxy": false,
+        "source_prim_path": "/World/BottleCollisionDiagnosticSession/Bottle500/Collisions/COL_Neck_02/COL_Neck_02Mesh"
+      },
+      {
+        "category": "collider",
+        "clone_prim_path": "/World/BottleCollisionDiagnosticSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_004",
+        "collision_schema_applied": false,
+        "face_count": 6,
+        "physics_schema_applied": false,
+        "point_count": 8,
+        "source_instance_proxy": false,
+        "source_prim_path": "/World/BottleCollisionDiagnosticSession/Bottle500/Collisions/COL_Neck_10/COL_Neck_10Mesh"
+      },
+      {
+        "category": "collider",
+        "clone_prim_path": "/World/BottleCollisionDiagnosticSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_005",
+        "collision_schema_applied": false,
+        "face_count": 6,
+        "physics_schema_applied": false,
+        "point_count": 8,
+        "source_instance_proxy": false,
+        "source_prim_path": "/World/BottleCollisionDiagnosticSession/Bottle500/Collisions/COL_Shoulder_06/COL_Shoulder_06Mesh"
+      },
+      {
+        "category": "collider",
+        "clone_prim_path": "/World/BottleCollisionDiagnosticSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_006",
+        "collision_schema_applied": false,
+        "face_count": 6,
+        "physics_schema_applied": false,
+        "point_count": 8,
+        "source_instance_proxy": false,
+        "source_prim_path": "/World/BottleCollisionDiagnosticSession/Bottle500/Collisions/COL_Shoulder_01/COL_Shoulder_01Mesh"
+      },
+      {
+        "category": "collider",
+        "clone_prim_path": "/World/BottleCollisionDiagnosticSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_007",
+        "collision_schema_applied": false,
+        "face_count": 6,
+        "physics_schema_applied": false,
+        "point_count": 8,
+        "source_instance_proxy": false,
+        "source_prim_path": "/World/BottleCollisionDiagnosticSession/Bottle500/Collisions/COL_Body_08/COL_Body_08Mesh"
+      },
+      {
+        "category": "collider",
+        "clone_prim_path": "/World/BottleCollisionDiagnosticSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_008",
+        "collision_schema_applied": false,
+        "face_count": 6,
+        "physics_schema_applied": false,
+        "point_count": 8,
+        "source_instance_proxy": false,
+        "source_prim_path": "/World/BottleCollisionDiagnosticSession/Bottle500/Collisions/COL_Body_11/COL_Body_11Mesh"
+      },
+      {
+        "category": "collider",
+        "clone_prim_path": "/World/BottleCollisionDiagnosticSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_009",
+        "collision_schema_applied": false,
+        "face_count": 6,
+        "physics_schema_applied": false,
+        "point_count": 8,
+        "source_instance_proxy": false,
+        "source_prim_path": "/World/BottleCollisionDiagnosticSession/Bottle500/Collisions/COL_Body_01/COL_Body_01Mesh"
+      },
+      {
+        "category": "collider",
+        "clone_prim_path": "/World/BottleCollisionDiagnosticSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_010",
+        "collision_schema_applied": false,
+        "face_count": 6,
+        "physics_schema_applied": false,
+        "point_count": 8,
+        "source_instance_proxy": false,
+        "source_prim_path": "/World/BottleCollisionDiagnosticSession/Bottle500/Collisions/COL_Shoulder_00/COL_Shoulder_00Mesh"
+      },
+      {
+        "category": "collider",
+        "clone_prim_path": "/World/BottleCollisionDiagnosticSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_011",
+        "collision_schema_applied": false,
+        "face_count": 6,
+        "physics_schema_applied": false,
+        "point_count": 8,
+        "source_instance_proxy": false,
+        "source_prim_path": "/World/BottleCollisionDiagnosticSession/Bottle500/Collisions/COL_Body_02/COL_Body_02Mesh"
+      },
+      {
+        "category": "collider",
+        "clone_prim_path": "/World/BottleCollisionDiagnosticSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_012",
+        "collision_schema_applied": false,
+        "face_count": 6,
+        "physics_schema_applied": false,
+        "point_count": 8,
+        "source_instance_proxy": false,
+        "source_prim_path": "/World/BottleCollisionDiagnosticSession/Bottle500/Collisions/COL_Shoulder_04/COL_Shoulder_04Mesh"
+      },
+      {
+        "category": "collider",
+        "clone_prim_path": "/World/BottleCollisionDiagnosticSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_013",
+        "collision_schema_applied": false,
+        "face_count": 6,
+        "physics_schema_applied": false,
+        "point_count": 8,
+        "source_instance_proxy": false,
+        "source_prim_path": "/World/BottleCollisionDiagnosticSession/Bottle500/Collisions/COL_Neck_01/COL_Neck_01Mesh"
+      },
+      {
+        "category": "collider",
+        "clone_prim_path": "/World/BottleCollisionDiagnosticSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_014",
+        "collision_schema_applied": false,
+        "face_count": 6,
+        "physics_schema_applied": false,
+        "point_count": 8,
+        "source_instance_proxy": false,
+        "source_prim_path": "/World/BottleCollisionDiagnosticSession/Bottle500/Collisions/COL_Body_03/COL_Body_03Mesh"
+      },
+      {
+        "category": "collider",
+        "clone_prim_path": "/World/BottleCollisionDiagnosticSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_015",
+        "collision_schema_applied": false,
+        "face_count": 6,
+        "physics_schema_applied": false,
+        "point_count": 8,
+        "source_instance_proxy": false,
+        "source_prim_path": "/World/BottleCollisionDiagnosticSession/Bottle500/Collisions/COL_Shoulder_05/COL_Shoulder_05Mesh"
+      },
+      {
+        "category": "collider",
+        "clone_prim_path": "/World/BottleCollisionDiagnosticSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_016",
+        "collision_schema_applied": false,
+        "face_count": 6,
+        "physics_schema_applied": false,
+        "point_count": 8,
+        "source_instance_proxy": false,
+        "source_prim_path": "/World/BottleCollisionDiagnosticSession/Bottle500/Collisions/COL_Body_10/COL_Body_10Mesh"
+      },
+      {
+        "category": "collider",
+        "clone_prim_path": "/World/BottleCollisionDiagnosticSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_017",
+        "collision_schema_applied": false,
+        "face_count": 6,
+        "physics_schema_applied": false,
+        "point_count": 8,
+        "source_instance_proxy": false,
+        "source_prim_path": "/World/BottleCollisionDiagnosticSession/Bottle500/Collisions/COL_Neck_06/COL_Neck_06Mesh"
+      },
+      {
+        "category": "collider",
+        "clone_prim_path": "/World/BottleCollisionDiagnosticSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_018",
+        "collision_schema_applied": false,
+        "face_count": 6,
+        "physics_schema_applied": false,
+        "point_count": 8,
+        "source_instance_proxy": false,
+        "source_prim_path": "/World/BottleCollisionDiagnosticSession/Bottle500/Collisions/COL_Neck_05/COL_Neck_05Mesh"
+      },
+      {
+        "category": "collider",
+        "clone_prim_path": "/World/BottleCollisionDiagnosticSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_019",
+        "collision_schema_applied": false,
+        "face_count": 6,
+        "physics_schema_applied": false,
+        "point_count": 8,
+        "source_instance_proxy": false,
+        "source_prim_path": "/World/BottleCollisionDiagnosticSession/Bottle500/Collisions/COL_Body_15/COL_Body_15Mesh"
+      },
+      {
+        "category": "collider",
+        "clone_prim_path": "/World/BottleCollisionDiagnosticSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_020",
+        "collision_schema_applied": false,
+        "face_count": 6,
+        "physics_schema_applied": false,
+        "point_count": 8,
+        "source_instance_proxy": false,
+        "source_prim_path": "/World/BottleCollisionDiagnosticSession/Bottle500/Collisions/COL_Body_05/COL_Body_05Mesh"
+      },
+      {
+        "category": "collider",
+        "clone_prim_path": "/World/BottleCollisionDiagnosticSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_021",
+        "collision_schema_applied": false,
+        "face_count": 6,
+        "physics_schema_applied": false,
+        "point_count": 8,
+        "source_instance_proxy": false,
+        "source_prim_path": "/World/BottleCollisionDiagnosticSession/Bottle500/Collisions/COL_Neck_11/COL_Neck_11Mesh"
+      },
+      {
+        "category": "collider",
+        "clone_prim_path": "/World/BottleCollisionDiagnosticSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_022",
+        "collision_schema_applied": false,
+        "face_count": 6,
+        "physics_schema_applied": false,
+        "point_count": 8,
+        "source_instance_proxy": false,
+        "source_prim_path": "/World/BottleCollisionDiagnosticSession/Bottle500/Collisions/COL_Shoulder_07/COL_Shoulder_07Mesh"
+      },
+      {
+        "category": "collider",
+        "clone_prim_path": "/World/BottleCollisionDiagnosticSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_023",
+        "collision_schema_applied": false,
+        "face_count": 6,
+        "physics_schema_applied": false,
+        "point_count": 8,
+        "source_instance_proxy": false,
+        "source_prim_path": "/World/BottleCollisionDiagnosticSession/Bottle500/Collisions/COL_Neck_09/COL_Neck_09Mesh"
+      },
+      {
+        "category": "collider",
+        "clone_prim_path": "/World/BottleCollisionDiagnosticSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_024",
+        "collision_schema_applied": false,
+        "face_count": 6,
+        "physics_schema_applied": false,
+        "point_count": 8,
+        "source_instance_proxy": false,
+        "source_prim_path": "/World/BottleCollisionDiagnosticSession/Bottle500/Collisions/COL_Body_04/COL_Body_04Mesh"
+      },
+      {
+        "category": "collider",
+        "clone_prim_path": "/World/BottleCollisionDiagnosticSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_025",
+        "collision_schema_applied": false,
+        "face_count": 6,
+        "physics_schema_applied": false,
+        "point_count": 8,
+        "source_instance_proxy": false,
+        "source_prim_path": "/World/BottleCollisionDiagnosticSession/Bottle500/Collisions/COL_Body_06/COL_Body_06Mesh"
+      },
+      {
+        "category": "collider",
+        "clone_prim_path": "/World/BottleCollisionDiagnosticSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_026",
+        "collision_schema_applied": false,
+        "face_count": 6,
+        "physics_schema_applied": false,
+        "point_count": 8,
+        "source_instance_proxy": false,
+        "source_prim_path": "/World/BottleCollisionDiagnosticSession/Bottle500/Collisions/COL_Body_09/COL_Body_09Mesh"
+      },
+      {
+        "category": "collider",
+        "clone_prim_path": "/World/BottleCollisionDiagnosticSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_027",
+        "collision_schema_applied": false,
+        "face_count": 6,
+        "physics_schema_applied": false,
+        "point_count": 8,
+        "source_instance_proxy": false,
+        "source_prim_path": "/World/BottleCollisionDiagnosticSession/Bottle500/Collisions/COL_Body_07/COL_Body_07Mesh"
+      },
+      {
+        "category": "collider",
+        "clone_prim_path": "/World/BottleCollisionDiagnosticSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_028",
+        "collision_schema_applied": false,
+        "face_count": 6,
+        "physics_schema_applied": false,
+        "point_count": 8,
+        "source_instance_proxy": false,
+        "source_prim_path": "/World/BottleCollisionDiagnosticSession/Bottle500/Collisions/COL_Shoulder_09/COL_Shoulder_09Mesh"
+      },
+      {
+        "category": "collider",
+        "clone_prim_path": "/World/BottleCollisionDiagnosticSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_029",
+        "collision_schema_applied": false,
+        "face_count": 6,
+        "physics_schema_applied": false,
+        "point_count": 8,
+        "source_instance_proxy": false,
+        "source_prim_path": "/World/BottleCollisionDiagnosticSession/Bottle500/Collisions/COL_Body_14/COL_Body_14Mesh"
+      },
+      {
+        "category": "collider",
+        "clone_prim_path": "/World/BottleCollisionDiagnosticSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_030",
+        "collision_schema_applied": false,
+        "face_count": 6,
+        "physics_schema_applied": false,
+        "point_count": 8,
+        "source_instance_proxy": false,
+        "source_prim_path": "/World/BottleCollisionDiagnosticSession/Bottle500/Collisions/COL_Shoulder_10/COL_Shoulder_10Mesh"
+      },
+      {
+        "category": "collider",
+        "clone_prim_path": "/World/BottleCollisionDiagnosticSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_031",
+        "collision_schema_applied": false,
+        "face_count": 6,
+        "physics_schema_applied": false,
+        "point_count": 8,
+        "source_instance_proxy": false,
+        "source_prim_path": "/World/BottleCollisionDiagnosticSession/Bottle500/Collisions/COL_Neck_04/COL_Neck_04Mesh"
+      },
+      {
+        "category": "collider",
+        "clone_prim_path": "/World/BottleCollisionDiagnosticSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_032",
+        "collision_schema_applied": false,
+        "face_count": 6,
+        "physics_schema_applied": false,
+        "point_count": 8,
+        "source_instance_proxy": false,
+        "source_prim_path": "/World/BottleCollisionDiagnosticSession/Bottle500/Collisions/COL_Shoulder_03/COL_Shoulder_03Mesh"
+      },
+      {
+        "category": "collider",
+        "clone_prim_path": "/World/BottleCollisionDiagnosticSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_033",
+        "collision_schema_applied": false,
+        "face_count": 6,
+        "physics_schema_applied": false,
+        "point_count": 8,
+        "source_instance_proxy": false,
+        "source_prim_path": "/World/BottleCollisionDiagnosticSession/Bottle500/Collisions/COL_Neck_07/COL_Neck_07Mesh"
+      },
+      {
+        "category": "collider",
+        "clone_prim_path": "/World/BottleCollisionDiagnosticSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_034",
+        "collision_schema_applied": false,
+        "face_count": 6,
+        "physics_schema_applied": false,
+        "point_count": 8,
+        "source_instance_proxy": false,
+        "source_prim_path": "/World/BottleCollisionDiagnosticSession/Bottle500/Collisions/COL_Shoulder_11/COL_Shoulder_11Mesh"
+      },
+      {
+        "category": "collider",
+        "clone_prim_path": "/World/BottleCollisionDiagnosticSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_035",
+        "collision_schema_applied": false,
+        "face_count": 6,
+        "physics_schema_applied": false,
+        "point_count": 8,
+        "source_instance_proxy": false,
+        "source_prim_path": "/World/BottleCollisionDiagnosticSession/Bottle500/Collisions/COL_Shoulder_08/COL_Shoulder_08Mesh"
+      },
+      {
+        "category": "collider",
+        "clone_prim_path": "/World/BottleCollisionDiagnosticSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_036",
+        "collision_schema_applied": false,
+        "face_count": 6,
+        "physics_schema_applied": false,
+        "point_count": 8,
+        "source_instance_proxy": false,
+        "source_prim_path": "/World/BottleCollisionDiagnosticSession/Bottle500/Collisions/COL_Neck_00/COL_Neck_00Mesh"
+      },
+      {
+        "category": "collider",
+        "clone_prim_path": "/World/BottleCollisionDiagnosticSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_037",
+        "collision_schema_applied": false,
+        "face_count": 6,
+        "physics_schema_applied": false,
+        "point_count": 8,
+        "source_instance_proxy": false,
+        "source_prim_path": "/World/BottleCollisionDiagnosticSession/Bottle500/Collisions/COL_Neck_03/COL_Neck_03Mesh"
+      },
+      {
+        "category": "collider",
+        "clone_prim_path": "/World/BottleCollisionDiagnosticSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_038",
+        "collision_schema_applied": false,
+        "face_count": 6,
+        "physics_schema_applied": false,
+        "point_count": 8,
+        "source_instance_proxy": false,
+        "source_prim_path": "/World/BottleCollisionDiagnosticSession/Bottle500/Collisions/COL_Body_13/COL_Body_13Mesh"
+      },
+      {
+        "category": "collider",
+        "clone_prim_path": "/World/BottleCollisionDiagnosticSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_039",
+        "collision_schema_applied": false,
+        "face_count": 6,
+        "physics_schema_applied": false,
+        "point_count": 8,
+        "source_instance_proxy": false,
+        "source_prim_path": "/World/BottleCollisionDiagnosticSession/Bottle500/Collisions/COL_Body_12/COL_Body_12Mesh"
+      },
+      {
+        "category": "collider",
+        "clone_prim_path": "/World/BottleCollisionDiagnosticSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_040",
+        "collision_schema_applied": false,
+        "face_count": 6,
+        "physics_schema_applied": false,
+        "point_count": 8,
+        "source_instance_proxy": false,
+        "source_prim_path": "/World/BottleCollisionDiagnosticSession/Bottle500/Collisions/COL_Neck_08/COL_Neck_08Mesh"
+      }
+    ],
+    "visual_mesh_count": 1,
+    "visual_root": "/World/BottleCollisionDiagnosticSession/DiagnosticRenderEvidence/BottlePose/ExactVisualClones"
+  },
+  "root_cause": "COLLISION_PIPELINE_VERIFIED",
+  "runtime": {
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physics_frequency_hz": 60,
+    "physx": "107.3.26",
+    "solve_articulation_contact_last": true
+  },
+  "runtime_seconds": 17.373030142043717,
+  "schema_version": 1,
+  "stage": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/table_support_alignment/1.0/aloha1_table_support_aligned_workcell.usda",
+    "root_prim": "/World",
+    "session_only": true,
+    "sha256_after": "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c",
+    "sha256_before": "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c",
+    "sublayers": [
+      "configuration/aloha1_tabletop_world_zero.usda",
+      "../../signal_correspondence/1.0/aloha1_signal_correspondence_workcell.usda"
+    ]
+  },
+  "status": "PASS"
+}
