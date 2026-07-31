@@ -1,0 +1,86 @@
+Syntax Warning: Mismatch between font type and embedded font file
+Syntax Warning: Mismatch between font type and embedded font file
+Syntax Warning: Mismatch between font type and embedded font file
+Syntax Warning: Mismatch between font type and embedded font file
+Syntax Warning: Mismatch between font type and embedded font file
+Syntax Warning: Mismatch between font type and embedded font file
+Syntax Warning: Mismatch between font type and embedded font file
+Syntax Warning: Mismatch between font type and embedded font file
+Syntax Warning: Mismatch between font type and embedded font file
+Syntax Warning: Mismatch between font type and embedded font file
+Syntax Warning: Mismatch between font type and embedded font file
+Syntax Warning: Mismatch between font type and embedded font file
+Syntax Warning: Mismatch between font type and embedded font file
+Syntax Warning: Mismatch between font type and embedded font file
+Syntax Warning: Mismatch between font type and embedded font file
+Syntax Warning: Mismatch between font type and embedded font file
+Syntax Warning: Mismatch between font type and embedded font file
+Syntax Warning: Mismatch between font type and embedded font file
+Syntax Warning: Mismatch between font type and embedded font file
+Syntax Warning: Mismatch between font type and embedded font file
+Syntax Warning: Mismatch between font type and embedded font file
+Syntax Warning: Mismatch between font type and embedded font file
+Syntax Warning: Mismatch between font type and embedded font file
+Syntax Warning: Mismatch between font type and embedded font file
+Syntax Warning: Mismatch between font type and embedded font file
+Syntax Warning: Mismatch between font type and embedded font file
+Syntax Warning: Mismatch between font type and embedded font file
+Syntax Warning: Mismatch between font type and embedded font file
+Syntax Warning: Mismatch between font type and embedded font file
+Syntax Warning: Mismatch between font type and embedded font file
+name                                 type              encoding         emb sub uni object ID
+------------------------------------ ----------------- ---------------- --- --- --- ---------
+AZJUZG+NotoSerifCJKjp-Regular-Identity-H CID Type 0C       Identity-H       yes yes yes      5  0
+NEVDQX+NotoSansCJKjp-Black-Identity-H CID Type 0C       Identity-H       yes yes yes      7  0
+UQVOZB+NotoSerifCJKjp-Bold-Identity-H CID Type 0C       Identity-H       yes yes yes      9  0
+LJMLYM+LMRoman10-Regular-Identity-H  CID Type 0C       Identity-H       yes yes yes     12  0
+YVNYUL+LMMono10-Regular-Identity-H   CID Type 0C       Identity-H       yes yes yes     14  0
+OKCSEW+LMRoman10-Bold-Identity-H     CID Type 0C       Identity-H       yes yes yes     20  0
+AIHXRD+LMRoman7-Regular-Identity-H   CID Type 0C       Identity-H       yes yes yes     22  0
+BMATCG+LMRoman9-Regular-Identity-H   CID Type 0C       Identity-H       yes yes yes     27  0
+KGBNZW+LMRoman9-Bold-Identity-H      CID Type 0C       Identity-H       yes yes yes     49  0
+CVKVVF+NotoSansCJKjp-Bold            CID Type 0C (OT)  Identity-H       yes yes yes     30  0
+CVKVVF+NotoSansCJKjp-Regular         CID Type 0C (OT)  Identity-H       yes yes yes     37  0
+PTABAT+NotoSansCJKjp-Regular-Identity-H CID Type 0C       Identity-H       yes yes yes     57  0
+AKIJPW+LMSans8-Regular-Identity-H    CID Type 0C       Identity-H       yes yes yes     60  0
+KPDRDO+LMRoman8-Regular-Identity-H   CID Type 0C       Identity-H       yes yes yes     63  0
+CVKVVF+NotoSansCJKjp-Bold            CID Type 0C (OT)  Identity-H       yes yes yes    220  0
+CVKVVF+NotoSansCJKjp-Regular         CID Type 0C (OT)  Identity-H       yes yes yes    227  0
+VJOBUQ+CMSY9                         Type 1C           Builtin          yes yes yes    268  0
+CVKVVF+NotoSansCJKjp-Bold            CID Type 0C (OT)  Identity-H       yes yes yes    249  0
+CVKVVF+NotoSansCJKjp-Regular         CID Type 0C (OT)  Identity-H       yes yes yes    256  0
+YHHKUR+LMRomanDemi10-Regular-Identity-H CID Type 0C       Identity-H       yes yes yes    272  0
+GDMVUA+CMMI7                         Type 1C           Builtin          yes yes yes    274  0
+RSBJPD+CMMI10                        Type 1C           Builtin          yes yes yes    275  0
+PSHRPZ+CMSY10                        Type 1C           Builtin          yes yes yes    276  0
+RXGZIG+MSBM10                        Type 1C           Builtin          yes yes yes    277  0
+JBRORY+CMR7                          Type 1C           Builtin          yes yes yes    278  0
+RDVFEP+CMR10                         Type 1C           Builtin          yes yes yes    279  0
+CVKVVF+NotoSansCJKjp-Bold            CID Type 0C (OT)  Identity-H       yes yes yes    287  0
+CVKVVF+NotoSansCJKjp-Regular         CID Type 0C (OT)  Identity-H       yes yes yes    294  0
+CVKVVF+NotoSansCJKjp-Bold            CID Type 0C (OT)  Identity-H       yes yes yes    311  0
+CVKVVF+NotoSansCJKjp-Regular         CID Type 0C (OT)  Identity-H       yes yes yes    318  0
+CVKVVF+NotoSansCJKjp-Bold            CID Type 0C (OT)  Identity-H       yes yes yes    336  0
+CVKVVF+NotoSansCJKjp-Regular         CID Type 0C (OT)  Identity-H       yes yes yes    343  0
+CVKVVF+NotoSansCJKjp-Bold            CID Type 0C (OT)  Identity-H       yes yes yes    359  0
+CVKVVF+NotoSansCJKjp-Regular         CID Type 0C (OT)  Identity-H       yes yes yes    366  0
+CVKVVF+NotoSansCJKjp-Bold            CID Type 0C (OT)  Identity-H       yes yes yes    388  0
+CVKVVF+NotoSansCJKjp-Regular         CID Type 0C (OT)  Identity-H       yes yes yes    395  0
+UXKVXB+CMMIB10                       Type 1C           Builtin          yes yes yes    413  0
+GJOYQS+CMEX10                        Type 1C           Builtin          yes yes yes    414  0
+CRNRSD+CMSY7                         Type 1C           Builtin          yes yes yes    415  0
+CVKVVF+NotoSansCJKjp-Bold            CID Type 0C (OT)  Identity-H       yes yes yes    422  0
+CVKVVF+NotoSansCJKjp-Regular         CID Type 0C (OT)  Identity-H       yes yes yes    429  0
+CVKVVF+NotoSansCJKjp-Bold            CID Type 0C (OT)  Identity-H       yes yes yes    451  0
+CVKVVF+NotoSansCJKjp-Regular         CID Type 0C (OT)  Identity-H       yes yes yes    458  0
+CVKVVF+NotoSansCJKjp-Bold            CID Type 0C (OT)  Identity-H       yes yes yes    480  0
+CVKVVF+NotoSansCJKjp-Regular         CID Type 0C (OT)  Identity-H       yes yes yes    487  0
+CVKVVF+NotoSansCJKjp-Bold            CID Type 0C (OT)  Identity-H       yes yes yes    503  0
+CVKVVF+NotoSansCJKjp-Regular         CID Type 0C (OT)  Identity-H       yes yes yes    510  0
+CVKVVF+NotoSansCJKjp-Bold            CID Type 0C (OT)  Identity-H       yes yes yes    529  0
+CVKVVF+NotoSansCJKjp-Regular         CID Type 0C (OT)  Identity-H       yes yes yes    536  0
+CVKVVF+NotoSansCJKjp-Bold            CID Type 0C (OT)  Identity-H       yes yes yes    554  0
+CVKVVF+NotoSansCJKjp-Regular         CID Type 0C (OT)  Identity-H       yes yes yes    561  0
+CVKVVF+NotoSansCJKjp-Bold            CID Type 0C (OT)  Identity-H       yes yes yes    592  0
+CVKVVF+NotoSansCJKjp-Regular         CID Type 0C (OT)  Identity-H       yes yes yes    599  0
+MYYTLF+LMRoman10-Italic-Identity-H   CID Type 0C       Identity-H       yes yes yes    650  0

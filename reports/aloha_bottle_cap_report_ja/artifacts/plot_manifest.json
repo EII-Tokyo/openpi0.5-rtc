@@ -1,0 +1,92 @@
+[
+  {
+    "figure": "data_scope",
+    "question": "データ資産の範囲",
+    "purpose": "全資産と本番学習部分集合の違い"
+  },
+  {
+    "figure": "sampling_exposure",
+    "question": "重点サンプリング",
+    "purpose": "一意な軌跡と等価サンプリング量の違い"
+  },
+  {
+    "figure": "baseline_episode_length_distribution",
+    "question": "教示時間",
+    "purpose": "軌跡長の分布"
+  },
+  {
+    "figure": "baseline_training_loss",
+    "question": "学習の実在性",
+    "purpose": "学習誤差は低下したが検証成功率はない"
+  },
+  {
+    "figure": "experiment_funnel",
+    "question": "工学的作業量",
+    "purpose": "実行試行と十分に進んだ学習の違い"
+  },
+  {
+    "figure": "condition_coverage",
+    "question": "条件網羅",
+    "purpose": "方向、キャップなし、反転などの分布"
+  },
+  {
+    "figure": "prompt_condition_gap",
+    "question": "空回しリスク",
+    "purpose": "キャップなしにも無条件開栓指示を使用"
+  },
+  {
+    "figure": "attention_camera_share",
+    "question": "視覚利用",
+    "purpose": "3視野の注意割合"
+  },
+  {
+    "figure": "attention_real_example",
+    "question": "アテンションマップ",
+    "purpose": "実記録の熱領域と解釈限界"
+  },
+  {
+    "figure": "rlt_offline_validation",
+    "question": "強化学習探索",
+    "purpose": "オフライン学習閉ループのみを示す"
+  },
+  {
+    "figure": "evidence_grade",
+    "question": "結論の確度",
+    "purpose": "確認事実、現場概算、未測定を区別"
+  },
+  {
+    "figure": "model_dataflow",
+    "question": "手法",
+    "purpose": "観測から双腕動作までの流れ"
+  },
+  {
+    "figure": "task_timeline",
+    "question": "タスク難度",
+    "purpose": "7段階の協調動作と誤差蓄積"
+  },
+  {
+    "figure": "software_data_pipeline",
+    "question": "基盤作業量",
+    "purpose": "収集、編集、公開、学習、運用の閉ループ"
+  },
+  {
+    "figure": "engineering_workload_dashboard",
+    "question": "工学的作業強度",
+    "purpose": "7種の検証可能な工学資産"
+  },
+  {
+    "figure": "next_year_roadmap",
+    "question": "次年度",
+    "purpose": "優先順位と依存関係"
+  },
+  {
+    "figure": "training_demonstration_keyframes",
+    "question": "実学習画像",
+    "purpose": "データ網羅を示し、自律成功を示さない"
+  },
+  {
+    "figure": "aloha_formal_photo_annotated",
+    "question": "実機設備",
+    "purpose": "静止状態の設備構成"
+  }
+]

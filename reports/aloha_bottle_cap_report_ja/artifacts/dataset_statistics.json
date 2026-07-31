@@ -1,0 +1,131 @@
+{
+  "generated_utc": "2026-07-30T07:56:52.344402+00:00",
+  "scope": "deployed baseline bottle-sorting model; RLT data preserved separately",
+  "platform_aloha_assets": {
+    "projects": 51,
+    "declared_episodes": 2413,
+    "declared_frames": 2907804,
+    "declared_duration_sec": 58156.08000000001
+  },
+  "deployed_training_dataset": {
+    "unique_repositories": 25,
+    "unique_episodes": 1051,
+    "unique_frames": 879852,
+    "declared_fps": 50,
+    "duration_sec": 17597.040000000005,
+    "duration_hours": 4.888066666666668,
+    "trainable_frames": 844102,
+    "trainable_duration_hours": 4.689455555555556,
+    "excluded_frames": 35750,
+    "sampler_entries": 29,
+    "weighted_episode_exposure": 1495,
+    "weighted_frame_exposure": 978792,
+    "splits": [
+      "train"
+    ],
+    "camera_videos": {
+      "raw": [
+        "cam_high",
+        "cam_low",
+        "cam_left_wrist",
+        "cam_right_wrist"
+      ],
+      "training": [
+        "cam_high",
+        "cam_left_wrist",
+        "cam_right_wrist"
+      ],
+      "raw_resolution": [
+        640,
+        480
+      ],
+      "training_resolution": [
+        224,
+        224
+      ]
+    },
+    "state_dim": 14,
+    "action_dim": 14,
+    "action_type": "delta joint actions including two grippers",
+    "language_instruction": true,
+    "reward_field": false,
+    "success_field": false
+  },
+  "numeric_quality": {
+    "rows_scanned": 879852,
+    "nonfinite_state_values": 0,
+    "nonfinite_action_values": 0,
+    "all_zero_state_rows": 0,
+    "all_zero_action_rows": 0,
+    "timing_bad_episodes": 0,
+    "frame_index_bad_episodes": 0,
+    "exact_duplicate_trajectory_groups": 0
+  },
+  "condition_coverage": {
+    "no_cap_named": {
+      "repositories": 6,
+      "episodes": 158,
+      "frames": 137667,
+      "deployed_weighted_episodes": 158,
+      "current_code_weighted_episodes": 158
+    },
+    "direction_named": {
+      "repositories": 11,
+      "episodes": 404,
+      "frames": 350307,
+      "deployed_weighted_episodes": 404,
+      "current_code_weighted_episodes": 404
+    },
+    "turn_over_named": {
+      "repositories": 3,
+      "episodes": 127,
+      "frames": 54043,
+      "deployed_weighted_episodes": 127,
+      "current_code_weighted_episodes": 635
+    },
+    "free_spinning_named": {
+      "repositories": 1,
+      "episodes": 111,
+      "frames": 24735,
+      "deployed_weighted_episodes": 555,
+      "current_code_weighted_episodes": 1665
+    },
+    "water_named": {
+      "repositories": 4,
+      "episodes": 136,
+      "frames": 94065,
+      "deployed_weighted_episodes": 136,
+      "current_code_weighted_episodes": 136
+    },
+    "return_home_named": {
+      "repositories": 3,
+      "episodes": 135,
+      "frames": 161970,
+      "deployed_weighted_episodes": 135,
+      "current_code_weighted_episodes": 135
+    }
+  },
+  "prompt_summary": {
+    "conditional_on_cap_presence": {
+      "repositories": 1,
+      "episodes": 19,
+      "frames": 23142
+    },
+    "long_but_unconditional_cap_step": {
+      "repositories": 4,
+      "episodes": 88,
+      "frames": 68106
+    },
+    "short_unconditional_unscrew": {
+      "repositories": 20,
+      "episodes": 944,
+      "frames": 788604
+    }
+  },
+  "limitations": [
+    "Only a train split exists; leakage and train/test gap cannot be audited.",
+    "All videos were not exhaustively decoded frame by frame.",
+    "Filename-token condition classes are non-exclusive and are not per-frame semantic labels.",
+    "No reward or success field exists in the deployed baseline dataset."
+  ]
+}

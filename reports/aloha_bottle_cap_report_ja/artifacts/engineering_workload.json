@@ -1,0 +1,47 @@
+{
+  "cards": [
+    {
+      "title": "データ資産",
+      "value": "51プロジェクト",
+      "detail": "2,413軌跡｜約16.15時間"
+    },
+    {
+      "title": "本番学習データ",
+      "value": "1,051軌跡",
+      "detail": "879,852フレーム｜25確定版"
+    },
+    {
+      "title": "学習探索",
+      "value": "41回試行",
+      "detail": "14設定｜6種類のバッチ"
+    },
+    {
+      "title": "本番学習",
+      "value": "59,990ステップ",
+      "detail": "6,059記録｜約51.4時間"
+    },
+    {
+      "title": "運用モデル",
+      "value": "8.38億パラメータ",
+      "detail": "ステップ19,000｜3視野"
+    },
+    {
+      "title": "視覚監査",
+      "value": "8,223サンプル",
+      "detail": "9実行記録一覧｜3視野"
+    },
+    {
+      "title": "強化学習研究",
+      "value": "835軌跡",
+      "detail": "238,816学習区間｜5ラウンド"
+    }
+  ],
+  "source_artifacts": [
+    "artifacts/dataset_statistics.json",
+    "artifacts/wandb_experiment_inventory.json",
+    "artifacts/attention_audit.json",
+    "artifacts/checkpoint_metadata.json",
+    "artifacts/rlt_dataset_statistics.json"
+  ],
+  "interpretation_limit": "The cards use different units and must not be summed."
+}

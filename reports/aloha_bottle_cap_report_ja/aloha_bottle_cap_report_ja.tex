@@ -1,0 +1,152 @@
+\documentclass[xelatex,ja=standard,a4paper,10pt,openany]{bxjsreport}
+\geometry{top=20mm,bottom=21mm,left=22mm,right=22mm,headheight=15pt}
+\usepackage{zxjatype}
+\setjamainfont{Noto Serif CJK JP}
+\setjasansfont{Noto Sans CJK JP}
+\newfontfamily\japanesesans{Noto Sans CJK JP}
+\usepackage{booktabs,tabularx,array,multirow,makecell}
+\usepackage{graphicx,subcaption,float,placeins,pdflscape}
+\usepackage{amsmath,amssymb}
+\usepackage{siunitx}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit,shapes.geometric,calc}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage{hyperref}
+\usepackage[nameinlink,noabbrev]{cleveref}
+\usepackage{xurl}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+\usepackage{setspace}
+\usepackage{microtype}
+\usepackage{caption}
+\usepackage{titlesec}
+
+\definecolor{ReportNavy}{HTML}{142B4A}
+\definecolor{ReportBlue}{HTML}{2474B5}
+\definecolor{ReportTeal}{HTML}{168B83}
+\definecolor{ReportAmber}{HTML}{E69F35}
+\definecolor{ReportRed}{HTML}{C6534C}
+\definecolor{ReportGreen}{HTML}{4C956C}
+\definecolor{ReportGray}{HTML}{667085}
+\definecolor{ReportLight}{HTML}{F2F6F8}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=ReportBlue,
+  urlcolor=ReportBlue,
+  citecolor=ReportBlue,
+  pdftitle={ALOHAボトルキャップ開栓ロボット 現段階技術報告書},
+  pdfsubject={初年度成果総括と次年度計画},
+  pdfauthor={記入欄}
+}
+\graphicspath{{figures/}}
+\setlength{\emergencystretch}{3em}
+\setlength{\parindent}{1em}
+\setlength{\parskip}{0.28em}
+\setstretch{1.16}
+\setlist{topsep=3pt,itemsep=2pt,parsep=0pt,leftmargin=2em}
+\captionsetup{font=small,labelfont=bf,labelsep=quad}
+\renewcommand{\arraystretch}{1.18}
+\setlength{\tabcolsep}{4.5pt}
+\setcounter{tocdepth}{2}
+\setcounter{secnumdepth}{2}
+\let\cleardoublepage\clearpage
+\makeatletter
+\@openrightfalse
+\makeatother
+
+\titleformat{\chapter}[display]
+  {\japanesesans\bfseries\color{ReportNavy}}
+  {\filleft\Large 第\thechapter 章}
+  {0.3ex}
+  {\titlerule\vspace{0.8ex}\Huge}
+\titleformat{\section}{\japanesesans\Large\bfseries\color{ReportNavy}}{\thesection}{0.7em}{}
+\titleformat{\subsection}{\japanesesans\large\bfseries\color{ReportBlue}}{\thesubsection}{0.7em}{}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small ALOHA ボトルキャップ開栓ロボット 現段階技術報告書}
+\fancyhead[R]{\small\color{ReportGray}\leftmark}
+\fancyfoot[C]{\color{ReportGray}\thepage}
+\renewcommand{\headrulewidth}{0.3pt}
+
+\newcommand{\ev}[1]{\textcolor{ReportBlue}{\textsuperscript{[#1]}}}
+\newcommand{\plain}[1]{\par\smallskip\noindent
+  \colorbox{ReportLight}{\parbox{\dimexpr\linewidth-2\fboxsep}{\textbf{\japanesesans 要点：}#1}}\par\smallskip}
+\newcommand{\limitbox}[1]{\par\smallskip\noindent
+  \fcolorbox{ReportAmber}{white}{\parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule}{\textbf{\japanesesans\color{ReportAmber}エビデンスの範囲：}#1}}\par\smallskip}
+\newcommand{\resultbox}[1]{\par\smallskip\noindent
+  \fcolorbox{ReportGreen}{white}{\parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule}{\textbf{\japanesesans\color{ReportGreen}現段階の結論：}#1}}\par\smallskip}
+\newcommand{\missing}{\textcolor{ReportRed}{現時点の証拠から直接確認できない}}
+\newcommand{\coverrow}[2]{%
+  \textbf{\japanesesans\color{ReportNavy}#1} & #2\\[1.4mm]%
+}
+\newcommand{\figfull}[3][0.94\textwidth]{
+  \begin{figure}[tbp]
+    \centering
+    \includegraphics[width=#1]{#2}
+    \caption{#3}
+  \end{figure}
+}
+
+\begin{document}
+\begin{titlepage}
+\thispagestyle{empty}
+\begin{tikzpicture}[remember picture,overlay]
+  \fill[ReportNavy] (current page.north west) rectangle ([yshift=-44mm]current page.north east);
+  \fill[ReportTeal] ([yshift=-44mm]current page.north west) rectangle ([yshift=-47mm]current page.north east);
+  \fill[ReportLight] (current page.south west) rectangle ([yshift=20mm]current page.south east);
+\end{tikzpicture}
+\vspace*{8mm}
+{\color{white}\Large 初年度成果の総括・現段階技術レビュー\par}
+\vspace{11mm}
+{\color{white}\fontsize{27}{33}\selectfont\japanesesans\bfseries
+ALOHA ボトルキャップ開栓ロボット\\[2mm]現段階技術報告書\par}
+\vspace{7mm}
+\begin{center}
+\includegraphics[width=.88\textwidth,height=.28\textheight,keepaspectratio]{cover_concept.png}
+
+{\footnotesize\color{ReportGray}表紙画像はタスクの概念図であり、実験写真ではない。}
+\end{center}
+\vspace{4mm}
+\begin{tabular}{@{}l@{\hspace{7mm}}l@{}}
+\coverrow{報告対象期間}{初年度成果の総括と次年度計画}
+\coverrow{実機運用モデル}{2026年5月に学習、現場ではステップ19,000の学習済みモデルを使用}
+\coverrow{エビデンス確認版}{データ、学習履歴、学習済みモデル、現場観測を相互確認}
+\coverrow{報告日}{2026年7月31日}
+\coverrow{報告書版}{v2.1-ja（動画なし・エビデンス区分版）}
+\coverrow{作成者}{\underline{\hspace{75mm}}}
+\end{tabular}\par
+\vspace{3mm}
+{\small\color{ReportGray}用途：プロジェクト報告、社内技術審査、論文資料整理\par}
+\end{titlepage}
+
+\pagenumbering{Roman}
+\input{sections/00_executive_summary}
+\begingroup
+\footnotesize
+\setlength{\parskip}{0pt}
+\linespread{0.86}\selectfont
+\tableofcontents
+\listoffigures
+\listoftables
+\endgroup
+\clearpage
+\pagenumbering{arabic}
+
+\input{sections/01_background}
+\input{sections/02_system}
+\input{sections/03_data}
+\input{sections/04_model}
+\input{sections/05_experiments}
+\input{sections/06_results}
+\input{sections/07_discussion}
+\input{sections/08_conclusion}
+\input{sections/09_plan}
+\input{sections/10_appendix}
+
+\bibliographystyle{plain}
+\bibliography{bibliography/references}
+\end{document}

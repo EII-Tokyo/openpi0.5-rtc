@@ -1,0 +1,379 @@
+{
+  "audit_generated_utc": "2026-07-30T07:33:08.200719+00:00",
+  "classification_method": "Explicit non-exclusive filename-token rules listed in this artifact.",
+  "category_tokens": {
+    "no_cap_named": [
+      "no-cap",
+      "no_cap",
+      "havent_cap",
+      "haven-t_cap",
+      "havent-cap",
+      "haven-t-cap"
+    ],
+    "direction_named": [
+      "direction"
+    ],
+    "turn_over_named": [
+      "turn_over"
+    ],
+    "free_spinning_named": [
+      "free-spinning"
+    ],
+    "water_named": [
+      "water"
+    ],
+    "return_home_named": [
+      "return-home",
+      "return_home"
+    ]
+  },
+  "category_summary": {
+    "no_cap_named": {
+      "repositories": 6,
+      "episodes": 158,
+      "frames": 137667,
+      "deployed_weighted_episodes": 158,
+      "current_code_weighted_episodes": 158
+    },
+    "direction_named": {
+      "repositories": 11,
+      "episodes": 404,
+      "frames": 350307,
+      "deployed_weighted_episodes": 404,
+      "current_code_weighted_episodes": 404
+    },
+    "turn_over_named": {
+      "repositories": 3,
+      "episodes": 127,
+      "frames": 54043,
+      "deployed_weighted_episodes": 127,
+      "current_code_weighted_episodes": 635
+    },
+    "free_spinning_named": {
+      "repositories": 1,
+      "episodes": 111,
+      "frames": 24735,
+      "deployed_weighted_episodes": 555,
+      "current_code_weighted_episodes": 1665
+    },
+    "water_named": {
+      "repositories": 4,
+      "episodes": 136,
+      "frames": 94065,
+      "deployed_weighted_episodes": 136,
+      "current_code_weighted_episodes": 136
+    },
+    "return_home_named": {
+      "repositories": 3,
+      "episodes": 135,
+      "frames": 161970,
+      "deployed_weighted_episodes": 135,
+      "current_code_weighted_episodes": 135
+    }
+  },
+  "prompt_summary": {
+    "conditional_on_cap_presence": {
+      "repositories": 1,
+      "episodes": 19,
+      "frames": 23142
+    },
+    "long_but_unconditional_cap_step": {
+      "repositories": 4,
+      "episodes": 88,
+      "frames": 68106
+    },
+    "short_unconditional_unscrew": {
+      "repositories": 20,
+      "episodes": 944,
+      "frames": 788604
+    }
+  },
+  "no_cap_prompt_cross_check": {
+    "repositories": 6,
+    "episodes": 158,
+    "frames": 137667,
+    "conditional_prompt_repositories": 0,
+    "unconditional_prompt_repositories": 6
+  },
+  "repositories": [
+    {
+      "repo_id": "lyl472324464/2026-05-11_free-spinning-lerobot-without-rinse-merged-adjust-pickup",
+      "episodes": 111,
+      "frames": 24735,
+      "deployed_run_weight": 5,
+      "current_code_weight": 15,
+      "task_type": "short_unconditional_unscrew",
+      "categories": [
+        "free_spinning_named"
+      ]
+    },
+    {
+      "repo_id": "lyl472324464/2025-09-15-twist-one-bottle-no-box-in-the-front-without-rinse-merged-adjust-pickup",
+      "episodes": 98,
+      "frames": 55356,
+      "deployed_run_weight": 1,
+      "current_code_weight": 1,
+      "task_type": "short_unconditional_unscrew",
+      "categories": []
+    },
+    {
+      "repo_id": "lyl472324464/2025-12-10-twist-one-bottle-merged-adjust-pickup",
+      "episodes": 19,
+      "frames": 23142,
+      "deployed_run_weight": 1,
+      "current_code_weight": 1,
+      "task_type": "conditional_on_cap_presence",
+      "categories": []
+    },
+    {
+      "repo_id": "lyl472324464/2025-12-23-twist-one-bottle-without-rinse-merged-adjust-pickup",
+      "episodes": 91,
+      "frames": 122038,
+      "deployed_run_weight": 1,
+      "current_code_weight": 1,
+      "task_type": "short_unconditional_unscrew",
+      "categories": []
+    },
+    {
+      "repo_id": "lyl472324464/2026-01-20-twist-one-bottle-merged-adjust-pickup",
+      "episodes": 32,
+      "frames": 40172,
+      "deployed_run_weight": 1,
+      "current_code_weight": 1,
+      "task_type": "long_but_unconditional_cap_step",
+      "categories": []
+    },
+    {
+      "repo_id": "lyl472324464/2026-02-03-no-cap-and-direction-without-rinse-merged-adjust-pickup",
+      "episodes": 12,
+      "frames": 70849,
+      "deployed_run_weight": 1,
+      "current_code_weight": 1,
+      "task_type": "short_unconditional_unscrew",
+      "categories": [
+        "no_cap_named",
+        "direction_named"
+      ]
+    },
+    {
+      "repo_id": "lyl472324464/2026-03-04-one-direction-lerobot-without-rinse-merged-adjust-pickup",
+      "episodes": 32,
+      "frames": 48111,
+      "deployed_run_weight": 1,
+      "current_code_weight": 1,
+      "task_type": "short_unconditional_unscrew",
+      "categories": [
+        "direction_named"
+      ]
+    },
+    {
+      "repo_id": "lyl472324464/2026.03.12_one_have_cap-lerobot-without-rinse-merged-adjust-pickup",
+      "episodes": 16,
+      "frames": 21164,
+      "deployed_run_weight": 1,
+      "current_code_weight": 1,
+      "task_type": "short_unconditional_unscrew",
+      "categories": []
+    },
+    {
+      "repo_id": "lyl472324464/2026.03.12_one_have_cap_direction-lerobot-without-rinse-merged-adjust-pickup",
+      "episodes": 15,
+      "frames": 22994,
+      "deployed_run_weight": 1,
+      "current_code_weight": 1,
+      "task_type": "short_unconditional_unscrew",
+      "categories": [
+        "direction_named"
+      ]
+    },
+    {
+      "repo_id": "lyl472324464/2026-03-12-one-havent-cap-merged-adjust-pickup",
+      "episodes": 15,
+      "frames": 7217,
+      "deployed_run_weight": 1,
+      "current_code_weight": 1,
+      "task_type": "long_but_unconditional_cap_step",
+      "categories": [
+        "no_cap_named"
+      ]
+    },
+    {
+      "repo_id": "lyl472324464/2026-03-12-one-havent-cap-direction-merged-adjust-pickup",
+      "episodes": 15,
+      "frames": 9051,
+      "deployed_run_weight": 1,
+      "current_code_weight": 1,
+      "task_type": "long_but_unconditional_cap_step",
+      "categories": [
+        "no_cap_named",
+        "direction_named"
+      ]
+    },
+    {
+      "repo_id": "lyl472324464/2026-04-21_direction-lerobot-without-rinse-merged-adjust-pickup",
+      "episodes": 104,
+      "frames": 61435,
+      "deployed_run_weight": 1,
+      "current_code_weight": 1,
+      "task_type": "short_unconditional_unscrew",
+      "categories": [
+        "direction_named"
+      ]
+    },
+    {
+      "repo_id": "lyl472324464/2026-04-21_direction_2-lerobot-without-rinse-merged-adjust-pickup",
+      "episodes": 61,
+      "frames": 31777,
+      "deployed_run_weight": 1,
+      "current_code_weight": 1,
+      "task_type": "short_unconditional_unscrew",
+      "categories": [
+        "direction_named"
+      ]
+    },
+    {
+      "repo_id": "lyl472324464/2026-04-21_direction_haven-t_cap-lerobot-without-rinse-merged-adjust-pickup",
+      "episodes": 29,
+      "frames": 12025,
+      "deployed_run_weight": 1,
+      "current_code_weight": 1,
+      "task_type": "short_unconditional_unscrew",
+      "categories": [
+        "no_cap_named",
+        "direction_named"
+      ]
+    },
+    {
+      "repo_id": "lyl472324464/2026-04-21_direction_havent_cap_water-lerobot-without-rinse-merged-adjust-pickup",
+      "episodes": 26,
+      "frames": 11666,
+      "deployed_run_weight": 1,
+      "current_code_weight": 1,
+      "task_type": "long_but_unconditional_cap_step",
+      "categories": [
+        "no_cap_named",
+        "direction_named",
+        "water_named"
+      ]
+    },
+    {
+      "repo_id": "lyl472324464/2026-04-23_direction_havent_cap_water-lerobot-without-rinse-merged-adjust-pickup",
+      "episodes": 61,
+      "frames": 26859,
+      "deployed_run_weight": 1,
+      "current_code_weight": 1,
+      "task_type": "short_unconditional_unscrew",
+      "categories": [
+        "no_cap_named",
+        "direction_named",
+        "water_named"
+      ]
+    },
+    {
+      "repo_id": "lyl472324464/2026-04-28_direction_have_cap_water-lerobot-without-rinse-merged-adjust-pickup",
+      "episodes": 27,
+      "frames": 31252,
+      "deployed_run_weight": 1,
+      "current_code_weight": 1,
+      "task_type": "short_unconditional_unscrew",
+      "categories": [
+        "direction_named",
+        "water_named"
+      ]
+    },
+    {
+      "repo_id": "lyl472324464/2026-04-28_direction_have_cap_water2-lerobot-without-rinse-merged-adjust-pickup",
+      "episodes": 22,
+      "frames": 24288,
+      "deployed_run_weight": 1,
+      "current_code_weight": 1,
+      "task_type": "short_unconditional_unscrew",
+      "categories": [
+        "direction_named",
+        "water_named"
+      ]
+    },
+    {
+      "repo_id": "lyl472324464/2026-05-11_cap-lerobot-without-rinse-merged-adjust-pickup",
+      "episodes": 3,
+      "frames": 19708,
+      "deployed_run_weight": 1,
+      "current_code_weight": 1,
+      "task_type": "short_unconditional_unscrew",
+      "categories": []
+    },
+    {
+      "repo_id": "lyl472324464/2026-05-11_twist-lerobot-truncated-return-home-exp-truncated-return-home-20260520-095140",
+      "episodes": 45,
+      "frames": 52398,
+      "deployed_run_weight": 1,
+      "current_code_weight": 1,
+      "task_type": "short_unconditional_unscrew",
+      "categories": [
+        "return_home_named"
+      ]
+    },
+    {
+      "repo_id": "lyl472324464/2026-05-12_twist-lerobot-truncated-return-home-exp-truncated-return-home-20260520-095140",
+      "episodes": 57,
+      "frames": 70749,
+      "deployed_run_weight": 1,
+      "current_code_weight": 1,
+      "task_type": "short_unconditional_unscrew",
+      "categories": [
+        "return_home_named"
+      ]
+    },
+    {
+      "repo_id": "lyl472324464/2026-05-12_twist2-lerobot-truncated-return-home-exp-truncated-return-home-20260520-095140",
+      "episodes": 33,
+      "frames": 38823,
+      "deployed_run_weight": 1,
+      "current_code_weight": 1,
+      "task_type": "short_unconditional_unscrew",
+      "categories": [
+        "return_home_named"
+      ]
+    },
+    {
+      "repo_id": "lyl472324464/2026-05-04_turn_over-lerobot-without-rinse",
+      "episodes": 45,
+      "frames": 21787,
+      "deployed_run_weight": 1,
+      "current_code_weight": 5,
+      "task_type": "short_unconditional_unscrew",
+      "categories": [
+        "turn_over_named"
+      ]
+    },
+    {
+      "repo_id": "lyl472324464/2026-05-03_turn_over-lerobot-without-rinse",
+      "episodes": 68,
+      "frames": 27061,
+      "deployed_run_weight": 1,
+      "current_code_weight": 5,
+      "task_type": "short_unconditional_unscrew",
+      "categories": [
+        "turn_over_named"
+      ]
+    },
+    {
+      "repo_id": "lyl472324464/2026-05-01_turn_over-lerobot-without-rinse",
+      "episodes": 14,
+      "frames": 5195,
+      "deployed_run_weight": 1,
+      "current_code_weight": 5,
+      "task_type": "short_unconditional_unscrew",
+      "categories": [
+        "turn_over_named"
+      ]
+    }
+  ],
+  "interpretation": [
+    "The filename categories measure intended coverage, not verified scene labels.",
+    "All six no-cap-named repositories use an unconditional unscrew instruction.",
+    "This instruction mismatch is a concrete risk consistent with field-observed air-unscrewing, but it does not prove causality.",
+    "Turn-over and free-spinning data exist; their presence alone does not prove those failures are solved.",
+    "The later current-code weights are shown as remediation evidence, not as the deployed step-19000 recipe."
+  ]
+}

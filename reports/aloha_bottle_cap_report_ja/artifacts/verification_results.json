@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "pdf": "/home/eii/.config/superpowers/worktrees/openpi0.5-rtc-reward-learning/aloha-report-ja-edition/reports/aloha_bottle_cap_report_ja/aloha_bottle_cap_report_ja.pdf",
+  "pages": 51,
+  "embedded_japanese_fonts": [
+    "Noto Serif CJK JP",
+    "Noto Sans CJK JP"
+  ],
+  "figures_referenced": 19,
+  "tables": 30,
+  "longtable_count": 0,
+  "blank_pages": [],
+  "canonical_facts_checked": 9
+}

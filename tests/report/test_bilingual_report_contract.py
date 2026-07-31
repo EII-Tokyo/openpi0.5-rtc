@@ -40,3 +40,39 @@ def test_japanese_report_does_not_use_longtable() -> None:
     sources = [JA_TEX, *sorted((JA_REPORT / "sections").glob("*.tex"))]
     text = "\n".join(path.read_text(encoding="utf-8") for path in sources)
     assert "\\begin{longtable}" not in text
+
+
+def test_japanese_report_has_all_sections_and_figures() -> None:
+    sections = sorted((JA_REPORT / "sections").glob("*.tex"))
+    assert [path.name for path in sections] == [
+        "00_executive_summary.tex",
+        "01_background.tex",
+        "02_system.tex",
+        "03_data.tex",
+        "04_model.tex",
+        "05_experiments.tex",
+        "06_results.tex",
+        "07_discussion.tex",
+        "08_conclusion.tex",
+        "09_plan.tex",
+        "10_appendix.tex",
+    ]
+    source = "\n".join(path.read_text(encoding="utf-8") for path in sections)
+    for figure_name in [
+        "aloha_formal_photo_annotated.png",
+        "model_dataflow.pdf",
+        "experiment_funnel.pdf",
+        "baseline_training_loss.pdf",
+        "next_year_roadmap.pdf",
+    ]:
+        assert figure_name in source
+        assert (JA_REPORT / "figures" / figure_name).is_file()
+
+
+def test_japanese_tables_are_unbreakable_float_tables() -> None:
+    source = "\n".join(
+        path.read_text(encoding="utf-8")
+        for path in sorted((JA_REPORT / "sections").glob("*.tex"))
+    )
+    assert source.count("\\begin{table}[H]") == source.count("\\end{table}")
+    assert "\\begin{table}[ht" not in source
