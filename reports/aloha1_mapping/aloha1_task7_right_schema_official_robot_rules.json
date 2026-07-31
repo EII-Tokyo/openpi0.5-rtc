@@ -1,0 +1,35 @@
+{
+  "blocking_issue_count": 0,
+  "category": "IsaacSim.RobotRules",
+  "direct_nvidia_mcp_verified": true,
+  "issues": [],
+  "official_status": "PASS",
+  "official_status_suppressed": false,
+  "real_robot_connected": false,
+  "remote_192_168_1_103_accessed": false,
+  "rule_count": 10,
+  "rules": [
+    "CheckRobotRelationships",
+    "CleanFolder",
+    "JointsExist",
+    "LinksExist",
+    "NoOverrides",
+    "RobotNaming",
+    "RobotSchema",
+    "ThumbnailExists",
+    "VerifyRobotPhysicsAttributesSourceLayer",
+    "VerifyRobotPhysicsSchemaSourceLayer"
+  ],
+  "runtime": {
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physx": "107.3.26"
+  },
+  "schema_version": 1,
+  "target_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right_robot_schema/1.0/supplier_cad_follower_right_robot_schema.usda",
+  "target_immutable": true,
+  "target_name": "follower_right_schema_only",
+  "target_sha256_after": "233135f55addbf957034f27061c542ad60de168945ba7d823e161723f081d550",
+  "target_sha256_before": "233135f55addbf957034f27061c542ad60de168945ba7d823e161723f081d550",
+  "warning_count": 0
+}

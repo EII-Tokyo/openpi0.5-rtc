@@ -1,0 +1,19 @@
+#usda 1.0
+(
+    defaultPrim = "follower_right"
+    metersPerUnit = 1
+    subLayers = [
+        @configuration/supplier_cad_follower_right_robot_schema_robot.usda@,
+        @../../supplier_cad_follower_right/1.0/geometry/supplier_cad_follower_right_geometry.usda@
+    ]
+    upAxis = "Z"
+)
+
+def Xform "follower_right"
+{
+    def Xform "vx300s_right" (
+        prepend references = @../../../follower_vx300s/follower_right/follower_right.usd@</follower_right>
+    )
+    {
+    }
+}

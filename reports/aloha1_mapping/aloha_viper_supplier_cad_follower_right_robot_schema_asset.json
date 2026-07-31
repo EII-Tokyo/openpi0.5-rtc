@@ -1,0 +1,99 @@
+{
+  "final_default_collider_modified": false,
+  "generic_fingers_deactivated": [
+    "/follower_right/vx300s_right/follower_right_left_finger_link/visuals/gripper_finger",
+    "/follower_right/vx300s_right/follower_right_left_finger_link/collisions/gripper_finger",
+    "/follower_right/vx300s_right/follower_right_right_finger_link/visuals/gripper_finger",
+    "/follower_right/vx300s_right/follower_right_right_finger_link/collisions/gripper_finger"
+  ],
+  "isaac_version_contract": {
+    "asset_validation": "1.1.0",
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physx": "107.3.26"
+  },
+  "physical_right_stage": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/supplier_cad_follower_right.usda",
+    "modified": false,
+    "sha256": "95c7878f794f5f557b70997a2240b6476836b8ffbeed5a4992cb114a169487ea"
+  },
+  "physical_right_stage_included": false,
+  "protected_inputs_unchanged": {
+    "physical_right_stage": true,
+    "source_geometry_layer": true,
+    "source_right_asset": true
+  },
+  "readback": {
+    "robot_api": true,
+    "robot_joints": [
+      "/follower_right/vx300s_right/joints/waist",
+      "/follower_right/vx300s_right/joints/shoulder",
+      "/follower_right/vx300s_right/joints/elbow",
+      "/follower_right/vx300s_right/joints/forearm_roll",
+      "/follower_right/vx300s_right/joints/wrist_angle",
+      "/follower_right/vx300s_right/joints/wrist_rotate",
+      "/follower_right/vx300s_right/joints/ee_arm",
+      "/follower_right/vx300s_right/joints/gripper",
+      "/follower_right/vx300s_right/joints/gripper_bar",
+      "/follower_right/vx300s_right/joints/ee_bar",
+      "/follower_right/vx300s_right/joints/ee_gripper",
+      "/follower_right/vx300s_right/joints/left_finger",
+      "/follower_right/vx300s_right/joints/right_finger",
+      "/follower_right/vx300s_right/root_joint"
+    ],
+    "robot_links": [
+      "/follower_right/vx300s_right/follower_right_base_link",
+      "/follower_right/vx300s_right/follower_right_shoulder_link",
+      "/follower_right/vx300s_right/follower_right_upper_arm_link",
+      "/follower_right/vx300s_right/follower_right_upper_forearm_link",
+      "/follower_right/vx300s_right/follower_right_lower_forearm_link",
+      "/follower_right/vx300s_right/follower_right_wrist_link",
+      "/follower_right/vx300s_right/follower_right_gripper_link",
+      "/follower_right/vx300s_right/follower_right_ee_arm_link",
+      "/follower_right/vx300s_right/follower_right_gripper_prop_link",
+      "/follower_right/vx300s_right/follower_right_gripper_bar_link",
+      "/follower_right/vx300s_right/follower_right_fingers_link",
+      "/follower_right/vx300s_right/follower_right_ee_gripper_link",
+      "/follower_right/vx300s_right/follower_right_left_finger_link",
+      "/follower_right/vx300s_right/follower_right_right_finger_link"
+    ]
+  },
+  "real_robot_connected": false,
+  "remote_192_168_1_103_accessed": false,
+  "schema_layer": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right_robot_schema/1.0/configuration/supplier_cad_follower_right_robot_schema_robot.usda",
+    "sha256": "9be689e9d25284186f627745f3161c676fa02a242e66dbf69ea22b39c9b7d4cf"
+  },
+  "schema_version": 1,
+  "scope": "ROBOTRULES_SCHEMA_ONLY_DIAGNOSTIC",
+  "source_geometry_layer": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/geometry/supplier_cad_follower_right_geometry.usda",
+    "modified": false,
+    "sha256": "168ad2705541ea17afe46f4fe2389a53f4ab660f5f4df09b25fff7fa5007fd65"
+  },
+  "source_right_asset": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/follower_right.usd",
+    "modified": false,
+    "sha256": "86d850cea5b35fb2969d3a78834317b51e2ac0d301f09aaaa9dad191f9bb3d5d"
+  },
+  "status": "PASS",
+  "task8": "NOT_RUN",
+  "thumbnail": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right_robot_schema/1.0/.thumbs/256x256/supplier_cad_follower_right_robot_schema.usda.png",
+    "mode": "RGB",
+    "resolution": [
+      256,
+      256
+    ],
+    "scope": "ASSET_BROWSER_METADATA_NOT_PHYSICS_ACCEPTANCE",
+    "sha256": "d42633596f4ebd0866b8327aa6b1e3f89910f4ed9f7d11b30615cee2c9c73720",
+    "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/follower_right_pose_evidence/attempt4_final/screenshots_raw/full_arm_oblique_home_reference_raw.png",
+    "source_sha256": "26e66a9de101024051957de123c9fe699508e732dbad78d70a0d97fa88b27d97",
+    "source_visual_review": "PASS"
+  },
+  "wrapper": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right_robot_schema/1.0/supplier_cad_follower_right_robot_schema.usda",
+    "default_prim": "/follower_right",
+    "sha256": "233135f55addbf957034f27061c542ad60de168945ba7d823e161723f081d550"
+  }
+}

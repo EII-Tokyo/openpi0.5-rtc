@@ -1,0 +1,118 @@
+{
+  "action_counts": {
+    "CREATE_ISOLATED_PACKAGING_CANDIDATE": 28,
+    "HARD_BLOCKER_NO_SOURCE_GEOMETRY": 6,
+    "KEEP_UNSUPPRESSED_VERSION_CONFLICT": 2,
+    "RECORD_NON_BLOCKING_INFORMATION": 1
+  },
+  "candidate_boundary": {
+    "collision_change_allowed": false,
+    "directory": "assets/Trossen/ALOHA1/1.0/diagnostics/task7_promotion_candidate/",
+    "final_or_default_asset_change_allowed": false,
+    "geometry_change_allowed": false,
+    "isolated_only": true,
+    "joint_or_drive_change_allowed": false
+  },
+  "candidate_mutation_issue_count": 28,
+  "classification_counts": {
+    "ISAAC_5_1_VALIDATOR_SCHEMA_CONFLICT": 2,
+    "LAYER_PACKAGING_DEFECT": 28,
+    "MISSING_SOURCE_EVIDENCE": 6,
+    "NON_APPLICABLE_FALSE_POSITIVE": 1
+  },
+  "direct_nvidia_mcp_probe": {
+    "asset_validation": "1.2.1",
+    "robot_schema": "5.1.0",
+    "status": "PASS",
+    "tool": "get_isaac_sim_extension_details",
+    "transport": "DIRECT_NOT_MCPJUNGLE",
+    "version_match_for_asset_validation": false
+  },
+  "final_or_default_asset_modified": false,
+  "input_manifest": [
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7a_rule_triage.json",
+      "sha256": "59c45343616cda2017344b1b0170697ee6b16c615fe4d7cfaa09b91bf373d53c"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_signal_correspondence_official_rules.json",
+      "sha256": "a7acb1e7363d1306b01b7f9609f9a5250f0b535771a3de8523246ae3cd31756f"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/aloha1_signal_correspondence_workcell.usda",
+      "sha256": "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_supplier_cad_follower_right_robot_schema_asset.json",
+      "sha256": "1bb8b2495a9872538d40d028d70536e73b6fd1e75b89abdd7c75c7074ee68ab0"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7_right_schema_official_robot_rules.json",
+      "sha256": "7b5688acbac079b0a6514b1fe31890ff780c5bf1b9425f307804be8f38b0d34c"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-post-grasp-task7/follower_right_schema_robot_rules_repeat.json",
+      "sha256": "b7898402e1044e6e04c5de6d778deadbf037511a187629856bd00b3a4a98e2f0"
+    }
+  ],
+  "isolated_candidate_results": {
+    "follower_right_robot_schema": {
+      "blocking_issue_count": 0,
+      "candidate_stage": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right_robot_schema/1.0/supplier_cad_follower_right_robot_schema.usda",
+        "default_prim": "/follower_right",
+        "sha256": "233135f55addbf957034f27061c542ad60de168945ba7d823e161723f081d550"
+      },
+      "checks": {
+        "asset_status": true,
+        "blocking_issue_count": true,
+        "official_status": true,
+        "physical_stage_excluded": true,
+        "physical_stage_unchanged": true,
+        "repeat": true,
+        "scope": true,
+        "target_immutable": true,
+        "warning_count": true
+      },
+      "deterministic_repeat": true,
+      "deterministic_signature": "8bb47b41417ef7f05e233b5bae651c94130441066b560a2686d77ed830ab550f",
+      "official_status": "PASS",
+      "physical_stage": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/supplier_cad_follower_right.usda",
+        "modified": false,
+        "sha256": "95c7878f794f5f557b70997a2240b6476836b8ffbeed5a4992cb114a169487ea"
+      },
+      "physical_stage_modified": false,
+      "scope": "ROBOTRULES_SCHEMA_ONLY_DIAGNOSTIC",
+      "status": "PASS",
+      "warning_count": 0
+    }
+  },
+  "issue_count": 37,
+  "local_runtime": {
+    "asset_validation": "1.1.0",
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physx": "107.3.26"
+  },
+  "official_status": "FAIL",
+  "official_status_suppressed": false,
+  "packaging_rule_counts": {
+    "JointHasJointStateAPI": 2,
+    "NoOverrides": 8,
+    "RobotNaming": 1,
+    "RobotSchema": 3,
+    "ThumbnailExists": 2,
+    "VerifyRobotPhysicsAttributesSourceLayer": 4,
+    "VerifyRobotPhysicsSchemaSourceLayer": 8
+  },
+  "real_robot_connected": false,
+  "remote_192_168_1_103_accessed": false,
+  "schema_version": 1,
+  "source_or_runtime_mutation_issue_count": 0,
+  "stage_mutated": false,
+  "status": "PARTIAL",
+  "task8": "NOT_RUN",
+  "unclassified_issue_count": 0,
+  "version_authority": "LOCAL_ISAAC_SIM_5_1_SOURCE"
+}

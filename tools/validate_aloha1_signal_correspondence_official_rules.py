@@ -86,7 +86,7 @@ def main() -> int:
             "kit": "107.3.3",
             "physx": "107.3.26",
         },
-        "mcpjungle_nvidia_official_api_verified": True,
+        "direct_nvidia_mcp_verified": True,
         "official_status_suppressed": False,
         "real_robot_connected": False,
         "remote_192_168_1_103_accessed": False,
