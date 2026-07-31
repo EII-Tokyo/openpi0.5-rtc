@@ -1,0 +1,95 @@
+schema_version: 2
+classification: DIAGNOSTIC_ONLY_NOT_FINAL_CONTROL_MAPPING
+scope: follower_left five frozen Bottle500 poses and five frozen arm starts
+runtime:
+  isaac_sim: 5.1.0.0
+  kit: 107.3.3
+  physx: 107.3.26
+  allow_runtime_resampling: false
+  fresh_process_per_sample: true
+  machine_repeat_per_sample: 1
+  required_primary_videos: 5
+  initial_pose_hold_frames: 60
+  bottle_setup_may_be_kinematic: true
+  bottle_settle_through_hold_dynamic: true
+  surface_gripper: false
+  fixed_joint: false
+  parent_attachment: false
+sampling:
+  seed: 2026073102
+  candidate_count: 256
+  formal_sample_count: 5
+  bottle_line_yaw_domain_deg: [0.0, 180.0]
+  initial_arm_sampling: FIXED_SEED_UNIFORM_WITHIN_EXPLICIT_JOINT_LIMITS_THEN_FK
+  selection: FIRST_FIVE_COMPLETE_PREFLIGHT_PASSES_IN_GENERATED_ORDER
+formal_structure:
+  sample_01:
+    bottle_center_world_x_m: 0.0
+    bottle_center_y_sign: positive
+  sample_04:
+    bottle_center_world_x_m: 0.0
+    bottle_center_y_sign: negative
+  remaining_samples:
+    sample_ids: [sample_02, sample_03, sample_05]
+    bottle_center_world_x_relation: negative
+geometry:
+  world_origin: USER_CONFIRMED_TABLETOP_CENTER
+  world_up: [0.0, 0.0, 1.0]
+  table_vertical_centerline: WORLD_X_EQUALS_ZERO
+  bottle_cad_axis:
+    a_local_m: [0.0, 0.0, 0.0]
+    b_local_m: [0.0, 0.0, 0.206]
+    source: PROJECT_BOTTLE_CAD_REVOLUTION_AXIS
+  bottle_geometric_center_local_m: [0.0, 0.0, 0.103]
+  bottle_geometric_center_derivation: MIDPOINT_OF_AUDITED_CAD_Z_0_TO_0_206_M
+  bottle_geometric_center_world_z_policy: RUNTIME_DERIVED_AFTER_HORIZONTAL_PLACEMENT_AND_DYNAMIC_SETTLE
+  sampled_yaw_axis_world: [0.0, 0.0, 1.0]
+  object_to_gripper_transform_policy: FROZEN_VALIDATED_GRASP_EDITOR_T_O_G
+gates:
+  minimum_bottle_line_yaw_separation_deg: 25.0
+  minimum_initial_ee_separation_m: 0.050
+  bottle_centerline_residual_m: 1.0e-6
+  axis_to_table_normal_target_deg: 90.0
+  axis_to_table_normal_tolerance_deg: 1.0
+  geometry_tolerance_status: ENGINEERING_DIAGNOSTIC_NOT_PHYSICAL_MEASUREMENT
+  support_contact_latch_clearance_m: 0.0005
+  target_clearance_m: 0.200
+  hold_interval_s: 2.0
+  maximum_hold_drop_m: 0.010
+frozen_inputs:
+  approved_stage:
+    path: assets/Trossen/ALOHA1/1.0/diagnostics/table_support_alignment/1.0/aloha1_table_support_aligned_workcell.usda
+    sha256: 2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c
+    root_prim: /World
+    articulation_prim: /World/follower_left/vx300s_left/root_joint
+    table_prim: /World/environment/worldBody/user_confirmed_table
+  runtime_config:
+    path: configs/aloha1_grasp_20cm_gui.yaml
+    sha256: 67a427e93a5bbaee6b21f1e0c23a56b0c22771cf1cc0e837e7ea48a6c39185f4
+  grasp_editor_candidate:
+    path: configs/aloha1_grasps/bottle500_horizontal_body_grasp.isaac_grasp.yaml
+    sha256: b3307c86a44101eadd6ed2151722e7668bb7d644422378765d98eac906835cca
+    pose_semantics: T_O_G
+  joint_map:
+    path: configs/aloha1_joint_map.yaml
+    sha256: f56be097d859f7361b804705af6659e0d51d9e480d1c721a60040ab787530308
+  bottle_cad_audit:
+    path: reports/aloha1_mapping/aloha_project_bottle_cad_audit.json
+    sha256: a6c4ea40295ddafa2a690f346eea2be549105db7590b13948d2f977aa812aba3
+  bottle_cad_build_script:
+    path: assets/bottle_500ml/scripts/build_bottle_freecad.py
+    sha256: b077b03839b8d3e7395a98fe85d8388ed8553d344300f97cd4886c83771e7945
+  bottle_cad:
+    path: assets/bottle_500ml/cad/bottle_500ml.FCStd
+    sha256: 3594f60200e54181bc8480a229484293a0d386c146d3f235b32e31a0c16bbf8a
+boundaries:
+  real_robot: false
+  remote_103: false
+  source_stage_modified: false
+  final_collider_modified: false
+  workcell_expansion: false
+  camera_expansion: false
+  ros: false
+  leader: false
+  pipe_insertion: false
+  task8: NOT_RUN

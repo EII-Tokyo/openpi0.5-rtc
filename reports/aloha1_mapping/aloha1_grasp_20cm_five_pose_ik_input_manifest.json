@@ -1,0 +1,171 @@
+{
+  "schema_version": 1,
+  "status": "PASS",
+  "classification": "FROZEN_INPUT_MANIFEST_BEFORE_FORMAL_PREFLIGHT",
+  "project_root": "/home/eii/project/openpi0.5-rtc-reward-learning",
+  "approved_stage": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/table_support_alignment/1.0/aloha1_table_support_aligned_workcell.usda",
+    "sha256": "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c",
+    "size_bytes": 245,
+    "default_prim": "/World",
+    "root_prim": "/World",
+    "meters_per_unit": 1.0,
+    "up_axis": "Z",
+    "traversed_prim_count": 367,
+    "required_prims": {
+      "/World": true,
+      "/World/follower_left": true,
+      "/World/follower_left/vx300s_left/root_joint": true,
+      "/World/environment/worldBody/user_confirmed_table": true
+    },
+    "root_sublayers": [
+      "configuration/aloha1_tabletop_world_zero.usda",
+      "../../signal_correspondence/1.0/aloha1_signal_correspondence_workcell.usda"
+    ],
+    "composed_layer_stack": [
+      {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/table_support_alignment/1.0/aloha1_table_support_aligned_workcell.usda",
+        "sha256": "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c",
+        "size_bytes": 245
+      },
+      {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/table_support_alignment/1.0/configuration/aloha1_tabletop_world_zero.usda",
+        "sha256": "c9f8c656ed3a1b2722bfe0fb18dd2e5056da0320782e5dd3a7d4df2d7e845afc",
+        "size_bytes": 423
+      },
+      {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/aloha1_signal_correspondence_workcell.usda",
+        "sha256": "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf",
+        "size_bytes": 1336
+      },
+      {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/configuration/aloha1_signal_home_targets.usda",
+        "sha256": "484f17e3c638ea729a260eb67a666954f346b37a69987d9fe4f15cf7fad9d141",
+        "size_bytes": 5099
+      }
+    ],
+    "direct_external_references": [
+      {
+        "authored_in": "aloha1_signal_correspondence_workcell.usda",
+        "asset_path": "../../supplier_cad_follower_right/1.0/supplier_cad_follower_right.usda",
+        "resolved_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/supplier_cad_follower_right.usda",
+        "sha256": "95c7878f794f5f557b70997a2240b6476836b8ffbeed5a4992cb114a169487ea",
+        "size_bytes": 494
+      },
+      {
+        "authored_in": "aloha1_signal_correspondence_workcell.usda",
+        "asset_path": "follower_left_asset/aloha1_signal_follower_left.usda",
+        "resolved_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/follower_left_asset/aloha1_signal_follower_left.usda",
+        "sha256": "34badd857a3327b3605dc4ffd2fc40eb9c4c72a31c427c20967a3273f003aa7c",
+        "size_bytes": 490
+      },
+      {
+        "authored_in": "aloha1_signal_correspondence_workcell.usda",
+        "asset_path": "workcell/aloha1_signal_correspondence_environment.usda",
+        "resolved_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/workcell/aloha1_signal_correspondence_environment.usda",
+        "sha256": "43840c44fae108be1872ef97e38d806f90f99bd595b68a3aaaa4be6cf75b213b",
+        "size_bytes": 1218
+      }
+    ]
+  },
+  "frozen_files": [
+    {
+      "role": "five_pose_config",
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/configs/aloha1_grasp_20cm_five_pose_ik.yaml",
+      "sha256": "1925cd1721f98fecdbc76b17d1b3801be2dd64a24043e260f2dcdebda15c615b",
+      "size_bytes": 3703
+    },
+    {
+      "role": "existing_grasp_runtime_config",
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/configs/aloha1_grasp_20cm_gui.yaml",
+      "sha256": "67a427e93a5bbaee6b21f1e0c23a56b0c22771cf1cc0e837e7ea48a6c39185f4",
+      "size_bytes": 4480
+    },
+    {
+      "role": "validated_grasp_editor_object_to_gripper_pose",
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/configs/aloha1_grasps/bottle500_horizontal_body_grasp.isaac_grasp.yaml",
+      "sha256": "b3307c86a44101eadd6ed2151722e7668bb7d644422378765d98eac906835cca",
+      "size_bytes": 584
+    },
+    {
+      "role": "explicit_joint_map",
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/configs/aloha1_joint_map.yaml",
+      "sha256": "f56be097d859f7361b804705af6659e0d51d9e480d1c721a60040ab787530308",
+      "size_bytes": 17141
+    },
+    {
+      "role": "bottle_cad_audit",
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_project_bottle_cad_audit.json",
+      "sha256": "a6c4ea40295ddafa2a690f346eea2be549105db7590b13948d2f977aa812aba3",
+      "size_bytes": 4721
+    },
+    {
+      "role": "bottle_cad_build_script",
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/bottle_500ml/scripts/build_bottle_freecad.py",
+      "sha256": "b077b03839b8d3e7395a98fe85d8388ed8553d344300f97cd4886c83771e7945",
+      "size_bytes": 5653
+    },
+    {
+      "role": "bottle_cad",
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/bottle_500ml/cad/bottle_500ml.FCStd",
+      "sha256": "3594f60200e54181bc8480a229484293a0d386c146d3f235b32e31a0c16bbf8a",
+      "size_bytes": 9282
+    },
+    {
+      "role": "direct_nvidia_mcp_and_local_api_evidence",
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_grasp_20cm_five_pose_ik_api_evidence.json",
+      "sha256": "129dced22c031cedb58cf2d20d5175f4562ace56ab817e6b2f72377a21cb163f",
+      "size_bytes": 4695
+    }
+  ],
+  "bottle_cad_geometry": {
+    "source_object": "BottleMaster",
+    "cad_long_axis": "+Z",
+    "a_local_m": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "b_local_m": [
+      0.0,
+      0.0,
+      0.206
+    ],
+    "audited_bbox_m": {
+      "x": 0.068,
+      "y": 0.068,
+      "z": 0.206
+    },
+    "geometric_center_local_m": [
+      0.0,
+      0.0,
+      0.103
+    ],
+    "center_derivation": "MIDPOINT_OF_AUDITED_CAD_Z_0_TO_0_206_M",
+    "world_z_policy": "DERIVE_FROM_FROZEN_HORIZONTAL_WORLD_TRANSFORM_AND_DYNAMIC_SETTLE"
+  },
+  "evidence_logs": [
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-20cm-five-pose-ik/logs/baseline_focused_pytest.log",
+      "sha256": "75eab78946c2fb11138f10e82f3be273e86497d547d2bfe8b63b6464a007e634",
+      "result": "67 passed"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-20cm-five-pose-ik/logs/stage_static_probe.log",
+      "sha256": "313a704d47bbf7a720fb5b40c3fb3a2ebc6b367091d50a8141d4fbca8424924c",
+      "result": "PASS"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-20cm-five-pose-ik/logs/stage_layer_stack_probe.log",
+      "sha256": "a4db835d34420c045d7930e0fbddd2fc1f93358430337687bf4914269482f66a",
+      "result": "PASS"
+    }
+  ],
+  "boundaries": {
+    "source_stage_hash_before": "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c",
+    "source_stage_modified": false,
+    "real_robot_access": false,
+    "remote_103_access": false,
+    "task8": "NOT_RUN"
+  }
+}

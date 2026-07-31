@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "status": "PASS",
+  "source": "NVIDIA_OFFICIAL_ISAAC_MCP_DIRECT_NOT_MCPJUNGLE",
+  "direct_mcp_namespace": "mcp__isaac_sim_mcp",
+  "queries": [
+    {
+      "tool": "get_isaac_sim_instructions",
+      "instruction_sets": [
+        "robot_simulation",
+        "python_scripting_and_tutorials",
+        "isaac_sim_conventions"
+      ],
+      "status": "PASS"
+    },
+    {
+      "tool": "search_isaac_sim_code_examples",
+      "query": "Lula inverse kinematics warm_start forward kinematics SingleArticulation set_joints_default_state post_reset",
+      "top_k": 8,
+      "status": "PASS"
+    }
+  ],
+  "target_runtime": {
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physx": "107.3.26",
+    "python": "3.11.13"
+  },
+  "official_documentation_readback": {
+    "core_quaternion_order": "QW_QX_QY_QZ",
+    "core_control_angle_unit": "radian",
+    "usd_angle_unit": "degree",
+    "lula_warm_start_supported": true,
+    "articulation_reset_path": [
+      "set_joints_default_state",
+      "post_reset"
+    ],
+    "latest_or_6_0_used": false
+  },
+  "local_isaac_5_1_source_readback": [
+    {
+      "qualname": "SingleArticulation.set_joints_default_state",
+      "signature": "(self, positions: Optional[numpy.ndarray] = None, velocities: Optional[numpy.ndarray] = None, efforts: Optional[numpy.ndarray] = None) -> None",
+      "source_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.core.prims/isaacsim/core/prims/impl/single_articulation.py",
+      "source_sha256": "086c94ac60aa4f8f1ffac0c921fe8eb4a5b118604d4e108b891d827635382234"
+    },
+    {
+      "qualname": "_SinglePrimWrapper.post_reset",
+      "signature": "(self) -> None",
+      "source_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.core.prims/isaacsim/core/prims/impl/single_prim_wrapper.py",
+      "source_sha256": "30cad6463a0ffa514ec357640f3fcff2fe076d241179c809f5f05e2b85b41333"
+    },
+    {
+      "qualname": "SingleArticulation.set_joint_positions",
+      "signature": "(self, positions: numpy.ndarray, joint_indices: Union[List, numpy.ndarray, NoneType] = None) -> None",
+      "source_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.core.prims/isaacsim/core/prims/impl/single_articulation.py",
+      "source_sha256": "086c94ac60aa4f8f1ffac0c921fe8eb4a5b118604d4e108b891d827635382234"
+    },
+    {
+      "qualname": "LulaKinematicsSolver.compute_inverse_kinematics",
+      "signature": "(self, frame_name: str, target_position: array, target_orientation: array = None, warm_start: array = None, position_tolerance: float = None, orientation_tolerance: float = None) -> Tuple[array, bool]",
+      "source_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.robot_motion.motion_generation/isaacsim/robot_motion/motion_generation/lula/kinematics.py",
+      "source_sha256": "ddb7fba5d65eb141e0d9e417fac3d859c2e58c8ad4e370e0f32d07c20c00674a"
+    },
+    {
+      "qualname": "LulaKinematicsSolver.compute_forward_kinematics",
+      "signature": "(self, frame_name: str, joint_positions: array, position_only: Optional[bool] = False) -> Tuple[array, array]",
+      "source_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.robot_motion.motion_generation/isaacsim/robot_motion/motion_generation/lula/kinematics.py",
+      "source_sha256": "ddb7fba5d65eb141e0d9e417fac3d859c2e58c8ad4e370e0f32d07c20c00674a"
+    }
+  ],
+  "diagnostic_logs": [
+    {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-20cm-five-pose-ik/logs/local_isaac_api_probe_unbuffered.log",
+      "sha256": "cb7629e329e5196b9dc90a1a5a7ee5a674715281754405beaabe6fc5db0d7206",
+      "status": "PASS"
+    }
+  ],
+  "failed_probe_history": [
+    {
+      "classification": "EXPECTED_KIT_IMPORT_ORDER_REQUIREMENT",
+      "cause": "isaacsim.core was imported before SimulationApp",
+      "resolution": "reran the read-only probe after headless SimulationApp startup"
+    },
+    {
+      "classification": "STDOUT_BUFFERED_DURING_KIT_SHUTDOWN",
+      "cause": "the successful probe output was buffered before app.close",
+      "resolution": "reran with unbuffered Python and explicit flush"
+    }
+  ],
+  "boundaries": {
+    "mcpjungle_used_for_nvidia_query": false,
+    "source_stage_modified": false,
+    "isaac_runtime_behavior_modified": false,
+    "real_robot_access": false,
+    "remote_103_access": false,
+    "task8": "NOT_RUN"
+  }
+}
