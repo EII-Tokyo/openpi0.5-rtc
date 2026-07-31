@@ -21,6 +21,7 @@ sim-to-real dynamics model and it is not yet accepted for bottle insertion.
 | Five fixed-seed random-position pickup | **PASS (diagnostic)** | successful samples 1–4 were preserved; only failed sample 5 was replanned with a downward gripper and rerecorded; candidate 119 passes a fresh deterministic pair and full-frame visual-model review, and the user confirmed the grasp is correct |
 | Task 7 post-grasp runtime acceptance | **PASS** | Task 7A runtime/workcell, table alignment, ALOHA 6DOF IK correspondence v3, Bottle500 static hold and five-pose dynamic pickup all pass |
 | Task 7 post-grasp aggregate | **PARTIAL** | literal NVIDIA official-rule status remains FAIL with 37 unsuppressed findings, so asset-promotion readiness remains PARTIAL even though runtime/grasp acceptance passes |
+| follower_right RobotRules schema-only candidate | **PASS** | isolated wrapper passed `IsaacSim.RobotRules` twice in fresh Isaac 5.1 processes with 0 issues and an identical deterministic signature; the physical follower_right Stage and final/default assets were not modified |
 | Current signal screenshots | **PASS (visual 24/24 PASS)** | 12 fresh raw + 12 annotated images match Stage SHA-256 `d8182a6c…c788cf`; the controlled OmniHydra screenshot process has zero `protoPath` errors |
 | Hydra protoPath controlled diagnosis | **PASS / `FSD_7_5_1_PRIMARY`** | A=29 errors, B OmniHydra=0, B repeat deterministic, D materialization=0; default delegate restored and final assets unchanged |
 | Source and environment audit | PARTIAL | `reports/aloha1_mapping/source_audit.md`, `source_manifest.json`, `missing_resources.json` |
@@ -46,7 +47,7 @@ sim-to-real dynamics model and it is not yet accepted for bottle insertion.
 | Gripper hold root cause v2 | **SUPERSEDED INPUT** | prior `inconclusive` used the rejected generic finger mesh |
 | Supplier CAD raw + annotated visual review | PASS (8 pairs) | `aloha_viper_gripper_screenshot_review.json` |
 | Workcell and logical cameras | PARTIAL | `workcell_manifest.json`, `camera_validation.json` |
-| Supplier-CAD Task 7 aggregate | **FAIL** | historical isolated supplier-CAD robot-package validation; follower_left remains PARTIAL and follower_right robot-local remains FAIL there with 5 PhysicsRules and 4 RobotRules blocking findings. This is not the current frozen dual-follower Task 7A runtime result |
+| Supplier-CAD Task 7 aggregate | **FAIL** | historical physical-target result: follower_left remains PARTIAL and the prior follower_right report still contains 5 PhysicsRules and 4 RobotRules blocking findings; a new schema-only right candidate now passes RobotRules 0/0, but it does not rewrite that historical physical report or clear the remaining PhysicsRules/source-evidence boundaries |
 | Task 7 certified-pose screenshots | **PARTIAL** | follower_left: 6 raw + 6 annotated PASS; follower_right robot-local: 7 raw + 7 annotated visual PASS, while numeric runtime remains PARTIAL because mimic accuracy fails |
 | CAD render/tessellation determinism | PASS | `aloha_viper_gripper_screenshot_review.json`, `aloha_viper_finger_tessellation.json` |
 | Task 8 optimization | **NOT_RUN** | no mesh merge, collider promotion, instanceable, payload, or performance optimization |
@@ -123,11 +124,32 @@ status remains `FAIL` with 37 findings, none suppressed; asset-promotion
 readiness and the Task 7 aggregate therefore remain `PARTIAL`. Task 8 remains
 `NOT_RUN`.
 
+The 37 findings are now also partitioned by a machine-readable closure audit:
+28 package/layer findings, 6 missing-source-collider findings, 2 literal Isaac
+Sim 5.1 mimic-rule conflicts, and 1 non-blocking information record. A direct
+NVIDIA MCP probe was reachable, but its Asset Validation catalog reported
+1.2.1; the installed Isaac Sim 5.1 Asset Validation 1.1.0 source remains the
+exact rule authority.
+
+The first isolated package action is complete for follower_right RobotRules.
+`supplier_cad_follower_right_robot_schema/1.0` deliberately excludes the
+physical diagnostic Stage, applies the Robot Schema and ordered relationships,
+and includes the approved 256×256 robot-local thumbnail. Two fresh-process
+official runs both returned `PASS`, 0 blocking findings, 0 warnings, and
+deterministic signature
+`8bb47b41417ef7f05e233b5bae651c94130441066b560a2686d77ed830ab550f`.
+This closes only the right-side RobotRules packaging boundary. It does not
+invent helper-link colliders, change mimic semantics, or modify any physical,
+final, or default asset.
+
 Authoritative reports:
 
 - `reports/aloha1_mapping/aloha1_task7_post_grasp_acceptance.json`;
 - `reports/aloha1_mapping/aloha1_task7_post_grasp_acceptance.md`;
 - `reports/aloha1_mapping/aloha1_ik_correspondence_v3.json`.
+- `reports/aloha1_mapping/aloha1_task7_official_rule_closure.json`;
+- `reports/aloha1_mapping/aloha1_task7_right_schema_official_robot_rules.json`;
+- `reports/aloha1_mapping/aloha_viper_supplier_cad_follower_right_robot_schema_asset.json`.
 
 ## 2026-07-29 kinematic and signal-correspondence baseline
 

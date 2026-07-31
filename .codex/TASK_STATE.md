@@ -48,6 +48,23 @@
 - Asset-promotion readiness remains `PARTIAL`; the NVIDIA official-rule
   literal status remains `FAIL` with 37 unsuppressed findings. Task 7
   aggregate is therefore `PARTIAL`, not `PASS`.
+- The 37 findings now have a machine-readable closure audit at
+  `reports/aloha1_mapping/aloha1_task7_official_rule_closure.json`: 28 are
+  package/layer findings, 6 are missing-source-collider HARD_BLOCKERs, 2 are
+  unsuppressed Isaac Sim 5.1 mimic-rule/schema conflicts, and 1 is
+  non-blocking information. Exact rule behavior remains anchored to the local
+  Asset Validation 1.1.0 source; the reachable direct NVIDIA MCP catalog
+  returned Asset Validation 1.2.1 and is not used as the version authority.
+- A new isolated follower_right RobotRules schema-only candidate now passes
+  twice in fresh Isaac Sim 5.1 processes with 0 issues. Deterministic signature:
+  `8bb47b41417ef7f05e233b5bae651c94130441066b560a2686d77ed830ab550f`.
+  Candidate Stage:
+  `assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right_robot_schema/1.0/supplier_cad_follower_right_robot_schema.usda`,
+  SHA-256
+  `233135f55addbf957034f27061c542ad60de168945ba7d823e161723f081d550`.
+  It excludes and does not modify the physical follower_right Stage. This
+  closes only the right RobotRules package boundary; PhysicsRules/source
+  evidence blockers remain literal and Task 7 stays `PARTIAL`.
 - No real robot or `192.168.1.103` access occurred. Task 8 remains `NOT_RUN`.
 
 ## Active Goal — 2026-07-28 ALOHA1 Isaac Sim 5.1 Mapping
