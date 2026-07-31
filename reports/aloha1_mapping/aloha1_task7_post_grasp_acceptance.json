@@ -1,0 +1,124 @@
+{
+  "asset_promotion_readiness": "PARTIAL",
+  "boundaries": {
+    "aligned_stage_modified": false,
+    "final_asset_promoted": false,
+    "real_robot": false,
+    "remote_103": false,
+    "report_only": true,
+    "source_stage_modified": false,
+    "task8": "NOT_RUN"
+  },
+  "dynamic_grasp": {
+    "confirmed_video_sha256": "4e1bf9d929ee182f437104ac40caa28fe18aeff535402e7dd06ed451a285e3cd",
+    "evidence_pass_count": 5,
+    "machine_pass_count": 5,
+    "user_confirmation": "PASS",
+    "visual_model_review": "PASS"
+  },
+  "evidence": {
+    "asset_promotion": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7_asset_promotion_readiness.json",
+      "sha256": "d1e91053b9b867eff9644cf926011841b4b85cc9ff74ead7705083d632ad05b6",
+      "status": "PARTIAL"
+    },
+    "dynamic_grasp": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_grasp_20cm_five_pose_downward_acceptance_v6.json",
+      "sha256": "6b40381c5f5da7682f8489564effff926b278a632de58525cb044e5ad5519e41",
+      "status": "PASS"
+    },
+    "ik_correspondence": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_ik_correspondence_v3.json",
+      "sha256": "068285a8a9554d5466a9dc54fb2ba864fe645dda9ebd7ce9c325a0f18da9fa8c",
+      "status": "PASS"
+    },
+    "official_applicability": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7_official_rule_applicability.json",
+      "sha256": "562113a656ebfe2fe9b3f6455b69bdb5dd7d9c55e7a0fa900bf6d908b8f81e98",
+      "status": "PASS"
+    },
+    "static_hold": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7b_bottle_geometry_ab.json",
+      "sha256": "9b0f9366b2abe5664da794d7a40911108db3aee3c100d43d0c8760c500452567",
+      "status": "PASS"
+    },
+    "table_alignment": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_table_support_alignment_validation.json",
+      "sha256": "dc50119e5d3edaad84416301b8099709658705a4dd54a5d78b00bbd6bb857c73",
+      "status": "PASS"
+    },
+    "task7_runtime": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7_runtime_acceptance.json",
+      "sha256": "82981e2ee228efaa23800f27aabcde2d53486f9c33203343ae75439ac56818fc",
+      "status": null
+    }
+  },
+  "failed_runtime_grasp_gates": [],
+  "input_immutability": {
+    "after_sha256": {
+      "asset_promotion": "d1e91053b9b867eff9644cf926011841b4b85cc9ff74ead7705083d632ad05b6",
+      "dynamic_grasp": "6b40381c5f5da7682f8489564effff926b278a632de58525cb044e5ad5519e41",
+      "ik_correspondence": "068285a8a9554d5466a9dc54fb2ba864fe645dda9ebd7ce9c325a0f18da9fa8c",
+      "official_applicability": "562113a656ebfe2fe9b3f6455b69bdb5dd7d9c55e7a0fa900bf6d908b8f81e98",
+      "static_hold": "9b0f9366b2abe5664da794d7a40911108db3aee3c100d43d0c8760c500452567",
+      "table_alignment": "dc50119e5d3edaad84416301b8099709658705a4dd54a5d78b00bbd6bb857c73",
+      "task7_runtime": "82981e2ee228efaa23800f27aabcde2d53486f9c33203343ae75439ac56818fc"
+    },
+    "all_hashes_unchanged": true,
+    "before_sha256": {
+      "asset_promotion": "d1e91053b9b867eff9644cf926011841b4b85cc9ff74ead7705083d632ad05b6",
+      "dynamic_grasp": "6b40381c5f5da7682f8489564effff926b278a632de58525cb044e5ad5519e41",
+      "ik_correspondence": "068285a8a9554d5466a9dc54fb2ba864fe645dda9ebd7ce9c325a0f18da9fa8c",
+      "official_applicability": "562113a656ebfe2fe9b3f6455b69bdb5dd7d9c55e7a0fa900bf6d908b8f81e98",
+      "static_hold": "9b0f9366b2abe5664da794d7a40911108db3aee3c100d43d0c8760c500452567",
+      "table_alignment": "dc50119e5d3edaad84416301b8099709658705a4dd54a5d78b00bbd6bb857c73",
+      "task7_runtime": "82981e2ee228efaa23800f27aabcde2d53486f9c33203343ae75439ac56818fc"
+    }
+  },
+  "official_rule_issue_count": 37,
+  "official_rules_literal_status": "FAIL",
+  "official_rules_suppressed": false,
+  "partial_or_not_run_runtime_grasp_gates": [],
+  "runtime_grasp_acceptance": "PASS",
+  "runtime_grasp_gates": {
+    "aloha_6dof_ik_correspondence": "PASS",
+    "dynamic_five_pose_grasp": "PASS",
+    "runtime_control": "PASS",
+    "static_bottle_hold": "PASS",
+    "table_support_alignment": "PASS",
+    "user_confirmation": "PASS",
+    "visual_model_review": "PASS",
+    "workcell_physics": "PASS"
+  },
+  "schema_version": 1,
+  "stage": {
+    "aligned": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/table_support_alignment/1.0/aloha1_table_support_aligned_workcell.usda",
+      "root_prim": "/World",
+      "sha256": "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c",
+      "sublayers": [
+        "configuration/aloha1_tabletop_world_zero.usda",
+        "../../signal_correspondence/1.0/aloha1_signal_correspondence_workcell.usda"
+      ]
+    },
+    "composition_checks": {
+      "alignment_output_matches_frozen_stage": true,
+      "alignment_source_after_unchanged": true,
+      "alignment_source_before_unchanged": true,
+      "alignment_sublayers_source_stage": true,
+      "collider_or_physics_not_modified": true,
+      "dynamic_grasp_uses_aligned_stage": true,
+      "robot_geometry_not_modified": true,
+      "source_stage_not_modified": true,
+      "table_translation_only": true,
+      "task7_runtime_uses_source_stage": true
+    },
+    "composition_verified": true,
+    "source": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/aloha1_signal_correspondence_workcell.usda",
+      "sha256": "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf"
+    }
+  },
+  "task7_aggregate": "PARTIAL",
+  "task8": "NOT_RUN"
+}
