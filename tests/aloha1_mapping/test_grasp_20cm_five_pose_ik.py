@@ -8,6 +8,7 @@ import yaml
 
 from tools.aloha1_mapping.grasp_20cm_five_pose_ik import apply_frozen_bottle_transform
 from tools.aloha1_mapping.grasp_20cm_five_pose_ik import canonical_five_pose_signature
+from tools.aloha1_mapping.grasp_20cm_five_pose_ik import compose_initial_command
 from tools.aloha1_mapping.grasp_20cm_five_pose_ik import derive_sample_geometry
 from tools.aloha1_mapping.grasp_20cm_five_pose_ik import line_yaw_distance_deg
 from tools.aloha1_mapping.grasp_20cm_five_pose_ik import minimum_pairwise_ee_distance_m
@@ -281,3 +282,32 @@ def test_canonical_signature_is_deterministic_and_pose_sensitive() -> None:
     assert first == second
     assert len(first) == 64
     assert first != canonical_five_pose_signature(changed)
+
+
+def test_initial_command_replaces_only_explicit_six_arm_dofs() -> None:
+    baseline = np.arange(9, dtype=float)
+    sampled_arm = np.array([0.1, -0.2, 0.3, -0.4, 0.5, -0.6])
+
+    result = compose_initial_command(
+        baseline,
+        sampled_arm,
+        arm_dof_indices=[0, 1, 2, 3, 4, 5],
+    )
+
+    assert result[:6] == pytest.approx(sampled_arm)
+    assert result[6:] == pytest.approx(baseline[6:])
+
+
+def test_initial_command_rejects_duplicate_or_out_of_range_indices() -> None:
+    with pytest.raises(ValueError, match="unique"):
+        compose_initial_command(
+            np.zeros(9),
+            np.zeros(6),
+            arm_dof_indices=[0, 1, 2, 3, 4, 4],
+        )
+    with pytest.raises(ValueError, match="out of range"):
+        compose_initial_command(
+            np.zeros(9),
+            np.zeros(6),
+            arm_dof_indices=[0, 1, 2, 3, 4, 9],
+        )

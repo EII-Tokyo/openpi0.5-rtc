@@ -99,6 +99,31 @@ def _parse_args() -> argparse.Namespace:
         help="Session-only Bottle500 world-Y translation.",
     )
     parser.add_argument(
+        "--bottle-world-from-object-json",
+        type=Path,
+        default=None,
+        help=(
+            "JSON file containing the frozen finite 4x4 Bottle500 "
+            "world-from-object transform."
+        ),
+    )
+    parser.add_argument(
+        "--initial-arm-q-rad",
+        type=float,
+        nargs=6,
+        default=None,
+        help="Frozen six-DOF follower-left initial arm state in radians.",
+    )
+    parser.add_argument(
+        "--initial-pose-hold-frames",
+        type=int,
+        default=60,
+        help=(
+            "Setup-only physics frames that hold and record the frozen "
+            "initial arm pose before dynamic bottle settle."
+        ),
+    )
+    parser.add_argument(
         "--additional-lift-margin-m",
         type=float,
         default=0.0,
@@ -120,6 +145,20 @@ def _parse_args() -> argparse.Namespace:
 
 def _bounded_traceback() -> str:
     return "".join(traceback.format_exc(limit=20))[-12000:]
+
+
+def _load_frozen_bottle_transform(
+    path: Path,
+) -> list[list[float]]:
+    payload = json.loads(path.resolve(strict=True).read_text(encoding="utf-8"))
+    if isinstance(payload, dict):
+        payload = payload.get("world_from_object")
+    from tools.aloha1_mapping.grasp_20cm_five_pose_ik import require_rigid_transform
+
+    return require_rigid_transform(
+        payload,
+        name="bottle world_from_object JSON",
+    ).tolist()
 
 
 def _atomic_json(path: Path, payload: dict[str, Any]) -> None:
@@ -429,6 +468,19 @@ def main() -> int:
         raise ValueError(
             "additional lift margin must be finite and non-negative"
         )
+    if args.initial_pose_hold_frames < 1:
+        raise ValueError("--initial-pose-hold-frames must be positive")
+    if args.initial_arm_q_rad is not None and not all(
+        math.isfinite(value) for value in args.initial_arm_q_rad
+    ):
+        raise ValueError("--initial-arm-q-rad values must be finite")
+    if args.bottle_world_from_object_json is not None and (
+        args.bottle_offset_x_m != 0.0 or args.bottle_offset_y_m != 0.0
+    ):
+        raise ValueError(
+            "frozen bottle transform cannot be combined with legacy "
+            "Bottle500 XY offsets"
+        )
     if args.reset_after_abort and args.autorun_abort_at_phase is None:
         raise ValueError(
             "--reset-after-abort requires --autorun-abort-at-phase"
@@ -444,6 +496,13 @@ def main() -> int:
     profile = load_and_verify_config(
         args.config.resolve(strict=True),
         project_root=ROOT,
+    )
+    bottle_world_from_object = (
+        None
+        if args.bottle_world_from_object_json is None
+        else _load_frozen_bottle_transform(
+            args.bottle_world_from_object_json
+        )
     )
     config = profile["config"]
     stage_path = Path(
@@ -515,6 +574,11 @@ def main() -> int:
             bottle_xy_offset_m=(
                 float(args.bottle_offset_x_m),
                 float(args.bottle_offset_y_m),
+            ),
+            bottle_world_from_object=bottle_world_from_object,
+            initial_arm_q_rad=args.initial_arm_q_rad,
+            initial_pose_hold_frames=int(
+                args.initial_pose_hold_frames
             ),
             additional_lift_margin_m=float(
                 args.additional_lift_margin_m

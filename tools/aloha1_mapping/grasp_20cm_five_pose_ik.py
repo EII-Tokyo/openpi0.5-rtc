@@ -213,6 +213,34 @@ def sample_initial_arm_joint_candidates(
     return generator.uniform(lower, upper, size=(int(count), 6))
 
 
+def compose_initial_command(
+    baseline_command: Sequence[float] | np.ndarray,
+    sampled_arm_q_rad: Sequence[float] | np.ndarray,
+    *,
+    arm_dof_indices: Sequence[int],
+) -> np.ndarray:
+    """Replace only explicitly mapped arm DOFs in an existing command."""
+
+    baseline = np.asarray(baseline_command, dtype=np.float64)
+    if baseline.ndim != 1 or not np.isfinite(baseline).all():
+        raise ValueError("baseline_command must be a finite vector")
+    arm = _finite_vector(
+        sampled_arm_q_rad,
+        size=6,
+        name="sampled_arm_q_rad",
+    )
+    indices = [int(value) for value in arm_dof_indices]
+    if len(indices) != 6:
+        raise ValueError("arm_dof_indices must contain six entries")
+    if len(set(indices)) != len(indices):
+        raise ValueError("arm_dof_indices must be unique")
+    if any(index < 0 or index >= baseline.size for index in indices):
+        raise ValueError("arm_dof_indices contains an out of range index")
+    result = baseline.copy()
+    result[np.asarray(indices, dtype=np.int64)] = arm
+    return result
+
+
 def sample_bottle_center_yaw_candidates(
     *,
     center_xy_bounds: Mapping[str, Sequence[float]],

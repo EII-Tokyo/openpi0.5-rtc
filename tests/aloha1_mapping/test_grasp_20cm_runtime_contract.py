@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import ast
 import hashlib
+import inspect
+import json
 from pathlib import Path
 
 import numpy as np
@@ -10,7 +12,9 @@ import yaml
 
 from tools.aloha1_mapping.grasp_20cm_controller import Phase
 from tools.aloha1_mapping.grasp_20cm_controller import RunObservation
+from tools.aloha1_mapping.grasp_20cm_isaac_bindings import IsaacGrasp20cmBindings
 from tools.aloha1_mapping.grasp_20cm_isaac_bindings import derive_gripper_closeup_camera_geometry
+from tools.aloha1_mapping.grasp_20cm_isaac_bindings import initial_pose_hold_complete
 from tools.aloha1_mapping.grasp_20cm_isaac_bindings import physics_sample_duration_s
 from tools.aloha1_mapping.grasp_20cm_isaac_bindings import preload_solver_contact_ready
 from tools.aloha1_mapping.grasp_20cm_isaac_bindings import reset_body_transition_plan
@@ -22,6 +26,7 @@ from tools.aloha1_mapping.grasp_20cm_runtime import Grasp20cmRuntimeAdapter
 from tools.aloha1_mapping.grasp_20cm_runtime import load_and_verify_config
 from tools.aloha1_mapping.grasp_20cm_runtime import validate_composed_stage
 from tools.aloha1_mapping.grasp_20cm_runtime import verify_frozen_file
+from tools.run_aloha1_grasp_20cm_gui import _load_frozen_bottle_transform
 from tools.run_aloha1_grasp_20cm_gui import evaluate_abort_reset_evidence
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -35,6 +40,53 @@ class _FakePrim:
 
     def IsValid(self) -> bool:  # noqa: N802 - matches the USD API.
         return self._valid
+
+
+def test_runtime_defaults_preserve_translation_only_baseline() -> None:
+    signature = inspect.signature(IsaacGrasp20cmBindings)
+
+    assert signature.parameters["bottle_world_from_object"].default is None
+    assert signature.parameters["initial_arm_q_rad"].default is None
+    assert signature.parameters["initial_pose_hold_frames"].default == 60
+
+
+def test_gui_accepts_frozen_bottle_pose_and_initial_arm_q() -> None:
+    source = GUI_SCRIPT.read_text(encoding="utf-8")
+
+    assert '"--bottle-world-from-object-json"' in source
+    assert '"--initial-arm-q-rad"' in source
+    assert '"--initial-pose-hold-frames"' in source
+    assert "nargs=6" in source
+
+
+def test_initial_pose_hold_completes_on_exact_required_frame() -> None:
+    assert not initial_pose_hold_complete(
+        observed_frame_count=59,
+        required_frame_count=60,
+    )
+    assert initial_pose_hold_complete(
+        observed_frame_count=60,
+        required_frame_count=60,
+    )
+
+
+@pytest.mark.parametrize("wrapped", [False, True])
+def test_load_frozen_bottle_transform_accepts_rigid_4x4_json(
+    tmp_path: Path,
+    *,
+    wrapped: bool,
+) -> None:
+    transform = np.eye(4)
+    transform[:3, 3] = [0.1, -0.2, 0.03]
+    path = tmp_path / "pose.json"
+    payload: object = (
+        {"world_from_object": transform.tolist()}
+        if wrapped
+        else transform.tolist()
+    )
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
+    assert _load_frozen_bottle_transform(path) == pytest.approx(transform)
 
 
 class _FakeLayer:

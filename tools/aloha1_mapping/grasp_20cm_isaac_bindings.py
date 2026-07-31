@@ -167,6 +167,22 @@ def physics_sample_duration_s(
     return float(sample_count) * float(physics_dt_s)
 
 
+def initial_pose_hold_complete(
+    *,
+    observed_frame_count: int,
+    required_frame_count: int,
+) -> bool:
+    """Return whether setup has observed the exact minimum hold duration."""
+
+    observed = int(observed_frame_count)
+    required = int(required_frame_count)
+    if observed < 0:
+        raise ValueError("observed_frame_count must be non-negative")
+    if required < 1:
+        raise ValueError("required_frame_count must be positive")
+    return observed >= required
+
+
 def preload_solver_contact_ready(
     *,
     close_exhausted: bool,
@@ -211,6 +227,9 @@ class IsaacGrasp20cmBindings:
         artifact_root: Path,
         delegate_readback: Mapping[str, Any],
         bottle_xy_offset_m: Sequence[float] = (0.0, 0.0),
+        bottle_world_from_object: Sequence[Sequence[float]] | None = None,
+        initial_arm_q_rad: Sequence[float] | None = None,
+        initial_pose_hold_frames: int = 60,
         additional_lift_margin_m: float = 0.0,
         capture_collider_evidence: bool = True,
     ) -> None:
@@ -227,6 +246,8 @@ class IsaacGrasp20cmBindings:
         from pxr import UsdGeom
         from pxr import UsdPhysics
 
+        from tools.aloha1_mapping.grasp_20cm_five_pose_ik import apply_frozen_bottle_transform
+        from tools.aloha1_mapping.grasp_20cm_five_pose_ik import compose_initial_command
         from tools.aloha1_mapping.grasp_20cm_sampling import translate_horizontal_bottle_profile
         from tools.audit_aloha1_bottle_collision_runtime import _create_bottle_render_evidence
         from tools.audit_aloha1_bottle_collision_runtime import _update_bottle_render_evidence
@@ -296,13 +317,45 @@ class IsaacGrasp20cmBindings:
             ]["absolute_path"]
         )
         self.task_profile = _load_profile(task_profile_path)
-        self.task_profile = translate_horizontal_bottle_profile(
-            self.task_profile,
-            offset_xy_m=bottle_xy_offset_m,
-        )
         self.bottle_xy_offset_m = [
             float(value) for value in bottle_xy_offset_m
         ]
+        if (
+            len(self.bottle_xy_offset_m) != 2
+            or not np.isfinite(self.bottle_xy_offset_m).all()
+        ):
+            raise ValueError("Bottle500 XY offset must be a finite two-vector")
+        if bottle_world_from_object is None:
+            self.task_profile = translate_horizontal_bottle_profile(
+                self.task_profile,
+                offset_xy_m=self.bottle_xy_offset_m,
+            )
+            self.bottle_pose_mode = "LEGACY_WORLD_XY_TRANSLATION_ONLY"
+        else:
+            if not np.allclose(
+                self.bottle_xy_offset_m,
+                [0.0, 0.0],
+                rtol=0.0,
+                atol=0.0,
+            ):
+                raise ValueError(
+                    "frozen bottle transform cannot be combined with "
+                    "legacy XY offsets"
+                )
+            self.task_profile = apply_frozen_bottle_transform(
+                self.task_profile,
+                world_from_object=bottle_world_from_object,
+            )
+            self.bottle_pose_mode = "FROZEN_CENTER_AND_YAW_TRANSFORM"
+        self.bottle_world_from_object = np.asarray(
+            self.task_profile["kinematics"]["placement"][
+                "placement_matrix"
+            ],
+            dtype=np.float64,
+        )
+        self.initial_pose_hold_frames = int(initial_pose_hold_frames)
+        if self.initial_pose_hold_frames < 1:
+            raise ValueError("initial_pose_hold_frames must be positive")
         self.additional_lift_margin_m = float(
             additional_lift_margin_m
         )
@@ -473,6 +526,97 @@ class IsaacGrasp20cmBindings:
             raise RuntimeError(
                 f"unexpected DOF order: {self.articulation.dof_names}"
             )
+        frozen_waypoints = self.task_profile["kinematics"]["ik"][
+            "waypoints"
+        ]
+        pregrasp = [
+            waypoint
+            for waypoint in frozen_waypoints
+            if waypoint["phase"] == "move_to_pregrasp"
+        ]
+        if not pregrasp:
+            raise RuntimeError("frozen pregrasp waypoint missing")
+        initial_arm = np.asarray(
+            pregrasp[-1]["joint_positions_rad"],
+            dtype=np.float64,
+        )
+        frozen_pregrasp_command = np.asarray(
+            [
+                *initial_arm,
+                0.0,
+                *self.config["robot"].get(
+                    "open_targets_m",
+                    self.task_profile["config"]["robot"][
+                        "open_targets_m"
+                    ],
+                ),
+            ],
+            dtype=np.float64,
+        )
+        arm_dof_names = list(
+            self.task_profile["config"]["robot"][
+                "cspace_joint_order"
+            ]
+        )
+        if len(arm_dof_names) != 6:
+            raise RuntimeError("explicit arm DOF order must contain six names")
+        verified_arm_dof_indices = [
+            list(self.articulation.dof_names).index(name)
+            for name in arm_dof_names
+        ]
+        sampled_arm = (
+            initial_arm
+            if initial_arm_q_rad is None
+            else np.asarray(initial_arm_q_rad, dtype=np.float64)
+        )
+        self.initial_command = compose_initial_command(
+            frozen_pregrasp_command,
+            sampled_arm,
+            arm_dof_indices=verified_arm_dof_indices,
+        )
+        zero_command = np.zeros_like(self.initial_command)
+        self.articulation.set_joints_default_state(
+            positions=self.initial_command,
+            velocities=zero_command,
+            efforts=zero_command,
+        )
+        self.articulation.post_reset()
+        self.articulation.set_joint_positions(self.initial_command)
+        self.articulation.set_joint_velocities(zero_command)
+        immediate_readback = np.asarray(
+            self.articulation.get_joint_positions(),
+            dtype=np.float64,
+        )
+        if immediate_readback.shape != self.initial_command.shape:
+            raise RuntimeError("initial joint readback shape mismatch")
+        immediate_error = np.abs(
+            immediate_readback - self.initial_command
+        )
+        if not np.isfinite(immediate_error).all():
+            raise RuntimeError("initial joint readback is non-finite")
+        self.arm_dof_indices = verified_arm_dof_indices
+        self.initial_pose_evidence: dict[str, Any] = {
+            "arm_dof_names": arm_dof_names,
+            "arm_dof_indices": verified_arm_dof_indices,
+            "initial_arm_q_target_rad": self.initial_command[
+                verified_arm_dof_indices
+            ].tolist(),
+            "initial_joint_readback_immediate": (
+                immediate_readback.tolist()
+            ),
+            "initial_arm_max_readback_error_rad": float(
+                immediate_error[verified_arm_dof_indices].max()
+            ),
+            "initial_pose_hold_frames_required": (
+                self.initial_pose_hold_frames
+            ),
+            "initial_pose_hold_frames_observed": 0,
+            "first_frame_jump_rad": None,
+            "initial_ee_position_world_m": None,
+            "initial_ee_orientation_world_wxyz": None,
+        }
+        self._initial_pose_reference_q = immediate_readback.copy()
+
         controller = self.articulation.get_articulation_controller()
         finger_indices = np.asarray([7, 8], dtype=np.int32)
         copied_max_force = float(
@@ -497,39 +641,8 @@ class IsaacGrasp20cmBindings:
         ):
             raise RuntimeError("finger max-force readback mismatch")
 
-        frozen_waypoints = self.task_profile["kinematics"]["ik"][
-            "waypoints"
-        ]
-        pregrasp = [
-            waypoint
-            for waypoint in frozen_waypoints
-            if waypoint["phase"] == "move_to_pregrasp"
-        ]
-        if not pregrasp:
-            raise RuntimeError("frozen pregrasp waypoint missing")
-        initial_arm = np.asarray(
-            pregrasp[-1]["joint_positions_rad"],
-            dtype=np.float64,
-        )
-        self.initial_command = np.asarray(
-            [
-                *initial_arm,
-                0.0,
-                *self.config["robot"].get(
-                    "open_targets_m",
-                    self.task_profile["config"]["robot"][
-                        "open_targets_m"
-                    ],
-                ),
-            ],
-            dtype=np.float64,
-        )
         self.command = self.initial_command.copy()
         self._target_write_count = 0
-        self.articulation.set_joint_positions(self.command)
-        self.articulation.set_joint_velocities(
-            np.zeros_like(self.command)
-        )
         self._write_joint_command()
 
         simulation_view = SimulationManager.get_physics_sim_view()
@@ -729,7 +842,19 @@ class IsaacGrasp20cmBindings:
         self._trajectory: dict[Phase, list[np.ndarray]] = {}
         self._trajectory_cursor: dict[Phase, int] = {}
         self._ik_report: dict[str, Any] = {"status": "NOT_RUN"}
-        self._setup_complete = True
+        self._setup_complete = False
+        self._initial_pose_hold_observed_frames = 0
+        if hasattr(self, "initial_pose_evidence"):
+            self.initial_pose_evidence[
+                "initial_pose_hold_frames_observed"
+            ] = 0
+            self.initial_pose_evidence["first_frame_jump_rad"] = None
+            self.initial_pose_evidence[
+                "initial_ee_position_world_m"
+            ] = None
+            self.initial_pose_evidence[
+                "initial_ee_orientation_world_wxyz"
+            ] = None
         self._preload_stable_frames = 0
         self._bilateral_before_lift = False
         self._bilateral_through_hold = True
@@ -1053,10 +1178,42 @@ class IsaacGrasp20cmBindings:
             self.articulation.get_joint_velocities(),
             dtype=np.float64,
         )
-        ee_position, _ = self._get_world_pose(
+        ee_position, ee_orientation = self._get_world_pose(
             str(self.config["robot"]["end_effector_prim"])
         )
         ee_position = np.asarray(ee_position, dtype=np.float64)
+        ee_orientation = np.asarray(
+            ee_orientation,
+            dtype=np.float64,
+        )
+        if self._phase is Phase.SETUP_KINEMATIC:
+            self._initial_pose_hold_observed_frames += 1
+            self._setup_complete = initial_pose_hold_complete(
+                observed_frame_count=(
+                    self._initial_pose_hold_observed_frames
+                ),
+                required_frame_count=self.initial_pose_hold_frames,
+            )
+            self.initial_pose_evidence[
+                "initial_pose_hold_frames_observed"
+            ] = self._initial_pose_hold_observed_frames
+            if self._initial_pose_hold_observed_frames == 1:
+                self.initial_pose_evidence["first_frame_jump_rad"] = float(
+                    np.max(
+                        np.abs(
+                            qpos[self.arm_dof_indices]
+                            - self._initial_pose_reference_q[
+                                self.arm_dof_indices
+                            ]
+                        )
+                    )
+                )
+                self.initial_pose_evidence[
+                    "initial_ee_position_world_m"
+                ] = ee_position.tolist()
+                self.initial_pose_evidence[
+                    "initial_ee_orientation_world_wxyz"
+                ] = ee_orientation.tolist()
         if self._initial_ee_z_m is None:
             self._initial_ee_z_m = float(ee_position[2])
         ee_displacement = (
@@ -1127,10 +1284,13 @@ class IsaacGrasp20cmBindings:
         maximum_angular = float(
             bottle_state["angular_speed_rad_s"]
         )
-        phase_timed_out = self._phase_frames > PHASE_TIMEOUT_FRAMES.get(
-            self._phase,
-            600,
-        )
+        phase_timeout = PHASE_TIMEOUT_FRAMES.get(self._phase, 600)
+        if self._phase is Phase.SETUP_KINEMATIC:
+            phase_timeout = max(
+                phase_timeout,
+                self.initial_pose_hold_frames + 10,
+            )
+        phase_timed_out = self._phase_frames > phase_timeout
         dynamic = not bool(
             UsdPhysics.RigidBodyAPI(self.bottle_prim)
             .GetKinematicEnabledAttr()
@@ -1959,6 +2119,7 @@ class IsaacGrasp20cmBindings:
                 "ik": self._ik_report,
                 "coupling": self.coupling_readback,
                 "finger_drive": self.drive_readback,
+                "initial_pose": self.initial_pose_evidence,
                 "trajectory": {
                     "additional_lift_margin_m": (
                         self.additional_lift_margin_m
@@ -1986,10 +2147,20 @@ class IsaacGrasp20cmBindings:
             "bottle": self.bottle_session,
             "bottle_random_position": {
                 "offset_xy_m": self.bottle_xy_offset_m,
+                "pose_mode": self.bottle_pose_mode,
+                "world_from_object": (
+                    self.bottle_world_from_object.tolist()
+                ),
                 "changed_variable": (
                     "BOTTLE_INITIAL_WORLD_XY_TRANSLATION_ONLY"
+                    if self.bottle_pose_mode
+                    == "LEGACY_WORLD_XY_TRANSLATION_ONLY"
+                    else "BOTTLE_GEOMETRIC_CENTER_XY_AND_WORLD_Z_YAW"
                 ),
-                "rotation_unchanged": True,
+                "rotation_unchanged": (
+                    self.bottle_pose_mode
+                    == "LEGACY_WORLD_XY_TRANSLATION_ONLY"
+                ),
                 "object_from_gripper_unchanged": True,
             },
             "table_top_z_m": self.table_top_z_m,
