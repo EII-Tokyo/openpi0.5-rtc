@@ -22,6 +22,7 @@ sim-to-real dynamics model and it is not yet accepted for bottle insertion.
 | Task 7 post-grasp runtime acceptance | **PASS** | Task 7A runtime/workcell, table alignment, ALOHA 6DOF IK correspondence v3, Bottle500 static hold and five-pose dynamic pickup all pass |
 | Task 7 post-grasp aggregate | **PARTIAL** | literal NVIDIA official-rule status remains FAIL with 37 unsuppressed findings, so asset-promotion readiness remains PARTIAL even though runtime/grasp acceptance passes |
 | follower_right RobotRules schema-only candidate | **PASS** | isolated wrapper passed `IsaacSim.RobotRules` twice in fresh Isaac 5.1 processes with 0 issues and an identical deterministic signature; the physical follower_right Stage and final/default assets were not modified |
+| Gripper JointStateAPI physics-layer candidate | **PASS (isolated packaging gate)** | both gripper joints are confirmed RevoluteJoint and receive only `PhysicsJointStateAPI:angular` in dedicated `_physics.usd` layers; each fresh/repeat PhysicsRules run changes `FAIL/5` to literal `FAIL/4` by removing only `JointHasJointStateAPI` |
 | Current signal screenshots | **PASS (visual 24/24 PASS)** | 12 fresh raw + 12 annotated images match Stage SHA-256 `d8182a6c…c788cf`; the controlled OmniHydra screenshot process has zero `protoPath` errors |
 | Hydra protoPath controlled diagnosis | **PASS / `FSD_7_5_1_PRIMARY`** | A=29 errors, B OmniHydra=0, B repeat deterministic, D materialization=0; default delegate restored and final assets unchanged |
 | Source and environment audit | PARTIAL | `reports/aloha1_mapping/source_audit.md`, `source_manifest.json`, `missing_resources.json` |
@@ -142,6 +143,16 @@ This closes only the right-side RobotRules packaging boundary. It does not
 invent helper-link colliders, change mimic semantics, or modify any physical,
 final, or default asset.
 
+The next isolated packaging candidate closes the two gripper JointStateAPI
+omissions. Runtime readback confirms both gripper joints are RevoluteJoint, so
+the applied multiple-apply instance is `PhysicsJointStateAPI:angular`. The two
+new `_physics.usd` layers author no state or drive values; existing drive
+targets read back unchanged. For each follower, two fresh PhysicsRules runs
+deterministically reduce the result from five blocking findings to four. The
+only removed rule is `JointHasJointStateAPI`; `MimicAPICheck ×1` and
+`RigidBodyHasCollider ×3` remain literal. This is a packaging-gate `PASS`, not
+an official PhysicsRules `PASS`, so Task 7 remains `PARTIAL`.
+
 Authoritative reports:
 
 - `reports/aloha1_mapping/aloha1_task7_post_grasp_acceptance.json`;
@@ -150,6 +161,8 @@ Authoritative reports:
 - `reports/aloha1_mapping/aloha1_task7_official_rule_closure.json`;
 - `reports/aloha1_mapping/aloha1_task7_right_schema_official_robot_rules.json`;
 - `reports/aloha1_mapping/aloha_viper_supplier_cad_follower_right_robot_schema_asset.json`.
+- `reports/aloha1_mapping/aloha1_task7_joint_state_physics_candidate.json`;
+- `reports/aloha1_mapping/aloha1_task7_joint_state_physics_candidate.md`.
 
 ## 2026-07-29 kinematic and signal-correspondence baseline
 

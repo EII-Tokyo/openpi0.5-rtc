@@ -65,6 +65,22 @@
   It excludes and does not modify the physical follower_right Stage. This
   closes only the right RobotRules package boundary; PhysicsRules/source
   evidence blockers remain literal and Task 7 stays `PARTIAL`.
+- The two gripper `JointHasJointStateAPI` packaging omissions now have an
+  isolated physics-layer candidate at
+  `assets/Trossen/ALOHA1/1.0/diagnostics/task7_joint_state_physics_candidate/1.0/`.
+  Both gripper joints read back as RevoluteJoint; only
+  `PhysicsJointStateAPI:angular` is applied in dedicated `_physics.usd`
+  layers. No state/drive values are authored and source drive targets are
+  unchanged. Each follower was validated twice in fresh Isaac processes:
+  blocking findings change from 5 to 4, with only
+  `JointHasJointStateAPI` removed. The remaining per-follower findings are
+  `MimicAPICheck ×1` and `RigidBodyHasCollider ×3`.
+- Authoritative report:
+  `reports/aloha1_mapping/aloha1_task7_joint_state_physics_candidate.json`,
+  SHA-256
+  `f0a68e066dd1aa11adc4a1c5ceb810a3cf48aa30b182743191261518f6bcf283`.
+  This is an isolated packaging-gate `PASS`; literal PhysicsRules remains
+  `FAIL`, Task 7 remains `PARTIAL`, and the final/default assets are unchanged.
 - No real robot or `192.168.1.103` access occurred. Task 8 remains `NOT_RUN`.
 
 ## Active Goal — 2026-07-28 ALOHA1 Isaac Sim 5.1 Mapping
