@@ -33,6 +33,8 @@ TEAL = "#168B83"
 AMBER = "#E69F35"
 RED = "#C6534C"
 GREEN = "#4C956C"
+TOP_CAMERA_TARGET = (856, 241)
+TERMINAL_BOX_GAP = .050
 GRAY = "#667085"
 LIGHT = "#F2F6F8"
 INK = "#182230"
@@ -362,7 +364,7 @@ def figure_model_dataflow() -> None:
         (.23, .36, .18, .28, "统一理解", "把画面、动作状态\n和任务指令放到\n同一表示中", NAVY),
         (.47, .36, .18, .28, "动作生成", "从随机动作开始\n分 10 次修正\n得到未来动作", AMBER),
         (.71, .36, .15, .28, "动作片段", "一次预测未来\n50 个控制时刻\n共 14 个量", BLUE),
-        (.895, .36, .08, .28, "双臂", "50 Hz\n连续执行", GREEN),
+        (.86 + TERMINAL_BOX_GAP, .36, .065, .28, "双臂", "50 Hz\n连续执行", GREEN),
     ]
     for x, y, w, h, title, body, color in boxes:
         rounded_box(ax, (x, y), w, h, title, body, color, size=10)
@@ -371,7 +373,7 @@ def figure_model_dataflow() -> None:
         ((.175, .30), (.23, .46)),
         ((.41, .50), (.47, .50)),
         ((.65, .50), (.71, .50)),
-        ((.86, .50), (.895, .50)),
+        ((.868, .50), (.86 + TERMINAL_BOX_GAP - .008, .50)),
     ]
     for start, end in arrows:
         ax.add_patch(FancyArrowPatch(start, end, arrowstyle="-|>", mutation_scale=15,
@@ -565,7 +567,7 @@ def annotated_photo() -> None:
 
     label("左侧工作臂", (340, 430, 590, 505), (520, 700), (36, 116, 181))
     label("右侧工作臂", (1110, 410, 1375, 485), (1190, 700), (22, 139, 131))
-    label("顶部总览相机", (700, 465, 975, 540), (842, 645), (230, 159, 53))
+    label("顶部总览相机", (690, 330, 1010, 405), TOP_CAMERA_TARGET, (230, 159, 53))
     label("操作者示教臂", (65, 920, 330, 995), (285, 850), (102, 112, 133))
     label("操作者示教臂", (1370, 900, 1635, 975), (1440, 830), (102, 112, 133))
     draw.rounded_rectangle((475, 750, 1230, 930), radius=25, outline=(198, 83, 76, 230),

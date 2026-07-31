@@ -8,5 +8,5 @@
 8. 实验：找到 41 次训练运行尝试、33 个运行名称、14 组配置；不把运行尝试当作成功实验。
 9. 当前最好结果：现场观察到完整分拣循环；>1 小时、约 2 瓶/分钟均为估计，没有正式成功率。
 10. 关键缺失：完整录像/计数、自动成功判定、独立测试集、多随机种子、条件配对实验、网页视口截图和 RLT 同条件真机对照。
-11. PDF 完整路径：/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha_bottle_cap_report/aloha_bottle_cap_report.pdf
+11. PDF 完整路径：/home/eii/.config/superpowers/worktrees/openpi0.5-rtc-reward-learning/aloha-report-ja-edition/reports/aloha_bottle_cap_report/aloha_bottle_cap_report.pdf
 12. 编译与验证：成功（PASS）。
