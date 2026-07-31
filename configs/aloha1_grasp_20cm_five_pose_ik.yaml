@@ -20,7 +20,11 @@ sampling:
   candidate_count: 256
   formal_sample_count: 5
   bottle_line_yaw_domain_deg: [0.0, 180.0]
-  initial_arm_sampling: FIXED_SEED_UNIFORM_WITHIN_EXPLICIT_JOINT_LIMITS_THEN_FK
+  initial_arm_sampling: TASK_SPACE_POSITION_CANDIDATE_PLUS_VALIDATED_DOWNWARD_T_O_G_ORIENTATION_THEN_LULA_IK
+  preserved_success_sample_ids: [sample_01, sample_02, sample_03, sample_04]
+  excluded_runtime_failure_candidate_indices:
+    sample_05: [108]
+  exclusion_evidence: FAILED_PRIMARY_AND_FRESH_REPEAT_BILATERAL_CONTACT_TIMEOUT
   selection: FIRST_FIVE_COMPLETE_PREFLIGHT_PASSES_IN_GENERATED_ORDER
 formal_structure:
   sample_01:
@@ -45,9 +49,15 @@ geometry:
   bottle_geometric_center_world_z_policy: RUNTIME_DERIVED_AFTER_HORIZONTAL_PLACEMENT_AND_DYNAMIC_SETTLE
   sampled_yaw_axis_world: [0.0, 0.0, 1.0]
   object_to_gripper_transform_policy: FROZEN_VALIDATED_GRASP_EDITOR_T_O_G
+  initial_gripper_approach_axis_local: [1.0, 0.0, 0.0]
+  initial_gripper_approach_axis_source: USER_CONFIRMED_RUNTIME_GRIPPER_FRAME_AND_PROJECT_TRANSFORM_VALIDATION
 gates:
   minimum_bottle_line_yaw_separation_deg: 25.0
   minimum_initial_ee_separation_m: 0.050
+  episode18_observed_maximum_approach_angle_to_world_down_deg: 20.241131059202324
+  existing_engineering_orientation_tolerance_deg: 3.0
+  maximum_initial_approach_angle_to_world_down_deg: 23.241131059202324
+  initial_approach_angle_derivation: EPISODE18_FRAMES_208_244_MAXIMUM_PLUS_EXISTING_PROJECT_ENGINEERING_TOLERANCE
   bottle_centerline_residual_m: 1.0e-6
   axis_to_table_normal_target_deg: 90.0
   axis_to_table_normal_tolerance_deg: 1.0
@@ -55,10 +65,53 @@ gates:
   support_contact_latch_clearance_m: 0.0005
   initial_arm_readback_tolerance_rad: 0.020
   first_frame_jump_tolerance_rad: 0.020
+  arm_phase_readback_tolerance_rad: 0.020
   target_clearance_m: 0.200
   hold_interval_s: 2.0
   maximum_hold_drop_m: 0.010
+arm_trajectory:
+  mode: LULA_CSPACE_ACCELERATION_LIMITED
+  classification: DIAGNOSTIC_ONLY_NOT_FINAL_CONTROL_MAPPING
+  velocity_limits_rad_s:
+    - 3.141592653589793
+    - 3.141592653589793
+    - 3.141592653589793
+    - 3.141592653589793
+    - 3.141592653589793
+    - 3.141592653589793
+  velocity_source: GENERATED_FOLLOWER_LEFT_URDF
+  acceleration_limits_rad_s2: [5.0, 5.0, 5.0, 5.0, 5.0, 5.0]
+  jerk_limit_status: NOT_SET_NO_EXACT_MODEL_OFFICIAL_VALUE
+  source:
+    authority: Trossen Robotics / Interbotix
+    repository: https://github.com/Interbotix/interbotix_ros_manipulators.git
+    branch: humble
+    commit: b66d5b905725351dd71d3251a06cd3f4c777940f
+    license: BSD-3-Clause
+    local_path: external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_moveit/config/joint_limits/vx300s_joint_limits.yaml
+    sha256: 6a3df726ddb35f19ba4a92da4d27f8974d982f9ac91b7ff566d59bf5bd8d5a93
+    exact_keys:
+      - joint_limits.waist.max_acceleration
+      - joint_limits.shoulder.max_acceleration
+      - joint_limits.elbow.max_acceleration
+      - joint_limits.forearm_roll.max_acceleration
+      - joint_limits.wrist_angle.max_acceleration
+      - joint_limits.wrist_rotate.max_acceleration
 frozen_inputs:
+  failed_downward_v2_results:
+    path: reports/aloha1_mapping/aloha1_grasp_20cm_five_pose_ik_results_downward_v2.json
+    sha256: 971ec23f18a5c340f724cbcda3b1669f74d5e7256fc5f11b84b8aa5c292df108
+    use: EXCLUDE_ONLY_SAMPLE_05_CANDIDATE_108_AFTER_DETERMINISTIC_BILATERAL_CONTACT_TIMEOUT
+  legacy_five_pose_preflight:
+    path: reports/aloha1_mapping/aloha1_grasp_20cm_five_pose_ik_preflight_downward_v2.json
+    sha256: ade50fcea48cd88246828c376a490e38144f4d0251dcb36cace020dbdb46efa0
+    use: PRESERVE_USER_ACCEPTED_SAMPLE_01_AND_SAMPLE_02_PLUS_DOWNWARD_SAMPLE_03_AND_SAMPLE_04_WITHOUT_RERECORDING
+  episode18_approach_probe:
+    path: .codex/artifacts/20260731-aloha1-grasp-20cm-five-pose-ik/downward_initial_pose/episode18_approach_probe.json
+    sha256: c0fb35d253f8db2b43d1ef5d6e809839f1313c8e2bac83d97cf06c940b861c0e
+    source_hdf5: /home/eii/project/bottles_data/episode_18.hdf5
+    source_hdf5_sha256: f073a21c6a790e738e36085d791482924a82832ca6d80cece04a26353b9fc745
+    frames_inclusive: [208, 244]
   approved_stage:
     path: assets/Trossen/ALOHA1/1.0/diagnostics/table_support_alignment/1.0/aloha1_table_support_aligned_workcell.usda
     sha256: 2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c
@@ -81,6 +134,7 @@ frozen_inputs:
     reused_gates:
       initial_arm_readback_tolerance_rad: 0.020
       first_frame_jump_tolerance_rad: 0.020
+      arm_phase_readback_tolerance_rad: 0.020
   bottle_cad_audit:
     path: reports/aloha1_mapping/aloha_project_bottle_cad_audit.json
     sha256: a6c4ea40295ddafa2a690f346eea2be549105db7590b13948d2f977aa812aba3

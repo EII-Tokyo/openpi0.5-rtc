@@ -83,6 +83,193 @@ def _angle_degrees(
     return float(math.degrees(math.acos(cosine)))
 
 
+def _unit_quaternion_wxyz(
+    value: Sequence[float] | np.ndarray,
+    *,
+    name: str,
+) -> np.ndarray:
+    quaternion = _finite_vector(value, size=4, name=name)
+    norm = float(np.linalg.norm(quaternion))
+    if norm <= 1.0e-12:
+        raise ValueError(f"{name} is degenerate")
+    return quaternion / norm
+
+
+def gripper_approach_axis_world(
+    orientation_world_wxyz: Sequence[float] | np.ndarray,
+    *,
+    approach_axis_local: Sequence[float] | np.ndarray = (1.0, 0.0, 0.0),
+) -> np.ndarray:
+    """Rotate the audited gripper-local approach axis into world coordinates."""
+
+    quaternion = _unit_quaternion_wxyz(
+        orientation_world_wxyz,
+        name="orientation_world_wxyz",
+    )
+    local_axis = _unit(approach_axis_local, name="approach_axis_local")
+    rotation = Rotation.from_quat(quaternion, scalar_first=True).as_matrix()
+    return _unit(rotation @ local_axis, name="approach_axis_world")
+
+
+def initial_tool_orientation_gate(
+    orientation_world_wxyz: Sequence[float] | np.ndarray,
+    *,
+    maximum_angle_to_world_down_deg: float,
+    approach_axis_local: Sequence[float] | np.ndarray = (1.0, 0.0, 0.0),
+) -> dict[str, Any]:
+    """Evaluate whether the gripper approach axis points sufficiently downward."""
+
+    maximum = float(maximum_angle_to_world_down_deg)
+    if not math.isfinite(maximum) or maximum < 0.0 or maximum > 180.0:
+        raise ValueError(
+            "maximum_angle_to_world_down_deg must be within [0, 180]"
+        )
+    local_axis = _unit(approach_axis_local, name="approach_axis_local")
+    world_axis = gripper_approach_axis_world(
+        orientation_world_wxyz,
+        approach_axis_local=local_axis,
+    )
+    angle = _angle_degrees(world_axis, [0.0, 0.0, -1.0])
+    return {
+        "status": "PASS" if angle <= maximum + 1.0e-12 else "FAIL",
+        "approach_axis_local": local_axis.tolist(),
+        "approach_axis_world": world_axis.tolist(),
+        "world_down": [0.0, 0.0, -1.0],
+        "angle_to_world_down_deg": angle,
+        "maximum_angle_to_world_down_deg": maximum,
+    }
+
+
+def _quaternion_angular_distance_rad(
+    first_wxyz: Sequence[float] | np.ndarray,
+    second_wxyz: Sequence[float] | np.ndarray,
+) -> float:
+    first = _unit_quaternion_wxyz(first_wxyz, name="first quaternion")
+    second = _unit_quaternion_wxyz(second_wxyz, name="second quaternion")
+    cosine_half_angle = abs(float(np.dot(first, second)))
+    return float(2.0 * math.acos(np.clip(cosine_half_angle, -1.0, 1.0)))
+
+
+def solve_oriented_initial_arm_pose(
+    *,
+    kinematics_solver: Any,
+    frame_name: str,
+    target_position_world_m: Sequence[float] | np.ndarray,
+    target_orientation_world_wxyz: Sequence[float] | np.ndarray,
+    warm_start_arm_q_rad: Sequence[float] | np.ndarray,
+    lower_limits_rad: Sequence[float] | np.ndarray,
+    upper_limits_rad: Sequence[float] | np.ndarray,
+    position_tolerance_m: float,
+    orientation_tolerance_rad: float,
+    maximum_approach_angle_to_world_down_deg: float,
+    approach_axis_local: Sequence[float] | np.ndarray = (1.0, 0.0, 0.0),
+) -> dict[str, Any]:
+    """Solve and FK-read back a task-space initial pose with audited orientation."""
+
+    target_position = _finite_vector(
+        target_position_world_m,
+        size=3,
+        name="target_position_world_m",
+    )
+    target_orientation = _unit_quaternion_wxyz(
+        target_orientation_world_wxyz,
+        name="target_orientation_world_wxyz",
+    )
+    warm_start = _finite_vector(
+        warm_start_arm_q_rad,
+        size=6,
+        name="warm_start_arm_q_rad",
+    )
+    lower = _finite_vector(lower_limits_rad, size=6, name="lower_limits_rad")
+    upper = _finite_vector(upper_limits_rad, size=6, name="upper_limits_rad")
+    position_tolerance = float(position_tolerance_m)
+    orientation_tolerance = float(orientation_tolerance_rad)
+    if np.any(upper <= lower):
+        raise ValueError("upper joint limits must exceed lower limits")
+    if not math.isfinite(position_tolerance) or position_tolerance <= 0.0:
+        raise ValueError("position_tolerance_m must be finite and positive")
+    if not math.isfinite(orientation_tolerance) or orientation_tolerance <= 0.0:
+        raise ValueError(
+            "orientation_tolerance_rad must be finite and positive"
+        )
+
+    solved_q, success = kinematics_solver.compute_inverse_kinematics(
+        str(frame_name),
+        target_position,
+        target_orientation,
+        warm_start=warm_start,
+        position_tolerance=position_tolerance,
+        orientation_tolerance=orientation_tolerance,
+    )
+    solved = np.asarray(solved_q, dtype=np.float64)
+    if (
+        not bool(success)
+        or solved.shape != (6,)
+        or not np.isfinite(solved).all()
+    ):
+        return {
+            "status": "FAIL",
+            "failure_gate": "inverse_kinematics",
+            "ik_success": bool(success),
+        }
+
+    actual_position, actual_rotation = (
+        kinematics_solver.compute_forward_kinematics(str(frame_name), solved)
+    )
+    actual_position = _finite_vector(
+        actual_position,
+        size=3,
+        name="actual_position_world_m",
+    )
+    actual_rotation = np.asarray(actual_rotation, dtype=np.float64)
+    if actual_rotation.shape != (3, 3) or not np.isfinite(actual_rotation).all():
+        raise ValueError("actual_orientation_world must be a finite 3x3 matrix")
+    actual_orientation = Rotation.from_matrix(actual_rotation).as_quat(
+        canonical=True,
+        scalar_first=True,
+    )
+    position_error = float(np.linalg.norm(actual_position - target_position))
+    orientation_error = _quaternion_angular_distance_rad(
+        actual_orientation,
+        target_orientation,
+    )
+    within_limits = bool(np.all(solved >= lower) and np.all(solved <= upper))
+    orientation_gate = initial_tool_orientation_gate(
+        actual_orientation,
+        maximum_angle_to_world_down_deg=(
+            maximum_approach_angle_to_world_down_deg
+        ),
+        approach_axis_local=approach_axis_local,
+    )
+    gates = {
+        "ik_success": bool(success),
+        "within_joint_limits": within_limits,
+        "fk_position_within_tolerance": (
+            position_error <= position_tolerance + 1.0e-12
+        ),
+        "fk_orientation_within_tolerance": (
+            orientation_error <= orientation_tolerance + 1.0e-12
+        ),
+        "tool_orientation_downward": orientation_gate["status"] == "PASS",
+    }
+    return {
+        "status": "PASS" if all(gates.values()) else "FAIL",
+        "failure_gate": next(
+            (name for name, passed in gates.items() if not passed),
+            None,
+        ),
+        "initial_arm_q_rad": solved.tolist(),
+        "target_position_world_m": target_position.tolist(),
+        "target_orientation_world_wxyz": target_orientation.tolist(),
+        "fk_position_world_m": actual_position.tolist(),
+        "fk_orientation_world_wxyz": actual_orientation.tolist(),
+        "fk_position_error_m": position_error,
+        "fk_orientation_error_rad": orientation_error,
+        "orientation_gate": orientation_gate,
+        "gates": gates,
+    }
+
+
 def place_bottle_center_and_yaw(
     *,
     nominal_world_from_object: Sequence[Sequence[float]] | np.ndarray,

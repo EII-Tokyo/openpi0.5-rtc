@@ -1,0 +1,2663 @@
+{
+  "collision_screenshot_evidence": {
+    "candidate_manifest": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/collider_evidence_retake_v6/video_attempt_001/video/candidate_manifest.json",
+      "sha256": "b2b390fa7604bcdae93b00ce162e4fc997f7740aaacb541709d80431a47d93df"
+    },
+    "records": [
+      {
+        "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/collider_evidence_retake_v6/video_attempt_001/video/collision_annotated/RELEASE_DYNAMIC/overview_normal_contact_annotated.png",
+        "annotated_resolution": [
+          960,
+          670
+        ],
+        "annotated_sha256": "00d60d017c56292e3aea08d1197c74cd696d8675b437a3653d9a280b3735225b",
+        "mode": "normal_contact",
+        "phase_label": "RELEASE_DYNAMIC",
+        "physics_frame": 62,
+        "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/collider_evidence_retake_v6/video_attempt_001/frames/overview/000062.png",
+        "raw_resolution": [
+          960,
+          540
+        ],
+        "raw_sha256": "0bc0f47e36eefd65d139dfbc43892a1732ef8f0fc3b2d3d7bfb07d3e36716d60",
+        "retake_reason": null,
+        "runtime_phase": "RELEASE_DYNAMIC",
+        "time_s": 1.0333333872258663,
+        "view": "overview",
+        "visual_model_review": "PASS"
+      },
+      {
+        "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/collider_evidence_retake_v6/video_attempt_001/video/collision_annotated/RELEASE_DYNAMIC/overview_physics_collider_overlay_annotated.png",
+        "annotated_resolution": [
+          1600,
+          1130
+        ],
+        "annotated_sha256": "98c456aee6157d0481dd0a860b61794a35c61b549411dfb0f3bd880fb30713fd",
+        "mode": "physics_collider_overlay",
+        "phase_label": "RELEASE_DYNAMIC",
+        "physics_frame": 62,
+        "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/collider_evidence_retake_v6/video_attempt_001/collider_overlay/RELEASE_DYNAMIC/overview_raw.png",
+        "raw_resolution": [
+          1600,
+          1000
+        ],
+        "raw_sha256": "492ac0d206caf340b388145f0d53d7a88f548dd2d93d148f84232b12c1f44b06",
+        "retake_reason": null,
+        "runtime_phase": "RELEASE_DYNAMIC",
+        "time_s": 1.0333333872258663,
+        "view": "overview",
+        "visual_model_review": "PASS"
+      },
+      {
+        "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/collider_evidence_retake_v6/video_attempt_001/video/collision_annotated/RELEASE_DYNAMIC/gripper_closeup_normal_contact_annotated.png",
+        "annotated_resolution": [
+          960,
+          670
+        ],
+        "annotated_sha256": "3c15b49cf183dbd5417554bc8947b367f84a69988f0f91c9acf9f64d2c7e54eb",
+        "mode": "normal_contact",
+        "phase_label": "RELEASE_DYNAMIC",
+        "physics_frame": 62,
+        "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/collider_evidence_retake_v6/video_attempt_001/frames/gripper_closeup/000062.png",
+        "raw_resolution": [
+          960,
+          540
+        ],
+        "raw_sha256": "ab83ea2cb49ade756f92785281eb327d8c5a94ddf9dfc8cc5ad054c0dc362b11",
+        "retake_reason": null,
+        "runtime_phase": "RELEASE_DYNAMIC",
+        "time_s": 1.0333333872258663,
+        "view": "gripper_closeup",
+        "visual_model_review": "PASS"
+      },
+      {
+        "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/collider_evidence_retake_v6/video_attempt_001/video/collision_annotated/RELEASE_DYNAMIC/gripper_closeup_physics_collider_overlay_annotated.png",
+        "annotated_resolution": [
+          1600,
+          1130
+        ],
+        "annotated_sha256": "502e49e0a5a556788cfbb6c3b3636c899b65abc14486535c2dc226d5a24c9109",
+        "mode": "physics_collider_overlay",
+        "phase_label": "RELEASE_DYNAMIC",
+        "physics_frame": 62,
+        "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/collider_evidence_retake_v6/video_attempt_001/collider_overlay/RELEASE_DYNAMIC/gripper_closeup_raw.png",
+        "raw_resolution": [
+          1600,
+          1000
+        ],
+        "raw_sha256": "251419d1c8d799f699fbb339b3018dc5f333d529f3610f0cff83d2de8d1d55f1",
+        "retake_reason": null,
+        "runtime_phase": "RELEASE_DYNAMIC",
+        "time_s": 1.0333333872258663,
+        "view": "gripper_closeup",
+        "visual_model_review": "PASS"
+      },
+      {
+        "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/collider_evidence_retake_v6/video_attempt_001/video/collision_annotated/OPEN_PREGRASP/overview_normal_contact_annotated.png",
+        "annotated_resolution": [
+          960,
+          670
+        ],
+        "annotated_sha256": "7ffc382a682492c73f420135d0f8ded2d7ff79286717cd2d9dba7a54eb47e168",
+        "mode": "normal_contact",
+        "phase_label": "OPEN_PREGRASP",
+        "physics_frame": 593,
+        "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/collider_evidence_retake_v6/video_attempt_001/frames/overview/000593.png",
+        "raw_resolution": [
+          960,
+          540
+        ],
+        "raw_sha256": "f91b867cedd2b007ab17ec591b11251c15dd8bd6782c8b21cdb8fbf3ab33f70d",
+        "retake_reason": null,
+        "runtime_phase": "OPEN_PREGRASP",
+        "time_s": 9.883333848789334,
+        "view": "overview",
+        "visual_model_review": "PASS"
+      },
+      {
+        "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/collider_evidence_retake_v6/video_attempt_001/video/collision_annotated/OPEN_PREGRASP/overview_physics_collider_overlay_annotated.png",
+        "annotated_resolution": [
+          1600,
+          1130
+        ],
+        "annotated_sha256": "241a6445e1fb7907bb0e9a351ccd19ce106d4ad2602f9fde49c92801f367cd6e",
+        "mode": "physics_collider_overlay",
+        "phase_label": "OPEN_PREGRASP",
+        "physics_frame": 593,
+        "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/collider_evidence_retake_v6/video_attempt_001/collider_overlay/OPEN_PREGRASP/overview_raw.png",
+        "raw_resolution": [
+          1600,
+          1000
+        ],
+        "raw_sha256": "a7d50ae7f4b96464c43f36727ad4d8ad5e7ec0bba0d1b3859e92ec06a7f4e0a9",
+        "retake_reason": null,
+        "runtime_phase": "OPEN_PREGRASP",
+        "time_s": 9.883333848789334,
+        "view": "overview",
+        "visual_model_review": "PASS"
+      },
+      {
+        "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/collider_evidence_retake_v6/video_attempt_001/video/collision_annotated/OPEN_PREGRASP/gripper_closeup_normal_contact_annotated.png",
+        "annotated_resolution": [
+          960,
+          670
+        ],
+        "annotated_sha256": "9964d6159b8b5133c215eb98d70202a5f28ab83645c4129a03f3a7f117d142f0",
+        "mode": "normal_contact",
+        "phase_label": "OPEN_PREGRASP",
+        "physics_frame": 593,
+        "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/collider_evidence_retake_v6/video_attempt_001/frames/gripper_closeup/000593.png",
+        "raw_resolution": [
+          960,
+          540
+        ],
+        "raw_sha256": "4dbb6acbff3f1a671a4fec49fdf1dbadd6403891e16ad0f6232bfabadcf6974b",
+        "retake_reason": null,
+        "runtime_phase": "OPEN_PREGRASP",
+        "time_s": 9.883333848789334,
+        "view": "gripper_closeup",
+        "visual_model_review": "PASS"
+      },
+      {
+        "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/collider_evidence_retake_v6/video_attempt_001/video/collision_annotated/OPEN_PREGRASP/gripper_closeup_physics_collider_overlay_annotated.png",
+        "annotated_resolution": [
+          1600,
+          1130
+        ],
+        "annotated_sha256": "9751d1edac192935add3046619ec40daed965e2c762efaf00eedd3a37ac2f76e",
+        "mode": "physics_collider_overlay",
+        "phase_label": "OPEN_PREGRASP",
+        "physics_frame": 593,
+        "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/collider_evidence_retake_v6/video_attempt_001/collider_overlay/OPEN_PREGRASP/gripper_closeup_raw.png",
+        "raw_resolution": [
+          1600,
+          1000
+        ],
+        "raw_sha256": "12135545bd129c0a835bd9cbf35d60fab32f2fde03a02524113d145128f92809",
+        "retake_reason": null,
+        "runtime_phase": "OPEN_PREGRASP",
+        "time_s": 9.883333848789334,
+        "view": "gripper_closeup",
+        "visual_model_review": "PASS"
+      },
+      {
+        "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/collider_evidence_retake_v6/video_attempt_001/video/collision_annotated/BILATERAL_CONTACT/overview_normal_contact_annotated.png",
+        "annotated_resolution": [
+          960,
+          670
+        ],
+        "annotated_sha256": "229eb9f534d4131df5ffcf28373f5a05e42e274a3cbc4f3105a03aaeda05ebc0",
+        "mode": "normal_contact",
+        "phase_label": "BILATERAL_CONTACT",
+        "physics_frame": 661,
+        "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/collider_evidence_retake_v6/video_attempt_001/frames/overview/000661.png",
+        "raw_resolution": [
+          960,
+          540
+        ],
+        "raw_sha256": "a323c8b0c12342dbb783b025a3b52da1ab297323252f62e8a3cf4e2cf5e1d921",
+        "retake_reason": null,
+        "runtime_phase": "BILATERAL_CONTACT",
+        "time_s": 11.016667241230607,
+        "view": "overview",
+        "visual_model_review": "PASS"
+      },
+      {
+        "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/collider_evidence_retake_v6/video_attempt_001/video/collision_annotated/BILATERAL_CONTACT/overview_physics_collider_overlay_annotated.png",
+        "annotated_resolution": [
+          1600,
+          1130
+        ],
+        "annotated_sha256": "9cd6a796283a2d9308f3f796c39717fd6876c354518548e64742058b17c4e360",
+        "mode": "physics_collider_overlay",
+        "phase_label": "BILATERAL_CONTACT",
+        "physics_frame": 661,
+        "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/collider_evidence_retake_v6/video_attempt_001/collider_overlay/BILATERAL_CONTACT/overview_raw.png",
+        "raw_resolution": [
+          1600,
+          1000
+        ],
+        "raw_sha256": "46ccbee1289123d14c2914aec8e4e506a0433f70666c7b91a7337ca7fa1f14d1",
+        "retake_reason": null,
+        "runtime_phase": "BILATERAL_CONTACT",
+        "time_s": 11.016667241230607,
+        "view": "overview",
+        "visual_model_review": "PASS"
+      },
+      {
+        "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/collider_evidence_retake_v6/video_attempt_001/video/collision_annotated/BILATERAL_CONTACT/gripper_closeup_normal_contact_annotated.png",
+        "annotated_resolution": [
+          960,
+          670
+        ],
+        "annotated_sha256": "e8f1b412ebe579787f0f0ed92cb7629520920b99988a7c9d5884204a38d1e005",
+        "mode": "normal_contact",
+        "phase_label": "BILATERAL_CONTACT",
+        "physics_frame": 661,
+        "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/collider_evidence_retake_v6/video_attempt_001/frames/gripper_closeup/000661.png",
+        "raw_resolution": [
+          960,
+          540
+        ],
+        "raw_sha256": "0dd2e18612bac7f30e61af46590d2f54225eab9973d9666115d2270aef7c5a7c",
+        "retake_reason": null,
+        "runtime_phase": "BILATERAL_CONTACT",
+        "time_s": 11.016667241230607,
+        "view": "gripper_closeup",
+        "visual_model_review": "PASS"
+      },
+      {
+        "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/collider_evidence_retake_v6/video_attempt_001/video/collision_annotated/BILATERAL_CONTACT/gripper_closeup_physics_collider_overlay_annotated.png",
+        "annotated_resolution": [
+          1600,
+          1130
+        ],
+        "annotated_sha256": "9614b73274214ae63f2f6c115cea67f6b83afd90f72e08479feb6f53994bc558",
+        "mode": "physics_collider_overlay",
+        "phase_label": "BILATERAL_CONTACT",
+        "physics_frame": 661,
+        "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/collider_evidence_retake_v6/video_attempt_001/collider_overlay/BILATERAL_CONTACT/gripper_closeup_raw.png",
+        "raw_resolution": [
+          1600,
+          1000
+        ],
+        "raw_sha256": "468c787a13a0adfb219c572bab179bdb7a47faa1b8fdf49a362c96beb9747028",
+        "retake_reason": null,
+        "runtime_phase": "BILATERAL_CONTACT",
+        "time_s": 11.016667241230607,
+        "view": "gripper_closeup",
+        "visual_model_review": "PASS"
+      },
+      {
+        "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/collider_evidence_retake_v6/video_attempt_001/video/collision_annotated/FIRST_SUPPORT_CLEARANCE/overview_normal_contact_annotated.png",
+        "annotated_resolution": [
+          960,
+          670
+        ],
+        "annotated_sha256": "54501931a55c7169173ac785814d653de677efab425551793480ee9aa17c6d88",
+        "mode": "normal_contact",
+        "phase_label": "FIRST_SUPPORT_CLEARANCE",
+        "physics_frame": 673,
+        "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/collider_evidence_retake_v6/video_attempt_001/frames/overview/000673.png",
+        "raw_resolution": [
+          960,
+          540
+        ],
+        "raw_sha256": "f3e52acbb8a9131ccbf494d961d8e3c338d7e43f8b7a405299cb8b14ee109216",
+        "retake_reason": null,
+        "runtime_phase": "VERTICAL_LIFT",
+        "time_s": 11.21666725166142,
+        "view": "overview",
+        "visual_model_review": "PASS"
+      },
+      {
+        "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/collider_evidence_retake_v6/video_attempt_001/video/collision_annotated/FIRST_SUPPORT_CLEARANCE/overview_physics_collider_overlay_annotated.png",
+        "annotated_resolution": [
+          1600,
+          1130
+        ],
+        "annotated_sha256": "a723c732a5f0b3cba59f656926466aef6996141ec59b742fb7ce30e0c1f4ece9",
+        "mode": "physics_collider_overlay",
+        "phase_label": "FIRST_SUPPORT_CLEARANCE",
+        "physics_frame": 673,
+        "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/collider_evidence_retake_v6/video_attempt_001/collider_overlay/FIRST_SUPPORT_CLEARANCE/overview_raw.png",
+        "raw_resolution": [
+          1600,
+          1000
+        ],
+        "raw_sha256": "b877d8ead05ab29a5d1d003165b67eac8d5b2ebdd06c0e3664041c88607f24a8",
+        "retake_reason": null,
+        "runtime_phase": "VERTICAL_LIFT",
+        "time_s": 11.21666725166142,
+        "view": "overview",
+        "visual_model_review": "PASS"
+      },
+      {
+        "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/collider_evidence_retake_v6/video_attempt_001/video/collision_annotated/FIRST_SUPPORT_CLEARANCE/gripper_closeup_normal_contact_annotated.png",
+        "annotated_resolution": [
+          960,
+          670
+        ],
+        "annotated_sha256": "bde890e32ac10020b14afcfa643a108a34bf420ca33d71e04d431036f9ba923d",
+        "mode": "normal_contact",
+        "phase_label": "FIRST_SUPPORT_CLEARANCE",
+        "physics_frame": 673,
+        "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/collider_evidence_retake_v6/video_attempt_001/frames/gripper_closeup/000673.png",
+        "raw_resolution": [
+          960,
+          540
+        ],
+        "raw_sha256": "cb4a3a6b6addb70f8a61d7d7a2747d15fcc5e01b7f2677d51e12ef30fb194919",
+        "retake_reason": null,
+        "runtime_phase": "VERTICAL_LIFT",
+        "time_s": 11.21666725166142,
+        "view": "gripper_closeup",
+        "visual_model_review": "PASS"
+      },
+      {
+        "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/collider_evidence_retake_v6/video_attempt_001/video/collision_annotated/FIRST_SUPPORT_CLEARANCE/gripper_closeup_physics_collider_overlay_annotated.png",
+        "annotated_resolution": [
+          1600,
+          1130
+        ],
+        "annotated_sha256": "900f73b6674f419a6153d62a147ff4c25dfc0616b61cd24e4478a2007916f298",
+        "mode": "physics_collider_overlay",
+        "phase_label": "FIRST_SUPPORT_CLEARANCE",
+        "physics_frame": 673,
+        "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/collider_evidence_retake_v6/video_attempt_001/collider_overlay/FIRST_SUPPORT_CLEARANCE/gripper_closeup_raw.png",
+        "raw_resolution": [
+          1600,
+          1000
+        ],
+        "raw_sha256": "2a38b5ae4da905961838c101c66c87b812a8ff1b3506405bebc40162ccaba536",
+        "retake_reason": null,
+        "runtime_phase": "VERTICAL_LIFT",
+        "time_s": 11.21666725166142,
+        "view": "gripper_closeup",
+        "visual_model_review": "PASS"
+      },
+      {
+        "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/collider_evidence_retake_v6/video_attempt_001/video/collision_annotated/HEIGHT_REACHED/overview_normal_contact_annotated.png",
+        "annotated_resolution": [
+          960,
+          670
+        ],
+        "annotated_sha256": "9737c220cd4af1c5eb49c67f1797b1a605382de1380936e95dea2f773ae59ad5",
+        "mode": "normal_contact",
+        "phase_label": "HEIGHT_REACHED",
+        "physics_frame": 792,
+        "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/collider_evidence_retake_v6/video_attempt_001/frames/overview/000792.png",
+        "raw_resolution": [
+          960,
+          540
+        ],
+        "raw_sha256": "186b5b8887255108d0b1d215c6e908c92b39dda1a008c0bc92bae16ed25e2b80",
+        "retake_reason": null,
+        "runtime_phase": "HEIGHT_REACHED",
+        "time_s": 13.200000688433647,
+        "view": "overview",
+        "visual_model_review": "PASS"
+      },
+      {
+        "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/collider_evidence_retake_v6/video_attempt_001/video/collision_annotated/HEIGHT_REACHED/overview_physics_collider_overlay_annotated.png",
+        "annotated_resolution": [
+          1600,
+          1130
+        ],
+        "annotated_sha256": "77e6cc0849494ff3317008e4363522adfc603aadf7f9ad67a6a803699dbbcf39",
+        "mode": "physics_collider_overlay",
+        "phase_label": "HEIGHT_REACHED",
+        "physics_frame": 792,
+        "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/collider_evidence_retake_v6/video_attempt_001/collider_overlay/HEIGHT_REACHED/overview_raw.png",
+        "raw_resolution": [
+          1600,
+          1000
+        ],
+        "raw_sha256": "173535e6e16a004a4bc0ff79ef3e903c3cd99df75ed1879b74088e955dd84493",
+        "retake_reason": null,
+        "runtime_phase": "HEIGHT_REACHED",
+        "time_s": 13.200000688433647,
+        "view": "overview",
+        "visual_model_review": "PASS"
+      },
+      {
+        "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/collider_evidence_retake_v6/video_attempt_001/video/collision_annotated/HEIGHT_REACHED/gripper_closeup_normal_contact_annotated.png",
+        "annotated_resolution": [
+          960,
+          670
+        ],
+        "annotated_sha256": "a1cc22b3784320a2e4eecbd366d50295691bef2771bf390fc1bf9a432f292cae",
+        "mode": "normal_contact",
+        "phase_label": "HEIGHT_REACHED",
+        "physics_frame": 792,
+        "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/collider_evidence_retake_v6/video_attempt_001/frames/gripper_closeup/000792.png",
+        "raw_resolution": [
+          960,
+          540
+        ],
+        "raw_sha256": "66abecbbe133e950e868c8222a33ce78c6c211d59a7d0714432b56fb37fe2635",
+        "retake_reason": null,
+        "runtime_phase": "HEIGHT_REACHED",
+        "time_s": 13.200000688433647,
+        "view": "gripper_closeup",
+        "visual_model_review": "PASS"
+      },
+      {
+        "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/collider_evidence_retake_v6/video_attempt_001/video/collision_annotated/HEIGHT_REACHED/gripper_closeup_physics_collider_overlay_annotated.png",
+        "annotated_resolution": [
+          1600,
+          1130
+        ],
+        "annotated_sha256": "621b676cdbce49c52450ab8e5bbba07fb21b92ab0e0ddb187d9a8ee0cb7774e8",
+        "mode": "physics_collider_overlay",
+        "phase_label": "HEIGHT_REACHED",
+        "physics_frame": 792,
+        "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/collider_evidence_retake_v6/video_attempt_001/collider_overlay/HEIGHT_REACHED/gripper_closeup_raw.png",
+        "raw_resolution": [
+          1600,
+          1000
+        ],
+        "raw_sha256": "f0cd3f180eb795fa8f8b7215c86eac4c3c7a5d99009c3aff57aca08e95e547f5",
+        "retake_reason": null,
+        "runtime_phase": "HEIGHT_REACHED",
+        "time_s": 13.200000688433647,
+        "view": "gripper_closeup",
+        "visual_model_review": "PASS"
+      },
+      {
+        "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/collider_evidence_retake_v6/video_attempt_001/video/collision_annotated/HOLD_END/overview_normal_contact_annotated.png",
+        "annotated_resolution": [
+          960,
+          670
+        ],
+        "annotated_sha256": "abcfc021f0aa1edf2b12f1b6b5b8f9321ef62eec4eee0a4db6739fefe65eec96",
+        "mode": "normal_contact",
+        "phase_label": "HOLD_END",
+        "physics_frame": 912,
+        "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/collider_evidence_retake_v6/video_attempt_001/frames/overview/000912.png",
+        "raw_resolution": [
+          960,
+          540
+        ],
+        "raw_sha256": "5e137f230a37429a491c89d078b67d7b98c8836d7c96f96d600bed67a794798b",
+        "retake_reason": null,
+        "runtime_phase": "HOLD",
+        "time_s": 15.200000792741776,
+        "view": "overview",
+        "visual_model_review": "PASS"
+      },
+      {
+        "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/collider_evidence_retake_v6/video_attempt_001/video/collision_annotated/HOLD_END/overview_physics_collider_overlay_annotated.png",
+        "annotated_resolution": [
+          1600,
+          1130
+        ],
+        "annotated_sha256": "7db73217a6b6306026bd7a60a9178fec09439174e84d8b4e57c0b3e8ed6cdf88",
+        "mode": "physics_collider_overlay",
+        "phase_label": "HOLD_END",
+        "physics_frame": 912,
+        "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/collider_evidence_retake_v6/video_attempt_001/collider_overlay/HOLD_END/overview_raw.png",
+        "raw_resolution": [
+          1600,
+          1000
+        ],
+        "raw_sha256": "fec150647c1a113e45bd2f6c8b48eb2fe5f450d0cde9fa868916159e9149769a",
+        "retake_reason": null,
+        "runtime_phase": "HOLD",
+        "time_s": 15.200000792741776,
+        "view": "overview",
+        "visual_model_review": "PASS"
+      },
+      {
+        "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/collider_evidence_retake_v6/video_attempt_001/video/collision_annotated/HOLD_END/gripper_closeup_normal_contact_annotated.png",
+        "annotated_resolution": [
+          960,
+          670
+        ],
+        "annotated_sha256": "82670525900f8f3b85097964510feae42d6d6286391eeac1c3a598a426f18a78",
+        "mode": "normal_contact",
+        "phase_label": "HOLD_END",
+        "physics_frame": 912,
+        "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/collider_evidence_retake_v6/video_attempt_001/frames/gripper_closeup/000912.png",
+        "raw_resolution": [
+          960,
+          540
+        ],
+        "raw_sha256": "f6dcf801a1a01049754202de00bf5673d294e0835126bc6a051128869d70c112",
+        "retake_reason": null,
+        "runtime_phase": "HOLD",
+        "time_s": 15.200000792741776,
+        "view": "gripper_closeup",
+        "visual_model_review": "PASS"
+      },
+      {
+        "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/collider_evidence_retake_v6/video_attempt_001/video/collision_annotated/HOLD_END/gripper_closeup_physics_collider_overlay_annotated.png",
+        "annotated_resolution": [
+          1600,
+          1130
+        ],
+        "annotated_sha256": "b4c181f980a495a0dc76f17a9ba78a35f79829cca48c19d60d6888a83978e178",
+        "mode": "physics_collider_overlay",
+        "phase_label": "HOLD_END",
+        "physics_frame": 912,
+        "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/collider_evidence_retake_v6/video_attempt_001/collider_overlay/HOLD_END/gripper_closeup_raw.png",
+        "raw_resolution": [
+          1600,
+          1000
+        ],
+        "raw_sha256": "8a8c94a994971b953854a835c88746457f94bc082178d24c9a7bc7e5e2eeab03",
+        "retake_reason": null,
+        "runtime_phase": "HOLD",
+        "time_s": 15.200000792741776,
+        "view": "gripper_closeup",
+        "visual_model_review": "PASS"
+      }
+    ],
+    "render_evidence": {
+      "authored_geometry_clone": true,
+      "bottle": {
+        "classification": "AUTHORED_COLLIDER_GEOMETRY_OVERLAY",
+        "collider_mesh_count": 41,
+        "collider_root": "/World/ALOHA1Grasp20cmSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay",
+        "collision_schemas_copied": false,
+        "official_physics_debug_setting_also_enabled": true,
+        "physics_schemas_copied": false,
+        "pose_root": "/World/ALOHA1Grasp20cmSession/DiagnosticRenderEvidence/BottlePose",
+        "purpose": "SESSION_ONLY_RENDER_EVIDENCE",
+        "pusher_visual_prim": "/World/ALOHA1Grasp20cmSession/DiagnosticRenderEvidence/PusherVisual",
+        "records": [
+          {
+            "category": "visual",
+            "clone_prim_path": "/World/ALOHA1Grasp20cmSession/DiagnosticRenderEvidence/BottlePose/ExactVisualClones/mesh_000",
+            "collision_schema_applied": false,
+            "face_count": 6298,
+            "physics_schema_applied": false,
+            "point_count": 3151,
+            "source_instance_proxy": false,
+            "source_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500/Visuals/VIS_Bottle/VIS_BottleMesh"
+          },
+          {
+            "category": "collider",
+            "clone_prim_path": "/World/ALOHA1Grasp20cmSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_000",
+            "collision_schema_applied": false,
+            "face_count": 6,
+            "physics_schema_applied": false,
+            "point_count": 8,
+            "source_instance_proxy": false,
+            "source_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Shoulder_02/COL_Shoulder_02Mesh"
+          },
+          {
+            "category": "collider",
+            "clone_prim_path": "/World/ALOHA1Grasp20cmSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_001",
+            "collision_schema_applied": false,
+            "face_count": 6,
+            "physics_schema_applied": false,
+            "point_count": 8,
+            "source_instance_proxy": false,
+            "source_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Body_00/COL_Body_00Mesh"
+          },
+          {
+            "category": "collider",
+            "clone_prim_path": "/World/ALOHA1Grasp20cmSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_002",
+            "collision_schema_applied": false,
+            "face_count": 34,
+            "physics_schema_applied": false,
+            "point_count": 64,
+            "source_instance_proxy": false,
+            "source_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Bottom/COL_BottomMesh"
+          },
+          {
+            "category": "collider",
+            "clone_prim_path": "/World/ALOHA1Grasp20cmSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_003",
+            "collision_schema_applied": false,
+            "face_count": 6,
+            "physics_schema_applied": false,
+            "point_count": 8,
+            "source_instance_proxy": false,
+            "source_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Neck_02/COL_Neck_02Mesh"
+          },
+          {
+            "category": "collider",
+            "clone_prim_path": "/World/ALOHA1Grasp20cmSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_004",
+            "collision_schema_applied": false,
+            "face_count": 6,
+            "physics_schema_applied": false,
+            "point_count": 8,
+            "source_instance_proxy": false,
+            "source_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Neck_10/COL_Neck_10Mesh"
+          },
+          {
+            "category": "collider",
+            "clone_prim_path": "/World/ALOHA1Grasp20cmSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_005",
+            "collision_schema_applied": false,
+            "face_count": 6,
+            "physics_schema_applied": false,
+            "point_count": 8,
+            "source_instance_proxy": false,
+            "source_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Shoulder_06/COL_Shoulder_06Mesh"
+          },
+          {
+            "category": "collider",
+            "clone_prim_path": "/World/ALOHA1Grasp20cmSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_006",
+            "collision_schema_applied": false,
+            "face_count": 6,
+            "physics_schema_applied": false,
+            "point_count": 8,
+            "source_instance_proxy": false,
+            "source_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Shoulder_01/COL_Shoulder_01Mesh"
+          },
+          {
+            "category": "collider",
+            "clone_prim_path": "/World/ALOHA1Grasp20cmSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_007",
+            "collision_schema_applied": false,
+            "face_count": 6,
+            "physics_schema_applied": false,
+            "point_count": 8,
+            "source_instance_proxy": false,
+            "source_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Body_08/COL_Body_08Mesh"
+          },
+          {
+            "category": "collider",
+            "clone_prim_path": "/World/ALOHA1Grasp20cmSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_008",
+            "collision_schema_applied": false,
+            "face_count": 6,
+            "physics_schema_applied": false,
+            "point_count": 8,
+            "source_instance_proxy": false,
+            "source_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Body_11/COL_Body_11Mesh"
+          },
+          {
+            "category": "collider",
+            "clone_prim_path": "/World/ALOHA1Grasp20cmSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_009",
+            "collision_schema_applied": false,
+            "face_count": 6,
+            "physics_schema_applied": false,
+            "point_count": 8,
+            "source_instance_proxy": false,
+            "source_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Body_01/COL_Body_01Mesh"
+          },
+          {
+            "category": "collider",
+            "clone_prim_path": "/World/ALOHA1Grasp20cmSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_010",
+            "collision_schema_applied": false,
+            "face_count": 6,
+            "physics_schema_applied": false,
+            "point_count": 8,
+            "source_instance_proxy": false,
+            "source_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Shoulder_00/COL_Shoulder_00Mesh"
+          },
+          {
+            "category": "collider",
+            "clone_prim_path": "/World/ALOHA1Grasp20cmSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_011",
+            "collision_schema_applied": false,
+            "face_count": 6,
+            "physics_schema_applied": false,
+            "point_count": 8,
+            "source_instance_proxy": false,
+            "source_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Body_02/COL_Body_02Mesh"
+          },
+          {
+            "category": "collider",
+            "clone_prim_path": "/World/ALOHA1Grasp20cmSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_012",
+            "collision_schema_applied": false,
+            "face_count": 6,
+            "physics_schema_applied": false,
+            "point_count": 8,
+            "source_instance_proxy": false,
+            "source_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Shoulder_04/COL_Shoulder_04Mesh"
+          },
+          {
+            "category": "collider",
+            "clone_prim_path": "/World/ALOHA1Grasp20cmSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_013",
+            "collision_schema_applied": false,
+            "face_count": 6,
+            "physics_schema_applied": false,
+            "point_count": 8,
+            "source_instance_proxy": false,
+            "source_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Neck_01/COL_Neck_01Mesh"
+          },
+          {
+            "category": "collider",
+            "clone_prim_path": "/World/ALOHA1Grasp20cmSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_014",
+            "collision_schema_applied": false,
+            "face_count": 6,
+            "physics_schema_applied": false,
+            "point_count": 8,
+            "source_instance_proxy": false,
+            "source_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Body_03/COL_Body_03Mesh"
+          },
+          {
+            "category": "collider",
+            "clone_prim_path": "/World/ALOHA1Grasp20cmSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_015",
+            "collision_schema_applied": false,
+            "face_count": 6,
+            "physics_schema_applied": false,
+            "point_count": 8,
+            "source_instance_proxy": false,
+            "source_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Shoulder_05/COL_Shoulder_05Mesh"
+          },
+          {
+            "category": "collider",
+            "clone_prim_path": "/World/ALOHA1Grasp20cmSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_016",
+            "collision_schema_applied": false,
+            "face_count": 6,
+            "physics_schema_applied": false,
+            "point_count": 8,
+            "source_instance_proxy": false,
+            "source_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Body_10/COL_Body_10Mesh"
+          },
+          {
+            "category": "collider",
+            "clone_prim_path": "/World/ALOHA1Grasp20cmSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_017",
+            "collision_schema_applied": false,
+            "face_count": 6,
+            "physics_schema_applied": false,
+            "point_count": 8,
+            "source_instance_proxy": false,
+            "source_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Neck_06/COL_Neck_06Mesh"
+          },
+          {
+            "category": "collider",
+            "clone_prim_path": "/World/ALOHA1Grasp20cmSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_018",
+            "collision_schema_applied": false,
+            "face_count": 6,
+            "physics_schema_applied": false,
+            "point_count": 8,
+            "source_instance_proxy": false,
+            "source_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Neck_05/COL_Neck_05Mesh"
+          },
+          {
+            "category": "collider",
+            "clone_prim_path": "/World/ALOHA1Grasp20cmSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_019",
+            "collision_schema_applied": false,
+            "face_count": 6,
+            "physics_schema_applied": false,
+            "point_count": 8,
+            "source_instance_proxy": false,
+            "source_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Body_15/COL_Body_15Mesh"
+          },
+          {
+            "category": "collider",
+            "clone_prim_path": "/World/ALOHA1Grasp20cmSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_020",
+            "collision_schema_applied": false,
+            "face_count": 6,
+            "physics_schema_applied": false,
+            "point_count": 8,
+            "source_instance_proxy": false,
+            "source_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Body_05/COL_Body_05Mesh"
+          },
+          {
+            "category": "collider",
+            "clone_prim_path": "/World/ALOHA1Grasp20cmSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_021",
+            "collision_schema_applied": false,
+            "face_count": 6,
+            "physics_schema_applied": false,
+            "point_count": 8,
+            "source_instance_proxy": false,
+            "source_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Neck_11/COL_Neck_11Mesh"
+          },
+          {
+            "category": "collider",
+            "clone_prim_path": "/World/ALOHA1Grasp20cmSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_022",
+            "collision_schema_applied": false,
+            "face_count": 6,
+            "physics_schema_applied": false,
+            "point_count": 8,
+            "source_instance_proxy": false,
+            "source_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Shoulder_07/COL_Shoulder_07Mesh"
+          },
+          {
+            "category": "collider",
+            "clone_prim_path": "/World/ALOHA1Grasp20cmSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_023",
+            "collision_schema_applied": false,
+            "face_count": 6,
+            "physics_schema_applied": false,
+            "point_count": 8,
+            "source_instance_proxy": false,
+            "source_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Neck_09/COL_Neck_09Mesh"
+          },
+          {
+            "category": "collider",
+            "clone_prim_path": "/World/ALOHA1Grasp20cmSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_024",
+            "collision_schema_applied": false,
+            "face_count": 6,
+            "physics_schema_applied": false,
+            "point_count": 8,
+            "source_instance_proxy": false,
+            "source_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Body_04/COL_Body_04Mesh"
+          },
+          {
+            "category": "collider",
+            "clone_prim_path": "/World/ALOHA1Grasp20cmSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_025",
+            "collision_schema_applied": false,
+            "face_count": 6,
+            "physics_schema_applied": false,
+            "point_count": 8,
+            "source_instance_proxy": false,
+            "source_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Body_06/COL_Body_06Mesh"
+          },
+          {
+            "category": "collider",
+            "clone_prim_path": "/World/ALOHA1Grasp20cmSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_026",
+            "collision_schema_applied": false,
+            "face_count": 6,
+            "physics_schema_applied": false,
+            "point_count": 8,
+            "source_instance_proxy": false,
+            "source_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Body_09/COL_Body_09Mesh"
+          },
+          {
+            "category": "collider",
+            "clone_prim_path": "/World/ALOHA1Grasp20cmSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_027",
+            "collision_schema_applied": false,
+            "face_count": 6,
+            "physics_schema_applied": false,
+            "point_count": 8,
+            "source_instance_proxy": false,
+            "source_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Body_07/COL_Body_07Mesh"
+          },
+          {
+            "category": "collider",
+            "clone_prim_path": "/World/ALOHA1Grasp20cmSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_028",
+            "collision_schema_applied": false,
+            "face_count": 6,
+            "physics_schema_applied": false,
+            "point_count": 8,
+            "source_instance_proxy": false,
+            "source_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Shoulder_09/COL_Shoulder_09Mesh"
+          },
+          {
+            "category": "collider",
+            "clone_prim_path": "/World/ALOHA1Grasp20cmSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_029",
+            "collision_schema_applied": false,
+            "face_count": 6,
+            "physics_schema_applied": false,
+            "point_count": 8,
+            "source_instance_proxy": false,
+            "source_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Body_14/COL_Body_14Mesh"
+          },
+          {
+            "category": "collider",
+            "clone_prim_path": "/World/ALOHA1Grasp20cmSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_030",
+            "collision_schema_applied": false,
+            "face_count": 6,
+            "physics_schema_applied": false,
+            "point_count": 8,
+            "source_instance_proxy": false,
+            "source_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Shoulder_10/COL_Shoulder_10Mesh"
+          },
+          {
+            "category": "collider",
+            "clone_prim_path": "/World/ALOHA1Grasp20cmSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_031",
+            "collision_schema_applied": false,
+            "face_count": 6,
+            "physics_schema_applied": false,
+            "point_count": 8,
+            "source_instance_proxy": false,
+            "source_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Neck_04/COL_Neck_04Mesh"
+          },
+          {
+            "category": "collider",
+            "clone_prim_path": "/World/ALOHA1Grasp20cmSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_032",
+            "collision_schema_applied": false,
+            "face_count": 6,
+            "physics_schema_applied": false,
+            "point_count": 8,
+            "source_instance_proxy": false,
+            "source_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Shoulder_03/COL_Shoulder_03Mesh"
+          },
+          {
+            "category": "collider",
+            "clone_prim_path": "/World/ALOHA1Grasp20cmSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_033",
+            "collision_schema_applied": false,
+            "face_count": 6,
+            "physics_schema_applied": false,
+            "point_count": 8,
+            "source_instance_proxy": false,
+            "source_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Neck_07/COL_Neck_07Mesh"
+          },
+          {
+            "category": "collider",
+            "clone_prim_path": "/World/ALOHA1Grasp20cmSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_034",
+            "collision_schema_applied": false,
+            "face_count": 6,
+            "physics_schema_applied": false,
+            "point_count": 8,
+            "source_instance_proxy": false,
+            "source_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Shoulder_11/COL_Shoulder_11Mesh"
+          },
+          {
+            "category": "collider",
+            "clone_prim_path": "/World/ALOHA1Grasp20cmSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_035",
+            "collision_schema_applied": false,
+            "face_count": 6,
+            "physics_schema_applied": false,
+            "point_count": 8,
+            "source_instance_proxy": false,
+            "source_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Shoulder_08/COL_Shoulder_08Mesh"
+          },
+          {
+            "category": "collider",
+            "clone_prim_path": "/World/ALOHA1Grasp20cmSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_036",
+            "collision_schema_applied": false,
+            "face_count": 6,
+            "physics_schema_applied": false,
+            "point_count": 8,
+            "source_instance_proxy": false,
+            "source_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Neck_00/COL_Neck_00Mesh"
+          },
+          {
+            "category": "collider",
+            "clone_prim_path": "/World/ALOHA1Grasp20cmSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_037",
+            "collision_schema_applied": false,
+            "face_count": 6,
+            "physics_schema_applied": false,
+            "point_count": 8,
+            "source_instance_proxy": false,
+            "source_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Neck_03/COL_Neck_03Mesh"
+          },
+          {
+            "category": "collider",
+            "clone_prim_path": "/World/ALOHA1Grasp20cmSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_038",
+            "collision_schema_applied": false,
+            "face_count": 6,
+            "physics_schema_applied": false,
+            "point_count": 8,
+            "source_instance_proxy": false,
+            "source_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Body_13/COL_Body_13Mesh"
+          },
+          {
+            "category": "collider",
+            "clone_prim_path": "/World/ALOHA1Grasp20cmSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_039",
+            "collision_schema_applied": false,
+            "face_count": 6,
+            "physics_schema_applied": false,
+            "point_count": 8,
+            "source_instance_proxy": false,
+            "source_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Body_12/COL_Body_12Mesh"
+          },
+          {
+            "category": "collider",
+            "clone_prim_path": "/World/ALOHA1Grasp20cmSession/DiagnosticRenderEvidence/BottlePose/AuthoredColliderGeometryOverlay/mesh_040",
+            "collision_schema_applied": false,
+            "face_count": 6,
+            "physics_schema_applied": false,
+            "point_count": 8,
+            "source_instance_proxy": false,
+            "source_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Neck_08/COL_Neck_08Mesh"
+          }
+        ],
+        "visual_mesh_count": 1,
+        "visual_root": "/World/ALOHA1Grasp20cmSession/DiagnosticRenderEvidence/BottlePose/ExactVisualClones"
+      },
+      "collision_schemas_copied": false,
+      "fingers": {
+        "classification": "SESSION_ONLY_EXACT_MESH_RENDER_EVIDENCE",
+        "collision_schemas_copied": false,
+        "physics_schemas_copied": false,
+        "records": [
+          {
+            "category": "visual",
+            "clone_prim_path": "/World/Task7B2HorizontalSession/FingerCollisionRenderEvidence/left/ExactVisualAtPhysxPose/mesh",
+            "collision_schema_applied": false,
+            "face_count": 1662,
+            "physics_schema_applied": false,
+            "point_count": 831,
+            "side": "left",
+            "source_prim_path": "/World/follower_left/vx300s_left/follower_left_left_finger_link/visuals/diagnostic_supplier_cad_left_finger/mesh"
+          },
+          {
+            "category": "collider",
+            "clone_prim_path": "/World/Task7B2HorizontalSession/FingerCollisionRenderEvidence/left/AuthoredColliderAtPhysxPose/mesh",
+            "collision_schema_applied": false,
+            "face_count": 1662,
+            "physics_schema_applied": false,
+            "point_count": 831,
+            "side": "left",
+            "source_prim_path": "/World/follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh"
+          },
+          {
+            "category": "visual",
+            "clone_prim_path": "/World/Task7B2HorizontalSession/FingerCollisionRenderEvidence/right/ExactVisualAtPhysxPose/mesh",
+            "collision_schema_applied": false,
+            "face_count": 1662,
+            "physics_schema_applied": false,
+            "point_count": 831,
+            "side": "right",
+            "source_prim_path": "/World/follower_left/vx300s_left/follower_left_right_finger_link/visuals/diagnostic_supplier_cad_right_finger/mesh"
+          },
+          {
+            "category": "collider",
+            "clone_prim_path": "/World/Task7B2HorizontalSession/FingerCollisionRenderEvidence/right/AuthoredColliderAtPhysxPose/mesh",
+            "collision_schema_applied": false,
+            "face_count": 1662,
+            "physics_schema_applied": false,
+            "point_count": 831,
+            "side": "right",
+            "source_prim_path": "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh"
+          }
+        ],
+        "root": "/World/Task7B2HorizontalSession/FingerCollisionRenderEvidence"
+      },
+      "physics_schemas_copied": false,
+      "semantics": "ISAAC_PHYSICS_DEBUG_DISPLAY_PLUS_SESSION_AUTHORED_COLLIDER_CLONE_NOT_COOKED_HULL_READBACK"
+    },
+    "review_method": "CODEX_VISION_REVIEW_OF_NORMAL_AND_COLLIDER_ANNOTATED_MONTAGES;_ANNOTATED_TOP_PIXELS_ARE_THE_UNMODIFIED_RAW_CAPTURE",
+    "run_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/collider_evidence_retake_v6",
+    "status": "PASS"
+  },
+  "deterministic_signature": "879b4b88e25b1c54bf38b2713e59ad77b330d3805f1ac8d43561cf271512cff7",
+  "machine_status": "PASS",
+  "primary_action_video": {
+    "annotated": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/aloha1_grasp_20cm_annotated_candidate.mp4",
+      "encoder_command": "ffmpeg -hide_banner -loglevel info -y -framerate 60 -start_number 1 -i /home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/composite_annotated_frames/%06d.png -frames:v 912 -an -c:v libx264 -preset slow -crf 18 -pix_fmt yuv420p -movflags +faststart /home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/aloha1_grasp_20cm_annotated_candidate.mp4",
+      "encoder_log_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/ffmpeg_annotated.log",
+      "fps": 60,
+      "frame_count": 912,
+      "kind": "annotated",
+      "probe": {
+        "duration_s": 15.2,
+        "fps": 60.0,
+        "frame_count": 912,
+        "pixel_format": "yuv420p",
+        "r_frame_rate": "60/1",
+        "resolution": [
+          1440,
+          680
+        ]
+      },
+      "sha256": "4e1bf9d929ee182f437104ac40caa28fe18aeff535402e7dd06ed451a285e3cd"
+    },
+    "full_frame_review": {
+      "criteria": {
+        "critical_occlusion": false,
+        "full_arm_visible": true,
+        "gripper_and_bottle_visible": true,
+        "missing_or_duplicated_frame": false,
+        "open_contact_lift_hold_visibly_distinct": true
+      },
+      "method": "CODEX_VISION_REVIEW_OF_ALL_CONTACT_SHEETS_COVERING_EVERY_FRAME_EXACTLY_ONCE",
+      "sheet_count": 46,
+      "sheets": [
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/review_contact_sheets/sheet_01_frames_000001_000020.png",
+          "frame_count": 20,
+          "frame_numbers": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "resolution": [
+            1440,
+            675
+          ],
+          "retake_reason": null,
+          "sha256": "f836a21b0aedb0801e4290df26c4db2eb0d91c99058b2dd58bec30ad0204dc4f",
+          "sheet_index": 1,
+          "visual_model_review": "PASS"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/review_contact_sheets/sheet_02_frames_000021_000040.png",
+          "frame_count": 20,
+          "frame_numbers": [
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40
+          ],
+          "resolution": [
+            1440,
+            675
+          ],
+          "retake_reason": null,
+          "sha256": "f01094774b67d45bb7c4af3052ebcf05154796bfb327c491f86d6438ed657549",
+          "sheet_index": 2,
+          "visual_model_review": "PASS"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/review_contact_sheets/sheet_03_frames_000041_000060.png",
+          "frame_count": 20,
+          "frame_numbers": [
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            55,
+            56,
+            57,
+            58,
+            59,
+            60
+          ],
+          "resolution": [
+            1440,
+            675
+          ],
+          "retake_reason": null,
+          "sha256": "32ad4a7d3bf5c209d62e650290287055c257d2647d7e273609332938bf200527",
+          "sheet_index": 3,
+          "visual_model_review": "PASS"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/review_contact_sheets/sheet_04_frames_000061_000080.png",
+          "frame_count": 20,
+          "frame_numbers": [
+            61,
+            62,
+            63,
+            64,
+            65,
+            66,
+            67,
+            68,
+            69,
+            70,
+            71,
+            72,
+            73,
+            74,
+            75,
+            76,
+            77,
+            78,
+            79,
+            80
+          ],
+          "resolution": [
+            1440,
+            675
+          ],
+          "retake_reason": null,
+          "sha256": "9d220f91df4b5627c857586614e982194e831878534e38f0b9d7ee33144b0f8b",
+          "sheet_index": 4,
+          "visual_model_review": "PASS"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/review_contact_sheets/sheet_05_frames_000081_000100.png",
+          "frame_count": 20,
+          "frame_numbers": [
+            81,
+            82,
+            83,
+            84,
+            85,
+            86,
+            87,
+            88,
+            89,
+            90,
+            91,
+            92,
+            93,
+            94,
+            95,
+            96,
+            97,
+            98,
+            99,
+            100
+          ],
+          "resolution": [
+            1440,
+            675
+          ],
+          "retake_reason": null,
+          "sha256": "8e3ba4c4ab84b7d97f410fafc0880bc0d3f2854ad1ac664c1c4c9387cd886b6f",
+          "sheet_index": 5,
+          "visual_model_review": "PASS"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/review_contact_sheets/sheet_06_frames_000101_000120.png",
+          "frame_count": 20,
+          "frame_numbers": [
+            101,
+            102,
+            103,
+            104,
+            105,
+            106,
+            107,
+            108,
+            109,
+            110,
+            111,
+            112,
+            113,
+            114,
+            115,
+            116,
+            117,
+            118,
+            119,
+            120
+          ],
+          "resolution": [
+            1440,
+            675
+          ],
+          "retake_reason": null,
+          "sha256": "ae30cdc4b5d653c2ff241df69b680b48842a10cdf851359389f58ca09a46ae29",
+          "sheet_index": 6,
+          "visual_model_review": "PASS"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/review_contact_sheets/sheet_07_frames_000121_000140.png",
+          "frame_count": 20,
+          "frame_numbers": [
+            121,
+            122,
+            123,
+            124,
+            125,
+            126,
+            127,
+            128,
+            129,
+            130,
+            131,
+            132,
+            133,
+            134,
+            135,
+            136,
+            137,
+            138,
+            139,
+            140
+          ],
+          "resolution": [
+            1440,
+            675
+          ],
+          "retake_reason": null,
+          "sha256": "71757c39bdadd1c32d3c5d6b6fb0333607fbdcd47d136ef86f5875dbc7537b4b",
+          "sheet_index": 7,
+          "visual_model_review": "PASS"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/review_contact_sheets/sheet_08_frames_000141_000160.png",
+          "frame_count": 20,
+          "frame_numbers": [
+            141,
+            142,
+            143,
+            144,
+            145,
+            146,
+            147,
+            148,
+            149,
+            150,
+            151,
+            152,
+            153,
+            154,
+            155,
+            156,
+            157,
+            158,
+            159,
+            160
+          ],
+          "resolution": [
+            1440,
+            675
+          ],
+          "retake_reason": null,
+          "sha256": "ebbd3d5f585f61d0d2fff44e92a061609222fd9b83249a46445bbd65b00dff16",
+          "sheet_index": 8,
+          "visual_model_review": "PASS"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/review_contact_sheets/sheet_09_frames_000161_000180.png",
+          "frame_count": 20,
+          "frame_numbers": [
+            161,
+            162,
+            163,
+            164,
+            165,
+            166,
+            167,
+            168,
+            169,
+            170,
+            171,
+            172,
+            173,
+            174,
+            175,
+            176,
+            177,
+            178,
+            179,
+            180
+          ],
+          "resolution": [
+            1440,
+            675
+          ],
+          "retake_reason": null,
+          "sha256": "ae7b608d58452130881713e35307b6e08352d144afaa9e94bc10584f39985693",
+          "sheet_index": 9,
+          "visual_model_review": "PASS"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/review_contact_sheets/sheet_10_frames_000181_000200.png",
+          "frame_count": 20,
+          "frame_numbers": [
+            181,
+            182,
+            183,
+            184,
+            185,
+            186,
+            187,
+            188,
+            189,
+            190,
+            191,
+            192,
+            193,
+            194,
+            195,
+            196,
+            197,
+            198,
+            199,
+            200
+          ],
+          "resolution": [
+            1440,
+            675
+          ],
+          "retake_reason": null,
+          "sha256": "bd4d66ed37de202fbe13dbf096d1af9fb4956c162978632e990301ccb192df17",
+          "sheet_index": 10,
+          "visual_model_review": "PASS"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/review_contact_sheets/sheet_11_frames_000201_000220.png",
+          "frame_count": 20,
+          "frame_numbers": [
+            201,
+            202,
+            203,
+            204,
+            205,
+            206,
+            207,
+            208,
+            209,
+            210,
+            211,
+            212,
+            213,
+            214,
+            215,
+            216,
+            217,
+            218,
+            219,
+            220
+          ],
+          "resolution": [
+            1440,
+            675
+          ],
+          "retake_reason": null,
+          "sha256": "56c3e4e75015728c557eec3e769bbe99a3c60acf7a80461e8357dbaf7f1ece06",
+          "sheet_index": 11,
+          "visual_model_review": "PASS"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/review_contact_sheets/sheet_12_frames_000221_000240.png",
+          "frame_count": 20,
+          "frame_numbers": [
+            221,
+            222,
+            223,
+            224,
+            225,
+            226,
+            227,
+            228,
+            229,
+            230,
+            231,
+            232,
+            233,
+            234,
+            235,
+            236,
+            237,
+            238,
+            239,
+            240
+          ],
+          "resolution": [
+            1440,
+            675
+          ],
+          "retake_reason": null,
+          "sha256": "fa04c509196ae1b71d54034d68a237154f251d921ba36d2663fb3d3786558a30",
+          "sheet_index": 12,
+          "visual_model_review": "PASS"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/review_contact_sheets/sheet_13_frames_000241_000260.png",
+          "frame_count": 20,
+          "frame_numbers": [
+            241,
+            242,
+            243,
+            244,
+            245,
+            246,
+            247,
+            248,
+            249,
+            250,
+            251,
+            252,
+            253,
+            254,
+            255,
+            256,
+            257,
+            258,
+            259,
+            260
+          ],
+          "resolution": [
+            1440,
+            675
+          ],
+          "retake_reason": null,
+          "sha256": "9e9f6ada50a9b42f19ad94b3577de86b80e88de5059768d01424b021e35d2848",
+          "sheet_index": 13,
+          "visual_model_review": "PASS"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/review_contact_sheets/sheet_14_frames_000261_000280.png",
+          "frame_count": 20,
+          "frame_numbers": [
+            261,
+            262,
+            263,
+            264,
+            265,
+            266,
+            267,
+            268,
+            269,
+            270,
+            271,
+            272,
+            273,
+            274,
+            275,
+            276,
+            277,
+            278,
+            279,
+            280
+          ],
+          "resolution": [
+            1440,
+            675
+          ],
+          "retake_reason": null,
+          "sha256": "978a829744dd01b79179e483dbb6ab38aa7557b5555916e5e865ee243567caa7",
+          "sheet_index": 14,
+          "visual_model_review": "PASS"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/review_contact_sheets/sheet_15_frames_000281_000300.png",
+          "frame_count": 20,
+          "frame_numbers": [
+            281,
+            282,
+            283,
+            284,
+            285,
+            286,
+            287,
+            288,
+            289,
+            290,
+            291,
+            292,
+            293,
+            294,
+            295,
+            296,
+            297,
+            298,
+            299,
+            300
+          ],
+          "resolution": [
+            1440,
+            675
+          ],
+          "retake_reason": null,
+          "sha256": "b41c269df61b6fc9262c7e7dae2b92cd587cc57ad06a79758abe0e613c46d8e3",
+          "sheet_index": 15,
+          "visual_model_review": "PASS"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/review_contact_sheets/sheet_16_frames_000301_000320.png",
+          "frame_count": 20,
+          "frame_numbers": [
+            301,
+            302,
+            303,
+            304,
+            305,
+            306,
+            307,
+            308,
+            309,
+            310,
+            311,
+            312,
+            313,
+            314,
+            315,
+            316,
+            317,
+            318,
+            319,
+            320
+          ],
+          "resolution": [
+            1440,
+            675
+          ],
+          "retake_reason": null,
+          "sha256": "dd3847f3d99d952a59ab08838460f51bc53f0a1e115616790993fdc443674e5b",
+          "sheet_index": 16,
+          "visual_model_review": "PASS"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/review_contact_sheets/sheet_17_frames_000321_000340.png",
+          "frame_count": 20,
+          "frame_numbers": [
+            321,
+            322,
+            323,
+            324,
+            325,
+            326,
+            327,
+            328,
+            329,
+            330,
+            331,
+            332,
+            333,
+            334,
+            335,
+            336,
+            337,
+            338,
+            339,
+            340
+          ],
+          "resolution": [
+            1440,
+            675
+          ],
+          "retake_reason": null,
+          "sha256": "af6b83c38ee0fdf95a8d578c481ea939d9b7f5ffdb675ca40c5d6f8d4e3cb620",
+          "sheet_index": 17,
+          "visual_model_review": "PASS"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/review_contact_sheets/sheet_18_frames_000341_000360.png",
+          "frame_count": 20,
+          "frame_numbers": [
+            341,
+            342,
+            343,
+            344,
+            345,
+            346,
+            347,
+            348,
+            349,
+            350,
+            351,
+            352,
+            353,
+            354,
+            355,
+            356,
+            357,
+            358,
+            359,
+            360
+          ],
+          "resolution": [
+            1440,
+            675
+          ],
+          "retake_reason": null,
+          "sha256": "37a375ea773a5f4b983304668290fa7d8ce4fc746c1e7a3e65542cbae128015c",
+          "sheet_index": 18,
+          "visual_model_review": "PASS"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/review_contact_sheets/sheet_19_frames_000361_000380.png",
+          "frame_count": 20,
+          "frame_numbers": [
+            361,
+            362,
+            363,
+            364,
+            365,
+            366,
+            367,
+            368,
+            369,
+            370,
+            371,
+            372,
+            373,
+            374,
+            375,
+            376,
+            377,
+            378,
+            379,
+            380
+          ],
+          "resolution": [
+            1440,
+            675
+          ],
+          "retake_reason": null,
+          "sha256": "9f3a71113b3cda46c0ca20aebf9597dc0c90610f98c05a434c674328868cf938",
+          "sheet_index": 19,
+          "visual_model_review": "PASS"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/review_contact_sheets/sheet_20_frames_000381_000400.png",
+          "frame_count": 20,
+          "frame_numbers": [
+            381,
+            382,
+            383,
+            384,
+            385,
+            386,
+            387,
+            388,
+            389,
+            390,
+            391,
+            392,
+            393,
+            394,
+            395,
+            396,
+            397,
+            398,
+            399,
+            400
+          ],
+          "resolution": [
+            1440,
+            675
+          ],
+          "retake_reason": null,
+          "sha256": "4cfa9bafdef5382d577b9d50b068a858e89ff604be2bc574821651463d865f63",
+          "sheet_index": 20,
+          "visual_model_review": "PASS"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/review_contact_sheets/sheet_21_frames_000401_000420.png",
+          "frame_count": 20,
+          "frame_numbers": [
+            401,
+            402,
+            403,
+            404,
+            405,
+            406,
+            407,
+            408,
+            409,
+            410,
+            411,
+            412,
+            413,
+            414,
+            415,
+            416,
+            417,
+            418,
+            419,
+            420
+          ],
+          "resolution": [
+            1440,
+            675
+          ],
+          "retake_reason": null,
+          "sha256": "be9d6a60261dd61a65b42326f9ee282f6a84c4eea23eb2d6050bf67157d1a89d",
+          "sheet_index": 21,
+          "visual_model_review": "PASS"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/review_contact_sheets/sheet_22_frames_000421_000440.png",
+          "frame_count": 20,
+          "frame_numbers": [
+            421,
+            422,
+            423,
+            424,
+            425,
+            426,
+            427,
+            428,
+            429,
+            430,
+            431,
+            432,
+            433,
+            434,
+            435,
+            436,
+            437,
+            438,
+            439,
+            440
+          ],
+          "resolution": [
+            1440,
+            675
+          ],
+          "retake_reason": null,
+          "sha256": "7dcb44e252f1b1484ae4290fd1ef307125ccfb93f76e3ffb7eb273fbbc6edc86",
+          "sheet_index": 22,
+          "visual_model_review": "PASS"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/review_contact_sheets/sheet_23_frames_000441_000460.png",
+          "frame_count": 20,
+          "frame_numbers": [
+            441,
+            442,
+            443,
+            444,
+            445,
+            446,
+            447,
+            448,
+            449,
+            450,
+            451,
+            452,
+            453,
+            454,
+            455,
+            456,
+            457,
+            458,
+            459,
+            460
+          ],
+          "resolution": [
+            1440,
+            675
+          ],
+          "retake_reason": null,
+          "sha256": "fc381c452c9e52401078c1dc6883e5268cf31b2edfbb38acc6f832fe423c362a",
+          "sheet_index": 23,
+          "visual_model_review": "PASS"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/review_contact_sheets/sheet_24_frames_000461_000480.png",
+          "frame_count": 20,
+          "frame_numbers": [
+            461,
+            462,
+            463,
+            464,
+            465,
+            466,
+            467,
+            468,
+            469,
+            470,
+            471,
+            472,
+            473,
+            474,
+            475,
+            476,
+            477,
+            478,
+            479,
+            480
+          ],
+          "resolution": [
+            1440,
+            675
+          ],
+          "retake_reason": null,
+          "sha256": "4f5b7459d6f36fae73be568909fabe1521f5b67460667525611a280b0691987e",
+          "sheet_index": 24,
+          "visual_model_review": "PASS"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/review_contact_sheets/sheet_25_frames_000481_000500.png",
+          "frame_count": 20,
+          "frame_numbers": [
+            481,
+            482,
+            483,
+            484,
+            485,
+            486,
+            487,
+            488,
+            489,
+            490,
+            491,
+            492,
+            493,
+            494,
+            495,
+            496,
+            497,
+            498,
+            499,
+            500
+          ],
+          "resolution": [
+            1440,
+            675
+          ],
+          "retake_reason": null,
+          "sha256": "b6a5e284b7a94e42228aa9ba8d7509652e2962e5c470b2266f187ab6007590b9",
+          "sheet_index": 25,
+          "visual_model_review": "PASS"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/review_contact_sheets/sheet_26_frames_000501_000520.png",
+          "frame_count": 20,
+          "frame_numbers": [
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514,
+            515,
+            516,
+            517,
+            518,
+            519,
+            520
+          ],
+          "resolution": [
+            1440,
+            675
+          ],
+          "retake_reason": null,
+          "sha256": "ce8b0b406e1a8ba6102342be8a6ac837fef55995e7c4400e1e57a06c624e668b",
+          "sheet_index": 26,
+          "visual_model_review": "PASS"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/review_contact_sheets/sheet_27_frames_000521_000540.png",
+          "frame_count": 20,
+          "frame_numbers": [
+            521,
+            522,
+            523,
+            524,
+            525,
+            526,
+            527,
+            528,
+            529,
+            530,
+            531,
+            532,
+            533,
+            534,
+            535,
+            536,
+            537,
+            538,
+            539,
+            540
+          ],
+          "resolution": [
+            1440,
+            675
+          ],
+          "retake_reason": null,
+          "sha256": "3e84c202fc59d48dc7ba732b4555994d288e153368787f981f544fcebdee2ec9",
+          "sheet_index": 27,
+          "visual_model_review": "PASS"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/review_contact_sheets/sheet_28_frames_000541_000560.png",
+          "frame_count": 20,
+          "frame_numbers": [
+            541,
+            542,
+            543,
+            544,
+            545,
+            546,
+            547,
+            548,
+            549,
+            550,
+            551,
+            552,
+            553,
+            554,
+            555,
+            556,
+            557,
+            558,
+            559,
+            560
+          ],
+          "resolution": [
+            1440,
+            675
+          ],
+          "retake_reason": null,
+          "sha256": "87820a2bc9836804f756969425063972f1713fed04dc48449693f7454edba0b0",
+          "sheet_index": 28,
+          "visual_model_review": "PASS"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/review_contact_sheets/sheet_29_frames_000561_000580.png",
+          "frame_count": 20,
+          "frame_numbers": [
+            561,
+            562,
+            563,
+            564,
+            565,
+            566,
+            567,
+            568,
+            569,
+            570,
+            571,
+            572,
+            573,
+            574,
+            575,
+            576,
+            577,
+            578,
+            579,
+            580
+          ],
+          "resolution": [
+            1440,
+            675
+          ],
+          "retake_reason": null,
+          "sha256": "b30a3a7ec92dc6c99f16ac70358ab1923cf10cfba5a62e2b29944f8c45eea0ee",
+          "sheet_index": 29,
+          "visual_model_review": "PASS"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/review_contact_sheets/sheet_30_frames_000581_000600.png",
+          "frame_count": 20,
+          "frame_numbers": [
+            581,
+            582,
+            583,
+            584,
+            585,
+            586,
+            587,
+            588,
+            589,
+            590,
+            591,
+            592,
+            593,
+            594,
+            595,
+            596,
+            597,
+            598,
+            599,
+            600
+          ],
+          "resolution": [
+            1440,
+            675
+          ],
+          "retake_reason": null,
+          "sha256": "1719f23548808fdd70aeb4818213e45df3a7e822f3b32d8ecd735cc02675a52b",
+          "sheet_index": 30,
+          "visual_model_review": "PASS"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/review_contact_sheets/sheet_31_frames_000601_000620.png",
+          "frame_count": 20,
+          "frame_numbers": [
+            601,
+            602,
+            603,
+            604,
+            605,
+            606,
+            607,
+            608,
+            609,
+            610,
+            611,
+            612,
+            613,
+            614,
+            615,
+            616,
+            617,
+            618,
+            619,
+            620
+          ],
+          "resolution": [
+            1440,
+            675
+          ],
+          "retake_reason": null,
+          "sha256": "2d62a7c7e87f47196f002d0b9014b119955dd4ed30a8026dc97cacb9aa49bc9d",
+          "sheet_index": 31,
+          "visual_model_review": "PASS"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/review_contact_sheets/sheet_32_frames_000621_000640.png",
+          "frame_count": 20,
+          "frame_numbers": [
+            621,
+            622,
+            623,
+            624,
+            625,
+            626,
+            627,
+            628,
+            629,
+            630,
+            631,
+            632,
+            633,
+            634,
+            635,
+            636,
+            637,
+            638,
+            639,
+            640
+          ],
+          "resolution": [
+            1440,
+            675
+          ],
+          "retake_reason": null,
+          "sha256": "2cf8ed6a42ec58d1707779d97faba9062395d598786f146cfe0aa4d005bd9f40",
+          "sheet_index": 32,
+          "visual_model_review": "PASS"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/review_contact_sheets/sheet_33_frames_000641_000660.png",
+          "frame_count": 20,
+          "frame_numbers": [
+            641,
+            642,
+            643,
+            644,
+            645,
+            646,
+            647,
+            648,
+            649,
+            650,
+            651,
+            652,
+            653,
+            654,
+            655,
+            656,
+            657,
+            658,
+            659,
+            660
+          ],
+          "resolution": [
+            1440,
+            675
+          ],
+          "retake_reason": null,
+          "sha256": "4a50e5bfe1861d72edc00c3d40c92fd5f6bcd68bbea61eecae004d5a09c921cc",
+          "sheet_index": 33,
+          "visual_model_review": "PASS"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/review_contact_sheets/sheet_34_frames_000661_000680.png",
+          "frame_count": 20,
+          "frame_numbers": [
+            661,
+            662,
+            663,
+            664,
+            665,
+            666,
+            667,
+            668,
+            669,
+            670,
+            671,
+            672,
+            673,
+            674,
+            675,
+            676,
+            677,
+            678,
+            679,
+            680
+          ],
+          "resolution": [
+            1440,
+            675
+          ],
+          "retake_reason": null,
+          "sha256": "8663d16db8eb24da0a8a9a922ec71c2f1236753a9ff4ce4866c55d3027ebde61",
+          "sheet_index": 34,
+          "visual_model_review": "PASS"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/review_contact_sheets/sheet_35_frames_000681_000700.png",
+          "frame_count": 20,
+          "frame_numbers": [
+            681,
+            682,
+            683,
+            684,
+            685,
+            686,
+            687,
+            688,
+            689,
+            690,
+            691,
+            692,
+            693,
+            694,
+            695,
+            696,
+            697,
+            698,
+            699,
+            700
+          ],
+          "resolution": [
+            1440,
+            675
+          ],
+          "retake_reason": null,
+          "sha256": "327ac0a8622325a7a3e7839589d45d5d30cec1b0eedd1213fe5911fef673d80f",
+          "sheet_index": 35,
+          "visual_model_review": "PASS"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/review_contact_sheets/sheet_36_frames_000701_000720.png",
+          "frame_count": 20,
+          "frame_numbers": [
+            701,
+            702,
+            703,
+            704,
+            705,
+            706,
+            707,
+            708,
+            709,
+            710,
+            711,
+            712,
+            713,
+            714,
+            715,
+            716,
+            717,
+            718,
+            719,
+            720
+          ],
+          "resolution": [
+            1440,
+            675
+          ],
+          "retake_reason": null,
+          "sha256": "d5f4813625a4a5dea7d856c79270f2f84972039e2028200ab3038976f665f77c",
+          "sheet_index": 36,
+          "visual_model_review": "PASS"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/review_contact_sheets/sheet_37_frames_000721_000740.png",
+          "frame_count": 20,
+          "frame_numbers": [
+            721,
+            722,
+            723,
+            724,
+            725,
+            726,
+            727,
+            728,
+            729,
+            730,
+            731,
+            732,
+            733,
+            734,
+            735,
+            736,
+            737,
+            738,
+            739,
+            740
+          ],
+          "resolution": [
+            1440,
+            675
+          ],
+          "retake_reason": null,
+          "sha256": "66f2ac15e0248714e0c8b4b20f3466a3ac95e8ce63ec12f6f7f6ff178927a4ea",
+          "sheet_index": 37,
+          "visual_model_review": "PASS"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/review_contact_sheets/sheet_38_frames_000741_000760.png",
+          "frame_count": 20,
+          "frame_numbers": [
+            741,
+            742,
+            743,
+            744,
+            745,
+            746,
+            747,
+            748,
+            749,
+            750,
+            751,
+            752,
+            753,
+            754,
+            755,
+            756,
+            757,
+            758,
+            759,
+            760
+          ],
+          "resolution": [
+            1440,
+            675
+          ],
+          "retake_reason": null,
+          "sha256": "462e34d41d15384e82d43181df1986cf8424d862c685620412f6fa2704febb12",
+          "sheet_index": 38,
+          "visual_model_review": "PASS"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/review_contact_sheets/sheet_39_frames_000761_000780.png",
+          "frame_count": 20,
+          "frame_numbers": [
+            761,
+            762,
+            763,
+            764,
+            765,
+            766,
+            767,
+            768,
+            769,
+            770,
+            771,
+            772,
+            773,
+            774,
+            775,
+            776,
+            777,
+            778,
+            779,
+            780
+          ],
+          "resolution": [
+            1440,
+            675
+          ],
+          "retake_reason": null,
+          "sha256": "ff4cc0034710582190eb1053c24f5415dc3e0c603391a5860a8a2c6b9286551b",
+          "sheet_index": 39,
+          "visual_model_review": "PASS"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/review_contact_sheets/sheet_40_frames_000781_000800.png",
+          "frame_count": 20,
+          "frame_numbers": [
+            781,
+            782,
+            783,
+            784,
+            785,
+            786,
+            787,
+            788,
+            789,
+            790,
+            791,
+            792,
+            793,
+            794,
+            795,
+            796,
+            797,
+            798,
+            799,
+            800
+          ],
+          "resolution": [
+            1440,
+            675
+          ],
+          "retake_reason": null,
+          "sha256": "0e4706ee4630a749292f1cb3d77392f19b3bc4bea9d613efe40d98af39809896",
+          "sheet_index": 40,
+          "visual_model_review": "PASS"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/review_contact_sheets/sheet_41_frames_000801_000820.png",
+          "frame_count": 20,
+          "frame_numbers": [
+            801,
+            802,
+            803,
+            804,
+            805,
+            806,
+            807,
+            808,
+            809,
+            810,
+            811,
+            812,
+            813,
+            814,
+            815,
+            816,
+            817,
+            818,
+            819,
+            820
+          ],
+          "resolution": [
+            1440,
+            675
+          ],
+          "retake_reason": null,
+          "sha256": "e17560d4577ae7fe84efa5e3b1bcbe0861f5ad3c174ad3acfe005d01ccce6da2",
+          "sheet_index": 41,
+          "visual_model_review": "PASS"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/review_contact_sheets/sheet_42_frames_000821_000840.png",
+          "frame_count": 20,
+          "frame_numbers": [
+            821,
+            822,
+            823,
+            824,
+            825,
+            826,
+            827,
+            828,
+            829,
+            830,
+            831,
+            832,
+            833,
+            834,
+            835,
+            836,
+            837,
+            838,
+            839,
+            840
+          ],
+          "resolution": [
+            1440,
+            675
+          ],
+          "retake_reason": null,
+          "sha256": "1448dbc17a1a9a70b09cd584408b6bbb48c262c8f8a97c4bb9673ba25928e995",
+          "sheet_index": 42,
+          "visual_model_review": "PASS"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/review_contact_sheets/sheet_43_frames_000841_000860.png",
+          "frame_count": 20,
+          "frame_numbers": [
+            841,
+            842,
+            843,
+            844,
+            845,
+            846,
+            847,
+            848,
+            849,
+            850,
+            851,
+            852,
+            853,
+            854,
+            855,
+            856,
+            857,
+            858,
+            859,
+            860
+          ],
+          "resolution": [
+            1440,
+            675
+          ],
+          "retake_reason": null,
+          "sha256": "66143870439245aa4a75b51cf3db71ac0c616bb052e819c6f725912c91d8c73e",
+          "sheet_index": 43,
+          "visual_model_review": "PASS"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/review_contact_sheets/sheet_44_frames_000861_000880.png",
+          "frame_count": 20,
+          "frame_numbers": [
+            861,
+            862,
+            863,
+            864,
+            865,
+            866,
+            867,
+            868,
+            869,
+            870,
+            871,
+            872,
+            873,
+            874,
+            875,
+            876,
+            877,
+            878,
+            879,
+            880
+          ],
+          "resolution": [
+            1440,
+            675
+          ],
+          "retake_reason": null,
+          "sha256": "6ac127503988a34feff64714be0d20b4583dcae3ed94b09665293dda00314502",
+          "sheet_index": 44,
+          "visual_model_review": "PASS"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/review_contact_sheets/sheet_45_frames_000881_000900.png",
+          "frame_count": 20,
+          "frame_numbers": [
+            881,
+            882,
+            883,
+            884,
+            885,
+            886,
+            887,
+            888,
+            889,
+            890,
+            891,
+            892,
+            893,
+            894,
+            895,
+            896,
+            897,
+            898,
+            899,
+            900
+          ],
+          "resolution": [
+            1440,
+            675
+          ],
+          "retake_reason": null,
+          "sha256": "6b2c3b8f687f55e10d598184e6b71fdb83d8ad5ab8c6808189061f53371cd282",
+          "sheet_index": 45,
+          "visual_model_review": "PASS"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/review_contact_sheets/sheet_46_frames_000901_000912.png",
+          "frame_count": 12,
+          "frame_numbers": [
+            901,
+            902,
+            903,
+            904,
+            905,
+            906,
+            907,
+            908,
+            909,
+            910,
+            911,
+            912
+          ],
+          "resolution": [
+            1440,
+            675
+          ],
+          "retake_reason": null,
+          "sha256": "31fc042e0af14d258e7edf0c972310d3efcc9d4cf9b99d78594e403f6eb85d4d",
+          "sheet_index": 46,
+          "visual_model_review": "PASS"
+        }
+      ],
+      "status": "PASS"
+    },
+    "raw": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/aloha1_grasp_20cm_raw_candidate.mp4",
+      "encoder_command": "ffmpeg -hide_banner -loglevel info -y -framerate 60 -start_number 1 -i /home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/composite_raw_frames/%06d.png -frames:v 912 -an -c:v libx264 -preset slow -crf 18 -pix_fmt yuv420p -movflags +faststart /home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/aloha1_grasp_20cm_raw_candidate.mp4",
+      "encoder_log_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/ffmpeg_raw.log",
+      "fps": 60,
+      "frame_count": 912,
+      "kind": "raw",
+      "probe": {
+        "duration_s": 15.2,
+        "fps": 60.0,
+        "frame_count": 912,
+        "pixel_format": "yuv420p",
+        "r_frame_rate": "60/1",
+        "resolution": [
+          1440,
+          540
+        ]
+      },
+      "sha256": "d13fb2506af502214ff714ea7072cdd4c835acfc27d595eaa5d61ec10b26557c"
+    },
+    "run_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary"
+  },
+  "promotion_status": "USER_CONFIRMED_PASS_DIAGNOSTIC_ONLY",
+  "rejected_attempts": [
+    {
+      "run": "formal_candidate119_v5/sample_05/collider_repeat",
+      "status": "REJECTED_OPEN_PREGRASP_CAPTURED_BEFORE_OPEN_TARGET_REACHED"
+    }
+  ],
+  "schema_version": 1,
+  "semantic_boundary": {
+    "green_geometry": "SESSION_ONLY_AUTHORED_COLLIDER_MESH_AT_RUNTIME_RIGID_POSE_NOT_COOKED_PHYSX_HULL_READBACK",
+    "machine_contacts_pose_velocity_and_drop_authoritative": true,
+    "no_physics_or_collision_schema_on_render_clones": true,
+    "screenshots_are_auxiliary": true
+  },
+  "status": "PASS",
+  "task8": "NOT_RUN",
+  "user_confirmation": "PASS",
+  "visual_model_review": "PASS"
+}

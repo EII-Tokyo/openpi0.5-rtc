@@ -124,6 +124,37 @@ def _parse_args() -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--arm-phase-readback-tolerance-rad",
+        type=float,
+        default=None,
+        help=(
+            "Optional six-arm-DOF readback gate applied after each IK "
+            "command sequence before advancing to the next phase."
+        ),
+    )
+    parser.add_argument(
+        "--arm-trajectory-mode",
+        choices=(
+            "LEGACY_VELOCITY_STEP",
+            "LULA_CSPACE_ACCELERATION_LIMITED",
+        ),
+        default="LEGACY_VELOCITY_STEP",
+        help=(
+            "Arm phase time-parameterization. The default preserves the "
+            "existing baseline."
+        ),
+    )
+    parser.add_argument(
+        "--arm-acceleration-limits-rad-s2",
+        type=float,
+        nargs=6,
+        default=None,
+        help=(
+            "Explicit six-joint acceleration limits required by the "
+            "acceleration-limited local Lula mode."
+        ),
+    )
+    parser.add_argument(
         "--additional-lift-margin-m",
         type=float,
         default=0.0,
@@ -138,6 +169,15 @@ def _parse_args() -> argparse.Namespace:
         help=(
             "Keep the primary video clean; capture collider overlays in "
             "a separate deterministic repeat."
+        ),
+    )
+    parser.add_argument(
+        "--skip-video-capture",
+        action="store_true",
+        help=(
+            "Run the complete machine gate without rendering or encoding "
+            "video. This is only for candidate screening before a formal "
+            "recorded run."
         ),
     )
     return parser.parse_args()
@@ -474,6 +514,20 @@ def main() -> int:
         math.isfinite(value) for value in args.initial_arm_q_rad
     ):
         raise ValueError("--initial-arm-q-rad values must be finite")
+    if (
+        args.arm_trajectory_mode == "LULA_CSPACE_ACCELERATION_LIMITED"
+        and (
+            args.arm_acceleration_limits_rad_s2 is None
+            or not all(
+            math.isfinite(value) and value > 0.0
+            for value in args.arm_acceleration_limits_rad_s2
+            )
+        )
+    ):
+        raise ValueError(
+            "acceleration-limited Lula mode requires six finite "
+            "positive --arm-acceleration-limits-rad-s2 values"
+        )
     if args.bottle_world_from_object_json is not None and (
         args.bottle_offset_x_m != 0.0 or args.bottle_offset_y_m != 0.0
     ):
@@ -579,6 +633,13 @@ def main() -> int:
             initial_arm_q_rad=args.initial_arm_q_rad,
             initial_pose_hold_frames=int(
                 args.initial_pose_hold_frames
+            ),
+            arm_phase_readback_tolerance_rad=(
+                args.arm_phase_readback_tolerance_rad
+            ),
+            arm_trajectory_mode=str(args.arm_trajectory_mode),
+            arm_acceleration_limits_rad_s2=(
+                args.arm_acceleration_limits_rad_s2
             ),
             additional_lift_margin_m=float(
                 args.additional_lift_margin_m
@@ -727,7 +788,10 @@ def main() -> int:
                         omni.kit.app.get_app().post_quit()
                         continue
                 captured = False
-                if bindings.has_pending_video_frame:
+                if (
+                    not args.skip_video_capture
+                    and bindings.has_pending_video_frame
+                ):
                     timeline.pause()
                     captured = bindings.capture_pending_render_frame()
                 terminal = (
@@ -743,6 +807,29 @@ def main() -> int:
                         timeline.play()
                 if (
                     terminal
+                    and args.skip_video_capture
+                    and not video_state["finalized"]
+                ):
+                    _atomic_json(
+                        artifact_root / "video_capture_skipped.json",
+                        {
+                            "schema_version": 1,
+                            "status": "PASS",
+                            "classification": (
+                                "MACHINE_ONLY_CANDIDATE_SCREENING"
+                            ),
+                            "machine_status": adapter.phase.value,
+                            "reason": (
+                                "VIDEO_INTENTIONALLY_NOT_CAPTURED_BEFORE_"
+                                "FORMAL_RECORDED_RUN"
+                            ),
+                            "task8": "NOT_RUN",
+                        },
+                    )
+                    video_state["finalized"] = True
+                if (
+                    terminal
+                    and not args.skip_video_capture
                     and args.autorun_abort_at_phase is None
                     and not bindings.has_pending_video_frame
                     and not video_state["finalized"]

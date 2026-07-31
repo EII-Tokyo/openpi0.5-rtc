@@ -70,6 +70,53 @@ def freeze_preflight_records(
     return selected
 
 
+def preserve_accepted_preflight_records(
+    records: Sequence[Mapping[str, Any]],
+    *,
+    sample_ids: Sequence[str],
+) -> list[dict[str, Any]]:
+    """Copy user-accepted successes without claiming the new orientation gate."""
+
+    requested = [str(value) for value in sample_ids]
+    if len(set(requested)) != len(requested):
+        raise ValueError("preserved sample_ids must be unique")
+    by_id = {str(record.get("sample_id")): record for record in records}
+    missing = [sample_id for sample_id in requested if sample_id not in by_id]
+    if missing:
+        raise ValueError(f"preserved preflight samples missing: {missing}")
+    preserved: list[dict[str, Any]] = []
+    for sample_id in requested:
+        source = by_id[sample_id]
+        if source.get("preflight_status") != "PASS":
+            raise ValueError(f"preserved sample is not a preflight PASS: {sample_id}")
+        record = copy.deepcopy(dict(source))
+        record["initial_orientation_policy"] = record.get(
+            "initial_orientation_policy",
+            "USER_ACCEPTED_LEGACY_INITIAL_ORIENTATION_EXCEPTION",
+        )
+        preserved.append(record)
+    return preserved
+
+
+def is_excluded_runtime_failure_candidate(
+    exclusions: Mapping[str, Sequence[int]],
+    *,
+    sample_id: str,
+    candidate_index: int,
+) -> bool:
+    """Return whether a frozen candidate has already failed formal runtime."""
+
+    indices = exclusions.get(str(sample_id), ())
+    normalized = [int(value) for value in indices]
+    if len(set(normalized)) != len(normalized):
+        raise ValueError(
+            f"duplicate excluded candidate indices for {sample_id}"
+        )
+    if any(value < 0 for value in normalized):
+        raise ValueError("excluded candidate indices must be non-negative")
+    return int(candidate_index) in normalized
+
+
 def classify_preflight_contacts(
     contacts: Sequence[Mapping[str, Any]],
 ) -> dict[str, Any]:
@@ -414,6 +461,7 @@ def main() -> int:
         from tools.aloha1_mapping.grasp_20cm_five_pose_ik import place_bottle_center_and_yaw
         from tools.aloha1_mapping.grasp_20cm_five_pose_ik import sample_bottle_center_yaw_candidates
         from tools.aloha1_mapping.grasp_20cm_five_pose_ik import sample_initial_arm_joint_candidates
+        from tools.aloha1_mapping.grasp_20cm_five_pose_ik import solve_oriented_initial_arm_pose
         from tools.aloha1_mapping.grasp_20cm_isaac_bindings import IsaacGrasp20cmBindings
         from tools.aloha1_mapping.grasp_20cm_runtime import validate_composed_stage
         from tools.aloha1_mapping.grasp_20cm_sampling import extend_profile_for_clearance_lift
@@ -612,7 +660,18 @@ def main() -> int:
             )
             for sample_index in range(5)
         ]
-        selected: list[dict[str, Any]] = []
+        legacy_preflight = json.loads(
+            frozen_paths["legacy_five_pose_preflight"].read_text(
+                encoding="utf-8"
+            )
+        )
+        preserved_sample_ids = list(
+            config["sampling"]["preserved_success_sample_ids"]
+        )
+        selected = preserve_accepted_preflight_records(
+            legacy_preflight["selected_samples"],
+            sample_ids=preserved_sample_ids,
+        )
         candidate_results: list[dict[str, Any]] = []
         failure_counts: dict[str, int] = {}
         table_top_z = float(table_bounds["maximum"][2])
@@ -636,12 +695,54 @@ def main() -> int:
         end_effector_frame = formal_profile["config"]["robot"][
             "end_effector_frame"
         ]
+        ik_position_tolerance = float(
+            formal_profile["config"]["motion"]["ik_position_tolerance_m"]
+        )
+        ik_orientation_tolerance = float(
+            formal_profile["config"]["motion"][
+                "ik_orientation_tolerance_rad"
+            ]
+        )
+        maximum_initial_approach_angle = float(
+            config["gates"][
+                "maximum_initial_approach_angle_to_world_down_deg"
+            ]
+        )
+        approach_axis_local = np.asarray(
+            config["geometry"]["initial_gripper_approach_axis_local"],
+            dtype=np.float64,
+        )
+        runtime_failure_exclusions = config["sampling"].get(
+            "excluded_runtime_failure_candidate_indices",
+            {},
+        )
 
         for candidate_index in range(candidate_count):
             if len(selected) == int(config["sampling"]["formal_sample_count"]):
                 break
             sample_index = len(selected)
             sample_id = f"sample_{sample_index + 1:02d}"
+            if is_excluded_runtime_failure_candidate(
+                runtime_failure_exclusions,
+                sample_id=sample_id,
+                candidate_index=candidate_index,
+            ):
+                failure_name = "excluded_prior_formal_runtime_failure"
+                failure_counts[failure_name] = (
+                    failure_counts.get(failure_name, 0) + 1
+                )
+                candidate_results.append(
+                    {
+                        "sample_id": sample_id,
+                        "candidate_index": candidate_index,
+                        "seed": seed,
+                        "preflight_status": (
+                            "EXCLUDED_PRIOR_FORMAL_RUNTIME_FAILURE"
+                        ),
+                        "failure_gate": failure_name,
+                    }
+                )
+                continue
             bottle_candidate = bottle_candidates[sample_index][
                 candidate_index
             ]
@@ -686,17 +787,63 @@ def main() -> int:
                 or abs(float(center_world[0]))
                 <= float(config["gates"]["bottle_centerline_residual_m"])
             )
-            q = q_candidates[candidate_index]
-            ee_position, ee_rotation = fk_solver.compute_forward_kinematics(
-                end_effector_frame,
-                q,
+            warm_start_q = q_candidates[candidate_index]
+            seed_ee_position, _seed_ee_rotation = (
+                fk_solver.compute_forward_kinematics(
+                    end_effector_frame,
+                    warm_start_q,
+                )
             )
-            ee_position = np.asarray(ee_position, dtype=np.float64)
-            ee_rotation = np.asarray(ee_rotation, dtype=np.float64)
-            ee_orientation = _matrix_quaternion_wxyz(ee_rotation)
+            target_initial_orientation = _matrix_quaternion_wxyz(
+                np.asarray(
+                    geometry["world_from_gripper"],
+                    dtype=np.float64,
+                )[:3, :3]
+            )
+            initial_task_space_ik = solve_oriented_initial_arm_pose(
+                kinematics_solver=fk_solver,
+                frame_name=end_effector_frame,
+                target_position_world_m=seed_ee_position,
+                target_orientation_world_wxyz=target_initial_orientation,
+                warm_start_arm_q_rad=warm_start_q,
+                lower_limits_rad=lower,
+                upper_limits_rad=upper,
+                position_tolerance_m=ik_position_tolerance,
+                orientation_tolerance_rad=ik_orientation_tolerance,
+                maximum_approach_angle_to_world_down_deg=(
+                    maximum_initial_approach_angle
+                ),
+                approach_axis_local=approach_axis_local,
+            )
+            initial_task_space_pass = (
+                initial_task_space_ik["status"] == "PASS"
+            )
+            if initial_task_space_pass:
+                q = np.asarray(
+                    initial_task_space_ik["initial_arm_q_rad"],
+                    dtype=np.float64,
+                )
+                ee_position = np.asarray(
+                    initial_task_space_ik["fk_position_world_m"],
+                    dtype=np.float64,
+                )
+                ee_orientation = np.asarray(
+                    initial_task_space_ik["fk_orientation_world_wxyz"],
+                    dtype=np.float64,
+                )
+            else:
+                q = np.asarray(warm_start_q, dtype=np.float64)
+                ee_position = np.asarray(seed_ee_position, dtype=np.float64)
+                _, fallback_rotation = fk_solver.compute_forward_kinematics(
+                    end_effector_frame,
+                    q,
+                )
+                ee_orientation = _matrix_quaternion_wxyz(
+                    np.asarray(fallback_rotation, dtype=np.float64)
+                )
             finite_fk = bool(
                 np.isfinite(ee_position).all()
-                and np.isfinite(ee_rotation).all()
+                and np.isfinite(ee_orientation).all()
                 and np.isfinite(q).all()
             )
             ee_above_table = bool(
@@ -734,13 +881,22 @@ def main() -> int:
                 and abs(lowest_gap) <= gap_gate
                 and axis_horizontal
                 and centerline
+                and initial_task_space_pass
                 and finite_fk
                 and ee_above_table
                 and yaw_margin + 1.0e-12 >= yaw_gate
                 and ee_margin + 1.0e-12 >= ee_gate
             )
             failure = None
-            if not geometry_pass:
+            if not initial_task_space_pass:
+                failure = "initial_task_space_ik"
+                ik: dict[str, Any] = {
+                    "status": "NOT_RUN_INITIAL_TASK_SPACE_IK_GATE"
+                }
+                runtime_initial: dict[str, Any] = {
+                    "status": "NOT_RUN_INITIAL_TASK_SPACE_IK_GATE"
+                }
+            elif not geometry_pass:
                 failure = "geometry_fk_or_diversity"
                 ik: dict[str, Any] = {
                     "status": "NOT_RUN_GEOMETRY_GATE"
@@ -814,9 +970,18 @@ def main() -> int:
                     else None
                 ),
                 "initial_arm_q_rad": q.tolist(),
+                "initial_arm_warm_start_q_rad": warm_start_q.tolist(),
                 "initial_ee_position_world_m": ee_position.tolist(),
                 "initial_ee_orientation_world_wxyz": (
                     ee_orientation.tolist()
+                ),
+                "initial_orientation_policy": (
+                    "TASK_SPACE_VALIDATED_T_O_G_ORIENTATION_THEN_LULA_IK"
+                ),
+                "initial_task_space_ik": initial_task_space_ik,
+                "initial_tool_orientation_gate": initial_task_space_ik.get(
+                    "orientation_gate",
+                    {"status": "NOT_RUN"},
                 ),
                 "minimum_prior_yaw_separation_deg": yaw_margin,
                 "minimum_prior_ee_distance_m": ee_margin,
@@ -832,6 +997,7 @@ def main() -> int:
                     "support_gap": abs(lowest_gap) <= gap_gate,
                     "axis_horizontal": axis_horizontal,
                     "centerline": centerline,
+                    "initial_task_space_ik": initial_task_space_pass,
                     "finite_fk": finite_fk,
                     "ee_above_table": ee_above_table,
                     "yaw_diversity": yaw_margin + 1.0e-12 >= yaw_gate,
@@ -929,6 +1095,13 @@ def main() -> int:
             "candidate_count_preflighted": len(candidate_results),
             "failure_gate_counts": failure_counts,
             "selected_sample_count": len(frozen),
+            "preserved_success_sample_ids": preserved_sample_ids,
+            "new_orientation_gate_sample_ids": [
+                str(record["sample_id"])
+                for record in frozen
+                if record.get("initial_orientation_policy")
+                != "USER_ACCEPTED_LEGACY_INITIAL_ORIENTATION_EXCEPTION"
+            ],
             "candidate_results": candidate_results,
             "selected_samples": frozen,
             "minimum_pairwise_yaw_separation_deg": min(
@@ -962,6 +1135,11 @@ def main() -> int:
                 "sample_01_and_04_centerline": "BOTTLE_CAD_GEOMETRIC_CENTER_WORLD_X_ZERO",
                 "bottle_rotation": "WORLD_Z_LINE_YAW_WITH_HORIZONTAL_ROLL_PRESERVED",
                 "object_from_gripper": "UNCHANGED_VALIDATED_T_O_G",
+                "initial_pose_policy": (
+                    f"PRESERVE_{'_'.join(preserved_sample_ids)};_"
+                    "REMAINING_SAMPLES_USE_TASK_SPACE_POSITION_PLUS_"
+                    "VALIDATED_T_O_G_ORIENTATION_THEN_LULA_IK"
+                ),
             },
             "boundaries": {
                 **config["boundaries"],

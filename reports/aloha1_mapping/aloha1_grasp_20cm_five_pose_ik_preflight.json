@@ -61139,7 +61139,7 @@
   "classification": "DIAGNOSTIC_ONLY_NOT_FINAL_CONTROL_MAPPING",
   "config": {
     "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/configs/aloha1_grasp_20cm_five_pose_ik.yaml",
-    "sha256": "6313f44d8e4e110e627cdf61cd1ebd8a9a0172b88f719af00af9f7fcb0ba8a62"
+    "sha256": "1c48518ed895d8ae1c1a6c2df1d1b3208395db4092e5a0305cc57e8df278abd8"
   },
   "deterministic_signature": "76392bd6ae3cd5af4c8d87b19df86d812354738607736d7878239f8d8faa7306",
   "failure_gate_counts": {

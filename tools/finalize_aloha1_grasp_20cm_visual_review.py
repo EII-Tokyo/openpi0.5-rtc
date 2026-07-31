@@ -29,6 +29,45 @@ def _write_json(path: Path, payload: dict[str, Any]) -> None:
     temporary.replace(path)
 
 
+def complete_sheet_frame_coverage(
+    sheets: list[dict[str, Any]],
+    *,
+    expected_frame_count: int,
+) -> bool:
+    """Verify that review sheets cover every encoded frame exactly once."""
+
+    expected = int(expected_frame_count)
+    if expected < 1:
+        raise ValueError("expected_frame_count must be positive")
+    actual = [
+        int(frame)
+        for sheet in sheets
+        for frame in sheet["frame_numbers"]
+    ]
+    return actual == list(range(1, expected + 1))
+
+
+def normalized_rejected_attempts(
+    records: list[dict[str, Any]] | None,
+) -> list[dict[str, Any]]:
+    """Keep run-specific retake history explicit and machine readable."""
+
+    if records is None:
+        return []
+    normalized: list[dict[str, Any]] = []
+    for record in records:
+        if set(record) != {"run", "status"}:
+            raise ValueError(
+                "each rejected attempt requires exactly run and status"
+            )
+        run = str(record["run"])
+        status = str(record["status"])
+        if not run or not status.startswith("REJECTED_"):
+            raise ValueError("invalid rejected-attempt record")
+        normalized.append({"run": run, "status": status})
+    return normalized
+
+
 def _candidate_paths(run_root: Path) -> tuple[Path, Path]:
     return (
         run_root / "aloha1_grasp_20cm_runtime.json",
@@ -74,6 +113,7 @@ def build_reports(
     primary_run_root: Path,
     collision_run_root: Path,
     confirmed_annotated_sha256: str | None = None,
+    rejected_attempts: list[dict[str, Any]] | None = None,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     primary_report_path, primary_candidate_path = _candidate_paths(
         primary_run_root
@@ -112,13 +152,16 @@ def build_reports(
     }
     if set(videos) != {"raw", "annotated"}:
         raise ValueError("primary candidate must have raw and annotated video")
-    sheet_frames = [
-        int(frame)
-        for sheet in primary_candidate["review_contact_sheets"]
-        for frame in sheet["frame_numbers"]
-    ]
-    if sheet_frames != list(range(1, 248)):
-        raise ValueError("primary review sheets do not cover frames 1-247")
+    expected_frame_count = int(
+        primary_candidate["frame_validation"]["frame_count"]
+    )
+    if not complete_sheet_frame_coverage(
+        primary_candidate["review_contact_sheets"],
+        expected_frame_count=expected_frame_count,
+    ):
+        raise ValueError(
+            "primary review sheets do not cover every encoded frame"
+        )
 
     signature = signatures.pop()
     shared = {
@@ -167,7 +210,7 @@ def build_reports(
             "full_frame_review": {
                 "status": "PASS",
                 "method": (
-                    "CODEX_VISION_REVIEW_OF_13_CONTACT_SHEETS_"
+                    "CODEX_VISION_REVIEW_OF_ALL_CONTACT_SHEETS_"
                     "COVERING_EVERY_FRAME_EXACTLY_ONCE"
                 ),
                 "sheet_count": len(
@@ -216,30 +259,9 @@ def build_reports(
                 for record in collision["records"]
             ],
         },
-        "rejected_attempts": [
-            {
-                "run": "video_smoke_001",
-                "status": "REJECTED_RGB_ANNOTATOR_NOT_READY",
-            },
-            {
-                "run": "video_smoke_002",
-                "status": "REJECTED_CLOSEUP_OCCLUSION_AND_CROPPING",
-            },
-            {
-                "run": "final_candidate_002",
-                "status": (
-                    "REJECTED_PRIMARY_VIDEO_COLLIDER_OVERLAY_"
-                    "RENDER_PRODUCT_LAG"
-                ),
-            },
-            {
-                "run": "final_candidate_003_video_only",
-                "status": (
-                    "REJECTED_PRIMARY_VIDEO_COLLIDER_OVERLAY_"
-                    "RENDER_PRODUCT_LAG"
-                ),
-            },
-        ],
+        "rejected_attempts": normalized_rejected_attempts(
+            rejected_attempts
+        ),
         "semantic_boundary": {
             "screenshots_are_auxiliary": True,
             "machine_contacts_pose_velocity_and_drop_authoritative": True,
@@ -362,7 +384,16 @@ def main() -> int:
         "--confirmed-annotated-sha256",
         default=None,
     )
+    parser.add_argument(
+        "--rejected-attempts-json",
+        type=Path,
+        default=None,
+    )
     args = parser.parse_args()
+    rejected_attempts = None
+    if args.rejected_attempts_json is not None:
+        payload = _load(args.rejected_attempts_json.resolve(strict=True))
+        rejected_attempts = payload["rejected_attempts"]
     run_report, review_report = build_reports(
         primary_run_root=args.primary_run_root.resolve(strict=True),
         collision_run_root=args.collision_run_root.resolve(strict=True),
@@ -371,6 +402,7 @@ def main() -> int:
             if args.confirmed_annotated_sha256
             else None
         ),
+        rejected_attempts=rejected_attempts,
     )
     run_path = (
         args.output_dir / "aloha1_grasp_20cm_button_run.json"

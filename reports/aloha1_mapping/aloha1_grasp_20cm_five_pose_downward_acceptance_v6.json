@@ -1,0 +1,147 @@
+{
+  "schema_version": 1,
+  "status": "PASS",
+  "machine_status": "PASS",
+  "machine_pass_count": 5,
+  "evidence_status": "PASS",
+  "evidence_pass_count": 5,
+  "visual_model_review": "PASS",
+  "user_confirmation": "PASS",
+  "acceptance_boundary": "MACHINE_VISUAL_MODEL_AND_USER_CONFIRMATION_PASS",
+  "source_results": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_grasp_20cm_five_pose_ik_results_downward_contact_gate_v5.json",
+    "status": "PARTIAL",
+    "machine_status": "PASS"
+  },
+  "source_video_review": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/grasp_20cm_five_pose_ik_downward_v6_review/aloha1_grasp_20cm_button_video_review.json",
+    "status": "PASS",
+    "machine_status": "PASS",
+    "visual_model_review": "PASS",
+    "promotion_status": "USER_CONFIRMED_PASS_DIAGNOSTIC_ONLY"
+  },
+  "user_confirmation_evidence": {
+    "date": "2026-07-31",
+    "statement": "抓取是对的",
+    "confirmed_sample_id": "sample_05",
+    "confirmed_annotated_video_sha256": "4e1bf9d929ee182f437104ac40caa28fe18aeff535402e7dd06ed451a285e3cd",
+    "scope": "DIAGNOSTIC_FIVE_POSE_GRASP_ACCEPTANCE_NOT_FINAL_ASSET_PROMOTION"
+  },
+  "contact_gate": {
+    "selected_gate": "BILATERAL_REPORTED_PAIR_WITH_FINITE_POSITIVE_SOLVER_IMPULSE",
+    "geometric_separation_gate": "DIAGNOSTIC_ONLY",
+    "reason": "PhysX solver-active bilateral contacts can carry finite positive impulse while separation remains slightly positive inside the contact envelope",
+    "unchanged_variables": [
+      "collider",
+      "friction",
+      "drive",
+      "mimic",
+      "bottle_mass",
+      "bottle_diameter",
+      "physics_timestep",
+      "solver_iterations",
+      "hold_gate"
+    ]
+  },
+  "samples": [
+    {
+      "sample_id": "sample_01",
+      "candidate_index": 5,
+      "machine_status": "PASS",
+      "machine_reason": "stable_20cm_hold",
+      "execution_policy": "REUSED_ACCEPTED_SUCCESS_NO_RERECORDING",
+      "initial_orientation_policy": "USER_ACCEPTED_LEGACY_INITIAL_ORIENTATION_EXCEPTION",
+      "raw_video": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-20cm-five-pose-ik/formal_lula_acceleration_v3/sample_01/primary/video_attempt_001/video/aloha1_grasp_20cm_raw_candidate.mp4",
+      "raw_video_sha256": "d25e8c6835d2713f5076f8c35988ac2653dacd3f686905e36fde2a33c1941c14",
+      "annotated_video": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-20cm-five-pose-ik/formal_lula_acceleration_v3/sample_01/primary/video_attempt_001/video/aloha1_grasp_20cm_annotated_candidate.mp4",
+      "annotated_video_sha256": "d9ae61bf32568e58ad60487d95357d7187b564077f3a6ee27d6401607caa4b32"
+    },
+    {
+      "sample_id": "sample_02",
+      "candidate_index": 7,
+      "machine_status": "PASS",
+      "machine_reason": "stable_20cm_hold",
+      "execution_policy": "REUSED_ACCEPTED_SUCCESS_NO_RERECORDING",
+      "initial_orientation_policy": "USER_ACCEPTED_LEGACY_INITIAL_ORIENTATION_EXCEPTION",
+      "raw_video": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-20cm-five-pose-ik/formal_lula_acceleration_v3/sample_02/primary/video_attempt_001/video/aloha1_grasp_20cm_raw_candidate.mp4",
+      "raw_video_sha256": "84b11637d6b4b8bd416dd1880ca52b78cc9f465c7935886df035dd89d40c27eb",
+      "annotated_video": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-20cm-five-pose-ik/formal_lula_acceleration_v3/sample_02/primary/video_attempt_001/video/aloha1_grasp_20cm_annotated_candidate.mp4",
+      "annotated_video_sha256": "e025c771d604b55d450735a78299af91578aca3549cec3af11ce9493122c8f98"
+    },
+    {
+      "sample_id": "sample_03",
+      "candidate_index": 48,
+      "machine_status": "PASS",
+      "machine_reason": "stable_20cm_hold",
+      "execution_policy": "REUSED_ACCEPTED_SUCCESS_NO_RERECORDING",
+      "initial_orientation_policy": "TASK_SPACE_VALIDATED_T_O_G_ORIENTATION_THEN_LULA_IK",
+      "initial_approach_angle_to_world_down_deg": 7.206320946359682,
+      "raw_video": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-20cm-five-pose-ik/formal_downward_initial_v2/sample_03/primary/video_attempt_001/video/aloha1_grasp_20cm_raw_candidate.mp4",
+      "raw_video_sha256": "aa8c6b170d8fd54f9f3ca115155a6d8cda40d826095899f09f9715125a315fab",
+      "annotated_video": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-20cm-five-pose-ik/formal_downward_initial_v2/sample_03/primary/video_attempt_001/video/aloha1_grasp_20cm_annotated_candidate.mp4",
+      "annotated_video_sha256": "7cfbe6640591f8f84ee2a6f48f70ea93410a488099d120ef414c7ba9385984ad"
+    },
+    {
+      "sample_id": "sample_04",
+      "candidate_index": 81,
+      "machine_status": "PASS",
+      "machine_reason": "stable_20cm_hold",
+      "execution_policy": "REUSED_ACCEPTED_SUCCESS_NO_RERECORDING",
+      "initial_orientation_policy": "TASK_SPACE_VALIDATED_T_O_G_ORIENTATION_THEN_LULA_IK",
+      "initial_approach_angle_to_world_down_deg": 7.085219644363113,
+      "raw_video": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-20cm-five-pose-ik/formal_downward_initial_v2/sample_04/primary/video_attempt_001/video/aloha1_grasp_20cm_raw_candidate.mp4",
+      "raw_video_sha256": "978a7cefe82bb7d61fa51604f44a5995d8b02e48f5abcfb59a2e429f5ad5df7e",
+      "annotated_video": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-20cm-five-pose-ik/formal_downward_initial_v2/sample_04/primary/video_attempt_001/video/aloha1_grasp_20cm_annotated_candidate.mp4",
+      "annotated_video_sha256": "68f904597db9735681742bd5b1290a4d4a1d04237d14a4b3c56bc8966d5e8d3f"
+    },
+    {
+      "sample_id": "sample_05",
+      "candidate_index": 119,
+      "machine_status": "PASS",
+      "machine_reason": "stable_20cm_hold",
+      "execution_policy": "FRESH_PRIMARY_AND_FRESH_DETERMINISM_REPEAT",
+      "initial_orientation_policy": "TASK_SPACE_VALIDATED_T_O_G_ORIENTATION_THEN_LULA_IK",
+      "initial_approach_angle_to_world_down_deg": 7.189721450960664,
+      "maximum_clearance_m": 0.20077485934609024,
+      "hold_duration_s": 2.0,
+      "hold_drop_m": 0.0007390718475712432,
+      "hold_geometric_bilateral_frame_count": 2,
+      "hold_solver_active_bilateral_frame_count": 120,
+      "deterministic_signature": "879b4b88e25b1c54bf38b2713e59ad77b330d3805f1ac8d43561cf271512cff7",
+      "raw_video": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/aloha1_grasp_20cm_raw_candidate.mp4",
+      "raw_video_sha256": "d13fb2506af502214ff714ea7072cdd4c835acfc27d595eaa5d61ec10b26557c",
+      "annotated_video": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-downward-contact-gate/formal_candidate119_v5/sample_05/primary/video_attempt_001/video/aloha1_grasp_20cm_annotated_candidate.mp4",
+      "annotated_video_sha256": "4e1bf9d929ee182f437104ac40caa28fe18aeff535402e7dd06ed451a285e3cd",
+      "video_probe": {
+        "fps": 60.0,
+        "frame_count": 912,
+        "duration_s": 15.2,
+        "raw_resolution": [1440, 540],
+        "annotated_resolution": [1440, 680]
+      },
+      "full_frame_visual_review": {
+        "status": "PASS",
+        "method": "CODEX_VISION_REVIEW_OF_ALL_CONTACT_SHEETS_COVERING_EVERY_FRAME_EXACTLY_ONCE",
+        "contact_sheet_count": 46
+      },
+      "collision_screenshot_visual_review": {
+        "status": "PASS",
+        "record_count": 24,
+        "retake_reason": "OPEN_PREGRASP_CAPTURED_BEFORE_OPEN_TARGET_REACHED",
+        "retake_status": "PASS"
+      }
+    }
+  ],
+  "stage": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/table_support_alignment/1.0/aloha1_table_support_aligned_workcell.usda",
+    "sha256": "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c",
+    "modified": false
+  },
+  "boundaries": {
+    "real_robot": false,
+    "remote_103": false,
+    "source_stage_modified": false,
+    "final_collider_modified": false,
+    "task8": "NOT_RUN"
+  }
+}

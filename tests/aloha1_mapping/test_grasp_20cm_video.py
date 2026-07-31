@@ -18,6 +18,8 @@ from tools.build_aloha1_grasp_20cm_video import validate_encoded_video_pair
 from tools.build_aloha1_grasp_20cm_video import validate_frame_manifest
 from tools.finalize_aloha1_grasp_20cm_visual_review import _markdown
 from tools.finalize_aloha1_grasp_20cm_visual_review import apply_user_confirmation
+from tools.finalize_aloha1_grasp_20cm_visual_review import complete_sheet_frame_coverage
+from tools.finalize_aloha1_grasp_20cm_visual_review import normalized_rejected_attempts
 
 VIEWS = ("overview", "gripper_closeup")
 FULL_ARM_LINKS = (
@@ -28,6 +30,34 @@ FULL_ARM_LINKS = (
     "wrist",
     "gripper",
 )
+
+
+def test_visual_review_sheet_coverage_supports_full_runtime_length() -> None:
+    sheets = [
+        {"frame_numbers": list(range(1, 501))},
+        {"frame_numbers": list(range(501, 913))},
+    ]
+
+    assert complete_sheet_frame_coverage(
+        sheets,
+        expected_frame_count=912,
+    )
+    assert not complete_sheet_frame_coverage(
+        sheets,
+        expected_frame_count=913,
+    )
+
+
+def test_visual_review_rejected_attempts_must_be_explicit() -> None:
+    assert normalized_rejected_attempts(None) == []
+    assert normalized_rejected_attempts(
+        [{"run": "repeat_v5", "status": "REJECTED_OPEN_FRAME_TOO_EARLY"}]
+    ) == [
+        {
+            "run": "repeat_v5",
+            "status": "REJECTED_OPEN_FRAME_TOO_EARLY",
+        }
+    ]
 
 
 def _sha256(path: Path) -> str:

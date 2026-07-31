@@ -1,0 +1,1464 @@
+{
+  "aloha_6dof_correspondence": "PASS",
+  "bindings": {
+    "bottle_usd": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/bottle_500ml/isaac/bottle_500ml_sim.usd",
+      "sha256": "16427135f152ec951de2321fd689366d745a2dd389cbe260976631783952533e"
+    },
+    "descriptor": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/configs/aloha1_lula_follower_left.yaml",
+      "sha256": "4038d3692693ae673be907b3088c5a2ba83790f14f1a26900aaeccadb564c031"
+    },
+    "episode18": {
+      "frames_inclusive": [
+        208,
+        244
+      ],
+      "path": "/home/eii/project/bottles_data/episode_18.hdf5",
+      "sha256": "f073a21c6a790e738e36085d791482924a82832ca6d80cece04a26353b9fc745"
+    },
+    "grasp_editor_v2_derived_yaml": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-official-gripper-unattended/stage4/grasp_editor_passing_coupling_run00/grasp_editor_variant_b_skip_sim_derived.yaml",
+      "sha256": "a861d2d1f072006f3027bb630c4f7c045a17d0c53020e8bd35d7f64ceeb3c2c5"
+    },
+    "grasp_editor_v2_native_raw_yaml": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-official-gripper-unattended/stage4/grasp_editor_passing_coupling_run00/grasp_editor_variant_b_native_raw.yaml",
+      "sha256": "fa1270a547e0ac89da2e7afc3965b1d6e7bcc34aab46005d6c65f977e3f69e5e"
+    },
+    "grasp_editor_v2_semantics": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_grasp_editor_semantics_audit_v2.json",
+      "sha256": "61f2e23f54fca02d3b47b12a9f29f9b97446a1aa5e79049e73e7192db71416f9"
+    },
+    "gripper_coupling_ab": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_gripper_coupling_ab.json",
+      "sha256": "df8a1857b7cd945fd38e9d0c921f736c766aadc854534eab6b04eac935f7f90c"
+    },
+    "horizontal_grasp_config": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/configs/aloha1_task7b2_horizontal_grasp.yaml",
+      "sha256": "17597b120af46f0f2eed2dab7b8bbde754c97db48aa351f40c860d541f78b0bd"
+    },
+    "joint_map": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/configs/aloha1_joint_map.yaml",
+      "sha256": "f56be097d859f7361b804705af6659e0d51d9e480d1c721a60040ab787530308"
+    },
+    "kinematics_v2": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7b2_horizontal_kinematics_v2.json",
+      "sha256": "c5bf60b04065de31fcb5d1700e058d51a9f0d70da5db98a5c65bd00f795fa0cb"
+    },
+    "stage": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/table_support_alignment/1.0/aloha1_table_support_aligned_workcell.usda",
+      "sha256": "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c",
+      "sha256_after": "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c",
+      "sha256_before": "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c"
+    },
+    "urdf": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_left.urdf",
+      "sha256": "d9e4b32723ee71dfce26fb4e78546cfcfef147b2d7dbf5e53e3620e3d8aa96bd"
+    }
+  },
+  "determinism": {
+    "fresh_process_count": 3,
+    "records": [
+      {
+        "fk_status": "PASS",
+        "ik_status": "PASS",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7b2_horizontal_kinematics_v2.json",
+        "sha256": "c5bf60b04065de31fcb5d1700e058d51a9f0d70da5db98a5c65bd00f795fa0cb",
+        "signature": "759258627f41bae02e2cef896abff8111438f4dc0f2c6dd112da6f64b5d8662f",
+        "status": "PASS"
+      },
+      {
+        "fk_status": "PASS",
+        "ik_status": "PASS",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-official-gripper-unattended/stage5/kinematics_run01.json",
+        "sha256": "c5bf60b04065de31fcb5d1700e058d51a9f0d70da5db98a5c65bd00f795fa0cb",
+        "signature": "759258627f41bae02e2cef896abff8111438f4dc0f2c6dd112da6f64b5d8662f",
+        "status": "PASS"
+      },
+      {
+        "fk_status": "PASS",
+        "ik_status": "PASS",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-official-gripper-unattended/stage5/kinematics_run02.json",
+        "sha256": "c5bf60b04065de31fcb5d1700e058d51a9f0d70da5db98a5c65bd00f795fa0cb",
+        "signature": "759258627f41bae02e2cef896abff8111438f4dc0f2c6dd112da6f64b5d8662f",
+        "status": "PASS"
+      }
+    ],
+    "rounding_digits": 9,
+    "status": "PASS"
+  },
+  "diagnostic_coupling": {
+    "classification": "PHYSX_MIMIC_PRIMARY",
+    "passing_path": "official_symmetric_adapter",
+    "promotion_authorized": false,
+    "scope": "DIAGNOSTIC_ONLY_NOT_FINAL_CONTROL_MAPPING"
+  },
+  "dynamic_horizontal_bottle_grasp": "NOT_RUN",
+  "failure_taxonomy": {
+    "branch_selection": false,
+    "collision_preflight": "NOT_RUN_STAGE5_NUMERIC_ONLY",
+    "frame": false,
+    "joint_limit": false,
+    "unreachable": false
+  },
+  "finger_dofs_excluded_from_ik": [
+    "gripper",
+    "left_finger",
+    "right_finger"
+  ],
+  "fk_correspondence": {
+    "cases": [
+      {
+        "arm_readback_rad": [
+          6.403493898687884e-06,
+          -0.9599537253379822,
+          1.1619408130645752,
+          0.0002516868698876351,
+          -0.2915378510951996,
+          3.028662376891589e-06
+        ],
+        "arm_target_rad": [
+          0.0,
+          -0.96,
+          1.16,
+          0.0,
+          -0.3,
+          0.0
+        ],
+        "base_orientation_world_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "base_position_world_m": [
+          -0.46950000524520874,
+          -0.01899999938905239,
+          0.01999998837709427
+        ],
+        "case": "approved_home",
+        "finger_readback_m": [
+          0.056999415159225464,
+          -0.057000502943992615
+        ],
+        "interbotix_poe_position_world_m": [
+          -0.2109581933706578,
+          -0.019011144164631063,
+          0.3235380079263748
+        ],
+        "interbotix_poe_rotation_world": [
+          [
+            0.9959930078654063,
+            4.3818166762118254e-05,
+            -0.08943112636654588
+          ],
+          [
+            -6.596339424319548e-05,
+            0.9999999678932563,
+            -0.0002446677680917306
+          ],
+          [
+            0.08943111277431039,
+            0.0002495865669155279,
+            0.9959929787777092
+          ]
+        ],
+        "interbotix_poe_to_lula_rotation_residual_rad": 0.0,
+        "interbotix_poe_to_lula_translation_residual_m": 1.1102230246251565e-16,
+        "interbotix_poe_to_usd_rotation_residual_rad": 3.891457574725353e-07,
+        "interbotix_poe_to_usd_translation_residual_m": 1.4868155647296203e-07,
+        "lula_position_world_m": [
+          -0.2109581933706579,
+          -0.019011144164631063,
+          0.3235380079263748
+        ],
+        "lula_rotation_world": [
+          [
+            0.9959930078654062,
+            4.3818166762118294e-05,
+            -0.08943112636654565
+          ],
+          [
+            -6.59633942431955e-05,
+            0.9999999678932564,
+            -0.0002446677680917307
+          ],
+          [
+            0.08943111277431035,
+            0.00024958656691552797,
+            0.9959929787777092
+          ]
+        ],
+        "rotation_angle_residual_rad": 3.891457574725353e-07,
+        "status": "PASS",
+        "translation_residual_m": 1.4868155654760776e-07,
+        "usd_orientation_world_wxyz": [
+          0.9989977415375586,
+          0.00012387335378685052,
+          -0.04476043237704634,
+          -2.741658880986272e-05
+        ],
+        "usd_position_world_m": [
+          -0.2109580934047699,
+          -0.019011076539754868,
+          0.3235380947589874
+        ]
+      },
+      {
+        "arm_readback_rad": [
+          -0.04999634250998497,
+          -0.9599897265434265,
+          1.1618244647979736,
+          0.0002968274930026382,
+          -0.29188501834869385,
+          5.527214739231567e-07
+        ],
+        "arm_target_rad": [
+          -0.05,
+          -0.96,
+          1.16,
+          0.0,
+          -0.3,
+          0.0
+        ],
+        "base_orientation_world_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "base_position_world_m": [
+          -0.46950000524520874,
+          -0.01899999938905239,
+          0.01999998837709427
+        ],
+        "case": "waist_negative",
+        "finger_readback_m": [
+          0.056999146938323975,
+          -0.057000841945409775
+        ],
+        "interbotix_poe_position_world_m": [
+          -0.21128871461771548,
+          -0.03193551921457852,
+          0.32366319622014883
+        ],
+        "interbotix_poe_rotation_world": [
+          [
+            0.994699447604845,
+            0.0500348943085505,
+            -0.08983049752811521
+          ],
+          [
+            -0.04985833382046406,
+            0.9987474277640239,
+            0.004209760491170629
+          ],
+          [
+            0.08992861326220733,
+            0.00029135249789901524,
+            0.9959481711567414
+          ]
+        ],
+        "interbotix_poe_to_lula_rotation_residual_rad": 0.0,
+        "interbotix_poe_to_lula_translation_residual_m": 2.3551386880256624e-16,
+        "interbotix_poe_to_usd_rotation_residual_rad": 3.481901122792954e-07,
+        "interbotix_poe_to_usd_translation_residual_m": 1.38603821178558e-07,
+        "lula_position_world_m": [
+          -0.21128871461771564,
+          -0.03193551921457852,
+          0.323663196220149
+        ],
+        "lula_rotation_world": [
+          [
+            0.9946994476048449,
+            0.05003489430855051,
+            -0.0898304975281153
+          ],
+          [
+            -0.04985833382046407,
+            0.9987474277640239,
+            0.004209760491170633
+          ],
+          [
+            0.0899286132622077,
+            0.0002913524978990162,
+            0.9959481711567416
+          ]
+        ],
+        "rotation_angle_residual_rad": 3.4755181639464677e-07,
+        "status": "PASS",
+        "translation_residual_m": 1.3860382121491997e-07,
+        "usd_orientation_world_wxyz": [
+          0.9986734999120761,
+          -0.0009807348818055266,
+          -0.044999508924802534,
+          -0.025006457745601226
+        ],
+        "usd_position_world_m": [
+          -0.21128861606121063,
+          -0.031935449689626694,
+          0.32366326451301575
+        ]
+      },
+      {
+        "arm_readback_rad": [
+          0.05000508949160576,
+          -0.9599581360816956,
+          1.1618655920028687,
+          0.00027121970197185874,
+          -0.2918838858604431,
+          7.871001344028627e-07
+        ],
+        "arm_target_rad": [
+          0.05,
+          -0.96,
+          1.16,
+          0.0,
+          -0.3,
+          0.0
+        ],
+        "base_orientation_world_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "base_position_world_m": [
+          -0.46950000524520874,
+          -0.01899999938905239,
+          0.01999998837709427
+        ],
+        "case": "waist_positive",
+        "finger_readback_m": [
+          0.05699888616800308,
+          -0.05700111761689186
+        ],
+        "interbotix_poe_position_world_m": [
+          -0.21128360952054848,
+          -0.006090919274980388,
+          0.32363549434173855
+        ],
+        "interbotix_poe_rotation_world": [
+          [
+            0.9947138125220716,
+            -0.04992999921114058,
+            -0.08972974064701249
+          ],
+          [
+            0.04970411076132129,
+            0.9987526841814822,
+            -0.004751548559244434
+          ],
+          [
+            0.08985506413792682,
+            0.0002664940150460441,
+            0.995954816459918
+          ]
+        ],
+        "interbotix_poe_to_lula_rotation_residual_rad": 0.0,
+        "interbotix_poe_to_lula_translation_residual_m": 1.7557595556438868e-16,
+        "interbotix_poe_to_usd_rotation_residual_rad": 5.213277245919734e-07,
+        "interbotix_poe_to_usd_translation_residual_m": 1.9931425720528583e-07,
+        "lula_position_world_m": [
+          -0.2112836095205483,
+          -0.006090919274980384,
+          0.3236354943417386
+        ],
+        "lula_rotation_world": [
+          [
+            0.9947138125220718,
+            -0.04992999921114057,
+            -0.08972974064701271
+          ],
+          [
+            0.0497041107613213,
+            0.9987526841814821,
+            -0.004751548559244444
+          ],
+          [
+            0.08985506413792695,
+            0.00026649401504604377,
+            0.995954816459918
+          ]
+        ],
+        "rotation_angle_residual_rad": 5.213277245919734e-07,
+        "status": "PASS",
+        "translation_residual_m": 1.99314257079768e-07,
+        "usd_orientation_world_wxyz": [
+          0.9986767855019173,
+          0.0012563001999140024,
+          -0.0449556321265081,
+          0.024941751130809542
+        ],
+        "usd_position_world_m": [
+          -0.21128349006175995,
+          -0.006090783514082432,
+          0.3236355781555176
+        ]
+      },
+      {
+        "arm_readback_rad": [
+          3.6796134281757986e-06,
+          -1.0099769830703735,
+          1.161808967590332,
+          0.0002770449500530958,
+          -0.2918904721736908,
+          6.199408062457223e-07
+        ],
+        "arm_target_rad": [
+          0.0,
+          -1.01,
+          1.16,
+          0.0,
+          -0.3,
+          0.0
+        ],
+        "base_orientation_world_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "base_position_world_m": [
+          -0.46950000524520874,
+          -0.01899999938905239,
+          0.01999998837709427
+        ],
+        "case": "shoulder_negative",
+        "finger_readback_m": [
+          0.05699927732348442,
+          -0.05700070783495903
+        ],
+        "interbotix_poe_position_world_m": [
+          -0.22011238965390395,
+          -0.019013188308044417,
+          0.33636893401057777
+        ],
+        "interbotix_poe_rotation_world": [
+          [
+            0.9902078315859333,
+            3.813669490050727e-05,
+            -0.1396010344212273
+          ],
+          [
+            -7.607977118065848e-05,
+            0.9999999616054673,
+            -0.00026646000129087067
+          ],
+          [
+            0.13960101889940707,
+            0.0002744715948379682,
+            0.9902077964687972
+          ]
+        ],
+        "interbotix_poe_to_lula_rotation_residual_rad": 0.0,
+        "interbotix_poe_to_lula_translation_residual_m": 1.2412670766236366e-16,
+        "interbotix_poe_to_usd_rotation_residual_rad": 2.5023304855446086e-07,
+        "interbotix_poe_to_usd_translation_residual_m": 1.420386386044004e-07,
+        "lula_position_world_m": [
+          -0.2201123896539039,
+          -0.019013188308044417,
+          0.33636893401057766
+        ],
+        "lula_rotation_world": [
+          [
+            0.9902078315859332,
+            3.8136694900507297e-05,
+            -0.13960103442122712
+          ],
+          [
+            -7.607977118065845e-05,
+            0.9999999616054673,
+            -0.0002664600012908707
+          ],
+          [
+            0.13960101889940685,
+            0.0002744715948379682,
+            0.9902077964687973
+          ]
+        ],
+        "rotation_angle_residual_rad": 2.49344118396663e-07,
+        "status": "PASS",
+        "translation_residual_m": 1.4203863871205206e-07,
+        "usd_orientation_world_wxyz": [
+          0.9975489435030936,
+          0.0001356881104250021,
+          -0.06997203787659519,
+          -2.863554966407839e-05
+        ],
+        "usd_position_world_m": [
+          -0.2201123982667923,
+          -0.019013140350580215,
+          0.3363690674304962
+        ]
+      },
+      {
+        "arm_readback_rad": [
+          5.089825208415277e-06,
+          -0.9100165963172913,
+          1.161847472190857,
+          0.00029325022478587925,
+          -0.291812002658844,
+          9.212469080921437e-07
+        ],
+        "arm_target_rad": [
+          0.0,
+          -0.9099999999999999,
+          1.16,
+          0.0,
+          -0.3,
+          0.0
+        ],
+        "base_orientation_world_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "base_position_world_m": [
+          -0.46950000524520874,
+          -0.01899999938905239,
+          0.01999998837709427
+        ],
+        "case": "shoulder_positive",
+        "finger_readback_m": [
+          0.05699899047613144,
+          -0.05700099095702171
+        ],
+        "interbotix_poe_position_world_m": [
+          -0.20246645745757347,
+          -0.019013568044285858,
+          0.3105046198086499
+        ],
+        "interbotix_poe_rotation_world": [
+          [
+            0.9992008585444523,
+            6.794470974314793e-05,
+            -0.03997048495510029
+          ],
+          [
+            -7.92788396488304e-05,
+            0.9999999571017738,
+            -0.00028197750979853286
+          ],
+          [
+            0.03997046408155728,
+            0.00028492098354836203,
+            0.9992008210670856
+          ]
+        ],
+        "interbotix_poe_to_lula_rotation_residual_rad": 0.0,
+        "interbotix_poe_to_lula_translation_residual_m": 5.551115123125783e-17,
+        "interbotix_poe_to_usd_rotation_residual_rad": 3.851308817660858e-07,
+        "interbotix_poe_to_usd_translation_residual_m": 1.348159305730698e-07,
+        "lula_position_world_m": [
+          -0.20246645745757347,
+          -0.019013568044285858,
+          0.31050461980864985
+        ],
+        "lula_rotation_world": [
+          [
+            0.9992008585444523,
+            6.794470974314796e-05,
+            -0.03997048495510021
+          ],
+          [
+            -7.927883964883041e-05,
+            0.9999999571017738,
+            -0.00028197750979853286
+          ],
+          [
+            0.039970464081557244,
+            0.0002849209835483621,
+            0.9992008210670856
+          ]
+        ],
+        "rotation_angle_residual_rad": 3.851308817660858e-07,
+        "status": "PASS",
+        "translation_residual_m": 1.3481593059575868e-07,
+        "usd_orientation_world_wxyz": [
+          0.999800186566253,
+          0.00014191679921013336,
+          -0.01998913325372655,
+          -3.678957068944031e-05
+        ],
+        "usd_position_world_m": [
+          -0.20246633887290955,
+          -0.019013535231351852,
+          0.310504674911499
+        ]
+      },
+      {
+        "arm_readback_rad": [
+          4.5649235289602075e-06,
+          -0.9599147439002991,
+          1.1118031740188599,
+          0.0002754486631602049,
+          -0.29163840413093567,
+          7.18710850833304e-07
+        ],
+        "arm_target_rad": [
+          0.0,
+          -0.96,
+          1.1099999999999999,
+          0.0,
+          -0.3,
+          0.0
+        ],
+        "base_orientation_world_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "base_position_world_m": [
+          -0.46950000524520874,
+          -0.01899999938905239,
+          0.01999998837709427
+        ],
+        "case": "elbow_negative",
+        "finger_readback_m": [
+          0.05699879303574562,
+          -0.0570012591779232
+        ],
+        "interbotix_poe_position_world_m": [
+          -0.20932045146756806,
+          -0.019012825212268363,
+          0.34716286130478713
+        ],
+        "interbotix_poe_rotation_world": [
+          [
+            0.9902508533675096,
+            3.701174767066989e-05,
+            -0.13929553487118454
+          ],
+          [
+            -7.467708364734909e-05,
+            0.9999999620535256,
+            -0.00026517217207815076
+          ],
+          [
+            0.13929551977092464,
+            0.0002729891539989826,
+            0.9902508185549104
+          ]
+        ],
+        "interbotix_poe_to_lula_rotation_residual_rad": 0.0,
+        "interbotix_poe_to_lula_translation_residual_m": 1.2412670766236366e-16,
+        "interbotix_poe_to_usd_rotation_residual_rad": 5.196212462831405e-07,
+        "interbotix_poe_to_usd_translation_residual_m": 1.8322673889548194e-07,
+        "lula_position_world_m": [
+          -0.20932045146756795,
+          -0.019012825212268363,
+          0.3471628613047871
+        ],
+        "lula_rotation_world": [
+          [
+            0.9902508533675097,
+            3.70117476706699e-05,
+            -0.13929553487118443
+          ],
+          [
+            -7.467708364734907e-05,
+            0.9999999620535255,
+            -0.0002651721720781507
+          ],
+          [
+            0.13929551977092444,
+            0.0002729891539989826,
+            0.9902508185549103
+          ]
+        ],
+        "rotation_angle_residual_rad": 5.196212462831405e-07,
+        "status": "PASS",
+        "translation_residual_m": 1.8322673888345045e-07,
+        "usd_orientation_world_wxyz": [
+          0.9975597306613002,
+          0.00013505295651654797,
+          -0.06981808325910817,
+          -2.781505614537119e-05
+        ],
+        "usd_position_world_m": [
+          -0.20932036638259888,
+          -0.019012728706002235,
+          0.34716299176216125
+        ]
+      },
+      {
+        "arm_readback_rad": [
+          4.294835889595561e-06,
+          -0.9600613117218018,
+          1.2118515968322754,
+          0.000287505827145651,
+          -0.29230213165283203,
+          5.175323281036981e-07
+        ],
+        "arm_target_rad": [
+          0.0,
+          -0.96,
+          1.21,
+          0.0,
+          -0.3,
+          0.0
+        ],
+        "base_orientation_world_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "base_position_world_m": [
+          -0.46950000524520874,
+          -0.01899999938905239,
+          0.01999998837709427
+        ],
+        "case": "elbow_positive",
+        "finger_readback_m": [
+          0.05699921399354935,
+          -0.057000771164894104
+        ],
+        "interbotix_poe_position_world_m": [
+          -0.21377869821497814,
+          -0.01901356037878318,
+          0.3003007759559889
+        ],
+        "interbotix_poe_rotation_world": [
+          [
+            0.9991795047502688,
+            6.731288461217244e-05,
+            -0.04050077475780612
+          ],
+          [
+            -7.855563832588006e-05,
+            0.9999999588259045,
+            -0.0002760021758599643
+          ],
+          [
+            0.04050075451172096,
+            0.000278957281599548,
+            0.9991794688977634
+          ]
+        ],
+        "interbotix_poe_to_lula_rotation_residual_rad": 0.0,
+        "interbotix_poe_to_lula_translation_residual_m": 2.0014830212433605e-16,
+        "interbotix_poe_to_usd_rotation_residual_rad": 4.539354506649955e-07,
+        "interbotix_poe_to_usd_translation_residual_m": 2.0086555710901685e-07,
+        "lula_position_world_m": [
+          -0.21377869821497797,
+          -0.01901356037878318,
+          0.3003007759559888
+        ],
+        "lula_rotation_world": [
+          [
+            0.9991795047502691,
+            6.73128846121724e-05,
+            -0.04050077475780622
+          ],
+          [
+            -7.855563832588006e-05,
+            0.9999999588259044,
+            -0.00027600217585996447
+          ],
+          [
+            0.040500754511720825,
+            0.00027895728159954813,
+            0.9991794688977633
+          ]
+        ],
+        "rotation_angle_residual_rad": 4.544243419759583e-07,
+        "status": "PASS",
+        "translation_residual_m": 2.0086555708175816e-07,
+        "usd_orientation_world_wxyz": [
+          0.9997948461934608,
+          0.00013894588507537973,
+          -0.020254503169628228,
+          -3.6337123822973306e-05
+        ],
+        "usd_position_world_m": [
+          -0.21377858519554138,
+          -0.01901344582438469,
+          0.3003008961677551
+        ]
+      },
+      {
+        "arm_readback_rad": [
+          5.359449914976722e-06,
+          -0.9599782228469849,
+          1.1618711948394775,
+          -0.04968146234750748,
+          -0.29193687438964844,
+          1.4205950719770044e-05
+        ],
+        "arm_target_rad": [
+          0.0,
+          -0.96,
+          1.16,
+          -0.05,
+          -0.3,
+          0.0
+        ],
+        "base_orientation_world_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "base_position_world_m": [
+          -0.46950000524520874,
+          -0.01899999938905239,
+          0.01999998837709427
+        ],
+        "case": "forearm_roll_negative",
+        "finger_readback_m": [
+          0.05699988827109337,
+          -0.056946322321891785
+        ],
+        "interbotix_poe_position_world_m": [
+          -0.2109783789359546,
+          -0.016469584176124895,
+          0.3235858337066472
+        ],
+        "interbotix_poe_rotation_world": [
+          [
+            0.9958774999401847,
+            -0.0099648719947111,
+            -0.09015933916692444
+          ],
+          [
+            0.014298162651830603,
+            0.9987667521114719,
+            0.047545109332961875
+          ],
+          [
+            0.0895743694237883,
+            -0.048638217512883074,
+            0.9947918154767361
+          ]
+        ],
+        "interbotix_poe_to_lula_rotation_residual_rad": 0.0,
+        "interbotix_poe_to_lula_translation_residual_m": 5.561946577567963e-17,
+        "interbotix_poe_to_usd_rotation_residual_rad": 3.097148193542154e-07,
+        "interbotix_poe_to_usd_translation_residual_m": 1.9178408763285433e-07,
+        "lula_position_world_m": [
+          -0.21097837893595467,
+          -0.0164695841761249,
+          0.3235858337066472
+        ],
+        "lula_rotation_world": [
+          [
+            0.9958774999401846,
+            -0.009964871994711091,
+            -0.09015933916692465
+          ],
+          [
+            0.01429816265183061,
+            0.9987667521114719,
+            0.04754510933296189
+          ],
+          [
+            0.08957436942378844,
+            -0.048638217512883074,
+            0.9947918154767359
+          ]
+        ],
+        "rotation_angle_residual_rad": 3.097148193542154e-07,
+        "status": "PASS",
+        "translation_residual_m": 1.917840876573871e-07,
+        "usd_orientation_world_wxyz": [
+          0.9986786381784907,
+          -0.02407750224670146,
+          -0.04499288853680612,
+          0.0060738383770015635
+        ],
+        "usd_position_world_m": [
+          -0.21097829937934875,
+          -0.016469500958919525,
+          0.32358598709106445
+        ]
+      },
+      {
+        "arm_readback_rad": [
+          4.518127752817236e-06,
+          -0.9599950313568115,
+          1.1617923974990845,
+          0.050237465649843216,
+          -0.2918192744255066,
+          -1.0501624274183996e-05
+        ],
+        "arm_target_rad": [
+          0.0,
+          -0.96,
+          1.16,
+          0.05,
+          -0.3,
+          0.0
+        ],
+        "base_orientation_world_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "base_position_world_m": [
+          -0.46950000524520874,
+          -0.01899999938905239,
+          0.01999998837709427
+        ],
+        "case": "forearm_roll_positive",
+        "finger_readback_m": [
+          0.05695534870028496,
+          -0.057034220546483994
+        ],
+        "interbotix_poe_position_world_m": [
+          -0.21097623838325535,
+          -0.021555139895664002,
+          0.32360513861636875
+        ],
+        "interbotix_poe_rotation_world": [
+          [
+            0.9958780793825719,
+            0.010061322075110145,
+            -0.09014222541839632
+          ],
+          [
+            -0.014442492481874805,
+            0.9987389143705978,
+            -0.048083212587668456
+          ],
+          [
+            0.08954476766506854,
+            0.04918689581525583,
+            0.9947675024164533
+          ]
+        ],
+        "interbotix_poe_to_lula_rotation_residual_rad": 0.0,
+        "interbotix_poe_to_lula_translation_residual_m": 1.7567876183194558e-16,
+        "interbotix_poe_to_usd_rotation_residual_rad": 4.991332955492854e-07,
+        "interbotix_poe_to_usd_translation_residual_m": 1.6289354084395414e-07,
+        "lula_position_world_m": [
+          -0.2109762383832553,
+          -0.02155513989566401,
+          0.3236051386163686
+        ],
+        "lula_rotation_world": [
+          [
+            0.9958780793825718,
+            0.010061322075110145,
+            -0.09014222541839635
+          ],
+          [
+            -0.014442492481874812,
+            0.9987389143705977,
+            -0.04808321258766847
+          ],
+          [
+            0.08954476766506834,
+            0.04918689581525583,
+            0.9947675024164532
+          ]
+        ],
+        "rotation_angle_residual_rad": 4.995779578161354e-07,
+        "status": "PASS",
+        "translation_residual_m": 1.6289354091036547e-07,
+        "usd_orientation_world_wxyz": [
+          0.9986721826288353,
+          0.024350022585812633,
+          -0.04498135957594605,
+          -0.006133949309224285
+        ],
+        "usd_position_world_m": [
+          -0.21097612380981445,
+          -0.021555082872509956,
+          0.3236052393913269
+        ]
+      },
+      {
+        "arm_readback_rad": [
+          4.838944732910022e-06,
+          -0.9599747061729431,
+          1.161760687828064,
+          0.00022765464382246137,
+          -0.34198829531669617,
+          8.950087249104399e-07
+        ],
+        "arm_target_rad": [
+          0.0,
+          -0.96,
+          1.16,
+          0.0,
+          -0.35,
+          0.0
+        ],
+        "base_orientation_world_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "base_position_world_m": [
+          -0.46950000524520874,
+          -0.01899999938905239,
+          0.01999998837709427
+        ],
+        "case": "wrist_angle_negative",
+        "finger_readback_m": [
+          0.05699928104877472,
+          -0.057000767439603806
+        ],
+        "interbotix_poe_position_world_m": [
+          -0.21197793607312454,
+          -0.019012262303256137,
+          0.33249513892616644
+        ],
+        "interbotix_poe_rotation_world": [
+          [
+            0.9901877430853193,
+            4.06623891340834e-05,
+            -0.1397434499007792
+          ],
+          [
+            -7.155500327630578e-05,
+            0.9999999741027983,
+            -0.0002160423199872512
+          ],
+          [
+            0.1397434374970181,
+            0.00022392180025458517,
+            0.9901877203518252
+          ]
+        ],
+        "interbotix_poe_to_lula_rotation_residual_rad": 0.0,
+        "interbotix_poe_to_lula_translation_residual_m": 1.2412670766236366e-16,
+        "interbotix_poe_to_usd_rotation_residual_rad": 3.9984011247750603e-07,
+        "interbotix_poe_to_usd_translation_residual_m": 2.2893910001992116e-07,
+        "lula_position_world_m": [
+          -0.21197793607312443,
+          -0.019012262303256137,
+          0.3324951389261664
+        ],
+        "lula_rotation_world": [
+          [
+            0.9901877430853194,
+            4.066238913408343e-05,
+            -0.13974344990077914
+          ],
+          [
+            -7.15550032763058e-05,
+            0.9999999741027984,
+            -0.00021604231998725122
+          ],
+          [
+            0.13974343749701795,
+            0.00022392180025458523,
+            0.9901877203518252
+          ]
+        ],
+        "rotation_angle_residual_rad": 3.99284392803143e-07,
+        "status": "PASS",
+        "translation_residual_m": 2.2893909992589116e-07,
+        "usd_orientation_world_wxyz": [
+          0.9975439190413763,
+          0.00011041388045483897,
+          -0.07004367642536036,
+          -2.8020819047368308e-05
+        ],
+        "usd_position_world_m": [
+          -0.21197772026062012,
+          -0.019012199714779854,
+          0.33249518275260925
+        ]
+      },
+      {
+        "arm_readback_rad": [
+          4.394439656607574e-06,
+          -0.9600030779838562,
+          1.161839485168457,
+          0.000327404763083905,
+          -0.24211212992668152,
+          1.3137914720573463e-06
+        ],
+        "arm_target_rad": [
+          0.0,
+          -0.96,
+          1.16,
+          0.0,
+          -0.25,
+          0.0
+        ],
+        "base_orientation_world_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "base_position_world_m": [
+          -0.46950000524520874,
+          -0.01899999938905239,
+          0.01999998837709427
+        ],
+        "case": "wrist_angle_positive",
+        "finger_readback_m": [
+          0.05699924752116203,
+          -0.057000719010829926
+        ],
+        "interbotix_poe_position_world_m": [
+          -0.21039450842322466,
+          -0.01901275024985167,
+          0.3148721706586275
+        ],
+        "interbotix_poe_rotation_world": [
+          [
+            0.9991890404703955,
+            6.118709848770314e-05,
+            -0.04026484397075649
+          ],
+          [
+            -7.4105621647219e-05,
+            0.9999999462631407,
+            -0.0003193463209936957
+          ],
+          [
+            0.040264822267175475,
+            0.0003220711953444228,
+            0.9991889913114225
+          ]
+        ],
+        "interbotix_poe_to_lula_rotation_residual_rad": 0.0,
+        "interbotix_poe_to_lula_translation_residual_m": 1.6653345369377348e-16,
+        "interbotix_poe_to_usd_rotation_residual_rad": 3.318646170395641e-07,
+        "interbotix_poe_to_usd_translation_residual_m": 1.5703983265056957e-07,
+        "lula_position_world_m": [
+          -0.21039450842322466,
+          -0.01901275024985167,
+          0.31487217065862766
+        ],
+        "lula_rotation_world": [
+          [
+            0.9991890404703955,
+            6.118709848770314e-05,
+            -0.04026484397075662
+          ],
+          [
+            -7.410562164721904e-05,
+            0.9999999462631406,
+            -0.0003193463209936957
+          ],
+          [
+            0.040264822267175565,
+            0.0003220711953444229,
+            0.9991889913114225
+          ]
+        ],
+        "rotation_angle_residual_rad": 3.318646170395641e-07,
+        "status": "PASS",
+        "translation_residual_m": 1.5703983248746323e-07,
+        "usd_orientation_world_wxyz": [
+          0.9997972271221388,
+          0.00016051903332998105,
+          -0.020136477382987076,
+          -3.3928255944266314e-05
+        ],
+        "usd_position_world_m": [
+          -0.210394486784935,
+          -0.019012773409485817,
+          0.3148723244667053
+        ]
+      },
+      {
+        "arm_readback_rad": [
+          4.0813215491652954e-06,
+          -0.9599669575691223,
+          1.1618562936782837,
+          0.00028023376944474876,
+          -0.29168182611465454,
+          -0.0499873161315918
+        ],
+        "arm_target_rad": [
+          0.0,
+          -0.96,
+          1.16,
+          0.0,
+          -0.3,
+          -0.05
+        ],
+        "base_orientation_world_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "base_position_world_m": [
+          -0.46950000524520874,
+          -0.01899999938905239,
+          0.01999998837709427
+        ],
+        "case": "wrist_rotate_negative",
+        "finger_readback_m": [
+          0.05699998512864113,
+          -0.056987516582012177
+        ],
+        "interbotix_poe_position_world_m": [
+          -0.21095906430473105,
+          -0.019013203229030783,
+          0.32360653747504264
+        ],
+        "interbotix_poe_rotation_world": [
+          [
+            0.9959713603225064,
+            0.004532636525110029,
+            -0.0895572700760093
+          ],
+          [
+            -7.652010057318316e-05,
+            0.9987642844008683,
+            0.049698071893140024
+          ],
+          [
+            0.08967186605625105,
+            -0.04949100333750311,
+            0.9947409698140701
+          ]
+        ],
+        "interbotix_poe_to_lula_rotation_residual_rad": 0.0,
+        "interbotix_poe_to_lula_translation_residual_m": 7.858125020761362e-17,
+        "interbotix_poe_to_usd_rotation_residual_rad": 4.193558478197572e-07,
+        "interbotix_poe_to_usd_translation_residual_m": 2.8357526512311865e-07,
+        "lula_position_world_m": [
+          -0.210959064304731,
+          -0.01901320322903078,
+          0.3236065374750427
+        ],
+        "lula_rotation_world": [
+          [
+            0.9959713603225064,
+            0.004532636525110026,
+            -0.0895572700760092
+          ],
+          [
+            -7.652010057318482e-05,
+            0.9987642844008683,
+            0.04969807189314004
+          ],
+          [
+            0.08967186605625099,
+            -0.049491003337503135,
+            0.9947409698140702
+          ]
+        ],
+        "rotation_angle_residual_rad": 4.193558478197572e-07,
+        "status": "PASS",
+        "translation_residual_m": 2.835752650568881e-07,
+        "usd_orientation_world_wxyz": [
+          0.9986837096787804,
+          -0.024829830515408147,
+          -0.04486643067521719,
+          -0.0011536625466349734
+        ],
+        "usd_position_world_m": [
+          -0.21095892786979675,
+          -0.019013045355677605,
+          0.3236067295074463
+        ]
+      },
+      {
+        "arm_readback_rad": [
+          4.955170425091637e-06,
+          -0.9599957466125488,
+          1.1618198156356812,
+          0.00028919693431816995,
+          -0.2918560802936554,
+          0.049989692866802216
+        ],
+        "arm_target_rad": [
+          0.0,
+          -0.96,
+          1.16,
+          0.0,
+          -0.3,
+          0.05
+        ],
+        "base_orientation_world_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "base_position_world_m": [
+          -0.46950000524520874,
+          -0.01899999938905239,
+          0.01999998837709427
+        ],
+        "case": "wrist_rotate_positive",
+        "finger_readback_m": [
+          0.0569860003888607,
+          -0.05700518935918808
+        ],
+        "interbotix_poe_position_world_m": [
+          -0.2109653020918244,
+          -0.019013441943556374,
+          0.3236618388035257
+        ],
+        "interbotix_poe_rotation_world": [
+          [
+            0.9959498533633276,
+            -0.004439773349775255,
+            -0.08980076836068347
+          ],
+          [
+            -7.827562088498705e-05,
+            0.9987368719907705,
+            -0.05024593912962939
+          ],
+          [
+            0.08991041907639881,
+            0.05004946491915645,
+            0.9946914936817407
+          ]
+        ],
+        "interbotix_poe_to_lula_rotation_residual_rad": 0.0,
+        "interbotix_poe_to_lula_translation_residual_m": 1.1107649934270853e-16,
+        "interbotix_poe_to_usd_rotation_residual_rad": 3.118582000800436e-07,
+        "interbotix_poe_to_usd_translation_residual_m": 1.7015255514842654e-07,
+        "lula_position_world_m": [
+          -0.2109653020918244,
+          -0.019013441943556378,
+          0.3236618388035256
+        ],
+        "lula_rotation_world": [
+          [
+            0.9959498533633275,
+            -0.004439773349775243,
+            -0.08980076836068325
+          ],
+          [
+            -7.827562088498713e-05,
+            0.9987368719907705,
+            -0.05024593912962939
+          ],
+          [
+            0.0899104190763987,
+            0.050049464919156454,
+            0.9946914936817407
+          ]
+        ],
+        "rotation_angle_residual_rad": 3.118582000800436e-07,
+        "status": "PASS",
+        "translation_residual_m": 1.7015255520503224e-07,
+        "usd_orientation_world_wxyz": [
+          0.9986713921543362,
+          0.025107335804557238,
+          -0.0449875527733698,
+          0.0010919142734223096
+        ],
+        "usd_position_world_m": [
+          -0.21096517145633698,
+          -0.01901337318122387,
+          0.3236619234085083
+        ]
+      }
+    ],
+    "max_residuals": {
+      "rotation_rad": 5.213277245919734e-07,
+      "translation_m": 2.8357526512311865e-07
+    },
+    "sources": {
+      "frame": "follower_left_ee_gripper_link",
+      "interbotix_product": "aloha_vx300s",
+      "source_file": "external/ros2-essentials/aloha_ws/src/interbotix_ros_toolboxes/interbotix_xs_toolbox/interbotix_xs_modules/interbotix_xs_modules/xs_robot/mr_descriptions.py",
+      "source_sha256": "9412f1496f0cf1f3e23995ba3f0c10f250624cdd3798274a7191b1cad6248388"
+    },
+    "status": "PASS"
+  },
+  "gates": {
+    "all_joint_samples": true,
+    "coordinate_closure": true,
+    "diagnostic_coupling": true,
+    "explicit_joint_order": true,
+    "fk_cases": true,
+    "fk_rotation": true,
+    "fk_translation": true,
+    "fresh_process_determinism": true,
+    "grasp_editor_v2": true,
+    "horizontal_geometry": true,
+    "ik": true,
+    "ik_fk_orientation": true,
+    "ik_fk_position": true,
+    "kinematics_status": true,
+    "rotation_rad": 0.005,
+    "runtime_prefix_order": true,
+    "stage_immutable": true,
+    "transform_determinants": true,
+    "translation_m": 0.001
+  },
+  "horizontal_geometry": {
+    "a_world_m": [
+      -0.06345338544407876,
+      -0.16883311240887486,
+      0.03290966177120053
+    ],
+    "approach_direction_world": [
+      0.0,
+      0.0,
+      -1.0
+    ],
+    "axis_to_table_normal_deg": 90.0,
+    "b_world_m": [
+      0.14074512150642032,
+      -0.14164911418957335,
+      0.03290966177120053
+    ],
+    "gripper_line_to_axis_deg": 90.31872920999105,
+    "lift_direction_world": [
+      0.0,
+      0.0,
+      1.0
+    ],
+    "lowest_point_to_table_gap_m": 0.0,
+    "status": "PASS",
+    "task_geometry": "HORIZONTAL_DYNAMIC_TABLE_SUPPORTED"
+  },
+  "ik": "PASS",
+  "joint_order": [
+    "waist",
+    "shoulder",
+    "elbow",
+    "forearm_roll",
+    "wrist_angle",
+    "wrist_rotate"
+  ],
+  "joint_order_policy": "EXPLICIT_SOURCE_ORDER_NOT_ALPHABETICAL",
+  "output_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_ik_correspondence_v3.json",
+  "schema_version": 2,
+  "status": "PASS",
+  "task8": "NOT_RUN",
+  "transform_contract": {
+    "determinants": {
+      "object_from_gripper": 1.0,
+      "world_from_base": 1.0,
+      "world_from_object": 1.0
+    },
+    "grasp_editor_closure_error": 2.220446049250313e-16,
+    "grasp_editor_formula": "T_W_G = T_W_O @ T_O_G",
+    "status": "PASS",
+    "units": "m",
+    "world_origin": "TABLETOP_CENTER",
+    "world_origin_world_m": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "waypoint_validation": {
+    "maximum_orientation_error_rad": 0.0020637832694331048,
+    "maximum_position_error_m": 2.5150293380534435e-06,
+    "orientation_gate_rad": 0.005,
+    "phases": [
+      "move_to_pregrasp",
+      "vertical_descent",
+      "vertical_lift"
+    ],
+    "position_gate_m": 0.001,
+    "status": "PASS",
+    "waypoint_count": 73
+  }
+}

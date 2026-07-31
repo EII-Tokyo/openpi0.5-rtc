@@ -72,8 +72,8 @@
     {
       "role": "five_pose_config",
       "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/configs/aloha1_grasp_20cm_five_pose_ik.yaml",
-      "sha256": "6313f44d8e4e110e627cdf61cd1ebd8a9a0172b88f719af00af9f7fcb0ba8a62",
-      "size_bytes": 4085
+      "sha256": "1c48518ed895d8ae1c1a6c2df1d1b3208395db4092e5a0305cc57e8df278abd8",
+      "size_bytes": 5411
     },
     {
       "role": "existing_grasp_runtime_config",
@@ -116,6 +116,22 @@
       "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/bottle_500ml/cad/bottle_500ml.FCStd",
       "sha256": "3594f60200e54181bc8480a229484293a0d386c146d3f235b32e31a0c16bbf8a",
       "size_bytes": 9282
+    },
+    {
+      "role": "official_viperx_300_moveit_acceleration_limits",
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_moveit/config/joint_limits/vx300s_joint_limits.yaml",
+      "sha256": "6a3df726ddb35f19ba4a92da4d27f8974d982f9ac91b7ff566d59bf5bd8d5a93",
+      "size_bytes": 1429,
+      "repository": "https://github.com/Interbotix/interbotix_ros_manipulators.git",
+      "branch": "humble",
+      "commit": "b66d5b905725351dd71d3251a06cd3f4c777940f",
+      "license": "BSD-3-Clause"
+    },
+    {
+      "role": "local_isaac_5_1_lula_trajectory_limit_probe",
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-20cm-five-pose-ik/probes/lula_trajectory_limits_readback.json",
+      "sha256": "7002ceddd2412501feac8aa2af5c9f298fb7f84736c769d7a6b8aca3ccb9ee41",
+      "size_bytes": 3168
     },
     {
       "role": "direct_nvidia_mcp_and_local_api_evidence",

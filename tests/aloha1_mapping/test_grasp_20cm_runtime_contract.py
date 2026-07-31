@@ -13,8 +13,15 @@ import yaml
 from tools.aloha1_mapping.grasp_20cm_controller import Phase
 from tools.aloha1_mapping.grasp_20cm_controller import RunObservation
 from tools.aloha1_mapping.grasp_20cm_isaac_bindings import IsaacGrasp20cmBindings
+from tools.aloha1_mapping.grasp_20cm_isaac_bindings import arm_phase_target_reached
+from tools.aloha1_mapping.grasp_20cm_isaac_bindings import arm_phase_timeout_reached
+from tools.aloha1_mapping.grasp_20cm_isaac_bindings import bilateral_observation_contact
+from tools.aloha1_mapping.grasp_20cm_isaac_bindings import build_lula_cspace_phase_targets
 from tools.aloha1_mapping.grasp_20cm_isaac_bindings import derive_gripper_closeup_camera_geometry
+from tools.aloha1_mapping.grasp_20cm_isaac_bindings import derive_overview_camera_geometry
+from tools.aloha1_mapping.grasp_20cm_isaac_bindings import formal_phase_bottle_dynamic
 from tools.aloha1_mapping.grasp_20cm_isaac_bindings import initial_pose_hold_complete
+from tools.aloha1_mapping.grasp_20cm_isaac_bindings import open_pregrasp_evidence_ready
 from tools.aloha1_mapping.grasp_20cm_isaac_bindings import physics_sample_duration_s
 from tools.aloha1_mapping.grasp_20cm_isaac_bindings import preload_solver_contact_ready
 from tools.aloha1_mapping.grasp_20cm_isaac_bindings import reset_body_transition_plan
@@ -42,6 +49,116 @@ class _FakePrim:
         return self._valid
 
 
+class _FakeContinuousTrajectory:
+    start_time = 0.0
+    end_time = 0.5
+
+    def get_joint_targets(
+        self,
+        time_s: float,
+    ) -> tuple[np.ndarray, np.ndarray]:
+        fraction = float(time_s) / self.end_time
+        position = np.full(6, fraction, dtype=np.float64)
+        velocity = np.full(6, 2.0, dtype=np.float64)
+        if time_s in {self.start_time, self.end_time}:
+            velocity[:] = 0.0
+        return position, velocity
+
+
+class _FakeLulaTrajectoryGenerator:
+    def __init__(
+        self,
+        robot_description_path: str,
+        urdf_path: str,
+    ) -> None:
+        self.paths = (robot_description_path, urdf_path)
+        self.velocity_limits: np.ndarray | None = None
+        self.acceleration_limits: np.ndarray | None = None
+        self.waypoints: np.ndarray | None = None
+
+    def get_active_joints(self) -> list[str]:
+        return [
+            "waist",
+            "shoulder",
+            "elbow",
+            "forearm_roll",
+            "wrist_angle",
+            "wrist_rotate",
+        ]
+
+    def set_c_space_velocity_limits(self, limits: np.ndarray) -> None:
+        self.velocity_limits = limits
+
+    def set_c_space_acceleration_limits(
+        self,
+        limits: np.ndarray,
+    ) -> None:
+        self.acceleration_limits = limits
+
+    def compute_c_space_trajectory(
+        self,
+        waypoints: np.ndarray,
+    ) -> _FakeContinuousTrajectory:
+        self.waypoints = waypoints
+        return _FakeContinuousTrajectory()
+
+
+def test_lula_phase_targets_apply_limits_and_include_stopped_endpoint() -> None:
+    created: list[_FakeLulaTrajectoryGenerator] = []
+
+    def factory(
+        robot_description_path: str,
+        urdf_path: str,
+    ) -> _FakeLulaTrajectoryGenerator:
+        generator = _FakeLulaTrajectoryGenerator(
+            robot_description_path,
+            urdf_path,
+        )
+        created.append(generator)
+        return generator
+
+    result = build_lula_cspace_phase_targets(
+        generator_factory=factory,
+        robot_description_path="/tmp/robot.yaml",
+        urdf_path="/tmp/robot.urdf",
+        waypoint_positions=[
+            [0.0, -0.9, 1.1, 0.0, -0.3, 0.0],
+            [0.1, -0.8, 1.0, 0.1, -0.2, 0.1],
+        ],
+        physics_dt_s=0.1,
+        velocity_limits_rad_s=[3.0] * 6,
+        acceleration_limits_rad_s2=[5.0] * 6,
+    )
+
+    assert len(created) == 1
+    assert created[0].paths == ("/tmp/robot.yaml", "/tmp/robot.urdf")
+    assert created[0].velocity_limits == pytest.approx([3.0] * 6)
+    assert created[0].acceleration_limits == pytest.approx([5.0] * 6)
+    np.testing.assert_allclose(
+        created[0].waypoints,
+        np.asarray(
+            [
+            [0.0, -0.9, 1.1, 0.0, -0.3, 0.0],
+            [0.1, -0.8, 1.0, 0.1, -0.2, 0.1],
+            ],
+            dtype=np.float64,
+        ),
+    )
+    assert len(result["targets"]) == 6
+    assert result["targets"][0]["velocity_rad_s"] == pytest.approx(
+        [0.0] * 6
+    )
+    assert result["targets"][-1]["position_rad"] == pytest.approx(
+        [1.0] * 6
+    )
+    assert result["targets"][-1]["velocity_rad_s"] == pytest.approx(
+        [0.0] * 6
+    )
+    assert result["audit"]["duration_s"] == pytest.approx(0.5)
+    assert result["audit"]["endpoint_velocity_zero"] is True
+    assert result["audit"]["finite"] is True
+
+
 def test_runtime_defaults_preserve_translation_only_baseline() -> None:
     signature = inspect.signature(IsaacGrasp20cmBindings)
 
@@ -67,6 +184,89 @@ def test_initial_pose_hold_completes_on_exact_required_frame() -> None:
     assert initial_pose_hold_complete(
         observed_frame_count=60,
         required_frame_count=60,
+    )
+
+
+def test_dynamic_gate_excludes_kinematic_setup_but_not_formal_phases() -> None:
+    observations = [
+        type("Observation", (), {"bottle_dynamic": False})(),
+        type("Observation", (), {"bottle_dynamic": True})(),
+        type("Observation", (), {"bottle_dynamic": True})(),
+    ]
+    telemetry = [
+        {"phase": Phase.SETUP_KINEMATIC.value},
+        {"phase": Phase.RELEASE_DYNAMIC.value},
+        {"phase": Phase.HOLD.value},
+    ]
+
+    assert formal_phase_bottle_dynamic(observations, telemetry)
+
+    observations[-1].bottle_dynamic = False
+    assert not formal_phase_bottle_dynamic(observations, telemetry)
+
+
+def test_arm_phase_requires_trajectory_exhaustion_and_readback() -> None:
+    target = np.array([0.2, -0.4, 0.8, 0.1, -0.2, 0.3])
+
+    assert not arm_phase_target_reached(
+        trajectory_exhausted=False,
+        joint_readback=target,
+        joint_target=target,
+        arm_dof_indices=[0, 1, 2, 3, 4, 5],
+        tolerance_rad=0.020,
+    )
+    assert not arm_phase_target_reached(
+        trajectory_exhausted=True,
+        joint_readback=target
+        + np.array([0.46, 0.0, 0.0, 0.0, -0.298, 0.0]),
+        joint_target=target,
+        arm_dof_indices=[0, 1, 2, 3, 4, 5],
+        tolerance_rad=0.020,
+    )
+    assert arm_phase_target_reached(
+        trajectory_exhausted=True,
+        joint_readback=target + 0.019,
+        joint_target=target,
+        arm_dof_indices=[0, 1, 2, 3, 4, 5],
+        tolerance_rad=0.020,
+    )
+
+
+def test_arm_phase_timeout_starts_after_trajectory_exhaustion() -> None:
+    assert not arm_phase_timeout_reached(
+        phase_frame_count=900,
+        trajectory_sample_count=1922,
+        readback_settle_timeout_frames=900,
+        trajectory_exhausted=False,
+    )
+    assert not arm_phase_timeout_reached(
+        phase_frame_count=2822,
+        trajectory_sample_count=1922,
+        readback_settle_timeout_frames=900,
+        trajectory_exhausted=True,
+    )
+    assert arm_phase_timeout_reached(
+        phase_frame_count=2823,
+        trajectory_sample_count=1922,
+        readback_settle_timeout_frames=900,
+        trajectory_exhausted=True,
+    )
+
+
+def test_overview_camera_includes_random_start_in_derived_target() -> None:
+    result = derive_overview_camera_geometry(
+        base_position_world_m=[-0.45, 0.0, 0.0],
+        initial_ee_position_world_m=[-0.12, 0.15, 0.775],
+        grasp_position_world_m=[-0.18, 0.0, 0.056],
+        lift_position_world_m=[-0.18, 0.0, 0.266],
+    )
+
+    assert result["distance_m"] >= 3.6
+    assert result["anchor_min_world_m"][2] == pytest.approx(0.0)
+    assert result["anchor_max_world_m"][2] == pytest.approx(0.775)
+    assert result["target_world_m"][2] > 0.25
+    assert result["derivation"] == (
+        "RUNTIME_BASE_INITIAL_EE_GRASP_LIFT_ANCHOR_BOUNDS"
     )
 
 
@@ -548,6 +748,32 @@ def test_solver_active_contact_requires_matching_pair_and_finite_impulse() -> No
         contacts,
         tokens=("Bottle500", "left_finger_link"),
     ) == [contacts[0]]
+
+
+def test_bilateral_observation_gate_uses_force_carrying_contact_report() -> None:
+    assert bilateral_observation_contact(
+        bilateral_geometric=False,
+        bilateral_solver_active=True,
+    )
+    assert not bilateral_observation_contact(
+        bilateral_geometric=True,
+        bilateral_solver_active=False,
+    )
+
+
+def test_open_pregrasp_collider_evidence_waits_for_open_target() -> None:
+    assert not open_pregrasp_evidence_ready(
+        open_target_reached=False,
+        already_captured=False,
+    )
+    assert open_pregrasp_evidence_ready(
+        open_target_reached=True,
+        already_captured=False,
+    )
+    assert not open_pregrasp_evidence_ready(
+        open_target_reached=True,
+        already_captured=True,
+    )
 
 
 def test_hold_duration_counts_physics_samples_not_sample_intervals() -> None:

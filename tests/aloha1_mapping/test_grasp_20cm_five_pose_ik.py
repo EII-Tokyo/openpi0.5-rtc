@@ -10,6 +10,8 @@ from tools.aloha1_mapping.grasp_20cm_five_pose_ik import apply_frozen_bottle_tra
 from tools.aloha1_mapping.grasp_20cm_five_pose_ik import canonical_five_pose_signature
 from tools.aloha1_mapping.grasp_20cm_five_pose_ik import compose_initial_command
 from tools.aloha1_mapping.grasp_20cm_five_pose_ik import derive_sample_geometry
+from tools.aloha1_mapping.grasp_20cm_five_pose_ik import gripper_approach_axis_world
+from tools.aloha1_mapping.grasp_20cm_five_pose_ik import initial_tool_orientation_gate
 from tools.aloha1_mapping.grasp_20cm_five_pose_ik import line_yaw_distance_deg
 from tools.aloha1_mapping.grasp_20cm_five_pose_ik import minimum_pairwise_ee_distance_m
 from tools.aloha1_mapping.grasp_20cm_five_pose_ik import minimum_pairwise_line_yaw_separation_deg
@@ -17,11 +19,18 @@ from tools.aloha1_mapping.grasp_20cm_five_pose_ik import place_bottle_center_and
 from tools.aloha1_mapping.grasp_20cm_five_pose_ik import sample_bottle_center_yaw_candidates
 from tools.aloha1_mapping.grasp_20cm_five_pose_ik import sample_initial_arm_joint_candidates
 from tools.aloha1_mapping.grasp_20cm_five_pose_ik import select_diverse_records
+from tools.aloha1_mapping.grasp_20cm_five_pose_ik import solve_oriented_initial_arm_pose
 from tools.plan_aloha1_grasp_20cm_five_pose_ik import classify_preflight_contacts
 from tools.plan_aloha1_grasp_20cm_five_pose_ik import freeze_preflight_records
+from tools.plan_aloha1_grasp_20cm_five_pose_ik import is_excluded_runtime_failure_candidate
+from tools.plan_aloha1_grasp_20cm_five_pose_ik import preserve_accepted_preflight_records
+from tools.run_aloha1_grasp_20cm_five_pose_ik import build_five_pose_summary
+from tools.run_aloha1_grasp_20cm_five_pose_ik import reuse_accepted_runtime_records
 
 ROOT = Path(__file__).resolve().parents[2]
 CONFIG = ROOT / "configs/aloha1_grasp_20cm_five_pose_ik.yaml"
+GUI_SCRIPT = ROOT / "tools/run_aloha1_grasp_20cm_gui.py"
+RUNNER_SCRIPT = ROOT / "tools/run_aloha1_grasp_20cm_five_pose_ik.py"
 
 
 def _horizontal_world_from_object() -> np.ndarray:
@@ -49,6 +58,35 @@ def _candidate_records() -> list[dict[str, object]]:
     ]
 
 
+def _five_runtime_pass_records() -> list[dict[str, object]]:
+    records = []
+    for index in range(5):
+        signature = f"signature-{index}"
+        records.append(
+            {
+                "sample_id": f"sample_{index + 1:02d}",
+                "primary": {
+                    "process_id": 100 + index,
+                    "exit_code": 0,
+                    "machine_status": "PASS",
+                    "evidence_status": "PASS",
+                    "deterministic_signature": signature,
+                    "video_count": 2,
+                },
+                "collider_repeat": {
+                    "process_id": 200 + index,
+                    "exit_code": 0,
+                    "machine_status": "PASS",
+                    "evidence_status": "PASS",
+                    "deterministic_signature": signature,
+                    "collision_record_count": 24,
+                },
+                "visual_review_status": "NOT_REVIEWED",
+            }
+        )
+    return records
+
+
 def test_five_pose_config_freezes_joint_sampling_and_diversity() -> None:
     config = yaml.safe_load(CONFIG.read_text(encoding="utf-8"))
 
@@ -61,6 +99,7 @@ def test_five_pose_config_freezes_joint_sampling_and_diversity() -> None:
     assert config["gates"]["minimum_initial_ee_separation_m"] == 0.050
     assert config["gates"]["initial_arm_readback_tolerance_rad"] == 0.020
     assert config["gates"]["first_frame_jump_tolerance_rad"] == 0.020
+    assert config["gates"]["arm_phase_readback_tolerance_rad"] == 0.020
     assert (
         config["frozen_inputs"]["task7a_structure_validation"]["sha256"]
         == "668a1c83e14d28de50c3fa18c773c6f60ec2feb2263eac985546c2bb7e52048a"
@@ -84,6 +123,33 @@ def test_five_pose_config_freezes_joint_sampling_and_diversity() -> None:
     assert config["runtime"]["allow_runtime_resampling"] is False
     assert config["runtime"]["required_primary_videos"] == 5
     assert config["boundaries"]["task8"] == "NOT_RUN"
+
+
+def test_five_pose_config_uses_official_acceleration_limited_lula_path() -> None:
+    config = yaml.safe_load(CONFIG.read_text(encoding="utf-8"))
+    trajectory = config["arm_trajectory"]
+
+    assert trajectory["mode"] == "LULA_CSPACE_ACCELERATION_LIMITED"
+    assert trajectory["velocity_limits_rad_s"] == pytest.approx(
+        [np.pi] * 6
+    )
+    assert trajectory["acceleration_limits_rad_s2"] == [5.0] * 6
+    assert trajectory["jerk_limit_status"] == (
+        "NOT_SET_NO_EXACT_MODEL_OFFICIAL_VALUE"
+    )
+    assert trajectory["classification"] == (
+        "DIAGNOSTIC_ONLY_NOT_FINAL_CONTROL_MAPPING"
+    )
+    assert trajectory["source"]["local_path"].endswith(
+        "vx300s_joint_limits.yaml"
+    )
+    assert len(trajectory["source"]["sha256"]) == 64
+    gui_source = GUI_SCRIPT.read_text(encoding="utf-8")
+    runner_source = RUNNER_SCRIPT.read_text(encoding="utf-8")
+    assert '"--arm-trajectory-mode"' in gui_source
+    assert '"--arm-acceleration-limits-rad-s2"' in gui_source
+    assert '"--arm-trajectory-mode"' in runner_source
+    assert '"--arm-acceleration-limits-rad-s2"' in runner_source
 
 
 def test_bottle_transform_places_cad_center_on_vertical_centerline() -> None:
@@ -166,6 +232,207 @@ def test_joint_candidate_sampling_is_fixed_seed_and_within_limits() -> None:
     assert np.array_equal(first, second)
     assert np.all(first >= lower)
     assert np.all(first <= upper)
+
+
+def test_initial_tool_orientation_gate_uses_gripper_local_positive_x() -> None:
+    root_half = float(np.sqrt(0.5))
+    downward_wxyz = [root_half, 0.0, root_half, 0.0]
+
+    assert gripper_approach_axis_world(downward_wxyz) == pytest.approx(
+        [0.0, 0.0, -1.0]
+    )
+    result = initial_tool_orientation_gate(
+        downward_wxyz,
+        maximum_angle_to_world_down_deg=23.241131059202324,
+    )
+
+    assert result["status"] == "PASS"
+    assert result["approach_axis_local"] == [1.0, 0.0, 0.0]
+    assert result["approach_axis_world"] == pytest.approx([0.0, 0.0, -1.0])
+    assert result["angle_to_world_down_deg"] == pytest.approx(0.0)
+
+
+def test_initial_tool_orientation_gate_rejects_upward_approach() -> None:
+    result = initial_tool_orientation_gate(
+        [0.0, 0.0, 1.0, 0.0],
+        maximum_angle_to_world_down_deg=23.241131059202324,
+    )
+
+    assert result["status"] == "FAIL"
+    assert result["angle_to_world_down_deg"] == pytest.approx(90.0)
+
+
+class _FakeKinematicsSolver:
+    def __init__(self) -> None:
+        self.inverse_call: dict[str, object] | None = None
+
+    def compute_inverse_kinematics(
+        self,
+        frame_name: str,
+        target_position: np.ndarray,
+        target_orientation: np.ndarray,
+        **kwargs: object,
+    ) -> tuple[np.ndarray, bool]:
+        self.inverse_call = {
+            "frame_name": frame_name,
+            "target_position": target_position.copy(),
+            "target_orientation": target_orientation.copy(),
+            **kwargs,
+        }
+        return np.asarray([0.1, -0.2, 0.3, 0.0, 0.2, -0.1]), True
+
+    def compute_forward_kinematics(
+        self,
+        frame_name: str,
+        joint_positions: np.ndarray,
+    ) -> tuple[np.ndarray, np.ndarray]:
+        assert frame_name == "ee_gripper_link"
+        assert joint_positions.shape == (6,)
+        return (
+            np.asarray([0.10, -0.05, 0.40]),
+            np.asarray(
+                [
+                    [0.0, 0.0, 1.0],
+                    [0.0, 1.0, 0.0],
+                    [-1.0, 0.0, 0.0],
+                ]
+            ),
+        )
+
+
+def test_oriented_initial_pose_is_solved_in_task_space_and_read_back() -> None:
+    solver = _FakeKinematicsSolver()
+    result = solve_oriented_initial_arm_pose(
+        kinematics_solver=solver,
+        frame_name="ee_gripper_link",
+        target_position_world_m=[0.10, -0.05, 0.40],
+        target_orientation_world_wxyz=[
+            float(np.sqrt(0.5)),
+            0.0,
+            float(np.sqrt(0.5)),
+            0.0,
+        ],
+        warm_start_arm_q_rad=[0.0] * 6,
+        lower_limits_rad=[-1.0] * 6,
+        upper_limits_rad=[1.0] * 6,
+        position_tolerance_m=0.001,
+        orientation_tolerance_rad=0.005,
+        maximum_approach_angle_to_world_down_deg=23.241131059202324,
+    )
+
+    assert result["status"] == "PASS"
+    assert result["initial_arm_q_rad"] == pytest.approx(
+        [0.1, -0.2, 0.3, 0.0, 0.2, -0.1]
+    )
+    assert result["fk_position_error_m"] == pytest.approx(0.0)
+    assert result["fk_orientation_error_rad"] == pytest.approx(0.0)
+    assert result["orientation_gate"]["status"] == "PASS"
+    assert solver.inverse_call is not None
+    assert solver.inverse_call["warm_start"] == pytest.approx([0.0] * 6)
+
+
+def test_preserved_successes_are_explicit_orientation_exceptions() -> None:
+    records = [
+        {
+            "sample_id": f"sample_{index:02d}",
+            "preflight_status": "PASS",
+            "initial_arm_q_rad": [float(index)] * 6,
+            **(
+                {
+                    "initial_orientation_policy": (
+                        "TASK_SPACE_VALIDATED_T_O_G_ORIENTATION_THEN_LULA_IK"
+                    )
+                }
+                if index == 2
+                else {}
+            ),
+        }
+        for index in range(1, 4)
+    ]
+
+    preserved = preserve_accepted_preflight_records(
+        records,
+        sample_ids=["sample_01", "sample_02"],
+    )
+
+    assert [record["sample_id"] for record in preserved] == [
+        "sample_01",
+        "sample_02",
+    ]
+    assert preserved[0]["initial_orientation_policy"] == (
+        "USER_ACCEPTED_LEGACY_INITIAL_ORIENTATION_EXCEPTION"
+    )
+    assert preserved[1]["initial_orientation_policy"] == (
+        "TASK_SPACE_VALIDATED_T_O_G_ORIENTATION_THEN_LULA_IK"
+    )
+    assert records[0].get("initial_orientation_policy") is None
+
+
+def test_runtime_reuse_keeps_only_verified_accepted_successes() -> None:
+    source = {"samples": _five_runtime_pass_records()}
+    source["samples"][1]["initial_orientation_policy"] = (
+        "TASK_SPACE_VALIDATED_T_O_G_ORIENTATION_THEN_LULA_IK"
+    )
+
+    reused = reuse_accepted_runtime_records(
+        source,
+        sample_ids=["sample_01", "sample_02"],
+    )
+
+    assert [record["sample_id"] for record in reused] == [
+        "sample_01",
+        "sample_02",
+    ]
+    assert all(
+        record["execution_policy"]
+        == "REUSED_USER_ACCEPTED_SUCCESS_NO_RERECORDING"
+        for record in reused
+    )
+    assert reused[0]["initial_orientation_policy"] == (
+        "USER_ACCEPTED_LEGACY_INITIAL_ORIENTATION_EXCEPTION"
+    )
+    assert reused[1]["initial_orientation_policy"] == (
+        "TASK_SPACE_VALIDATED_T_O_G_ORIENTATION_THEN_LULA_IK"
+    )
+    assert source["samples"][0].get("execution_policy") is None
+
+
+def test_failed_runtime_candidate_is_explicitly_excluded_by_sample() -> None:
+    exclusions = {"sample_05": [108]}
+
+    assert is_excluded_runtime_failure_candidate(
+        exclusions,
+        sample_id="sample_05",
+        candidate_index=108,
+    )
+    assert not is_excluded_runtime_failure_candidate(
+        exclusions,
+        sample_id="sample_05",
+        candidate_index=109,
+    )
+    assert not is_excluded_runtime_failure_candidate(
+        exclusions,
+        sample_id="sample_04",
+        candidate_index=108,
+    )
+
+
+def test_gui_supports_machine_only_screening_without_video(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from tools import run_aloha1_grasp_20cm_gui
+
+    monkeypatch.setattr(
+        "sys.argv",
+        [
+            "run_aloha1_grasp_20cm_gui.py",
+            "--skip-video-capture",
+        ],
+    )
+
+    args = run_aloha1_grasp_20cm_gui._parse_args()  # noqa: SLF001
+
+    assert args.skip_video_capture is True
 
 
 @pytest.mark.parametrize(
@@ -403,3 +670,39 @@ def test_preflight_contact_policy_allows_only_confirmed_finger_table_pair() -> N
     assert allowed["allowed_physical_contact_count"] == 1
     assert blocked["status"] == "FAIL"
     assert blocked["forbidden_physical_contact_count"] == 1
+
+
+def test_five_pose_summary_requires_all_five_machine_passes() -> None:
+    summary = build_five_pose_summary(_five_runtime_pass_records())
+
+    assert summary["machine_status"] == "PASS"
+    assert summary["machine_pass_count"] == 5
+    assert summary["primary_video_count"] == 5
+    assert summary["fresh_process_count"] == 10
+    assert summary["failed_sample_ids"] == []
+
+
+def test_one_runtime_failure_cannot_be_hidden_by_visual_pass() -> None:
+    records = _five_runtime_pass_records()
+    records[3]["primary"]["machine_status"] = "FAIL"
+    records[3]["visual_review_status"] = "PASS"
+
+    summary = build_five_pose_summary(records)
+
+    assert summary["machine_status"] == "FAIL"
+    assert summary["status"] == "FAIL"
+    assert summary["failed_sample_ids"] == ["sample_04"]
+
+
+def test_video_failure_does_not_erase_physics_machine_pass() -> None:
+    records = _five_runtime_pass_records()
+    records[2]["primary"]["evidence_status"] = "FAIL"
+    records[2]["primary"]["video_count"] = 0
+
+    summary = build_five_pose_summary(records)
+
+    assert summary["machine_status"] == "PASS"
+    assert summary["machine_pass_count"] == 5
+    assert summary["status"] == "FAIL"
+    assert summary["failed_sample_ids"] == []
+    assert summary["evidence_failed_sample_ids"] == ["sample_03"]

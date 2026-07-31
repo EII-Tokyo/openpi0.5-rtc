@@ -114,6 +114,60 @@ def derive_gripper_closeup_camera_geometry(
     }
 
 
+def derive_overview_camera_geometry(
+    *,
+    base_position_world_m: Sequence[float],
+    initial_ee_position_world_m: Sequence[float],
+    grasp_position_world_m: Sequence[float],
+    lift_position_world_m: Sequence[float],
+    minimum_distance_m: float = 3.6,
+) -> dict[str, Any]:
+    """Frame the base, random initial EE, grasp, and lift anchors."""
+
+    anchors = np.asarray(
+        [
+            base_position_world_m,
+            initial_ee_position_world_m,
+            grasp_position_world_m,
+            lift_position_world_m,
+        ],
+        dtype=np.float64,
+    )
+    if anchors.shape != (4, 3) or not np.isfinite(anchors).all():
+        raise ValueError("overview anchors must be four finite 3-vectors")
+    distance_floor = float(minimum_distance_m)
+    if not math.isfinite(distance_floor) or distance_floor <= 0.0:
+        raise ValueError("overview minimum distance must be positive")
+    anchor_min = anchors.min(axis=0)
+    anchor_max = anchors.max(axis=0)
+    target = (anchor_min + anchor_max) / 2.0
+    target[2] = max(
+        float(target[2]),
+        float(anchors[0, 2]) + 0.30,
+    )
+    radius = float(
+        np.max(np.linalg.norm(anchors - target, axis=1))
+    )
+    distance = max(distance_floor, 4.0 * radius)
+    viewing_ray = np.asarray([1.85, -1.75, 1.45], dtype=np.float64)
+    viewing_ray /= np.linalg.norm(viewing_ray)
+    position = target + viewing_ray * distance
+    return {
+        "position_world_m": position.tolist(),
+        "target_world_m": target.tolist(),
+        "distance_m": distance,
+        "anchor_min_world_m": anchor_min.tolist(),
+        "anchor_max_world_m": anchor_max.tolist(),
+        "anchors_world_m": anchors.tolist(),
+        "derivation": (
+            "RUNTIME_BASE_INITIAL_EE_GRASP_LIFT_ANCHOR_BOUNDS"
+        ),
+        "framing_status": (
+            "NUMERIC_FRUSTUM_GATE_STILL_REQUIRED_PER_CAPTURED_FRAME"
+        ),
+    }
+
+
 def solver_active_contacts(
     contacts: Sequence[Mapping[str, Any]],
     *,
@@ -153,6 +207,33 @@ def solver_active_contacts(
     return records
 
 
+def bilateral_observation_contact(
+    *,
+    bilateral_geometric: bool,
+    bilateral_solver_active: bool,
+) -> bool:
+    """Gate motion on bilateral force-carrying contact-report pairs.
+
+    ``bilateral_geometric`` remains an independent diagnostic.  PhysX may
+    solve a reported contact while its separation is slightly positive
+    inside the contact-offset envelope, so its sign must not suppress a
+    finite positive solver impulse.
+    """
+
+    del bilateral_geometric
+    return bool(bilateral_solver_active)
+
+
+def open_pregrasp_evidence_ready(
+    *,
+    open_target_reached: bool,
+    already_captured: bool,
+) -> bool:
+    """Capture the open evidence after motion reaches its commanded target."""
+
+    return bool(open_target_reached and not already_captured)
+
+
 def physics_sample_duration_s(
     *,
     sample_count: int,
@@ -181,6 +262,251 @@ def initial_pose_hold_complete(
     if required < 1:
         raise ValueError("required_frame_count must be positive")
     return observed >= required
+
+
+def formal_phase_bottle_dynamic(
+    observations: Sequence[RunObservation],
+    telemetry: Sequence[Mapping[str, Any]],
+) -> bool:
+    """Exclude setup-only kinematics from the formal dynamic-bottle gate."""
+
+    if len(observations) != len(telemetry):
+        raise ValueError("observation and telemetry counts must match")
+    formal_phases = {
+        Phase.RELEASE_DYNAMIC.value,
+        Phase.SETTLE.value,
+        Phase.OPEN_PREGRASP.value,
+        Phase.VERTICAL_DESCENT.value,
+        Phase.BILATERAL_CONTACT.value,
+        Phase.CLOSE_PRELOAD.value,
+        Phase.VERTICAL_LIFT.value,
+        Phase.HEIGHT_REACHED.value,
+        Phase.HOLD.value,
+    }
+    formal_observations = [
+        observation
+        for observation, record in zip(
+            observations,
+            telemetry,
+            strict=True,
+        )
+        if record.get("phase") in formal_phases
+    ]
+    return bool(formal_observations) and all(
+        observation.bottle_dynamic
+        for observation in formal_observations
+    )
+
+
+def build_lula_cspace_phase_targets(
+    *,
+    generator_factory: Any,
+    robot_description_path: str,
+    urdf_path: str,
+    waypoint_positions: Sequence[Sequence[float]],
+    physics_dt_s: float,
+    velocity_limits_rad_s: Sequence[float],
+    acceleration_limits_rad_s2: Sequence[float],
+) -> dict[str, Any]:
+    """Time-parameterize one six-DOF ALOHA arm phase with local Lula."""
+
+    waypoints = np.asarray(waypoint_positions, dtype=np.float64)
+    velocity_limits = np.asarray(
+        velocity_limits_rad_s,
+        dtype=np.float64,
+    )
+    acceleration_limits = np.asarray(
+        acceleration_limits_rad_s2,
+        dtype=np.float64,
+    )
+    dt = float(physics_dt_s)
+    if (
+        waypoints.ndim != 2
+        or waypoints.shape[0] < 2
+        or waypoints.shape[1] != 6
+        or velocity_limits.shape != (6,)
+        or acceleration_limits.shape != (6,)
+        or not np.isfinite(waypoints).all()
+        or not np.isfinite(velocity_limits).all()
+        or not np.isfinite(acceleration_limits).all()
+        or np.any(velocity_limits <= 0.0)
+        or np.any(acceleration_limits <= 0.0)
+        or not math.isfinite(dt)
+        or dt <= 0.0
+    ):
+        raise ValueError("invalid six-DOF Lula trajectory inputs")
+    generator = generator_factory(
+        robot_description_path=robot_description_path,
+        urdf_path=urdf_path,
+    )
+    active_joints = list(generator.get_active_joints())
+    expected_joints = [
+        "waist",
+        "shoulder",
+        "elbow",
+        "forearm_roll",
+        "wrist_angle",
+        "wrist_rotate",
+    ]
+    if active_joints != expected_joints:
+        raise RuntimeError(
+            f"unexpected Lula active-joint order: {active_joints}"
+        )
+    generator.set_c_space_velocity_limits(velocity_limits)
+    generator.set_c_space_acceleration_limits(acceleration_limits)
+    trajectory = generator.compute_c_space_trajectory(waypoints)
+    if trajectory is None:
+        raise RuntimeError("Lula could not time-parameterize arm phase")
+    start_time = float(trajectory.start_time)
+    end_time = float(trajectory.end_time)
+    if (
+        not math.isfinite(start_time)
+        or not math.isfinite(end_time)
+        or end_time <= start_time
+    ):
+        raise RuntimeError("Lula returned an invalid trajectory domain")
+    sample_times = list(np.arange(start_time, end_time, dt))
+    if not sample_times or not math.isclose(
+        sample_times[-1],
+        end_time,
+        rel_tol=0.0,
+        abs_tol=1.0e-12,
+    ):
+        sample_times.append(end_time)
+    targets = []
+    positions = []
+    velocities = []
+    for time_s in sample_times:
+        position, velocity = trajectory.get_joint_targets(float(time_s))
+        position_array = np.asarray(position, dtype=np.float64)
+        velocity_array = np.asarray(velocity, dtype=np.float64)
+        if (
+            position_array.shape != (6,)
+            or velocity_array.shape != (6,)
+            or not np.isfinite(position_array).all()
+            or not np.isfinite(velocity_array).all()
+        ):
+            raise RuntimeError("Lula returned non-finite phase target")
+        positions.append(position_array)
+        velocities.append(velocity_array)
+        targets.append(
+            {
+                "time_s": float(time_s),
+                "position_rad": position_array.tolist(),
+                "velocity_rad_s": velocity_array.tolist(),
+            }
+        )
+    position_array = np.asarray(positions, dtype=np.float64)
+    velocity_array = np.asarray(velocities, dtype=np.float64)
+    time_array = np.asarray(sample_times, dtype=np.float64)
+    sample_intervals = np.diff(time_array)
+    sampled_acceleration = np.diff(velocity_array, axis=0) / (
+        sample_intervals[:, None]
+    )
+    maximum_velocity = np.max(np.abs(velocity_array), axis=0)
+    maximum_acceleration = np.max(
+        np.abs(sampled_acceleration),
+        axis=0,
+    )
+    endpoint_velocity_zero = bool(
+        np.max(np.abs(velocity_array[[0, -1]])) <= 1.0e-8
+    )
+    return {
+        "targets": targets,
+        "audit": {
+            "active_joints": active_joints,
+            "waypoint_count": int(waypoints.shape[0]),
+            "sample_count": len(targets),
+            "physics_dt_s": dt,
+            "start_time_s": start_time,
+            "end_time_s": end_time,
+            "duration_s": end_time - start_time,
+            "finite": bool(
+                np.isfinite(position_array).all()
+                and np.isfinite(velocity_array).all()
+                and np.isfinite(sampled_acceleration).all()
+            ),
+            "endpoint_velocity_zero": endpoint_velocity_zero,
+            "maximum_abs_velocity_rad_s": maximum_velocity.tolist(),
+            "maximum_abs_sampled_acceleration_rad_s2": (
+                maximum_acceleration.tolist()
+            ),
+            "velocity_within_limits": bool(
+                np.all(maximum_velocity <= velocity_limits + 1.0e-8)
+            ),
+            "sampled_acceleration_within_limits": bool(
+                np.all(
+                    maximum_acceleration
+                    <= acceleration_limits + 1.0e-6
+                )
+            ),
+            "velocity_limits_rad_s": velocity_limits.tolist(),
+            "acceleration_limits_rad_s2": (
+                acceleration_limits.tolist()
+            ),
+            "jerk_limit_status": (
+                "NOT_SET_NO_EXACT_MODEL_OFFICIAL_VALUE"
+            ),
+        },
+    }
+
+
+def arm_phase_target_reached(
+    *,
+    trajectory_exhausted: bool,
+    joint_readback: Sequence[float],
+    joint_target: Sequence[float],
+    arm_dof_indices: Sequence[int],
+    tolerance_rad: float,
+) -> bool:
+    """Require physical arm readback, not only command-sequence exhaustion."""
+
+    readback = np.asarray(joint_readback, dtype=np.float64)
+    target = np.asarray(joint_target, dtype=np.float64)
+    indices = np.asarray(arm_dof_indices, dtype=np.int64)
+    tolerance = float(tolerance_rad)
+    if (
+        readback.ndim != 1
+        or target.shape != readback.shape
+        or indices.shape != (6,)
+        or len(set(indices.tolist())) != 6
+        or np.any(indices < 0)
+        or np.any(indices >= readback.size)
+        or not np.isfinite(readback).all()
+        or not np.isfinite(target).all()
+    ):
+        raise ValueError("arm readback gate inputs are invalid")
+    if not math.isfinite(tolerance) or tolerance < 0.0:
+        raise ValueError("arm readback tolerance must be finite/non-negative")
+    return bool(
+        trajectory_exhausted
+        and np.max(np.abs(readback[indices] - target[indices]))
+        <= tolerance
+    )
+
+
+def arm_phase_timeout_reached(
+    *,
+    phase_frame_count: int,
+    trajectory_sample_count: int,
+    readback_settle_timeout_frames: int,
+    trajectory_exhausted: bool,
+) -> bool:
+    """Start the existing readback timeout only after trajectory playback."""
+
+    phase_frames = int(phase_frame_count)
+    trajectory_samples = int(trajectory_sample_count)
+    settle_frames = int(readback_settle_timeout_frames)
+    if (
+        phase_frames < 0
+        or trajectory_samples <= 0
+        or settle_frames <= 0
+    ):
+        raise ValueError("arm phase timeout inputs must be positive")
+    return bool(
+        trajectory_exhausted
+        and phase_frames > trajectory_samples + settle_frames
+    )
 
 
 def preload_solver_contact_ready(
@@ -230,6 +556,9 @@ class IsaacGrasp20cmBindings:
         bottle_world_from_object: Sequence[Sequence[float]] | None = None,
         initial_arm_q_rad: Sequence[float] | None = None,
         initial_pose_hold_frames: int = 60,
+        arm_phase_readback_tolerance_rad: float | None = None,
+        arm_trajectory_mode: str = "LEGACY_VELOCITY_STEP",
+        arm_acceleration_limits_rad_s2: Sequence[float] | None = None,
         additional_lift_margin_m: float = 0.0,
         capture_collider_evidence: bool = True,
     ) -> None:
@@ -356,6 +685,53 @@ class IsaacGrasp20cmBindings:
         self.initial_pose_hold_frames = int(initial_pose_hold_frames)
         if self.initial_pose_hold_frames < 1:
             raise ValueError("initial_pose_hold_frames must be positive")
+        self.arm_phase_readback_tolerance_rad = (
+            None
+            if arm_phase_readback_tolerance_rad is None
+            else float(arm_phase_readback_tolerance_rad)
+        )
+        if (
+            self.arm_phase_readback_tolerance_rad is not None
+            and (
+                not math.isfinite(
+                    self.arm_phase_readback_tolerance_rad
+                )
+                or self.arm_phase_readback_tolerance_rad < 0.0
+            )
+        ):
+            raise ValueError(
+                "arm phase readback tolerance must be finite/non-negative"
+            )
+        self.arm_trajectory_mode = str(arm_trajectory_mode)
+        allowed_trajectory_modes = {
+            "LEGACY_VELOCITY_STEP",
+            "LULA_CSPACE_ACCELERATION_LIMITED",
+        }
+        if self.arm_trajectory_mode not in allowed_trajectory_modes:
+            raise ValueError(
+                f"unsupported arm trajectory mode: "
+                f"{self.arm_trajectory_mode}"
+            )
+        self.arm_acceleration_limits_rad_s2 = (
+            None
+            if arm_acceleration_limits_rad_s2 is None
+            else np.asarray(
+                arm_acceleration_limits_rad_s2,
+                dtype=np.float64,
+            )
+        )
+        if self.arm_trajectory_mode == "LULA_CSPACE_ACCELERATION_LIMITED":
+            limits = self.arm_acceleration_limits_rad_s2
+            if (
+                limits is None
+                or limits.shape != (6,)
+                or not np.isfinite(limits).all()
+                or np.any(limits <= 0.0)
+            ):
+                raise ValueError(
+                    "acceleration-limited Lula mode requires six finite "
+                    "positive arm acceleration limits"
+                )
         self.additional_lift_margin_m = float(
             additional_lift_margin_m
         )
@@ -642,6 +1018,7 @@ class IsaacGrasp20cmBindings:
             raise RuntimeError("finger max-force readback mismatch")
 
         self.command = self.initial_command.copy()
+        self.command_velocity = np.zeros_like(self.command)
         self._target_write_count = 0
         self._write_joint_command()
 
@@ -737,22 +1114,36 @@ class IsaacGrasp20cmBindings:
         from isaacsim.core.utils.numpy.rotations import quats_to_rot_matrices
         from isaacsim.sensors.camera import Camera
 
+        targets = self.task_profile["kinematics"]["placement"][
+            "target_poses"
+        ]
         grasp = np.asarray(
-            self.task_profile["kinematics"]["placement"][
-                "bottle_axis"
-            ]["grasp_point_world_m"],
+            targets["grasp_ee_position_world_m"],
             dtype=np.float64,
         )
         base = np.asarray(self.base_position, dtype=np.float64)
-        overview_target = (base + grasp) / 2.0
-        overview_target[2] += 0.08
+        initial_ee, _ = self._get_world_pose(
+            str(self.config["robot"]["end_effector_prim"])
+        )
+        overview = derive_overview_camera_geometry(
+            base_position_world_m=base,
+            initial_ee_position_world_m=initial_ee,
+            grasp_position_world_m=grasp,
+            lift_position_world_m=targets[
+                "lift_ee_position_world_m"
+            ],
+        )
         specs = {
             "overview": {
-                "position": (
-                    overview_target
-                    + np.asarray([1.85, -1.75, 1.45])
+                "position": np.asarray(
+                    overview["position_world_m"],
+                    dtype=np.float64,
                 ),
-                "target": overview_target,
+                "target": np.asarray(
+                    overview["target_world_m"],
+                    dtype=np.float64,
+                ),
+                "derivation": overview,
             },
         }
         closeup = derive_gripper_closeup_camera_geometry(
@@ -840,7 +1231,9 @@ class IsaacGrasp20cmBindings:
         self._phase = Phase.IDLE
         self._phase_frames = 0
         self._trajectory: dict[Phase, list[np.ndarray]] = {}
+        self._trajectory_velocity: dict[Phase, list[np.ndarray]] = {}
         self._trajectory_cursor: dict[Phase, int] = {}
+        self._trajectory_audit: dict[str, Any] = {}
         self._ik_report: dict[str, Any] = {"status": "NOT_RUN"}
         self._setup_complete = False
         self._initial_pose_hold_observed_frames = 0
@@ -979,8 +1372,15 @@ class IsaacGrasp20cmBindings:
             "vertical_descent": Phase.VERTICAL_DESCENT,
             "vertical_lift": Phase.VERTICAL_LIFT,
         }
+        previous_q = current_q[:6].copy()
+        velocity_limits = np.asarray(
+            extended_profile["kinematics"]["ik"][
+                "joint_velocity_limits_rad_s"
+            ],
+            dtype=np.float64,
+        )
         for phase_name, phase in phase_map.items():
-            self._trajectory[phase] = [
+            raw_targets = [
                 np.asarray(
                     waypoint["joint_positions_rad"],
                     dtype=np.float64,
@@ -988,14 +1388,88 @@ class IsaacGrasp20cmBindings:
                 for waypoint in result["waypoints"]
                 if waypoint["phase"] == phase_name
             ]
-            self._trajectory_cursor[phase] = 0
-            if not self._trajectory[phase]:
+            if not raw_targets:
                 raise RuntimeError(
                     f"runtime IK has no {phase_name} waypoints"
                 )
+            if (
+                self.arm_trajectory_mode
+                == "LULA_CSPACE_ACCELERATION_LIMITED"
+            ):
+                from isaacsim.robot_motion.motion_generation import LulaCSpaceTrajectoryGenerator
+
+                assert self.arm_acceleration_limits_rad_s2 is not None
+                timed = build_lula_cspace_phase_targets(
+                    generator_factory=LulaCSpaceTrajectoryGenerator,
+                    robot_description_path=str(
+                        extended_profile["inputs"]["lula_descriptor"]
+                    ),
+                    urdf_path=str(
+                        extended_profile["inputs"]["follower_left_urdf"]
+                    ),
+                    waypoint_positions=[
+                        previous_q,
+                        *raw_targets,
+                    ],
+                    physics_dt_s=self.dt,
+                    velocity_limits_rad_s=velocity_limits,
+                    acceleration_limits_rad_s2=(
+                        self.arm_acceleration_limits_rad_s2
+                    ),
+                )
+                audit = timed["audit"]
+                if not all(
+                    bool(audit[key])
+                    for key in (
+                        "finite",
+                        "endpoint_velocity_zero",
+                        "velocity_within_limits",
+                        "sampled_acceleration_within_limits",
+                    )
+                ):
+                    raise RuntimeError(
+                        f"Lula trajectory audit failed for {phase_name}: "
+                        f"{audit}"
+                    )
+                self._trajectory[phase] = [
+                    np.asarray(target["position_rad"], dtype=np.float64)
+                    for target in timed["targets"]
+                ]
+                self._trajectory_velocity[phase] = [
+                    np.asarray(
+                        target["velocity_rad_s"],
+                        dtype=np.float64,
+                    )
+                    for target in timed["targets"]
+                ]
+                self._trajectory_audit[phase_name] = audit
+            else:
+                self._trajectory[phase] = raw_targets
+                self._trajectory_velocity[phase] = [
+                    np.zeros(6, dtype=np.float64)
+                    for _ in raw_targets
+                ]
+                self._trajectory_audit[phase_name] = {
+                    "mode": "LEGACY_VELOCITY_STEP",
+                    "sample_count": len(raw_targets),
+                    "acceleration_limit_status": "NOT_APPLIED",
+                }
+            self._trajectory_cursor[phase] = 0
+            previous_q = self._trajectory[phase][-1].copy()
         self._trajectory[Phase.BILATERAL_CONTACT] = []
+        self._trajectory_velocity[Phase.BILATERAL_CONTACT] = []
         self._trajectory_cursor[Phase.BILATERAL_CONTACT] = 0
         self._trajectory_cursor[Phase.CLOSE_PRELOAD] = 0
+        self._ik_report["trajectory_time_parameterization"] = {
+            "mode": self.arm_trajectory_mode,
+            "phase_audits": self._trajectory_audit,
+            "jerk_limit_status": (
+                "NOT_SET_NO_EXACT_MODEL_OFFICIAL_VALUE"
+                if self.arm_trajectory_mode
+                == "LULA_CSPACE_ACCELERATION_LIMITED"
+                else "NOT_APPLICABLE_LEGACY_BASELINE"
+            ),
+        }
 
     def _advance_arm(self, phase: Phase) -> None:
         targets = self._trajectory.get(phase, [])
@@ -1003,6 +1477,7 @@ class IsaacGrasp20cmBindings:
         if cursor >= len(targets):
             return
         self.command[:6] = targets[cursor]
+        self.command_velocity[:6] = self._trajectory_velocity[phase][cursor]
         self._trajectory_cursor[phase] = cursor + 1
         self._write_joint_command()
 
@@ -1023,7 +1498,40 @@ class IsaacGrasp20cmBindings:
         self._write_joint_command()
 
     def _write_joint_command(self) -> None:
-        self._command_positions(self.articulation, self.command)
+        if (
+            self.arm_trajectory_mode
+            == "LULA_CSPACE_ACCELERATION_LIMITED"
+        ):
+            from isaacsim.core.utils.types import ArticulationAction
+
+            arm_indices = np.asarray(
+                self.arm_dof_indices,
+                dtype=np.int32,
+            )
+            self.articulation.apply_action(
+                ArticulationAction(
+                    joint_positions=np.asarray(
+                        self.command[self.arm_dof_indices],
+                        dtype=np.float32,
+                    ),
+                    joint_velocities=np.asarray(
+                        self.command_velocity[self.arm_dof_indices],
+                        dtype=np.float32,
+                    ),
+                    joint_indices=arm_indices,
+                )
+            )
+            self.articulation.apply_action(
+                ArticulationAction(
+                    joint_positions=np.asarray(
+                        self.command[[7, 8]],
+                        dtype=np.float32,
+                    ),
+                    joint_indices=np.asarray([7, 8], dtype=np.int32),
+                )
+            )
+        else:
+            self._command_positions(self.articulation, self.command)
         self._target_write_count += 1
 
     def apply_phase_target(self, phase: Phase) -> None:
@@ -1157,12 +1665,11 @@ class IsaacGrasp20cmBindings:
         bilateral_solver_active = bool(
             left_solver_contacts and right_solver_contacts
         )
-        bilateral = (
-            bilateral_solver_active
-            if self._phase in {Phase.HEIGHT_REACHED, Phase.HOLD}
-            else bilateral_geometric
+        bilateral = bilateral_observation_contact(
+            bilateral_geometric=bilateral_geometric,
+            bilateral_solver_active=bilateral_solver_active,
         )
-        if bilateral_geometric and self._phase in {
+        if bilateral and self._phase in {
             Phase.BILATERAL_CONTACT,
             Phase.CLOSE_PRELOAD,
         }:
@@ -1178,6 +1685,26 @@ class IsaacGrasp20cmBindings:
             self.articulation.get_joint_velocities(),
             dtype=np.float64,
         )
+        arm_target_error_rad = float(
+            np.max(
+                np.abs(
+                    qpos[self.arm_dof_indices]
+                    - self.command[self.arm_dof_indices]
+                )
+            )
+        )
+        def phase_target_reached(phase: Phase) -> bool:
+            exhausted = self._phase_done(phase)
+            if self.arm_phase_readback_tolerance_rad is None:
+                return exhausted
+            return arm_phase_target_reached(
+                trajectory_exhausted=exhausted,
+                joint_readback=qpos,
+                joint_target=self.command,
+                arm_dof_indices=self.arm_dof_indices,
+                tolerance_rad=self.arm_phase_readback_tolerance_rad,
+            )
+
         ee_position, ee_orientation = self._get_world_pose(
             str(self.config["robot"]["end_effector_prim"])
         )
@@ -1290,7 +1817,21 @@ class IsaacGrasp20cmBindings:
                 phase_timeout,
                 self.initial_pose_hold_frames + 10,
             )
-        phase_timed_out = self._phase_frames > phase_timeout
+        if self._phase in {
+            Phase.OPEN_PREGRASP,
+            Phase.VERTICAL_DESCENT,
+            Phase.VERTICAL_LIFT,
+        }:
+            phase_timed_out = arm_phase_timeout_reached(
+                phase_frame_count=self._phase_frames,
+                trajectory_sample_count=len(
+                    self._trajectory.get(self._phase, [])
+                ),
+                readback_settle_timeout_frames=phase_timeout,
+                trajectory_exhausted=self._phase_done(self._phase),
+            )
+        else:
+            phase_timed_out = self._phase_frames > phase_timeout
         dynamic = not bool(
             UsdPhysics.RigidBodyAPI(self.bottle_prim)
             .GetKinematicEnabledAttr()
@@ -1308,15 +1849,15 @@ class IsaacGrasp20cmBindings:
                 sha256_file(self.stage_path) == self.stage_hash_before
             ),
             setup_complete=self._setup_complete,
-            open_target_reached=self._phase_done(
+            open_target_reached=phase_target_reached(
                 Phase.OPEN_PREGRASP
             ),
-            descent_complete=self._phase_done(
+            descent_complete=phase_target_reached(
                 Phase.VERTICAL_DESCENT
             ),
             bilateral_contact=bilateral,
             preload_complete=preload_complete,
-            lift_waypoint_exhausted=self._phase_done(
+            lift_waypoint_exhausted=phase_target_reached(
                 Phase.VERTICAL_LIFT
             ),
             hold_drop_m=hold_drop_m,
@@ -1336,8 +1877,10 @@ class IsaacGrasp20cmBindings:
             "phase": self._phase.value,
             "observation": asdict(observation),
             "joint_target": self.command.tolist(),
+            "joint_velocity_target": self.command_velocity.tolist(),
             "joint_readback": qpos.tolist(),
             "joint_velocity": qvel.tolist(),
+            "arm_target_max_readback_error_rad": arm_target_error_rad,
             "bottle": {
                 **bottle_state,
                 "collision_bounds": collision_bounds,
@@ -1360,9 +1903,8 @@ class IsaacGrasp20cmBindings:
                     bilateral_solver_active
                 ),
                 "observation_contact_gate": (
-                    "SOLVER_ACTIVE_AFTER_HEIGHT_REACHED"
-                    if self._phase in {Phase.HEIGHT_REACHED, Phase.HOLD}
-                    else "GEOMETRIC_BEFORE_HEIGHT_REACHED"
+                    "BILATERAL_REPORTED_PAIR_WITH_FINITE_POSITIVE_"
+                    "SOLVER_IMPULSE"
                 ),
             },
             "contacts": current_contacts,
@@ -1704,12 +2246,20 @@ class IsaacGrasp20cmBindings:
             labels.append("RELEASE_DYNAMIC")
         if (
             phase == Phase.OPEN_PREGRASP.value
-            and "OPEN_PREGRASP" not in self._captured_overlay_phases
+            and open_pregrasp_evidence_ready(
+                open_target_reached=bool(
+                    observation["open_target_reached"]
+                ),
+                already_captured=(
+                    "OPEN_PREGRASP"
+                    in self._captured_overlay_phases
+                ),
+            )
         ):
             labels.append("OPEN_PREGRASP")
         if (
             phase == Phase.BILATERAL_CONTACT.value
-            and bool(contact["bilateral_geometric_contact"])
+            and bool(contact["bilateral_solver_active_contact"])
             and "BILATERAL_CONTACT"
             not in self._captured_overlay_phases
         ):
@@ -2024,10 +2574,9 @@ class IsaacGrasp20cmBindings:
         }
 
     def _terminal_metrics(self, phase: Phase) -> dict[str, Any]:
-        dynamic_formal = all(
-            item.bottle_dynamic
-            for item in self.observations
-            if item.frame > 2
+        dynamic_formal = formal_phase_bottle_dynamic(
+            self.observations,
+            self.telemetry,
         )
         hold_samples = [
             item
@@ -2120,7 +2669,23 @@ class IsaacGrasp20cmBindings:
                 "coupling": self.coupling_readback,
                 "finger_drive": self.drive_readback,
                 "initial_pose": self.initial_pose_evidence,
+                "arm_phase_readback_tolerance_rad": (
+                    self.arm_phase_readback_tolerance_rad
+                ),
                 "trajectory": {
+                    "arm_trajectory_mode": self.arm_trajectory_mode,
+                    "phase_audits": self._trajectory_audit,
+                    "arm_acceleration_limits_rad_s2": (
+                        None
+                        if self.arm_acceleration_limits_rad_s2 is None
+                        else self.arm_acceleration_limits_rad_s2.tolist()
+                    ),
+                    "jerk_limit_status": (
+                        "NOT_SET_NO_EXACT_MODEL_OFFICIAL_VALUE"
+                        if self.arm_trajectory_mode
+                        == "LULA_CSPACE_ACCELERATION_LIMITED"
+                        else "NOT_APPLICABLE_LEGACY_BASELINE"
+                    ),
                     "additional_lift_margin_m": (
                         self.additional_lift_margin_m
                     ),
@@ -2247,6 +2812,7 @@ class IsaacGrasp20cmBindings:
         kinematic_attr.Set(True)
         self._physx_sim.flush_changes()
         self.command = self.initial_command.copy()
+        self.command_velocity = np.zeros_like(self.command)
         self.articulation.set_joint_positions(self.command)
         self.articulation.set_joint_velocities(
             np.zeros_like(self.command)
