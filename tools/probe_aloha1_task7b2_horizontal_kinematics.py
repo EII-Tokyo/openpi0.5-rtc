@@ -46,6 +46,10 @@ ROTATION_GATE_RAD = 0.005
 EXPECTED_EPISODE_SHA256 = "f073a21c6a790e738e36085d791482924a82832ca6d80cece04a26353b9fc745"
 EXPECTED_JOINT_MAP_SHA256 = "f56be097d859f7361b804705af6659e0d51d9e480d1c721a60040ab787530308"
 EXPECTED_BOTTLE_USD_SHA256 = "16427135f152ec951de2321fd689366d745a2dd389cbe260976631783952533e"
+GRASP_EDITOR_V2_REPORT = ROOT / "reports/aloha1_mapping/aloha1_grasp_editor_semantics_audit_v2.json"
+EXPECTED_GRASP_EDITOR_V2_REPORT_SHA256 = "61f2e23f54fca02d3b47b12a9f29f9b97446a1aa5e79049e73e7192db71416f9"
+COUPLING_AB_REPORT = ROOT / "reports/aloha1_mapping/aloha1_gripper_coupling_ab.json"
+EXPECTED_COUPLING_AB_REPORT_SHA256 = "df8a1857b7cd945fd38e9d0c921f736c766aadc854534eab6b04eac935f7f90c"
 SUPPLIER_CAD_CLEARANCE_REPORT = ROOT / "reports/aloha1_mapping/aloha1_supplier_cad_grasp_clearance.json"
 EXPECTED_SUPPLIER_CAD_CLEARANCE_REPORT_SHA256 = "9f23974af362dc92134a38633180360bfff8b54bc0a5eaefae8032e2240b91bc"
 SUPPLIER_CAD_CLEARANCE_SCREENSHOT_REVIEW = (
@@ -277,12 +281,13 @@ def _closest_opposing_points(
     )
 
 
-def _solve_adaptive_linear_ik(
+def solve_adaptive_linear_ik(
     *,
     solver: Any,
     frame_name: str,
     start_position: np.ndarray,
     end_position: np.ndarray,
+    start_orientation_wxyz: np.ndarray,
     orientation_wxyz: np.ndarray,
     start_q: np.ndarray,
     lower_limits: np.ndarray,
@@ -294,6 +299,28 @@ def _solve_adaptive_linear_ik(
     orientation_tolerance: float,
     maximum_segments: int = 512,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    from scipy.spatial.transform import Rotation
+    from scipy.spatial.transform import Slerp
+
+    start_orientation = np.asarray(start_orientation_wxyz, dtype=np.float64)
+    end_orientation = np.asarray(orientation_wxyz, dtype=np.float64)
+    orientation_keyframes = Rotation.from_quat(
+        [
+            [
+                start_orientation[1],
+                start_orientation[2],
+                start_orientation[3],
+                start_orientation[0],
+            ],
+            [
+                end_orientation[1],
+                end_orientation[2],
+                end_orientation[3],
+                end_orientation[0],
+            ],
+        ]
+    )
+    orientation_interpolator = Slerp([0.0, 1.0], orientation_keyframes)
     attempts: list[dict[str, Any]] = []
     segment_count = 1
     while segment_count <= maximum_segments:
@@ -304,10 +331,20 @@ def _solve_adaptive_linear_ik(
         for segment in range(1, segment_count + 1):
             fraction = segment / segment_count
             target = start_position + fraction * (end_position - start_position)
+            target_orientation_xyzw = orientation_interpolator([fraction]).as_quat()[0]
+            target_orientation = np.asarray(
+                [
+                    target_orientation_xyzw[3],
+                    target_orientation_xyzw[0],
+                    target_orientation_xyzw[1],
+                    target_orientation_xyzw[2],
+                ],
+                dtype=np.float64,
+            )
             solution, success = solver.compute_inverse_kinematics(
                 frame_name=frame_name,
                 target_position=target,
-                target_orientation=orientation_wxyz,
+                target_orientation=target_orientation,
                 warm_start=previous,
                 position_tolerance=position_tolerance,
                 orientation_tolerance=orientation_tolerance,
@@ -317,7 +354,32 @@ def _solve_adaptive_linear_ik(
             within_limits = bool(finite and np.all(solution >= lower_limits) and np.all(solution <= upper_limits))
             delta = solution - previous if finite else np.full(6, np.nan)
             velocity_ok = bool(finite and np.all(np.abs(delta) <= velocity_limits * physics_dt))
-            waypoint_status = "PASS" if success and finite and within_limits and velocity_ok else "FAIL"
+            fk_position_error_m = math.inf
+            fk_orientation_error_rad = math.inf
+            if finite:
+                fk_position, fk_rotation = solver.compute_forward_kinematics(
+                    frame_name,
+                    solution,
+                )
+                fk_position_error_m = float(np.linalg.norm(np.asarray(fk_position, dtype=np.float64) - target))
+                target_rotation = Rotation.from_quat(
+                    [
+                        target_orientation[1],
+                        target_orientation[2],
+                        target_orientation[3],
+                        target_orientation[0],
+                    ]
+                ).as_matrix()
+                fk_orientation_error_rad = _rotation_residual_rad(
+                    np.asarray(fk_rotation, dtype=np.float64),
+                    target_rotation,
+                )
+            fk_within_tolerance = bool(
+                fk_position_error_m <= position_tolerance and fk_orientation_error_rad <= orientation_tolerance
+            )
+            waypoint_status = (
+                "PASS" if success and finite and within_limits and velocity_ok and fk_within_tolerance else "FAIL"
+            )
             waypoints.append(
                 {
                     "phase": phase,
@@ -325,13 +387,16 @@ def _solve_adaptive_linear_ik(
                     "segment_count": segment_count,
                     "fraction": fraction,
                     "target_position_world_m": [float(value) for value in target],
-                    "target_orientation_world_wxyz": [float(value) for value in orientation_wxyz],
+                    "target_orientation_world_wxyz": [float(value) for value in target_orientation],
                     "joint_positions_rad": [float(value) for value in solution],
                     "joint_delta_rad": [float(value) for value in delta],
                     "solver_success": bool(success),
                     "finite": finite,
                     "within_limits": within_limits,
                     "velocity_ok": velocity_ok,
+                    "fk_position_error_m": fk_position_error_m,
+                    "fk_orientation_error_rad": fk_orientation_error_rad,
+                    "fk_within_tolerance": fk_within_tolerance,
                     "status": waypoint_status,
                 }
             )
@@ -343,6 +408,7 @@ def _solve_adaptive_linear_ik(
                     "finite": finite,
                     "within_limits": within_limits,
                     "velocity_ok": velocity_ok,
+                    "fk_within_tolerance": fk_within_tolerance,
                 }
                 break
             previous = solution
@@ -580,14 +646,12 @@ def main() -> int:
         if runtime_dof_order != expected_runtime_order:
             raise RuntimeError(f"runtime DOF order mismatch: {runtime_dof_order}")
 
-        cases = [
-            ("approved_home", DEFAULT_Q.copy()),
-            (
-                "validated_waist_positive",
-                DEFAULT_Q + np.asarray([0.05, 0.0, 0.0, 0.0, 0.0, 0.0]),
-            ),
-            ("approved_home_return", DEFAULT_Q.copy()),
-        ]
+        cases = [("approved_home", DEFAULT_Q.copy())]
+        for joint_index, joint_name in enumerate(EXPECTED_CSPACE):
+            for direction_name, delta in (("negative", -0.05), ("positive", 0.05)):
+                sample = DEFAULT_Q.copy()
+                sample[joint_index] += delta
+                cases.append((f"{joint_name}_{direction_name}", sample))
         fk_records = []
         for case_name, arm_q in cases:
             full_q = np.asarray(
@@ -775,6 +839,7 @@ def main() -> int:
         world_from_ee_exact = world_from_base @ fk_space(exact_lift_q)
         target_world_rotation = world_from_ee_exact[:3, :3]
         target_world_orientation = rot_matrices_to_quats(target_world_rotation)
+        current_world_orientation = target_world_orientation.copy()
         solver.set_robot_base_pose(
             np.zeros(3, dtype=np.float64),
             np.asarray([1.0, 0.0, 0.0, 0.0], dtype=np.float64),
@@ -856,13 +921,13 @@ def main() -> int:
         ee_from_contact = np.linalg.inv(gripper_link_from_ee) @ gripper_link_from_contact
         world_from_contact = world_from_ee_exact @ ee_from_contact
         contact_midpoint = world_from_contact[:3, 3]
-        gripper_line_world = world_from_ee_exact[:3, :3] @ np.asarray(
+        episode_gripper_line_world = world_from_ee_exact[:3, :3] @ np.asarray(
             clearance_frame["finger_line_axis_reference"],
             dtype=np.float64,
         )
-        gripper_line_xy = gripper_line_world.copy()
-        gripper_line_xy[2] = 0.0
-        bottle_axis_world = canonical_bottle_axis(gripper_line_xy)
+        episode_gripper_line_xy = episode_gripper_line_world.copy()
+        episode_gripper_line_xy[2] = 0.0
+        bottle_axis_world = canonical_bottle_axis(episode_gripper_line_xy)
         left_contact_reference = np.asarray(
             clearance_frame["contact_points_reference_m"]["left"],
             dtype=np.float64,
@@ -931,6 +996,60 @@ def main() -> int:
             placement.axis_unit,
             0.069,
         )
+
+        grasp_editor_report_path = GRASP_EDITOR_V2_REPORT.resolve(strict=True)
+        coupling_report_path = COUPLING_AB_REPORT.resolve(strict=True)
+        if _sha256(grasp_editor_report_path) != EXPECTED_GRASP_EDITOR_V2_REPORT_SHA256:
+            raise RuntimeError("Grasp Editor v2 report SHA-256 mismatch")
+        if _sha256(coupling_report_path) != EXPECTED_COUPLING_AB_REPORT_SHA256:
+            raise RuntimeError("gripper coupling A/B report SHA-256 mismatch")
+        grasp_editor_report = json.loads(grasp_editor_report_path.read_text(encoding="utf-8"))
+        coupling_report = json.loads(coupling_report_path.read_text(encoding="utf-8"))
+        if not (
+            grasp_editor_report["status"] == "PASS"
+            and grasp_editor_report["ik_diagnostic_allowed"] is True
+            and grasp_editor_report["final_asset_promotion_authorized"] is False
+        ):
+            raise RuntimeError("Grasp Editor v2 diagnostic gate is not passing")
+        if not (
+            coupling_report["status"] == "PASS"
+            and coupling_report["classification"] == "PHYSX_MIMIC_PRIMARY"
+            and coupling_report["passing_path"] == "official_symmetric_adapter"
+            and coupling_report["promotion_authorized"] is False
+        ):
+            raise RuntimeError("gripper coupling A/B diagnostic gate is not passing")
+        raw_yaml_path = Path(grasp_editor_report["native_raw_yaml"]["path"]).resolve(strict=True)
+        derived_yaml_path = Path(grasp_editor_report["derived_yaml"]["path"]).resolve(strict=True)
+        if _sha256(raw_yaml_path) != grasp_editor_report["native_raw_yaml"]["sha256"]:
+            raise RuntimeError("native Grasp Editor YAML SHA-256 mismatch")
+        if _sha256(derived_yaml_path) != grasp_editor_report["derived_yaml"]["sha256"]:
+            raise RuntimeError("derived Grasp Editor YAML SHA-256 mismatch")
+        raw_yaml = yaml.safe_load(raw_yaml_path.read_text(encoding="utf-8"))
+        raw_grasp = next(iter(raw_yaml["grasps"].values()))
+        raw_orientation = raw_grasp["orientation"]
+        object_from_gripper = np.eye(4, dtype=np.float64)
+        object_from_gripper[:3, :3] = quats_to_rot_matrices(
+            np.asarray(
+                [
+                    raw_orientation["w"],
+                    *raw_orientation["xyz"],
+                ],
+                dtype=np.float64,
+            )
+        )
+        object_from_gripper[:3, 3] = np.asarray(
+            raw_grasp["position"],
+            dtype=np.float64,
+        )
+        world_from_gripper = placement.matrix @ object_from_gripper
+        target_world_rotation = world_from_gripper[:3, :3]
+        target_world_orientation = rot_matrices_to_quats(target_world_rotation)
+        gripper_line_world = target_world_rotation @ np.asarray(
+            clearance_frame["finger_line_axis_reference"],
+            dtype=np.float64,
+        )
+        gripper_line_xy = gripper_line_world.copy()
+        gripper_line_xy[2] = 0.0
         geometry_gate = evaluate_geometry(
             axis_unit=placement.axis_unit,
             table_normal=[0.0, 0.0, 1.0],
@@ -941,8 +1060,7 @@ def main() -> int:
             approach_direction_gate_deg=3.0,
         )
         current_ee_position_array = world_from_ee_exact[:3, 3].copy()
-        link_to_contact_midpoint = contact_midpoint - current_ee_position_array
-        grasp_ee_position = np.asarray(bottle_grasp_point, dtype=np.float64) - link_to_contact_midpoint
+        grasp_ee_position = world_from_gripper[:3, 3].copy()
         finger_points = np.concatenate([left_points, right_points], axis=0)
         finger_relative_min_z = float(np.min(finger_points[:, 2] - current_ee_position_array[2]))
         bottle_top_z = float(np.max(bottle_points_world[:, 2]))
@@ -984,26 +1102,35 @@ def main() -> int:
                 "move_to_pregrasp",
                 current_ee_position_array,
                 pregrasp_ee_position,
+                current_world_orientation,
             ),
             (
                 "vertical_descent",
                 pregrasp_ee_position,
                 grasp_ee_position,
+                target_world_orientation,
             ),
             (
                 "vertical_lift",
                 grasp_ee_position,
                 lift_ee_position,
+                target_world_orientation,
             ),
         ]
         previous_q = episode_window.qpos[lift_index, :6].copy()
         ik_status = "PASS"
-        for phase_name, start_position, end_position in phase_specs:
-            phase_waypoints, phase_summary = _solve_adaptive_linear_ik(
+        for (
+            phase_name,
+            start_position,
+            end_position,
+            start_orientation,
+        ) in phase_specs:
+            phase_waypoints, phase_summary = solve_adaptive_linear_ik(
                 solver=solver,
                 frame_name=END_EFFECTOR_FRAME,
                 start_position=start_position,
                 end_position=end_position,
+                start_orientation_wxyz=start_orientation,
                 orientation_wxyz=target_world_orientation,
                 start_q=previous_q,
                 lower_limits=lower_limits,
@@ -1053,6 +1180,28 @@ def main() -> int:
                 "bottle_usd": {
                     "path": str(bottle_usd_path),
                     "sha256": EXPECTED_BOTTLE_USD_SHA256,
+                },
+                "grasp_editor_v2_semantics": {
+                    "path": str(grasp_editor_report_path),
+                    "sha256": EXPECTED_GRASP_EDITOR_V2_REPORT_SHA256,
+                    "required_status": "PASS",
+                },
+                "grasp_editor_v2_native_raw_yaml": {
+                    "path": str(raw_yaml_path),
+                    "sha256": grasp_editor_report["native_raw_yaml"]["sha256"],
+                    "pose_semantics": "T_O_G",
+                },
+                "grasp_editor_v2_derived_yaml": {
+                    "path": str(derived_yaml_path),
+                    "sha256": grasp_editor_report["derived_yaml"]["sha256"],
+                    "control_mapping": "DIAGNOSTIC_ONLY_NOT_FINAL_CONTROL_MAPPING",
+                },
+                "gripper_coupling_ab": {
+                    "path": str(coupling_report_path),
+                    "sha256": EXPECTED_COUPLING_AB_REPORT_SHA256,
+                    "classification": coupling_report["classification"],
+                    "passing_path": coupling_report["passing_path"],
+                    "promotion_authorized": coupling_report["promotion_authorized"],
                 },
                 "articulation_path": ARTICULATION_PATH,
                 "base_frame": "follower_left_base_link",
@@ -1147,6 +1296,8 @@ def main() -> int:
                     "orientation_world_wxyz": [float(value) for value in target_world_orientation],
                     "approach_direction_world": [0.0, 0.0, -1.0],
                     "lift_direction_world": [0.0, 0.0, 1.0],
+                    "source": "FROZEN_GRASP_EDITOR_V2_NATIVE_T_O_G_COMPOSED_WITH_HORIZONTAL_BOTTLE_T_W_O",
+                    "object_from_gripper": [[float(value) for value in row] for row in object_from_gripper],
                 },
             },
             "ik": {
@@ -1203,7 +1354,7 @@ def main() -> int:
                     "urdf_sha256": urdf_hash,
                 },
                 "official_api_evidence": {
-                    "source": "MCPJungle Gateway NVIDIA official Isaac capability",
+                    "source": "Direct NVIDIA official isaac-sim-mcp plus local Isaac 5.1 source",
                     "status": "QUERIED_AND_LOCAL_SOURCE_CROSS_CHECKED",
                     "symbols": [
                         (
