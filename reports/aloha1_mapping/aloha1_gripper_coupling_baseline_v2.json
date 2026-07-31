@@ -1,0 +1,162 @@
+{
+  "classification": "RESET_DEPENDENT",
+  "contract": {
+    "arm_q_rad": [
+      0.0,
+      -0.96,
+      1.16,
+      0.0,
+      -0.3,
+      0.0
+    ],
+    "articulation": "/World/follower_left/vx300s_left/root_joint",
+    "bottle": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/bottle_500ml/isaac/bottle_500ml_sim.usd",
+      "policy": "SESSION_LAYER_ONLY_GRAVITY_DISABLED_BASELINE_LOAD",
+      "sha256": "16427135f152ec951de2321fd689366d745a2dd389cbe260976631783952533e"
+    },
+    "dof_order": [
+      "waist",
+      "shoulder",
+      "elbow",
+      "forearm_roll",
+      "wrist_angle",
+      "wrist_rotate",
+      "gripper",
+      "left_finger",
+      "right_finger"
+    ],
+    "grasp_candidate": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/configs/aloha1_grasps/bottle500_horizontal_body_grasp.isaac_grasp.yaml",
+      "sha256": "b3307c86a44101eadd6ed2151722e7668bb7d644422378765d98eac906835cca"
+    },
+    "grasp_editor_pre_close_update_steps": 42,
+    "hold_steps": 120,
+    "left_close_speed_m_s": 0.02,
+    "left_close_target_m": 0.048316874538855845,
+    "mimic_policy": "UNCHANGED_PHYSX_MIMIC",
+    "mimic_tolerance_m": 0.001,
+    "minimum_fresh_runs_per_load_case": 5,
+    "open_fingers_m": [
+      0.057,
+      -0.057
+    ],
+    "physics_frequency_hz": 60,
+    "right_finger_commanded": false,
+    "solve_articulation_contact_last": true,
+    "stage": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/table_support_alignment/1.0/aloha1_table_support_aligned_workcell.usda",
+      "sha256": "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c"
+    },
+    "task8": "NOT_RUN"
+  },
+  "controlled_observations": {
+    "fresh_world_reset_maximum_impulse_ns": 4.6011998269861757e-05,
+    "fresh_world_reset_residual_m": 0.0008201375603675842,
+    "native_grasp_editor_maximum_impulse_ns": 0.0005472996575105919,
+    "native_grasp_editor_residual_m": 0.0017794594168663025,
+    "pre_close_42_update_probe": {
+      "reason": "The fresh World.reset path retained the 42 pre-close updates but remained below the 1 mm residual gate.",
+      "status": "REJECTED_AS_SOLE_EXPLANATION"
+    }
+  },
+  "current_stage_hash_matches_frozen": true,
+  "current_stage_sha256": "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c",
+  "evidence_scope": {
+    "engineering_inference": "RESET_DEPENDENT names the measured lifecycle boundary; it does not identify an internal PhysX or Grasp Editor implementation defect.",
+    "local_runtime_readback": [
+      "Isaac Sim 5.1.0.0",
+      "Kit 107.3.3",
+      "PhysX 107.3.26",
+      "Grasp Editor 2.0.20"
+    ],
+    "not_proven": [
+      "Internal solver defect",
+      "Correct final control mapping",
+      "Real-hardware force equivalence"
+    ],
+    "official_api_evidence": "Direct NVIDIA Isaac MCP was queried for Isaac 5.1 PhysxMimicJointAPI, drive, joint-state, and articulation readback examples before the runtime diagnostic."
+  },
+  "failure_reasons": [],
+  "fresh_world_reset": {
+    "bilateral_contact_all_runs": true,
+    "determinism_span_tolerance_m": 5e-05,
+    "deterministic": true,
+    "execution_boundaries": [
+      "FRESH_WORLD_RESET_HEADLESS"
+    ],
+    "fresh_process_count": 5,
+    "maximum_residual_m": 0.0008201375603675842,
+    "mean_residual_m": 0.0008201375603675842,
+    "mimic_gate": "PASS",
+    "minimum_residual_m": 0.0008201375603675842,
+    "population_stddev_m": 0.0,
+    "residual_span_m": 0.0,
+    "residuals_m": [
+      0.0008201375603675842,
+      0.0008201375603675842,
+      0.0008201375603675842,
+      0.0008201375603675842,
+      0.0008201375603675842
+    ],
+    "run_count": 5,
+    "signatures": [
+      "977e082f9a5cc082b514a44e1a28261a38116dc81e476602583b7066f0635886",
+      "977e082f9a5cc082b514a44e1a28261a38116dc81e476602583b7066f0635886",
+      "977e082f9a5cc082b514a44e1a28261a38116dc81e476602583b7066f0635886",
+      "977e082f9a5cc082b514a44e1a28261a38116dc81e476602583b7066f0635886",
+      "977e082f9a5cc082b514a44e1a28261a38116dc81e476602583b7066f0635886"
+    ]
+  },
+  "interpretation": "The residual depends on the runtime initialization/reset boundary. This does not prove a PhysX internal defect or authorize a final coupling change.",
+  "native_grasp_editor": {
+    "bilateral_contact_all_runs": true,
+    "determinism_span_tolerance_m": 5e-05,
+    "deterministic": true,
+    "execution_boundaries": [
+      "NATIVE_GRASP_EDITOR_GUI_EXTERNAL_CONTACT_SKIP_SIM"
+    ],
+    "fresh_process_count": 5,
+    "maximum_residual_m": 0.0017794594168663025,
+    "mean_residual_m": 0.0017794594168663025,
+    "mimic_gate": "FAIL",
+    "minimum_residual_m": 0.0017794594168663025,
+    "population_stddev_m": 0.0,
+    "residual_span_m": 0.0,
+    "residuals_m": [
+      0.0017794594168663025,
+      0.0017794594168663025,
+      0.0017794594168663025,
+      0.0017794594168663025,
+      0.0017794594168663025
+    ],
+    "run_count": 5,
+    "signatures": [
+      "c81bee1ae5ee89c5e4dc5cfad53d4813a704489231ab7b2ea2dc6589210bf6c0",
+      "c81bee1ae5ee89c5e4dc5cfad53d4813a704489231ab7b2ea2dc6589210bf6c0",
+      "c81bee1ae5ee89c5e4dc5cfad53d4813a704489231ab7b2ea2dc6589210bf6c0",
+      "c81bee1ae5ee89c5e4dc5cfad53d4813a704489231ab7b2ea2dc6589210bf6c0",
+      "c81bee1ae5ee89c5e4dc5cfad53d4813a704489231ab7b2ea2dc6589210bf6c0"
+    ]
+  },
+  "next_gate": "ISOLATED_COUPLING_AB",
+  "run_report_paths": {
+    "fresh_world_reset": [
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-official-gripper-unattended/stage2/fresh_world_reset/run00/run.json",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-official-gripper-unattended/stage2/fresh_world_reset/run01/run.json",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-official-gripper-unattended/stage2/fresh_world_reset/run02/run.json",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-official-gripper-unattended/stage2/fresh_world_reset/run03/run.json",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-official-gripper-unattended/stage2/fresh_world_reset/run04/run.json"
+    ],
+    "native_grasp_editor": [
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-official-gripper-unattended/stage2/native_gui/contact_run00/grasp_editor_variant_b_gui_report.json",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-official-gripper-unattended/stage2/native_gui/contact_run01/grasp_editor_variant_b_gui_report.json",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-official-gripper-unattended/stage2/native_gui/contact_run02/grasp_editor_variant_b_gui_report.json",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-official-gripper-unattended/stage2/native_gui/contact_run03/grasp_editor_variant_b_gui_report.json",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-official-gripper-unattended/stage2/native_gui/contact_run04/grasp_editor_variant_b_gui_report.json"
+    ]
+  },
+  "schema_version": 1,
+  "status": "PASS",
+  "task8": "NOT_RUN"
+}

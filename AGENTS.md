@@ -22,6 +22,27 @@ cd /home/eii/Documents/Notes/openpi0.5-rtc-reward-learning && npm run check:math
 - Real ALOHA hardware diagnostics, DYNAMIXEL Wizard, serial aliases, or any action that can touch physical motors:
   - Read `docs/agents/aloha_hardware_debug.md`.
   - Also read `docs/agents/remote_103_operations.md` if the action happens on `192.168.1.103`.
+- Any ALOHA hardware-parameter question or hardware-to-simulation mapping,
+  including motors, grippers, transmissions, limits, mass properties, control
+  modes, gains, current/PWM limits, sensors, or physical dimensions:
+  - Read `docs/agents/aloha_official_hardware_parameter_sources.md`.
+  - For the currently confirmed Stationary ALOHA follower, use the exact
+    Trossen Interbotix ViperX-300 6DOF / `aloha_vx300s` product and its exact
+    component models; do not substitute a generic ViperX, ALOHA 2, WidowX, or
+    another generation.
+  - Follow the mandatory source chain from the official ALOHA/Trossen product
+    page to the exact component manufacturer's official manual and the pinned
+    official driver/description source. Do not guess from photographs, generic
+    model knowledge, historical experiments, or configuration found on
+    `192.168.1.103`.
+  - Treat an absent value on one page as an incomplete source search, not as
+    evidence that the hardware parameter does not exist. Continue through the
+    exact product BOM and component-manufacturer documentation before declaring
+    a blocker.
+  - Every simulation parameter must have a traceable official definition,
+    exact-model source, units, and derivation. If that evidence is not yet
+    available, record `HARD_BLOCKER` and continue independent work; never fill
+    the gap with an inferred or convenient value.
 - Isaac Sim, Isaac Lab, Claude Code MCP, Codex MCP, or the local MCP installation on machine `101`:
   - Read `docs/agents/isaac_mcp_toolchain.md`.
   - NVIDIA official Isaac MCP is mandatory before modifying Isaac Sim code, USD stages, scene-generation scripts, physics setup, GUI controls, or Isaac runtime behavior. Read-only investigation does not require starting Isaac MCP unless the answer depends on official Isaac API behavior.

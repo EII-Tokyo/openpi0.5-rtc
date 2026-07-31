@@ -2,6 +2,12 @@
 
 Read this before using hardware diagnostics, serial devices, Dynamixel tools, or anything that can touch the real ALOHA robot on `192.168.1.103`.
 
+For product identity, component models, manufacturer specifications, and any
+hardware-to-simulation parameter mapping, also read
+`docs/agents/aloha_official_hardware_parameter_sources.md`. A machine-103
+configuration or register snapshot is runtime evidence, not a substitute for
+the exact-model official manufacturer source.
+
 - On `192.168.1.103`, the real ALOHA / Dynamixel GUI diagnostic tool is **DYNAMIXEL Wizard 2.0**.
 - Launch path:
   - `/home/eii/ROBOTIS/DynamixelWizard2/DynamixelWizard2.sh`

@@ -1,5 +1,10 @@
 # Isaac MCP Toolchain
 
+For any ALOHA hardware parameter used in Isaac, also read
+`docs/agents/aloha_official_hardware_parameter_sources.md`. Exact-model
+manufacturer evidence is mandatory, and machine-103 configuration must not be
+used to guess missing hardware or PhysX parameters.
+
 Read this before using, changing, debugging, or reinstalling Isaac Sim / Isaac Lab MCP tooling on machine `101`.
 
 ## Setup Paths

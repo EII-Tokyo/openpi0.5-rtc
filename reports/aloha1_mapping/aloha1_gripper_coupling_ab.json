@@ -1,0 +1,783 @@
+{
+  "classification": "PHYSX_MIMIC_PRIMARY",
+  "contact_equivalence": {
+    "classification": "ENGINEERING_DIAGNOSTIC_VALIDITY_GATE_NOT_REAL_HARDWARE_CALIBRATION",
+    "maximum_additional_penetration_m": 0.001,
+    "maximum_impulse_ratio": 10.0,
+    "measured_additional_penetration_m": 7.639446994289756e-05,
+    "measured_impulse_ratio": 1.7976133020374836,
+    "status": "PASS"
+  },
+  "evidence_scope": {
+    "direct_nvidia_mcp": "Isaac 5.1 drive/mimic/joint-state semantics queried before authoring the isolated adapter.",
+    "engineering_gate": "Contact-equivalence thresholds validate the intervention; they are not real-hardware calibration values.",
+    "official_source": "One physical gripper coordinate and +x/-x state mapping from the Stage 1 exact-model official-source audit.",
+    "runtime_readback": "Five fresh native GUI processes per variant on the frozen Stage."
+  },
+  "failure_reasons": [],
+  "frozen_stage": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/table_support_alignment/1.0/aloha1_table_support_aligned_workcell.usda",
+    "current_sha256": "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c",
+    "expected_sha256": "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c",
+    "unchanged": true
+  },
+  "mimic_tolerance_m": 0.001,
+  "next_gate": "GRASP_EDITOR_DIAGNOSTIC_ON_PASSING_PATH",
+  "passing_path": "official_symmetric_adapter",
+  "promotion_authorized": false,
+  "rejected_diagnostics": [
+    {
+      "maximum_impulse_ns": 0.6450559057324757,
+      "minimum_separation_m": -0.009414959698915482,
+      "name": "DIRECT_RIGHT_JOINT_STATE_PROJECTION",
+      "report_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-official-gripper-unattended/stage3/symmetric_probe00/grasp_editor_variant_b_gui_report.json",
+      "residual_m": 0.0,
+      "status": "REJECTED_CONTACT_EQUIVALENCE_FAILED"
+    }
+  ],
+  "schema_version": 1,
+  "status": "PASS",
+  "task8": "NOT_RUN",
+  "trials": [
+    {
+      "bilateral_contact": true,
+      "coupling_runtime_readback": {
+        "active_edit_target": "anon:0x6065373f7c40:ALOHA1GraspEditorVariantBNativeGui",
+        "applied_schemas_after": [
+          "PhysicsJointStateAPI:linear",
+          "PhysxJointAPI",
+          "PhysxMimicJointAPI:rotY",
+          "IsaacJointAPI"
+        ],
+        "applied_schemas_before": [
+          "PhysicsJointStateAPI:linear",
+          "PhysxJointAPI",
+          "PhysxMimicJointAPI:rotY",
+          "IsaacJointAPI"
+        ],
+        "bottle_changed": false,
+        "changed_variable": "NONE_BASELINE",
+        "classification": "UNCHANGED_CURRENT_PHYSX_MIMIC_BASELINE",
+        "collider_changed": false,
+        "copied_left_drive_parameters": null,
+        "drive_magnitude_changed": false,
+        "friction_changed": false,
+        "initial_pose_changed": false,
+        "mimic_instance": "rotY",
+        "mimic_present_after": true,
+        "right_drive_added_as_coupling_adapter": false,
+        "right_finger_commanded_as_hardware_actuator": false,
+        "right_joint_path": "/World/follower_left/vx300s_left/joints/right_finger",
+        "right_target_formula": null,
+        "runtime_adapter_policy": "UNCHANGED_PHYSX_MIMIC",
+        "solver_changed": false,
+        "stage_sha256": "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c",
+        "task8": "NOT_RUN",
+        "timestep_changed": false,
+        "variant": "current_physx_mimic"
+      },
+      "fresh_process": true,
+      "maximum_impulse_ns": 0.0005472996575105919,
+      "mimic_residual_abs_m": 0.0017794594168663025,
+      "minimum_separation_m": -0.00012263594544492662,
+      "native_gate": {
+        "bilateral_contact": "PASS",
+        "derived_export": "PASS",
+        "execution_mode": "EXTERNAL_CONTACT_SKIP_SIM",
+        "failure_reasons": [
+          "MIMIC_ACCURACY_FAILED"
+        ],
+        "mimic_accuracy": "FAIL",
+        "raw_export": "PASS",
+        "status": "FAIL"
+      },
+      "native_report_status": "FAIL",
+      "report_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-official-gripper-unattended/stage3/formal/current_physx_mimic/run00/grasp_editor_variant_b_gui_report.json",
+      "run_index": 0,
+      "single_variable_contract": true,
+      "source_stage_unchanged": true,
+      "stage_sha256": "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c",
+      "status": "PASS",
+      "variant": "current_physx_mimic"
+    },
+    {
+      "bilateral_contact": true,
+      "coupling_runtime_readback": {
+        "active_edit_target": "anon:0x5c21f58d74a0:ALOHA1GraspEditorVariantBNativeGui",
+        "applied_schemas_after": [
+          "PhysicsJointStateAPI:linear",
+          "PhysxJointAPI",
+          "PhysxMimicJointAPI:rotY",
+          "IsaacJointAPI"
+        ],
+        "applied_schemas_before": [
+          "PhysicsJointStateAPI:linear",
+          "PhysxJointAPI",
+          "PhysxMimicJointAPI:rotY",
+          "IsaacJointAPI"
+        ],
+        "bottle_changed": false,
+        "changed_variable": "NONE_BASELINE",
+        "classification": "UNCHANGED_CURRENT_PHYSX_MIMIC_BASELINE",
+        "collider_changed": false,
+        "copied_left_drive_parameters": null,
+        "drive_magnitude_changed": false,
+        "friction_changed": false,
+        "initial_pose_changed": false,
+        "mimic_instance": "rotY",
+        "mimic_present_after": true,
+        "right_drive_added_as_coupling_adapter": false,
+        "right_finger_commanded_as_hardware_actuator": false,
+        "right_joint_path": "/World/follower_left/vx300s_left/joints/right_finger",
+        "right_target_formula": null,
+        "runtime_adapter_policy": "UNCHANGED_PHYSX_MIMIC",
+        "solver_changed": false,
+        "stage_sha256": "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c",
+        "task8": "NOT_RUN",
+        "timestep_changed": false,
+        "variant": "current_physx_mimic"
+      },
+      "fresh_process": true,
+      "maximum_impulse_ns": 0.0005472996575105919,
+      "mimic_residual_abs_m": 0.0017794594168663025,
+      "minimum_separation_m": -0.00012263594544492662,
+      "native_gate": {
+        "bilateral_contact": "PASS",
+        "derived_export": "PASS",
+        "execution_mode": "EXTERNAL_CONTACT_SKIP_SIM",
+        "failure_reasons": [
+          "MIMIC_ACCURACY_FAILED"
+        ],
+        "mimic_accuracy": "FAIL",
+        "raw_export": "PASS",
+        "status": "FAIL"
+      },
+      "native_report_status": "FAIL",
+      "report_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-official-gripper-unattended/stage3/formal/current_physx_mimic/run01/grasp_editor_variant_b_gui_report.json",
+      "run_index": 1,
+      "single_variable_contract": true,
+      "source_stage_unchanged": true,
+      "stage_sha256": "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c",
+      "status": "PASS",
+      "variant": "current_physx_mimic"
+    },
+    {
+      "bilateral_contact": true,
+      "coupling_runtime_readback": {
+        "active_edit_target": "anon:0x646c98ccc6f0:ALOHA1GraspEditorVariantBNativeGui",
+        "applied_schemas_after": [
+          "PhysicsJointStateAPI:linear",
+          "PhysxJointAPI",
+          "PhysxMimicJointAPI:rotY",
+          "IsaacJointAPI"
+        ],
+        "applied_schemas_before": [
+          "PhysicsJointStateAPI:linear",
+          "PhysxJointAPI",
+          "PhysxMimicJointAPI:rotY",
+          "IsaacJointAPI"
+        ],
+        "bottle_changed": false,
+        "changed_variable": "NONE_BASELINE",
+        "classification": "UNCHANGED_CURRENT_PHYSX_MIMIC_BASELINE",
+        "collider_changed": false,
+        "copied_left_drive_parameters": null,
+        "drive_magnitude_changed": false,
+        "friction_changed": false,
+        "initial_pose_changed": false,
+        "mimic_instance": "rotY",
+        "mimic_present_after": true,
+        "right_drive_added_as_coupling_adapter": false,
+        "right_finger_commanded_as_hardware_actuator": false,
+        "right_joint_path": "/World/follower_left/vx300s_left/joints/right_finger",
+        "right_target_formula": null,
+        "runtime_adapter_policy": "UNCHANGED_PHYSX_MIMIC",
+        "solver_changed": false,
+        "stage_sha256": "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c",
+        "task8": "NOT_RUN",
+        "timestep_changed": false,
+        "variant": "current_physx_mimic"
+      },
+      "fresh_process": true,
+      "maximum_impulse_ns": 0.0005472996575105919,
+      "mimic_residual_abs_m": 0.0017794594168663025,
+      "minimum_separation_m": -0.00012263594544492662,
+      "native_gate": {
+        "bilateral_contact": "PASS",
+        "derived_export": "PASS",
+        "execution_mode": "EXTERNAL_CONTACT_SKIP_SIM",
+        "failure_reasons": [
+          "MIMIC_ACCURACY_FAILED"
+        ],
+        "mimic_accuracy": "FAIL",
+        "raw_export": "PASS",
+        "status": "FAIL"
+      },
+      "native_report_status": "FAIL",
+      "report_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-official-gripper-unattended/stage3/formal/current_physx_mimic/run02/grasp_editor_variant_b_gui_report.json",
+      "run_index": 2,
+      "single_variable_contract": true,
+      "source_stage_unchanged": true,
+      "stage_sha256": "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c",
+      "status": "PASS",
+      "variant": "current_physx_mimic"
+    },
+    {
+      "bilateral_contact": true,
+      "coupling_runtime_readback": {
+        "active_edit_target": "anon:0x565eb23e9a60:ALOHA1GraspEditorVariantBNativeGui",
+        "applied_schemas_after": [
+          "PhysicsJointStateAPI:linear",
+          "PhysxJointAPI",
+          "PhysxMimicJointAPI:rotY",
+          "IsaacJointAPI"
+        ],
+        "applied_schemas_before": [
+          "PhysicsJointStateAPI:linear",
+          "PhysxJointAPI",
+          "PhysxMimicJointAPI:rotY",
+          "IsaacJointAPI"
+        ],
+        "bottle_changed": false,
+        "changed_variable": "NONE_BASELINE",
+        "classification": "UNCHANGED_CURRENT_PHYSX_MIMIC_BASELINE",
+        "collider_changed": false,
+        "copied_left_drive_parameters": null,
+        "drive_magnitude_changed": false,
+        "friction_changed": false,
+        "initial_pose_changed": false,
+        "mimic_instance": "rotY",
+        "mimic_present_after": true,
+        "right_drive_added_as_coupling_adapter": false,
+        "right_finger_commanded_as_hardware_actuator": false,
+        "right_joint_path": "/World/follower_left/vx300s_left/joints/right_finger",
+        "right_target_formula": null,
+        "runtime_adapter_policy": "UNCHANGED_PHYSX_MIMIC",
+        "solver_changed": false,
+        "stage_sha256": "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c",
+        "task8": "NOT_RUN",
+        "timestep_changed": false,
+        "variant": "current_physx_mimic"
+      },
+      "fresh_process": true,
+      "maximum_impulse_ns": 0.0005472996575105919,
+      "mimic_residual_abs_m": 0.0017794594168663025,
+      "minimum_separation_m": -0.00012263594544492662,
+      "native_gate": {
+        "bilateral_contact": "PASS",
+        "derived_export": "PASS",
+        "execution_mode": "EXTERNAL_CONTACT_SKIP_SIM",
+        "failure_reasons": [
+          "MIMIC_ACCURACY_FAILED"
+        ],
+        "mimic_accuracy": "FAIL",
+        "raw_export": "PASS",
+        "status": "FAIL"
+      },
+      "native_report_status": "FAIL",
+      "report_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-official-gripper-unattended/stage3/formal/current_physx_mimic/run03/grasp_editor_variant_b_gui_report.json",
+      "run_index": 3,
+      "single_variable_contract": true,
+      "source_stage_unchanged": true,
+      "stage_sha256": "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c",
+      "status": "PASS",
+      "variant": "current_physx_mimic"
+    },
+    {
+      "bilateral_contact": true,
+      "coupling_runtime_readback": {
+        "active_edit_target": "anon:0x64fde7053e30:ALOHA1GraspEditorVariantBNativeGui",
+        "applied_schemas_after": [
+          "PhysicsJointStateAPI:linear",
+          "PhysxJointAPI",
+          "PhysxMimicJointAPI:rotY",
+          "IsaacJointAPI"
+        ],
+        "applied_schemas_before": [
+          "PhysicsJointStateAPI:linear",
+          "PhysxJointAPI",
+          "PhysxMimicJointAPI:rotY",
+          "IsaacJointAPI"
+        ],
+        "bottle_changed": false,
+        "changed_variable": "NONE_BASELINE",
+        "classification": "UNCHANGED_CURRENT_PHYSX_MIMIC_BASELINE",
+        "collider_changed": false,
+        "copied_left_drive_parameters": null,
+        "drive_magnitude_changed": false,
+        "friction_changed": false,
+        "initial_pose_changed": false,
+        "mimic_instance": "rotY",
+        "mimic_present_after": true,
+        "right_drive_added_as_coupling_adapter": false,
+        "right_finger_commanded_as_hardware_actuator": false,
+        "right_joint_path": "/World/follower_left/vx300s_left/joints/right_finger",
+        "right_target_formula": null,
+        "runtime_adapter_policy": "UNCHANGED_PHYSX_MIMIC",
+        "solver_changed": false,
+        "stage_sha256": "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c",
+        "task8": "NOT_RUN",
+        "timestep_changed": false,
+        "variant": "current_physx_mimic"
+      },
+      "fresh_process": true,
+      "maximum_impulse_ns": 0.0005472996575105919,
+      "mimic_residual_abs_m": 0.0017794594168663025,
+      "minimum_separation_m": -0.00012263594544492662,
+      "native_gate": {
+        "bilateral_contact": "PASS",
+        "derived_export": "PASS",
+        "execution_mode": "EXTERNAL_CONTACT_SKIP_SIM",
+        "failure_reasons": [
+          "MIMIC_ACCURACY_FAILED"
+        ],
+        "mimic_accuracy": "FAIL",
+        "raw_export": "PASS",
+        "status": "FAIL"
+      },
+      "native_report_status": "FAIL",
+      "report_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-official-gripper-unattended/stage3/formal/current_physx_mimic/run04/grasp_editor_variant_b_gui_report.json",
+      "run_index": 4,
+      "single_variable_contract": true,
+      "source_stage_unchanged": true,
+      "stage_sha256": "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c",
+      "status": "PASS",
+      "variant": "current_physx_mimic"
+    },
+    {
+      "bilateral_contact": true,
+      "coupling_runtime_readback": {
+        "active_edit_target": "anon:0x616764626930:ALOHA1GraspEditorVariantBNativeGui",
+        "applied_schemas_after": [
+          "PhysicsDriveAPI:linear",
+          "PhysicsJointStateAPI:linear",
+          "PhysxJointAPI",
+          "IsaacJointAPI"
+        ],
+        "applied_schemas_before": [
+          "PhysicsJointStateAPI:linear",
+          "PhysxJointAPI",
+          "PhysxMimicJointAPI:rotY",
+          "IsaacJointAPI"
+        ],
+        "bottle_changed": false,
+        "changed_variable": "COUPLING_REPRESENTATION_ONLY",
+        "classification": "DIAGNOSTIC_ONLY_NOT_FINAL_CONTROL_MAPPING",
+        "collider_changed": false,
+        "copied_left_drive_parameters": {
+          "damping": 0.10000000149011612,
+          "max_force": 5.0,
+          "stiffness": 625.0,
+          "target_position": 0.022390000522136688,
+          "target_velocity": 0.0,
+          "type": "acceleration"
+        },
+        "drive_magnitude_changed": false,
+        "friction_changed": false,
+        "initial_pose_changed": false,
+        "mimic_instance": "rotY",
+        "mimic_present_after": false,
+        "right_drive_added_as_coupling_adapter": true,
+        "right_finger_commanded_as_hardware_actuator": false,
+        "right_joint_path": "/World/follower_left/vx300s_left/joints/right_finger",
+        "right_target_formula": "q_right=-q_left",
+        "runtime_adapter_policy": "REMOVE_RIGHT_MIMIC_IN_SESSION_LAYER_COPY_UNCHANGED_LEFT_DRIVE_PARAMETERS_AND_DISTRIBUTE_ONE_COMMAND_AS_PLUS_MINUS_TARGETS",
+        "solver_changed": false,
+        "stage_sha256": "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c",
+        "task8": "NOT_RUN",
+        "timestep_changed": false,
+        "variant": "official_symmetric_adapter"
+      },
+      "fresh_process": true,
+      "maximum_impulse_ns": 0.0009838331445415989,
+      "mimic_residual_abs_m": 2.390146255493164e-05,
+      "minimum_separation_m": -0.00019903041538782418,
+      "native_gate": {
+        "bilateral_contact": "PASS",
+        "derived_export": "PASS",
+        "execution_mode": "EXTERNAL_CONTACT_SKIP_SIM",
+        "failure_reasons": [],
+        "mimic_accuracy": "PASS",
+        "raw_export": "PASS",
+        "status": "PASS"
+      },
+      "native_report_status": "PASS",
+      "report_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-official-gripper-unattended/stage3/formal/official_symmetric_adapter/run00/grasp_editor_variant_b_gui_report.json",
+      "run_index": 0,
+      "single_variable_contract": true,
+      "source_stage_unchanged": true,
+      "stage_sha256": "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c",
+      "status": "PASS",
+      "variant": "official_symmetric_adapter"
+    },
+    {
+      "bilateral_contact": true,
+      "coupling_runtime_readback": {
+        "active_edit_target": "anon:0x60403613bbf0:ALOHA1GraspEditorVariantBNativeGui",
+        "applied_schemas_after": [
+          "PhysicsDriveAPI:linear",
+          "PhysicsJointStateAPI:linear",
+          "PhysxJointAPI",
+          "IsaacJointAPI"
+        ],
+        "applied_schemas_before": [
+          "PhysicsJointStateAPI:linear",
+          "PhysxJointAPI",
+          "PhysxMimicJointAPI:rotY",
+          "IsaacJointAPI"
+        ],
+        "bottle_changed": false,
+        "changed_variable": "COUPLING_REPRESENTATION_ONLY",
+        "classification": "DIAGNOSTIC_ONLY_NOT_FINAL_CONTROL_MAPPING",
+        "collider_changed": false,
+        "copied_left_drive_parameters": {
+          "damping": 0.10000000149011612,
+          "max_force": 5.0,
+          "stiffness": 625.0,
+          "target_position": 0.022390000522136688,
+          "target_velocity": 0.0,
+          "type": "acceleration"
+        },
+        "drive_magnitude_changed": false,
+        "friction_changed": false,
+        "initial_pose_changed": false,
+        "mimic_instance": "rotY",
+        "mimic_present_after": false,
+        "right_drive_added_as_coupling_adapter": true,
+        "right_finger_commanded_as_hardware_actuator": false,
+        "right_joint_path": "/World/follower_left/vx300s_left/joints/right_finger",
+        "right_target_formula": "q_right=-q_left",
+        "runtime_adapter_policy": "REMOVE_RIGHT_MIMIC_IN_SESSION_LAYER_COPY_UNCHANGED_LEFT_DRIVE_PARAMETERS_AND_DISTRIBUTE_ONE_COMMAND_AS_PLUS_MINUS_TARGETS",
+        "solver_changed": false,
+        "stage_sha256": "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c",
+        "task8": "NOT_RUN",
+        "timestep_changed": false,
+        "variant": "official_symmetric_adapter"
+      },
+      "fresh_process": true,
+      "maximum_impulse_ns": 0.0009838331445415989,
+      "mimic_residual_abs_m": 2.390146255493164e-05,
+      "minimum_separation_m": -0.00019903041538782418,
+      "native_gate": {
+        "bilateral_contact": "PASS",
+        "derived_export": "PASS",
+        "execution_mode": "EXTERNAL_CONTACT_SKIP_SIM",
+        "failure_reasons": [],
+        "mimic_accuracy": "PASS",
+        "raw_export": "PASS",
+        "status": "PASS"
+      },
+      "native_report_status": "PASS",
+      "report_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-official-gripper-unattended/stage3/formal/official_symmetric_adapter/run01/grasp_editor_variant_b_gui_report.json",
+      "run_index": 1,
+      "single_variable_contract": true,
+      "source_stage_unchanged": true,
+      "stage_sha256": "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c",
+      "status": "PASS",
+      "variant": "official_symmetric_adapter"
+    },
+    {
+      "bilateral_contact": true,
+      "coupling_runtime_readback": {
+        "active_edit_target": "anon:0x5cfe24fb3410:ALOHA1GraspEditorVariantBNativeGui",
+        "applied_schemas_after": [
+          "PhysicsDriveAPI:linear",
+          "PhysicsJointStateAPI:linear",
+          "PhysxJointAPI",
+          "IsaacJointAPI"
+        ],
+        "applied_schemas_before": [
+          "PhysicsJointStateAPI:linear",
+          "PhysxJointAPI",
+          "PhysxMimicJointAPI:rotY",
+          "IsaacJointAPI"
+        ],
+        "bottle_changed": false,
+        "changed_variable": "COUPLING_REPRESENTATION_ONLY",
+        "classification": "DIAGNOSTIC_ONLY_NOT_FINAL_CONTROL_MAPPING",
+        "collider_changed": false,
+        "copied_left_drive_parameters": {
+          "damping": 0.10000000149011612,
+          "max_force": 5.0,
+          "stiffness": 625.0,
+          "target_position": 0.022390000522136688,
+          "target_velocity": 0.0,
+          "type": "acceleration"
+        },
+        "drive_magnitude_changed": false,
+        "friction_changed": false,
+        "initial_pose_changed": false,
+        "mimic_instance": "rotY",
+        "mimic_present_after": false,
+        "right_drive_added_as_coupling_adapter": true,
+        "right_finger_commanded_as_hardware_actuator": false,
+        "right_joint_path": "/World/follower_left/vx300s_left/joints/right_finger",
+        "right_target_formula": "q_right=-q_left",
+        "runtime_adapter_policy": "REMOVE_RIGHT_MIMIC_IN_SESSION_LAYER_COPY_UNCHANGED_LEFT_DRIVE_PARAMETERS_AND_DISTRIBUTE_ONE_COMMAND_AS_PLUS_MINUS_TARGETS",
+        "solver_changed": false,
+        "stage_sha256": "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c",
+        "task8": "NOT_RUN",
+        "timestep_changed": false,
+        "variant": "official_symmetric_adapter"
+      },
+      "fresh_process": true,
+      "maximum_impulse_ns": 0.0009838331445415989,
+      "mimic_residual_abs_m": 2.390146255493164e-05,
+      "minimum_separation_m": -0.00019903041538782418,
+      "native_gate": {
+        "bilateral_contact": "PASS",
+        "derived_export": "PASS",
+        "execution_mode": "EXTERNAL_CONTACT_SKIP_SIM",
+        "failure_reasons": [],
+        "mimic_accuracy": "PASS",
+        "raw_export": "PASS",
+        "status": "PASS"
+      },
+      "native_report_status": "PASS",
+      "report_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-official-gripper-unattended/stage3/formal/official_symmetric_adapter/run02/grasp_editor_variant_b_gui_report.json",
+      "run_index": 2,
+      "single_variable_contract": true,
+      "source_stage_unchanged": true,
+      "stage_sha256": "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c",
+      "status": "PASS",
+      "variant": "official_symmetric_adapter"
+    },
+    {
+      "bilateral_contact": true,
+      "coupling_runtime_readback": {
+        "active_edit_target": "anon:0x5fe655c24c00:ALOHA1GraspEditorVariantBNativeGui",
+        "applied_schemas_after": [
+          "PhysicsDriveAPI:linear",
+          "PhysicsJointStateAPI:linear",
+          "PhysxJointAPI",
+          "IsaacJointAPI"
+        ],
+        "applied_schemas_before": [
+          "PhysicsJointStateAPI:linear",
+          "PhysxJointAPI",
+          "PhysxMimicJointAPI:rotY",
+          "IsaacJointAPI"
+        ],
+        "bottle_changed": false,
+        "changed_variable": "COUPLING_REPRESENTATION_ONLY",
+        "classification": "DIAGNOSTIC_ONLY_NOT_FINAL_CONTROL_MAPPING",
+        "collider_changed": false,
+        "copied_left_drive_parameters": {
+          "damping": 0.10000000149011612,
+          "max_force": 5.0,
+          "stiffness": 625.0,
+          "target_position": 0.022390000522136688,
+          "target_velocity": 0.0,
+          "type": "acceleration"
+        },
+        "drive_magnitude_changed": false,
+        "friction_changed": false,
+        "initial_pose_changed": false,
+        "mimic_instance": "rotY",
+        "mimic_present_after": false,
+        "right_drive_added_as_coupling_adapter": true,
+        "right_finger_commanded_as_hardware_actuator": false,
+        "right_joint_path": "/World/follower_left/vx300s_left/joints/right_finger",
+        "right_target_formula": "q_right=-q_left",
+        "runtime_adapter_policy": "REMOVE_RIGHT_MIMIC_IN_SESSION_LAYER_COPY_UNCHANGED_LEFT_DRIVE_PARAMETERS_AND_DISTRIBUTE_ONE_COMMAND_AS_PLUS_MINUS_TARGETS",
+        "solver_changed": false,
+        "stage_sha256": "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c",
+        "task8": "NOT_RUN",
+        "timestep_changed": false,
+        "variant": "official_symmetric_adapter"
+      },
+      "fresh_process": true,
+      "maximum_impulse_ns": 0.0009838331445415989,
+      "mimic_residual_abs_m": 2.390146255493164e-05,
+      "minimum_separation_m": -0.00019903041538782418,
+      "native_gate": {
+        "bilateral_contact": "PASS",
+        "derived_export": "PASS",
+        "execution_mode": "EXTERNAL_CONTACT_SKIP_SIM",
+        "failure_reasons": [],
+        "mimic_accuracy": "PASS",
+        "raw_export": "PASS",
+        "status": "PASS"
+      },
+      "native_report_status": "PASS",
+      "report_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-official-gripper-unattended/stage3/formal/official_symmetric_adapter/run03/grasp_editor_variant_b_gui_report.json",
+      "run_index": 3,
+      "single_variable_contract": true,
+      "source_stage_unchanged": true,
+      "stage_sha256": "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c",
+      "status": "PASS",
+      "variant": "official_symmetric_adapter"
+    },
+    {
+      "bilateral_contact": true,
+      "coupling_runtime_readback": {
+        "active_edit_target": "anon:0x574f4ed42480:ALOHA1GraspEditorVariantBNativeGui",
+        "applied_schemas_after": [
+          "PhysicsDriveAPI:linear",
+          "PhysicsJointStateAPI:linear",
+          "PhysxJointAPI",
+          "IsaacJointAPI"
+        ],
+        "applied_schemas_before": [
+          "PhysicsJointStateAPI:linear",
+          "PhysxJointAPI",
+          "PhysxMimicJointAPI:rotY",
+          "IsaacJointAPI"
+        ],
+        "bottle_changed": false,
+        "changed_variable": "COUPLING_REPRESENTATION_ONLY",
+        "classification": "DIAGNOSTIC_ONLY_NOT_FINAL_CONTROL_MAPPING",
+        "collider_changed": false,
+        "copied_left_drive_parameters": {
+          "damping": 0.10000000149011612,
+          "max_force": 5.0,
+          "stiffness": 625.0,
+          "target_position": 0.022390000522136688,
+          "target_velocity": 0.0,
+          "type": "acceleration"
+        },
+        "drive_magnitude_changed": false,
+        "friction_changed": false,
+        "initial_pose_changed": false,
+        "mimic_instance": "rotY",
+        "mimic_present_after": false,
+        "right_drive_added_as_coupling_adapter": true,
+        "right_finger_commanded_as_hardware_actuator": false,
+        "right_joint_path": "/World/follower_left/vx300s_left/joints/right_finger",
+        "right_target_formula": "q_right=-q_left",
+        "runtime_adapter_policy": "REMOVE_RIGHT_MIMIC_IN_SESSION_LAYER_COPY_UNCHANGED_LEFT_DRIVE_PARAMETERS_AND_DISTRIBUTE_ONE_COMMAND_AS_PLUS_MINUS_TARGETS",
+        "solver_changed": false,
+        "stage_sha256": "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c",
+        "task8": "NOT_RUN",
+        "timestep_changed": false,
+        "variant": "official_symmetric_adapter"
+      },
+      "fresh_process": true,
+      "maximum_impulse_ns": 0.0009838331445415989,
+      "mimic_residual_abs_m": 2.390146255493164e-05,
+      "minimum_separation_m": -0.00019903041538782418,
+      "native_gate": {
+        "bilateral_contact": "PASS",
+        "derived_export": "PASS",
+        "execution_mode": "EXTERNAL_CONTACT_SKIP_SIM",
+        "failure_reasons": [],
+        "mimic_accuracy": "PASS",
+        "raw_export": "PASS",
+        "status": "PASS"
+      },
+      "native_report_status": "PASS",
+      "report_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-official-gripper-unattended/stage3/formal/official_symmetric_adapter/run04/grasp_editor_variant_b_gui_report.json",
+      "run_index": 4,
+      "single_variable_contract": true,
+      "source_stage_unchanged": true,
+      "stage_sha256": "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c",
+      "status": "PASS",
+      "variant": "official_symmetric_adapter"
+    },
+    {
+      "bilateral_contact": true,
+      "coupling_runtime_readback": {
+        "active_edit_target": "anon:0x5872a3958cf0:ALOHA1GraspEditorVariantBNativeGui",
+        "applied_schemas_after": [
+          "PhysicsDriveAPI:linear",
+          "PhysicsJointStateAPI:linear",
+          "PhysxJointAPI",
+          "IsaacJointAPI"
+        ],
+        "applied_schemas_before": [
+          "PhysicsJointStateAPI:linear",
+          "PhysxJointAPI",
+          "PhysxMimicJointAPI:rotY",
+          "IsaacJointAPI"
+        ],
+        "bottle_changed": false,
+        "changed_variable": "COUPLING_REPRESENTATION_ONLY",
+        "classification": "DIAGNOSTIC_ONLY_NOT_FINAL_CONTROL_MAPPING",
+        "collider_changed": false,
+        "copied_left_drive_parameters": {
+          "damping": 0.10000000149011612,
+          "max_force": 5.0,
+          "stiffness": 625.0,
+          "target_position": 0.022390000522136688,
+          "target_velocity": 0.0,
+          "type": "acceleration"
+        },
+        "drive_magnitude_changed": false,
+        "friction_changed": false,
+        "initial_pose_changed": false,
+        "mimic_instance": "rotY",
+        "mimic_present_after": false,
+        "right_drive_added_as_coupling_adapter": true,
+        "right_finger_commanded_as_hardware_actuator": false,
+        "right_joint_path": "/World/follower_left/vx300s_left/joints/right_finger",
+        "right_target_formula": "q_right=-q_left",
+        "runtime_adapter_policy": "REMOVE_RIGHT_MIMIC_IN_SESSION_LAYER_COPY_UNCHANGED_LEFT_DRIVE_PARAMETERS_AND_DISTRIBUTE_ONE_COMMAND_AS_PLUS_MINUS_TARGETS",
+        "solver_changed": false,
+        "stage_sha256": "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c",
+        "task8": "NOT_RUN",
+        "timestep_changed": false,
+        "variant": "official_symmetric_adapter"
+      },
+      "fresh_process": true,
+      "maximum_impulse_ns": 0.0009838331445415989,
+      "mimic_residual_abs_m": 2.390146255493164e-05,
+      "minimum_separation_m": -0.00019903041538782418,
+      "native_gate": {
+        "bilateral_contact": "PASS",
+        "derived_export": "PASS",
+        "execution_mode": "EXTERNAL_CONTACT_SKIP_SIM",
+        "failure_reasons": [],
+        "mimic_accuracy": "PASS",
+        "raw_export": "PASS",
+        "status": "PASS"
+      },
+      "native_report_status": "PASS",
+      "report_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-official-gripper-unattended/stage3/formal/official_symmetric_adapter/run05/grasp_editor_variant_b_gui_report.json",
+      "run_index": 5,
+      "single_variable_contract": true,
+      "source_stage_unchanged": true,
+      "stage_sha256": "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c",
+      "status": "PASS",
+      "variant": "official_symmetric_adapter"
+    }
+  ],
+  "variants": {
+    "current_physx_mimic": {
+      "bilateral_contact_all_runs": true,
+      "deterministic": true,
+      "fresh_process_count": 5,
+      "maximum_impulse_ns": 0.0005472996575105919,
+      "mean_residual_m": 0.0017794594168663025,
+      "mimic_gate": "FAIL",
+      "minimum_separation_m": -0.00012263594544492662,
+      "residual_span_m": 0.0,
+      "residuals_m": [
+        0.0017794594168663025,
+        0.0017794594168663025,
+        0.0017794594168663025,
+        0.0017794594168663025,
+        0.0017794594168663025
+      ],
+      "run_count": 5
+    },
+    "official_symmetric_adapter": {
+      "bilateral_contact_all_runs": true,
+      "deterministic": true,
+      "fresh_process_count": 6,
+      "maximum_impulse_ns": 0.0009838331445415989,
+      "mean_residual_m": 2.390146255493164e-05,
+      "mimic_gate": "PASS",
+      "minimum_separation_m": -0.00019903041538782418,
+      "residual_span_m": 0.0,
+      "residuals_m": [
+        2.390146255493164e-05,
+        2.390146255493164e-05,
+        2.390146255493164e-05,
+        2.390146255493164e-05,
+        2.390146255493164e-05,
+        2.390146255493164e-05
+      ],
+      "run_count": 6
+    }
+  }
+}

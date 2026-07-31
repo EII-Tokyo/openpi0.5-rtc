@@ -1,0 +1,353 @@
+{
+  "config": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/configs/aloha1_vx300s_gripper_hardware_model.yaml",
+    "sha256": "b7a6108c20d3162844b13a3b821e09f1416d661c345a829308a189e4f4eb0936"
+  },
+  "formula_validation": {
+    "arm_length_m": 0.035,
+    "endpoint_max_abs_error_m": 6.938893903907228e-18,
+    "formula": "x=r*sin(theta)+sqrt(L^2-(sqrt(r^2-(r*sin(theta))^2))^2)",
+    "horn_radius_m": 0.0275,
+    "lower_linear_position_m": 0.021,
+    "lower_motor_angle_rad": -0.02402828611523418,
+    "monotonic_over_urdf_range": true,
+    "published_sign_relation": {
+      "left_finger": "+x",
+      "right_finger": "-x"
+    },
+    "right_is_negative_left": true,
+    "sample_count": 1001,
+    "source_function": {
+      "file": "xs_driver",
+      "function": "InterbotixDriverXS::convertMotorPositionToLinearPosition"
+    },
+    "status": "PASS",
+    "upper_linear_position_m": 0.057,
+    "upper_motor_angle_rad": 1.090465499880684
+  },
+  "hardware": {
+    "gripper_actuator": {
+      "current_limit": {
+        "derived_formula": "200 * 0.00269",
+        "derived_limit_ampere": 0.538,
+        "physx_max_force_mapping": "NOT_DIRECTLY_MAPPABLE",
+        "pwm_mode_torque_cap_status": "NOT_ESTABLISHED",
+        "raw_value": 200,
+        "source": "aloha_vx300s_motor_config",
+        "unit_ampere_per_tick": 0.00269,
+        "unit_source": "ROBOTIS_XM430_W350_MANUAL"
+      },
+      "dynamixel_id": 9,
+      "manufacturer": "ROBOTIS",
+      "model": "XM430-W350",
+      "operating_mode": "pwm",
+      "performance": {
+        "conditions": [
+          {
+            "stall_current_a": 2.1,
+            "stall_torque_nm": 3.8,
+            "voltage_v": 11.1
+          },
+          {
+            "stall_current_a": 2.3,
+            "stall_torque_nm": 4.1,
+            "voltage_v": 12.0
+          },
+          {
+            "stall_current_a": 2.7,
+            "stall_torque_nm": 4.8,
+            "voltage_v": 14.8
+          }
+        ],
+        "simulation_mapping_status": "REQUIRES_LINKAGE_AND_CONTROLLER_DERIVATION",
+        "source": "ROBOTIS_XM430_W350_MANUAL",
+        "stall_torque_is_continuous_rating": false
+      },
+      "physical_actuator_count": 1,
+      "pwm": {
+        "goal_pwm_semantics": "DIRECT_VOLTAGE_DUTY_CONTROL_SUBJECT_TO_PWM_LIMIT",
+        "manual_default_limit_raw": 885,
+        "pid_behavior": "PID_AND_FEEDFORWARD_DEACTIVATED_IN_PWM_CONTROL_MODE",
+        "unit_percent_per_tick": 0.113
+      },
+      "right_finger_independently_sensed": false,
+      "supported_operating_modes": [
+        "current",
+        "velocity",
+        "position",
+        "extended_position",
+        "current_based_position",
+        "pwm"
+      ]
+    },
+    "gripper_linkage": {
+      "arm_length_m": 0.035,
+      "formula_implementation_source": {
+        "file": "xs_driver",
+        "function": "InterbotixDriverXS::convertMotorPositionToLinearPosition"
+      },
+      "horn_radius_m": 0.0275,
+      "motor_angle_to_linear_formula": "x=r*sin(theta)+sqrt(L^2-(sqrt(r^2-(r*sin(theta))^2))^2)",
+      "published_finger_positions": {
+        "left_finger": "+x",
+        "right_finger": "-x"
+      },
+      "right_finger_state_kind": "DRIVER_DERIVED_NOT_INDEPENDENT_SENSOR",
+      "source": "aloha_vx300s_motor_config",
+      "state_publication_source": {
+        "file": "xs_sdk_obj",
+        "function": "InterbotixRobotXS::robot_get_joint_states"
+      }
+    },
+    "maximum_aperture_conflict": {
+      "claims": [
+        {
+          "measurement": "CARRIAGE_CENTER_TO_CENTER",
+          "source": "exact_robot",
+          "value_m": 0.116
+        },
+        {
+          "measurement": "CARRIAGE_CENTER_TO_CENTER",
+          "source": "general_robot_table",
+          "value_m": 0.114
+        }
+      ],
+      "definition": "DISTANCE_BETWEEN_GRIPPER_CARRIAGE_CENTERS",
+      "selected_value_m": null,
+      "selection_status": "UNRESOLVED_FAIL_CLOSED",
+      "urdf_range_note": "URDF_LEFT_FINGER_0.021_TO_0.057_IMPLIES_0.042_TO_0.114_SYMMETRIC_CENTER_DISTANCE"
+    }
+  },
+  "identity_check": {
+    "actuator": "ROBOTIS XM430-W350",
+    "dynamixel_id": 9,
+    "physical_actuator_count": 1,
+    "product": "ViperX-300 6DOF",
+    "project_model": "aloha_vx300s",
+    "right_finger_state": "DRIVER_DERIVED_NOT_INDEPENDENT_SENSOR",
+    "status": "PASS"
+  },
+  "important_boundaries": {
+    "official_aperture_selection": "UNRESOLVED_FAIL_CLOSED",
+    "physx_max_force_mapping": "NOT_DIRECTLY_MAPPABLE",
+    "real_robot_accessed": false,
+    "supplier_cad_license": "UNKNOWN_HARD_BLOCKER"
+  },
+  "official_hardware_model_status": "PASS",
+  "official_source_chain": {
+    "actuator": {
+      "authority": "ROBOTIS",
+      "confirms": [
+        "operating modes",
+        "register units",
+        "voltage-conditioned performance table",
+        "PWM control semantics"
+      ],
+      "exact_model": "XM430-W350",
+      "url": "https://emanual.robotis.com/docs/en/dxl/x/xm430-w350/"
+    },
+    "exact_robot": {
+      "authority": "Trossen Robotics",
+      "confirms": [
+        "ViperX-300 6DOF",
+        "gripper actuator ID 9 XM430-W350",
+        "42 to 116 mm gripper range claim"
+      ],
+      "url": "https://docs.trossenrobotics.com/interbotix_xsarms_docs/specifications/vx300s.html"
+    },
+    "general_robot_table": {
+      "authority": "Trossen Robotics",
+      "confirms": [
+        "42 to 114 mm carriage-center gripper range claim"
+      ],
+      "url": "https://docs.trossenrobotics.com/interbotix_xsarms_docs/specifications.html"
+    },
+    "official_core_repository": {
+      "branch": "humble",
+      "inspected_head": "af18d4fe24ba08e09a0f1e92afaca1863e3205de",
+      "license": "BSD-3-Clause",
+      "url": "https://github.com/Interbotix/interbotix_ros_core.git"
+    },
+    "official_driver_repository": {
+      "branch": "ros2",
+      "inspected_head": "da27b8b2b6c7677844f74581b82c01829a834e1c",
+      "license": "BSD-3-Clause",
+      "url": "https://github.com/Interbotix/interbotix_xs_driver.git"
+    },
+    "official_manipulator_repository": {
+      "branch": "humble",
+      "inspected_head": "b66d5b905725351dd71d3251a06cd3f4c777940f",
+      "license": "BSD-3-Clause",
+      "url": "https://github.com/Interbotix/interbotix_ros_manipulators.git"
+    },
+    "stationary_aloha": {
+      "authority": "Trossen Robotics",
+      "confirms": [
+        "stationary follower role",
+        "ViperX follower arms"
+      ],
+      "url": "https://docs.trossenrobotics.com/aloha_docs/2.0/getting_started/stationary/hardware_setup.html"
+    }
+  },
+  "provenance_classes": {
+    "direct_official_facts": [
+      "exact follower product identity",
+      "exact actuator identity and DYNAMIXEL ID",
+      "ROBOTIS register units and voltage-conditioned performance",
+      "Trossen aperture claims"
+    ],
+    "engineering_inference": [
+      "the DYNAMIXEL current register and URDF effort cannot be copied directly to PhysX max force"
+    ],
+    "numerical_derivations": [
+      "Current_Limit 200 multiplied by 2.69 mA per tick equals 0.538 A",
+      "symmetric URDF finger coordinates imply 42 to 114 mm carriage-center distance"
+    ],
+    "pinned_source_facts": [
+      "linkage dimensions",
+      "PWM operating mode",
+      "mimic sign and offset",
+      "URDF limits and dynamics",
+      "driver-derived right finger state"
+    ],
+    "runtime_readback": [],
+    "temporary_diagnostic_values": []
+  },
+  "schema_version": 1,
+  "scope": {
+    "excluded_related_model": {
+      "model": "avx300s",
+      "official_page": "https://docs.trossenrobotics.com/interbotix_xsarms_docs/specifications/avx300s.html",
+      "reason": "ALOHA_2_VARIANT_NOT_APPLICABLE_TO_STATIONARY_ALOHA_1"
+    },
+    "follower_instances": [
+      "follower_left",
+      "follower_right"
+    ],
+    "follower_product": "ViperX-300 6DOF",
+    "generation": "STATIONARY_ALOHA_1",
+    "left_right_relation": "TWO_INSTANCES_OF_THE_SAME_ROBOT_PRODUCT",
+    "project_model": "aloha_vx300s"
+  },
+  "simulation_description": {
+    "isaac_mapping_boundary": {
+      "dynamixel_current_limit_to_physx_force": "NOT_ESTABLISHED",
+      "hardware_integer_gain_direct_mapping": "PROHIBITED",
+      "isaac_sim": "5.1.0.0",
+      "kit": "107.3.3",
+      "physx": "107.3.26",
+      "urdf_effort_to_calibrated_grip_force": "NOT_ESTABLISHED"
+    },
+    "joint_dynamics": {
+      "damping": 0.1,
+      "friction": 0.1,
+      "mapping_status": "URDF_SOURCE_VALUE_NOT_HARDWARE_CALIBRATION"
+    },
+    "urdf_finger_limits": {
+      "effort_physical_calibration_status": "NOT_ESTABLISHED",
+      "effort_source_value": 5.0,
+      "left_lower_m": 0.021,
+      "left_upper_m": 0.057,
+      "right_lower_m": -0.057,
+      "right_upper_m": -0.021,
+      "velocity_m_per_s": 1.0
+    },
+    "urdf_mimic": {
+      "child_joint": "right_finger",
+      "multiplier": -1.0,
+      "offset_m": 0.0,
+      "parent_joint": "left_finger"
+    }
+  },
+  "source_verification": {
+    "all_local_hashes_match": true,
+    "all_required_provenance_present": true,
+    "hash_mismatches": [],
+    "missing_provenance_fields": [],
+    "missing_sources": [],
+    "records": [
+      {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_control/config/aloha_vx300s.yaml",
+        "actual_sha256": "a5c809a5dd1cd6fb795a8f4f4cbf69de6e0133e1916cb8816061d29f4a8aa75e",
+        "branch_or_tag": "humble",
+        "commit": "d15df61e1c91067bac7ef2d002117cef4ffe1926",
+        "exists": true,
+        "expected_sha256": "a5c809a5dd1cd6fb795a8f4f4cbf69de6e0133e1916cb8816061d29f4a8aa75e",
+        "license": "BSD-3-Clause",
+        "name": "aloha_vx300s_motor_config",
+        "repository": "https://github.com/Interbotix/interbotix_ros_manipulators.git",
+        "sha256_matches": true
+      },
+      {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_control/config/modes.yaml",
+        "actual_sha256": "ee7f2b5fcd367442419396c2feeaa111b7b1776d8302a4ca2dd0c4f3d13cb95f",
+        "branch_or_tag": "humble",
+        "commit": "b66d5b905725351dd71d3251a06cd3f4c777940f",
+        "exists": true,
+        "expected_sha256": "ee7f2b5fcd367442419396c2feeaa111b7b1776d8302a4ca2dd0c4f3d13cb95f",
+        "license": "BSD-3-Clause",
+        "name": "xsarm_modes",
+        "repository": "https://github.com/Interbotix/interbotix_ros_manipulators.git",
+        "sha256_matches": true
+      },
+      {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/urdf/aloha_vx300s.urdf.xacro",
+        "actual_sha256": "45dff1e0de2456386dbb64b851c94db2d874b6dbefb6503cb747bc55435177bd",
+        "branch_or_tag": "humble",
+        "commit": "b66d5b905725351dd71d3251a06cd3f4c777940f",
+        "exists": true,
+        "expected_sha256": "45dff1e0de2456386dbb64b851c94db2d874b6dbefb6503cb747bc55435177bd",
+        "license": "BSD-3-Clause",
+        "name": "aloha_vx300s_xacro",
+        "repository": "https://github.com/Interbotix/interbotix_ros_manipulators.git",
+        "sha256_matches": true
+      },
+      {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_core/interbotix_ros_xseries/interbotix_xs_driver/src/xs_driver.cpp",
+        "actual_sha256": "6d9b8bd613ef17094490ad1a3f82c685316b3bd21c067930b2a5199a91ba9bcb",
+        "branch_or_tag": "ros2",
+        "commit": "da27b8b2b6c7677844f74581b82c01829a834e1c",
+        "exists": true,
+        "expected_sha256": "6d9b8bd613ef17094490ad1a3f82c685316b3bd21c067930b2a5199a91ba9bcb",
+        "license": "BSD-3-Clause",
+        "name": "xs_driver",
+        "repository": "https://github.com/Interbotix/interbotix_xs_driver.git",
+        "sha256_matches": true
+      },
+      {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_core/interbotix_ros_xseries/interbotix_xs_sdk/src/xs_sdk_obj.cpp",
+        "actual_sha256": "e65fb1c873274412e5634dbaa0d647858435cc5689157ca44d8cd7cca6fcc02d",
+        "branch_or_tag": "humble",
+        "commit": "af18d4fe24ba08e09a0f1e92afaca1863e3205de",
+        "exists": true,
+        "expected_sha256": "e65fb1c873274412e5634dbaa0d647858435cc5689157ca44d8cd7cca6fcc02d",
+        "license": "BSD-3-Clause",
+        "name": "xs_sdk_obj",
+        "repository": "https://github.com/Interbotix/interbotix_ros_core.git",
+        "sha256_matches": true
+      },
+      {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/gdrive_source_readonly/Simple Aloha Viper 2024-5-13.step",
+        "actual_sha256": "337862418769d4ea8b801d26e68930c4412f870050e60769bbf91765194dc571",
+        "branch_or_tag": "NOT_APPLICABLE_STATIC_VENDOR_FILE",
+        "commit": "SHA256_PINNED_STATIC_VENDOR_FILE",
+        "exists": true,
+        "expected_sha256": "337862418769d4ea8b801d26e68930c4412f870050e60769bbf91765194dc571",
+        "license": "UNKNOWN_HARD_BLOCKER",
+        "name": "supplier_cad",
+        "repository": "https://drive.google.com/drive/folders/1mhJuhzT4lBnvZ9VE57UgT6vmJDFPVsBf",
+        "sha256_matches": true
+      }
+    ]
+  },
+  "status": "PASS",
+  "task8": "NOT_RUN",
+  "unconfirmed_physical_quantities": [
+    "continuous allowable gripper torque under the installed voltage and thermal duty cycle",
+    "linkage efficiency and friction under load",
+    "finger-pad friction coefficient",
+    "mapping from PWM command to fingertip normal force",
+    "calibrated PhysX stiffness damping and max force",
+    "selection between the official 114 mm and 116 mm maximum-aperture claims"
+  ]
+}
