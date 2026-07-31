@@ -17,6 +17,8 @@ from tools.aloha1_mapping.grasp_20cm_five_pose_ik import place_bottle_center_and
 from tools.aloha1_mapping.grasp_20cm_five_pose_ik import sample_bottle_center_yaw_candidates
 from tools.aloha1_mapping.grasp_20cm_five_pose_ik import sample_initial_arm_joint_candidates
 from tools.aloha1_mapping.grasp_20cm_five_pose_ik import select_diverse_records
+from tools.plan_aloha1_grasp_20cm_five_pose_ik import classify_preflight_contacts
+from tools.plan_aloha1_grasp_20cm_five_pose_ik import freeze_preflight_records
 
 ROOT = Path(__file__).resolve().parents[2]
 CONFIG = ROOT / "configs/aloha1_grasp_20cm_five_pose_ik.yaml"
@@ -57,6 +59,12 @@ def test_five_pose_config_freezes_joint_sampling_and_diversity() -> None:
     assert config["sampling"]["bottle_line_yaw_domain_deg"] == [0.0, 180.0]
     assert config["gates"]["minimum_bottle_line_yaw_separation_deg"] == 25.0
     assert config["gates"]["minimum_initial_ee_separation_m"] == 0.050
+    assert config["gates"]["initial_arm_readback_tolerance_rad"] == 0.020
+    assert config["gates"]["first_frame_jump_tolerance_rad"] == 0.020
+    assert (
+        config["frozen_inputs"]["task7a_structure_validation"]["sha256"]
+        == "668a1c83e14d28de50c3fa18c773c6f60ec2feb2263eac985546c2bb7e52048a"
+    )
     assert (
         config["formal_structure"]["sample_01"]["bottle_center_world_x_m"]
         == 0.0
@@ -311,3 +319,87 @@ def test_initial_command_rejects_duplicate_or_out_of_range_indices() -> None:
             np.zeros(6),
             arm_dof_indices=[0, 1, 2, 3, 4, 9],
         )
+
+
+def test_selector_does_not_replace_runtime_failures() -> None:
+    records = [
+        {
+            "sample_id": f"sample_{index + 1:02d}",
+            "preflight_status": "PASS",
+            "runtime_status": "PASS",
+        }
+        for index in range(5)
+    ]
+    records[1]["runtime_status"] = "FAIL"
+
+    selected = freeze_preflight_records(records, required=5)
+
+    assert [item["sample_id"] for item in selected] == [
+        "sample_01",
+        "sample_02",
+        "sample_03",
+        "sample_04",
+        "sample_05",
+    ]
+
+
+def test_centerline_record_binds_geometric_center_not_prim_translation() -> None:
+    records = [
+        {
+            "sample_id": "sample_01",
+            "preflight_status": "PASS",
+            "bottle_geometric_center_world_m": [0.0, 0.08, 0.034],
+            "world_from_object": [
+                [0.0, 0.0, 1.0, -0.103],
+                [0.0, 1.0, 0.0, 0.08],
+                [-1.0, 0.0, 0.0, 0.034],
+                [0.0, 0.0, 0.0, 1.0],
+            ],
+        }
+    ]
+
+    selected = freeze_preflight_records(records, required=1)
+
+    assert selected[0]["bottle_geometric_center_world_m"][0] == pytest.approx(
+        0.0,
+        abs=1e-6,
+    )
+    assert selected[0]["world_from_object"][0][3] != pytest.approx(0.0)
+
+
+def test_preflight_contact_policy_allows_only_confirmed_finger_table_pair() -> None:
+    allowed = classify_preflight_contacts(
+        [
+            {
+                "actor0_path": (
+                    "/World/follower_left/vx300s_left/"
+                    "follower_left_left_finger_link"
+                ),
+                "actor1_path": (
+                    "/World/environment/worldBody/user_confirmed_table"
+                ),
+                "separation_m": -0.0002,
+                "impulse_ns": 0.001,
+            }
+        ]
+    )
+    blocked = classify_preflight_contacts(
+        [
+            {
+                "actor0_path": (
+                    "/World/follower_left/vx300s_left/"
+                    "follower_left_shoulder_link"
+                ),
+                "actor1_path": (
+                    "/World/environment/worldBody/user_confirmed_table"
+                ),
+                "separation_m": -0.0002,
+                "impulse_ns": 0.001,
+            }
+        ]
+    )
+
+    assert allowed["status"] == "PASS"
+    assert allowed["allowed_physical_contact_count"] == 1
+    assert blocked["status"] == "FAIL"
+    assert blocked["forbidden_physical_contact_count"] == 1

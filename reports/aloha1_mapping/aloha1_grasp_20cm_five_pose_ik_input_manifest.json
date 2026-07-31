@@ -72,8 +72,8 @@
     {
       "role": "five_pose_config",
       "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/configs/aloha1_grasp_20cm_five_pose_ik.yaml",
-      "sha256": "1925cd1721f98fecdbc76b17d1b3801be2dd64a24043e260f2dcdebda15c615b",
-      "size_bytes": 3703
+      "sha256": "6313f44d8e4e110e627cdf61cd1ebd8a9a0172b88f719af00af9f7fcb0ba8a62",
+      "size_bytes": 4085
     },
     {
       "role": "existing_grasp_runtime_config",
@@ -92,6 +92,12 @@
       "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/configs/aloha1_joint_map.yaml",
       "sha256": "f56be097d859f7361b804705af6659e0d51d9e480d1c721a60040ab787530308",
       "size_bytes": 17141
+    },
+    {
+      "role": "task7a_reused_readback_and_first_frame_jump_gates",
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_signal_task7a_structure_validation.json",
+      "sha256": "668a1c83e14d28de50c3fa18c773c6f60ec2feb2263eac985546c2bb7e52048a",
+      "size_bytes": 9354
     },
     {
       "role": "bottle_cad_audit",

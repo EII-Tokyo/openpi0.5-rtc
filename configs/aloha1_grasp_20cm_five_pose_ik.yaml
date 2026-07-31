@@ -53,6 +53,8 @@ gates:
   axis_to_table_normal_tolerance_deg: 1.0
   geometry_tolerance_status: ENGINEERING_DIAGNOSTIC_NOT_PHYSICAL_MEASUREMENT
   support_contact_latch_clearance_m: 0.0005
+  initial_arm_readback_tolerance_rad: 0.020
+  first_frame_jump_tolerance_rad: 0.020
   target_clearance_m: 0.200
   hold_interval_s: 2.0
   maximum_hold_drop_m: 0.010
@@ -73,6 +75,12 @@ frozen_inputs:
   joint_map:
     path: configs/aloha1_joint_map.yaml
     sha256: f56be097d859f7361b804705af6659e0d51d9e480d1c721a60040ab787530308
+  task7a_structure_validation:
+    path: reports/aloha1_mapping/aloha1_signal_task7a_structure_validation.json
+    sha256: 668a1c83e14d28de50c3fa18c773c6f60ec2feb2263eac985546c2bb7e52048a
+    reused_gates:
+      initial_arm_readback_tolerance_rad: 0.020
+      first_frame_jump_tolerance_rad: 0.020
   bottle_cad_audit:
     path: reports/aloha1_mapping/aloha_project_bottle_cad_audit.json
     sha256: a6c4ea40295ddafa2a690f346eea2be549105db7590b13948d2f977aa812aba3
