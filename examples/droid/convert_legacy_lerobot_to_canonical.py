@@ -203,6 +203,11 @@ def _map_legacy_frame(
     )
     subtask_label = resolve_subtask_for_frame(annotation, frame_index=frame_index, episode_length=episode_length)
     frame.update(compute_env_stats_for_frame(frame, frame_index=frame_index, episode_length=episode_length, annotation=annotation))
+    # Platform-curated exports (e.g. michios/clm145) carry conveyor_speed per frame; use it when
+    # no annotation/mongo metadata provided a speed.
+    source_conveyor_speed = source_frame.get("environment.conveyor_speed", source_frame.get("conveyor_speed"))
+    if source_conveyor_speed is not None and np.isnan(frame["environment.conveyor_speed"][0]):
+        frame["environment.conveyor_speed"] = ensure_vector(source_conveyor_speed, 1)
     return frame, subtask_label
 
 
