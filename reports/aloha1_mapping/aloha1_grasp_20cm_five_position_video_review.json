@@ -1,0 +1,366 @@
+{
+  "acceptance_status": "FAIL",
+  "lift_comparison": {
+    "position_01": {
+      "clearance_end_m": 0.20227658864865317,
+      "clearance_start_m": 0.004569123969469124,
+      "ee_displacement_end_m": 0.1457379162311554,
+      "ee_displacement_start_m": -0.058169007301330566,
+      "lift_frame_count": 16,
+      "maximum_clearance_m": 0.20227658864865317,
+      "mean_estimated_normal_force_n": {
+        "left": 0.870840619536358,
+        "right": 0.8828968566247615
+      },
+      "method": "SUM_POSITIVE_FINGER_BOTTLE_NORMAL_IMPULSE_PER_FRAME_TIMES_60HZ;_RELATIVE_SLIP_FROM_EE_AND_BOTTLE_CLEARANCE_DELTA",
+      "relative_vertical_slip_change_m": 0.00619945885330192
+    },
+    "position_02": {
+      "clearance_end_m": 0.19231900772232502,
+      "clearance_start_m": 0.004137737706602931,
+      "ee_displacement_end_m": 0.14023590087890625,
+      "ee_displacement_start_m": -0.05949819087982178,
+      "lift_frame_count": 53,
+      "maximum_clearance_m": 0.19840033460203355,
+      "mean_estimated_normal_force_n": {
+        "left": 0.9013644105061649,
+        "right": 0.8937352150305314
+      },
+      "method": "SUM_POSITIVE_FINGER_BOTTLE_NORMAL_IMPULSE_PER_FRAME_TIMES_60HZ;_RELATIVE_SLIP_FROM_EE_AND_BOTTLE_CLEARANCE_DELTA",
+      "relative_vertical_slip_change_m": 0.011552821743005925
+    },
+    "position_03": {
+      "clearance_end_m": 0.20376844321033669,
+      "clearance_start_m": 0.005017482678630697,
+      "ee_displacement_end_m": 0.1423218548297882,
+      "ee_displacement_start_m": -0.05723607540130615,
+      "lift_frame_count": 19,
+      "maximum_clearance_m": 0.20376844321033669,
+      "mean_estimated_normal_force_n": {
+        "left": 1.0033636126289078,
+        "right": 1.0145669763484535
+      },
+      "method": "SUM_POSITIVE_FINGER_BOTTLE_NORMAL_IMPULSE_PER_FRAME_TIMES_60HZ;_RELATIVE_SLIP_FROM_EE_AND_BOTTLE_CLEARANCE_DELTA",
+      "relative_vertical_slip_change_m": 0.0008069696993883713
+    },
+    "position_04": {
+      "clearance_end_m": 0.20258633834235037,
+      "clearance_start_m": 0.0046226575055656055,
+      "ee_displacement_end_m": 0.1430892050266266,
+      "ee_displacement_start_m": -0.05821529030799866,
+      "lift_frame_count": 17,
+      "maximum_clearance_m": 0.20258633834235037,
+      "mean_estimated_normal_force_n": {
+        "left": 0.959743877374496,
+        "right": 0.9473939248107627
+      },
+      "method": "SUM_POSITIVE_FINGER_BOTTLE_NORMAL_IMPULSE_PER_FRAME_TIMES_60HZ;_RELATIVE_SLIP_FROM_EE_AND_BOTTLE_CLEARANCE_DELTA",
+      "relative_vertical_slip_change_m": 0.003340814497840461
+    },
+    "position_05": {
+      "clearance_end_m": 0.20426504111183,
+      "clearance_start_m": 0.005346604110556992,
+      "ee_displacement_end_m": 0.14284944534301758,
+      "ee_displacement_start_m": -0.05699722468852997,
+      "lift_frame_count": 19,
+      "maximum_clearance_m": 0.20426504111183,
+      "mean_estimated_normal_force_n": {
+        "left": 0.9255503095653671,
+        "right": 0.9379738980575322
+      },
+      "method": "SUM_POSITIVE_FINGER_BOTTLE_NORMAL_IMPULSE_PER_FRAME_TIMES_60HZ;_RELATIVE_SLIP_FROM_EE_AND_BOTTLE_CLEARANCE_DELTA",
+      "relative_vertical_slip_change_m": 0.0009282330302745334
+    }
+  },
+  "machine_pass_count": 4,
+  "positions": [
+    {
+      "annotated_keyframe_review_montage": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-20cm-button/five_position_acceptance_002/visual_review_montages/position_01_annotated_keyframes_montage.png",
+        "resolution": [
+          1456,
+          1044
+        ],
+        "sha256": "d90e911cccc013d02ac7b7fc93d6b1e376d68b45516937f01ec753c26fe11354"
+      },
+      "deterministic_repeat": true,
+      "machine_reason": "stable_20cm_hold",
+      "machine_status": "PASS",
+      "position_id": "position_01",
+      "raw_full_video_review_montage": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-20cm-button/five_position_acceptance_002/visual_review_montages/position_01_full_video_contact_sheet_montage.png",
+        "resolution": [
+          1456,
+          2076
+        ],
+        "sha256": "1bcc463fb631e5da01671f50035b07246daeb0b1614554ea39936f3146782051"
+      },
+      "retake_reasons": [],
+      "videos": [
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-20cm-button/five_position_acceptance_002/position_01/primary/video_attempt_001/video/aloha1_grasp_20cm_raw_candidate.mp4",
+          "fps": 60,
+          "frame_count": 240,
+          "kind": "raw",
+          "sha256": "aff88017980dbbf8e31a649d90331b690b289e591432905bd64d30ac561902c7"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-20cm-button/five_position_acceptance_002/position_01/primary/video_attempt_001/video/aloha1_grasp_20cm_annotated_candidate.mp4",
+          "fps": 60,
+          "frame_count": 240,
+          "kind": "annotated",
+          "sha256": "d5752b1bb015d2049a6c198bf20c96e5ba227b300db0d786150145742ff47627"
+        }
+      ],
+      "visual_checks": {
+        "critical_geometry_not_occluded": true,
+        "full_arm_visible": true,
+        "gripper_and_bottle_visible": true,
+        "machine_status_annotation_matches_report": true,
+        "open_contact_lift_hold_or_failure_distinguishable": true,
+        "overview_and_closeup_synchronized": true
+      },
+      "visual_review_scope": "EVIDENCE_QUALITY_ONLY_NOT_PHYSICAL_ACCEPTANCE",
+      "visual_review_status": "PASS"
+    },
+    {
+      "annotated_keyframe_review_montage": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-20cm-button/five_position_acceptance_002/visual_review_montages/position_02_annotated_keyframes_montage.png",
+        "resolution": [
+          1456,
+          1044
+        ],
+        "sha256": "27ee1b69663db5ebe6010c240131d97fdea26e6b52de0dbb9ba7280e1d6ceea7"
+      },
+      "deterministic_repeat": true,
+      "machine_reason": "height_target_not_reached",
+      "machine_status": "FAIL",
+      "position_id": "position_02",
+      "raw_full_video_review_montage": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-20cm-button/five_position_acceptance_002/visual_review_montages/position_02_full_video_contact_sheet_montage.png",
+        "resolution": [
+          1456,
+          1384
+        ],
+        "sha256": "b13c8059a0a0af809c0eab4d3f25677b059742bb223ebf86f1e00cdf28a0097b"
+      },
+      "retake_reasons": [],
+      "videos": [
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-20cm-button/five_position_acceptance_002/position_02/primary/video_attempt_001/video/aloha1_grasp_20cm_raw_candidate.mp4",
+          "fps": 60,
+          "frame_count": 149,
+          "kind": "raw",
+          "sha256": "56e19594ae0a8229d7c4f0f9969392d62aff75fa50eca0e77cff329d5066d1c2"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-20cm-button/five_position_acceptance_002/position_02/primary/video_attempt_001/video/aloha1_grasp_20cm_annotated_candidate.mp4",
+          "fps": 60,
+          "frame_count": 149,
+          "kind": "annotated",
+          "sha256": "9539a2f3fb3c0a3f770f4d40c684bb88e73a52b13ae173c964575a3e0d7a3abd"
+        }
+      ],
+      "visual_checks": {
+        "critical_geometry_not_occluded": true,
+        "full_arm_visible": true,
+        "gripper_and_bottle_visible": true,
+        "machine_status_annotation_matches_report": true,
+        "open_contact_lift_hold_or_failure_distinguishable": true,
+        "overview_and_closeup_synchronized": true
+      },
+      "visual_review_scope": "EVIDENCE_QUALITY_ONLY_NOT_PHYSICAL_ACCEPTANCE",
+      "visual_review_status": "PASS"
+    },
+    {
+      "annotated_keyframe_review_montage": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-20cm-button/five_position_acceptance_002/visual_review_montages/position_03_annotated_keyframes_montage.png",
+        "resolution": [
+          1456,
+          1044
+        ],
+        "sha256": "32cdfaf248e3bef4585cc4186edd35888583b86e0f65f6b8770066187fd929e7"
+      },
+      "deterministic_repeat": true,
+      "machine_reason": "stable_20cm_hold",
+      "machine_status": "PASS",
+      "position_id": "position_03",
+      "raw_full_video_review_montage": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-20cm-button/five_position_acceptance_002/visual_review_montages/position_03_full_video_contact_sheet_montage.png",
+        "resolution": [
+          1456,
+          2076
+        ],
+        "sha256": "c4619a1df0b293398d03628c2b916a0f374da4053724489d63ec445fdbd47cd1"
+      },
+      "retake_reasons": [],
+      "videos": [
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-20cm-button/five_position_acceptance_002/position_03/primary/video_attempt_001/video/aloha1_grasp_20cm_raw_candidate.mp4",
+          "fps": 60,
+          "frame_count": 236,
+          "kind": "raw",
+          "sha256": "6ffb2990bdb7a093ad4c5a6459c2ad741f66586937224a147523e5099d33a124"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-20cm-button/five_position_acceptance_002/position_03/primary/video_attempt_001/video/aloha1_grasp_20cm_annotated_candidate.mp4",
+          "fps": 60,
+          "frame_count": 236,
+          "kind": "annotated",
+          "sha256": "996dc7307e1a2b116366f1a2cdb2355f9985c0f399ed9c1349284510b5eb944b"
+        }
+      ],
+      "visual_checks": {
+        "critical_geometry_not_occluded": true,
+        "full_arm_visible": true,
+        "gripper_and_bottle_visible": true,
+        "machine_status_annotation_matches_report": true,
+        "open_contact_lift_hold_or_failure_distinguishable": true,
+        "overview_and_closeup_synchronized": true
+      },
+      "visual_review_scope": "EVIDENCE_QUALITY_ONLY_NOT_PHYSICAL_ACCEPTANCE",
+      "visual_review_status": "PASS"
+    },
+    {
+      "annotated_keyframe_review_montage": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-20cm-button/five_position_acceptance_002/visual_review_montages/position_04_annotated_keyframes_montage.png",
+        "resolution": [
+          1456,
+          1044
+        ],
+        "sha256": "c73ce1558dd43f72ed66913111f905fef5779dd96ea963f8bffdfbe6e94deebc"
+      },
+      "deterministic_repeat": true,
+      "machine_reason": "stable_20cm_hold",
+      "machine_status": "PASS",
+      "position_id": "position_04",
+      "raw_full_video_review_montage": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-20cm-button/five_position_acceptance_002/visual_review_montages/position_04_full_video_contact_sheet_montage.png",
+        "resolution": [
+          1456,
+          2076
+        ],
+        "sha256": "1bc5f8a231b2d246cabed34ff9b5f9c2fd0d9f1fd25ffe836649b289e0629131"
+      },
+      "retake_reasons": [],
+      "videos": [
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-20cm-button/five_position_acceptance_002/position_04/primary/video_attempt_001/video/aloha1_grasp_20cm_raw_candidate.mp4",
+          "fps": 60,
+          "frame_count": 235,
+          "kind": "raw",
+          "sha256": "a5fc438265123641ecb4700393bd63604df814f03053ee386aa91ef266993f61"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-20cm-button/five_position_acceptance_002/position_04/primary/video_attempt_001/video/aloha1_grasp_20cm_annotated_candidate.mp4",
+          "fps": 60,
+          "frame_count": 235,
+          "kind": "annotated",
+          "sha256": "92792c9ddb4d5e60204048835396262c1e0beec07d58b7e4c17cb76d5fbc7ce2"
+        }
+      ],
+      "visual_checks": {
+        "critical_geometry_not_occluded": true,
+        "full_arm_visible": true,
+        "gripper_and_bottle_visible": true,
+        "machine_status_annotation_matches_report": true,
+        "open_contact_lift_hold_or_failure_distinguishable": true,
+        "overview_and_closeup_synchronized": true
+      },
+      "visual_review_scope": "EVIDENCE_QUALITY_ONLY_NOT_PHYSICAL_ACCEPTANCE",
+      "visual_review_status": "PASS"
+    },
+    {
+      "annotated_keyframe_review_montage": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-20cm-button/five_position_acceptance_002/visual_review_montages/position_05_annotated_keyframes_montage.png",
+        "resolution": [
+          1456,
+          1044
+        ],
+        "sha256": "d513d1a4005a517f714d858376cd82fe7c17e858ff8cf0fcf470d3d4688fd5b4"
+      },
+      "deterministic_repeat": true,
+      "machine_reason": "stable_20cm_hold",
+      "machine_status": "PASS",
+      "position_id": "position_05",
+      "raw_full_video_review_montage": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-20cm-button/five_position_acceptance_002/visual_review_montages/position_05_full_video_contact_sheet_montage.png",
+        "resolution": [
+          1456,
+          2076
+        ],
+        "sha256": "16d88840a6a55a99694334b5cd4a1c9dcca5085823d0179636be12a189d66288"
+      },
+      "retake_reasons": [],
+      "videos": [
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-20cm-button/five_position_acceptance_002/position_05/primary/video_attempt_001/video/aloha1_grasp_20cm_raw_candidate.mp4",
+          "fps": 60,
+          "frame_count": 235,
+          "kind": "raw",
+          "sha256": "33d668417eb5dcac55c3e78b4c158f4f9a121ff829ef71b0b7734dcea7e866f8"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-20cm-button/five_position_acceptance_002/position_05/primary/video_attempt_001/video/aloha1_grasp_20cm_annotated_candidate.mp4",
+          "fps": 60,
+          "frame_count": 235,
+          "kind": "annotated",
+          "sha256": "64f632e6e16233745b3a00c117f1a0346e5143e0f7dbd978c5d0108ccf737e82"
+        }
+      ],
+      "visual_checks": {
+        "critical_geometry_not_occluded": true,
+        "full_arm_visible": true,
+        "gripper_and_bottle_visible": true,
+        "machine_status_annotation_matches_report": true,
+        "open_contact_lift_hold_or_failure_distinguishable": true,
+        "overview_and_closeup_synchronized": true
+      },
+      "visual_review_scope": "EVIDENCE_QUALITY_ONLY_NOT_PHYSICAL_ACCEPTANCE",
+      "visual_review_status": "PASS"
+    }
+  ],
+  "review_method": "VISUAL_MODEL_COMPLETE_RAW_CONTACT_SHEET_MONTAGE_AND_ANNOTATED_PHASE_KEYFRAME_REVIEW",
+  "root_cause_diagnosis": {
+    "classification": "POSITION_DEPENDENT_CONTINUOUS_SLIP_OR_ROTATIONAL_INSTABILITY_NOT_RESOLVED",
+    "extra_lift_promoted": false,
+    "failed_position": "position_02",
+    "failed_position_maximum_clearance_m": 0.19840033460203355,
+    "failed_position_mean_estimated_normal_force_n": {
+      "left": 0.9013644105061649,
+      "right": 0.8937352150305314
+    },
+    "failed_position_relative_slip_m": 0.011552821743005925,
+    "height_deficit_m": 0.0015996653979664655,
+    "height_gate_m": 0.2,
+    "lift_margin_diagnostic": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260731-aloha1-grasp-20cm-button/position_02_lift_margin_diag_001/aloha1_grasp_20cm_runtime.json",
+      "additional_lift_margin_m": 0.002,
+      "reason": "hold_drop_exceeded",
+      "sha256": "99956d2267767f8bc9d24730d5ac92607d4ecdf1087ad11616ba792e91cdaf94",
+      "status": "FAIL"
+    },
+    "lift_margin_diagnostic_hold_drop_m": 0.01077557458159592,
+    "lift_margin_diagnostic_hold_duration_s": 0.08333333333333333,
+    "unchanged": [
+      "collider",
+      "friction",
+      "drive",
+      "mimic",
+      "bottle_mass",
+      "bottle_diameter",
+      "physics_timestep",
+      "acceptance_gates"
+    ]
+  },
+  "schema_version": 1,
+  "source_results": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_grasp_20cm_five_position_results_v2.json",
+    "sha256_after_review": "3f90ed4b56ae7f8d04cc0441f01f3590f7188b7e456681b6e4829e430fde7432",
+    "sha256_before_review": "4a24f827966c3ef45808ee9073e826f2b7663a587360c16de8ad00ec6089f34c"
+  },
+  "status": "PASS",
+  "task8": "NOT_RUN",
+  "user_confirmation": "NOT_RUN",
+  "visual_evidence_status": "PASS"
+}

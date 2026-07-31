@@ -1,0 +1,3874 @@
+{
+  "boundaries": {
+    "final_collider_modified": false,
+    "real_robot": false,
+    "remote_103": false,
+    "source_stage_modified": false,
+    "task8": "NOT_RUN"
+  },
+  "candidate_count_generated": 64,
+  "candidate_count_preflighted": 12,
+  "candidate_results": [
+    {
+      "bottle_position_world_m": [
+        0.102259809947154,
+        -0.2268706534656239,
+        0.03143499791622162
+      ],
+      "bottle_xy_bounds_world_m": {
+        "maximum": [
+          0.30893069213362734,
+          -0.17772194313050527
+        ],
+        "minimum": [
+          0.09881934870127966,
+          -0.2584951283901052
+        ]
+      },
+      "candidate_index": 0,
+      "full_bottle_inside_free_surface": true,
+      "ik": {
+        "classification": null,
+        "failure_phase": "move_to_pregrasp",
+        "grasp_position_world_m": null,
+        "lift_position_world_m": null,
+        "phase_summaries": {
+          "move_to_pregrasp": {
+            "attempts": [
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": false,
+                  "segment": 1,
+                  "solver_success": false,
+                  "velocity_ok": false,
+                  "within_limits": false
+                },
+                "segment_count": 1,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": false,
+                  "segment": 1,
+                  "solver_success": false,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 2,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 4,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 8,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 16,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 9,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 32,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 26,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 64,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 54,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 128,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 108,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 256,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 216,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 512,
+                "status": "FAIL"
+              }
+            ],
+            "selected_segment_count": null,
+            "status": "FAIL"
+          }
+        },
+        "pregrasp_position_world_m": null,
+        "source": null,
+        "status": "FAIL",
+        "target_orientation_world_wxyz": null,
+        "waypoint_count": 0
+      },
+      "offset_xy_m": [
+        0.1662234616042585,
+        -0.059985262587900205
+      ],
+      "seed": 20260731,
+      "selected": false
+    },
+    {
+      "bottle_position_world_m": [
+        -0.20788926509470856,
+        -0.10290010333767574,
+        0.03143499791622162
+      ],
+      "bottle_xy_bounds_world_m": {
+        "maximum": [
+          -0.0012183829082352549,
+          -0.0537513930025571
+        ],
+        "minimum": [
+          -0.2113297263405829,
+          -0.13452457826215702
+        ]
+      },
+      "candidate_index": 1,
+      "full_bottle_inside_free_surface": true,
+      "ik": {
+        "classification": "DIAGNOSTIC_CYLINDRICAL_SYMMETRY_VARIANT_PENDING_CORRECTED_NATIVE_GRASP_EDITOR_EXPORT",
+        "failure_phase": null,
+        "grasp_position_world_m": [
+          -0.13949978037030464,
+          -0.09374158931352713,
+          0.056389985841833044
+        ],
+        "lift_position_world_m": [
+          -0.13949978037030464,
+          -0.09374158931352713,
+          0.26638998584183304
+        ],
+        "phase_summaries": {
+          "move_to_pregrasp": {
+            "attempts": [
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 1,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 2,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 4,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 8,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 16,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": null,
+                "segment_count": 32,
+                "status": "PASS"
+              }
+            ],
+            "selected_segment_count": 32,
+            "status": "PASS"
+          },
+          "vertical_descent": {
+            "attempts": [
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 1,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 2,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 4,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": null,
+                "segment_count": 8,
+                "status": "PASS"
+              }
+            ],
+            "selected_segment_count": 8,
+            "status": "PASS"
+          },
+          "vertical_lift": {
+            "attempts": [
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 1,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 2,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 4,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 8,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": null,
+                "segment_count": 16,
+                "status": "PASS"
+              }
+            ],
+            "selected_segment_count": 16,
+            "status": "PASS"
+          }
+        },
+        "pregrasp_position_world_m": [
+          -0.13949978037030464,
+          -0.09374158931352713,
+          0.1303738596459329
+        ],
+        "source": "DYNAMIC_SETTLED_CYLINDRICAL_ROLL_EQUIVALENT_SELECTED_FROM_SUPPLIER_CAD_GRASP_CANDIDATE_T_O_G",
+        "status": "PASS",
+        "target_orientation_world_wxyz": [
+          0.047032030235806696,
+          0.7055409188217918,
+          0.047032030235806696,
+          -0.7055409188217917
+        ],
+        "waypoint_count": 56
+      },
+      "offset_xy_m": [
+        -0.14392561343760407,
+        0.06398528754004795
+      ],
+      "position_id": "position_01",
+      "seed": 20260731,
+      "selected": true
+    },
+    {
+      "bottle_position_world_m": [
+        0.159680359495309,
+        0.0019604927373477743,
+        0.03143499791622162
+      ],
+      "bottle_xy_bounds_world_m": {
+        "maximum": [
+          0.36635124168178235,
+          0.051109203072466414
+        ],
+        "minimum": [
+          0.15623989824943468,
+          -0.02966398218713351
+        ]
+      },
+      "candidate_index": 2,
+      "full_bottle_inside_free_surface": true,
+      "ik": {
+        "classification": null,
+        "failure_phase": "move_to_pregrasp",
+        "grasp_position_world_m": null,
+        "lift_position_world_m": null,
+        "phase_summaries": {
+          "move_to_pregrasp": {
+            "attempts": [
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": false,
+                  "segment": 1,
+                  "solver_success": false,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 1,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": false,
+                  "segment": 1,
+                  "solver_success": false,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 2,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 4,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 8,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 16,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 8,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 32,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 23,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 64,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 49,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 128,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 100,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 256,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 200,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 512,
+                "status": "FAIL"
+              }
+            ],
+            "selected_segment_count": null,
+            "status": "FAIL"
+          }
+        },
+        "pregrasp_position_world_m": null,
+        "source": null,
+        "status": "FAIL",
+        "target_orientation_world_wxyz": null,
+        "waypoint_count": 0
+      },
+      "offset_xy_m": [
+        0.2236440111524135,
+        0.16884588361507147
+      ],
+      "seed": 20260731,
+      "selected": false
+    },
+    {
+      "bottle_position_world_m": [
+        -0.2577489870616172,
+        0.2230382012984063,
+        0.03143499791622162
+      ],
+      "bottle_xy_bounds_world_m": {
+        "maximum": [
+          -0.05107810487514389,
+          0.27218691163352493
+        ],
+        "minimum": [
+          -0.2611894483074915,
+          0.191413726373925
+        ]
+      },
+      "candidate_index": 3,
+      "full_bottle_inside_free_surface": true,
+      "ik": {
+        "classification": null,
+        "failure_phase": "move_to_pregrasp",
+        "grasp_position_world_m": null,
+        "lift_position_world_m": null,
+        "phase_summaries": {
+          "move_to_pregrasp": {
+            "attempts": [
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 1,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 2,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 4,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 8,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 16,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 32,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 30,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 64,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 61,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 128,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 120,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 256,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 240,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 512,
+                "status": "FAIL"
+              }
+            ],
+            "selected_segment_count": null,
+            "status": "FAIL"
+          }
+        },
+        "pregrasp_position_world_m": null,
+        "source": null,
+        "status": "FAIL",
+        "target_orientation_world_wxyz": null,
+        "waypoint_count": 0
+      },
+      "offset_xy_m": [
+        -0.1937853354045127,
+        0.38992359217613
+      ],
+      "seed": 20260731,
+      "selected": false
+    },
+    {
+      "bottle_position_world_m": [
+        0.01647268447856315,
+        -0.005378171853373692,
+        0.03143499791622162
+      ],
+      "bottle_xy_bounds_world_m": {
+        "maximum": [
+          0.22314356666503646,
+          0.04377053848174495
+        ],
+        "minimum": [
+          0.013032223232688808,
+          -0.037002646777854975
+        ]
+      },
+      "candidate_index": 4,
+      "full_bottle_inside_free_surface": true,
+      "ik": {
+        "classification": null,
+        "failure_phase": "vertical_lift",
+        "grasp_position_world_m": null,
+        "lift_position_world_m": null,
+        "phase_summaries": {
+          "move_to_pregrasp": {
+            "attempts": [
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 1,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 2,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 4,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 7,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 8,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": null,
+                "segment_count": 16,
+                "status": "PASS"
+              }
+            ],
+            "selected_segment_count": 16,
+            "status": "PASS"
+          },
+          "vertical_descent": {
+            "attempts": [
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 1,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 2,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 4,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": null,
+                "segment_count": 8,
+                "status": "PASS"
+              }
+            ],
+            "selected_segment_count": 8,
+            "status": "PASS"
+          },
+          "vertical_lift": {
+            "attempts": [
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": false,
+                  "segment": 1,
+                  "solver_success": false,
+                  "velocity_ok": false,
+                  "within_limits": false
+                },
+                "segment_count": 1,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 2,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 4,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 8,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 9,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 16,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 22,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 32,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 47,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 64,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 96,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 128,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 192,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 256,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 384,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 512,
+                "status": "FAIL"
+              }
+            ],
+            "selected_segment_count": null,
+            "status": "FAIL"
+          }
+        },
+        "pregrasp_position_world_m": null,
+        "source": null,
+        "status": "FAIL",
+        "target_orientation_world_wxyz": null,
+        "waypoint_count": 24
+      },
+      "offset_xy_m": [
+        0.08043633613566764,
+        0.16150721902435
+      ],
+      "seed": 20260731,
+      "selected": false
+    },
+    {
+      "bottle_position_world_m": [
+        -0.17294013044766224,
+        -0.17142316929557014,
+        0.03143499791622162
+      ],
+      "bottle_xy_bounds_world_m": {
+        "maximum": [
+          0.03373075173881107,
+          -0.1222744589604515
+        ],
+        "minimum": [
+          -0.1763805916935366,
+          -0.20304764422005142
+        ]
+      },
+      "candidate_index": 5,
+      "full_bottle_inside_free_surface": true,
+      "ik": {
+        "classification": "DIAGNOSTIC_CYLINDRICAL_SYMMETRY_VARIANT_PENDING_CORRECTED_NATIVE_GRASP_EDITOR_EXPORT",
+        "failure_phase": null,
+        "grasp_position_world_m": [
+          -0.10455064572325833,
+          -0.16226465527142153,
+          0.056389985841833044
+        ],
+        "lift_position_world_m": [
+          -0.10455064572325833,
+          -0.16226465527142153,
+          0.26638998584183304
+        ],
+        "phase_summaries": {
+          "move_to_pregrasp": {
+            "attempts": [
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 1,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 2,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 4,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 8,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 16,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": null,
+                "segment_count": 32,
+                "status": "PASS"
+              }
+            ],
+            "selected_segment_count": 32,
+            "status": "PASS"
+          },
+          "vertical_descent": {
+            "attempts": [
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 1,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 2,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 4,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": null,
+                "segment_count": 8,
+                "status": "PASS"
+              }
+            ],
+            "selected_segment_count": 8,
+            "status": "PASS"
+          },
+          "vertical_lift": {
+            "attempts": [
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 1,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 2,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 4,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 8,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": null,
+                "segment_count": 16,
+                "status": "PASS"
+              }
+            ],
+            "selected_segment_count": 16,
+            "status": "PASS"
+          }
+        },
+        "pregrasp_position_world_m": [
+          -0.10455064572325833,
+          -0.16226465527142153,
+          0.1303738596459329
+        ],
+        "source": "DYNAMIC_SETTLED_CYLINDRICAL_ROLL_EQUIVALENT_SELECTED_FROM_SUPPLIER_CAD_GRASP_CANDIDATE_T_O_G",
+        "status": "PASS",
+        "target_orientation_world_wxyz": [
+          0.047032030235806696,
+          0.7055409188217918,
+          0.047032030235806696,
+          -0.7055409188217917
+        ],
+        "waypoint_count": 56
+      },
+      "offset_xy_m": [
+        -0.10897647879055775,
+        -0.004537778417846444
+      ],
+      "position_id": "position_02",
+      "seed": 20260731,
+      "selected": true
+    },
+    {
+      "bottle_position_world_m": [
+        0.1518815510786099,
+        -0.20724657140730204,
+        0.03143499791622162
+      ],
+      "bottle_xy_bounds_world_m": {
+        "maximum": [
+          0.35855243326508324,
+          -0.1580978610721834
+        ],
+        "minimum": [
+          0.14844108983273557,
+          -0.23887104633178333
+        ]
+      },
+      "candidate_index": 6,
+      "full_bottle_inside_free_surface": true,
+      "ik": {
+        "classification": null,
+        "failure_phase": "move_to_pregrasp",
+        "grasp_position_world_m": null,
+        "lift_position_world_m": null,
+        "phase_summaries": {
+          "move_to_pregrasp": {
+            "attempts": [
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": false,
+                  "segment": 1,
+                  "solver_success": false,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 1,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": false,
+                  "segment": 1,
+                  "solver_success": false,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 2,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 4,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 8,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 16,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 5,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 32,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 19,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 64,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 41,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 128,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 82,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 256,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 168,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 512,
+                "status": "FAIL"
+              }
+            ],
+            "selected_segment_count": null,
+            "status": "FAIL"
+          }
+        },
+        "pregrasp_position_world_m": null,
+        "source": null,
+        "status": "FAIL",
+        "target_orientation_world_wxyz": null,
+        "waypoint_count": 0
+      },
+      "offset_xy_m": [
+        0.2158452027357144,
+        -0.04036118052957834
+      ],
+      "seed": 20260731,
+      "selected": false
+    },
+    {
+      "bottle_position_world_m": [
+        -0.3100441646348211,
+        0.006172446773324403,
+        0.03143499791622162
+      ],
+      "bottle_xy_bounds_world_m": {
+        "maximum": [
+          -0.10337328244834776,
+          0.05532115710844304
+        ],
+        "minimum": [
+          -0.3134846258806954,
+          -0.02545202815115688
+        ]
+      },
+      "candidate_index": 7,
+      "full_bottle_inside_free_surface": true,
+      "ik": {
+        "classification": null,
+        "failure_phase": "move_to_pregrasp",
+        "grasp_position_world_m": null,
+        "lift_position_world_m": null,
+        "phase_summaries": {
+          "move_to_pregrasp": {
+            "attempts": [
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 1,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 2,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 4,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 8,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 16,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 32,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 63,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 64,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 126,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 128,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 252,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 256,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 504,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 512,
+                "status": "FAIL"
+              }
+            ],
+            "selected_segment_count": null,
+            "status": "FAIL"
+          }
+        },
+        "pregrasp_position_world_m": null,
+        "source": null,
+        "status": "FAIL",
+        "target_orientation_world_wxyz": null,
+        "waypoint_count": 0
+      },
+      "offset_xy_m": [
+        -0.24608051297771658,
+        0.1730578376510481
+      ],
+      "seed": 20260731,
+      "selected": false
+    },
+    {
+      "bottle_position_world_m": [
+        -0.14113233724227484,
+        0.1436247386395587,
+        0.03143499791622162
+      ],
+      "bottle_xy_bounds_world_m": {
+        "maximum": [
+          0.06553854494419847,
+          0.19277344897467735
+        ],
+        "minimum": [
+          -0.1445727984881492,
+          0.11200026371507743
+        ]
+      },
+      "candidate_index": 8,
+      "full_bottle_inside_free_surface": true,
+      "ik": {
+        "classification": null,
+        "failure_phase": "move_to_pregrasp",
+        "grasp_position_world_m": null,
+        "lift_position_world_m": null,
+        "phase_summaries": {
+          "move_to_pregrasp": {
+            "attempts": [
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 1,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 2,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 4,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 8,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 16,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 20,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 32,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 40,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 64,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 79,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 128,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 158,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 256,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 316,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 512,
+                "status": "FAIL"
+              }
+            ],
+            "selected_segment_count": null,
+            "status": "FAIL"
+          }
+        },
+        "pregrasp_position_world_m": null,
+        "source": null,
+        "status": "FAIL",
+        "target_orientation_world_wxyz": null,
+        "waypoint_count": 0
+      },
+      "offset_xy_m": [
+        -0.07716868558517034,
+        0.3105101295172824
+      ],
+      "seed": 20260731,
+      "selected": false
+    },
+    {
+      "bottle_position_world_m": [
+        -0.25549722061938057,
+        -0.12379538541442384,
+        0.03143499791622162
+      ],
+      "bottle_xy_bounds_world_m": {
+        "maximum": [
+          -0.04882633843290726,
+          -0.0746466750793052
+        ],
+        "minimum": [
+          -0.2589376818652549,
+          -0.15541986033890512
+        ]
+      },
+      "candidate_index": 9,
+      "full_bottle_inside_free_surface": true,
+      "ik": {
+        "classification": "DIAGNOSTIC_CYLINDRICAL_SYMMETRY_VARIANT_PENDING_CORRECTED_NATIVE_GRASP_EDITOR_EXPORT",
+        "failure_phase": null,
+        "grasp_position_world_m": [
+          -0.18710773589497665,
+          -0.11463687139027523,
+          0.056389985841833044
+        ],
+        "lift_position_world_m": [
+          -0.18710773589497665,
+          -0.11463687139027523,
+          0.26638998584183304
+        ],
+        "phase_summaries": {
+          "move_to_pregrasp": {
+            "attempts": [
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 1,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 2,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 4,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 8,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 16,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": null,
+                "segment_count": 32,
+                "status": "PASS"
+              }
+            ],
+            "selected_segment_count": 32,
+            "status": "PASS"
+          },
+          "vertical_descent": {
+            "attempts": [
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 1,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 2,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 4,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": null,
+                "segment_count": 8,
+                "status": "PASS"
+              }
+            ],
+            "selected_segment_count": 8,
+            "status": "PASS"
+          },
+          "vertical_lift": {
+            "attempts": [
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 1,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 2,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 4,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 8,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": null,
+                "segment_count": 16,
+                "status": "PASS"
+              }
+            ],
+            "selected_segment_count": 16,
+            "status": "PASS"
+          }
+        },
+        "pregrasp_position_world_m": [
+          -0.18710773589497665,
+          -0.11463687139027523,
+          0.1303738596459329
+        ],
+        "source": "DYNAMIC_SETTLED_CYLINDRICAL_ROLL_EQUIVALENT_SELECTED_FROM_SUPPLIER_CAD_GRASP_CANDIDATE_T_O_G",
+        "status": "PASS",
+        "target_orientation_world_wxyz": [
+          0.047032030235806696,
+          0.7055409188217918,
+          0.047032030235806696,
+          -0.7055409188217917
+        ],
+        "waypoint_count": 56
+      },
+      "offset_xy_m": [
+        -0.19153356896227608,
+        0.04309000546329986
+      ],
+      "position_id": "position_03",
+      "seed": 20260731,
+      "selected": true
+    },
+    {
+      "bottle_position_world_m": [
+        -0.21356931556701178,
+        -0.13991797346453536,
+        0.03143499791622162
+      ],
+      "bottle_xy_bounds_world_m": {
+        "maximum": [
+          -0.006898433380538471,
+          -0.09076926312941672
+        ],
+        "minimum": [
+          -0.21700977681288613,
+          -0.17154244838901664
+        ]
+      },
+      "candidate_index": 10,
+      "full_bottle_inside_free_surface": true,
+      "ik": {
+        "classification": "DIAGNOSTIC_CYLINDRICAL_SYMMETRY_VARIANT_PENDING_CORRECTED_NATIVE_GRASP_EDITOR_EXPORT",
+        "failure_phase": null,
+        "grasp_position_world_m": [
+          -0.14517983084260788,
+          -0.13075945944038675,
+          0.056389985841833044
+        ],
+        "lift_position_world_m": [
+          -0.14517983084260788,
+          -0.13075945944038675,
+          0.26638998584183304
+        ],
+        "phase_summaries": {
+          "move_to_pregrasp": {
+            "attempts": [
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 1,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 2,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 4,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 8,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 16,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": null,
+                "segment_count": 32,
+                "status": "PASS"
+              }
+            ],
+            "selected_segment_count": 32,
+            "status": "PASS"
+          },
+          "vertical_descent": {
+            "attempts": [
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 1,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 2,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 4,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": null,
+                "segment_count": 8,
+                "status": "PASS"
+              }
+            ],
+            "selected_segment_count": 8,
+            "status": "PASS"
+          },
+          "vertical_lift": {
+            "attempts": [
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 1,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 2,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 4,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 8,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": null,
+                "segment_count": 16,
+                "status": "PASS"
+              }
+            ],
+            "selected_segment_count": 16,
+            "status": "PASS"
+          }
+        },
+        "pregrasp_position_world_m": [
+          -0.14517983084260788,
+          -0.13075945944038675,
+          0.1303738596459329
+        ],
+        "source": "DYNAMIC_SETTLED_CYLINDRICAL_ROLL_EQUIVALENT_SELECTED_FROM_SUPPLIER_CAD_GRASP_CANDIDATE_T_O_G",
+        "status": "PASS",
+        "target_orientation_world_wxyz": [
+          0.047032030235806696,
+          0.7055409188217918,
+          0.047032030235806696,
+          -0.7055409188217917
+        ],
+        "waypoint_count": 56
+      },
+      "offset_xy_m": [
+        -0.1496056639099073,
+        0.026967417413188338
+      ],
+      "position_id": "position_04",
+      "seed": 20260731,
+      "selected": true
+    },
+    {
+      "bottle_position_world_m": [
+        -0.2629810801865755,
+        -0.10293779369973441,
+        0.03143499791622162
+      ],
+      "bottle_xy_bounds_world_m": {
+        "maximum": [
+          -0.0563101980001022,
+          -0.05378908336461577
+        ],
+        "minimum": [
+          -0.26642154143244984,
+          -0.1345622686242157
+        ]
+      },
+      "candidate_index": 11,
+      "full_bottle_inside_free_surface": true,
+      "ik": {
+        "classification": "DIAGNOSTIC_CYLINDRICAL_SYMMETRY_VARIANT_PENDING_CORRECTED_NATIVE_GRASP_EDITOR_EXPORT",
+        "failure_phase": null,
+        "grasp_position_world_m": [
+          -0.19459159546217158,
+          -0.0937792796755858,
+          0.056389985841833044
+        ],
+        "lift_position_world_m": [
+          -0.19459159546217158,
+          -0.0937792796755858,
+          0.26638998584183304
+        ],
+        "phase_summaries": {
+          "move_to_pregrasp": {
+            "attempts": [
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 1,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 2,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 4,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 8,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 16,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": null,
+                "segment_count": 32,
+                "status": "PASS"
+              }
+            ],
+            "selected_segment_count": 32,
+            "status": "PASS"
+          },
+          "vertical_descent": {
+            "attempts": [
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 1,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 2,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 4,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": null,
+                "segment_count": 8,
+                "status": "PASS"
+              }
+            ],
+            "selected_segment_count": 8,
+            "status": "PASS"
+          },
+          "vertical_lift": {
+            "attempts": [
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 1,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 2,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 4,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 8,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": null,
+                "segment_count": 16,
+                "status": "PASS"
+              }
+            ],
+            "selected_segment_count": 16,
+            "status": "PASS"
+          }
+        },
+        "pregrasp_position_world_m": [
+          -0.19459159546217158,
+          -0.0937792796755858,
+          0.1303738596459329
+        ],
+        "source": "DYNAMIC_SETTLED_CYLINDRICAL_ROLL_EQUIVALENT_SELECTED_FROM_SUPPLIER_CAD_GRASP_CANDIDATE_T_O_G",
+        "status": "PASS",
+        "target_orientation_world_wxyz": [
+          0.047032030235806696,
+          0.7055409188217918,
+          0.047032030235806696,
+          -0.7055409188217917
+        ],
+        "waypoint_count": 56
+      },
+      "offset_xy_m": [
+        -0.19901742852947102,
+        0.06394759717798928
+      ],
+      "position_id": "position_05",
+      "seed": 20260731,
+      "selected": true
+    }
+  ],
+  "classification": "DIAGNOSTIC_ONLY_NOT_FINAL_CONTROL_MAPPING",
+  "formal_lift_derivation": "TARGET_CLEARANCE_PLUS_HOLD_DROP_GATE",
+  "formal_lift_distance_m": 0.21000000000000002,
+  "ik_start_state": {
+    "ee_orientation_world_wxyz": [
+      -0.05932579055954215,
+      -0.6610635064122198,
+      -0.02903248282001979,
+      0.7474172904113014
+    ],
+    "ee_position_world_m": [
+      0.015278923586444892,
+      -0.15714534110224018,
+      0.1259021192799959
+    ],
+    "joint_readback_arm_rad": [
+      -0.25016099214553833,
+      0.6378646492958069,
+      -0.4662381708621979,
+      -0.07844164222478867,
+      1.502675175666809,
+      2.7755277156829834
+    ],
+    "physics_frame": 36,
+    "source": "ACCEPTED_SINGLE_POSITION_LAST_SETTLE_READBACK_PLUS_LOCAL_LULA_FK"
+  },
+  "legal_geometry": {
+    "clearance_margin_m": 0.0,
+    "clearance_margin_status": "NO_GUESSED_MARGIN;_CANDIDATES_REQUIRE_RUNTIME_IK_AND_PHYSICS_VALIDATION",
+    "free_surface_xy": {
+      "derivation": "TABLE_Y_BOUNDS_AND_INNER_X_FACES_OF_COMPOSED_LEFT_RIGHT_ROBOT_BASE_AABBS",
+      "maximum": [
+        0.3674999916639486,
+        0.3
+      ],
+      "minimum": [
+        -0.3674999916639486,
+        -0.3
+      ]
+    },
+    "nominal_bottle_xy_bounds": {
+      "maximum": [
+        0.14270723052936882,
+        -0.11773668054260505
+      ],
+      "minimum": [
+        -0.06740411290297883,
+        -0.19850986580220498
+      ]
+    },
+    "offset_xy_m": {
+      "maximum": [
+        0.22479276113457977,
+        0.41773668054260504
+      ],
+      "minimum": [
+        -0.30009587876096977,
+        -0.10149013419779501
+      ]
+    }
+  },
+  "nominal_positive_control_ik": {
+    "classification": "DIAGNOSTIC_CYLINDRICAL_SYMMETRY_VARIANT_PENDING_CORRECTED_NATIVE_GRASP_EDITOR_EXPORT",
+    "failure_phase": null,
+    "grasp_position_world_m": [
+      0.00442583306729942,
+      -0.1577268768535751,
+      0.056389985841833044
+    ],
+    "lift_position_world_m": [
+      0.00442583306729942,
+      -0.1577268768535751,
+      0.26638998584183304
+    ],
+    "phase_summaries": {
+      "move_to_pregrasp": {
+        "attempts": [
+          {
+            "failure_reason": {
+              "finite": true,
+              "fk_within_tolerance": true,
+              "segment": 1,
+              "solver_success": true,
+              "velocity_ok": false,
+              "within_limits": true
+            },
+            "segment_count": 1,
+            "status": "FAIL"
+          },
+          {
+            "failure_reason": {
+              "finite": true,
+              "fk_within_tolerance": true,
+              "segment": 1,
+              "solver_success": true,
+              "velocity_ok": false,
+              "within_limits": true
+            },
+            "segment_count": 2,
+            "status": "FAIL"
+          },
+          {
+            "failure_reason": null,
+            "segment_count": 4,
+            "status": "PASS"
+          }
+        ],
+        "selected_segment_count": 4,
+        "status": "PASS"
+      },
+      "vertical_descent": {
+        "attempts": [
+          {
+            "failure_reason": {
+              "finite": true,
+              "fk_within_tolerance": true,
+              "segment": 1,
+              "solver_success": true,
+              "velocity_ok": false,
+              "within_limits": true
+            },
+            "segment_count": 1,
+            "status": "FAIL"
+          },
+          {
+            "failure_reason": {
+              "finite": true,
+              "fk_within_tolerance": true,
+              "segment": 1,
+              "solver_success": true,
+              "velocity_ok": false,
+              "within_limits": true
+            },
+            "segment_count": 2,
+            "status": "FAIL"
+          },
+          {
+            "failure_reason": {
+              "finite": true,
+              "fk_within_tolerance": true,
+              "segment": 1,
+              "solver_success": true,
+              "velocity_ok": false,
+              "within_limits": true
+            },
+            "segment_count": 4,
+            "status": "FAIL"
+          },
+          {
+            "failure_reason": null,
+            "segment_count": 8,
+            "status": "PASS"
+          }
+        ],
+        "selected_segment_count": 8,
+        "status": "PASS"
+      },
+      "vertical_lift": {
+        "attempts": [
+          {
+            "failure_reason": {
+              "finite": true,
+              "fk_within_tolerance": true,
+              "segment": 1,
+              "solver_success": true,
+              "velocity_ok": false,
+              "within_limits": true
+            },
+            "segment_count": 1,
+            "status": "FAIL"
+          },
+          {
+            "failure_reason": {
+              "finite": true,
+              "fk_within_tolerance": true,
+              "segment": 1,
+              "solver_success": true,
+              "velocity_ok": false,
+              "within_limits": true
+            },
+            "segment_count": 2,
+            "status": "FAIL"
+          },
+          {
+            "failure_reason": {
+              "finite": true,
+              "fk_within_tolerance": true,
+              "segment": 1,
+              "solver_success": true,
+              "velocity_ok": false,
+              "within_limits": true
+            },
+            "segment_count": 4,
+            "status": "FAIL"
+          },
+          {
+            "failure_reason": {
+              "finite": true,
+              "fk_within_tolerance": true,
+              "segment": 1,
+              "solver_success": true,
+              "velocity_ok": false,
+              "within_limits": true
+            },
+            "segment_count": 8,
+            "status": "FAIL"
+          },
+          {
+            "failure_reason": {
+              "finite": true,
+              "fk_within_tolerance": true,
+              "segment": 14,
+              "solver_success": true,
+              "velocity_ok": false,
+              "within_limits": true
+            },
+            "segment_count": 16,
+            "status": "FAIL"
+          },
+          {
+            "failure_reason": null,
+            "segment_count": 32,
+            "status": "PASS"
+          }
+        ],
+        "selected_segment_count": 32,
+        "status": "PASS"
+      }
+    },
+    "pregrasp_position_world_m": [
+      0.00442583306729942,
+      -0.1577268768535751,
+      0.1303738596459329
+    ],
+    "source": "DYNAMIC_SETTLED_CYLINDRICAL_ROLL_EQUIVALENT_SELECTED_FROM_SUPPLIER_CAD_GRASP_CANDIDATE_T_O_G",
+    "status": "PASS",
+    "target_orientation_world_wxyz": [
+      0.047032030235806696,
+      0.7055409188217918,
+      0.047032030235806696,
+      -0.7055409188217917
+    ],
+    "waypoint_count": 44
+  },
+  "required_passing_positions": 5,
+  "runtime": {
+    "ik": "LULA_LOCAL_5_1_RUNTIME",
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physx": "107.3.26"
+  },
+  "sampling_config": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/configs/aloha1_grasp_20cm_five_positions.yaml",
+    "sha256": "935cc32d918244430fcb34473a5a510c840675204b1401429fcfc63a1136d30b"
+  },
+  "schema_version": 1,
+  "selected_position_count": 5,
+  "selected_positions": [
+    {
+      "bottle_position_world_m": [
+        -0.20788926509470856,
+        -0.10290010333767574,
+        0.03143499791622162
+      ],
+      "bottle_xy_bounds_world_m": {
+        "maximum": [
+          -0.0012183829082352549,
+          -0.0537513930025571
+        ],
+        "minimum": [
+          -0.2113297263405829,
+          -0.13452457826215702
+        ]
+      },
+      "candidate_index": 1,
+      "full_bottle_inside_free_surface": true,
+      "ik": {
+        "classification": "DIAGNOSTIC_CYLINDRICAL_SYMMETRY_VARIANT_PENDING_CORRECTED_NATIVE_GRASP_EDITOR_EXPORT",
+        "failure_phase": null,
+        "grasp_position_world_m": [
+          -0.13949978037030464,
+          -0.09374158931352713,
+          0.056389985841833044
+        ],
+        "lift_position_world_m": [
+          -0.13949978037030464,
+          -0.09374158931352713,
+          0.26638998584183304
+        ],
+        "phase_summaries": {
+          "move_to_pregrasp": {
+            "attempts": [
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 1,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 2,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 4,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 8,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 16,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": null,
+                "segment_count": 32,
+                "status": "PASS"
+              }
+            ],
+            "selected_segment_count": 32,
+            "status": "PASS"
+          },
+          "vertical_descent": {
+            "attempts": [
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 1,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 2,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 4,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": null,
+                "segment_count": 8,
+                "status": "PASS"
+              }
+            ],
+            "selected_segment_count": 8,
+            "status": "PASS"
+          },
+          "vertical_lift": {
+            "attempts": [
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 1,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 2,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 4,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 8,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": null,
+                "segment_count": 16,
+                "status": "PASS"
+              }
+            ],
+            "selected_segment_count": 16,
+            "status": "PASS"
+          }
+        },
+        "pregrasp_position_world_m": [
+          -0.13949978037030464,
+          -0.09374158931352713,
+          0.1303738596459329
+        ],
+        "source": "DYNAMIC_SETTLED_CYLINDRICAL_ROLL_EQUIVALENT_SELECTED_FROM_SUPPLIER_CAD_GRASP_CANDIDATE_T_O_G",
+        "status": "PASS",
+        "target_orientation_world_wxyz": [
+          0.047032030235806696,
+          0.7055409188217918,
+          0.047032030235806696,
+          -0.7055409188217917
+        ],
+        "waypoint_count": 56
+      },
+      "offset_xy_m": [
+        -0.14392561343760407,
+        0.06398528754004795
+      ],
+      "position_id": "position_01",
+      "seed": 20260731,
+      "selected": true
+    },
+    {
+      "bottle_position_world_m": [
+        -0.17294013044766224,
+        -0.17142316929557014,
+        0.03143499791622162
+      ],
+      "bottle_xy_bounds_world_m": {
+        "maximum": [
+          0.03373075173881107,
+          -0.1222744589604515
+        ],
+        "minimum": [
+          -0.1763805916935366,
+          -0.20304764422005142
+        ]
+      },
+      "candidate_index": 5,
+      "full_bottle_inside_free_surface": true,
+      "ik": {
+        "classification": "DIAGNOSTIC_CYLINDRICAL_SYMMETRY_VARIANT_PENDING_CORRECTED_NATIVE_GRASP_EDITOR_EXPORT",
+        "failure_phase": null,
+        "grasp_position_world_m": [
+          -0.10455064572325833,
+          -0.16226465527142153,
+          0.056389985841833044
+        ],
+        "lift_position_world_m": [
+          -0.10455064572325833,
+          -0.16226465527142153,
+          0.26638998584183304
+        ],
+        "phase_summaries": {
+          "move_to_pregrasp": {
+            "attempts": [
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 1,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 2,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 4,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 8,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 16,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": null,
+                "segment_count": 32,
+                "status": "PASS"
+              }
+            ],
+            "selected_segment_count": 32,
+            "status": "PASS"
+          },
+          "vertical_descent": {
+            "attempts": [
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 1,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 2,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 4,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": null,
+                "segment_count": 8,
+                "status": "PASS"
+              }
+            ],
+            "selected_segment_count": 8,
+            "status": "PASS"
+          },
+          "vertical_lift": {
+            "attempts": [
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 1,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 2,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 4,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 8,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": null,
+                "segment_count": 16,
+                "status": "PASS"
+              }
+            ],
+            "selected_segment_count": 16,
+            "status": "PASS"
+          }
+        },
+        "pregrasp_position_world_m": [
+          -0.10455064572325833,
+          -0.16226465527142153,
+          0.1303738596459329
+        ],
+        "source": "DYNAMIC_SETTLED_CYLINDRICAL_ROLL_EQUIVALENT_SELECTED_FROM_SUPPLIER_CAD_GRASP_CANDIDATE_T_O_G",
+        "status": "PASS",
+        "target_orientation_world_wxyz": [
+          0.047032030235806696,
+          0.7055409188217918,
+          0.047032030235806696,
+          -0.7055409188217917
+        ],
+        "waypoint_count": 56
+      },
+      "offset_xy_m": [
+        -0.10897647879055775,
+        -0.004537778417846444
+      ],
+      "position_id": "position_02",
+      "seed": 20260731,
+      "selected": true
+    },
+    {
+      "bottle_position_world_m": [
+        -0.25549722061938057,
+        -0.12379538541442384,
+        0.03143499791622162
+      ],
+      "bottle_xy_bounds_world_m": {
+        "maximum": [
+          -0.04882633843290726,
+          -0.0746466750793052
+        ],
+        "minimum": [
+          -0.2589376818652549,
+          -0.15541986033890512
+        ]
+      },
+      "candidate_index": 9,
+      "full_bottle_inside_free_surface": true,
+      "ik": {
+        "classification": "DIAGNOSTIC_CYLINDRICAL_SYMMETRY_VARIANT_PENDING_CORRECTED_NATIVE_GRASP_EDITOR_EXPORT",
+        "failure_phase": null,
+        "grasp_position_world_m": [
+          -0.18710773589497665,
+          -0.11463687139027523,
+          0.056389985841833044
+        ],
+        "lift_position_world_m": [
+          -0.18710773589497665,
+          -0.11463687139027523,
+          0.26638998584183304
+        ],
+        "phase_summaries": {
+          "move_to_pregrasp": {
+            "attempts": [
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 1,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 2,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 4,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 8,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 16,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": null,
+                "segment_count": 32,
+                "status": "PASS"
+              }
+            ],
+            "selected_segment_count": 32,
+            "status": "PASS"
+          },
+          "vertical_descent": {
+            "attempts": [
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 1,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 2,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 4,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": null,
+                "segment_count": 8,
+                "status": "PASS"
+              }
+            ],
+            "selected_segment_count": 8,
+            "status": "PASS"
+          },
+          "vertical_lift": {
+            "attempts": [
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 1,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 2,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 4,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 8,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": null,
+                "segment_count": 16,
+                "status": "PASS"
+              }
+            ],
+            "selected_segment_count": 16,
+            "status": "PASS"
+          }
+        },
+        "pregrasp_position_world_m": [
+          -0.18710773589497665,
+          -0.11463687139027523,
+          0.1303738596459329
+        ],
+        "source": "DYNAMIC_SETTLED_CYLINDRICAL_ROLL_EQUIVALENT_SELECTED_FROM_SUPPLIER_CAD_GRASP_CANDIDATE_T_O_G",
+        "status": "PASS",
+        "target_orientation_world_wxyz": [
+          0.047032030235806696,
+          0.7055409188217918,
+          0.047032030235806696,
+          -0.7055409188217917
+        ],
+        "waypoint_count": 56
+      },
+      "offset_xy_m": [
+        -0.19153356896227608,
+        0.04309000546329986
+      ],
+      "position_id": "position_03",
+      "seed": 20260731,
+      "selected": true
+    },
+    {
+      "bottle_position_world_m": [
+        -0.21356931556701178,
+        -0.13991797346453536,
+        0.03143499791622162
+      ],
+      "bottle_xy_bounds_world_m": {
+        "maximum": [
+          -0.006898433380538471,
+          -0.09076926312941672
+        ],
+        "minimum": [
+          -0.21700977681288613,
+          -0.17154244838901664
+        ]
+      },
+      "candidate_index": 10,
+      "full_bottle_inside_free_surface": true,
+      "ik": {
+        "classification": "DIAGNOSTIC_CYLINDRICAL_SYMMETRY_VARIANT_PENDING_CORRECTED_NATIVE_GRASP_EDITOR_EXPORT",
+        "failure_phase": null,
+        "grasp_position_world_m": [
+          -0.14517983084260788,
+          -0.13075945944038675,
+          0.056389985841833044
+        ],
+        "lift_position_world_m": [
+          -0.14517983084260788,
+          -0.13075945944038675,
+          0.26638998584183304
+        ],
+        "phase_summaries": {
+          "move_to_pregrasp": {
+            "attempts": [
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 1,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 2,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 4,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 8,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 16,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": null,
+                "segment_count": 32,
+                "status": "PASS"
+              }
+            ],
+            "selected_segment_count": 32,
+            "status": "PASS"
+          },
+          "vertical_descent": {
+            "attempts": [
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 1,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 2,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 4,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": null,
+                "segment_count": 8,
+                "status": "PASS"
+              }
+            ],
+            "selected_segment_count": 8,
+            "status": "PASS"
+          },
+          "vertical_lift": {
+            "attempts": [
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 1,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 2,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 4,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 8,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": null,
+                "segment_count": 16,
+                "status": "PASS"
+              }
+            ],
+            "selected_segment_count": 16,
+            "status": "PASS"
+          }
+        },
+        "pregrasp_position_world_m": [
+          -0.14517983084260788,
+          -0.13075945944038675,
+          0.1303738596459329
+        ],
+        "source": "DYNAMIC_SETTLED_CYLINDRICAL_ROLL_EQUIVALENT_SELECTED_FROM_SUPPLIER_CAD_GRASP_CANDIDATE_T_O_G",
+        "status": "PASS",
+        "target_orientation_world_wxyz": [
+          0.047032030235806696,
+          0.7055409188217918,
+          0.047032030235806696,
+          -0.7055409188217917
+        ],
+        "waypoint_count": 56
+      },
+      "offset_xy_m": [
+        -0.1496056639099073,
+        0.026967417413188338
+      ],
+      "position_id": "position_04",
+      "seed": 20260731,
+      "selected": true
+    },
+    {
+      "bottle_position_world_m": [
+        -0.2629810801865755,
+        -0.10293779369973441,
+        0.03143499791622162
+      ],
+      "bottle_xy_bounds_world_m": {
+        "maximum": [
+          -0.0563101980001022,
+          -0.05378908336461577
+        ],
+        "minimum": [
+          -0.26642154143244984,
+          -0.1345622686242157
+        ]
+      },
+      "candidate_index": 11,
+      "full_bottle_inside_free_surface": true,
+      "ik": {
+        "classification": "DIAGNOSTIC_CYLINDRICAL_SYMMETRY_VARIANT_PENDING_CORRECTED_NATIVE_GRASP_EDITOR_EXPORT",
+        "failure_phase": null,
+        "grasp_position_world_m": [
+          -0.19459159546217158,
+          -0.0937792796755858,
+          0.056389985841833044
+        ],
+        "lift_position_world_m": [
+          -0.19459159546217158,
+          -0.0937792796755858,
+          0.26638998584183304
+        ],
+        "phase_summaries": {
+          "move_to_pregrasp": {
+            "attempts": [
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 1,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 2,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 4,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 8,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 16,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": null,
+                "segment_count": 32,
+                "status": "PASS"
+              }
+            ],
+            "selected_segment_count": 32,
+            "status": "PASS"
+          },
+          "vertical_descent": {
+            "attempts": [
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 1,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 2,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 4,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": null,
+                "segment_count": 8,
+                "status": "PASS"
+              }
+            ],
+            "selected_segment_count": 8,
+            "status": "PASS"
+          },
+          "vertical_lift": {
+            "attempts": [
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 1,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 2,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 4,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": {
+                  "finite": true,
+                  "fk_within_tolerance": true,
+                  "segment": 1,
+                  "solver_success": true,
+                  "velocity_ok": false,
+                  "within_limits": true
+                },
+                "segment_count": 8,
+                "status": "FAIL"
+              },
+              {
+                "failure_reason": null,
+                "segment_count": 16,
+                "status": "PASS"
+              }
+            ],
+            "selected_segment_count": 16,
+            "status": "PASS"
+          }
+        },
+        "pregrasp_position_world_m": [
+          -0.19459159546217158,
+          -0.0937792796755858,
+          0.1303738596459329
+        ],
+        "source": "DYNAMIC_SETTLED_CYLINDRICAL_ROLL_EQUIVALENT_SELECTED_FROM_SUPPLIER_CAD_GRASP_CANDIDATE_T_O_G",
+        "status": "PASS",
+        "target_orientation_world_wxyz": [
+          0.047032030235806696,
+          0.7055409188217918,
+          0.047032030235806696,
+          -0.7055409188217917
+        ],
+        "waypoint_count": 56
+      },
+      "offset_xy_m": [
+        -0.19901742852947102,
+        0.06394759717798928
+      ],
+      "position_id": "position_05",
+      "seed": 20260731,
+      "selected": true
+    }
+  ],
+  "semantics": {
+    "bottle_rotation": "UNCHANGED",
+    "formal_physics_required_after_preflight": true,
+    "object_from_gripper": "UNCHANGED_VARIANT_B",
+    "randomized": "BOTTLE_INITIAL_WORLD_XY_TRANSLATION_ONLY",
+    "selection": "FIRST_FIVE_LULA_IK_PASSING_CANDIDATES_IN_GENERATED_ORDER"
+  },
+  "stage": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/table_support_alignment/1.0/aloha1_table_support_aligned_workcell.usda",
+    "root_prim": "/World",
+    "sha256_after": "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c",
+    "sha256_before": "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c",
+    "sublayers": [
+      "configuration/aloha1_tabletop_world_zero.usda",
+      "../../signal_correspondence/1.0/aloha1_signal_correspondence_workcell.usda"
+    ]
+  },
+  "status": "PASS"
+}

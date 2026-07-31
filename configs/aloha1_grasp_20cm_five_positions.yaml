@@ -1,0 +1,45 @@
+schema_version: 1
+classification: DIAGNOSTIC_ONLY_NOT_FINAL_CONTROL_MAPPING
+sampling:
+  seed: 20260731
+  candidate_count: 64
+  required_passing_positions: 5
+  method: FIXED_SEED_UNIFORM_IN_DERIVED_CENTRAL_FREE_TABLETOP_OFFSET_ENVELOPE
+  selection: FIRST_FIVE_LULA_IK_PASSING_CANDIDATES_IN_GENERATED_ORDER
+  changed_runtime_variable: BOTTLE_INITIAL_WORLD_XY_TRANSLATION_ONLY
+  unchanged:
+    - bottle_rotation
+    - grasp_editor_object_from_gripper
+    - collider
+    - friction
+    - drive
+    - mimic
+    - bottle_mass
+    - timestep
+    - solver_iterations
+sources:
+  grasp_runtime_config:
+    path: configs/aloha1_grasp_20cm_gui.yaml
+    sha256: 67a427e93a5bbaee6b21f1e0c23a56b0c22771cf1cc0e837e7ea48a6c39185f4
+  table_support_alignment:
+    path: reports/aloha1_mapping/aloha1_table_support_alignment_validation.json
+    sha256: dc50119e5d3edaad84416301b8099709658705a4dd54a5d78b00bbd6bb857c73
+  accepted_single_position_runtime:
+    path: .codex/artifacts/20260731-aloha1-grasp-20cm-button/final_candidate_001/aloha1_grasp_20cm_runtime.json
+    sha256: 5f299fe9be5d7643a4420f4e16c452c148f6b4169ab04d1cba8c733620176cda
+  accepted_single_position_telemetry:
+    path: .codex/artifacts/20260731-aloha1-grasp-20cm-button/final_candidate_001/aloha1_grasp_20cm_telemetry.jsonl
+    sha256: 53d1fd87645db5ef48f901774d7b7047d3736356d11447abbb31f98a12dac69c
+gates:
+  full_bottle_aabb_inside_derived_free_surface: true
+  lula_pregrasp_descent_lift_required: true
+  fresh_isaac_process_per_formal_position: true
+  five_videos_required: true
+  machine_pass_required_for_all_five: true
+  vision_pass_required_for_all_five: true
+boundaries:
+  real_robot: false
+  remote_103: false
+  source_stage_modified: false
+  final_collider_modified: false
+  task8: NOT_RUN
