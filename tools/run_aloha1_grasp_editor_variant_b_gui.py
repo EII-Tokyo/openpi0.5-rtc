@@ -123,6 +123,8 @@ MIMIC_ERROR_TOLERANCE_M = 0.001
 MIMIC_SETTLE_OBSERVATION_FRAMES = (0, 1, 2, 4, 8, 12, 30, 60, 120)
 GRASP_FRAME_TRANSLATION_TOLERANCE_M = 1e-6
 GRASP_FRAME_ROTATION_TOLERANCE_ABS = 1e-6
+OBJECT_AUTHORING_TRANSLATION_TOLERANCE_M = 1e-6
+OBJECT_AUTHORING_ROTATION_TOLERANCE_RAD = 1e-6
 EPISODE18_LIFT_ONSET_ARM_Q_RAD = (
     -0.16720470786094666,
     0.5324101448059082,
@@ -149,6 +151,153 @@ VARIANT_B: dict[str, Any] = {
         "SUPPLIER_CAD_CLEARANCE_GRASP_CANDIDATE"
     ),
 }
+
+
+def validate_object_authoring_mode(
+    *,
+    requested_mode: str,
+    kinematic_readbacks: Sequence[bool],
+    translation_drift_m: float,
+    rotation_drift_rad: float,
+    target_translation_residual_m: float,
+    target_rotation_residual_rad: float,
+    fixed_joint_used: bool,
+    surface_gripper_used: bool,
+    parent_attachment_used: bool,
+) -> dict[str, object]:
+    """Fail closed on a moving or constraint-backed authoring reference."""
+    forbidden = {
+        "fixed_joint_used": bool(fixed_joint_used),
+        "surface_gripper_used": bool(surface_gripper_used),
+        "parent_attachment_used": bool(parent_attachment_used),
+    }
+    if any(forbidden.values()):
+        raise RuntimeError(f"forbidden authoring constraint: {forbidden}")
+    if requested_mode == "kinematic_contact_reference":
+        if not kinematic_readbacks or not all(kinematic_readbacks):
+            raise RuntimeError(
+                f"kinematic readback failed: {list(kinematic_readbacks)}"
+            )
+        if (
+            not math.isfinite(translation_drift_m)
+            or not math.isfinite(rotation_drift_rad)
+            or translation_drift_m
+            > OBJECT_AUTHORING_TRANSLATION_TOLERANCE_M
+            or rotation_drift_rad
+            > OBJECT_AUTHORING_ROTATION_TOLERANCE_RAD
+        ):
+            raise RuntimeError(
+                "kinematic authoring pose drift exceeds tolerance: "
+                f"translation={translation_drift_m}, "
+                f"rotation={rotation_drift_rad}"
+            )
+        if (
+            not math.isfinite(target_translation_residual_m)
+            or not math.isfinite(target_rotation_residual_rad)
+            or target_translation_residual_m
+            > OBJECT_AUTHORING_TRANSLATION_TOLERANCE_M
+            or target_rotation_residual_rad
+            > OBJECT_AUTHORING_ROTATION_TOLERANCE_RAD
+        ):
+            raise RuntimeError(
+                "kinematic authoring target pose residual exceeds tolerance: "
+                f"translation={target_translation_residual_m}, "
+                f"rotation={target_rotation_residual_rad}"
+            )
+        classification = (
+            "KINEMATIC_CONTACT_REFERENCE_NOT_DYNAMIC_HOLD"
+        )
+    elif requested_mode == "dynamic_native_test":
+        classification = "DYNAMIC_NATIVE_GRASP_TEST"
+    else:
+        raise ValueError(
+            f"unsupported object authoring mode: {requested_mode}"
+        )
+    return {
+        "status": "PASS",
+        "classification": classification,
+        "requested_mode": requested_mode,
+        "kinematic_readbacks": list(kinematic_readbacks),
+        "translation_drift_m": float(translation_drift_m),
+        "rotation_drift_rad": float(rotation_drift_rad),
+        "target_translation_residual_m": float(
+            target_translation_residual_m
+        ),
+        "target_rotation_residual_rad": float(
+            target_rotation_residual_rad
+        ),
+        "translation_tolerance_m": (
+            OBJECT_AUTHORING_TRANSLATION_TOLERANCE_M
+        ),
+        "rotation_tolerance_rad": (
+            OBJECT_AUTHORING_ROTATION_TOLERANCE_RAD
+        ),
+        "eligible_as_static_hold_evidence": False,
+        **forbidden,
+    }
+
+
+def _quaternion_distance_rad(
+    first_wxyz: Sequence[float],
+    second_wxyz: Sequence[float],
+    *,
+    np: Any,
+) -> float:
+    first = np.asarray(first_wxyz, dtype=float)
+    second = np.asarray(second_wxyz, dtype=float)
+    first /= np.linalg.norm(first)
+    second /= np.linalg.norm(second)
+    cosine = float(np.clip(abs(np.dot(first, second)), -1.0, 1.0))
+    return float(2.0 * math.acos(cosine))
+
+
+def validate_native_candidate_pose(
+    *,
+    requested_mode: str,
+    exported_object_from_gripper: Any,
+    candidate_object_from_gripper: Any,
+    np: Any,
+) -> dict[str, object]:
+    """Validate that kinematic Skip Sim preserves the frozen candidate pose."""
+    exported = np.asarray(exported_object_from_gripper, dtype=float)
+    candidate = np.asarray(candidate_object_from_gripper, dtype=float)
+    translation_residual = float(
+        np.linalg.norm(exported[:3, 3] - candidate[:3, 3])
+    )
+    relative_rotation = exported[:3, :3].T @ candidate[:3, :3]
+    rotation_residual = float(
+        math.acos(
+            float(
+                np.clip(
+                    (np.trace(relative_rotation) - 1.0) / 2.0,
+                    -1.0,
+                    1.0,
+                )
+            )
+        )
+    )
+    if requested_mode == "kinematic_contact_reference" and (
+        translation_residual
+        > OBJECT_AUTHORING_TRANSLATION_TOLERANCE_M
+        or rotation_residual > OBJECT_AUTHORING_ROTATION_TOLERANCE_RAD
+    ):
+        raise RuntimeError(
+            "kinematic native export pose does not match frozen candidate: "
+            f"translation={translation_residual}, "
+            f"rotation={rotation_residual}"
+        )
+    return {
+        "status": "PASS",
+        "requested_mode": requested_mode,
+        "translation_residual_m": translation_residual,
+        "rotation_residual_rad": rotation_residual,
+        "translation_tolerance_m": (
+            OBJECT_AUTHORING_TRANSLATION_TOLERANCE_M
+        ),
+        "rotation_tolerance_rad": (
+            OBJECT_AUTHORING_ROTATION_TOLERANCE_RAD
+        ),
+    }
 
 
 def build_external_close_targets(
@@ -858,7 +1007,15 @@ def _load_object_from_gripper(
     rotation_type: Any,
 ) -> Any:
     document = yaml.safe_load(path.read_text(encoding="utf-8"))
-    grasp = document["grasps"]["horizontal_body_grasp"]
+    grasps = document["grasps"]
+    if "horizontal_body_grasp" in grasps:
+        grasp = grasps["horizontal_body_grasp"]
+    elif len(grasps) == 1:
+        grasp = next(iter(grasps.values()))
+    else:
+        raise RuntimeError(
+            f"cannot select one grasp from {path}: {list(grasps)}"
+        )
     return _matrix_from_pose(
         grasp["position"],
         [grasp["orientation"]["w"], *grasp["orientation"]["xyz"]],
@@ -1555,13 +1712,17 @@ def _configure_and_run_native_gui(
     renderer_capture: Any,
     set_camera_view: Any,
     stage: Any,
+    gf: Any,
     usd_geom: Any,
+    usd_physics: Any,
     contact_records: list[dict[str, object]],
     contact_state: dict[str, str],
     contact_report_paths: Sequence[str],
     grasp_frame_authoring: dict[str, object],
     mimic_load_case: dict[str, object],
     execution_mode: str,
+    coupling_variant: str,
+    object_authoring_mode: str,
     timeline: Any,
 ) -> dict[str, object]:
     grasp_frame_readback = validate_existing_grasp_frame_runtime(
@@ -1668,14 +1829,66 @@ def _configure_and_run_native_gui(
         np=np,
         rotation_type=rotation_type,
     )
+    bottle_rigid_body_api = usd_physics.RigidBodyAPI(
+        stage.GetPrimAtPath(BOTTLE_SESSION_PATH)
+    )
+    if not bottle_rigid_body_api:
+        raise RuntimeError(
+            f"Bottle500 has no RigidBodyAPI: {BOTTLE_SESSION_PATH}"
+        )
+    kinematic_attr = (
+        bottle_rigid_body_api.CreateKinematicEnabledAttr()
+    )
+    if object_authoring_mode == "kinematic_contact_reference":
+        kinematic_attr.Set(True)  # noqa: FBT003 - USD API is positional.
+    elif object_authoring_mode == "dynamic_native_test":
+        kinematic_attr.Set(False)  # noqa: FBT003 - USD API is positional.
+    else:
+        raise ValueError(
+            f"unsupported object authoring mode: {object_authoring_mode}"
+        )
+    app.update()
+    if object_authoring_mode == "kinematic_contact_reference":
+        bottle_xformable = usd_geom.Xformable(
+            stage.GetPrimAtPath(BOTTLE_SESSION_PATH)
+        )
+        authored_matrix = gf.Matrix4d(1.0)
+        authored_matrix.SetRotate(
+            gf.Quatd(
+                float(object_quaternion[0]),
+                gf.Vec3d(
+                    float(object_quaternion[1]),
+                    float(object_quaternion[2]),
+                    float(object_quaternion[3]),
+                ),
+            )
+        )
+        authored_matrix.SetTranslateOnly(
+            gf.Vec3d(*(float(value) for value in object_position))
+        )
+        bottle_xformable.ClearXformOpOrder()
+        bottle_xformable.AddTransformOp().Set(authored_matrix)
+        app.update()
     builder._rigid_body.set_world_poses(  # noqa: SLF001
         object_position[np.newaxis, :],
         object_quaternion[np.newaxis, :],
     )
-    builder.stop_rigid_body()
     for _ in range(4):
         app.update()
-        builder.stop_rigid_body()
+        if object_authoring_mode == "kinematic_contact_reference":
+            builder._rigid_body.set_world_poses(  # noqa: SLF001
+                object_position[np.newaxis, :],
+                object_quaternion[np.newaxis, :],
+            )
+        else:
+            builder.stop_rigid_body()
+    physics_pose_before_close = builder._rigid_body.get_world_poses()  # noqa: SLF001
+    usd_pose_before_close = get_world_pose(BOTTLE_SESSION_PATH)
+    kinematic_readbacks = [
+        bool(
+            bottle_rigid_body_api.GetKinematicEnabledAttr().Get()
+        )
+    ]
     record_mimic_checkpoint("POST_BOTTLE_PLACEMENT")
 
     contact_state["phase"] = "CONFIGURE_NATIVE_GRASP_EDITOR"
@@ -1711,8 +1924,19 @@ def _configure_and_run_native_gui(
     left_index = articulation.get_dof_index("left_finger")
     right_index = articulation.get_dof_index("right_finger")
     articulation.get_articulation_controller().set_max_efforts(
-        [float(VARIANT_B["max_effort_n"])],
-        [left_index],
+        (
+            [
+                float(VARIANT_B["max_effort_n"]),
+                float(VARIANT_B["max_effort_n"]),
+            ]
+            if coupling_variant == "official_symmetric_adapter"
+            else [float(VARIANT_B["max_effort_n"])]
+        ),
+        (
+            [left_index, right_index]
+            if coupling_variant == "official_symmetric_adapter"
+            else [left_index]
+        ),
     )
     for frame in builder._robot_joint_frames:  # noqa: SLF001
         frame.rebuild()
@@ -1806,10 +2030,20 @@ def _configure_and_run_native_gui(
         timeline.play()
         app.update()
         for frame, target_m in enumerate(close_targets, start=1):
+            action_indices = (
+                np.asarray([left_index, right_index], dtype=np.int32)
+                if coupling_variant == "official_symmetric_adapter"
+                else np.asarray([left_index], dtype=np.int32)
+            )
+            action_positions = (
+                np.asarray([target_m, -target_m], dtype=float)
+                if coupling_variant == "official_symmetric_adapter"
+                else np.asarray([target_m], dtype=float)
+            )
             articulation.apply_action(
                 articulation_action_type(
-                    joint_positions=np.asarray([target_m], dtype=float),
-                    joint_indices=np.asarray([left_index], dtype=np.int32),
+                    joint_positions=action_positions,
+                    joint_indices=action_indices,
                 )
             )
             app.update()
@@ -1830,13 +2064,23 @@ def _configure_and_run_native_gui(
                 }
             )
         for hold_frame in range(120):
+            hold_positions = (
+                np.asarray(
+                    [close_targets[-1], -close_targets[-1]],
+                    dtype=float,
+                )
+                if coupling_variant == "official_symmetric_adapter"
+                else np.asarray([close_targets[-1]], dtype=float)
+            )
+            hold_indices = (
+                np.asarray([left_index, right_index], dtype=np.int32)
+                if coupling_variant == "official_symmetric_adapter"
+                else np.asarray([left_index], dtype=np.int32)
+            )
             articulation.apply_action(
                 articulation_action_type(
-                    joint_positions=np.asarray(
-                        [close_targets[-1]],
-                        dtype=float,
-                    ),
-                    joint_indices=np.asarray([left_index], dtype=np.int32),
+                    joint_positions=hold_positions,
+                    joint_indices=hold_indices,
                 )
             )
             app.update()
@@ -1863,6 +2107,11 @@ def _configure_and_run_native_gui(
                 )
         timeline.pause()
         app.update()
+        kinematic_readbacks.append(
+            bool(
+                bottle_rigid_body_api.GetKinematicEnabledAttr().Get()
+            )
+        )
         builder._last_grasp_test_results = None  # noqa: SLF001
         builder._test_skip_btn.trigger_click()  # noqa: SLF001
         if builder._last_grasp_test_results is None:  # noqa: SLF001
@@ -1908,6 +2157,92 @@ def _configure_and_run_native_gui(
         articulation.get_joint_positions(),
         dtype=float,
     )
+    physics_pose_after_close = builder._rigid_body.get_world_poses()  # noqa: SLF001
+    usd_pose_after_close = get_world_pose(BOTTLE_SESSION_PATH)
+    kinematic_readbacks.append(
+        bool(
+            bottle_rigid_body_api.GetKinematicEnabledAttr().Get()
+        )
+    )
+    position_before = np.asarray(
+        usd_pose_before_close[0],
+        dtype=float,
+    )
+    position_after = np.asarray(
+        usd_pose_after_close[0],
+        dtype=float,
+    )
+    orientation_before = np.asarray(
+        usd_pose_before_close[1],
+        dtype=float,
+    )
+    orientation_after = np.asarray(
+        usd_pose_after_close[1],
+        dtype=float,
+    )
+    physics_position_before = np.asarray(
+        physics_pose_before_close[0][0],
+        dtype=float,
+    )
+    physics_orientation_before = np.asarray(
+        physics_pose_before_close[1][0],
+        dtype=float,
+    )
+    physics_position_after = np.asarray(
+        physics_pose_after_close[0][0],
+        dtype=float,
+    )
+    physics_orientation_after = np.asarray(
+        physics_pose_after_close[1][0],
+        dtype=float,
+    )
+    object_authoring = validate_object_authoring_mode(
+        requested_mode=object_authoring_mode,
+        kinematic_readbacks=kinematic_readbacks,
+        translation_drift_m=float(
+            max(
+                np.linalg.norm(position_after - position_before),
+                np.linalg.norm(
+                    physics_position_after - physics_position_before
+                ),
+            )
+        ),
+        rotation_drift_rad=max(
+            _quaternion_distance_rad(
+                orientation_before,
+                orientation_after,
+                np=np,
+            ),
+            _quaternion_distance_rad(
+                physics_orientation_before,
+                physics_orientation_after,
+                np=np,
+            ),
+        ),
+        target_translation_residual_m=float(
+            max(
+                np.linalg.norm(position_before - object_position),
+                np.linalg.norm(
+                    physics_position_before - object_position
+                ),
+            )
+        ),
+        target_rotation_residual_rad=max(
+            _quaternion_distance_rad(
+                orientation_before,
+                object_quaternion,
+                np=np,
+            ),
+            _quaternion_distance_rad(
+                physics_orientation_before,
+                object_quaternion,
+                np=np,
+            ),
+        ),
+        fixed_joint_used=False,
+        surface_gripper_used=False,
+        parent_attachment_used=False,
+    )
     result_capture = _capture_app_swapchain(
         app=app,
         renderer_capture=renderer_capture,
@@ -1937,6 +2272,22 @@ def _configure_and_run_native_gui(
         for _ in range(4):
             app.update()
         native_export = _validate_native_export(export_path, yaml=yaml)
+        exported_object_from_gripper = _load_object_from_gripper(
+            export_path,
+            yaml=yaml,
+            np=np,
+            rotation_type=rotation_type,
+        )
+        native_export["candidate_pose_validation"] = (
+            validate_native_candidate_pose(
+                requested_mode=object_authoring_mode,
+                exported_object_from_gripper=(
+                    exported_object_from_gripper
+                ),
+                candidate_object_from_gripper=object_from_gripper,
+                np=np,
+            )
+        )
     else:
         native_export = {
             "status": "NOT_RUN",
@@ -2006,6 +2357,8 @@ def _configure_and_run_native_gui(
         "gate": gate,
         "mimic_load_case": mimic_load_case,
         "execution_mode": execution_mode,
+        "coupling_variant": coupling_variant,
+        "object_authoring": object_authoring,
         "variant": variant_contract,
         "authoring_pose": authoring_pose,
         "articulation_dropdown_items": list(articulation_items),
@@ -2097,6 +2450,22 @@ def parse_args() -> argparse.Namespace:
         choices=("native_simulate", "external_contact_skip_sim"),
         default="native_simulate",
     )
+    parser.add_argument(
+        "--coupling-variant",
+        choices=(
+            "current_physx_mimic",
+            "official_symmetric_adapter",
+        ),
+        default="current_physx_mimic",
+    )
+    parser.add_argument(
+        "--object-authoring-mode",
+        choices=(
+            "dynamic_native_test",
+            "kinematic_contact_reference",
+        ),
+        default="dynamic_native_test",
+    )
     return parser.parse_args()
 
 
@@ -2142,7 +2511,11 @@ def main() -> int:
             {
                 "headless": False,
                 "sync_loads": True,
-                "fast_shutdown": False,
+                # The full Kit teardown path exits with SIGSEGV after all
+                # report/cleanup gates complete on this exact 5.1 stack.
+                # Fast shutdown changes teardown only, not the simulated
+                # frames, and gives the diagnostic a machine-verifiable exit.
+                "fast_shutdown": True,
             }
         )
     except BaseException:
@@ -2241,6 +2614,22 @@ def main() -> int:
         session_layer.subLayerPaths.append(diagnostic_layer_identifier)
         stage.SetEditTarget(diagnostic_layer)
 
+        from tools.validate_aloha1_gripper_coupling_ab import author_coupling_variant
+
+        coupling_variant_readback = author_coupling_variant(
+            stage=stage,
+            variant=args.coupling_variant,
+            physx_schema=PhysxSchema,
+            usd_physics=UsdPhysics,
+        )
+        coupling_layer_path = (
+            output_root / "official_gripper_coupling_diagnostic.usda"
+        )
+        if not diagnostic_layer.Export(str(coupling_layer_path)):
+            raise RuntimeError(
+                f"failed to export coupling layer: {coupling_layer_path}"
+            )
+
         grasp_frame_authoring = author_session_supplier_cad_grasp_frame(
             stage=stage,
         )
@@ -2332,6 +2721,11 @@ def main() -> int:
             "grasp_editor_version": version,
             "stage_contract": stage_contract,
             "task_frame_world_translation_m": [0.0, 0.0, 0.0],
+            "coupling_variant": coupling_variant_readback,
+            "coupling_layer": {
+                "absolute_path": str(coupling_layer_path.resolve()),
+                "sha256": _sha256(coupling_layer_path),
+            },
             "gui_workspace": workspace,
             "launch_focus_policy": launch_focus_policy,
         }
@@ -2352,13 +2746,17 @@ def main() -> int:
             ),
             set_camera_view=set_camera_view,
             stage=stage,
+            gf=Gf,
             usd_geom=UsdGeom,
+            usd_physics=UsdPhysics,
             contact_records=contact_records,
             contact_state=contact_state,
             contact_report_paths=contact_report_paths,
             grasp_frame_authoring=grasp_frame_authoring,
             mimic_load_case=mimic_load_case,
             execution_mode=args.execution_mode,
+            coupling_variant=args.coupling_variant,
+            object_authoring_mode=args.object_authoring_mode,
             timeline=omni.timeline.get_timeline_interface(),
         )
         if report["result"]["status"] != "PASS":

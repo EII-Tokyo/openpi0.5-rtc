@@ -1,0 +1,159 @@
+{
+  "classification": "GRASP_EDITOR_EXPORT_PASS_DIAGNOSTIC_COUPLING",
+  "coordinate_transform": {
+    "closure_max_abs": 2.220446049250313e-16,
+    "closure_status": "PASS",
+    "ee_endpoint_is_grasp_center": false,
+    "formula": "T_W_O = T_W_G @ inverse(T_O_G)",
+    "grasp_frame_status": "PASS",
+    "object_from_gripper": [
+      [
+        0.9912548881092187,
+        0.13196115640437622,
+        -1.7478453546507033e-16,
+        -0.02473675376396886
+      ],
+      [
+        0.13196115640437622,
+        -0.9912548881092187,
+        1.123356847992129e-15,
+        -0.00329308906472091
+      ],
+      [
+        -2.5016556429833627e-17,
+        -1.1365977360847348e-15,
+        -1.0,
+        0.06900000000000002
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ]
+  },
+  "coupling": {
+    "classification": "PHYSX_MIMIC_PRIMARY",
+    "passing_path": "official_symmetric_adapter",
+    "promotion_authorized": false,
+    "report_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_gripper_coupling_ab.json",
+    "report_sha256": "df8a1857b7cd945fd38e9d0c921f736c766aadc854534eab6b04eac935f7f90c"
+  },
+  "derived_yaml": {
+    "active_joints": [
+      "left_finger"
+    ],
+    "classification": "DIAGNOSTIC_ONLY_NOT_FINAL_CONTROL_MAPPING",
+    "cspace_position": {
+      "left_finger": 0.05039859190583229
+    },
+    "format": "isaac_grasp",
+    "format_version": 1.0,
+    "gripper_frame": "/World/follower_left/vx300s_left/follower_left_ee_gripper_link",
+    "object_frame": "/World/ALOHA1GraspEditorSession/Bottle500",
+    "orientation": {
+      "w": 8.547927673790287e-05,
+      "xyz": [
+        0.9970608398229055,
+        0.04793171758085323,
+        -0.05976809211180301
+      ]
+    },
+    "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-official-gripper-unattended/stage4/grasp_editor_passing_coupling_run00/grasp_editor_variant_b_skip_sim_derived.yaml",
+    "position": [
+      -0.020479620314324976,
+      -0.0017753636245105477,
+      0.08020476184493056
+    ],
+    "pregrasp_cspace_position": {
+      "left_finger": 0.057
+    },
+    "sha256": "a861d2d1f072006f3027bb630c4f7c045a17d0c53020e8bd35d7f64ceeb3c2c5"
+  },
+  "final_asset_promotion_authorized": false,
+  "gates": {
+    "cleanup": true,
+    "contact": true,
+    "coordinate_closure": true,
+    "coupling": true,
+    "derived_yaml": true,
+    "raw_yaml": true,
+    "runtime": true,
+    "screenshots": true,
+    "stage_hash": true
+  },
+  "ik_diagnostic_allowed": true,
+  "native_raw_yaml": {
+    "active_joints": [
+      "left_finger"
+    ],
+    "cspace_position": {
+      "left_finger": 0.05039859190583229
+    },
+    "format": "isaac_grasp",
+    "format_version": 1.0,
+    "gripper_frame": "/World/follower_left/vx300s_left/follower_left_ee_gripper_link",
+    "object_frame": "/World/ALOHA1GraspEditorSession/Bottle500",
+    "orientation": {
+      "w": 8.547927673790287e-05,
+      "xyz": [
+        0.9970608398229055,
+        0.04793171758085323,
+        -0.05976809211180301
+      ]
+    },
+    "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-official-gripper-unattended/stage4/grasp_editor_passing_coupling_run00/grasp_editor_variant_b_native_raw.yaml",
+    "position": [
+      -0.020479620314324976,
+      -0.0017753636245105477,
+      0.08020476184493056
+    ],
+    "pregrasp_cspace_position": {
+      "left_finger": 0.05039859190583229
+    },
+    "sha256": "fa1270a547e0ac89da2e7afc3965b1d6e7bcc34aab46005d6c65f977e3f69e5e"
+  },
+  "next_gates": {
+    "aloha_specific_fk_ik": "READY_DIAGNOSTIC",
+    "dynamic_horizontal_bottle_grasp": "NOT_RUN",
+    "five_random_bottle_videos": "NOT_RUN"
+  },
+  "runtime": {
+    "bilateral_contact": true,
+    "dof_order": [
+      "waist",
+      "shoulder",
+      "elbow",
+      "forearm_roll",
+      "wrist_angle",
+      "wrist_rotate",
+      "gripper",
+      "left_finger",
+      "right_finger"
+    ],
+    "grasp_editor": "2.0.20",
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "maximum_impulse_ns": 0.0009838331445415989,
+    "mimic_residual_abs_m": 2.390146255493164e-05,
+    "mimic_tolerance_m": 0.001,
+    "minimum_separation_m": -0.00019903041538782418,
+    "physx": "107.3.26",
+    "right_finger_policy": "RUNTIME_OBSERVER_DERIVED_FROM_ONE_OFFICIAL_COORDINATE"
+  },
+  "schema_version": 2,
+  "screenshot_review": {
+    "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_grasp_editor_external_skip_sim_screenshot_review_v2.json",
+    "raw_and_annotated_paths_recorded": true,
+    "record_count": 4,
+    "sha256": "aaa940cfcb069d78bd45ea2adc157b5fab50f1b781ed4e35bbbbc49b8ce54d6b",
+    "status": "PASS"
+  },
+  "stage": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/table_support_alignment/1.0/aloha1_table_support_aligned_workcell.usda",
+    "sha256": "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c"
+  },
+  "status": "PASS",
+  "task8": "NOT_RUN"
+}

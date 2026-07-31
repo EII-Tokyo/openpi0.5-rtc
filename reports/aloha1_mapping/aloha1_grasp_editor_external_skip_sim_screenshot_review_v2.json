@@ -1,0 +1,233 @@
+{
+  "annotation_history": [
+    {
+      "attempt": "draft_full_image_color_detection",
+      "reason": "Isaac UI borders and follower_right colors were mistaken for follower_left fingers, producing oversized boxes and a cross-image line.",
+      "status": "REJECTED_FALSE_COLOR_COMPONENTS"
+    },
+    {
+      "attempt": "retake_follower_left_viewport_roi",
+      "reason": "Color detection is bounded to the follower_left viewport-center ROI; labels and inward-surface band do not obscure the gripper.",
+      "status": "PASS"
+    }
+  ],
+  "camera": {
+    "distance_m": 0.4432341530518472,
+    "eye_world_m": [
+      0.1973042882680523,
+      -0.019063403829932213,
+      0.504863913756596
+    ],
+    "policy": "RUNTIME_GRIPPER_BOTTLE_AABB_OBLIQUE_CLOSEUP",
+    "status": "PASS",
+    "subject_aabb_max_m": [
+      -0.19275535643100739,
+      0.0379367433488369,
+      0.39596131443977356
+    ],
+    "subject_aabb_min_m": [
+      -0.2493365854024887,
+      -0.07606355100870132,
+      0.3209213316440582
+    ],
+    "subject_paths": [
+      "/World/follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh",
+      "/World/ALOHA1GraspEditorSession/Bottle500"
+    ],
+    "subject_world_positions_m": [
+      [
+        -0.24931341409683228,
+        0.0379367433488369,
+        0.32104355096817017
+      ],
+      [
+        -0.2493365854024887,
+        -0.07606355100870132,
+        0.3209213316440582
+      ],
+      [
+        -0.19275535643100739,
+        -0.019095847383141518,
+        0.39596131443977356
+      ]
+    ],
+    "target_world_m": [
+      -0.22104597091674805,
+      -0.019063403829932213,
+      0.3584413230419159
+    ],
+    "viewport_camera_path": "/OmniverseKit_Persp"
+  },
+  "numeric_failure_reasons": [],
+  "numeric_gate": "PASS",
+  "records": [
+    {
+      "acceptance": "PASS_CONTEXT_ONLY",
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-official-gripper-unattended/stage4/grasp_editor_passing_coupling_run00/annotated/grasp_editor_variant_b_configured_annotated.png",
+      "annotated_resolution": [
+        3500,
+        1800
+      ],
+      "annotated_sha256": "2dcf8e7a420a0bc700c5df95e6e868739477bc21f6fab3ea54236904c57f88f5",
+      "finger_bbox_xyxy": {
+        "left": [
+          1496,
+          577,
+          1508,
+          596
+        ],
+        "right": [
+          1385,
+          582,
+          1438,
+          635
+        ]
+      },
+      "follower_left_detection_roi_xyxy": [
+        1036,
+        270,
+        1728,
+        1260
+      ],
+      "phase": "CONFIGURED_BEFORE_SIMULATE",
+      "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-official-gripper-unattended/stage4/grasp_editor_passing_coupling_run00/grasp_editor_variant_b_configured_raw.png",
+      "raw_resolution": [
+        2880,
+        1800
+      ],
+      "raw_sha256": "34d6907b68e613a35323a187bfb5c157c81ff71e040d82cdd529a1c6b2ecd831",
+      "visual_model_review": "PASS",
+      "visual_model_review_note": "Reviewed from actual pixels; geometry is visible and the open/contact pair is distinct. Numeric coupling status remains a separate runtime gate.",
+      "visual_scope": "FULL_ARM_CONTEXT_OPEN"
+    },
+    {
+      "acceptance": "PASS_VISUAL_OPEN_STATE",
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-official-gripper-unattended/stage4/grasp_editor_passing_coupling_run00/annotated/grasp_editor_variant_b_configured_closeup_annotated.png",
+      "annotated_resolution": [
+        3500,
+        1800
+      ],
+      "annotated_sha256": "5668baf2da7e60468ace18b0620e2197e985c7fbc5ac1e4ec37967b4e615e383",
+      "finger_bbox_xyxy": {
+        "left": [
+          1445,
+          669,
+          1525,
+          807
+        ],
+        "right": [
+          1211,
+          670,
+          1286,
+          808
+        ]
+      },
+      "follower_left_detection_roi_xyxy": [
+        1036,
+        270,
+        1728,
+        1260
+      ],
+      "phase": "CONFIGURED_OPEN_CLOSEUP",
+      "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-official-gripper-unattended/stage4/grasp_editor_passing_coupling_run00/grasp_editor_variant_b_configured_closeup_raw.png",
+      "raw_resolution": [
+        2880,
+        1800
+      ],
+      "raw_sha256": "25adb16edbce4442bcb7ee9086363093027d92dba5fd4cf11a147cb8d2f43acb",
+      "visual_model_review": "PASS",
+      "visual_model_review_note": "Reviewed from actual pixels; geometry is visible and the open/contact pair is distinct. Numeric coupling status remains a separate runtime gate.",
+      "visual_scope": "BILATERAL_FINGER_OPEN_GEOMETRY"
+    },
+    {
+      "acceptance": "PASS_CONTEXT_ONLY",
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-official-gripper-unattended/stage4/grasp_editor_passing_coupling_run00/annotated/grasp_editor_variant_b_external_contact_annotated.png",
+      "annotated_resolution": [
+        3500,
+        1800
+      ],
+      "annotated_sha256": "64e8e2760ca9190f2d6bc15bc765935660513c204614804175e22983a14dd9d5",
+      "finger_bbox_xyxy": {
+        "left": [
+          1495,
+          581,
+          1504,
+          591
+        ],
+        "right": [
+          1388,
+          580,
+          1434,
+          633
+        ]
+      },
+      "follower_left_detection_roi_xyxy": [
+        1036,
+        270,
+        1728,
+        1260
+      ],
+      "phase": "EXTERNAL_CONTACT_SKIP_SIM_RESULT",
+      "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-official-gripper-unattended/stage4/grasp_editor_passing_coupling_run00/grasp_editor_variant_b_external_contact_raw.png",
+      "raw_resolution": [
+        2880,
+        1800
+      ],
+      "raw_sha256": "df92006c9b7f3b5b3d34ead1a2cd000ddb959ff96ebed180c5665710d6130f91",
+      "visual_model_review": "PASS",
+      "visual_model_review_note": "Reviewed from actual pixels; geometry is visible and the open/contact pair is distinct. Numeric coupling status remains a separate runtime gate.",
+      "visual_scope": "FULL_ARM_CONTEXT_EXTERNAL_CONTACT"
+    },
+    {
+      "acceptance": "PASS_VISUAL_CONTACT_STATE_NUMERIC_GATE_SEPARATE",
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-official-gripper-unattended/stage4/grasp_editor_passing_coupling_run00/annotated/grasp_editor_variant_b_external_contact_closeup_annotated.png",
+      "annotated_resolution": [
+        3500,
+        1800
+      ],
+      "annotated_sha256": "2ebce86fead745823367b7a732402cac1ee4c6372277a96e3c8c3a2bde84fb03",
+      "finger_bbox_xyxy": {
+        "left": [
+          1444,
+          670,
+          1509,
+          807
+        ],
+        "right": [
+          1227,
+          670,
+          1287,
+          808
+        ]
+      },
+      "follower_left_detection_roi_xyxy": [
+        1036,
+        270,
+        1728,
+        1260
+      ],
+      "phase": "EXTERNAL_CONTACT_SKIP_SIM_RESULT_CLOSEUP",
+      "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-official-gripper-unattended/stage4/grasp_editor_passing_coupling_run00/grasp_editor_variant_b_external_contact_closeup_raw.png",
+      "raw_resolution": [
+        2880,
+        1800
+      ],
+      "raw_sha256": "7a45d12b5ac47371345ef01d2c4371671051e782de018e2f2122ccf6bb6c0b4a",
+      "visual_model_review": "PASS",
+      "visual_model_review_note": "Reviewed from actual pixels; geometry is visible and the open/contact pair is distinct. Numeric coupling status remains a separate runtime gate.",
+      "visual_scope": "BILATERAL_CONTACT_CLOSEUP"
+    }
+  ],
+  "run_report_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-official-gripper-unattended/stage4/grasp_editor_passing_coupling_run00/grasp_editor_variant_b_gui_report.json",
+  "run_report_sha256": "169d364626901764b5624dc99ad110a5b29665ab635bcb097c62ac7a5c8aafac",
+  "schema_version": 1,
+  "stage": {
+    "path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/table_support_alignment/1.0/aloha1_table_support_aligned_workcell.usda",
+    "sha256": "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c",
+    "size_bytes": 245
+  },
+  "status": "PASS",
+  "task8": "NOT_RUN",
+  "visual_review_method": "VISION_MODEL_PER_IMAGE_PIXEL_REVIEW"
+}

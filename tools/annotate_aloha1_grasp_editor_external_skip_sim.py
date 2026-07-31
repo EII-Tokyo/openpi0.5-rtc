@@ -66,9 +66,19 @@ def visual_scope_for_phase(phase: str) -> dict[str, str]:
     if phase == "EXTERNAL_CONTACT_SKIP_SIM_RESULT_CLOSEUP":
         return {
             "visual_scope": "BILATERAL_CONTACT_CLOSEUP",
-            "acceptance": "PASS_VISUAL_CONTACT_STATE_NUMERIC_MIMIC_FAIL",
+            "acceptance": (
+                "PASS_VISUAL_CONTACT_STATE_NUMERIC_GATE_SEPARATE"
+            ),
         }
     raise ValueError(f"unsupported screenshot phase: {phase}")
+
+
+def final_review_status(*, finalized: bool, numeric_gate: str) -> str:
+    if not finalized:
+        return "PARTIAL_VISUAL_REVIEW_PENDING"
+    if numeric_gate != "PASS":
+        return "PARTIAL_NUMERIC_GATE_FAIL"
+    return "PASS"
 
 
 def _follower_left_finger_boxes(
@@ -269,8 +279,12 @@ def _draw_record(
             False,
         ),
         (
-            f"mimic residual={mimic_residual:.9f} m",
-            ORANGE,
+            f"coupling residual={mimic_residual:.9f} m",
+            (
+                GREEN
+                if mimic_residual <= 0.001
+                else ORANGE
+            ),
             True,
         ),
         ("mimic gate <= 0.001000000 m", WHITE, False),
@@ -326,7 +340,8 @@ def _draw_record(
         "visual_model_review": visual_review,
         "visual_model_review_note": (
             "Reviewed from actual pixels; geometry is visible and the "
-            "open/contact pair is distinct. Numeric mimic failure remains."
+            "open/contact pair is distinct. Numeric coupling status remains "
+            "a separate runtime gate."
             if visual_review == "PASS"
             else "Awaiting per-image visual-model review."
         ),
@@ -366,6 +381,8 @@ def main() -> int:
         action="store_true",
         help="Mark records PASS only after this agent visually reviewed them.",
     )
+    parser.add_argument("--json-output", type=Path, default=OUTPUT_JSON)
+    parser.add_argument("--markdown-output", type=Path, default=OUTPUT_MD)
     args = parser.parse_args()
     run_report_path = args.run_report.resolve(strict=True)
     runtime_report = json.loads(
@@ -390,10 +407,9 @@ def main() -> int:
         )
     report = {
         "schema_version": 1,
-        "status": (
-            "PARTIAL_NUMERIC_MIMIC_FAIL"
-            if args.finalize_visual_review
-            else "PARTIAL_VISUAL_REVIEW_PENDING"
+        "status": final_review_status(
+            finalized=args.finalize_visual_review,
+            numeric_gate=runtime_report["result"]["gate"]["status"],
         ),
         "numeric_gate": runtime_report["result"]["gate"]["status"],
         "numeric_failure_reasons": runtime_report["result"]["gate"][
@@ -428,19 +444,29 @@ def main() -> int:
             },
         ],
         "records": records,
+        "visual_review_method": (
+            "VISION_MODEL_PER_IMAGE_PIXEL_REVIEW"
+            if args.finalize_visual_review
+            else "NOT_RUN"
+        ),
         "task8": "NOT_RUN",
     }
-    OUTPUT_JSON.write_text(
+    args.json_output.parent.mkdir(parents=True, exist_ok=True)
+    args.markdown_output.parent.mkdir(parents=True, exist_ok=True)
+    args.json_output.write_text(
         json.dumps(report, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
-    OUTPUT_MD.write_text(_render_markdown(report), encoding="utf-8")
+    args.markdown_output.write_text(
+        _render_markdown(report),
+        encoding="utf-8",
+    )
     print(
         json.dumps(
             {
                 "status": report["status"],
-                "json": str(OUTPUT_JSON.resolve()),
-                "markdown": str(OUTPUT_MD.resolve()),
+                "json": str(args.json_output.resolve()),
+                "markdown": str(args.markdown_output.resolve()),
                 "annotated_dir": str(annotated_dir.resolve()),
             },
             sort_keys=True,

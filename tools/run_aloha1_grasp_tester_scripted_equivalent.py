@@ -58,13 +58,13 @@ FROZEN_INPUTS = {
     "candidate": {
         "path": CANDIDATE_PATH,
         "sha256": (
-            "5d60a5c3b38e7145cde13ee88bfebc1f3e430d3c8d5fc73ad1badf5023a7f137"
+            "b3307c86a44101eadd6ed2151722e7668bb7d644422378765d98eac906835cca"
         ),
     },
     "transform_report": {
         "path": TRANSFORM_REPORT_PATH,
         "sha256": (
-            "056573c6f698d87baac7e863df3cef042b004503f251d1795f9cb6efe1fd23f2"
+            "37d36dcbb4bfd7a9fdc39f96565c796bdc0d9b8d571172bf4639251a23b3f329"
         ),
     },
 }

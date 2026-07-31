@@ -6,6 +6,7 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+from scipy.spatial.transform import Rotation
 import yaml
 
 TOOL = Path("tools/run_aloha1_grasp_editor_variant_b_gui.py")
@@ -556,6 +557,140 @@ def test_world_from_object_closes_object_from_gripper_chain() -> None:
         atol=1e-12,
     )
     assert np.linalg.det(world_from_object[:3, :3]) == pytest.approx(1.0)
+
+
+def test_kinematic_contact_reference_requires_readback_and_pose_invariance() -> None:
+    module = _load_module()
+
+    result = module.validate_object_authoring_mode(
+        requested_mode="kinematic_contact_reference",
+        kinematic_readbacks=[True, True, True],
+        translation_drift_m=2e-8,
+        rotation_drift_rad=3e-8,
+        target_translation_residual_m=4e-8,
+        target_rotation_residual_rad=5e-8,
+        fixed_joint_used=False,
+        surface_gripper_used=False,
+        parent_attachment_used=False,
+    )
+
+    assert result["status"] == "PASS"
+    assert result["classification"] == (
+        "KINEMATIC_CONTACT_REFERENCE_NOT_DYNAMIC_HOLD"
+    )
+    assert result["eligible_as_static_hold_evidence"] is False
+
+    with pytest.raises(RuntimeError, match="kinematic readback"):
+        module.validate_object_authoring_mode(
+            requested_mode="kinematic_contact_reference",
+            kinematic_readbacks=[True, False],
+            translation_drift_m=0.0,
+            rotation_drift_rad=0.0,
+            target_translation_residual_m=0.0,
+            target_rotation_residual_rad=0.0,
+            fixed_joint_used=False,
+            surface_gripper_used=False,
+            parent_attachment_used=False,
+        )
+
+    with pytest.raises(RuntimeError, match="pose drift"):
+        module.validate_object_authoring_mode(
+            requested_mode="kinematic_contact_reference",
+            kinematic_readbacks=[True, True],
+            translation_drift_m=2e-4,
+            rotation_drift_rad=0.0,
+            target_translation_residual_m=0.0,
+            target_rotation_residual_rad=0.0,
+            fixed_joint_used=False,
+            surface_gripper_used=False,
+            parent_attachment_used=False,
+        )
+
+    with pytest.raises(RuntimeError, match="target pose residual"):
+        module.validate_object_authoring_mode(
+            requested_mode="kinematic_contact_reference",
+            kinematic_readbacks=[True, True],
+            translation_drift_m=0.0,
+            rotation_drift_rad=0.0,
+            target_translation_residual_m=0.2,
+            target_rotation_residual_rad=0.0,
+            fixed_joint_used=False,
+            surface_gripper_used=False,
+            parent_attachment_used=False,
+        )
+
+
+def test_runtime_has_explicit_kinematic_authoring_cli_and_session_readback() -> None:
+    source = TOOL.read_text(encoding="utf-8")
+
+    assert '"--object-authoring-mode"' in source
+    assert '"kinematic_contact_reference"' in source
+    assert "CreateKinematicEnabledAttr" in source
+    assert "GetKinematicEnabledAttr().Get()" in source
+    assert "bottle_xformable.ClearXformOpOrder()" in source
+    assert "bottle_xformable.AddTransformOp().Set(authored_matrix)" in source
+    assert "KINEMATIC_CONTACT_REFERENCE_NOT_DYNAMIC_HOLD" in source
+    assert "eligible_as_static_hold_evidence" in source
+
+
+def test_kinematic_native_export_must_match_frozen_candidate_pose() -> None:
+    module = _load_module()
+    candidate = np.eye(4)
+    candidate[:3, 3] = [-0.025, -0.003, 0.069]
+    exported = candidate.copy()
+    exported[:3, 3] += [1e-8, -2e-8, 3e-8]
+
+    result = module.validate_native_candidate_pose(
+        requested_mode="kinematic_contact_reference",
+        exported_object_from_gripper=exported,
+        candidate_object_from_gripper=candidate,
+        np=np,
+    )
+
+    assert result["status"] == "PASS"
+    assert result["translation_residual_m"] < 1e-6
+
+    exported[:3, 3] += [0.012, 0.0, 0.0]
+    with pytest.raises(RuntimeError, match="native export pose"):
+        module.validate_native_candidate_pose(
+            requested_mode="kinematic_contact_reference",
+            exported_object_from_gripper=exported,
+            candidate_object_from_gripper=candidate,
+            np=np,
+        )
+
+
+def test_object_from_gripper_loader_accepts_native_single_grasp_name(
+    tmp_path: Path,
+) -> None:
+    module = _load_module()
+    path = tmp_path / "native.yaml"
+    path.write_text(
+        yaml.safe_dump(
+            {
+                "grasps": {
+                    "grasp_0": {
+                        "position": [0.1, -0.2, 0.3],
+                        "orientation": {
+                            "w": 1.0,
+                            "xyz": [0.0, 0.0, 0.0],
+                        },
+                    }
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    result = module._load_object_from_gripper(  # noqa: SLF001
+        path,
+        yaml=yaml,
+        np=np,
+        rotation_type=Rotation,
+    )
+
+    assert result[:3, 3].tolist() == pytest.approx([0.1, -0.2, 0.3])
+    assert result[:3, :3] == pytest.approx(np.eye(3))
 
 
 def test_evidence_camera_pose_is_derived_from_runtime_subject_points() -> None:

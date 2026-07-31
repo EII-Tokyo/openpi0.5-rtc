@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import ast
+import hashlib
 import json
 from pathlib import Path
 import xml.etree.ElementTree as ET
@@ -14,6 +15,7 @@ from tools.aloha1_mapping.task7b2_horizontal_grasp import canonical_horizontal_s
 from tools.aloha1_mapping.task7b2_horizontal_grasp import evaluate_horizontal_trial
 from tools.aloha1_mapping.task7b2_horizontal_grasp import summarize_horizontal_trials
 from tools.probe_aloha1_task7b2_horizontal_kinematics import detect_lift_onset
+from tools.validate_aloha1_task7b2_horizontal_grasp import canonicalize_horizontal_cylindrical_grasp
 from tools.validate_aloha1_task7b2_horizontal_grasp import derive_interpolation_steps
 from tools.validate_aloha1_task7b2_horizontal_grasp import episode_gripper_targets
 
@@ -23,7 +25,9 @@ DESCRIPTOR = ROOT / "configs/aloha1_lula_follower_left.yaml"
 URDF = ROOT / "generated/urdf/follower_left.urdf"
 JOINT_MAP = ROOT / "configs/aloha1_joint_map.yaml"
 KINEMATICS_PROBE = ROOT / "tools/probe_aloha1_task7b2_horizontal_kinematics.py"
-KINEMATICS_REPORT = ROOT / "reports/aloha1_mapping/aloha1_task7b2_horizontal_kinematics.json"
+KINEMATICS_REPORT = ROOT / "reports/aloha1_mapping/aloha1_task7b2_horizontal_kinematics_v2.json"
+IK_CORRESPONDENCE_REPORT = ROOT / "reports/aloha1_mapping/aloha1_ik_correspondence_v2.json"
+SMOKE_REPORT = ROOT / "reports/aloha1_mapping/aloha1_task7b2_horizontal_grasp_v2.json"
 RUNTIME_SCRIPT = ROOT / "tools/validate_aloha1_task7b2_horizontal_grasp.py"
 EXPECTED_CSPACE = [
     "waist",
@@ -43,6 +47,7 @@ def _passing_horizontal_trial(*, trial_index: int = 0) -> dict:
         "support_contact_before_grasp": True,
         "axis_horizontal_pass": True,
         "gripper_axis_perpendicular_pass": True,
+        "coupling_accuracy_pass": True,
         "vertical_descent_pass": True,
         "ik_reachable": True,
         "left_physical_contact_before_lift": True,
@@ -112,6 +117,45 @@ def test_horizontal_config_freezes_geometry_and_task_boundaries() -> None:
     assert config["physics"]["drop_gate_m"] == 0.010
     assert config["boundaries"]["task8"] == "NOT_RUN"
     assert config["legacy"]["upright_shoulder_sweep"]["acceptance_eligible"] is False
+
+
+def test_horizontal_cylindrical_symmetry_selects_top_down_grasp() -> None:
+    roll = np.deg2rad(37.0)
+    world_from_object = np.eye(4, dtype=np.float64)
+    world_from_object[:3, :3] = np.asarray(
+        [
+            [0.0, -np.sin(roll), np.cos(roll)],
+            [0.0, np.cos(roll), np.sin(roll)],
+            [-1.0, 0.0, 0.0],
+        ],
+        dtype=np.float64,
+    )
+    world_from_object[:3, 3] = [0.1, -0.2, 0.03]
+    object_from_gripper = np.eye(4, dtype=np.float64)
+    object_from_gripper[:3, 3] = [-0.02, 0.003, 0.08]
+
+    selected = canonicalize_horizontal_cylindrical_grasp(
+        world_from_object=world_from_object,
+        object_from_gripper_base=object_from_gripper,
+        object_axis_local=np.asarray([0.0, 0.0, 1.0]),
+        table_normal_world=np.asarray([0.0, 0.0, 1.0]),
+    )
+
+    world_from_gripper = selected["world_from_gripper"]
+    assert selected["rotation_determinant"] == pytest.approx(1.0)
+    assert selected["axis_to_table_normal_deg"] == pytest.approx(90.0)
+    assert world_from_gripper[:3, 0] == pytest.approx([0.0, 0.0, -1.0])
+    assert np.dot(
+        world_from_gripper[:3, 1],
+        np.asarray([0.0, 0.0, 1.0]),
+    ) == pytest.approx(0.0)
+    assert np.dot(
+        world_from_gripper[:3, 1],
+        selected["axis_horizontal_world"],
+    ) == pytest.approx(0.0)
+    assert selected["axial_coordinate_m"] == pytest.approx(0.08)
+    assert selected["radial_distance_m"] == pytest.approx(np.hypot(0.02, 0.003))
+    assert (world_from_object @ selected["object_from_gripper_selected"]) == pytest.approx(world_from_gripper)
 
 
 def test_horizontal_config_freezes_exact_sources() -> None:
@@ -321,6 +365,10 @@ def test_horizontal_trial_passes_only_complete_physical_hold() -> None:
             {"gripper_axis_perpendicular_pass": False},
             "gripper_axis_correspondence_failed",
         ),
+        (
+            {"coupling_accuracy_pass": False},
+            "gripper_coupling_accuracy_failed",
+        ),
         ({"vertical_descent_pass": False}, "vertical_ik_unreachable"),
         (
             {"left_physical_contact_before_lift": False},
@@ -452,6 +500,11 @@ def test_horizontal_runtime_source_contract() -> None:
         "gripper_closeup",
         "frame_manifest",
         "runtime_trial_signature",
+        "official_symmetric_adapter",
+        "author_coupling_variant",
+        "DIAGNOSTIC_ONLY_NOT_FINAL_CONTROL_MAPPING",
+        "aloha1_task7b2_horizontal_kinematics_v2.json",
+        "aloha1_ik_correspondence_v2.json",
     }
     for token in required:
         assert token in source, f"missing required runtime token: {token}"
@@ -466,6 +519,174 @@ def test_horizontal_runtime_source_contract() -> None:
     }
     for token in forbidden:
         assert token not in source, f"forbidden runtime token: {token}"
+
+
+def test_session_drive_type_readback_changes_only_type() -> None:
+    before = {
+        "type": "acceleration",
+        "stiffness": 625.0,
+        "damping": 0.1,
+        "max_force": 5.0,
+    }
+    after = {
+        **before,
+        "type": "force",
+    }
+
+    result = horizontal_runtime.validate_session_drive_type_readback(
+        before=before,
+        after=after,
+        requested_type="force",
+    )
+
+    assert result["status"] == "PASS"
+    assert result["only_drive_type_changed"] is True
+    assert result["classification"] == "DIAGNOSTIC_ONLY_FORCE_DRIVE_UNCALIBRATED"
+
+
+def test_session_drive_type_readback_rejects_parameter_drift() -> None:
+    before = {
+        "type": "acceleration",
+        "stiffness": 625.0,
+        "damping": 0.1,
+        "max_force": 5.0,
+    }
+    after = {
+        **before,
+        "type": "force",
+        "max_force": 6.0,
+    }
+
+    with pytest.raises(RuntimeError, match="max_force"):
+        horizontal_runtime.validate_session_drive_type_readback(
+            before=before,
+            after=after,
+            requested_type="force",
+        )
+
+
+def test_bottle_state_uses_one_physx_tensor_view() -> None:
+    class Bottle:
+        count = 1
+
+        def get_transforms(self) -> np.ndarray:
+            return np.asarray([[1.0, 2.0, 3.0, 0.1, 0.2, 0.3, 0.9]])
+
+        def get_velocities(self) -> np.ndarray:
+            return np.asarray([[0.1, 0.2, 0.3, 0.4, 0.5, 0.6]])
+
+    state = horizontal_runtime.read_physx_bottle_state(Bottle())
+
+    assert state["state_source"] == "OMNI_PHYSICS_TENSORS_RIGID_BODY_VIEW"
+    assert state["position_world_m"] == [1.0, 2.0, 3.0]
+    assert state["orientation_wxyz"] == [0.9, 0.1, 0.2, 0.3]
+    assert state["vertical_velocity_m_s"] == pytest.approx(0.3)
+    assert state["angular_speed_rad_s"] == pytest.approx(np.linalg.norm([0.4, 0.5, 0.6]))
+
+
+def test_pose_finite_difference_velocity_is_independent_of_tensor_readback() -> None:
+    previous = {
+        "position_world_m": [0.0, 0.0, 0.020],
+        "orientation_wxyz": [1.0, 0.0, 0.0, 0.0],
+    }
+    current = {
+        "position_world_m": [0.0, 0.0, 0.021],
+        "orientation_wxyz": [
+            np.cos(np.pi / 4.0),
+            0.0,
+            0.0,
+            np.sin(np.pi / 4.0),
+        ],
+    }
+
+    result = horizontal_runtime.derive_pose_finite_difference_velocity(
+        previous=previous,
+        current=current,
+        dt_s=0.5,
+    )
+
+    assert result["linear_velocity_world_m_s"] == pytest.approx([0.0, 0.0, 0.002])
+    assert result["vertical_velocity_m_s"] == pytest.approx(0.002)
+    assert result["angular_velocity_world_rad_s"] == pytest.approx(
+        [0.0, 0.0, np.pi]
+    )
+    assert result["angular_speed_rad_s"] == pytest.approx(np.pi)
+    assert result["state_source"] == "POSE_FINITE_DIFFERENCE"
+
+
+def test_local_collider_points_follow_physx_pose_for_runtime_bounds() -> None:
+    local_points = np.asarray(
+        [
+            [-1.0, -2.0, -3.0],
+            [1.0, 2.0, 3.0],
+        ],
+        dtype=np.float64,
+    )
+    half_turn_z_wxyz = np.asarray([0.0, 0.0, 0.0, 1.0], dtype=np.float64)
+
+    bounds = horizontal_runtime.transform_local_points_to_world_bounds(
+        local_points=local_points,
+        position_world=np.asarray([10.0, 20.0, 30.0]),
+        orientation_world_wxyz=half_turn_z_wxyz,
+    )
+
+    assert bounds["minimum"] == pytest.approx([9.0, 18.0, 27.0])
+    assert bounds["maximum"] == pytest.approx([11.0, 22.0, 33.0])
+    assert bounds["source"] == "PHYSX_POSE_TRANSFORMED_FROZEN_LOCAL_COLLIDER_POINTS"
+
+
+def test_runtime_clearance_does_not_use_stale_usd_bottle_bounds() -> None:
+    source = RUNTIME_SCRIPT.read_text(encoding="utf-8")
+
+    assert "ComputeRelativeTransform" in source
+    assert "PHYSX_POSE_TRANSFORMED_FROZEN_LOCAL_COLLIDER_POINTS" in source
+    assert "_collision_world_bounds(stage, bottle_path)" not in source
+
+
+def test_horizontal_smoke_report_binds_passing_ik_and_diagnostic_coupling() -> None:
+    assert SMOKE_REPORT.is_file(), f"missing smoke report: {SMOKE_REPORT}"
+    report = json.loads(SMOKE_REPORT.read_text(encoding="utf-8"))
+    assert report["status"] in {"PASS", "FAIL"}
+    assert report["trial_kind"] == "SINGLE_DYNAMIC_SMOKE"
+    assert report["acceptance_random_trials"] == "NOT_RUN"
+    assert report["boundaries"]["task8"] == "NOT_RUN"
+    assert (
+        report["frozen_inputs"]["kinematics_report"]["sha256"]
+        == hashlib.sha256(KINEMATICS_REPORT.read_bytes()).hexdigest()
+    )
+    assert report["frozen_inputs"]["ik_correspondence_report"]["sha256"] == (
+        hashlib.sha256(IK_CORRESPONDENCE_REPORT.read_bytes()).hexdigest()
+    )
+    assert len(report["trials"]) == 1
+    trial = report["trials"][0]
+    coupling = trial["runtime"]["diagnostic_coupling"]
+    assert coupling["variant"] == "official_symmetric_adapter"
+    assert coupling["classification"] == "DIAGNOSTIC_ONLY_NOT_FINAL_CONTROL_MAPPING"
+    assert coupling["mimic_present_after"] is False
+    assert coupling["source_stage_modified"] is False
+    assert trial["stage"]["sha256_before"] == trial["stage"]["sha256_after"]
+
+
+def test_horizontal_smoke_video_contract_includes_complete_arm_and_closeup() -> None:
+    report = json.loads(SMOKE_REPORT.read_text(encoding="utf-8"))
+    trial = report["trials"][0]
+    capture = trial["video_capture"]
+    assert capture["capture_enabled"] is True
+    assert set(capture["views"]) == {"overview", "gripper_closeup"}
+    assert capture["first_physics_frame"] == 0
+    assert capture["last_physics_frame"] >= capture["first_physics_frame"]
+    assert capture["missing_physics_frames"] == []
+    required = {
+        "release_dynamic",
+        "support_settle",
+        "open_pregrasp",
+        "vertical_descent",
+        "bilateral_contact",
+        "vertical_lift",
+        "support_clear",
+        "hold_end",
+    }
+    assert required <= capture["phase_frame_ranges"].keys()
 
 
 def test_horizontal_runtime_constructs_simulation_app_before_isaac_imports() -> None:
@@ -518,6 +739,16 @@ def test_horizontal_runtime_requires_complete_two_view_frame_streams() -> None:
     assert '"render_fps"' in source
     assert '"first_physics_frame"' in source
     assert '"last_physics_frame"' in source
+
+
+def test_horizontal_runtime_records_physics_collider_overlay_evidence() -> None:
+    source = RUNTIME_SCRIPT.read_text(encoding="utf-8")
+
+    assert "/persistent/physics/visualizationDisplayColliders" in source
+    assert '"physics_collider_overlay"' in source
+    assert '"collider_display_setting"' in source
+    assert "settings.set_int(" in source
+    assert "collider_setting_before" in source
 
 
 def test_horizontal_runtime_full_arm_links_resolve_to_real_stage_prims() -> None:

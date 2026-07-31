@@ -13,6 +13,7 @@ REQUIRED_TRIAL_FIELDS = {
     "support_contact_before_grasp",
     "axis_horizontal_pass",
     "gripper_axis_perpendicular_pass",
+    "coupling_accuracy_pass",
     "vertical_descent_pass",
     "ik_reachable",
     "left_physical_contact_before_lift",
@@ -45,6 +46,8 @@ def classify_horizontal_failure(trial: dict[str, Any]) -> str:
         return "horizontal_geometry_failed"
     if not trial["gripper_axis_perpendicular_pass"]:
         return "gripper_axis_correspondence_failed"
+    if not trial["coupling_accuracy_pass"]:
+        return "gripper_coupling_accuracy_failed"
     if not trial["vertical_descent_pass"] or not trial["ik_reachable"]:
         return "vertical_ik_unreachable"
     if (

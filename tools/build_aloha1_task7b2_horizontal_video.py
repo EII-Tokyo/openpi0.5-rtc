@@ -189,6 +189,34 @@ def _contact_frames(trial: Mapping[str, Any], side: str) -> set[int]:
     return {int(item["frame"]) for item in contacts}
 
 
+def annotation_status_banner(
+    *,
+    physical_status: str,
+    failure_mode: str,
+    phase: str,
+    frame: int,
+    last_frame: int,
+    drive_classification: str,
+) -> dict[str, str]:
+    """Keep the final machine result separate from the displayed frame phase."""
+    display_phase = (
+        "hold_interval"
+        if phase == "hold_end" and frame < last_frame
+        else phase
+    )
+    drive_text = (
+        "DIAGNOSTIC FORCE DRIVE: UNCALIBRATED"
+        if drive_classification
+        == "DIAGNOSTIC_ONLY_FORCE_DRIVE_UNCALIBRATED"
+        else f"DRIVE CLASSIFICATION: {drive_classification}"
+    )
+    return {
+        "result": f"TRIAL MACHINE RESULT {physical_status}: {failure_mode}",
+        "phase": f"CURRENT PHASE {display_phase}",
+        "drive": drive_text,
+    }
+
+
 def compose_synchronized_frames(
     *,
     source_records: Sequence[Mapping[str, Any]],
@@ -263,6 +291,12 @@ def _annotate_frames(
     right_frames = _contact_frames(trial, "right")
     signature = str(trial["runtime_trial_signature"])
     physical_status = str(trial["physical_trial_status"])
+    drive_classification = str(
+        trial.get("runtime", {})
+        .get("diagnostic_finger_drive_type", {})
+        .get("classification", "NOT_REPORTED")
+    )
+    last_frame = max(int(record["physics_frame"]) for record in source_records)
     font = _font(18)
     small = _font(15)
     annotated_size = (0, 0)
@@ -271,7 +305,7 @@ def _annotate_frames(
         raw_path = Path(record["views"][view]["absolute_path"])
         with Image.open(raw_path) as source:
             rgb = source.convert("RGB")
-        panel_height = 96
+        panel_height = 120
         annotated = Image.new("RGB", (rgb.width, rgb.height + panel_height), (20, 20, 20))
         annotated.paste(rgb, (0, 0))
         draw = ImageDraw.Draw(annotated)
@@ -280,16 +314,32 @@ def _annotate_frames(
         position = bottle.get("position_world_m", [float("nan")] * 3)
         clearance = bottle.get("bottom_clearance_m", float("nan"))
         phase = str(record["phase"])
-        status_text = f"PHYSICAL {physical_status}: {trial.get('failure_mode', 'none')}"
-        draw.text((12, rgb.height + 8), status_text, fill=(255, 90, 90), font=font)
+        banner = annotation_status_banner(
+            physical_status=physical_status,
+            failure_mode=str(trial.get("failure_mode", "none")),
+            phase=phase,
+            frame=frame,
+            last_frame=last_frame,
+            drive_classification=drive_classification,
+        )
+        draw.text((12, rgb.height + 8), banner["result"], fill=(255, 90, 90), font=font)
         draw.text(
             (12, rgb.height + 36),
-            (f"{view} | frame {frame:03d} | t={float(record['time_s']):.3f}s | {phase}"),
+            (
+                f"{view} | frame {frame:03d} | "
+                f"t={float(record['time_s']):.3f}s | {banner['phase']}"
+            ),
             fill=(245, 245, 245),
             font=small,
         )
         draw.text(
             (12, rgb.height + 60),
+            banner["drive"],
+            fill=(255, 205, 90),
+            font=small,
+        )
+        draw.text(
+            (12, rgb.height + 84),
             (
                 f"bottle_z={float(position[2]):+.5f} m | "
                 f"support_clearance={float(clearance):+.5f} m | "

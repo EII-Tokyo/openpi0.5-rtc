@@ -3,11 +3,14 @@
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 from pathlib import Path
 import re
 from typing import Any
+
+import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 ARTIFACT_ROOT = (
@@ -63,6 +66,27 @@ OUTPUT_JSON = (
     "aloha1_grasp_editor_semantics_audit.json"
 )
 OUTPUT_MD = OUTPUT_JSON.with_suffix(".md")
+V2_RUN = (
+    ROOT
+    / ".codex/artifacts/"
+    "20260730-aloha1-official-gripper-unattended/stage4/"
+    "grasp_editor_passing_coupling_run00/"
+    "grasp_editor_variant_b_gui_report.json"
+)
+V2_COUPLING_REPORT = (
+    ROOT / "reports/aloha1_mapping/aloha1_gripper_coupling_ab.json"
+)
+V2_SCREENSHOT_REVIEW = (
+    ROOT
+    / "reports/aloha1_mapping/"
+    "aloha1_grasp_editor_external_skip_sim_screenshot_review_v2.json"
+)
+V2_OUTPUT_JSON = (
+    ROOT
+    / "reports/aloha1_mapping/"
+    "aloha1_grasp_editor_semantics_audit_v2.json"
+)
+V2_OUTPUT_MD = V2_OUTPUT_JSON.with_suffix(".md")
 OFFICIAL_TUTORIAL = (
     "https://docs.isaacsim.omniverse.nvidia.com/5.1.0/"
     "robot_simulation/grasp_editor.html"
@@ -451,6 +475,184 @@ def build_report() -> dict[str, Any]:
     }
 
 
+def _yaml_summary(path: Path) -> dict[str, Any]:
+    document = yaml.safe_load(path.read_text(encoding="utf-8"))
+    grasp = next(iter(document["grasps"].values()))
+    return {
+        "path": str(path.resolve()),
+        "sha256": _sha256(path),
+        "format": document["format"],
+        "format_version": document["format_version"],
+        "object_frame": document["object_frame"],
+        "gripper_frame": document["gripper_frame"],
+        "active_joints": sorted(grasp["cspace_position"]),
+        "cspace_position": grasp["cspace_position"],
+        "pregrasp_cspace_position": grasp[
+            "pregrasp_cspace_position"
+        ],
+        "position": grasp["position"],
+        "orientation": grasp["orientation"],
+    }
+
+
+def build_v2_report() -> dict[str, Any]:
+    stage_sha256 = _sha256(STAGE)
+    if stage_sha256 != EXPECTED_STAGE_SHA256:
+        raise RuntimeError(f"approved Stage hash changed: {stage_sha256}")
+    run = _load_json(V2_RUN)
+    coupling = _load_json(V2_COUPLING_REPORT)
+    screenshots = _load_json(V2_SCREENSHOT_REVIEW)
+    result = run["result"]
+    raw = _yaml_summary(Path(result["native_export"]["path"]))
+    derived = _yaml_summary(Path(result["derived_export"]["path"]))
+    if raw["active_joints"] != ["left_finger"]:
+        raise RuntimeError("native YAML must expose one hardware coordinate")
+    if derived["active_joints"] != ["left_finger"]:
+        raise RuntimeError("derived YAML invented another active coordinate")
+    closure = float(result["placement"]["closure_max_abs"])
+    gates = {
+        "coupling": coupling["status"] == "PASS"
+        and coupling["passing_path"] == "official_symmetric_adapter",
+        "runtime": result["gate"]["status"] == "PASS",
+        "contact": result["contacts"]["summary"]["status"] == "PASS",
+        "raw_yaml": result["native_export"]["status"] == "PASS",
+        "derived_yaml": result["derived_export"]["status"] == "PASS",
+        "coordinate_closure": closure <= 1.0e-12,
+        "screenshots": screenshots["status"] == "PASS",
+        "stage_hash": run["inputs"]["stage"]["sha256"]
+        == EXPECTED_STAGE_SHA256,
+        "cleanup": not run["cleanup_errors"],
+    }
+    status = "PASS" if all(gates.values()) else "FAIL"
+    return {
+        "schema_version": 2,
+        "status": status,
+        "classification": (
+            "GRASP_EDITOR_EXPORT_PASS_DIAGNOSTIC_COUPLING"
+            if status == "PASS"
+            else "GRASP_EDITOR_EXPORT_V2_FAILED"
+        ),
+        "stage": {
+            "absolute_path": str(STAGE.resolve()),
+            "sha256": stage_sha256,
+        },
+        "coupling": {
+            "classification": coupling["classification"],
+            "passing_path": coupling["passing_path"],
+            "promotion_authorized": coupling["promotion_authorized"],
+            "report_path": str(V2_COUPLING_REPORT.resolve()),
+            "report_sha256": _sha256(V2_COUPLING_REPORT),
+        },
+        "runtime": {
+            "isaac_sim": run["runtime"]["isaac_sim"],
+            "kit": run["runtime"]["kit"],
+            "physx": run["runtime"]["physx"],
+            "grasp_editor": run["runtime"]["grasp_editor_version"],
+            "mimic_residual_abs_m": result["joint_readback"][
+                "mimic_error_abs_m"
+            ],
+            "mimic_tolerance_m": MIMIC_TOLERANCE_M,
+            "bilateral_contact": result["contacts"]["summary"][
+                "bilateral_finger_contact"
+            ],
+            "maximum_impulse_ns": result["contacts"]["summary"][
+                "maximum_impulse_ns"
+            ],
+            "minimum_separation_m": result["contacts"]["summary"][
+                "minimum_separation_m"
+            ],
+            "dof_order": result["dof_order"],
+            "right_finger_policy": (
+                "RUNTIME_OBSERVER_DERIVED_FROM_ONE_OFFICIAL_COORDINATE"
+            ),
+        },
+        "coordinate_transform": {
+            "formula": result["placement"]["formula"],
+            "closure_max_abs": closure,
+            "closure_status": (
+                "PASS" if gates["coordinate_closure"] else "FAIL"
+            ),
+            "object_from_gripper": result["placement"][
+                "object_from_gripper_input"
+            ],
+            "grasp_frame_status": result["frames"][
+                "grasp_frame_readback"
+            ]["status"],
+            "ee_endpoint_is_grasp_center": result["frames"][
+                "grasp_frame_readback"
+            ]["ee_endpoint_is_grasp_center"],
+        },
+        "native_raw_yaml": raw,
+        "derived_yaml": {
+            **derived,
+            "classification": (
+                "DIAGNOSTIC_ONLY_NOT_FINAL_CONTROL_MAPPING"
+            ),
+        },
+        "screenshot_review": {
+            "status": screenshots["status"],
+            "path": str(V2_SCREENSHOT_REVIEW.resolve()),
+            "sha256": _sha256(V2_SCREENSHOT_REVIEW),
+            "record_count": len(screenshots["records"]),
+            "raw_and_annotated_paths_recorded": all(
+                item.get("raw_absolute_path")
+                and item.get("annotated_absolute_path")
+                for item in screenshots["records"]
+            ),
+        },
+        "gates": gates,
+        "ik_diagnostic_allowed": status == "PASS",
+        "final_asset_promotion_authorized": False,
+        "next_gates": {
+            "aloha_specific_fk_ik": (
+                "READY_DIAGNOSTIC" if status == "PASS" else "BLOCKED"
+            ),
+            "dynamic_horizontal_bottle_grasp": "NOT_RUN",
+            "five_random_bottle_videos": "NOT_RUN",
+        },
+        "task8": "NOT_RUN",
+    }
+
+
+def _render_v2_markdown(report: dict[str, Any]) -> str:
+    return "\n".join(
+        [
+            "# ALOHA 1 Grasp Editor semantics audit V2",
+            "",
+            f"- Status: `{report['status']}`",
+            f"- Classification: `{report['classification']}`",
+            (
+                "- Passing coupling path: "
+                f"`{report['coupling']['passing_path']}`"
+            ),
+            (
+                "- Runtime residual: "
+                f"`{report['runtime']['mimic_residual_abs_m']} m`"
+            ),
+            (
+                "- Bilateral physical contact: "
+                f"`{report['runtime']['bilateral_contact']}`"
+            ),
+            (
+                "- Transform closure: "
+                f"`{report['coordinate_transform']['closure_status']}`"
+            ),
+            f"- Screenshot review: `{report['screenshot_review']['status']}`",
+            f"- Diagnostic IK allowed: `{report['ik_diagnostic_allowed']}`",
+            "- Final asset promotion authorized: `False`",
+            "- Task 8: `NOT_RUN`",
+            "",
+            "The raw and derived YAML expose only `left_finger`, matching the "
+            "one physical gripper actuation coordinate. The right finger "
+            "remains a source-backed runtime observer derived as `-q`.",
+            "",
+            "The vertical bottle screenshots are robot-local Grasp Editor "
+            "authoring evidence, not horizontal task-placement evidence.",
+            "",
+        ]
+    )
+
+
 def _render_markdown(report: dict[str, Any]) -> str:
     comparison = report["mimic_load_comparison"]
     raw_yaml = report["native_raw_yaml"]
@@ -540,19 +742,31 @@ def _render_markdown(report: dict[str, Any]) -> str:
 
 
 def main() -> int:
-    report = build_report()
-    OUTPUT_JSON.parent.mkdir(parents=True, exist_ok=True)
-    OUTPUT_JSON.write_text(
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--v2", action="store_true")
+    args = parser.parse_args()
+    report = build_v2_report() if args.v2 else build_report()
+    output_json = V2_OUTPUT_JSON if args.v2 else OUTPUT_JSON
+    output_md = V2_OUTPUT_MD if args.v2 else OUTPUT_MD
+    output_json.parent.mkdir(parents=True, exist_ok=True)
+    output_json.write_text(
         json.dumps(report, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
-    OUTPUT_MD.write_text(_render_markdown(report), encoding="utf-8")
+    output_md.write_text(
+        (
+            _render_v2_markdown(report)
+            if args.v2
+            else _render_markdown(report)
+        ),
+        encoding="utf-8",
+    )
     print(
         json.dumps(
             {
                 "status": report["status"],
-                "json": str(OUTPUT_JSON.resolve()),
-                "markdown": str(OUTPUT_MD.resolve()),
+                "json": str(output_json.resolve()),
+                "markdown": str(output_md.resolve()),
                 "classification": report["classification"],
             },
             sort_keys=True,

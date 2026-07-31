@@ -83,3 +83,25 @@ def test_external_skip_sim_is_exportable_but_remains_blocked_by_mimic() -> None:
     assert report["next_gates"]["external_programmatic_grasp_then_skip_sim"] == (
         "FAIL_MIMIC_ACCURACY"
     )
+
+
+def test_v2_audit_promotes_only_diagnostic_ik_after_passing_coupling() -> None:
+    report = _load_module().build_v2_report()
+
+    assert report["status"] == "PASS"
+    assert report["classification"] == (
+        "GRASP_EDITOR_EXPORT_PASS_DIAGNOSTIC_COUPLING"
+    )
+    assert report["coupling"]["classification"] == "PHYSX_MIMIC_PRIMARY"
+    assert report["coupling"]["passing_path"] == (
+        "official_symmetric_adapter"
+    )
+    assert report["runtime"]["mimic_residual_abs_m"] <= 0.001
+    assert report["runtime"]["bilateral_contact"] is True
+    assert report["native_raw_yaml"]["active_joints"] == ["left_finger"]
+    assert report["derived_yaml"]["active_joints"] == ["left_finger"]
+    assert report["coordinate_transform"]["closure_status"] == "PASS"
+    assert report["screenshot_review"]["status"] == "PASS"
+    assert report["ik_diagnostic_allowed"] is True
+    assert report["final_asset_promotion_authorized"] is False
+    assert report["task8"] == "NOT_RUN"

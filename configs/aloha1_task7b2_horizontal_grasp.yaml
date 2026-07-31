@@ -28,6 +28,30 @@ frozen_inputs:
   joint_map:
     path: configs/aloha1_joint_map.yaml
     sha256: f56be097d859f7361b804705af6659e0d51d9e480d1c721a60040ab787530308
+  grasp_editor_v2_semantics:
+    path: reports/aloha1_mapping/aloha1_grasp_editor_semantics_audit_v2.json
+    sha256: 61f2e23f54fca02d3b47b12a9f29f9b97446a1aa5e79049e73e7192db71416f9
+    required_status: PASS
+  grasp_editor_v2_native_raw_yaml:
+    path: .codex/artifacts/20260730-aloha1-official-gripper-unattended/stage4/grasp_editor_passing_coupling_run00/grasp_editor_variant_b_native_raw.yaml
+    sha256: fa1270a547e0ac89da2e7afc3965b1d6e7bcc34aab46005d6c65f977e3f69e5e
+    pose_semantics: T_O_G
+  supplier_cad_grasp_candidate:
+    path: configs/aloha1_grasps/bottle500_horizontal_body_grasp.isaac_grasp.yaml
+    sha256: b3307c86a44101eadd6ed2151722e7668bb7d644422378765d98eac906835cca
+    pose_semantics: T_O_G
+    status: PRE_GUI_DIAGNOSTIC_CANDIDATE
+  grasp_editor_v2_derived_yaml:
+    path: .codex/artifacts/20260730-aloha1-official-gripper-unattended/stage4/grasp_editor_passing_coupling_run00/grasp_editor_variant_b_skip_sim_derived.yaml
+    sha256: a861d2d1f072006f3027bb630c4f7c045a17d0c53020e8bd35d7f64ceeb3c2c5
+    control_mapping: DIAGNOSTIC_ONLY_NOT_FINAL_CONTROL_MAPPING
+  gripper_coupling_ab:
+    path: reports/aloha1_mapping/aloha1_gripper_coupling_ab.json
+    sha256: df8a1857b7cd945fd38e9d0c921f736c766aadc854534eab6b04eac935f7f90c
+    required_status: PASS
+    required_classification: PHYSX_MIMIC_PRIMARY
+    passing_path: official_symmetric_adapter
+    promotion_authorized: false
   task7b_static_hold_report:
     path: reports/aloha1_mapping/aloha1_task7b_bottle_geometry_ab.json
     sha256: 9b0f9366b2abe5664da794d7a40911108db3aee3c100d43d0c8760c500452567
@@ -67,7 +91,8 @@ bottle:
   grasp_coordinate_source: MIDPOINT_OF_CAD_CONSTANT_RADIUS_BODY_INTERVAL
   canonical_direction_policy: WORLD_POSITIVE_X_THEN_POSITIVE_Y_TIE_BREAK
   canonical_direction_status: DIAGNOSTIC_CANONICAL_NOT_REAL_CALIBRATION
-  roll_policy: CAD_AUTHORED_ZERO_SHORTEST_ARC_TO_HORIZONTAL
+  roll_policy: DYNAMIC_SETTLED_CYLINDRICAL_SYMMETRY_TOP_DOWN_SELECTION
+  roll_policy_status: DIAGNOSTIC_PENDING_NATIVE_GRASP_EDITOR_EXPORT
 episode18:
   path: /home/eii/project/bottles_data/episode_18.hdf5
   sha256: f073a21c6a790e738e36085d791482924a82832ca6d80cece04a26353b9fc745

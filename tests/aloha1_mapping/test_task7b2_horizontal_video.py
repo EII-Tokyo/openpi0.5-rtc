@@ -367,6 +367,42 @@ def test_review_samples_cover_boundaries_and_half_second_intervals() -> None:
         assert end in samples
 
 
+def test_annotation_banner_distinguishes_trial_result_from_current_phase() -> None:
+    banner = video_builder.annotation_status_banner(
+        physical_status="PASS",
+        failure_mode="stable_hold",
+        phase="support_settle",
+        frame=60,
+        last_frame=321,
+        drive_classification="DIAGNOSTIC_ONLY_FORCE_DRIVE_UNCALIBRATED",
+    )
+
+    assert banner["result"] == "TRIAL MACHINE RESULT PASS: stable_hold"
+    assert banner["phase"] == "CURRENT PHASE support_settle"
+    assert banner["drive"] == "DIAGNOSTIC FORCE DRIVE: UNCALIBRATED"
+    assert not banner["result"].startswith("PHYSICAL PASS")
+
+    hold = video_builder.annotation_status_banner(
+        physical_status="PASS",
+        failure_mode="stable_hold",
+        phase="hold_end",
+        frame=240,
+        last_frame=321,
+        drive_classification="DIAGNOSTIC_ONLY_FORCE_DRIVE_UNCALIBRATED",
+    )
+    final = video_builder.annotation_status_banner(
+        physical_status="PASS",
+        failure_mode="stable_hold",
+        phase="hold_end",
+        frame=321,
+        last_frame=321,
+        drive_classification="DIAGNOSTIC_ONLY_FORCE_DRIVE_UNCALIBRATED",
+    )
+
+    assert hold["phase"] == "CURRENT PHASE hold_interval"
+    assert final["phase"] == "CURRENT PHASE hold_end"
+
+
 def test_visual_failure_remains_rejected_visual_review(tmp_path: Path) -> None:
     candidate_path, _ = _candidate_manifest(
         tmp_path,

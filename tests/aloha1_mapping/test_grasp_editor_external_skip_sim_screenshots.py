@@ -33,5 +33,22 @@ def test_visual_scope_never_promotes_context_image_to_numeric_pass() -> None:
         "EXTERNAL_CONTACT_SKIP_SIM_RESULT_CLOSEUP"
     ) == {
         "visual_scope": "BILATERAL_CONTACT_CLOSEUP",
-        "acceptance": "PASS_VISUAL_CONTACT_STATE_NUMERIC_MIMIC_FAIL",
+        "acceptance": "PASS_VISUAL_CONTACT_STATE_NUMERIC_GATE_SEPARATE",
     }
+
+
+def test_final_status_requires_both_visual_and_numeric_pass() -> None:
+    module = _load_module()
+
+    assert module.final_review_status(
+        finalized=True,
+        numeric_gate="PASS",
+    ) == "PASS"
+    assert module.final_review_status(
+        finalized=True,
+        numeric_gate="FAIL",
+    ) == "PARTIAL_NUMERIC_GATE_FAIL"
+    assert module.final_review_status(
+        finalized=False,
+        numeric_gate="PASS",
+    ) == "PARTIAL_VISUAL_REVIEW_PENDING"
