@@ -1,7 +1,7 @@
 # 最终验证
 
 - 状态：**PASS**
-- PDF：`/home/eii/.config/superpowers/worktrees/openpi0.5-rtc-reward-learning/aloha-report-ja-edition/reports/aloha_bottle_cap_report/aloha_bottle_cap_report.pdf`
+- PDF：`/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha_bottle_cap_report/aloha_bottle_cap_report.pdf`
 - 页数：42
 - 文件大小：9,700,234 bytes
 - 引用图片：19
