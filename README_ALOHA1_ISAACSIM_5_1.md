@@ -18,7 +18,9 @@ sim-to-real dynamics model and it is not yet accepted for bottle insertion.
 | Task 7B.2 continuous video evidence | **PASS visual / FAIL physical** | two synchronized 60 fps streams, 288 frames/4.8 s each, no missing physics frames; raw and annotated overview/close-up videos were vision-reviewed; all labels retain `PHYSICAL FAIL` |
 | Task 7B.2 screenshot evidence | **PARTIAL** | seven side-oblique raw/annotated pairs pass; seven true-top pairs remain PARTIAL because the actual wrist/gripper pose occludes the finger inner surfaces; runtime A/B, L/R origins and contact-normal projections are auxiliary |
 | Grasp Editor / 20 cm single-position pickup | **PASS (diagnostic)** | the user confirmed the exact single-position annotated video; Variant B, local Lula IK, supplier-CAD fingers, dynamic horizontal Bottle500, 20 cm measured clearance, 2 s hold, and Abort/Reset machine gates pass |
-| Five fixed-seed random-position pickup | **FAIL (4/5 machine; 5/5 visual evidence)** | 10 fresh Isaac processes produced deterministic paired signatures; positions 1/3/4/5 pass, position 2 repeatedly slips and reaches only `0.198400335 m`; all five raw/annotated videos passed visual evidence review |
+| Five fixed-seed random-position pickup | **PASS (diagnostic)** | successful samples 1–4 were preserved; only failed sample 5 was replanned with a downward gripper and rerecorded; candidate 119 passes a fresh deterministic pair and full-frame visual-model review, and the user confirmed the grasp is correct |
+| Task 7 post-grasp runtime acceptance | **PASS** | Task 7A runtime/workcell, table alignment, ALOHA 6DOF IK correspondence v3, Bottle500 static hold and five-pose dynamic pickup all pass |
+| Task 7 post-grasp aggregate | **PARTIAL** | literal NVIDIA official-rule status remains FAIL with 37 unsuppressed findings, so asset-promotion readiness remains PARTIAL even though runtime/grasp acceptance passes |
 | Current signal screenshots | **PASS (visual 24/24 PASS)** | 12 fresh raw + 12 annotated images match Stage SHA-256 `d8182a6c…c788cf`; the controlled OmniHydra screenshot process has zero `protoPath` errors |
 | Hydra protoPath controlled diagnosis | **PASS / `FSD_7_5_1_PRIMARY`** | A=29 errors, B OmniHydra=0, B repeat deterministic, D materialization=0; default delegate restored and final assets unchanged |
 | Source and environment audit | PARTIAL | `reports/aloha1_mapping/source_audit.md`, `source_manifest.json`, `missing_resources.json` |
@@ -65,42 +67,67 @@ The associated Abort-at-`VERTICAL_DESCENT` then Reset test is machine
 dynamic, Reset restores the session-owned kinematic setup, and the approved
 Stage hash remains unchanged.
 
-The fixed-seed five-position preflight now verifies the same formal lift used
-at runtime: `0.200 m` measured clearance plus the unchanged `0.010 m` drop
-allowance, rather than the obsolete approximately `0.00416 m` waypoint. The
-preload gate uses bilateral finite nonzero PhysX solver impulses plus completed
-closure and mimic residual, while retaining geometric `separation <= 0` as a
-separate reported quantity. This fixes a false timeout caused by micrometre
-scale separation-sign oscillation; it does not change friction, collision
-geometry, drive parameters, mimic mapping, bottle mass, timestep, or any
-acceptance threshold.
+The fixed-seed five-pose preflight verifies the formal `0.200 m` measured
+clearance, `2.0 s` hold and unchanged `0.010 m` drop gate. Samples 1 and 2
+preserve user-accepted legacy initial-orientation exceptions. Samples 3 and 4
+preserve their already successful downward-gripper runs. Only the previously
+failed sample 5 was replanned and rerecorded.
 
-The resulting five-position run is literal machine **FAIL (4/5)**:
+Sample 5 candidate 119 starts with its local gripper approach axis
+`7.189721450960664°` from world `-Z`, inside the frozen
+`23.241131059202324°` limit. Its fresh primary and repeat are deterministic
+machine `PASS`: maximum bottle clearance is `0.20077485934609024 m`, hold is
+`2.0 s`, and drop is `0.0007390718475712432 m`.
 
-- positions 1, 3, 4 and 5: `PASS`, 20 cm clearance reached and 2 s hold;
-- position 2: deterministic `height_target_not_reached`, maximum clearance
-  `0.19840033460203355 m`;
-- position 2 retained roughly `0.901 N` left and `0.894 N` right mean
-  estimated normal force but accumulated `0.011552821743005925 m` relative
-  vertical slip;
-- a diagnostic-only `+0.002 m` lift reached `0.2038176271708078 m`, then
-  failed after `0.083333 s` because hold drop reached
-  `0.01077557458159592 m`. The extra lift is therefore **not promoted**.
+The old candidate-119 timeout was a contact-report gate error, not an IK
+failure. PhysX reported bilateral finger/bottle pairs carrying finite positive
+solver impulse while geometric separation remained slightly positive within
+the contact envelope. The physical gate now uses bilateral reported pairs with
+finite positive solver impulse and retains `separation <= 0` as a separate
+diagnostic. Collider, friction, drive, mimic, bottle mass/diameter, timestep,
+solver iterations and all acceptance thresholds are unchanged.
 
-All five primary raw and annotated videos show the complete arm plus a
-synchronized gripper/bottle inset. They were reviewed through complete raw
-contact-sheet montages and annotated phase keyframes. Visual evidence quality
-is `PASS`; this does not override the 4/5 physical failure. Authoritative
+All five samples are machine `PASS` and evidence `PASS`. The new sample 5
+video contains 912 frames at 60 fps. The visual model reviewed all frames
+exactly once through 46 contact sheets and separately passed 24 fresh
+collision-overlay records. The user confirmed on 2026-07-31 that the grasp is
+correct, so the five-pose diagnostic acceptance is `PASS`. Authoritative
 reports:
 
-- `reports/aloha1_mapping/aloha1_grasp_20cm_five_position_preflight_v2.json`;
-- `reports/aloha1_mapping/aloha1_grasp_20cm_five_position_results_v2.json`;
-- `reports/aloha1_mapping/aloha1_grasp_20cm_five_position_video_review.json`;
-- `reports/aloha1_mapping/aloha1_grasp_20cm_five_position_video_review.md`.
+- `reports/aloha1_mapping/aloha1_grasp_20cm_five_pose_ik_results_downward_contact_gate_v5.json`;
+- `reports/aloha1_mapping/grasp_20cm_five_pose_ik_downward_v6_review/aloha1_grasp_20cm_button_video_review.json`;
+- `reports/aloha1_mapping/aloha1_grasp_20cm_five_pose_downward_acceptance_v6.json`;
+- `reports/aloha1_mapping/aloha1_grasp_20cm_five_pose_downward_acceptance_v6.md`.
 
 The source Stage, default/final collider and protected USD layers were not
 modified. The real robot and `192.168.1.103` were not accessed. Task 8 remains
 `NOT_RUN`.
+
+## 2026-07-31 Task 7 post-grasp closure
+
+The user-confirmed five-pose grasp was integrated into a report-only Task 7
+acceptance layer. Runtime control, workcell physics, table/support alignment,
+current ALOHA six-DOF IK correspondence, Bottle500 static hold, five-pose
+dynamic pickup, visual-model review and user confirmation are all `PASS`.
+
+The accepted video chain keeps
+`aloha1_ik_correspondence_v2.json` frozen at SHA-256
+`6b9af0569b2e1cb829da208b69e36c18fe0dd2ba1d22b12e42b84dc625c279f9`.
+A new `aloha1_ik_correspondence_v3.json` binds the current horizontal-grasp
+configuration without replacing the version used by the accepted videos.
+Version 3 is also ALOHA 6DOF correspondence `PASS`, IK `PASS`, and deterministic
+across the existing three fresh-process kinematics reports.
+
+This does not make the asset package SimReady. The literal NVIDIA official-rule
+status remains `FAIL` with 37 findings, none suppressed; asset-promotion
+readiness and the Task 7 aggregate therefore remain `PARTIAL`. Task 8 remains
+`NOT_RUN`.
+
+Authoritative reports:
+
+- `reports/aloha1_mapping/aloha1_task7_post_grasp_acceptance.json`;
+- `reports/aloha1_mapping/aloha1_task7_post_grasp_acceptance.md`;
+- `reports/aloha1_mapping/aloha1_ik_correspondence_v3.json`.
 
 ## 2026-07-29 kinematic and signal-correspondence baseline
 

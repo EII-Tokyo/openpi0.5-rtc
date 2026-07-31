@@ -9,32 +9,45 @@
 - The real Isaac GUI Abort-at-`VERTICAL_DESCENT` then Reset flow is machine
   `PASS`; evidence:
   `.codex/artifacts/20260731-aloha1-grasp-20cm-button/abort_reset_003/aloha1_grasp_20cm_abort_reset.json`.
-- The first five-position execution exposed two implementation errors:
-  preflight used an obsolete approximately 4.16 mm lift instead of the formal
-  210 mm lift, and preload completion incorrectly required five consecutive
-  negative-separation frames despite bilateral force-carrying solver contact.
-  Both have focused regression coverage.
-- Corrected fixed-seed preflight is `PASS`, uses 210 mm, and selects candidate
-  indices `1, 5, 9, 10, 11`:
-  `reports/aloha1_mapping/aloha1_grasp_20cm_five_position_preflight_v2.json`.
-- Corrected acceptance executed 10 fresh Isaac processes. Every primary/repeat
-  pair is deterministic. Positions 1/3/4/5 are machine `PASS`; position 2 is
-  deterministic `FAIL` at maximum clearance `0.19840033460203355 m`.
-  Aggregate acceptance is therefore **FAIL (4/5)**.
-- Position 2 has bilateral solver contact and approximately `0.901 N/0.894 N`
-  mean estimated left/right normal force, but accumulates
-  `0.011552821743005925 m` relative vertical slip. A one-variable,
-  diagnostic-only `+0.002 m` lift reached the height gate but failed hold
-  after `0.083333 s` with `0.01077557458159592 m` drop. It is not promoted.
-- All five raw and annotated videos passed visual-model evidence-quality
-  review: the complete arm, gripper/bottle inset, approach, contact, lift and
-  success/failure terminal state are visible. This does not override position
-  2's physical FAIL. Report:
-  `reports/aloha1_mapping/aloha1_grasp_20cm_five_position_video_review.json`.
-- Current root-cause boundary:
-  `POSITION_DEPENDENT_CONTINUOUS_SLIP_OR_ROTATIONAL_INSTABILITY_NOT_RESOLVED`.
-  No collider, friction, drive, mimic, bottle mass/diameter, timestep, solver,
-  final asset, or acceptance gate was changed.
+- The five-pose downward-gripper preflight is `PASS`. Samples 1 and 2 preserve
+  the user-accepted legacy initial-orientation exceptions; samples 3 and 4
+  preserve already successful downward-gripper runs; only failed sample 5 was
+  replanned and rerecorded.
+- Sample 5 candidate 119 starts with the gripper approach axis
+  `7.189721450960664°` from world `-Z`, inside the frozen
+  `23.241131059202324°` gate. Its fresh primary and repeat are deterministic
+  machine `PASS`, with `0.20077485934609024 m` clearance, `2.0 s` hold and
+  `0.0007390718475712432 m` drop.
+- The previous candidate-119 `bilateral_contact_timeout` was a contact-report
+  gate error, not an IK failure. Bilateral reported finger/bottle pairs carried
+  finite positive PhysX solver impulse while geometric separation remained
+  slightly positive inside the contact envelope. The controller now uses
+  bilateral finite positive solver impulse for physical contact and retains
+  `separation <= 0` as an independent diagnostic.
+- All five samples are now machine `PASS` and evidence `PASS`. The new sample
+  5 action video covers 912 frames at 60 fps; all frames were reviewed once
+  through 46 contact sheets, and 24 fresh collision-overlay records also pass
+  visual-model review. The user confirmed on 2026-07-31 that the sample 5
+  grasp is correct. The five-pose diagnostic acceptance is therefore `PASS`.
+- Authoritative report:
+  `reports/aloha1_mapping/aloha1_grasp_20cm_five_pose_downward_acceptance_v6.json`.
+- No collider, friction, drive, mimic, bottle mass/diameter, timestep, solver,
+  final asset or acceptance threshold changed.
+- Post-grasp Task 7 closure is now machine-readable:
+  `reports/aloha1_mapping/aloha1_task7_post_grasp_acceptance.json`.
+  Runtime/grasp acceptance is `PASS`: Task 7A runtime control, workcell
+  physics, table alignment, Bottle500 static hold, five-pose dynamic grasp,
+  visual review, user confirmation and the current ALOHA six-DOF IK
+  correspondence all pass.
+- The accepted-video dependency
+  `aloha1_ik_correspondence_v2.json` remains frozen at SHA-256
+  `6b9af0569b2e1cb829da208b69e36c18fe0dd2ba1d22b12e42b84dc625c279f9`.
+  A separate `aloha1_ik_correspondence_v3.json` binds the current horizontal
+  grasp config and is ALOHA 6DOF/IK `PASS`; it does not replace v2 in prior
+  runtime evidence.
+- Asset-promotion readiness remains `PARTIAL`; the NVIDIA official-rule
+  literal status remains `FAIL` with 37 unsuppressed findings. Task 7
+  aggregate is therefore `PARTIAL`, not `PASS`.
 - No real robot or `192.168.1.103` access occurred. Task 8 remains `NOT_RUN`.
 
 ## Active Goal — 2026-07-28 ALOHA1 Isaac Sim 5.1 Mapping
@@ -1859,3 +1872,60 @@ scene design is reviewed and approved.
 - No source/default/final USD, collider, friction, drive, mimic, bottle mass,
   timestep, solver, real robot, ROS, camera, pipe/insertion task, or Task 8
   optimization was modified or executed.
+
+## 2026-07-30 Bottle500 / supplier-CAD finger collision runtime gate
+
+- The user identified apparent finger-through-bottle behavior in the failed
+  grasp video and elevated graspable-object collision configuration to the
+  highest-priority diagnostic.
+- Frozen inputs remained unchanged:
+  - aligned review Stage:
+    `assets/Trossen/ALOHA1/1.0/diagnostics/table_support_alignment/1.0/aloha1_table_support_aligned_workcell.usda`,
+    SHA-256
+    `2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c`;
+  - Bottle500 USD:
+    `assets/bottle_500ml/isaac/bottle_500ml_sim.usd`, SHA-256
+    `16427135f152ec951de2321fd689366d745a2dd389cbe260976631783952533e`.
+- The independent standard-pusher gate is `PASS`: Bottle500 has 41 enabled
+  collision prims, a dynamic rigid body with runtime mass readback
+  `0.019999999552965164 kg`, 15 physical pusher contact records, and
+  `0.0033827643589525247 m` displacement. This falsifies the hypothesis that
+  Bottle500 has no active collider.
+- The complete finger-link inventory is `PASS`: each handed supplier-CAD
+  finger link has exactly one enabled collider, the named 831-point /
+  1662-face diagnostic supplier-CAD mesh using `convexHull`. No duplicate
+  legacy collider, FilteredPairs, or CollisionGroup was found.
+- Fresh follower replay run04 is `PASS` for the collision pipeline:
+  left/right first physical contact frames are 184/183; the run contains
+  274/270 physical contact records; impulses are finite; deepest separation
+  corresponds to `0.00003865920007228851 m` penetration. This is not a static
+  grasp or hold PASS.
+- User-required collision-area screenshot evidence is now mandatory. Every
+  final accepted screenshot uses Isaac Sim 5.1 setting
+  `/persistent/physics/visualizationDisplayColliders = 2`; run01 was rejected
+  for occlusion, run02 for finger cropping, and run03 was superseded to add
+  camera intrinsics and per-frame contact metadata.
+- Final run04 evidence contains eight collision-overlay raw images and eight
+  annotated images: open, bilateral contact, maximum closure and hold end,
+  each from left/right oblique views. All 8 annotated images were inspected
+  individually with the vision model and passed. Blue/orange identify the
+  handed fingers, green exposes collision regions, and projected contact
+  points/normals use runtime PhysX contact-report data.
+- Screenshot semantic boundary: green pixels combine Isaac's physics debug
+  display with a session-only exact authored-collider render clone. They are
+  not a direct cooked-convex-hull mesh readback.
+- Authoritative reports:
+  - `reports/aloha1_mapping/aloha1_bottle_graspable_object_collision_diagnosis.json/.md`;
+  - `reports/aloha1_mapping/aloha1_follower_finger_collision_registration.json/.md`;
+  - `reports/aloha1_mapping/aloha1_follower_finger_collision_runtime_run04.json/.md`;
+  - `reports/aloha1_mapping/aloha1_follower_finger_collision_screenshot_review.json/.md`.
+- Overall conclusion:
+  `BOTTLE_AND_FINGER_COLLISION_PIPELINES_VERIFIED`;
+  `MISSING_BOTTLE_COLLIDER_FALSIFIED`.
+- Acceptance boundary remains:
+  `STATIC_GRASP_NOT_YET_REVALIDATED`,
+  `FIVE_RANDOM_POSITION_TRIALS_NOT_RUN`,
+  `TASK8=NOT_RUN`.
+- Next mainline action is to replay the user-approved Grasp Editor / ALOHA IK
+  close-lift-hold trajectory while preserving this verified collision setup
+  and changing only one diagnostic variable at a time.
