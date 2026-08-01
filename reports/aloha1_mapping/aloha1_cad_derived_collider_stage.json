@@ -1,0 +1,411 @@
+{
+  "all_stage_articulation_root_paths": [
+    "/World/environment/worldBody",
+    "/World/follower_left/vx300s_left/root_joint",
+    "/World/follower_right/vx300s_right/root_joint"
+  ],
+  "articulation_count": 2,
+  "articulation_root_paths": [
+    "/World/follower_left/vx300s_left/root_joint",
+    "/World/follower_right/vx300s_right/root_joint"
+  ],
+  "baseline_fallback_collider_readback": {
+    "all_convex_hull": true,
+    "all_enabled": true,
+    "count": 4,
+    "records": [
+      {
+        "approximation": "convexHull",
+        "collision_enabled": true,
+        "link": "follower_left_wrist_link",
+        "prim_path": "/World/follower_left/vx300s_left/follower_left_wrist_link/collisions/wrist/node_STL_BINARY_"
+      },
+      {
+        "approximation": "convexHull",
+        "collision_enabled": true,
+        "link": "follower_left_gripper_prop_link",
+        "prim_path": "/World/follower_left/vx300s_left/follower_left_gripper_prop_link/collisions/gripper_prop/node_STL_BINARY_"
+      },
+      {
+        "approximation": "convexHull",
+        "collision_enabled": true,
+        "link": "follower_right_wrist_link",
+        "prim_path": "/World/follower_right/vx300s_right/follower_right_wrist_link/collisions/wrist/node_STL_BINARY_"
+      },
+      {
+        "approximation": "convexHull",
+        "collision_enabled": true,
+        "link": "follower_right_gripper_prop_link",
+        "prim_path": "/World/follower_right/vx300s_right/follower_right_gripper_prop_link/collisions/gripper_prop/node_STL_BINARY_"
+      }
+    ]
+  },
+  "blocked_link_colliders_authored": [],
+  "blocked_physical_links": [
+    "follower_left_wrist_link",
+    "follower_left_gripper_prop_link",
+    "follower_right_wrist_link",
+    "follower_right_gripper_prop_link"
+  ],
+  "collision_authoring_scope": "NEW_DIAGNOSTIC_MESH_PRIMS_PLUS_SOURCE_INSTANCE_DEACTIVATION",
+  "deactivated_source_collision_instances": {
+    "all_inactive": true,
+    "count": 14,
+    "records": [
+      {
+        "is_active": false,
+        "is_valid": true,
+        "prim_path": "/World/follower_left/vx300s_left/follower_left_base_link/collisions"
+      },
+      {
+        "is_active": false,
+        "is_valid": true,
+        "prim_path": "/World/follower_left/vx300s_left/follower_left_shoulder_link/collisions"
+      },
+      {
+        "is_active": false,
+        "is_valid": true,
+        "prim_path": "/World/follower_left/vx300s_left/follower_left_upper_arm_link/collisions"
+      },
+      {
+        "is_active": false,
+        "is_valid": true,
+        "prim_path": "/World/follower_left/vx300s_left/follower_left_upper_forearm_link/collisions"
+      },
+      {
+        "is_active": false,
+        "is_valid": true,
+        "prim_path": "/World/follower_left/vx300s_left/follower_left_lower_forearm_link/collisions"
+      },
+      {
+        "is_active": false,
+        "is_valid": true,
+        "prim_path": "/World/follower_left/vx300s_left/follower_left_gripper_link/collisions"
+      },
+      {
+        "is_active": false,
+        "is_valid": true,
+        "prim_path": "/World/follower_left/vx300s_left/follower_left_gripper_bar_link/collisions"
+      },
+      {
+        "is_active": false,
+        "is_valid": true,
+        "prim_path": "/World/follower_right/vx300s_right/follower_right_base_link/collisions"
+      },
+      {
+        "is_active": false,
+        "is_valid": true,
+        "prim_path": "/World/follower_right/vx300s_right/follower_right_shoulder_link/collisions"
+      },
+      {
+        "is_active": false,
+        "is_valid": true,
+        "prim_path": "/World/follower_right/vx300s_right/follower_right_upper_arm_link/collisions"
+      },
+      {
+        "is_active": false,
+        "is_valid": true,
+        "prim_path": "/World/follower_right/vx300s_right/follower_right_upper_forearm_link/collisions"
+      },
+      {
+        "is_active": false,
+        "is_valid": true,
+        "prim_path": "/World/follower_right/vx300s_right/follower_right_lower_forearm_link/collisions"
+      },
+      {
+        "is_active": false,
+        "is_valid": true,
+        "prim_path": "/World/follower_right/vx300s_right/follower_right_gripper_link/collisions"
+      },
+      {
+        "is_active": false,
+        "is_valid": true,
+        "prim_path": "/World/follower_right/vx300s_right/follower_right_gripper_bar_link/collisions"
+      }
+    ]
+  },
+  "direct_nvidia_mcp_local_api_evidence": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/commands/phase4_direct_nvidia_mcp_and_local_api_summary.json",
+    "sha256": "4bd257f73776093dda37ddeb47bb1775c6ee6e4e3b297b811f2755eb640ad5b0",
+    "status": "PASS"
+  },
+  "drive_modified": false,
+  "duplicate_source_candidate_collision_gate": "PASS",
+  "existing_finger_collider_readback": {
+    "all_convex_hull": true,
+    "count": 4,
+    "records": [
+      {
+        "approximation": "convexHull",
+        "prim_path": "/World/follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "prim_path": "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "prim_path": "/World/follower_right/vx300s_right/follower_right_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "prim_path": "/World/follower_right/vx300s_right/follower_right_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh"
+      }
+    ]
+  },
+  "final_or_default_asset_modified": false,
+  "geometry_layer": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/geometry/cad_derived_colliders.usda",
+    "sha256": "cbd1a36ef86fe4b826ff362a17e66e709743723c088e30859a583c7454c1f4f8"
+  },
+  "gripper_bar_fixed_group_coverage": {
+    "count": 2,
+    "owner_collider_paths": [
+      "/World/follower_left/vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/mesh",
+      "/World/follower_right/vx300s_right/follower_right_gripper_link/cad_derived_collisions/cad_derived_gripper_link/mesh"
+    ],
+    "rule": "supplier Part__Feature006 covers the fixed gripper+bar group; the source Stage had no active gripper_bar collider to disable"
+  },
+  "joint_signature_unchanged": true,
+  "mass_signature_unchanged": true,
+  "material_modified": false,
+  "new_collider_readback": [
+    {
+      "approximation": "convexHull",
+      "collision_enabled": true,
+      "face_count": 2430,
+      "link_suffix": "base_link",
+      "point_count": 1217,
+      "prim_path": "/World/follower_left/vx300s_left/follower_left_base_link/cad_derived_collisions/cad_derived_base_link/mesh",
+      "purpose": "guide",
+      "robot": "follower_left",
+      "source_obj_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/geometry/base_link.obj",
+      "source_obj_sha256": "946dfa01db09b98593d0c6ab6d84fe7fd9ed1e4f006f8a9fb1952946a68a1dc1",
+      "type_name": "Mesh"
+    },
+    {
+      "approximation": "convexHull",
+      "collision_enabled": true,
+      "face_count": 1756,
+      "link_suffix": "shoulder_link",
+      "point_count": 880,
+      "prim_path": "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/mesh",
+      "purpose": "guide",
+      "robot": "follower_left",
+      "source_obj_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/geometry/shoulder_link.obj",
+      "source_obj_sha256": "579e6fe0d01c6b8004a09719e2c56990acfba13ca1c10b240504f26470217be2",
+      "type_name": "Mesh"
+    },
+    {
+      "approximation": "convexHull",
+      "collision_enabled": true,
+      "face_count": 3682,
+      "link_suffix": "upper_arm_link",
+      "point_count": 1849,
+      "prim_path": "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/mesh",
+      "purpose": "guide",
+      "robot": "follower_left",
+      "source_obj_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/geometry/upper_arm_link.obj",
+      "source_obj_sha256": "9d27f621ac900a5ecaa1cba36f2e6522db84566fbf1004db2d7212f2f7995176",
+      "type_name": "Mesh"
+    },
+    {
+      "approximation": "convexHull",
+      "collision_enabled": true,
+      "face_count": 986,
+      "link_suffix": "upper_forearm_link",
+      "point_count": 495,
+      "prim_path": "/World/follower_left/vx300s_left/follower_left_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/mesh",
+      "purpose": "guide",
+      "robot": "follower_left",
+      "source_obj_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/geometry/upper_forearm_link.obj",
+      "source_obj_sha256": "fce9d4a8fb25ab225b99be104ee68c9cf5806894f65d41989d3dae944998e9ff",
+      "type_name": "Mesh"
+    },
+    {
+      "approximation": "convexHull",
+      "collision_enabled": true,
+      "face_count": 1160,
+      "link_suffix": "lower_forearm_link",
+      "point_count": 580,
+      "prim_path": "/World/follower_left/vx300s_left/follower_left_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/mesh",
+      "purpose": "guide",
+      "robot": "follower_left",
+      "source_obj_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/geometry/lower_forearm_link.obj",
+      "source_obj_sha256": "a07b245a58ab5581706a74372d8ef7491dc9bf03ef9111cbf1f887fda7444337",
+      "type_name": "Mesh"
+    },
+    {
+      "approximation": "convexHull",
+      "collision_enabled": true,
+      "face_count": 8522,
+      "link_suffix": "gripper_link",
+      "point_count": 4263,
+      "prim_path": "/World/follower_left/vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/mesh",
+      "purpose": "guide",
+      "robot": "follower_left",
+      "source_obj_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/geometry/gripper_link.obj",
+      "source_obj_sha256": "22dec9b9082d40d6f5f3be1c39fc73b3c3fbadd9754969738dabc3a15b8f4a79",
+      "type_name": "Mesh"
+    },
+    {
+      "approximation": "convexHull",
+      "collision_enabled": true,
+      "face_count": 2430,
+      "link_suffix": "base_link",
+      "point_count": 1217,
+      "prim_path": "/World/follower_right/vx300s_right/follower_right_base_link/cad_derived_collisions/cad_derived_base_link/mesh",
+      "purpose": "guide",
+      "robot": "follower_right",
+      "source_obj_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/geometry/base_link.obj",
+      "source_obj_sha256": "946dfa01db09b98593d0c6ab6d84fe7fd9ed1e4f006f8a9fb1952946a68a1dc1",
+      "type_name": "Mesh"
+    },
+    {
+      "approximation": "convexHull",
+      "collision_enabled": true,
+      "face_count": 1756,
+      "link_suffix": "shoulder_link",
+      "point_count": 880,
+      "prim_path": "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/mesh",
+      "purpose": "guide",
+      "robot": "follower_right",
+      "source_obj_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/geometry/shoulder_link.obj",
+      "source_obj_sha256": "579e6fe0d01c6b8004a09719e2c56990acfba13ca1c10b240504f26470217be2",
+      "type_name": "Mesh"
+    },
+    {
+      "approximation": "convexHull",
+      "collision_enabled": true,
+      "face_count": 3682,
+      "link_suffix": "upper_arm_link",
+      "point_count": 1849,
+      "prim_path": "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/mesh",
+      "purpose": "guide",
+      "robot": "follower_right",
+      "source_obj_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/geometry/upper_arm_link.obj",
+      "source_obj_sha256": "9d27f621ac900a5ecaa1cba36f2e6522db84566fbf1004db2d7212f2f7995176",
+      "type_name": "Mesh"
+    },
+    {
+      "approximation": "convexHull",
+      "collision_enabled": true,
+      "face_count": 986,
+      "link_suffix": "upper_forearm_link",
+      "point_count": 495,
+      "prim_path": "/World/follower_right/vx300s_right/follower_right_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/mesh",
+      "purpose": "guide",
+      "robot": "follower_right",
+      "source_obj_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/geometry/upper_forearm_link.obj",
+      "source_obj_sha256": "fce9d4a8fb25ab225b99be104ee68c9cf5806894f65d41989d3dae944998e9ff",
+      "type_name": "Mesh"
+    },
+    {
+      "approximation": "convexHull",
+      "collision_enabled": true,
+      "face_count": 1160,
+      "link_suffix": "lower_forearm_link",
+      "point_count": 580,
+      "prim_path": "/World/follower_right/vx300s_right/follower_right_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/mesh",
+      "purpose": "guide",
+      "robot": "follower_right",
+      "source_obj_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/geometry/lower_forearm_link.obj",
+      "source_obj_sha256": "a07b245a58ab5581706a74372d8ef7491dc9bf03ef9111cbf1f887fda7444337",
+      "type_name": "Mesh"
+    },
+    {
+      "approximation": "convexHull",
+      "collision_enabled": true,
+      "face_count": 8522,
+      "link_suffix": "gripper_link",
+      "point_count": 4263,
+      "prim_path": "/World/follower_right/vx300s_right/follower_right_gripper_link/cad_derived_collisions/cad_derived_gripper_link/mesh",
+      "purpose": "guide",
+      "robot": "follower_right",
+      "source_obj_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/geometry/gripper_link.obj",
+      "source_obj_sha256": "22dec9b9082d40d6f5f3be1c39fc73b3c3fbadd9754969738dabc3a15b8f4a79",
+      "type_name": "Mesh"
+    }
+  ],
+  "non_robot_articulation_root_paths": [
+    "/World/environment/worldBody"
+  ],
+  "physics_layer": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/physics/cad_derived_colliders_physics.usda",
+    "sha256": "a754055c130f10e5d40578d51fdd7591ae8fce0a76dd4cc25806932d2d1df65a"
+  },
+  "real_robot_connected": false,
+  "remote_192_168_1_103_accessed": false,
+  "required_prims": [
+    "/World",
+    "/World/follower_left/vx300s_left",
+    "/World/follower_right/vx300s_right",
+    "/World/follower_left/vx300s_left/follower_left_base_link/cad_derived_collisions/cad_derived_base_link/mesh",
+    "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/mesh",
+    "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/mesh",
+    "/World/follower_left/vx300s_left/follower_left_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/mesh",
+    "/World/follower_left/vx300s_left/follower_left_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/mesh",
+    "/World/follower_left/vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/mesh",
+    "/World/follower_right/vx300s_right/follower_right_base_link/cad_derived_collisions/cad_derived_base_link/mesh",
+    "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/mesh",
+    "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/mesh",
+    "/World/follower_right/vx300s_right/follower_right_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/mesh",
+    "/World/follower_right/vx300s_right/follower_right_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/mesh",
+    "/World/follower_right/vx300s_right/follower_right_gripper_link/cad_derived_collisions/cad_derived_gripper_link/mesh"
+  ],
+  "required_prims_valid": true,
+  "rigid_body_signature_unchanged": true,
+  "root_layer": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_diagnostic.usda",
+    "default_prim": "/World",
+    "sha256": "49d3b8370d7029d3739964eebc1fafa124107f133dade530c814fb578535aff3",
+    "sublayers": [
+      "physics/cad_derived_colliders_physics.usda",
+      "geometry/cad_derived_colliders.usda",
+      "../../signal_correspondence/1.0/aloha1_signal_correspondence_workcell.usda"
+    ]
+  },
+  "schema_version": 1,
+  "source_hashes_unchanged": true,
+  "source_instance_proxy_collider_count_before": 18,
+  "source_instance_proxy_colliders_before": [
+    "/World/follower_left/vx300s_left/follower_left_base_link/collisions/base/node_STL_BINARY_",
+    "/World/follower_left/vx300s_left/follower_left_shoulder_link/collisions/shoulder/node_STL_BINARY_",
+    "/World/follower_left/vx300s_left/follower_left_upper_arm_link/collisions/upper_arm/node_STL_BINARY_",
+    "/World/follower_left/vx300s_left/follower_left_upper_forearm_link/collisions/upper_forearm/node_STL_BINARY_",
+    "/World/follower_left/vx300s_left/follower_left_lower_forearm_link/collisions/lower_forearm/node_STL_BINARY_",
+    "/World/follower_left/vx300s_left/follower_left_wrist_link/collisions/wrist/node_STL_BINARY_",
+    "/World/follower_left/vx300s_left/follower_left_gripper_link/collisions/gripper/node_STL_BINARY_",
+    "/World/follower_left/vx300s_left/follower_left_gripper_prop_link/collisions/gripper_prop/node_STL_BINARY_",
+    "/World/follower_left/vx300s_left/follower_left_gripper_bar_link/collisions/gripper_bar/node_STL_BINARY_",
+    "/World/follower_right/vx300s_right/follower_right_base_link/collisions/base/node_STL_BINARY_",
+    "/World/follower_right/vx300s_right/follower_right_shoulder_link/collisions/shoulder/node_STL_BINARY_",
+    "/World/follower_right/vx300s_right/follower_right_upper_arm_link/collisions/upper_arm/node_STL_BINARY_",
+    "/World/follower_right/vx300s_right/follower_right_upper_forearm_link/collisions/upper_forearm/node_STL_BINARY_",
+    "/World/follower_right/vx300s_right/follower_right_lower_forearm_link/collisions/lower_forearm/node_STL_BINARY_",
+    "/World/follower_right/vx300s_right/follower_right_wrist_link/collisions/wrist/node_STL_BINARY_",
+    "/World/follower_right/vx300s_right/follower_right_gripper_link/collisions/gripper/node_STL_BINARY_",
+    "/World/follower_right/vx300s_right/follower_right_gripper_prop_link/collisions/gripper_prop/node_STL_BINARY_",
+    "/World/follower_right/vx300s_right/follower_right_gripper_bar_link/collisions/gripper_bar/node_STL_BINARY_"
+  ],
+  "source_layer_hashes_after": {
+    "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/aloha1_signal_correspondence_workcell.usda": "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf",
+    "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/configuration/aloha1_signal_home_targets.usda": "484f17e3c638ea729a260eb67a666954f346b37a69987d9fe4f15cf7fad9d141"
+  },
+  "source_layer_hashes_before": {
+    "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/aloha1_signal_correspondence_workcell.usda": "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf",
+    "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/configuration/aloha1_signal_home_targets.usda": "484f17e3c638ea729a260eb67a666954f346b37a69987d9fe4f15cf7fad9d141"
+  },
+  "source_or_imported_asset_modified": false,
+  "source_stage": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/aloha1_signal_correspondence_workcell.usda",
+    "sha256_after": "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf",
+    "sha256_before": "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf"
+  },
+  "stage_open_probe": "PASS",
+  "status": "PARTIAL",
+  "status_reason": "CAD-derived colliders are authored for six main links per follower; wrist B-Rep validity and moving gripper_prop identity remain blocked.",
+  "task8": "NOT_RUN",
+  "timestep_modified": false,
+  "virtual_frame_collider_count": 0
+}
