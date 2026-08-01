@@ -1,0 +1,1585 @@
+{
+  "classification_counts": {
+    "HARD_BLOCKER_CAD_TO_LINK_IDENTITY": 4,
+    "PHYSICAL_CAD_DERIVABLE": 14,
+    "PHYSICAL_EXISTING_VALIDATED_COLLIDER": 4,
+    "VIRTUAL_FRAME_NO_COLLIDER": 6
+  },
+  "final_or_default_asset_modified": false,
+  "hard_blockers": [
+    "HARD_BLOCKER_CAD_TO_LINK_IDENTITY:gripper_bar_link",
+    "HARD_BLOCKER_CAD_TO_LINK_IDENTITY:gripper_prop_link"
+  ],
+  "helper_frame_decision": "DO_NOT_INVENT_COLLIDER_AND_DO_NOT_REMOVE_RIGIDBODY_WITHOUT_SEPARATE_REGRESSION",
+  "inputs": {
+    "cad_assembly_audit": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_assembly_audit.json",
+      "sha256": "93f56348d32f591cb973bfda198e89aa1e2f205a68f366a3282d2edb2fb97a90"
+    },
+    "gripper_mapping": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_gripper_mapping.json",
+      "sha256": "9c67d96039f24438d4d5d9b36593fa5747a43f91b32eb31cf0fe1c3e4c53b2a0"
+    },
+    "helper_link_audit": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7a_helper_link_semantics.json",
+      "sha256": "5ef6cc9af9a8ef8147078070229a89dae106c9434c72e5737fe5c340a49f2e91"
+    }
+  },
+  "link_count": 28,
+  "links": [
+    {
+      "cad_object": {
+        "label": "Simple VX Base v3",
+        "name": "Part__Feature",
+        "shape_type": "Solid",
+        "shape_valid": true
+      },
+      "cad_to_link_matrix": null,
+      "classification": "PHYSICAL_CAD_DERIVABLE",
+      "collision_count": 1,
+      "evidence_paths": [
+        "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_left.urdf",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_assembly_audit.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7a_helper_link_semantics.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_gripper_mapping.json"
+      ],
+      "existing_collision_meshes": [
+        "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/base.stl"
+      ],
+      "existing_visual_meshes": [
+        "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/base.stl"
+      ],
+      "helper_semantic_source_class": null,
+      "invent_collider_allowed": false,
+      "link_suffix": "base_link",
+      "mirror_used": false,
+      "registration_status": "PENDING_PHASE3_NUMERICAL_REGISTRATION",
+      "robot": "follower_left",
+      "source_placement_determinant": 1.0,
+      "source_placement_matrix": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "transform_determinant": null,
+      "unit_conversion_mm_to_m": 0.001,
+      "unresolved": null,
+      "urdf_link_name": "follower_left_base_link",
+      "urdf_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_left.urdf",
+      "usd_prim_path": "/World/follower_left/vx300s_left/follower_left_base_link",
+      "visual_count": 1
+    },
+    {
+      "cad_object": {
+        "label": "Simple VX Shoulder v3",
+        "name": "Part__Feature001",
+        "shape_type": "Solid",
+        "shape_valid": true
+      },
+      "cad_to_link_matrix": null,
+      "classification": "PHYSICAL_CAD_DERIVABLE",
+      "collision_count": 1,
+      "evidence_paths": [
+        "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_left.urdf",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_assembly_audit.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7a_helper_link_semantics.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_gripper_mapping.json"
+      ],
+      "existing_collision_meshes": [
+        "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/shoulder.stl"
+      ],
+      "existing_visual_meshes": [
+        "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/shoulder.stl"
+      ],
+      "helper_semantic_source_class": null,
+      "invent_collider_allowed": false,
+      "link_suffix": "shoulder_link",
+      "mirror_used": false,
+      "registration_status": "PENDING_PHASE3_NUMERICAL_REGISTRATION",
+      "robot": "follower_left",
+      "source_placement_determinant": 1.0,
+      "source_placement_matrix": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "transform_determinant": null,
+      "unit_conversion_mm_to_m": 0.001,
+      "unresolved": null,
+      "urdf_link_name": "follower_left_shoulder_link",
+      "urdf_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_left.urdf",
+      "usd_prim_path": "/World/follower_left/vx300s_left/follower_left_shoulder_link",
+      "visual_count": 1
+    },
+    {
+      "cad_object": {
+        "label": "Simple VX Upper Arm v3",
+        "name": "Part__Feature002",
+        "shape_type": "Solid",
+        "shape_valid": true
+      },
+      "cad_to_link_matrix": null,
+      "classification": "PHYSICAL_CAD_DERIVABLE",
+      "collision_count": 1,
+      "evidence_paths": [
+        "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_left.urdf",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_assembly_audit.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7a_helper_link_semantics.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_gripper_mapping.json"
+      ],
+      "existing_collision_meshes": [
+        "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/upper_arm.stl"
+      ],
+      "existing_visual_meshes": [
+        "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/upper_arm.stl"
+      ],
+      "helper_semantic_source_class": null,
+      "invent_collider_allowed": false,
+      "link_suffix": "upper_arm_link",
+      "mirror_used": false,
+      "registration_status": "PENDING_PHASE3_NUMERICAL_REGISTRATION",
+      "robot": "follower_left",
+      "source_placement_determinant": 1.0,
+      "source_placement_matrix": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "transform_determinant": null,
+      "unit_conversion_mm_to_m": 0.001,
+      "unresolved": null,
+      "urdf_link_name": "follower_left_upper_arm_link",
+      "urdf_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_left.urdf",
+      "usd_prim_path": "/World/follower_left/vx300s_left/follower_left_upper_arm_link",
+      "visual_count": 1
+    },
+    {
+      "cad_object": {
+        "label": "Simple VX Forearm v3",
+        "name": "Part__Feature003",
+        "shape_type": "Solid",
+        "shape_valid": true
+      },
+      "cad_to_link_matrix": null,
+      "classification": "PHYSICAL_CAD_DERIVABLE",
+      "collision_count": 1,
+      "evidence_paths": [
+        "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_left.urdf",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_assembly_audit.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7a_helper_link_semantics.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_gripper_mapping.json"
+      ],
+      "existing_collision_meshes": [
+        "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/upper_forearm.stl"
+      ],
+      "existing_visual_meshes": [
+        "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/upper_forearm.stl"
+      ],
+      "helper_semantic_source_class": null,
+      "invent_collider_allowed": false,
+      "link_suffix": "upper_forearm_link",
+      "mirror_used": false,
+      "registration_status": "PENDING_PHASE3_NUMERICAL_REGISTRATION",
+      "robot": "follower_left",
+      "source_placement_determinant": 1.0,
+      "source_placement_matrix": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.1
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -7.105427357601e-14
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          7.105427357601e-14
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "transform_determinant": null,
+      "unit_conversion_mm_to_m": 0.001,
+      "unresolved": null,
+      "urdf_link_name": "follower_left_upper_forearm_link",
+      "urdf_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_left.urdf",
+      "usd_prim_path": "/World/follower_left/vx300s_left/follower_left_upper_forearm_link",
+      "visual_count": 1
+    },
+    {
+      "cad_object": {
+        "label": "Simple VX Wrist Twist v3",
+        "name": "Part__Feature004",
+        "shape_type": "Solid",
+        "shape_valid": true
+      },
+      "cad_to_link_matrix": null,
+      "classification": "PHYSICAL_CAD_DERIVABLE",
+      "collision_count": 1,
+      "evidence_paths": [
+        "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_left.urdf",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_assembly_audit.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7a_helper_link_semantics.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_gripper_mapping.json"
+      ],
+      "existing_collision_meshes": [
+        "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/lower_forearm.stl"
+      ],
+      "existing_visual_meshes": [
+        "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/lower_forearm.stl"
+      ],
+      "helper_semantic_source_class": null,
+      "invent_collider_allowed": false,
+      "link_suffix": "lower_forearm_link",
+      "mirror_used": false,
+      "registration_status": "PENDING_PHASE3_NUMERICAL_REGISTRATION",
+      "robot": "follower_left",
+      "source_placement_determinant": 1.0,
+      "source_placement_matrix": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "transform_determinant": null,
+      "unit_conversion_mm_to_m": 0.001,
+      "unresolved": null,
+      "urdf_link_name": "follower_left_lower_forearm_link",
+      "urdf_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_left.urdf",
+      "usd_prim_path": "/World/follower_left/vx300s_left/follower_left_lower_forearm_link",
+      "visual_count": 1
+    },
+    {
+      "cad_object": {
+        "label": "Simple VX Wrist Tilt v3",
+        "name": "Part__Feature005",
+        "shape_type": "Solid",
+        "shape_valid": false
+      },
+      "cad_to_link_matrix": null,
+      "classification": "PHYSICAL_CAD_DERIVABLE",
+      "collision_count": 1,
+      "evidence_paths": [
+        "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_left.urdf",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_assembly_audit.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7a_helper_link_semantics.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_gripper_mapping.json"
+      ],
+      "existing_collision_meshes": [
+        "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/wrist.stl"
+      ],
+      "existing_visual_meshes": [
+        "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/wrist.stl"
+      ],
+      "helper_semantic_source_class": null,
+      "invent_collider_allowed": false,
+      "link_suffix": "wrist_link",
+      "mirror_used": false,
+      "registration_status": "PENDING_PHASE3_NUMERICAL_REGISTRATION",
+      "robot": "follower_left",
+      "source_placement_determinant": 1.0,
+      "source_placement_matrix": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "transform_determinant": null,
+      "unit_conversion_mm_to_m": 0.001,
+      "unresolved": null,
+      "urdf_link_name": "follower_left_wrist_link",
+      "urdf_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_left.urdf",
+      "usd_prim_path": "/World/follower_left/vx300s_left/follower_left_wrist_link",
+      "visual_count": 1
+    },
+    {
+      "cad_object": {
+        "label": "Aloha VX Gripper 2024-4-19 v4",
+        "name": "Part__Feature006",
+        "shape_type": "Solid",
+        "shape_valid": true
+      },
+      "cad_to_link_matrix": null,
+      "classification": "PHYSICAL_CAD_DERIVABLE",
+      "collision_count": 1,
+      "evidence_paths": [
+        "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_left.urdf",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_assembly_audit.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7a_helper_link_semantics.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_gripper_mapping.json"
+      ],
+      "existing_collision_meshes": [
+        "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper.stl"
+      ],
+      "existing_visual_meshes": [
+        "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper.stl"
+      ],
+      "helper_semantic_source_class": null,
+      "invent_collider_allowed": false,
+      "link_suffix": "gripper_link",
+      "mirror_used": false,
+      "registration_status": "PENDING_PHASE3_NUMERICAL_REGISTRATION",
+      "robot": "follower_left",
+      "source_placement_determinant": 1.0,
+      "source_placement_matrix": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.100001049673413
+        ],
+        [
+          0.0,
+          -6.106226635438361e-14,
+          -1.0,
+          -430.29999973392
+        ],
+        [
+          0.0,
+          1.0,
+          -6.106226635438361e-14,
+          426.749997526362
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "transform_determinant": null,
+      "unit_conversion_mm_to_m": 0.001,
+      "unresolved": null,
+      "urdf_link_name": "follower_left_gripper_link",
+      "urdf_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_left.urdf",
+      "usd_prim_path": "/World/follower_left/vx300s_left/follower_left_gripper_link",
+      "visual_count": 1
+    },
+    {
+      "cad_object": null,
+      "cad_to_link_matrix": null,
+      "classification": "VIRTUAL_FRAME_NO_COLLIDER",
+      "collision_count": 0,
+      "evidence_paths": [
+        "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_left.urdf",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_assembly_audit.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7a_helper_link_semantics.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_gripper_mapping.json"
+      ],
+      "existing_collision_meshes": [],
+      "existing_visual_meshes": [],
+      "helper_semantic_source_class": "VIRTUAL_KINEMATIC_HELPER",
+      "invent_collider_allowed": false,
+      "link_suffix": "ee_arm_link",
+      "mirror_used": false,
+      "registration_status": "NOT_APPLICABLE_VIRTUAL_FRAME",
+      "robot": "follower_left",
+      "source_placement_determinant": null,
+      "source_placement_matrix": null,
+      "transform_determinant": null,
+      "unit_conversion_mm_to_m": 0.001,
+      "unresolved": null,
+      "urdf_link_name": "follower_left_ee_arm_link",
+      "urdf_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_left.urdf",
+      "usd_prim_path": "/World/follower_left/vx300s_left/follower_left_ee_arm_link",
+      "visual_count": 0
+    },
+    {
+      "cad_object": null,
+      "cad_to_link_matrix": null,
+      "classification": "HARD_BLOCKER_CAD_TO_LINK_IDENTITY",
+      "collision_count": 1,
+      "evidence_paths": [
+        "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_left.urdf",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_assembly_audit.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7a_helper_link_semantics.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_gripper_mapping.json"
+      ],
+      "existing_collision_meshes": [
+        "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_prop.stl"
+      ],
+      "existing_visual_meshes": [
+        "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_prop.stl"
+      ],
+      "helper_semantic_source_class": null,
+      "invent_collider_allowed": false,
+      "link_suffix": "gripper_prop_link",
+      "mirror_used": false,
+      "registration_status": "HARD_BLOCKER_CAD_TO_LINK_IDENTITY",
+      "robot": "follower_left",
+      "source_placement_determinant": null,
+      "source_placement_matrix": null,
+      "transform_determinant": null,
+      "unit_conversion_mm_to_m": 0.001,
+      "unresolved": "CAD subpart identity for this independent URDF link is not established by the supplier assembly audit.",
+      "urdf_link_name": "follower_left_gripper_prop_link",
+      "urdf_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_left.urdf",
+      "usd_prim_path": "/World/follower_left/vx300s_left/follower_left_gripper_prop_link",
+      "visual_count": 1
+    },
+    {
+      "cad_object": null,
+      "cad_to_link_matrix": null,
+      "classification": "HARD_BLOCKER_CAD_TO_LINK_IDENTITY",
+      "collision_count": 1,
+      "evidence_paths": [
+        "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_left.urdf",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_assembly_audit.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7a_helper_link_semantics.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_gripper_mapping.json"
+      ],
+      "existing_collision_meshes": [
+        "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_bar.stl"
+      ],
+      "existing_visual_meshes": [
+        "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_bar.stl"
+      ],
+      "helper_semantic_source_class": null,
+      "invent_collider_allowed": false,
+      "link_suffix": "gripper_bar_link",
+      "mirror_used": false,
+      "registration_status": "HARD_BLOCKER_CAD_TO_LINK_IDENTITY",
+      "robot": "follower_left",
+      "source_placement_determinant": null,
+      "source_placement_matrix": null,
+      "transform_determinant": null,
+      "unit_conversion_mm_to_m": 0.001,
+      "unresolved": "CAD subpart identity for this independent URDF link is not established by the supplier assembly audit.",
+      "urdf_link_name": "follower_left_gripper_bar_link",
+      "urdf_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_left.urdf",
+      "usd_prim_path": "/World/follower_left/vx300s_left/follower_left_gripper_bar_link",
+      "visual_count": 1
+    },
+    {
+      "cad_object": null,
+      "cad_to_link_matrix": null,
+      "classification": "VIRTUAL_FRAME_NO_COLLIDER",
+      "collision_count": 0,
+      "evidence_paths": [
+        "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_left.urdf",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_assembly_audit.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7a_helper_link_semantics.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_gripper_mapping.json"
+      ],
+      "existing_collision_meshes": [],
+      "existing_visual_meshes": [],
+      "helper_semantic_source_class": "VIRTUAL_KINEMATIC_HELPER",
+      "invent_collider_allowed": false,
+      "link_suffix": "fingers_link",
+      "mirror_used": false,
+      "registration_status": "NOT_APPLICABLE_VIRTUAL_FRAME",
+      "robot": "follower_left",
+      "source_placement_determinant": null,
+      "source_placement_matrix": null,
+      "transform_determinant": null,
+      "unit_conversion_mm_to_m": 0.001,
+      "unresolved": null,
+      "urdf_link_name": "follower_left_fingers_link",
+      "urdf_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_left.urdf",
+      "usd_prim_path": "/World/follower_left/vx300s_left/follower_left_fingers_link",
+      "visual_count": 0
+    },
+    {
+      "cad_object": {
+        "label": "Aloha VX Fingers 2024-4-21 v2",
+        "name": "Part__Feature007",
+        "shape_type": "Solid",
+        "shape_valid": true
+      },
+      "cad_to_link_matrix": [
+        [
+          0.0,
+          -1.0,
+          0.0,
+          -0.49899999973392
+        ],
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.021099890257662776
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.42680133373174
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "classification": "PHYSICAL_EXISTING_VALIDATED_COLLIDER",
+      "collision_count": 1,
+      "evidence_paths": [
+        "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_left.urdf",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_assembly_audit.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7a_helper_link_semantics.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_gripper_mapping.json"
+      ],
+      "existing_collision_meshes": [
+        "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_finger.stl"
+      ],
+      "existing_visual_meshes": [
+        "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_finger.stl"
+      ],
+      "helper_semantic_source_class": null,
+      "invent_collider_allowed": false,
+      "link_suffix": "left_finger_link",
+      "mirror_used": false,
+      "registration_status": "VERIFIED_EXISTING_SUPPLIER_CAD_REGISTRATION",
+      "robot": "follower_left",
+      "source_placement_determinant": 1.0,
+      "source_placement_matrix": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0998902576627736
+        ],
+        [
+          0.0,
+          -1.554312234475219e-14,
+          -1.0,
+          -430.29999973392
+        ],
+        [
+          0.0,
+          1.0,
+          -1.554312234475219e-14,
+          426.80133373174
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "transform_determinant": 1.0,
+      "unit_conversion_mm_to_m": 0.001,
+      "unresolved": null,
+      "urdf_link_name": "follower_left_left_finger_link",
+      "urdf_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_left.urdf",
+      "usd_prim_path": "/World/follower_left/vx300s_left/follower_left_left_finger_link",
+      "visual_count": 1
+    },
+    {
+      "cad_object": {
+        "label": "Aloha VX Fingers 2024-4-21 v001",
+        "name": "Part__Feature008",
+        "shape_type": "Solid",
+        "shape_valid": true
+      },
+      "cad_to_link_matrix": [
+        [
+          0.0,
+          -1.0,
+          0.0,
+          -0.49899999973392
+        ],
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.020900109742337226
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.42680133373174
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "classification": "PHYSICAL_EXISTING_VALIDATED_COLLIDER",
+      "collision_count": 1,
+      "evidence_paths": [
+        "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_left.urdf",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_assembly_audit.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7a_helper_link_semantics.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_gripper_mapping.json"
+      ],
+      "existing_collision_meshes": [
+        "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_finger.stl"
+      ],
+      "existing_visual_meshes": [
+        "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_finger.stl"
+      ],
+      "helper_semantic_source_class": null,
+      "invent_collider_allowed": false,
+      "link_suffix": "right_finger_link",
+      "mirror_used": false,
+      "registration_status": "VERIFIED_EXISTING_SUPPLIER_CAD_REGISTRATION",
+      "robot": "follower_left",
+      "source_placement_determinant": 1.0,
+      "source_placement_matrix": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0998902576627736
+        ],
+        [
+          0.0,
+          -1.554312234475219e-14,
+          -1.0,
+          -430.29999973392
+        ],
+        [
+          0.0,
+          1.0,
+          -1.554312234475219e-14,
+          426.80133373174
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "transform_determinant": 1.0,
+      "unit_conversion_mm_to_m": 0.001,
+      "unresolved": null,
+      "urdf_link_name": "follower_left_right_finger_link",
+      "urdf_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_left.urdf",
+      "usd_prim_path": "/World/follower_left/vx300s_left/follower_left_right_finger_link",
+      "visual_count": 1
+    },
+    {
+      "cad_object": null,
+      "cad_to_link_matrix": null,
+      "classification": "VIRTUAL_FRAME_NO_COLLIDER",
+      "collision_count": 0,
+      "evidence_paths": [
+        "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_left.urdf",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_assembly_audit.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7a_helper_link_semantics.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_gripper_mapping.json"
+      ],
+      "existing_collision_meshes": [],
+      "existing_visual_meshes": [],
+      "helper_semantic_source_class": "FIXED_FRAME_ALIAS",
+      "invent_collider_allowed": false,
+      "link_suffix": "ee_gripper_link",
+      "mirror_used": false,
+      "registration_status": "NOT_APPLICABLE_VIRTUAL_FRAME",
+      "robot": "follower_left",
+      "source_placement_determinant": null,
+      "source_placement_matrix": null,
+      "transform_determinant": null,
+      "unit_conversion_mm_to_m": 0.001,
+      "unresolved": null,
+      "urdf_link_name": "follower_left_ee_gripper_link",
+      "urdf_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_left.urdf",
+      "usd_prim_path": "/World/follower_left/vx300s_left/follower_left_ee_gripper_link",
+      "visual_count": 0
+    },
+    {
+      "cad_object": {
+        "label": "Simple VX Base v3",
+        "name": "Part__Feature",
+        "shape_type": "Solid",
+        "shape_valid": true
+      },
+      "cad_to_link_matrix": null,
+      "classification": "PHYSICAL_CAD_DERIVABLE",
+      "collision_count": 1,
+      "evidence_paths": [
+        "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_right.urdf",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_assembly_audit.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7a_helper_link_semantics.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_gripper_mapping.json"
+      ],
+      "existing_collision_meshes": [
+        "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/base.stl"
+      ],
+      "existing_visual_meshes": [
+        "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/base.stl"
+      ],
+      "helper_semantic_source_class": null,
+      "invent_collider_allowed": false,
+      "link_suffix": "base_link",
+      "mirror_used": false,
+      "registration_status": "PENDING_PHASE3_NUMERICAL_REGISTRATION",
+      "robot": "follower_right",
+      "source_placement_determinant": 1.0,
+      "source_placement_matrix": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "transform_determinant": null,
+      "unit_conversion_mm_to_m": 0.001,
+      "unresolved": null,
+      "urdf_link_name": "follower_right_base_link",
+      "urdf_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_right.urdf",
+      "usd_prim_path": "/World/follower_right/vx300s_right/follower_right_base_link",
+      "visual_count": 1
+    },
+    {
+      "cad_object": {
+        "label": "Simple VX Shoulder v3",
+        "name": "Part__Feature001",
+        "shape_type": "Solid",
+        "shape_valid": true
+      },
+      "cad_to_link_matrix": null,
+      "classification": "PHYSICAL_CAD_DERIVABLE",
+      "collision_count": 1,
+      "evidence_paths": [
+        "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_right.urdf",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_assembly_audit.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7a_helper_link_semantics.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_gripper_mapping.json"
+      ],
+      "existing_collision_meshes": [
+        "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/shoulder.stl"
+      ],
+      "existing_visual_meshes": [
+        "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/shoulder.stl"
+      ],
+      "helper_semantic_source_class": null,
+      "invent_collider_allowed": false,
+      "link_suffix": "shoulder_link",
+      "mirror_used": false,
+      "registration_status": "PENDING_PHASE3_NUMERICAL_REGISTRATION",
+      "robot": "follower_right",
+      "source_placement_determinant": 1.0,
+      "source_placement_matrix": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "transform_determinant": null,
+      "unit_conversion_mm_to_m": 0.001,
+      "unresolved": null,
+      "urdf_link_name": "follower_right_shoulder_link",
+      "urdf_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_right.urdf",
+      "usd_prim_path": "/World/follower_right/vx300s_right/follower_right_shoulder_link",
+      "visual_count": 1
+    },
+    {
+      "cad_object": {
+        "label": "Simple VX Upper Arm v3",
+        "name": "Part__Feature002",
+        "shape_type": "Solid",
+        "shape_valid": true
+      },
+      "cad_to_link_matrix": null,
+      "classification": "PHYSICAL_CAD_DERIVABLE",
+      "collision_count": 1,
+      "evidence_paths": [
+        "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_right.urdf",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_assembly_audit.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7a_helper_link_semantics.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_gripper_mapping.json"
+      ],
+      "existing_collision_meshes": [
+        "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/upper_arm.stl"
+      ],
+      "existing_visual_meshes": [
+        "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/upper_arm.stl"
+      ],
+      "helper_semantic_source_class": null,
+      "invent_collider_allowed": false,
+      "link_suffix": "upper_arm_link",
+      "mirror_used": false,
+      "registration_status": "PENDING_PHASE3_NUMERICAL_REGISTRATION",
+      "robot": "follower_right",
+      "source_placement_determinant": 1.0,
+      "source_placement_matrix": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "transform_determinant": null,
+      "unit_conversion_mm_to_m": 0.001,
+      "unresolved": null,
+      "urdf_link_name": "follower_right_upper_arm_link",
+      "urdf_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_right.urdf",
+      "usd_prim_path": "/World/follower_right/vx300s_right/follower_right_upper_arm_link",
+      "visual_count": 1
+    },
+    {
+      "cad_object": {
+        "label": "Simple VX Forearm v3",
+        "name": "Part__Feature003",
+        "shape_type": "Solid",
+        "shape_valid": true
+      },
+      "cad_to_link_matrix": null,
+      "classification": "PHYSICAL_CAD_DERIVABLE",
+      "collision_count": 1,
+      "evidence_paths": [
+        "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_right.urdf",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_assembly_audit.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7a_helper_link_semantics.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_gripper_mapping.json"
+      ],
+      "existing_collision_meshes": [
+        "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/upper_forearm.stl"
+      ],
+      "existing_visual_meshes": [
+        "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/upper_forearm.stl"
+      ],
+      "helper_semantic_source_class": null,
+      "invent_collider_allowed": false,
+      "link_suffix": "upper_forearm_link",
+      "mirror_used": false,
+      "registration_status": "PENDING_PHASE3_NUMERICAL_REGISTRATION",
+      "robot": "follower_right",
+      "source_placement_determinant": 1.0,
+      "source_placement_matrix": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.1
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -7.105427357601e-14
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          7.105427357601e-14
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "transform_determinant": null,
+      "unit_conversion_mm_to_m": 0.001,
+      "unresolved": null,
+      "urdf_link_name": "follower_right_upper_forearm_link",
+      "urdf_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_right.urdf",
+      "usd_prim_path": "/World/follower_right/vx300s_right/follower_right_upper_forearm_link",
+      "visual_count": 1
+    },
+    {
+      "cad_object": {
+        "label": "Simple VX Wrist Twist v3",
+        "name": "Part__Feature004",
+        "shape_type": "Solid",
+        "shape_valid": true
+      },
+      "cad_to_link_matrix": null,
+      "classification": "PHYSICAL_CAD_DERIVABLE",
+      "collision_count": 1,
+      "evidence_paths": [
+        "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_right.urdf",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_assembly_audit.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7a_helper_link_semantics.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_gripper_mapping.json"
+      ],
+      "existing_collision_meshes": [
+        "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/lower_forearm.stl"
+      ],
+      "existing_visual_meshes": [
+        "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/lower_forearm.stl"
+      ],
+      "helper_semantic_source_class": null,
+      "invent_collider_allowed": false,
+      "link_suffix": "lower_forearm_link",
+      "mirror_used": false,
+      "registration_status": "PENDING_PHASE3_NUMERICAL_REGISTRATION",
+      "robot": "follower_right",
+      "source_placement_determinant": 1.0,
+      "source_placement_matrix": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "transform_determinant": null,
+      "unit_conversion_mm_to_m": 0.001,
+      "unresolved": null,
+      "urdf_link_name": "follower_right_lower_forearm_link",
+      "urdf_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_right.urdf",
+      "usd_prim_path": "/World/follower_right/vx300s_right/follower_right_lower_forearm_link",
+      "visual_count": 1
+    },
+    {
+      "cad_object": {
+        "label": "Simple VX Wrist Tilt v3",
+        "name": "Part__Feature005",
+        "shape_type": "Solid",
+        "shape_valid": false
+      },
+      "cad_to_link_matrix": null,
+      "classification": "PHYSICAL_CAD_DERIVABLE",
+      "collision_count": 1,
+      "evidence_paths": [
+        "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_right.urdf",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_assembly_audit.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7a_helper_link_semantics.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_gripper_mapping.json"
+      ],
+      "existing_collision_meshes": [
+        "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/wrist.stl"
+      ],
+      "existing_visual_meshes": [
+        "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/wrist.stl"
+      ],
+      "helper_semantic_source_class": null,
+      "invent_collider_allowed": false,
+      "link_suffix": "wrist_link",
+      "mirror_used": false,
+      "registration_status": "PENDING_PHASE3_NUMERICAL_REGISTRATION",
+      "robot": "follower_right",
+      "source_placement_determinant": 1.0,
+      "source_placement_matrix": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "transform_determinant": null,
+      "unit_conversion_mm_to_m": 0.001,
+      "unresolved": null,
+      "urdf_link_name": "follower_right_wrist_link",
+      "urdf_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_right.urdf",
+      "usd_prim_path": "/World/follower_right/vx300s_right/follower_right_wrist_link",
+      "visual_count": 1
+    },
+    {
+      "cad_object": {
+        "label": "Aloha VX Gripper 2024-4-19 v4",
+        "name": "Part__Feature006",
+        "shape_type": "Solid",
+        "shape_valid": true
+      },
+      "cad_to_link_matrix": null,
+      "classification": "PHYSICAL_CAD_DERIVABLE",
+      "collision_count": 1,
+      "evidence_paths": [
+        "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_right.urdf",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_assembly_audit.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7a_helper_link_semantics.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_gripper_mapping.json"
+      ],
+      "existing_collision_meshes": [
+        "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper.stl"
+      ],
+      "existing_visual_meshes": [
+        "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper.stl"
+      ],
+      "helper_semantic_source_class": null,
+      "invent_collider_allowed": false,
+      "link_suffix": "gripper_link",
+      "mirror_used": false,
+      "registration_status": "PENDING_PHASE3_NUMERICAL_REGISTRATION",
+      "robot": "follower_right",
+      "source_placement_determinant": 1.0,
+      "source_placement_matrix": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.100001049673413
+        ],
+        [
+          0.0,
+          -6.106226635438361e-14,
+          -1.0,
+          -430.29999973392
+        ],
+        [
+          0.0,
+          1.0,
+          -6.106226635438361e-14,
+          426.749997526362
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "transform_determinant": null,
+      "unit_conversion_mm_to_m": 0.001,
+      "unresolved": null,
+      "urdf_link_name": "follower_right_gripper_link",
+      "urdf_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_right.urdf",
+      "usd_prim_path": "/World/follower_right/vx300s_right/follower_right_gripper_link",
+      "visual_count": 1
+    },
+    {
+      "cad_object": null,
+      "cad_to_link_matrix": null,
+      "classification": "VIRTUAL_FRAME_NO_COLLIDER",
+      "collision_count": 0,
+      "evidence_paths": [
+        "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_right.urdf",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_assembly_audit.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7a_helper_link_semantics.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_gripper_mapping.json"
+      ],
+      "existing_collision_meshes": [],
+      "existing_visual_meshes": [],
+      "helper_semantic_source_class": "VIRTUAL_KINEMATIC_HELPER",
+      "invent_collider_allowed": false,
+      "link_suffix": "ee_arm_link",
+      "mirror_used": false,
+      "registration_status": "NOT_APPLICABLE_VIRTUAL_FRAME",
+      "robot": "follower_right",
+      "source_placement_determinant": null,
+      "source_placement_matrix": null,
+      "transform_determinant": null,
+      "unit_conversion_mm_to_m": 0.001,
+      "unresolved": null,
+      "urdf_link_name": "follower_right_ee_arm_link",
+      "urdf_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_right.urdf",
+      "usd_prim_path": "/World/follower_right/vx300s_right/follower_right_ee_arm_link",
+      "visual_count": 0
+    },
+    {
+      "cad_object": null,
+      "cad_to_link_matrix": null,
+      "classification": "HARD_BLOCKER_CAD_TO_LINK_IDENTITY",
+      "collision_count": 1,
+      "evidence_paths": [
+        "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_right.urdf",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_assembly_audit.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7a_helper_link_semantics.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_gripper_mapping.json"
+      ],
+      "existing_collision_meshes": [
+        "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_prop.stl"
+      ],
+      "existing_visual_meshes": [
+        "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_prop.stl"
+      ],
+      "helper_semantic_source_class": null,
+      "invent_collider_allowed": false,
+      "link_suffix": "gripper_prop_link",
+      "mirror_used": false,
+      "registration_status": "HARD_BLOCKER_CAD_TO_LINK_IDENTITY",
+      "robot": "follower_right",
+      "source_placement_determinant": null,
+      "source_placement_matrix": null,
+      "transform_determinant": null,
+      "unit_conversion_mm_to_m": 0.001,
+      "unresolved": "CAD subpart identity for this independent URDF link is not established by the supplier assembly audit.",
+      "urdf_link_name": "follower_right_gripper_prop_link",
+      "urdf_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_right.urdf",
+      "usd_prim_path": "/World/follower_right/vx300s_right/follower_right_gripper_prop_link",
+      "visual_count": 1
+    },
+    {
+      "cad_object": null,
+      "cad_to_link_matrix": null,
+      "classification": "HARD_BLOCKER_CAD_TO_LINK_IDENTITY",
+      "collision_count": 1,
+      "evidence_paths": [
+        "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_right.urdf",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_assembly_audit.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7a_helper_link_semantics.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_gripper_mapping.json"
+      ],
+      "existing_collision_meshes": [
+        "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_bar.stl"
+      ],
+      "existing_visual_meshes": [
+        "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_bar.stl"
+      ],
+      "helper_semantic_source_class": null,
+      "invent_collider_allowed": false,
+      "link_suffix": "gripper_bar_link",
+      "mirror_used": false,
+      "registration_status": "HARD_BLOCKER_CAD_TO_LINK_IDENTITY",
+      "robot": "follower_right",
+      "source_placement_determinant": null,
+      "source_placement_matrix": null,
+      "transform_determinant": null,
+      "unit_conversion_mm_to_m": 0.001,
+      "unresolved": "CAD subpart identity for this independent URDF link is not established by the supplier assembly audit.",
+      "urdf_link_name": "follower_right_gripper_bar_link",
+      "urdf_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_right.urdf",
+      "usd_prim_path": "/World/follower_right/vx300s_right/follower_right_gripper_bar_link",
+      "visual_count": 1
+    },
+    {
+      "cad_object": null,
+      "cad_to_link_matrix": null,
+      "classification": "VIRTUAL_FRAME_NO_COLLIDER",
+      "collision_count": 0,
+      "evidence_paths": [
+        "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_right.urdf",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_assembly_audit.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7a_helper_link_semantics.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_gripper_mapping.json"
+      ],
+      "existing_collision_meshes": [],
+      "existing_visual_meshes": [],
+      "helper_semantic_source_class": "VIRTUAL_KINEMATIC_HELPER",
+      "invent_collider_allowed": false,
+      "link_suffix": "fingers_link",
+      "mirror_used": false,
+      "registration_status": "NOT_APPLICABLE_VIRTUAL_FRAME",
+      "robot": "follower_right",
+      "source_placement_determinant": null,
+      "source_placement_matrix": null,
+      "transform_determinant": null,
+      "unit_conversion_mm_to_m": 0.001,
+      "unresolved": null,
+      "urdf_link_name": "follower_right_fingers_link",
+      "urdf_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_right.urdf",
+      "usd_prim_path": "/World/follower_right/vx300s_right/follower_right_fingers_link",
+      "visual_count": 0
+    },
+    {
+      "cad_object": {
+        "label": "Aloha VX Fingers 2024-4-21 v2",
+        "name": "Part__Feature007",
+        "shape_type": "Solid",
+        "shape_valid": true
+      },
+      "cad_to_link_matrix": [
+        [
+          0.0,
+          -1.0,
+          0.0,
+          -0.49899999973392
+        ],
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.021099890257662776
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.42680133373174
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "classification": "PHYSICAL_EXISTING_VALIDATED_COLLIDER",
+      "collision_count": 1,
+      "evidence_paths": [
+        "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_right.urdf",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_assembly_audit.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7a_helper_link_semantics.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_gripper_mapping.json"
+      ],
+      "existing_collision_meshes": [
+        "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_finger.stl"
+      ],
+      "existing_visual_meshes": [
+        "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_finger.stl"
+      ],
+      "helper_semantic_source_class": null,
+      "invent_collider_allowed": false,
+      "link_suffix": "left_finger_link",
+      "mirror_used": false,
+      "registration_status": "VERIFIED_EXISTING_SUPPLIER_CAD_REGISTRATION",
+      "robot": "follower_right",
+      "source_placement_determinant": 1.0,
+      "source_placement_matrix": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0998902576627736
+        ],
+        [
+          0.0,
+          -1.554312234475219e-14,
+          -1.0,
+          -430.29999973392
+        ],
+        [
+          0.0,
+          1.0,
+          -1.554312234475219e-14,
+          426.80133373174
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "transform_determinant": 1.0,
+      "unit_conversion_mm_to_m": 0.001,
+      "unresolved": null,
+      "urdf_link_name": "follower_right_left_finger_link",
+      "urdf_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_right.urdf",
+      "usd_prim_path": "/World/follower_right/vx300s_right/follower_right_left_finger_link",
+      "visual_count": 1
+    },
+    {
+      "cad_object": {
+        "label": "Aloha VX Fingers 2024-4-21 v001",
+        "name": "Part__Feature008",
+        "shape_type": "Solid",
+        "shape_valid": true
+      },
+      "cad_to_link_matrix": [
+        [
+          0.0,
+          -1.0,
+          0.0,
+          -0.49899999973392
+        ],
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.020900109742337226
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.42680133373174
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "classification": "PHYSICAL_EXISTING_VALIDATED_COLLIDER",
+      "collision_count": 1,
+      "evidence_paths": [
+        "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_right.urdf",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_assembly_audit.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7a_helper_link_semantics.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_gripper_mapping.json"
+      ],
+      "existing_collision_meshes": [
+        "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_finger.stl"
+      ],
+      "existing_visual_meshes": [
+        "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_finger.stl"
+      ],
+      "helper_semantic_source_class": null,
+      "invent_collider_allowed": false,
+      "link_suffix": "right_finger_link",
+      "mirror_used": false,
+      "registration_status": "VERIFIED_EXISTING_SUPPLIER_CAD_REGISTRATION",
+      "robot": "follower_right",
+      "source_placement_determinant": 1.0,
+      "source_placement_matrix": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0998902576627736
+        ],
+        [
+          0.0,
+          -1.554312234475219e-14,
+          -1.0,
+          -430.29999973392
+        ],
+        [
+          0.0,
+          1.0,
+          -1.554312234475219e-14,
+          426.80133373174
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "transform_determinant": 1.0,
+      "unit_conversion_mm_to_m": 0.001,
+      "unresolved": null,
+      "urdf_link_name": "follower_right_right_finger_link",
+      "urdf_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_right.urdf",
+      "usd_prim_path": "/World/follower_right/vx300s_right/follower_right_right_finger_link",
+      "visual_count": 1
+    },
+    {
+      "cad_object": null,
+      "cad_to_link_matrix": null,
+      "classification": "VIRTUAL_FRAME_NO_COLLIDER",
+      "collision_count": 0,
+      "evidence_paths": [
+        "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_right.urdf",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_assembly_audit.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7a_helper_link_semantics.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_gripper_mapping.json"
+      ],
+      "existing_collision_meshes": [],
+      "existing_visual_meshes": [],
+      "helper_semantic_source_class": "FIXED_FRAME_ALIAS",
+      "invent_collider_allowed": false,
+      "link_suffix": "ee_gripper_link",
+      "mirror_used": false,
+      "registration_status": "NOT_APPLICABLE_VIRTUAL_FRAME",
+      "robot": "follower_right",
+      "source_placement_determinant": null,
+      "source_placement_matrix": null,
+      "transform_determinant": null,
+      "unit_conversion_mm_to_m": 0.001,
+      "unresolved": null,
+      "urdf_link_name": "follower_right_ee_gripper_link",
+      "urdf_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_right.urdf",
+      "usd_prim_path": "/World/follower_right/vx300s_right/follower_right_ee_gripper_link",
+      "visual_count": 0
+    }
+  ],
+  "pending_phase3_registration_count": 14,
+  "real_robot_connected": false,
+  "remote_192_168_1_103_accessed": false,
+  "schema_version": 1,
+  "scope": "CAD_TO_LINK_COLLISION_SEMANTICS_NO_GEOMETRY_AUTHORING",
+  "source_cad": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/gdrive_source_readonly/Simple Aloha Viper 2024-5-13.step",
+    "read_only": true,
+    "sha256": "337862418769d4ea8b801d26e68930c4412f870050e60769bbf91765194dc571"
+  },
+  "source_or_imported_asset_modified": false,
+  "status": "PARTIAL",
+  "task8": "NOT_RUN",
+  "unclassified_link_count": 0
+}
