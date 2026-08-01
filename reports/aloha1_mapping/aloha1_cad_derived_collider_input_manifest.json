@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "status": "PASS",
+  "generated_at_utc": "2026-08-01T23:25:21Z",
+  "scope": "ALOHA1_CAD_DERIVED_FULL_BODY_COLLIDER_DIAGNOSTIC",
+  "source_cad": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/gdrive_source_readonly/Simple Aloha Viper 2024-5-13.step",
+    "filename": "Simple Aloha Viper 2024-5-13.step",
+    "provider": "ALOHA supplier public Google Drive resource",
+    "provider_url": "https://drive.google.com/drive/folders/1mhJuhzT4lBnvZ9VE57UgT6vmJDFPVsBf",
+    "provider_file_id": "1HAtYF21od2K8oXrchFajMcxlKEfuifpv",
+    "size_bytes": 2539555,
+    "sha256": "337862418769d4ea8b801d26e68930c4412f870050e60769bbf91765194dc571",
+    "read_only": true,
+    "mode_octal": "0400",
+    "step_schema": "AP214",
+    "license_status": "UNKNOWN_HARD_BLOCKER",
+    "local_project_use": "ALLOWED_USER_CONFIRMED",
+    "original_may_be_committed": false,
+    "original_may_be_redistributed": false
+  },
+  "approved_stage": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/aloha1_signal_correspondence_workcell.usda",
+    "sha256": "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf",
+    "approved_sha256": "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf",
+    "hash_matches_approval": true,
+    "default_prim": "/World",
+    "root_prim": "/World",
+    "sublayers": [
+      "configuration/aloha1_signal_home_targets.usda"
+    ],
+    "references": [
+      "../../supplier_cad_follower_right/1.0/supplier_cad_follower_right.usda",
+      "follower_left_asset/aloha1_signal_follower_left.usda",
+      "workcell/aloha1_signal_correspondence_environment.usda"
+    ],
+    "required_prims": {
+      "/World/follower_left": true,
+      "/World/follower_right": true
+    },
+    "timeline_switched": false,
+    "stage_modified": false
+  },
+  "runtime": {
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physx": "107.3.26",
+    "asset_validation_extension": "1.1.0"
+  },
+  "freecad": {
+    "wrapper_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/local_tools/freecad-tessellation/freecadcmd",
+    "version": "1.1.1",
+    "commit": "0108fd4b4850cc46e625b60e53cea7a7bbe69f8d",
+    "occt": "7.8.1",
+    "python": "3.11.14",
+    "linear_deflection_mm": 0.2,
+    "angular_deflection_deg": 20.0,
+    "relative": false,
+    "toolchain_manifest_sha256": "e52fb9eeecff241d61565b3b6e3e33cbc3a4d36638dc6897bf84090abd492ff8"
+  },
+  "collision_baseline": {
+    "profile": "CAD_SUBPART_COMPOUND_CONVEX_HULL",
+    "visual_mesh_is_accepted_collider": false,
+    "accepted_supplier_cad_v2_finger_colliders_preserved": true,
+    "convex_decomposition_parameter_scan_allowed": false,
+    "self_collision_final_policy_modified": false,
+    "friction_modified": false,
+    "drive_modified": false,
+    "mimic_modified": false,
+    "mass_modified": false,
+    "timestep_modified": false,
+    "solver_iterations_modified": false,
+    "task8_optimization_allowed": false
+  },
+  "direct_nvidia_mcp": {
+    "status": "PASS",
+    "transport": "DIRECT_NOT_MCPJUNGLE",
+    "queries": [
+      "get_isaac_sim_instructions:physics,robot_setup",
+      "search_isaac_sim_code_examples:collision visualization,scene query,overlap,articulation self collision",
+      "get_isaac_sim_extension_details:omni.physx,omni.physx.ui,isaacsim.asset.validation"
+    ],
+    "official_physics_semantics_read": true,
+    "official_collision_debug_paths_read": true,
+    "catalog_asset_validation_version": "1.2.1",
+    "local_asset_validation_version": "1.1.0",
+    "catalog_version_mismatch_recorded": true,
+    "local_5_1_source_is_version_authority": true,
+    "summary_artifact": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/commands/phase1_direct_nvidia_mcp_summary.json",
+      "sha256": "624b4d76f05138b8dfa5c794c606c00ea87c0c303978075fb9a38304f91b3e9a"
+    }
+  },
+  "read_only_probe_artifacts": {
+    "stage_composition": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/commands/phase1_stage_composition.json",
+      "sha256": "4b1680804f7a91b6d1936153221e16d2511e6abf269a788bef99aa1a180f77ea"
+    },
+    "initial_pxr_probe_failure": {
+      "status": "RESOLVED_ENVIRONMENT_PATH_REQUIREMENT",
+      "error": "ModuleNotFoundError: No module named 'pxr'",
+      "root_cause": "omni.usd.libs extension path and matching libpython directory were not present in PYTHONPATH/LD_LIBRARY_PATH",
+      "source_or_stage_modified": false
+    }
+  },
+  "source_cad_read_only": true,
+  "source_usd_read_only": true,
+  "final_or_default_collider_modified": false,
+  "real_robot_connected": false,
+  "remote_192_168_1_103_accessed": false,
+  "task8": "NOT_RUN"
+}
