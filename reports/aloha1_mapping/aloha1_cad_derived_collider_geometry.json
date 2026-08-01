@@ -1,0 +1,1485 @@
+{
+  "accepted_finger_colliders_modified": false,
+  "collision_mesh_policy": "ONE_CONVEX_HULL_PER_SOURCE_CAD_SOLID_GROUPED_BY_OWNING_LINK",
+  "final_or_default_asset_modified": false,
+  "freecad_runs": {
+    "run_a_log": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase3_tessellation/run_a_trwujk04/freecad.log",
+    "run_a_log_sha256": "741f3c26535fd7fe882cbf068c5a3a91378842be72875ab0ec46d96ddd81620d",
+    "run_a_manifest": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase3_tessellation/run_a_trwujk04/output/manifest.json",
+    "run_a_manifest_sha256": "dd9c357fe319feff7f0761a9b58d3211b2ebdb327d5ca7f2cae3861a6e57816f",
+    "run_b_log": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase3_tessellation/run_b_nvziu2t2/freecad.log",
+    "run_b_log_sha256": "d0fe4f30b8afdbb342f2767960a6e2b050293ea611984f946e77d173e931ffbd",
+    "run_b_manifest": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase3_tessellation/run_b_nvziu2t2/output/manifest.json",
+    "run_b_manifest_sha256": "75e19e1ff11c41fde7e5e51b9ffc7163db794dbc7f49f6c2273cf5704a76a658"
+  },
+  "identity_blockers": [
+    {
+      "collider_authored": false,
+      "link_suffix": "gripper_prop_link",
+      "reason": "HARD_BLOCKER_CAD_TO_LINK_IDENTITY",
+      "robot": "follower_left",
+      "urdf_link_name": "follower_left_gripper_prop_link"
+    },
+    {
+      "collider_authored": false,
+      "link_suffix": "gripper_bar_link",
+      "reason": "HARD_BLOCKER_CAD_TO_LINK_IDENTITY",
+      "robot": "follower_left",
+      "urdf_link_name": "follower_left_gripper_bar_link"
+    },
+    {
+      "collider_authored": false,
+      "link_suffix": "gripper_prop_link",
+      "reason": "HARD_BLOCKER_CAD_TO_LINK_IDENTITY",
+      "robot": "follower_right",
+      "urdf_link_name": "follower_right_gripper_prop_link"
+    },
+    {
+      "collider_authored": false,
+      "link_suffix": "gripper_bar_link",
+      "reason": "HARD_BLOCKER_CAD_TO_LINK_IDENTITY",
+      "robot": "follower_right",
+      "urdf_link_name": "follower_right_gripper_bar_link"
+    }
+  ],
+  "invalid_brep_blockers": [
+    "follower_left_wrist_link",
+    "follower_right_wrist_link"
+  ],
+  "multi_link_source_groupings": [
+    {
+      "cad_label": "Aloha VX Gripper 2024-4-19 v4",
+      "diagnostic_authoring_constraint": "disable the duplicate baseline gripper_bar collider only inside the isolated diagnostic layer",
+      "evidence": "aloha_viper_cad_mount_registration.json compares the supplier shell against the fixed gripper+bar URDF group",
+      "fixed_member_link_suffixes": [
+        "gripper_link",
+        "gripper_bar_link"
+      ],
+      "moving_gripper_prop_included": false,
+      "owner_link_suffix": "gripper_link",
+      "source_object": "Part__Feature006"
+    }
+  ],
+  "physical_link_records": [
+    {
+      "aabb_link_local_m": {
+        "extent_m": [
+          0.29946298217773437,
+          0.20400000000000001,
+          0.07869999694878213
+        ],
+        "maximum_m": [
+          0.10200000000000001,
+          0.10200000000000001,
+          0.07869999694824219
+        ],
+        "minimum_m": [
+          -0.1974629821777344,
+          -0.10200000000000001,
+          -5.399381497461775e-13
+        ]
+      },
+      "approximation": "convexHull",
+      "brep_volume_mm3": 1673395.925018256,
+      "cad_to_link_matrix": [
+        [
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "canonical_geometry_sha256": "6b17d34c4bd7ad4065e80b2c917a3ace7d96b399e14e99915b39e47d64adf9ac",
+      "connected_components": 1,
+      "convex_piece_count": 1,
+      "degenerate_triangle_count": 0,
+      "downstream_authoring_rule": "AUTHOR_ON_OWNING_LINK_ONLY",
+      "fixed_group_members": [
+        "follower_left_base_link"
+      ],
+      "kind": "CAD_CANDIDATE",
+      "link_suffix": "base_link",
+      "mirror_used": false,
+      "output_obj": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/geometry/base_link.obj",
+        "sha256": "946dfa01db09b98593d0c6ab6d84fe7fd9ed1e4f006f8a9fb1952946a68a1dc1"
+      },
+      "owner_count": 1,
+      "registration_method": "URDF_ZERO_POSE_FK_INVERSE_WITH_VERIFIED_CAD_AXIS_ROTATION",
+      "robot": "follower_left",
+      "run_a_matches_run_b": true,
+      "source_object": "Part__Feature",
+      "source_solid_count": 1,
+      "status": "PASS",
+      "surface_deviation": {
+        "candidate_sample_count": 10937,
+        "candidate_to_reference_max_m": 0.02816652170817057,
+        "candidate_to_reference_rms_m": 0.0012275175140137717,
+        "decision_use": "DIAGNOSTIC_REVISION_DIFFERENCE_NOT_REGISTRATION_GATE",
+        "method": "VERTICES_CENTROIDS_EDGE_MIDPOINTS_BIDIRECTIONAL_CKDTREE",
+        "reference_sample_count": 13986,
+        "reference_to_candidate_max_m": 0.02816652170817057,
+        "reference_to_candidate_rms_m": 0.0014827902765475016
+      },
+      "transform_determinant": 1.0,
+      "triangle_count": 2430,
+      "unit_conversion_mm_to_m": 0.001,
+      "urdf_link_name": "follower_left_base_link",
+      "vertex_count": 1217
+    },
+    {
+      "aabb_link_local_m": {
+        "extent_m": [
+          0.123,
+          0.123,
+          0.06450000000000002
+        ],
+        "maximum_m": [
+          0.0615,
+          0.0615,
+          0.06150000000000001
+        ],
+        "minimum_m": [
+          -0.0615,
+          -0.0615,
+          -0.0030000000000000027
+        ]
+      },
+      "approximation": "convexHull",
+      "brep_volume_mm3": 227505.81140584743,
+      "cad_to_link_matrix": [
+        [
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.079
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "canonical_geometry_sha256": "ff1b53568321a7f09d526fe9045dfb123d7bc34135c24bec7d48a949f10710a1",
+      "connected_components": 1,
+      "convex_piece_count": 1,
+      "degenerate_triangle_count": 0,
+      "downstream_authoring_rule": "AUTHOR_ON_OWNING_LINK_ONLY",
+      "fixed_group_members": [
+        "follower_left_shoulder_link"
+      ],
+      "kind": "CAD_CANDIDATE",
+      "link_suffix": "shoulder_link",
+      "mirror_used": false,
+      "output_obj": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/geometry/shoulder_link.obj",
+        "sha256": "579e6fe0d01c6b8004a09719e2c56990acfba13ca1c10b240504f26470217be2"
+      },
+      "owner_count": 1,
+      "registration_method": "URDF_ZERO_POSE_FK_INVERSE_WITH_VERIFIED_CAD_AXIS_ROTATION",
+      "robot": "follower_left",
+      "run_a_matches_run_b": true,
+      "source_object": "Part__Feature001",
+      "source_solid_count": 1,
+      "status": "PASS",
+      "surface_deviation": {
+        "candidate_sample_count": 7904,
+        "candidate_to_reference_max_m": 0.017919120435630275,
+        "candidate_to_reference_rms_m": 0.0008779923628252111,
+        "decision_use": "DIAGNOSTIC_REVISION_DIFFERENCE_NOT_REGISTRATION_GATE",
+        "method": "VERTICES_CENTROIDS_EDGE_MIDPOINTS_BIDIRECTIONAL_CKDTREE",
+        "reference_sample_count": 8932,
+        "reference_to_candidate_max_m": 0.017727423497318755,
+        "reference_to_candidate_rms_m": 0.0011082114693787887
+      },
+      "transform_determinant": 1.0,
+      "triangle_count": 1756,
+      "unit_conversion_mm_to_m": 0.001,
+      "urdf_link_name": "follower_left_shoulder_link",
+      "vertex_count": 880
+    },
+    {
+      "aabb_link_local_m": {
+        "extent_m": [
+          0.0895,
+          0.10379999923706054,
+          0.32482501220703125
+        ],
+        "maximum_m": [
+          0.07375,
+          0.051900001525878904,
+          0.32065001220703127
+        ],
+        "minimum_m": [
+          -0.01575,
+          -0.051899997711181645,
+          -0.004174999999999998
+        ]
+      },
+      "approximation": "convexHull",
+      "brep_volume_mm3": 515850.8469642106,
+      "cad_to_link_matrix": [
+        [
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.12705
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "canonical_geometry_sha256": "628b85a27c06d6729dd966a92f2ab2d8bf2360d74ef6cf104a8190965267f5e9",
+      "connected_components": 4,
+      "convex_piece_count": 1,
+      "degenerate_triangle_count": 0,
+      "downstream_authoring_rule": "AUTHOR_ON_OWNING_LINK_ONLY",
+      "fixed_group_members": [
+        "follower_left_upper_arm_link"
+      ],
+      "kind": "CAD_CANDIDATE",
+      "link_suffix": "upper_arm_link",
+      "mirror_used": false,
+      "output_obj": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/geometry/upper_arm_link.obj",
+        "sha256": "9d27f621ac900a5ecaa1cba36f2e6522db84566fbf1004db2d7212f2f7995176"
+      },
+      "owner_count": 1,
+      "registration_method": "URDF_ZERO_POSE_FK_INVERSE_WITH_VERIFIED_CAD_AXIS_ROTATION",
+      "robot": "follower_left",
+      "run_a_matches_run_b": true,
+      "source_object": "Part__Feature002",
+      "source_solid_count": 1,
+      "status": "PASS",
+      "surface_deviation": {
+        "candidate_sample_count": 16577,
+        "candidate_to_reference_max_m": 0.011437268765932873,
+        "candidate_to_reference_rms_m": 0.0006788717988381572,
+        "decision_use": "DIAGNOSTIC_REVISION_DIFFERENCE_NOT_REGISTRATION_GATE",
+        "method": "VERTICES_CENTROIDS_EDGE_MIDPOINTS_BIDIRECTIONAL_CKDTREE",
+        "reference_sample_count": 14406,
+        "reference_to_candidate_max_m": 0.009758888931665604,
+        "reference_to_candidate_rms_m": 0.001048526555464221
+      },
+      "transform_determinant": 1.0,
+      "triangle_count": 3682,
+      "unit_conversion_mm_to_m": 0.001,
+      "urdf_link_name": "follower_left_upper_arm_link",
+      "vertex_count": 1849
+    },
+    {
+      "aabb_link_local_m": {
+        "extent_m": [
+          0.20025601196289067,
+          0.10120000076293946,
+          0.039000000000000035
+        ],
+        "maximum_m": [
+          0.19683101196289066,
+          0.05060000228881836,
+          0.01920000000000005
+        ],
+        "minimum_m": [
+          -0.0034249999999999975,
+          -0.0505999984741211,
+          -0.019799999999999984
+        ]
+      },
+      "approximation": "convexHull",
+      "brep_volume_mm3": 202589.01257215007,
+      "cad_to_link_matrix": [
+        [
+          0.0,
+          -1.0,
+          0.0,
+          -0.05955
+        ],
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.42705
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "canonical_geometry_sha256": "4779517d87c2940044d6334e43980a683f25e835d7dda35b17c94e41112b3ad4",
+      "connected_components": 1,
+      "convex_piece_count": 1,
+      "degenerate_triangle_count": 0,
+      "downstream_authoring_rule": "AUTHOR_ON_OWNING_LINK_ONLY",
+      "fixed_group_members": [
+        "follower_left_upper_forearm_link"
+      ],
+      "kind": "CAD_CANDIDATE",
+      "link_suffix": "upper_forearm_link",
+      "mirror_used": false,
+      "output_obj": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/geometry/upper_forearm_link.obj",
+        "sha256": "fce9d4a8fb25ab225b99be104ee68c9cf5806894f65d41989d3dae944998e9ff"
+      },
+      "owner_count": 1,
+      "registration_method": "URDF_ZERO_POSE_FK_INVERSE_WITH_VERIFIED_CAD_AXIS_ROTATION",
+      "robot": "follower_left",
+      "run_a_matches_run_b": true,
+      "source_object": "Part__Feature003",
+      "source_solid_count": 1,
+      "status": "PASS",
+      "surface_deviation": {
+        "candidate_sample_count": 4439,
+        "candidate_to_reference_max_m": 0.013374460734345648,
+        "candidate_to_reference_rms_m": 0.0022903866636126437,
+        "decision_use": "DIAGNOSTIC_REVISION_DIFFERENCE_NOT_REGISTRATION_GATE",
+        "method": "VERTICES_CENTROIDS_EDGE_MIDPOINTS_BIDIRECTIONAL_CKDTREE",
+        "reference_sample_count": 6930,
+        "reference_to_candidate_max_m": 0.013374460734345648,
+        "reference_to_candidate_rms_m": 0.0030039598422414004
+      },
+      "transform_determinant": 1.0,
+      "triangle_count": 986,
+      "unit_conversion_mm_to_m": 0.001,
+      "urdf_link_name": "follower_left_upper_forearm_link",
+      "vertex_count": 495
+    },
+    {
+      "aabb_link_local_m": {
+        "extent_m": [
+          0.11736898803710938,
+          0.07444999885559082,
+          0.045999999999999985
+        ],
+        "maximum_m": [
+          0.11420000000000002,
+          0.04475,
+          0.022699999999999998
+        ],
+        "minimum_m": [
+          -0.003168988037109355,
+          -0.029699998855590822,
+          -0.023299999999999987
+        ]
+      },
+      "approximation": "convexHull",
+      "brep_volume_mm3": 214698.6778255478,
+      "cad_to_link_matrix": [
+        [
+          0.0,
+          -1.0,
+          0.0,
+          -0.25955
+        ],
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.42705
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "canonical_geometry_sha256": "fb051c930f3dc1706bcee552e047489611ee78c86d71bf77ec51ac0b731bd4cb",
+      "connected_components": 1,
+      "convex_piece_count": 1,
+      "degenerate_triangle_count": 0,
+      "downstream_authoring_rule": "AUTHOR_ON_OWNING_LINK_ONLY",
+      "fixed_group_members": [
+        "follower_left_lower_forearm_link"
+      ],
+      "kind": "CAD_CANDIDATE",
+      "link_suffix": "lower_forearm_link",
+      "mirror_used": false,
+      "output_obj": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/geometry/lower_forearm_link.obj",
+        "sha256": "a07b245a58ab5581706a74372d8ef7491dc9bf03ef9111cbf1f887fda7444337"
+      },
+      "owner_count": 1,
+      "registration_method": "URDF_ZERO_POSE_FK_INVERSE_WITH_VERIFIED_CAD_AXIS_ROTATION",
+      "robot": "follower_left",
+      "run_a_matches_run_b": true,
+      "source_object": "Part__Feature004",
+      "source_solid_count": 1,
+      "status": "PASS",
+      "surface_deviation": {
+        "candidate_sample_count": 5220,
+        "candidate_to_reference_max_m": 0.010082515013131284,
+        "candidate_to_reference_rms_m": 0.0011293482812777338,
+        "decision_use": "DIAGNOSTIC_REVISION_DIFFERENCE_NOT_REGISTRATION_GATE",
+        "method": "VERTICES_CENTROIDS_EDGE_MIDPOINTS_BIDIRECTIONAL_CKDTREE",
+        "reference_sample_count": 13972,
+        "reference_to_candidate_max_m": 0.01045622104383288,
+        "reference_to_candidate_rms_m": 0.0029493615558690697
+      },
+      "transform_determinant": 1.0,
+      "triangle_count": 1160,
+      "unit_conversion_mm_to_m": 0.001,
+      "urdf_link_name": "follower_left_lower_forearm_link",
+      "vertex_count": 580
+    },
+    {
+      "aabb_link_local_m": null,
+      "approximation": "convexHull",
+      "brep_volume_mm3": 77921.86529289279,
+      "cad_to_link_matrix": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "canonical_geometry_sha256": null,
+      "connected_components": 0,
+      "convex_piece_count": 1,
+      "degenerate_triangle_count": 0,
+      "downstream_authoring_rule": "AUTHOR_ON_OWNING_LINK_ONLY",
+      "fixed_group_members": [
+        "follower_left_wrist_link"
+      ],
+      "kind": "CAD_CANDIDATE",
+      "link_suffix": "wrist_link",
+      "mirror_used": false,
+      "output_obj": null,
+      "owner_count": 1,
+      "registration_method": null,
+      "robot": "follower_left",
+      "run_a_matches_run_b": true,
+      "source_object": "Part__Feature005",
+      "source_solid_count": 1,
+      "status": "HARD_BLOCKER_INVALID_BREP",
+      "surface_deviation": null,
+      "transform_determinant": 1.0,
+      "triangle_count": 0,
+      "unit_conversion_mm_to_m": 0.001,
+      "urdf_link_name": "follower_left_wrist_link",
+      "vertex_count": 0
+    },
+    {
+      "aabb_link_local_m": {
+        "extent_m": [
+          0.06910000610351563,
+          0.15,
+          0.06587335205078126
+        ],
+        "maximum_m": [
+          0.06909999416256435,
+          0.07499999742444768,
+          0.03525000247363802
+        ],
+        "minimum_m": [
+          -1.1940951283317958e-08,
+          -0.07500000257555231,
+          -0.030623349577143244
+        ]
+      },
+      "approximation": "convexHull",
+      "brep_volume_mm3": 123425.0687561365,
+      "cad_to_link_matrix": [
+        [
+          0.0,
+          -1.0,
+          0.0,
+          -0.43029999973392
+        ],
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.000100001049673413
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.426749997526362
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "canonical_geometry_sha256": "ec8fa80167bddd0b969e0a9a8b074f220b645c2cc05a95f3ea88156fde2e5414",
+      "connected_components": 9,
+      "convex_piece_count": 1,
+      "degenerate_triangle_count": 0,
+      "downstream_authoring_rule": "AUTHOR_CAD_SHELL_ON_GRIPPER_LINK_AND_DISABLE_DUPLICATE_BASELINE_GRIPPER_BAR_COLLIDER_IN_DIAGNOSTIC_LAYER_ONLY",
+      "fixed_group_members": [
+        "follower_left_gripper_link",
+        "follower_left_gripper_bar_link"
+      ],
+      "kind": "CAD_CANDIDATE",
+      "link_suffix": "gripper_link",
+      "mirror_used": false,
+      "output_obj": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/geometry/gripper_link.obj",
+        "sha256": "22dec9b9082d40d6f5f3be1c39fc73b3c3fbadd9754969738dabc3a15b8f4a79"
+      },
+      "owner_count": 1,
+      "registration_method": "VERIFIED_GRIPPER_PLANAR_DATUM_REGISTRATION",
+      "robot": "follower_left",
+      "run_a_matches_run_b": true,
+      "source_object": "Part__Feature006",
+      "source_solid_count": 1,
+      "status": "PASS",
+      "surface_deviation": {
+        "candidate_sample_count": 38351,
+        "candidate_to_reference_max_m": 0.015725983073412185,
+        "candidate_to_reference_rms_m": 0.00729997419947331,
+        "decision_use": "DIAGNOSTIC_REVISION_DIFFERENCE_NOT_REGISTRATION_GATE",
+        "method": "VERTICES_CENTROIDS_EDGE_MIDPOINTS_BIDIRECTIONAL_CKDTREE",
+        "reference_sample_count": 116116,
+        "reference_to_candidate_max_m": 0.020870484837447485,
+        "reference_to_candidate_rms_m": 0.005641219565924983
+      },
+      "transform_determinant": 1.0,
+      "triangle_count": 8522,
+      "unit_conversion_mm_to_m": 0.001,
+      "urdf_link_name": "follower_left_gripper_link",
+      "vertex_count": 4263
+    },
+    {
+      "aabb_link_local_m": {
+        "extent_m": [
+          0.29946298217773437,
+          0.20400000000000001,
+          0.07869999694878213
+        ],
+        "maximum_m": [
+          0.10200000000000001,
+          0.10200000000000001,
+          0.07869999694824219
+        ],
+        "minimum_m": [
+          -0.1974629821777344,
+          -0.10200000000000001,
+          -5.399381497461775e-13
+        ]
+      },
+      "approximation": "convexHull",
+      "brep_volume_mm3": 1673395.925018256,
+      "cad_to_link_matrix": [
+        [
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "canonical_geometry_sha256": "6b17d34c4bd7ad4065e80b2c917a3ace7d96b399e14e99915b39e47d64adf9ac",
+      "connected_components": 1,
+      "convex_piece_count": 1,
+      "degenerate_triangle_count": 0,
+      "downstream_authoring_rule": "AUTHOR_ON_OWNING_LINK_ONLY",
+      "fixed_group_members": [
+        "follower_right_base_link"
+      ],
+      "kind": "CAD_CANDIDATE",
+      "link_suffix": "base_link",
+      "mirror_used": false,
+      "output_obj": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/geometry/base_link.obj",
+        "sha256": "946dfa01db09b98593d0c6ab6d84fe7fd9ed1e4f006f8a9fb1952946a68a1dc1"
+      },
+      "owner_count": 1,
+      "registration_method": "URDF_ZERO_POSE_FK_INVERSE_WITH_VERIFIED_CAD_AXIS_ROTATION",
+      "robot": "follower_right",
+      "run_a_matches_run_b": true,
+      "source_object": "Part__Feature",
+      "source_solid_count": 1,
+      "status": "PASS",
+      "surface_deviation": {
+        "candidate_sample_count": 10937,
+        "candidate_to_reference_max_m": 0.02816652170817057,
+        "candidate_to_reference_rms_m": 0.0012275175140137717,
+        "decision_use": "DIAGNOSTIC_REVISION_DIFFERENCE_NOT_REGISTRATION_GATE",
+        "method": "VERTICES_CENTROIDS_EDGE_MIDPOINTS_BIDIRECTIONAL_CKDTREE",
+        "reference_sample_count": 13986,
+        "reference_to_candidate_max_m": 0.02816652170817057,
+        "reference_to_candidate_rms_m": 0.0014827902765475016
+      },
+      "transform_determinant": 1.0,
+      "triangle_count": 2430,
+      "unit_conversion_mm_to_m": 0.001,
+      "urdf_link_name": "follower_right_base_link",
+      "vertex_count": 1217
+    },
+    {
+      "aabb_link_local_m": {
+        "extent_m": [
+          0.123,
+          0.123,
+          0.06450000000000002
+        ],
+        "maximum_m": [
+          0.0615,
+          0.0615,
+          0.06150000000000001
+        ],
+        "minimum_m": [
+          -0.0615,
+          -0.0615,
+          -0.0030000000000000027
+        ]
+      },
+      "approximation": "convexHull",
+      "brep_volume_mm3": 227505.81140584743,
+      "cad_to_link_matrix": [
+        [
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.079
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "canonical_geometry_sha256": "ff1b53568321a7f09d526fe9045dfb123d7bc34135c24bec7d48a949f10710a1",
+      "connected_components": 1,
+      "convex_piece_count": 1,
+      "degenerate_triangle_count": 0,
+      "downstream_authoring_rule": "AUTHOR_ON_OWNING_LINK_ONLY",
+      "fixed_group_members": [
+        "follower_right_shoulder_link"
+      ],
+      "kind": "CAD_CANDIDATE",
+      "link_suffix": "shoulder_link",
+      "mirror_used": false,
+      "output_obj": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/geometry/shoulder_link.obj",
+        "sha256": "579e6fe0d01c6b8004a09719e2c56990acfba13ca1c10b240504f26470217be2"
+      },
+      "owner_count": 1,
+      "registration_method": "URDF_ZERO_POSE_FK_INVERSE_WITH_VERIFIED_CAD_AXIS_ROTATION",
+      "robot": "follower_right",
+      "run_a_matches_run_b": true,
+      "source_object": "Part__Feature001",
+      "source_solid_count": 1,
+      "status": "PASS",
+      "surface_deviation": {
+        "candidate_sample_count": 7904,
+        "candidate_to_reference_max_m": 0.017919120435630275,
+        "candidate_to_reference_rms_m": 0.0008779923628252111,
+        "decision_use": "DIAGNOSTIC_REVISION_DIFFERENCE_NOT_REGISTRATION_GATE",
+        "method": "VERTICES_CENTROIDS_EDGE_MIDPOINTS_BIDIRECTIONAL_CKDTREE",
+        "reference_sample_count": 8932,
+        "reference_to_candidate_max_m": 0.017727423497318755,
+        "reference_to_candidate_rms_m": 0.0011082114693787887
+      },
+      "transform_determinant": 1.0,
+      "triangle_count": 1756,
+      "unit_conversion_mm_to_m": 0.001,
+      "urdf_link_name": "follower_right_shoulder_link",
+      "vertex_count": 880
+    },
+    {
+      "aabb_link_local_m": {
+        "extent_m": [
+          0.0895,
+          0.10379999923706054,
+          0.32482501220703125
+        ],
+        "maximum_m": [
+          0.07375,
+          0.051900001525878904,
+          0.32065001220703127
+        ],
+        "minimum_m": [
+          -0.01575,
+          -0.051899997711181645,
+          -0.004174999999999998
+        ]
+      },
+      "approximation": "convexHull",
+      "brep_volume_mm3": 515850.8469642106,
+      "cad_to_link_matrix": [
+        [
+          0.0,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.12705
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "canonical_geometry_sha256": "628b85a27c06d6729dd966a92f2ab2d8bf2360d74ef6cf104a8190965267f5e9",
+      "connected_components": 4,
+      "convex_piece_count": 1,
+      "degenerate_triangle_count": 0,
+      "downstream_authoring_rule": "AUTHOR_ON_OWNING_LINK_ONLY",
+      "fixed_group_members": [
+        "follower_right_upper_arm_link"
+      ],
+      "kind": "CAD_CANDIDATE",
+      "link_suffix": "upper_arm_link",
+      "mirror_used": false,
+      "output_obj": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/geometry/upper_arm_link.obj",
+        "sha256": "9d27f621ac900a5ecaa1cba36f2e6522db84566fbf1004db2d7212f2f7995176"
+      },
+      "owner_count": 1,
+      "registration_method": "URDF_ZERO_POSE_FK_INVERSE_WITH_VERIFIED_CAD_AXIS_ROTATION",
+      "robot": "follower_right",
+      "run_a_matches_run_b": true,
+      "source_object": "Part__Feature002",
+      "source_solid_count": 1,
+      "status": "PASS",
+      "surface_deviation": {
+        "candidate_sample_count": 16577,
+        "candidate_to_reference_max_m": 0.011437268765932873,
+        "candidate_to_reference_rms_m": 0.0006788717988381572,
+        "decision_use": "DIAGNOSTIC_REVISION_DIFFERENCE_NOT_REGISTRATION_GATE",
+        "method": "VERTICES_CENTROIDS_EDGE_MIDPOINTS_BIDIRECTIONAL_CKDTREE",
+        "reference_sample_count": 14406,
+        "reference_to_candidate_max_m": 0.009758888931665604,
+        "reference_to_candidate_rms_m": 0.001048526555464221
+      },
+      "transform_determinant": 1.0,
+      "triangle_count": 3682,
+      "unit_conversion_mm_to_m": 0.001,
+      "urdf_link_name": "follower_right_upper_arm_link",
+      "vertex_count": 1849
+    },
+    {
+      "aabb_link_local_m": {
+        "extent_m": [
+          0.20025601196289067,
+          0.10120000076293946,
+          0.039000000000000035
+        ],
+        "maximum_m": [
+          0.19683101196289066,
+          0.05060000228881836,
+          0.01920000000000005
+        ],
+        "minimum_m": [
+          -0.0034249999999999975,
+          -0.0505999984741211,
+          -0.019799999999999984
+        ]
+      },
+      "approximation": "convexHull",
+      "brep_volume_mm3": 202589.01257215007,
+      "cad_to_link_matrix": [
+        [
+          0.0,
+          -1.0,
+          0.0,
+          -0.05955
+        ],
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.42705
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "canonical_geometry_sha256": "4779517d87c2940044d6334e43980a683f25e835d7dda35b17c94e41112b3ad4",
+      "connected_components": 1,
+      "convex_piece_count": 1,
+      "degenerate_triangle_count": 0,
+      "downstream_authoring_rule": "AUTHOR_ON_OWNING_LINK_ONLY",
+      "fixed_group_members": [
+        "follower_right_upper_forearm_link"
+      ],
+      "kind": "CAD_CANDIDATE",
+      "link_suffix": "upper_forearm_link",
+      "mirror_used": false,
+      "output_obj": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/geometry/upper_forearm_link.obj",
+        "sha256": "fce9d4a8fb25ab225b99be104ee68c9cf5806894f65d41989d3dae944998e9ff"
+      },
+      "owner_count": 1,
+      "registration_method": "URDF_ZERO_POSE_FK_INVERSE_WITH_VERIFIED_CAD_AXIS_ROTATION",
+      "robot": "follower_right",
+      "run_a_matches_run_b": true,
+      "source_object": "Part__Feature003",
+      "source_solid_count": 1,
+      "status": "PASS",
+      "surface_deviation": {
+        "candidate_sample_count": 4439,
+        "candidate_to_reference_max_m": 0.013374460734345648,
+        "candidate_to_reference_rms_m": 0.0022903866636126437,
+        "decision_use": "DIAGNOSTIC_REVISION_DIFFERENCE_NOT_REGISTRATION_GATE",
+        "method": "VERTICES_CENTROIDS_EDGE_MIDPOINTS_BIDIRECTIONAL_CKDTREE",
+        "reference_sample_count": 6930,
+        "reference_to_candidate_max_m": 0.013374460734345648,
+        "reference_to_candidate_rms_m": 0.0030039598422414004
+      },
+      "transform_determinant": 1.0,
+      "triangle_count": 986,
+      "unit_conversion_mm_to_m": 0.001,
+      "urdf_link_name": "follower_right_upper_forearm_link",
+      "vertex_count": 495
+    },
+    {
+      "aabb_link_local_m": {
+        "extent_m": [
+          0.11736898803710938,
+          0.07444999885559082,
+          0.045999999999999985
+        ],
+        "maximum_m": [
+          0.11420000000000002,
+          0.04475,
+          0.022699999999999998
+        ],
+        "minimum_m": [
+          -0.003168988037109355,
+          -0.029699998855590822,
+          -0.023299999999999987
+        ]
+      },
+      "approximation": "convexHull",
+      "brep_volume_mm3": 214698.6778255478,
+      "cad_to_link_matrix": [
+        [
+          0.0,
+          -1.0,
+          0.0,
+          -0.25955
+        ],
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.42705
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "canonical_geometry_sha256": "fb051c930f3dc1706bcee552e047489611ee78c86d71bf77ec51ac0b731bd4cb",
+      "connected_components": 1,
+      "convex_piece_count": 1,
+      "degenerate_triangle_count": 0,
+      "downstream_authoring_rule": "AUTHOR_ON_OWNING_LINK_ONLY",
+      "fixed_group_members": [
+        "follower_right_lower_forearm_link"
+      ],
+      "kind": "CAD_CANDIDATE",
+      "link_suffix": "lower_forearm_link",
+      "mirror_used": false,
+      "output_obj": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/geometry/lower_forearm_link.obj",
+        "sha256": "a07b245a58ab5581706a74372d8ef7491dc9bf03ef9111cbf1f887fda7444337"
+      },
+      "owner_count": 1,
+      "registration_method": "URDF_ZERO_POSE_FK_INVERSE_WITH_VERIFIED_CAD_AXIS_ROTATION",
+      "robot": "follower_right",
+      "run_a_matches_run_b": true,
+      "source_object": "Part__Feature004",
+      "source_solid_count": 1,
+      "status": "PASS",
+      "surface_deviation": {
+        "candidate_sample_count": 5220,
+        "candidate_to_reference_max_m": 0.010082515013131284,
+        "candidate_to_reference_rms_m": 0.0011293482812777338,
+        "decision_use": "DIAGNOSTIC_REVISION_DIFFERENCE_NOT_REGISTRATION_GATE",
+        "method": "VERTICES_CENTROIDS_EDGE_MIDPOINTS_BIDIRECTIONAL_CKDTREE",
+        "reference_sample_count": 13972,
+        "reference_to_candidate_max_m": 0.01045622104383288,
+        "reference_to_candidate_rms_m": 0.0029493615558690697
+      },
+      "transform_determinant": 1.0,
+      "triangle_count": 1160,
+      "unit_conversion_mm_to_m": 0.001,
+      "urdf_link_name": "follower_right_lower_forearm_link",
+      "vertex_count": 580
+    },
+    {
+      "aabb_link_local_m": null,
+      "approximation": "convexHull",
+      "brep_volume_mm3": 77921.86529289279,
+      "cad_to_link_matrix": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "canonical_geometry_sha256": null,
+      "connected_components": 0,
+      "convex_piece_count": 1,
+      "degenerate_triangle_count": 0,
+      "downstream_authoring_rule": "AUTHOR_ON_OWNING_LINK_ONLY",
+      "fixed_group_members": [
+        "follower_right_wrist_link"
+      ],
+      "kind": "CAD_CANDIDATE",
+      "link_suffix": "wrist_link",
+      "mirror_used": false,
+      "output_obj": null,
+      "owner_count": 1,
+      "registration_method": null,
+      "robot": "follower_right",
+      "run_a_matches_run_b": true,
+      "source_object": "Part__Feature005",
+      "source_solid_count": 1,
+      "status": "HARD_BLOCKER_INVALID_BREP",
+      "surface_deviation": null,
+      "transform_determinant": 1.0,
+      "triangle_count": 0,
+      "unit_conversion_mm_to_m": 0.001,
+      "urdf_link_name": "follower_right_wrist_link",
+      "vertex_count": 0
+    },
+    {
+      "aabb_link_local_m": {
+        "extent_m": [
+          0.06910000610351563,
+          0.15,
+          0.06587335205078126
+        ],
+        "maximum_m": [
+          0.06909999416256435,
+          0.07499999742444768,
+          0.03525000247363802
+        ],
+        "minimum_m": [
+          -1.1940951283317958e-08,
+          -0.07500000257555231,
+          -0.030623349577143244
+        ]
+      },
+      "approximation": "convexHull",
+      "brep_volume_mm3": 123425.0687561365,
+      "cad_to_link_matrix": [
+        [
+          0.0,
+          -1.0,
+          0.0,
+          -0.43029999973392
+        ],
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.000100001049673413
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.426749997526362
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "canonical_geometry_sha256": "ec8fa80167bddd0b969e0a9a8b074f220b645c2cc05a95f3ea88156fde2e5414",
+      "connected_components": 9,
+      "convex_piece_count": 1,
+      "degenerate_triangle_count": 0,
+      "downstream_authoring_rule": "AUTHOR_CAD_SHELL_ON_GRIPPER_LINK_AND_DISABLE_DUPLICATE_BASELINE_GRIPPER_BAR_COLLIDER_IN_DIAGNOSTIC_LAYER_ONLY",
+      "fixed_group_members": [
+        "follower_right_gripper_link",
+        "follower_right_gripper_bar_link"
+      ],
+      "kind": "CAD_CANDIDATE",
+      "link_suffix": "gripper_link",
+      "mirror_used": false,
+      "output_obj": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/geometry/gripper_link.obj",
+        "sha256": "22dec9b9082d40d6f5f3be1c39fc73b3c3fbadd9754969738dabc3a15b8f4a79"
+      },
+      "owner_count": 1,
+      "registration_method": "VERIFIED_GRIPPER_PLANAR_DATUM_REGISTRATION",
+      "robot": "follower_right",
+      "run_a_matches_run_b": true,
+      "source_object": "Part__Feature006",
+      "source_solid_count": 1,
+      "status": "PASS",
+      "surface_deviation": {
+        "candidate_sample_count": 38351,
+        "candidate_to_reference_max_m": 0.015725983073412185,
+        "candidate_to_reference_rms_m": 0.00729997419947331,
+        "decision_use": "DIAGNOSTIC_REVISION_DIFFERENCE_NOT_REGISTRATION_GATE",
+        "method": "VERTICES_CENTROIDS_EDGE_MIDPOINTS_BIDIRECTIONAL_CKDTREE",
+        "reference_sample_count": 116116,
+        "reference_to_candidate_max_m": 0.020870484837447485,
+        "reference_to_candidate_rms_m": 0.005641219565924983
+      },
+      "transform_determinant": 1.0,
+      "triangle_count": 8522,
+      "unit_conversion_mm_to_m": 0.001,
+      "urdf_link_name": "follower_right_gripper_link",
+      "vertex_count": 4263
+    },
+    {
+      "aabb_link_local_m": null,
+      "approximation": "UNCHANGED_ACCEPTED_BASELINE",
+      "brep_volume_mm3": 35160.658046734075,
+      "cad_to_link_matrix": [
+        [
+          0.0,
+          -1.0,
+          0.0,
+          -0.49899999973392
+        ],
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.021099890257662776
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.42680133373174
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "canonical_geometry_sha256": null,
+      "connected_components": 1,
+      "convex_piece_count": 1,
+      "degenerate_triangle_count": 0,
+      "kind": "ACCEPTED_FINGER",
+      "link_suffix": "left_finger_link",
+      "mirror_used": false,
+      "output_obj": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/tessellation_angular_controlled/run_a/left_finger.obj",
+        "sha256": "c6710d0fe5b2030a32722d9df5c0b553c771c9d61d92b8ddaec36c94c5963488"
+      },
+      "owner_count": 1,
+      "registration_method": "VERIFIED_EXISTING_SUPPLIER_CAD_REGISTRATION",
+      "robot": "follower_left",
+      "run_a_matches_run_b": true,
+      "source_object": "Part__Feature007",
+      "source_solid_count": 1,
+      "status": "PASS",
+      "surface_deviation": null,
+      "transform_determinant": 1.0,
+      "triangle_count": 1662,
+      "unit_conversion_mm_to_m": 0.001,
+      "urdf_link_name": "follower_left_left_finger_link",
+      "vertex_count": 831
+    },
+    {
+      "aabb_link_local_m": null,
+      "approximation": "UNCHANGED_ACCEPTED_BASELINE",
+      "brep_volume_mm3": 35160.658046734075,
+      "cad_to_link_matrix": [
+        [
+          0.0,
+          -1.0,
+          0.0,
+          -0.49899999973392
+        ],
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.020900109742337226
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.42680133373174
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "canonical_geometry_sha256": null,
+      "connected_components": 1,
+      "convex_piece_count": 1,
+      "degenerate_triangle_count": 0,
+      "kind": "ACCEPTED_FINGER",
+      "link_suffix": "right_finger_link",
+      "mirror_used": false,
+      "output_obj": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/tessellation_angular_controlled/run_a/right_finger.obj",
+        "sha256": "b0979c5d55fee448dab512dc75b1251bab17d94892decd01de9a6e76c01482d1"
+      },
+      "owner_count": 1,
+      "registration_method": "VERIFIED_EXISTING_SUPPLIER_CAD_REGISTRATION",
+      "robot": "follower_left",
+      "run_a_matches_run_b": true,
+      "source_object": "Part__Feature008",
+      "source_solid_count": 1,
+      "status": "PASS",
+      "surface_deviation": null,
+      "transform_determinant": 1.0,
+      "triangle_count": 1662,
+      "unit_conversion_mm_to_m": 0.001,
+      "urdf_link_name": "follower_left_right_finger_link",
+      "vertex_count": 831
+    },
+    {
+      "aabb_link_local_m": null,
+      "approximation": "UNCHANGED_ACCEPTED_BASELINE",
+      "brep_volume_mm3": 35160.658046734075,
+      "cad_to_link_matrix": [
+        [
+          0.0,
+          -1.0,
+          0.0,
+          -0.49899999973392
+        ],
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.021099890257662776
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.42680133373174
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "canonical_geometry_sha256": null,
+      "connected_components": 1,
+      "convex_piece_count": 1,
+      "degenerate_triangle_count": 0,
+      "kind": "ACCEPTED_FINGER",
+      "link_suffix": "left_finger_link",
+      "mirror_used": false,
+      "output_obj": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/tessellation_angular_controlled/run_a/left_finger.obj",
+        "sha256": "c6710d0fe5b2030a32722d9df5c0b553c771c9d61d92b8ddaec36c94c5963488"
+      },
+      "owner_count": 1,
+      "registration_method": "VERIFIED_EXISTING_SUPPLIER_CAD_REGISTRATION",
+      "robot": "follower_right",
+      "run_a_matches_run_b": true,
+      "source_object": "Part__Feature007",
+      "source_solid_count": 1,
+      "status": "PASS",
+      "surface_deviation": null,
+      "transform_determinant": 1.0,
+      "triangle_count": 1662,
+      "unit_conversion_mm_to_m": 0.001,
+      "urdf_link_name": "follower_right_left_finger_link",
+      "vertex_count": 831
+    },
+    {
+      "aabb_link_local_m": null,
+      "approximation": "UNCHANGED_ACCEPTED_BASELINE",
+      "brep_volume_mm3": 35160.658046734075,
+      "cad_to_link_matrix": [
+        [
+          0.0,
+          -1.0,
+          0.0,
+          -0.49899999973392
+        ],
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.020900109742337226
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.42680133373174
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "canonical_geometry_sha256": null,
+      "connected_components": 1,
+      "convex_piece_count": 1,
+      "degenerate_triangle_count": 0,
+      "kind": "ACCEPTED_FINGER",
+      "link_suffix": "right_finger_link",
+      "mirror_used": false,
+      "output_obj": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/tessellation_angular_controlled/run_a/right_finger.obj",
+        "sha256": "b0979c5d55fee448dab512dc75b1251bab17d94892decd01de9a6e76c01482d1"
+      },
+      "owner_count": 1,
+      "registration_method": "VERIFIED_EXISTING_SUPPLIER_CAD_REGISTRATION",
+      "robot": "follower_right",
+      "run_a_matches_run_b": true,
+      "source_object": "Part__Feature008",
+      "source_solid_count": 1,
+      "status": "PASS",
+      "surface_deviation": null,
+      "transform_determinant": 1.0,
+      "triangle_count": 1662,
+      "unit_conversion_mm_to_m": 0.001,
+      "urdf_link_name": "follower_right_right_finger_link",
+      "vertex_count": 831
+    }
+  ],
+  "profile": "CAD_SUBPART_COMPOUND_CONVEX_HULL",
+  "real_robot_connected": false,
+  "remote_192_168_1_103_accessed": false,
+  "schema_version": 1,
+  "source_cad": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/gdrive_source_readonly/Simple Aloha Viper 2024-5-13.step",
+    "sha256": "337862418769d4ea8b801d26e68930c4412f870050e60769bbf91765194dc571"
+  },
+  "source_or_imported_asset_modified": false,
+  "source_stage": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/aloha1_signal_correspondence_workcell.usda",
+    "sha256": "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf"
+  },
+  "status": "PARTIAL",
+  "task8": "NOT_RUN",
+  "toolchain": {
+    "angular_deflection_deg": 20.0,
+    "freecad_version": "1.1.1",
+    "freecad_version_raw": [
+      "1",
+      "1",
+      "1",
+      "20260414 (Git shallow)",
+      "Unknown",
+      "2026/04/14 22:09:59",
+      "(HEAD detached at 0108fd4b4)",
+      "0108fd4b4850cc46e625b60e53cea7a7bbe69f8d"
+    ],
+    "linear_deflection_mm": 0.2,
+    "mesher_api": "MeshPart.meshFromShape",
+    "opencascade_version": "7.8.1",
+    "relative_deflection": false
+  },
+  "two_fresh_directory_determinism": "PASS",
+  "virtual_frame_records": [
+    {
+      "collider_authored": false,
+      "link_suffix": "ee_arm_link",
+      "reason": "VIRTUAL_FRAME_NO_COLLIDER",
+      "robot": "follower_left",
+      "urdf_link_name": "follower_left_ee_arm_link"
+    },
+    {
+      "collider_authored": false,
+      "link_suffix": "fingers_link",
+      "reason": "VIRTUAL_FRAME_NO_COLLIDER",
+      "robot": "follower_left",
+      "urdf_link_name": "follower_left_fingers_link"
+    },
+    {
+      "collider_authored": false,
+      "link_suffix": "ee_gripper_link",
+      "reason": "VIRTUAL_FRAME_NO_COLLIDER",
+      "robot": "follower_left",
+      "urdf_link_name": "follower_left_ee_gripper_link"
+    },
+    {
+      "collider_authored": false,
+      "link_suffix": "ee_arm_link",
+      "reason": "VIRTUAL_FRAME_NO_COLLIDER",
+      "robot": "follower_right",
+      "urdf_link_name": "follower_right_ee_arm_link"
+    },
+    {
+      "collider_authored": false,
+      "link_suffix": "fingers_link",
+      "reason": "VIRTUAL_FRAME_NO_COLLIDER",
+      "robot": "follower_right",
+      "urdf_link_name": "follower_right_fingers_link"
+    },
+    {
+      "collider_authored": false,
+      "link_suffix": "ee_gripper_link",
+      "reason": "VIRTUAL_FRAME_NO_COLLIDER",
+      "robot": "follower_right",
+      "urdf_link_name": "follower_right_ee_gripper_link"
+    }
+  ]
+}
