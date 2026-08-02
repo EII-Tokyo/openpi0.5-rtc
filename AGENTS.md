@@ -95,6 +95,24 @@ cd /home/eii/Documents/Notes/openpi0.5-rtc-reward-learning && npm run check:math
 - Historical training benchmark facts:
   - Read `docs/agents/training_notes.md`.
 
+## Isaac Sim User-Facing Launch Policy
+- Agent-run automation, bounded tests, and diagnostics may use the trimmed
+  `isaacsim.exp.base.python.kit` experience when a full GUI is unnecessary.
+- Whenever the user explicitly asks an agent to start, launch, or open Isaac
+  Sim, use `isaacsim.exp.full.kit` unless the user explicitly requests the
+  trimmed Python experience.
+- Do not accept a user-facing launch from its icon or window title alone.
+  Verify the process command or Kit log identifies the full experience and,
+  when relevant, verify required GUI extensions such as
+  `omni.physx.supportui` reached startup.
+- Keep the timeline paused and do not command simulated robot joints unless
+  the user explicitly authorizes simulation control.
+- Place the window on the workspace explicitly requested by the user;
+  otherwise follow this repository's default Isaac workspace rule.
+- The GNOME Dock Isaac favorite must resolve to an
+  `isaacsim.exp.full.kit` launch chain. Inspect the `.desktop` entry and its
+  target before changing either, and verify the resolved chain after a change.
+
 ## Hard Safety Defaults
 - Do not control the real robot unless the user explicitly asks for a real-hardware action and the relevant safety docs above have been read.
 - Do not start broad robot compose profiles when an explicit service list is safer. For robot starts on `192.168.1.103`, follow `docs/agents/remote_103_operations.md`.
