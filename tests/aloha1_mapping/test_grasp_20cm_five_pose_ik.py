@@ -25,6 +25,7 @@ from tools.plan_aloha1_grasp_20cm_five_pose_ik import freeze_preflight_records
 from tools.plan_aloha1_grasp_20cm_five_pose_ik import is_excluded_runtime_failure_candidate
 from tools.plan_aloha1_grasp_20cm_five_pose_ik import preserve_accepted_preflight_records
 from tools.plan_aloha1_grasp_20cm_five_pose_ik import replacement_slot
+from tools.run_aloha1_grasp_20cm_five_pose_ik import _load_historical_visual_evidence
 from tools.run_aloha1_grasp_20cm_five_pose_ik import _read_run_evidence
 from tools.run_aloha1_grasp_20cm_five_pose_ik import build_five_pose_summary
 from tools.run_aloha1_grasp_20cm_five_pose_ik import resume_verified_runtime_records
@@ -34,6 +35,12 @@ ROOT = Path(__file__).resolve().parents[2]
 CONFIG = ROOT / "configs/aloha1_grasp_20cm_five_pose_ik.yaml"
 GUI_SCRIPT = ROOT / "tools/run_aloha1_grasp_20cm_gui.py"
 RUNNER_SCRIPT = ROOT / "tools/run_aloha1_grasp_20cm_five_pose_ik.py"
+CANDIDATE_GUI_CONFIG = (
+    ROOT / "configs/aloha1_grasp_20cm_gui_finger_source_limit_candidate.yaml"
+)
+CANDIDATE_FIVE_CONFIG = (
+    ROOT / "configs/aloha1_grasp_20cm_five_pose_finger_source_limit_candidate.yaml"
+)
 
 
 def test_replacement_slot_preserves_noncontiguous_user_accepted_samples() -> None:
@@ -142,6 +149,63 @@ def test_five_pose_config_freezes_joint_sampling_and_diversity() -> None:
     assert config["runtime"]["allow_runtime_resampling"] is False
     assert config["runtime"]["required_primary_videos"] == 5
     assert config["boundaries"]["task8"] == "NOT_RUN"
+
+
+def test_candidate_config_is_isolated_and_binds_historical_visuals() -> None:
+    gui = yaml.safe_load(CANDIDATE_GUI_CONFIG.read_text(encoding="utf-8"))
+    five = yaml.safe_load(CANDIDATE_FIVE_CONFIG.read_text(encoding="utf-8"))
+
+    assert gui["diagnostic_candidate"]["promotion_status"] == "NOT_PROMOTED"
+    assert "cad_derived_full_body_colliders" in gui["stage"]["path"]
+    assert gui["frozen_inputs"]["task7b2_runtime_profile"]["path"].endswith(
+        "aloha1_task7b2_horizontal_grasp_cad_derived_colliders.yaml"
+    )
+    session_layers = gui["diagnostic_session_sublayers"]
+    assert len(session_layers) == 1
+    assert session_layers[0]["path"].endswith(
+        "configuration/finger_source_limits.usda"
+    )
+    assert five["runtime"]["required_primary_videos"] == 0
+    assert five["frozen_inputs"]["runtime_config"]["path"] == str(
+        CANDIDATE_GUI_CONFIG.relative_to(ROOT)
+    )
+    assert five["frozen_inputs"][
+        "historical_user_confirmed_visual_evidence"
+    ]["path"].endswith(
+        "aloha1_cad_derived_five_pose_visual_review_zup_attempt7.json"
+    )
+    assert five["diagnostic_candidate"]["promotion_status"] == "NOT_PROMOTED"
+    assert five["boundaries"]["task8"] == "NOT_RUN"
+
+
+def test_preflight_applies_verified_session_layers_before_runtime_binding() -> None:
+    source = (
+        ROOT / "tools/plan_aloha1_grasp_20cm_five_pose_ik.py"
+    ).read_text(encoding="utf-8")
+
+    application = source.index("apply_verified_session_sublayers(")
+    validation = source.index("validate_composed_stage(", application)
+    binding = source.index("IsaacGrasp20cmBindings(", validation)
+
+    assert application < validation < binding
+    assert '"session_sublayer_application"' in source
+
+
+def test_collision_only_reframes_evidence_camera_before_render_update() -> None:
+    source = GUI_SCRIPT.read_text(encoding="utf-8")
+
+    collision_branch = source.index("if args.collision_evidence_only")
+    prepare = source.index(
+        "bindings.prepare_pending_evidence_cameras(",
+        collision_branch,
+    )
+    render_update = source.index("app.update()", prepare)
+    capture = source.index("bindings.capture_pending_render_frame()", prepare)
+
+    assert prepare < render_update < capture
+    assert "EVIDENCE_CAMERA_RENDER_SETTLE_UPDATES = 20" in source
+    assert "for _ in range(" in source[prepare:capture]
+    assert "EVIDENCE_CAMERA_RENDER_SETTLE_UPDATES" in source[prepare:capture]
 
 
 def test_five_pose_config_uses_official_acceleration_limited_lula_path() -> None:
@@ -768,6 +832,50 @@ def test_video_failure_does_not_erase_physics_machine_pass() -> None:
     assert summary["evidence_failed_sample_ids"] == ["sample_03"]
 
 
+def test_machine_only_policy_requires_bound_historical_visual_evidence() -> None:
+    records = _five_runtime_pass_records()
+    for record in records:
+        primary = record["primary"]
+        primary["video_count"] = 0
+        primary["video_capture_policy"] = "SKIPPED_BY_USER_DECISION"
+        primary["historical_visual_evidence_status"] = "PASS"
+
+    summary = build_five_pose_summary(
+        records,
+        visual_evidence_policy=(
+            "HISTORICAL_USER_CONFIRMED_VIDEOS_PLUS_"
+            "FRESH_COLLISION_SCREENSHOTS"
+        ),
+    )
+
+    assert summary["machine_status"] == "PASS"
+    assert summary["status"] == "PARTIAL"
+    assert summary["primary_video_count"] == 0
+    assert summary["historical_visual_evidence_sample_count"] == 5
+    assert summary["global_gates"]["all_five_evidence_complete"] is True
+
+
+def test_machine_only_policy_rejects_unbound_historical_visual_evidence() -> None:
+    records = _five_runtime_pass_records()
+    for record in records:
+        primary = record["primary"]
+        primary["video_count"] = 0
+        primary["video_capture_policy"] = "SKIPPED_BY_USER_DECISION"
+        primary["historical_visual_evidence_status"] = "PASS"
+    records[3]["primary"]["historical_visual_evidence_status"] = "MISSING"
+
+    summary = build_five_pose_summary(
+        records,
+        visual_evidence_policy=(
+            "HISTORICAL_USER_CONFIRMED_VIDEOS_PLUS_"
+            "FRESH_COLLISION_SCREENSHOTS"
+        ),
+    )
+
+    assert summary["status"] == "FAIL"
+    assert summary["evidence_failed_sample_ids"] == ["sample_04"]
+
+
 def test_missing_video_candidate_is_reported_without_erasing_machine_pass(
     tmp_path: Path,
 ) -> None:
@@ -843,3 +951,141 @@ def test_missing_video_candidate_is_reported_without_erasing_machine_pass(
     assert result["evidence_status"] == "FAIL"
     assert result["candidate_manifest_sha256"] is None
     assert f"missing:{candidate_path}" in result["evidence_errors"]
+
+
+def test_machine_only_primary_accepts_explicit_skip_and_historical_binding(
+    tmp_path: Path,
+) -> None:
+    artifact_root = tmp_path / "primary"
+    artifact_root.mkdir()
+    stage_hash = "a" * 64
+    world_from_object = np.eye(4, dtype=np.float64)
+    initial_arm_q = np.asarray(
+        [-1.0, -0.1, 0.8, 2.2, 2.0, -1.2],
+        dtype=np.float64,
+    )
+    runtime = {
+        "status": "PASS",
+        "reason": "stable_20cm_hold",
+        "deterministic_signature": "b" * 64,
+        "stage": {
+            "sha256_before": stage_hash,
+            "sha256_after": stage_hash,
+        },
+        "bottle_random_position": {
+            "pose_mode": "FROZEN_CENTER_AND_YAW_TRANSFORM",
+            "world_from_object": world_from_object.tolist(),
+        },
+        "runtime": {
+            "initial_pose": {
+                "initial_arm_q_target_rad": initial_arm_q.tolist(),
+                "initial_pose_hold_frames_required": 60,
+                "initial_pose_hold_frames_observed": 60,
+                "initial_arm_max_readback_error_rad": 0.001,
+                "first_frame_jump_rad": 0.001,
+            },
+            "initialization_contract": {
+                "status": "PASS",
+                "signature": "init-signature",
+            },
+            "finger_safety": {"status": "PASS", "violation_count": 0},
+            "ik": {"status": "PASS"},
+        },
+        "metrics": {
+            "dynamic_during_formal_phases": True,
+            "finite_state": True,
+            "forbidden_constraint": False,
+        },
+        "boundaries": {
+            "surface_gripper": False,
+            "fixed_joint": False,
+            "parent_attachment": False,
+            "task8": "NOT_RUN",
+        },
+    }
+    (artifact_root / "aloha1_grasp_20cm_runtime.json").write_text(
+        __import__("json").dumps(runtime),
+        encoding="utf-8",
+    )
+    (artifact_root / "aloha1_grasp_20cm_telemetry.jsonl").write_text(
+        '{"frame": 1, "phase": "VALIDATE"}\n',
+        encoding="utf-8",
+    )
+    (artifact_root / "video_capture_skipped.json").write_text(
+        '{"status":"PASS","classification":"MACHINE_ONLY_CANDIDATE_SCREENING",'
+        '"machine_status":"PASS","task8":"NOT_RUN"}\n',
+        encoding="utf-8",
+    )
+
+    result = _read_run_evidence(
+        artifact_root=artifact_root,
+        process={"exit_code": 0, "timed_out": False},
+        collision_repeat=False,
+        selected={
+            "world_from_object": world_from_object.tolist(),
+            "initial_arm_q_rad": initial_arm_q.tolist(),
+        },
+        stage_sha256=stage_hash,
+        readback_tolerance_rad=0.02,
+        first_frame_jump_tolerance_rad=0.02,
+        hold_frames=60,
+        skip_primary_video=True,
+        historical_visual_evidence={
+            "status": "PASS",
+            "report_sha256": "c" * 64,
+        },
+    )
+
+    assert result["evidence_status"] == "PASS"
+    assert result["video_count"] == 0
+    assert result["video_capture_policy"] == "SKIPPED_BY_USER_DECISION"
+    assert result["historical_visual_evidence_status"] == "PASS"
+
+
+def test_historical_visual_evidence_binds_five_annotated_video_hashes(
+    tmp_path: Path,
+) -> None:
+    import hashlib
+    import json
+
+    samples = []
+    for index in range(5):
+        video = tmp_path / f"sample_{index + 1:02d}.mp4"
+        video.write_bytes(f"video-{index}".encode())
+        samples.append(
+            {
+                "sample_id": f"sample_{index + 1:02d}",
+                "status": "PASS",
+                "videos": {
+                    "annotated": {
+                        "absolute_path": str(video),
+                        "sha256": hashlib.sha256(video.read_bytes()).hexdigest(),
+                    }
+                },
+            }
+        )
+    report = tmp_path / "visual_review.json"
+    report.write_text(
+        json.dumps(
+            {
+                "status": "PASS",
+                "visual_model_review": "PASS",
+                "user_confirmation": "PASS",
+                "samples": samples,
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    result = _load_historical_visual_evidence(
+        {
+            "path": str(report),
+            "sha256": hashlib.sha256(report.read_bytes()).hexdigest(),
+        }
+    )
+
+    assert result["status"] == "PASS"
+    assert result["sample_count"] == 5
+    assert [item["sample_id"] for item in result["annotated_videos"]] == [
+        f"sample_{index:02d}" for index in range(1, 6)
+    ]

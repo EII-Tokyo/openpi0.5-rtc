@@ -123,6 +123,54 @@ def _limits_match(
     )
 
 
+def validate_session_layer_probe(
+    *,
+    record: dict[str, Any],
+    source_limits: dict[str, dict[str, float]],
+    expected_stage_sha256: str,
+    expected_layer_path: str,
+) -> dict[str, Any]:
+    """Evaluate an isolated session-layer limit readback without promotion."""
+
+    stage = record.get("stage", {})
+    application = record.get("session_sublayer_application", {})
+    expected_path = str(Path(expected_layer_path).resolve())
+    gates = {
+        "runtime_pass": record.get("status") == "PASS",
+        "source_stage_hash_unchanged": (
+            stage.get("sha256_before") == expected_stage_sha256
+            and stage.get("sha256_after") == expected_stage_sha256
+        ),
+        "root_sublayers_unchanged": (
+            stage.get("root_sublayers_before")
+            == stage.get("root_sublayers_after")
+        ),
+        "session_layer_inserted_exactly_once": (
+            application.get("status") == "PASS"
+            and application.get("inserted_paths") == [expected_path]
+            and application.get("after") == [expected_path]
+        ),
+        "root_layer_not_saved": application.get("root_layer_saved") is False,
+        "authored_limits_match_source": _limits_match(
+            source_limits,
+            record.get("composed_usd", {}).get("authored_limits", {}),
+        ),
+        "runtime_limits_match_source": _limits_match(
+            source_limits,
+            record.get("runtime_readback", {}).get("dof_limits", {}),
+        ),
+    }
+    return {
+        "status": "PASS" if all(gates.values()) else "FAIL",
+        "classification": "SESSION_ONLY_SOURCE_DERIVED_LIMIT_READBACK",
+        "gates": gates,
+        "source_stage_sha256": expected_stage_sha256,
+        "session_layer_absolute_path": expected_path,
+        "final_or_default_asset_modified": False,
+        "task8": "NOT_RUN",
+    }
+
+
 def aggregate_report(
     *,
     source_urdf: dict[str, Any],
@@ -264,7 +312,13 @@ over "World" {{
     }
 
 
-def _run_runtime(stage_path: Path, output: Path) -> int:
+def _run_runtime(
+    stage_path: Path,
+    output: Path,
+    *,
+    session_layer_path: Path | None = None,
+    session_layer_sha256: str | None = None,
+) -> int:
     from isaacsim import SimulationApp
 
     app = SimulationApp(
@@ -284,9 +338,42 @@ def _run_runtime(stage_path: Path, output: Path) -> int:
         from pxr import PhysxSchema
         from pxr import UsdPhysics
 
+        from tools.aloha1_mapping.grasp_20cm_runtime import apply_verified_session_sublayers
+
+        stage_sha256_before = _sha256(stage_path)
         if not open_stage(str(stage_path.resolve(strict=True))):
             raise RuntimeError(f"cannot open Stage: {stage_path}")
         stage = get_current_stage()
+        root_sublayers_before = list(stage.GetRootLayer().subLayerPaths)
+        session_application = {
+            "status": "NOT_APPLIED",
+            "before": list(stage.GetSessionLayer().subLayerPaths),
+            "after": list(stage.GetSessionLayer().subLayerPaths),
+            "inserted_paths": [],
+            "already_present_paths": [],
+            "root_layer_saved": False,
+        }
+        if session_layer_path is not None:
+            resolved_layer = session_layer_path.resolve(strict=True)
+            actual_layer_sha256 = _sha256(resolved_layer)
+            if session_layer_sha256 is None:
+                raise RuntimeError(
+                    "session layer requires an expected SHA-256"
+                )
+            if actual_layer_sha256 != session_layer_sha256:
+                raise RuntimeError(
+                    "session layer SHA-256 mismatch: "
+                    f"{actual_layer_sha256} != {session_layer_sha256}"
+                )
+            session_application = apply_verified_session_sublayers(
+                stage=stage,
+                records=[
+                    {
+                        "absolute_path": str(resolved_layer),
+                        "sha256": actual_layer_sha256,
+                    }
+                ],
+            )
         World.clear_instance()
         world = World(
             stage_units_in_meters=1.0,
@@ -356,10 +443,17 @@ def _run_runtime(stage_path: Path, output: Path) -> int:
             "status": "PASS",
             "stage": {
                 "absolute_path": str(stage_path.resolve()),
-                "sha256": _sha256(stage_path),
+                "sha256": stage_sha256_before,
+                "sha256_before": stage_sha256_before,
+                "sha256_after": _sha256(stage_path),
                 "default_prim": str(stage.GetDefaultPrim().GetPath()),
                 "sublayers": list(stage.GetRootLayer().subLayerPaths),
+                "root_sublayers_before": root_sublayers_before,
+                "root_sublayers_after": list(
+                    stage.GetRootLayer().subLayerPaths
+                ),
             },
+            "session_sublayer_application": session_application,
             "runtime": {
                 "isaac_sim": "5.1.0.0",
                 "kit": "107.3.3",
@@ -622,16 +716,71 @@ def build() -> dict[str, Any]:
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--runtime-output", type=Path)
+    parser.add_argument("--validate-session-runtime", type=Path)
+    parser.add_argument("--summary-output", type=Path)
     parser.add_argument("--stage", type=Path)
+    parser.add_argument("--session-layer", type=Path)
+    parser.add_argument("--session-layer-sha256")
     return parser.parse_args()
 
 
 def main() -> int:
     args = _parse_args()
+    if args.validate_session_runtime is not None:
+        if args.summary_output is None or args.stage is None:
+            raise ValueError(
+                "--validate-session-runtime requires --summary-output and --stage"
+            )
+        if args.session_layer is None or args.session_layer_sha256 is None:
+            raise ValueError(
+                "--validate-session-runtime requires a frozen session layer"
+            )
+        actual_session_layer_sha256 = _sha256(args.session_layer)
+        if actual_session_layer_sha256 != args.session_layer_sha256:
+            raise RuntimeError(
+                "session layer SHA-256 mismatch during summary generation"
+            )
+        runtime_path = args.validate_session_runtime.resolve(strict=True)
+        source = parse_source_urdf()
+        runtime_record = json.loads(runtime_path.read_text(encoding="utf-8"))
+        summary = validate_session_layer_probe(
+            record=runtime_record,
+            source_limits=source["limits"],
+            expected_stage_sha256=_sha256(args.stage),
+            expected_layer_path=str(args.session_layer.resolve(strict=True)),
+        )
+        summary["inputs"] = {
+            "runtime_output": {
+                "absolute_path": str(runtime_path),
+                "sha256": _sha256(runtime_path),
+            },
+            "source_urdf": source,
+            "stage": {
+                "absolute_path": str(args.stage.resolve(strict=True)),
+                "sha256": _sha256(args.stage),
+            },
+            "session_layer": {
+                "absolute_path": str(args.session_layer.resolve(strict=True)),
+                "sha256": actual_session_layer_sha256,
+                "expected_sha256": args.session_layer_sha256,
+            },
+        }
+        args.summary_output.parent.mkdir(parents=True, exist_ok=True)
+        args.summary_output.write_text(
+            json.dumps(summary, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        print(json.dumps(summary, indent=2, sort_keys=True))
+        return 0 if summary["status"] == "PASS" else 1
     if args.runtime_output is not None:
         if args.stage is None:
             raise ValueError("--runtime-output requires --stage")
-        return _run_runtime(args.stage, args.runtime_output)
+        return _run_runtime(
+            args.stage,
+            args.runtime_output,
+            session_layer_path=args.session_layer,
+            session_layer_sha256=args.session_layer_sha256,
+        )
     report = build()
     print(
         json.dumps(

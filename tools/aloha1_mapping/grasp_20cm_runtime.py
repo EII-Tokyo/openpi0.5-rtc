@@ -174,6 +174,39 @@ def verify_frozen_file(
     return {"absolute_path": str(resolved), "sha256": actual}
 
 
+def apply_verified_session_sublayers(
+    *,
+    stage: Any,
+    records: Sequence[Mapping[str, str]],
+) -> dict[str, Any]:
+    """Compose verified diagnostic layers only in the anonymous session layer."""
+
+    session_layer = stage.GetSessionLayer()
+    if session_layer is None:
+        raise FrozenInputError("opened Stage has no session layer")
+    before = [str(path) for path in session_layer.subLayerPaths]
+    inserted: list[str] = []
+    already_present: list[str] = []
+    for record in reversed(list(records)):
+        path = str(record["absolute_path"])
+        if path in session_layer.subLayerPaths:
+            already_present.append(path)
+            continue
+        session_layer.subLayerPaths.insert(0, path)
+        inserted.append(path)
+    return {
+        "status": "PASS",
+        "session_layer_identifier": str(
+            getattr(session_layer, "identifier", "ANONYMOUS_SESSION_LAYER")
+        ),
+        "before": before,
+        "after": [str(path) for path in session_layer.subLayerPaths],
+        "inserted_paths": inserted,
+        "already_present_paths": already_present,
+        "root_layer_saved": False,
+    }
+
+
 def load_and_verify_config(
     config_path: Path,
     *,
@@ -215,6 +248,23 @@ def load_and_verify_config(
             label=str(name),
         )
 
+    session_sublayers: list[dict[str, str]] = []
+    raw_session_sublayers = config.get("diagnostic_session_sublayers", [])
+    if not isinstance(raw_session_sublayers, Sequence) or isinstance(
+        raw_session_sublayers, str | bytes
+    ):
+        raise FrozenInputError(
+            "diagnostic_session_sublayers must be a sequence"
+        )
+    for index, record in enumerate(raw_session_sublayers):
+        session_sublayers.append(
+            _verify_record(
+                record,
+                project_root=project_root,
+                label=f"diagnostic_session_sublayers[{index}]",
+            )
+        )
+
     dof_order = config.get("robot", {}).get("dof_order")
     if dof_order != EXPECTED_DOF_ORDER:
         raise FrozenInputError(
@@ -227,6 +277,7 @@ def load_and_verify_config(
         "config_path": config_record["absolute_path"],
         "config_sha256": config_record["sha256"],
         "frozen_inputs": records,
+        "session_sublayers": session_sublayers,
     }
 
 

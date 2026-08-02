@@ -442,6 +442,7 @@ def main() -> int:
         from tools.aloha1_mapping.grasp_20cm_five_pose_ik import sample_initial_arm_joint_candidates
         from tools.aloha1_mapping.grasp_20cm_five_pose_ik import solve_oriented_initial_arm_pose
         from tools.aloha1_mapping.grasp_20cm_isaac_bindings import IsaacGrasp20cmBindings
+        from tools.aloha1_mapping.grasp_20cm_runtime import apply_verified_session_sublayers
         from tools.aloha1_mapping.grasp_20cm_runtime import validate_composed_stage
         from tools.aloha1_mapping.grasp_20cm_sampling import extend_profile_for_clearance_lift
         from tools.validate_aloha1_task7b2_horizontal_grasp import _solve_settled_bottle_runtime_ik
@@ -451,6 +452,12 @@ def main() -> int:
             raise RuntimeError(f"failed to open approved Stage: {stage_path}")
         stage = get_current_stage()
         runtime_config = runtime_profile["config"]
+        runtime_profile["session_sublayer_application"] = (
+            apply_verified_session_sublayers(
+                stage=stage,
+                records=runtime_profile["session_sublayers"],
+            )
+        )
         validate_composed_stage(
             stage=stage,
             expected_root_prim=str(runtime_config["stage"]["root_prim"]),
@@ -921,6 +928,9 @@ def main() -> int:
                 "kit": "107.3.3",
                 "physx": "107.3.26",
                 "ik": "LOCAL_LULA_5_1_WITH_WARM_START_AND_FK_READBACK",
+                "session_sublayer_application": runtime_profile[
+                    "session_sublayer_application"
+                ],
             },
             "config": {
                 "absolute_path": str(config_path),

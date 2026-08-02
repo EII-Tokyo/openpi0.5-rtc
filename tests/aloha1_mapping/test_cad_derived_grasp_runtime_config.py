@@ -40,6 +40,7 @@ def _sha256(path: Path) -> str:
 def test_diagnostic_runtime_changes_only_frozen_stage() -> None:
     base = _load(BASE)
     diagnostic = _load(DIAGNOSTIC)
+    finger_safety = diagnostic.pop("finger_safety")
     base_stage = copy.deepcopy(base.pop("stage"))
     diagnostic_stage = copy.deepcopy(diagnostic.pop("stage"))
     base_task = base["frozen_inputs"].pop("task7b2_runtime_profile")
@@ -60,6 +61,33 @@ def test_diagnostic_runtime_changes_only_frozen_stage() -> None:
     assert diagnostic_stage["sha256"] == Z_UP_METERS_STAGE_SHA256
     assert diagnostic_task != base_task
     assert diagnostic_kinematics != base_kinematics
+    assert finger_safety == {
+        "classification": "DIAGNOSTIC_ONLY_NOT_FINAL_CONTROL_MAPPING",
+        "dof_names": ["left_finger", "right_finger"],
+        "dof_indices": [7, 8],
+        "source_limits_m": {
+            "left_finger": {"lower": 0.021, "upper": 0.057},
+            "right_finger": {"lower": -0.057, "upper": -0.021},
+        },
+        "source_urdf": {
+            "path": "generated/urdf/follower_left.urdf",
+            "sha256": (
+                "d9e4b32723ee71dfce26fb4e78546cfcfef147b2d7dbf5e53e3620e3d8aa96bd"
+            ),
+            "left_joint_xpath": "joint[@name='left_finger']/limit",
+            "right_joint_xpath": "joint[@name='right_finger']/limit",
+            "right_mimic": {
+                "joint": "left_finger",
+                "multiplier": -1.0,
+                "offset": 0.0,
+            },
+        },
+        "require_world_reset": True,
+        "require_immediate_readback": True,
+        "require_zero_pair_overlap": True,
+        "abort_on_first_runtime_violation": True,
+        "pair_overlap_tolerance_m3": 0.0,
+    }
 
 
 def test_isolated_task_profile_changes_only_stage_binding_and_scope() -> None:

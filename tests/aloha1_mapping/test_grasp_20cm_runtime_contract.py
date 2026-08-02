@@ -21,6 +21,7 @@ from tools.aloha1_mapping.grasp_20cm_isaac_bindings import bottle_tensor_lifecyc
 from tools.aloha1_mapping.grasp_20cm_isaac_bindings import build_lula_cspace_phase_targets
 from tools.aloha1_mapping.grasp_20cm_isaac_bindings import derive_gripper_closeup_camera_geometry
 from tools.aloha1_mapping.grasp_20cm_isaac_bindings import derive_overview_camera_geometry
+from tools.aloha1_mapping.grasp_20cm_isaac_bindings import derive_subject_bounding_closeup_camera_geometry
 from tools.aloha1_mapping.grasp_20cm_isaac_bindings import formal_phase_bottle_dynamic
 from tools.aloha1_mapping.grasp_20cm_isaac_bindings import initial_pose_hold_complete
 from tools.aloha1_mapping.grasp_20cm_isaac_bindings import open_pregrasp_evidence_ready
@@ -33,6 +34,7 @@ from tools.aloha1_mapping.grasp_20cm_isaac_bindings import solver_active_contact
 from tools.aloha1_mapping.grasp_20cm_runtime import EXPECTED_DOF_ORDER
 from tools.aloha1_mapping.grasp_20cm_runtime import FrozenInputError
 from tools.aloha1_mapping.grasp_20cm_runtime import Grasp20cmRuntimeAdapter
+from tools.aloha1_mapping.grasp_20cm_runtime import apply_verified_session_sublayers
 from tools.aloha1_mapping.grasp_20cm_runtime import load_and_verify_config
 from tools.aloha1_mapping.grasp_20cm_runtime import validate_composed_stage
 from tools.aloha1_mapping.grasp_20cm_runtime import verify_frozen_file
@@ -50,6 +52,41 @@ class _FakePrim:
 
     def IsValid(self) -> bool:  # noqa: N802 - matches the USD API.
         return self._valid
+
+
+class _FakeSessionLayer:
+    def __init__(self) -> None:
+        self.subLayerPaths: list[str] = []
+
+
+class _FakeStageWithSession:
+    def __init__(self) -> None:
+        self.session = _FakeSessionLayer()
+
+    def GetSessionLayer(self) -> _FakeSessionLayer:  # noqa: N802
+        return self.session
+
+
+def test_verified_session_sublayer_is_inserted_once() -> None:
+    stage = _FakeStageWithSession()
+    records = [
+        {
+            "absolute_path": "/tmp/finger_source_limits.usda",
+            "sha256": "a" * 64,
+        }
+    ]
+
+    first = apply_verified_session_sublayers(stage=stage, records=records)
+    second = apply_verified_session_sublayers(stage=stage, records=records)
+
+    assert stage.session.subLayerPaths == [
+        "/tmp/finger_source_limits.usda"
+    ]
+    assert first["inserted_paths"] == ["/tmp/finger_source_limits.usda"]
+    assert second["inserted_paths"] == []
+    assert second["already_present_paths"] == [
+        "/tmp/finger_source_limits.usda"
+    ]
 
 
 class _FakeContinuousTrajectory:
@@ -898,6 +935,61 @@ def test_closeup_camera_can_use_opposite_ab_side_without_changing_target() -> No
     assert opposite["axial_side"] == -1
 
 
+def test_subject_bounding_closeup_frames_release_bottle_and_both_fingers() -> None:
+    points = np.asarray(
+        [
+            [0.0437, -0.0179, 0.0317],
+            [-0.0437, 0.1687, 0.0334],
+            [-0.2135, -0.1755, 0.3970],
+            [-0.3169, -0.2232, 0.3930],
+        ],
+        dtype=np.float64,
+    )
+    result = derive_subject_bounding_closeup_camera_geometry(
+        subject_points_world_m=points,
+        bottle_axis_world=[-0.4244923228, 0.9054315368, 0.0],
+        horizontal_fov_rad=np.deg2rad(65.0),
+        vertical_fov_rad=np.deg2rad(40.0),
+        near_clipping_m=1.0,
+        frame_margin_fraction=0.15,
+    )
+
+    target = np.asarray(result["target_world_m"])
+    position = np.asarray(result["position_world_m"])
+    radius = max(float(np.linalg.norm(point - target)) for point in points)
+    distance = float(np.linalg.norm(position - target))
+    usable_half_fov = np.deg2rad(40.0) * 0.5 * (1.0 - 0.15)
+
+    assert target == pytest.approx((points.min(axis=0) + points.max(axis=0)) / 2.0)
+    assert distance >= 1.0 + radius
+    assert np.arctan2(radius, distance) <= usable_half_fov
+    assert result["subject_point_count"] == 4
+    assert result["derivation"] == (
+        "CURRENT_FRAME_BOTTLE_AB_AND_BILATERAL_FINGER_BOUNDING_SPHERE"
+    )
+
+
+def test_subject_bounding_closeup_rejects_non_horizontal_bottle_axis() -> None:
+    with pytest.raises(ValueError, match="horizontal"):
+        derive_subject_bounding_closeup_camera_geometry(
+            subject_points_world_m=[[0, 0, 0], [1, 0, 0]],
+            bottle_axis_world=[1, 0, 0.1],
+            horizontal_fov_rad=1.0,
+            vertical_fov_rad=0.8,
+            near_clipping_m=0.1,
+        )
+
+
+def test_pending_evidence_camera_uses_full_finger_collider_geometry() -> None:
+    source = inspect.getsource(
+        IsaacGrasp20cmBindings.prepare_pending_evidence_cameras
+    )
+
+    assert "self._finger_collider_world_points()" in source
+    assert 'finger_points["left"]' in source
+    assert 'finger_points["right"]' in source
+
+
 def test_gui_exposes_run_abort_reset_and_workspace_two() -> None:
     source = GUI_SCRIPT.read_text(encoding="utf-8")
     assert 'ui.Button("Run: Grasp + Lift 20 cm"' in source
@@ -1086,6 +1178,7 @@ def test_isaac_binding_enforces_initialization_and_per_frame_finger_safety() -> 
     assert '"finger_safety"' in source
     assert '"first_violation"' in source
     assert "abort_on_first_runtime_violation" in source
+    assert '"session_sublayer_application"' in source
 
 
 def test_button_callbacks_do_not_contain_blocking_loops() -> None:

@@ -242,6 +242,100 @@ def derive_gripper_closeup_camera_geometry(
     }
 
 
+def derive_subject_bounding_closeup_camera_geometry(
+    *,
+    subject_points_world_m: Sequence[Sequence[float]],
+    bottle_axis_world: Sequence[float],
+    horizontal_fov_rad: float,
+    vertical_fov_rad: float,
+    near_clipping_m: float,
+    frame_margin_fraction: float = 0.15,
+    axial_side: int = 1,
+) -> dict[str, Any]:
+    """Frame current Bottle500 A/B and both finger origins without guessing.
+
+    A sphere around the supplied world points is fitted inside the smaller
+    usable camera half-FOV.  The near-plane constraint is evaluated against
+    the same sphere.  This is an evidence-camera operation only; it does not
+    modify physics, controls, or the simulated state.
+    """
+
+    points = np.asarray(subject_points_world_m, dtype=np.float64)
+    axis = np.asarray(bottle_axis_world, dtype=np.float64)
+    if points.ndim != 2 or points.shape[1] != 3 or len(points) < 2:
+        raise ValueError("subject points must contain at least two 3-vectors")
+    if axis.shape != (3,):
+        raise ValueError("bottle axis must be a 3-vector")
+    if not np.isfinite(points).all() or not np.isfinite(axis).all():
+        raise ValueError("closeup framing inputs must be finite")
+    if abs(float(axis[2])) > 1e-6:
+        raise ValueError("Bottle500 axis must remain horizontal")
+    axis_norm = float(np.linalg.norm(axis))
+    if axis_norm <= 0.0:
+        raise ValueError("bottle axis must be nonzero")
+    axis /= axis_norm
+    if axial_side not in {-1, 1}:
+        raise ValueError("axial_side must be either -1 or 1")
+    if (
+        not math.isfinite(horizontal_fov_rad)
+        or not math.isfinite(vertical_fov_rad)
+        or min(horizontal_fov_rad, vertical_fov_rad) <= 0.0
+        or max(horizontal_fov_rad, vertical_fov_rad) >= math.pi
+    ):
+        raise ValueError("camera FOV values must be finite angles in (0, pi)")
+    if not math.isfinite(near_clipping_m) or near_clipping_m < 0.0:
+        raise ValueError("near clipping distance must be finite and non-negative")
+    if not 0.0 <= frame_margin_fraction < 1.0:
+        raise ValueError("frame margin fraction must be in [0, 1)")
+
+    target = (points.min(axis=0) + points.max(axis=0)) / 2.0
+    radius = max(float(np.linalg.norm(point - target)) for point in points)
+    if radius <= 0.0:
+        raise ValueError("subject bounding sphere must have positive radius")
+    usable_half_fov = (
+        0.5
+        * min(float(horizontal_fov_rad), float(vertical_fov_rad))
+        * (1.0 - float(frame_margin_fraction))
+    )
+    fov_distance = radius / math.tan(usable_half_fov)
+    near_plane_distance = float(near_clipping_m) + radius
+    camera_distance = max(fov_distance, near_plane_distance)
+
+    baseline_offset = (
+        axis * float(axial_side) * 1.25
+        + np.asarray([0.0, 0.0, 0.75], dtype=np.float64)
+    )
+    offset_direction = baseline_offset / np.linalg.norm(baseline_offset)
+    position = target + offset_direction * camera_distance
+    forward = target - position
+    forward /= np.linalg.norm(forward)
+    return {
+        "position_world_m": position.tolist(),
+        "target_world_m": target.tolist(),
+        "camera_forward_world": forward.tolist(),
+        "bottle_axis_world": axis.tolist(),
+        "subject_point_count": len(points),
+        "subject_bounds_world_m": {
+            "minimum": points.min(axis=0).tolist(),
+            "maximum": points.max(axis=0).tolist(),
+        },
+        "bounding_sphere_radius_m": radius,
+        "camera_distance_m": camera_distance,
+        "fov_distance_m": fov_distance,
+        "near_plane_distance_m": near_plane_distance,
+        "horizontal_fov_rad": float(horizontal_fov_rad),
+        "vertical_fov_rad": float(vertical_fov_rad),
+        "usable_half_fov_rad": usable_half_fov,
+        "near_clipping_m": float(near_clipping_m),
+        "frame_margin_fraction": float(frame_margin_fraction),
+        "axial_side": int(axial_side),
+        "derivation": (
+            "CURRENT_FRAME_BOTTLE_AB_AND_BILATERAL_FINGER_BOUNDING_SPHERE"
+        ),
+        "scope": "DIAGNOSTIC_EVIDENCE_CAMERA_ONLY_NO_PHYSICS_CHANGE",
+    }
+
+
 def derive_overview_camera_geometry(
     *,
     base_position_world_m: Sequence[float],
@@ -2634,6 +2728,122 @@ class IsaacGrasp20cmBindings:
             return value
         return str(value)
 
+    def prepare_pending_evidence_cameras(
+        self,
+        *,
+        render_settle_updates: int,
+    ) -> dict[str, Any]:
+        """Refit only the sparse closeup camera around current evidence.
+
+        The collision-only pipeline calls this with the timeline paused and
+        performs one application update before reading the render product.
+        The overview camera and all simulation state remain unchanged.
+        """
+
+        if len(self._pending_capture_frames) != 1:
+            raise RuntimeError(
+                "evidence camera refit requires exactly one pending frame"
+            )
+        if render_settle_updates < 1:
+            raise ValueError("render_settle_updates must be positive")
+        pending = self._pending_capture_frames[0]
+        telemetry = self.telemetry[int(pending["telemetry_index"])]
+        bottle = telemetry["bottle"]
+        from isaacsim.core.utils.numpy.rotations import quats_to_rot_matrices
+
+        bottle_position = np.asarray(
+            bottle["position_world_m"],
+            dtype=np.float64,
+        )
+        bottle_rotation = quats_to_rot_matrices(
+            np.asarray(bottle["orientation_wxyz"], dtype=np.float64)
+        )
+        bottle_axis_config = self.task_profile["config"]["bottle"]["axis"]
+        a_world = (
+            bottle_rotation
+            @ np.asarray(bottle_axis_config["a_local_m"], dtype=np.float64)
+            + bottle_position
+        )
+        b_world = (
+            bottle_rotation
+            @ np.asarray(bottle_axis_config["b_local_m"], dtype=np.float64)
+            + bottle_position
+        )
+        left_origin, _ = self._get_world_pose(
+            str(
+                self.task_profile["config"]["robot"]
+                ["left_finger_collider"]
+            )
+        )
+        right_origin, _ = self._get_world_pose(
+            str(
+                self.task_profile["config"]["robot"]
+                ["right_finger_collider"]
+            )
+        )
+        finger_points = self._finger_collider_world_points()
+        subject_points = np.concatenate(
+            (
+                np.asarray([a_world, b_world], dtype=np.float64),
+                finger_points["left"],
+                finger_points["right"],
+            ),
+            axis=0,
+        )
+        camera_record = self.video_cameras["gripper_closeup"]
+        camera = camera_record["camera"]
+        clipping = camera.get_clipping_range()
+        geometry = derive_subject_bounding_closeup_camera_geometry(
+            subject_points_world_m=subject_points,
+            bottle_axis_world=(
+                self.task_profile["kinematics"]["placement"]["bottle_axis"]
+                ["unit_world"]
+            ),
+            horizontal_fov_rad=float(camera.get_horizontal_fov()),
+            vertical_fov_rad=float(camera.get_vertical_fov()),
+            near_clipping_m=float(clipping[0]),
+            axial_side=self.closeup_axial_side,
+        )
+        position = np.asarray(geometry["position_world_m"], dtype=np.float64)
+        target = np.asarray(geometry["target_world_m"], dtype=np.float64)
+        orientation = self._look_at_quaternion(position, target)
+        camera.set_world_pose(
+            position=position,
+            orientation=orientation,
+            camera_axes="usd",
+        )
+        matrix = np.eye(4, dtype=np.float64)
+        matrix[:3, :3] = quats_to_rot_matrices(orientation)
+        matrix[:3, 3] = position
+        camera_record.update(
+            {
+                "position_world_m": position.tolist(),
+                "target_world_m": target.tolist(),
+                "orientation_wxyz": orientation.tolist(),
+                "camera_world_matrix": matrix.tolist(),
+                "derivation": {
+                    **geometry,
+                    "physics_frame": int(pending["physics_frame"]),
+                    "time_s": float(pending["time_s"]),
+                    "runtime_phase": str(pending["phase"]),
+                    "clipping_range_m": [
+                        float(clipping[0]),
+                        float(clipping[1]),
+                    ],
+                    "render_settle_updates": int(render_settle_updates),
+                },
+            }
+        )
+        return {
+            "status": "PASS",
+            "view": "gripper_closeup",
+            "physics_frame": int(pending["physics_frame"]),
+            "runtime_phase": str(pending["phase"]),
+            "render_settle_updates": int(render_settle_updates),
+            "derivation": camera_record["derivation"],
+            "scope": "DIAGNOSTIC_EVIDENCE_CAMERA_ONLY_NO_PHYSICS_CHANGE",
+        }
+
     def capture_pending_render_frame(self) -> bool:
         """Save both camera products after the enclosing app update."""
 
@@ -3415,6 +3625,14 @@ class IsaacGrasp20cmBindings:
                 "kit": "107.3.3",
                 "physx": "107.3.26",
                 "delegate": self.delegate_readback,
+                "session_sublayer_application": self.profile.get(
+                    "session_sublayer_application",
+                    {
+                        "status": "NOT_APPLIED",
+                        "inserted_paths": [],
+                        "root_layer_saved": False,
+                    },
+                ),
                 "solve_articulation_contact_last": bool(
                     self.physics_context
                     .get_solve_articulation_contact_last()

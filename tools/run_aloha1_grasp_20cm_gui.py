@@ -15,6 +15,7 @@ import traceback
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
+EVIDENCE_CAMERA_RENDER_SETTLE_UPDATES = 20
 DEFAULT_CONFIG = ROOT / "configs/aloha1_grasp_20cm_gui.yaml"
 DEFAULT_ARTIFACT_ROOT = (
     ROOT
@@ -638,6 +639,7 @@ def main() -> int:
 
         from examples.aloha_isaac.scripts.open_workcell_gui import _move_current_process_window_to_workspace
         from tools.aloha1_mapping.grasp_20cm_isaac_bindings import IsaacGrasp20cmBindings
+        from tools.aloha1_mapping.grasp_20cm_runtime import apply_verified_session_sublayers
         from tools.aloha1_mapping.grasp_20cm_runtime import validate_composed_stage
 
         settings = carb.settings.get_settings()
@@ -652,6 +654,12 @@ def main() -> int:
         if not open_stage(str(stage_path)):
             raise RuntimeError(f"failed to open approved Stage: {stage_path}")
         stage = get_current_stage()
+        profile["session_sublayer_application"] = (
+            apply_verified_session_sublayers(
+                stage=stage,
+                records=profile["session_sublayers"],
+            )
+        )
         validate_composed_stage(
             stage=stage,
             expected_root_prim=str(config["stage"]["root_prim"]),
@@ -847,14 +855,29 @@ def main() -> int:
                     not args.skip_video_capture
                     and bindings.has_pending_video_frame
                 ):
-                    if args.collision_evidence_only and not (
-                        bindings.pending_requires_collider_evidence(
+                    requires_collision_evidence = (
+                        args.collision_evidence_only
+                        and bindings.pending_requires_collider_evidence(
                             terminal=terminal
                         )
+                    )
+                    if (
+                        args.collision_evidence_only
+                        and not requires_collision_evidence
                     ):
                         bindings.discard_pending_video_frame()
                     else:
                         timeline.pause()
+                        if requires_collision_evidence:
+                            bindings.prepare_pending_evidence_cameras(
+                                render_settle_updates=(
+                                    EVIDENCE_CAMERA_RENDER_SETTLE_UPDATES
+                                )
+                            )
+                            for _ in range(
+                                EVIDENCE_CAMERA_RENDER_SETTLE_UPDATES
+                            ):
+                                app.update()
                         captured = bindings.capture_pending_render_frame()
                 if captured:
                     bindings.capture_required_collider_evidence(

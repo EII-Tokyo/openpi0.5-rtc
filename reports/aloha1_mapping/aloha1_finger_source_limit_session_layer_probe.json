@@ -1,0 +1,51 @@
+{
+  "classification": "SESSION_ONLY_SOURCE_DERIVED_LIMIT_READBACK",
+  "final_or_default_asset_modified": false,
+  "gates": {
+    "authored_limits_match_source": true,
+    "root_layer_not_saved": true,
+    "root_sublayers_unchanged": true,
+    "runtime_limits_match_source": true,
+    "runtime_pass": true,
+    "session_layer_inserted_exactly_once": true,
+    "source_stage_hash_unchanged": true
+  },
+  "inputs": {
+    "runtime_output": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/session_layer_probe/runtime.json",
+      "sha256": "0bad4b9e258976ac5818e7207a4500fdefd83684c5cb4d64fccb4d568fe13197"
+    },
+    "session_layer": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/finger_limit_pair_collision_candidate/1.0/configuration/finger_source_limits.usda",
+      "expected_sha256": "2547e6fb374c213b5c6c54f200c7ced37605ab0e1a11735d0a32c0a231fd260f",
+      "sha256": "2547e6fb374c213b5c6c54f200c7ced37605ab0e1a11735d0a32c0a231fd260f"
+    },
+    "source_urdf": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_left.urdf",
+      "limits": {
+        "left_finger": {
+          "lower": 0.021,
+          "upper": 0.057
+        },
+        "right_finger": {
+          "lower": -0.057,
+          "upper": -0.021
+        }
+      },
+      "mimic": {
+        "joint": "left_finger",
+        "multiplier": -1.0,
+        "offset": 0.0
+      },
+      "sha256": "d9e4b32723ee71dfce26fb4e78546cfcfef147b2d7dbf5e53e3620e3d8aa96bd"
+    },
+    "stage": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "sha256": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9"
+    }
+  },
+  "session_layer_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/finger_limit_pair_collision_candidate/1.0/configuration/finger_source_limits.usda",
+  "source_stage_sha256": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9",
+  "status": "PASS",
+  "task8": "NOT_RUN"
+}

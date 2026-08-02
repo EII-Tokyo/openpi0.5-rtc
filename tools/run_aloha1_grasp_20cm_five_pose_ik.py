@@ -22,6 +22,10 @@ ISAAC_PYTHON = ROOT / ".venv_issac/bin/python"
 ISAAC_LAUNCHER = ROOT / "tools/run_aloha1_grasp_20cm_gui.py"
 EXPECTED_SAMPLE_IDS = [f"sample_{index:02d}" for index in range(1, 6)]
 CLASSIFICATION = "DIAGNOSTIC_ONLY_NOT_FINAL_CONTROL_MAPPING"
+FRESH_VIDEO_POLICY = "FRESH_PRIMARY_VIDEOS"
+HISTORICAL_VIDEO_POLICY = (
+    "HISTORICAL_USER_CONFIRMED_VIDEOS_PLUS_FRESH_COLLISION_SCREENSHOTS"
+)
 
 
 def _sha256(path: Path) -> str:
@@ -40,6 +44,65 @@ def _atomic_json(path: Path, payload: dict[str, Any]) -> None:
         encoding="utf-8",
     )
     temporary.replace(path)
+
+
+def _load_historical_visual_evidence(
+    record: dict[str, Any],
+) -> dict[str, Any]:
+    """Verify the user-confirmed attempt-7 report and its five videos."""
+
+    report_path = Path(str(record.get("path", "")))
+    if not report_path.is_absolute():
+        report_path = ROOT / report_path
+    report_path = report_path.resolve(strict=True)
+    expected_report_hash = str(record.get("sha256", ""))
+    actual_report_hash = _sha256(report_path)
+    if actual_report_hash != expected_report_hash:
+        raise RuntimeError("historical visual report hash changed")
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    if (
+        report.get("status") != "PASS"
+        or report.get("visual_model_review") != "PASS"
+        or report.get("user_confirmation") != "PASS"
+    ):
+        raise RuntimeError("historical visual report is not fully confirmed")
+    samples = list(report.get("samples", []))
+    if [str(item.get("sample_id")) for item in samples] != EXPECTED_SAMPLE_IDS:
+        raise RuntimeError("historical visual sample identity drift")
+    videos: list[dict[str, Any]] = []
+    for sample in samples:
+        if sample.get("status") != "PASS":
+            raise RuntimeError(
+                f"historical visual sample is not PASS: {sample.get('sample_id')}"
+            )
+        annotated = sample.get("videos", {}).get("annotated", {})
+        video_path = Path(str(annotated.get("absolute_path", ""))).resolve(
+            strict=True
+        )
+        expected_video_hash = str(annotated.get("sha256", ""))
+        actual_video_hash = _sha256(video_path)
+        if actual_video_hash != expected_video_hash:
+            raise RuntimeError(
+                f"historical annotated video hash changed: {sample.get('sample_id')}"
+            )
+        videos.append(
+            {
+                "sample_id": str(sample["sample_id"]),
+                "absolute_path": str(video_path),
+                "sha256": actual_video_hash,
+            }
+        )
+    return {
+        "status": "PASS",
+        "report_absolute_path": str(report_path),
+        "report_sha256": actual_report_hash,
+        "sample_count": len(videos),
+        "annotated_videos": videos,
+        "semantic_boundary": (
+            "HISTORICAL_VIDEOS_PROVE_GRASP_OUTCOME; FRESH_RUNTIME_AND_"
+            "COLLISION_SCREENSHOTS_PROVE_NEW_FINGER_SAFETY_CONTRACT"
+        ),
+    }
 
 
 def reuse_accepted_runtime_records(
@@ -145,8 +208,18 @@ def resume_verified_runtime_records(
 
 def build_five_pose_summary(
     records: list[dict[str, Any]],
+    *,
+    visual_evidence_policy: str = FRESH_VIDEO_POLICY,
 ) -> dict[str, Any]:
     """Evaluate the fixed five-sample machine gate before visual review."""
+
+    if visual_evidence_policy not in {
+        FRESH_VIDEO_POLICY,
+        HISTORICAL_VIDEO_POLICY,
+    }:
+        raise ValueError(
+            f"unsupported visual evidence policy: {visual_evidence_policy}"
+        )
 
     sample_ids = [str(record.get("sample_id")) for record in records]
     process_ids = [
@@ -197,6 +270,17 @@ def build_five_pose_summary(
                 and repeat.get("finger_safety_violation_count") == 0
             ),
         }
+        primary_visual_evidence_bound = (
+            primary.get("video_count") == 2
+            if visual_evidence_policy == FRESH_VIDEO_POLICY
+            else (
+                primary.get("video_count") == 0
+                and primary.get("video_capture_policy")
+                == "SKIPPED_BY_USER_DECISION"
+                and primary.get("historical_visual_evidence_status")
+                == "PASS"
+            )
+        )
         evidence_gates = {
             "primary_process_exit_zero": primary.get("exit_code") == 0,
             "repeat_process_exit_zero": repeat.get("exit_code") == 0,
@@ -207,7 +291,7 @@ def build_five_pose_summary(
                 repeat.get("evidence_status") == "PASS"
             ),
             "raw_and_annotated_video_present": (
-                primary.get("video_count") == 2
+                primary_visual_evidence_bound
             ),
             "collision_screenshot_records_complete": (
                 repeat.get("collision_record_count") == 24
@@ -272,6 +356,14 @@ def build_five_pose_summary(
             record.get("primary", {}).get("video_count") == 2
             for record in records
         ),
+        "historical_visual_evidence_sample_count": sum(
+            record.get("primary", {}).get(
+                "historical_visual_evidence_status"
+            )
+            == "PASS"
+            for record in records
+        ),
+        "visual_evidence_policy": visual_evidence_policy,
         "fresh_process_count": len(set(process_ids)),
         "failed_sample_ids": failed_sample_ids,
         "evidence_failed_sample_ids": evidence_failed_sample_ids,
@@ -388,6 +480,8 @@ def _read_run_evidence(
     readback_tolerance_rad: float,
     first_frame_jump_tolerance_rad: float,
     hold_frames: int,
+    skip_primary_video: bool = False,
+    historical_visual_evidence: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     result = dict(process)
     runtime_path = artifact_root / "aloha1_grasp_20cm_runtime.json"
@@ -396,6 +490,7 @@ def _read_run_evidence(
         artifact_root
         / "video_attempt_001/video/candidate_manifest.json"
     )
+    skipped_video_path = artifact_root / "video_capture_skipped.json"
     missing_mandatory = [
         str(path)
         for path in (runtime_path, telemetry_path)
@@ -419,6 +514,11 @@ def _read_run_evidence(
     candidate = (
         json.loads(candidate_path.read_text(encoding="utf-8"))
         if candidate_path.is_file()
+        else {}
+    )
+    skipped_video = (
+        json.loads(skipped_video_path.read_text(encoding="utf-8"))
+        if skipped_video_path.is_file()
         else {}
     )
     expected_transform = np.asarray(
@@ -524,7 +624,7 @@ def _read_run_evidence(
         ),
     }
     raw_videos = list(candidate.get("videos", []))
-    if collision_repeat:
+    if collision_repeat or skip_primary_video:
         validated_videos, video_errors = [], []
     else:
         validated_videos, video_errors = _validated_video_records(raw_videos)
@@ -535,6 +635,19 @@ def _read_run_evidence(
             collision.get("status")
             in {"PASS", "AWAITING_VISUAL_MODEL_REVIEW"}
             and len(collision_records) == 24
+        )
+    elif skip_primary_video:
+        historical = historical_visual_evidence or {}
+        gates["primary_video_intentionally_skipped"] = (
+            skipped_video.get("status") == "PASS"
+            and skipped_video.get("classification")
+            == "MACHINE_ONLY_CANDIDATE_SCREENING"
+            and skipped_video.get("machine_status") == runtime.get("status")
+            and skipped_video.get("task8") == "NOT_RUN"
+        )
+        gates["historical_visual_evidence_bound"] = (
+            historical.get("status") == "PASS"
+            and len(str(historical.get("report_sha256", ""))) == 64
         )
     else:
         gates["clean_primary_video"] = (
@@ -547,7 +660,7 @@ def _read_run_evidence(
         name for name, passed in gates.items() if not passed
     )
     evidence_errors.extend(video_errors)
-    if not candidate_path.is_file():
+    if not candidate_path.is_file() and not skip_primary_video:
         evidence_errors.append(f"missing:{candidate_path}")
     result.update(
         {
@@ -593,6 +706,29 @@ def _read_run_evidence(
             "video_count": (
                 len(validated_videos) if not collision_repeat else 0
             ),
+            "video_capture_policy": (
+                "SKIPPED_BY_USER_DECISION"
+                if skip_primary_video
+                else "FRESH_CAPTURE_REQUIRED"
+            ),
+            "video_capture_skipped_record_absolute_path": (
+                str(skipped_video_path.resolve())
+                if skip_primary_video and skipped_video_path.is_file()
+                else None
+            ),
+            "video_capture_skipped_record_sha256": (
+                _sha256(skipped_video_path)
+                if skip_primary_video and skipped_video_path.is_file()
+                else None
+            ),
+            "historical_visual_evidence_status": (
+                (historical_visual_evidence or {}).get("status")
+                if skip_primary_video
+                else None
+            ),
+            "historical_visual_evidence": (
+                historical_visual_evidence if skip_primary_video else None
+            ),
             "collision_status": collision.get("status"),
             "collision_records": (
                 collision_records if collision_repeat else []
@@ -621,6 +757,15 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--reuse-results", type=Path)
     parser.add_argument("--resume-results", type=Path)
+    parser.add_argument(
+        "--skip-primary-video-capture",
+        action="store_true",
+        help=(
+            "Run fresh primary physics without encoding new MP4 files; "
+            "requires a frozen historical_user_confirmed_visual_evidence "
+            "record in the selected config."
+        ),
+    )
     parser.add_argument("--timeout-s", type=float, default=900.0)
     return parser.parse_args()
 
@@ -635,6 +780,28 @@ def main() -> int:
         raise RuntimeError("five-pose config schema mismatch")
     if config.get("classification") != CLASSIFICATION:
         raise RuntimeError("five-pose classification mismatch")
+    skip_primary_video = bool(args.skip_primary_video_capture)
+    required_primary_videos = int(
+        config.get("runtime", {}).get("required_primary_videos", -1)
+    )
+    if skip_primary_video != (required_primary_videos == 0):
+        raise RuntimeError(
+            "primary video policy does not match frozen config"
+        )
+    historical_visual_evidence = (
+        _load_historical_visual_evidence(
+            config["frozen_inputs"][
+                "historical_user_confirmed_visual_evidence"
+            ]
+        )
+        if skip_primary_video
+        else None
+    )
+    visual_evidence_policy = (
+        HISTORICAL_VIDEO_POLICY
+        if skip_primary_video
+        else FRESH_VIDEO_POLICY
+    )
     if (
         preflight.get("status") != "PASS"
         or preflight.get("selected_sample_count") != 5
@@ -796,6 +963,8 @@ def main() -> int:
             "absolute_path": str(runtime_config_path),
             "sha256": runtime_config_sha256,
         },
+        "visual_evidence_policy": visual_evidence_policy,
+        "historical_visual_evidence": historical_visual_evidence,
         "samples": records,
         "reused_successes": reuse_manifest,
         "task8": "NOT_RUN",
@@ -837,13 +1006,16 @@ def main() -> int:
         ]
         stage_hash_before_primary = _sha256(stage_path)
         primary_root = sample_root / "primary"
-        primary_process = _run_logged(
-            command=[
+        primary_command = [
                 *common,
                 "--artifact-root",
                 str(primary_root),
                 "--skip-collider-evidence",
-            ],
+            ]
+        if skip_primary_video:
+            primary_command.append("--skip-video-capture")
+        primary_process = _run_logged(
+            command=primary_command,
             log_path=sample_root / "primary.log",
             timeout_s=timeout_s,
         )
@@ -857,6 +1029,8 @@ def main() -> int:
             readback_tolerance_rad=readback_gate,
             first_frame_jump_tolerance_rad=jump_gate,
             hold_frames=hold_frames,
+            skip_primary_video=skip_primary_video,
+            historical_visual_evidence=historical_visual_evidence,
         )
         primary["source_stage_sha256_before_process"] = (
             stage_hash_before_primary
@@ -942,7 +1116,10 @@ def main() -> int:
         )
         aggregate = {
             "schema_version": 1,
-            **build_five_pose_summary(records),
+            **build_five_pose_summary(
+                records,
+                visual_evidence_policy=visual_evidence_policy,
+            ),
             "classification": CLASSIFICATION,
             "config": {
                 "absolute_path": str(config_path),
@@ -964,6 +1141,7 @@ def main() -> int:
                 "sha256_before": stage_sha256,
                 "sha256_after": _sha256(stage_path),
             },
+            "historical_visual_evidence": historical_visual_evidence,
             "reused_successes": reuse_manifest,
             "samples": records,
             "boundaries": {

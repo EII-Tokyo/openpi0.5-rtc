@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 from tools.probe_aloha1_finger_limit_collision_semantics import aggregate_report
+from tools.probe_aloha1_finger_limit_collision_semantics import validate_session_layer_probe
 
 ROOT = Path(__file__).resolve().parents[2]
 REPORT = (
@@ -121,3 +122,38 @@ def test_generated_report_has_required_machine_schema() -> None:
     }
     assert isinstance(report["candidate_created"], bool)
     assert report["task8"] == "NOT_RUN"
+
+
+def test_session_layer_probe_requires_source_limits_and_immutable_root() -> None:
+    source_limits = {
+        "left_finger": {"lower": 0.021, "upper": 0.057},
+        "right_finger": {"lower": -0.057, "upper": -0.021},
+    }
+    layer_path = "/tmp/finger_source_limits.usda"
+    record = {
+        "status": "PASS",
+        "stage": {
+            "sha256_before": "a" * 64,
+            "sha256_after": "a" * 64,
+            "root_sublayers_before": ["geometry.usda"],
+            "root_sublayers_after": ["geometry.usda"],
+        },
+        "session_sublayer_application": {
+            "status": "PASS",
+            "inserted_paths": [layer_path],
+            "after": [layer_path],
+            "root_layer_saved": False,
+        },
+        "runtime_readback": {"dof_limits": source_limits},
+        "composed_usd": {"authored_limits": source_limits},
+    }
+
+    result = validate_session_layer_probe(
+        record=record,
+        source_limits=source_limits,
+        expected_stage_sha256="a" * 64,
+        expected_layer_path=layer_path,
+    )
+
+    assert result["status"] == "PASS"
+    assert all(result["gates"].values())
