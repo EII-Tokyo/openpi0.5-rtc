@@ -44,3 +44,20 @@ def test_runtime_script_has_required_order_and_safety_contract():
         "save_stage",
     ):
         assert forbidden not in source
+
+
+def test_runtime_script_configures_verified_dual_panel_handoff():
+    source = Path("tools/isaac_sim/open_left_physics_inspector.py").read_text()
+
+    for required in (
+        'TABLE_COLLIDER = "/World/environment/worldBody/user_confirmed_table"',
+        'TABLE_INSPECTOR_WINDOW_TITLE = "Physics Inspector: ###PhysicsInspector2"',
+        "add_inspector_window()",
+        "PhysXInspectorModelControlType.JOINT_DRIVE",
+        "get_enable_quasi_static_mode_model().set_value(True)",
+        "get_fix_articulation_base_model().set_value(True)",
+        "get_enable_gravity_model().set_value(False)",
+        "CODEX_TABLE_INSPECTOR_READY",
+        "CODEX_DUAL_INSPECTOR_ACCEPTED",
+    ):
+        assert required in source
