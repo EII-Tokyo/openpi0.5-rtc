@@ -1,0 +1,162 @@
+{
+  "capture_count": 4,
+  "captures": [
+    {
+      "acceptance": "worst point, target, deviation vector and CAD normal are unobscured",
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/supplier_cad_cooking/brep_failure_screenshots/screenshots_annotated/left_convex_hull_contact_deviation_annotated.png",
+      "annotated_sha256": "6df0ee9024b44add6ee2c7531c545d7bbec9c7f223072eca45dee358f1d676f7",
+      "annotated_size_px": [
+        1920,
+        960
+      ],
+      "approximation": "convexHull",
+      "camera": {
+        "azimuth_deg": -58,
+        "coordinate_frame": "supplier CAD assembly metres",
+        "elevation_deg": 24,
+        "type": "matplotlib_orthographic_like_3d_projection"
+      },
+      "phase": "offline_cooking_geometry_failure",
+      "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/supplier_cad_cooking/brep_failure_screenshots/screenshots_raw/left_convex_hull_contact_deviation_raw.png",
+      "raw_sha256": "c5d09f1ae6c9d2e96d663d3cc3fd55ba3816fbefac89ba4839957860e6013c01",
+      "raw_size_px": [
+        1560,
+        960
+      ],
+      "side": "left",
+      "target": "supplier-CAD inward contact surface cooked deviation",
+      "visual_review_note": "Attempt 2 individually reviewed: both handed fingers and both approximations show the full exact B-Rep sample region plus an actual-scale close-up; the red B-Rep witness, black cooked target, magenta crossing vector and green inward normal are legible and unobscured. Decomposition close-ups use wireframe to prevent piece overdraw. PASS is screenshot-evidence quality only; all four exact geometry gates remain FAIL.",
+      "visual_review_status": "PASS"
+    },
+    {
+      "acceptance": "worst point, target, deviation vector and CAD normal are unobscured",
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/supplier_cad_cooking/brep_failure_screenshots/screenshots_annotated/left_convex_decomposition_contact_deviation_annotated.png",
+      "annotated_sha256": "f6cfb0a6d9bd352fe623883cd53d61d64d93dd0488be3b8df595201833099cc5",
+      "annotated_size_px": [
+        1920,
+        960
+      ],
+      "approximation": "convexDecomposition",
+      "camera": {
+        "azimuth_deg": -58,
+        "coordinate_frame": "supplier CAD assembly metres",
+        "elevation_deg": 24,
+        "type": "matplotlib_orthographic_like_3d_projection"
+      },
+      "phase": "offline_cooking_geometry_failure",
+      "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/supplier_cad_cooking/brep_failure_screenshots/screenshots_raw/left_convex_decomposition_contact_deviation_raw.png",
+      "raw_sha256": "8f2cd2eca1b03a042b2cbb32d2ece9db07f4b5e408b4f5334c6f689d9c3067de",
+      "raw_size_px": [
+        1560,
+        960
+      ],
+      "side": "left",
+      "target": "supplier-CAD inward contact surface cooked deviation",
+      "visual_review_note": "Attempt 2 individually reviewed: both handed fingers and both approximations show the full exact B-Rep sample region plus an actual-scale close-up; the red B-Rep witness, black cooked target, magenta crossing vector and green inward normal are legible and unobscured. Decomposition close-ups use wireframe to prevent piece overdraw. PASS is screenshot-evidence quality only; all four exact geometry gates remain FAIL.",
+      "visual_review_status": "PASS"
+    },
+    {
+      "acceptance": "worst point, target, deviation vector and CAD normal are unobscured",
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/supplier_cad_cooking/brep_failure_screenshots/screenshots_annotated/right_convex_hull_contact_deviation_annotated.png",
+      "annotated_sha256": "5b21d03fd50723534c625e9f2df3b30e370d00404f48b3bee7ca9b988a6b334d",
+      "annotated_size_px": [
+        1920,
+        960
+      ],
+      "approximation": "convexHull",
+      "camera": {
+        "azimuth_deg": 122,
+        "coordinate_frame": "supplier CAD assembly metres",
+        "elevation_deg": 24,
+        "type": "matplotlib_orthographic_like_3d_projection"
+      },
+      "phase": "offline_cooking_geometry_failure",
+      "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/supplier_cad_cooking/brep_failure_screenshots/screenshots_raw/right_convex_hull_contact_deviation_raw.png",
+      "raw_sha256": "a30cb239d4b908772c8b9d0b9368593ee8490c0572ec421e8af19dcfabaf93fb",
+      "raw_size_px": [
+        1560,
+        960
+      ],
+      "side": "right",
+      "target": "supplier-CAD inward contact surface cooked deviation",
+      "visual_review_note": "Attempt 2 individually reviewed: both handed fingers and both approximations show the full exact B-Rep sample region plus an actual-scale close-up; the red B-Rep witness, black cooked target, magenta crossing vector and green inward normal are legible and unobscured. Decomposition close-ups use wireframe to prevent piece overdraw. PASS is screenshot-evidence quality only; all four exact geometry gates remain FAIL.",
+      "visual_review_status": "PASS"
+    },
+    {
+      "acceptance": "worst point, target, deviation vector and CAD normal are unobscured",
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/supplier_cad_cooking/brep_failure_screenshots/screenshots_annotated/right_convex_decomposition_contact_deviation_annotated.png",
+      "annotated_sha256": "52fbf959dec5eefdc6ddfa00bb9966b92330a9eba48fd94a049b2dc157b63f1b",
+      "annotated_size_px": [
+        1920,
+        960
+      ],
+      "approximation": "convexDecomposition",
+      "camera": {
+        "azimuth_deg": 122,
+        "coordinate_frame": "supplier CAD assembly metres",
+        "elevation_deg": 24,
+        "type": "matplotlib_orthographic_like_3d_projection"
+      },
+      "phase": "offline_cooking_geometry_failure",
+      "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/supplier_cad_cooking/brep_failure_screenshots/screenshots_raw/right_convex_decomposition_contact_deviation_raw.png",
+      "raw_sha256": "85e1bc56f679688ca609616aab0b97648ac914ef301f7702f6bfde75889aa3ab",
+      "raw_size_px": [
+        1560,
+        960
+      ],
+      "side": "right",
+      "target": "supplier-CAD inward contact surface cooked deviation",
+      "visual_review_note": "Attempt 2 individually reviewed: both handed fingers and both approximations show the full exact B-Rep sample region plus an actual-scale close-up; the red B-Rep witness, black cooked target, magenta crossing vector and green inward normal are legible and unobscured. Decomposition close-ups use wireframe to prevent piece overdraw. PASS is screenshot-evidence quality only; all four exact geometry gates remain FAIL.",
+      "visual_review_status": "PASS"
+    }
+  ],
+  "final_or_default_collider_modified": false,
+  "geometry_certificate_status": "PASS_DETERMINISTIC_MEASUREMENT_FAIL_EXACT_SURFACE_GATE",
+  "geometry_classification": "DECOMPOSITION_MIXED_OR_WORSE",
+  "geometry_failure_count": 4,
+  "geometry_gate_status": "FAIL",
+  "geometry_profiles": [
+    {
+      "approximation": "convexDecomposition",
+      "geometry_status": "FAIL_CROSSES_INWARD_CAD_SURFACE",
+      "maximum_contact_surface_deviation_m": 0.0005481080863960236,
+      "side": "left",
+      "tessellation_error_budget_m": 4.76837158203125e-07
+    },
+    {
+      "approximation": "convexHull",
+      "geometry_status": "FAIL_CROSSES_INWARD_CAD_SURFACE",
+      "maximum_contact_surface_deviation_m": 0.0006812051301957348,
+      "side": "left",
+      "tessellation_error_budget_m": 4.76837158203125e-07
+    },
+    {
+      "approximation": "convexDecomposition",
+      "geometry_status": "FAIL_CROSSES_INWARD_CAD_SURFACE",
+      "maximum_contact_surface_deviation_m": 0.001349715599626581,
+      "side": "right",
+      "tessellation_error_budget_m": 4.76837158203125e-07
+    },
+    {
+      "approximation": "convexHull",
+      "geometry_status": "FAIL_CROSSES_INWARD_CAD_SURFACE",
+      "maximum_contact_surface_deviation_m": 0.0006812053973147838,
+      "side": "right",
+      "tessellation_error_budget_m": 4.76837158203125e-07
+    }
+  ],
+  "interpretation": "Screenshot PASS means the evidence is legible; it does not mean the cooked collider geometry passed its numerical gate.",
+  "retake_history": [
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/supplier_cad_cooking/brep_failure_screenshots/attempt1_rejected_low_contrast",
+      "attempt": 1,
+      "status": "REJECTED_DECOMPOSITION_CLOSEUP_OVERDRAW_LOW_CONTRAST"
+    }
+  ],
+  "runtime_video_reason": "no dynamic simulation was run; static cooked-geometry failure only",
+  "runtime_video_required": false,
+  "schema_version": 1,
+  "scope": "OFFLINE_EXACT_BREP_COOKED_GEOMETRY_FAILURE_SCREENSHOTS_NOT_RUNTIME_CONTACT",
+  "screenshot_evidence_status": "PASS",
+  "timeline_started": false
+}

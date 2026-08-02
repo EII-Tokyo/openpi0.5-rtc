@@ -1,0 +1,204 @@
+{
+  "brep_runs": [
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/supplier_cad_brep_contact_samples/run1.json",
+      "deterministic_signature": "401bbe06363a496e6c15e48388351abda6a5ed778139c302b7cdab7ac88b8bc2",
+      "process_id": 2565222,
+      "sha256": "78923043bbd1111c0399e414c2ed361ae4b3c1777901f3aa321971b0f04e1dd2"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/supplier_cad_brep_contact_samples/run2.json",
+      "deterministic_signature": "401bbe06363a496e6c15e48388351abda6a5ed778139c302b7cdab7ac88b8bc2",
+      "process_id": 2565277,
+      "sha256": "4fcda292ccc6930c8868a7135edd5a1fa87adf102e84975bb0ce7c5052d60124"
+    }
+  ],
+  "brep_sampling": {
+    "deterministic_signature": "401bbe06363a496e6c15e48388351abda6a5ed778139c302b7cdab7ac88b8bc2",
+    "fresh_process_count": 2,
+    "source_geometry": "trimmed OCCT B-Rep face",
+    "tessellation_used_for_contact_points": false
+  },
+  "comparison": {
+    "asset_decision": "REJECTED_EXACT_CAD_CONTACT_GATE",
+    "crossing_profile_count": 4,
+    "crossing_records": [
+      {
+        "approximation": "convexHull",
+        "crosses_beyond_numeric_tolerance": true,
+        "maximum_inward_crossing_m": 0.0006812051301957348,
+        "side": "left"
+      },
+      {
+        "approximation": "convexDecomposition",
+        "crosses_beyond_numeric_tolerance": true,
+        "maximum_inward_crossing_m": 0.0005481080863960236,
+        "side": "left"
+      },
+      {
+        "approximation": "convexHull",
+        "crosses_beyond_numeric_tolerance": true,
+        "maximum_inward_crossing_m": 0.0006812053973147838,
+        "side": "right"
+      },
+      {
+        "approximation": "convexDecomposition",
+        "crosses_beyond_numeric_tolerance": true,
+        "maximum_inward_crossing_m": 0.001349715599626581,
+        "side": "right"
+      }
+    ],
+    "decomposition_comparison": "DECOMPOSITION_MIXED_OR_WORSE",
+    "exact_surface_status": "ALL_PROFILES_CROSS_INWARD_CAD_SURFACE",
+    "final_or_default_collider_modified": false,
+    "numeric_tolerance_m": 4.76837158203125e-07,
+    "profile_count": 4,
+    "task_local_approximate_collider_acceptance": "HARD_BLOCKER_TASK_LOCAL_APPROXIMATION_TOLERANCE"
+  },
+  "comparison_numeric_tolerance_m": 4.76837158203125e-07,
+  "cooking_runs": [
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/supplier_cad_cooking/run1.json",
+      "process_id": 2519077,
+      "sha256": "ebdcd90f28ff50cb11270ebb94abb555cd73f2c49941e14e1b8feea8ec79ed21"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/supplier_cad_cooking/run2.json",
+      "process_id": 2520640,
+      "sha256": "ab3ceed793a0b0c74b218f39b2760ac704236b8b371495b76f99228d17cce75b"
+    }
+  ],
+  "deterministic_signature": "83949956fe32d0e4b9c425fce8198eabc594d68e1574dbacdea437feb66e21bb",
+  "final_or_default_collider_modified": false,
+  "numeric_tolerance_by_side": {
+    "left": {
+      "brep_membership_tolerance_m": 1e-10,
+      "derivation": "MAX(BREP_MEMBERSHIP_TOLERANCE,8_FLOAT32_ULP)",
+      "float32_quantization_allowance_m": 4.76837158203125e-07,
+      "float32_ulp_at_maximum_coordinate_m": 5.960464477539063e-08,
+      "float32_ulp_multiplier": 8,
+      "maximum_sample_coordinate_m": 0.589250795154119,
+      "numeric_tolerance_m": 4.76837158203125e-07
+    },
+    "right": {
+      "brep_membership_tolerance_m": 1e-10,
+      "derivation": "MAX(BREP_MEMBERSHIP_TOLERANCE,8_FLOAT32_ULP)",
+      "float32_quantization_allowance_m": 4.76837158203125e-07,
+      "float32_ulp_at_maximum_coordinate_m": 5.960464477539063e-08,
+      "float32_ulp_multiplier": 8,
+      "maximum_sample_coordinate_m": 0.589250795154119,
+      "numeric_tolerance_m": 4.76837158203125e-07
+    }
+  },
+  "profiles_by_side": {
+    "left": {
+      "convexDecomposition": {
+        "exact_brep_face_index_1_based": 117,
+        "exact_brep_sample_count": 2029,
+        "exact_surface_status": "FAIL_CROSSES_INWARD_CAD_SURFACE",
+        "geometry_signature": "a7d3ae8f384708eea37bb9e88d4963819b1188ccfe6d8b55f5534f7315da4804",
+        "maximum_combined_deviation_kind": "UNCOVERED_NEAREST_SURFACE",
+        "maximum_combined_sample_deviation_m": 0.008964634488268597,
+        "maximum_inward_crossing_m": 0.0005481080863960236,
+        "maximum_inward_crossing_sample_index": 645,
+        "maximum_inward_crossing_source_point_m": [
+          0.007155460158338379,
+          -0.5434730899981944,
+          0.4163709408997647
+        ],
+        "maximum_inward_crossing_target_point_m": [
+          0.006610354665389128,
+          -0.5434157971022189,
+          0.4163709408997647
+        ],
+        "maximum_undercoverage_m": 0.008964634488268597,
+        "piece_count": 32,
+        "source_point_coverage_ratio": 0.6185312962050271
+      },
+      "convexHull": {
+        "exact_brep_face_index_1_based": 117,
+        "exact_brep_sample_count": 2029,
+        "exact_surface_status": "FAIL_CROSSES_INWARD_CAD_SURFACE",
+        "geometry_signature": "e3951f3ecc904e82b45c0fc297c2b7ce0fd0b2e6d17a91e03f9afb0e7911d18c",
+        "maximum_combined_deviation_kind": "COVERED_NORMAL_EXIT",
+        "maximum_combined_sample_deviation_m": 0.0006812051301957348,
+        "maximum_inward_crossing_m": 0.0006812051301957348,
+        "maximum_inward_crossing_sample_index": 1951,
+        "maximum_inward_crossing_source_point_m": [
+          0.01091536345365488,
+          -0.5076999997339203,
+          0.440352669937119
+        ],
+        "maximum_inward_crossing_target_point_m": [
+          0.010237890036438026,
+          -0.507628794408491,
+          0.440352669937119
+        ],
+        "maximum_undercoverage_m": 2.3779118118783207e-08,
+        "piece_count": 1,
+        "source_point_coverage_ratio": 0.8960078856579596
+      }
+    },
+    "right": {
+      "convexDecomposition": {
+        "exact_brep_face_index_1_based": 128,
+        "exact_brep_sample_count": 2029,
+        "exact_surface_status": "FAIL_CROSSES_INWARD_CAD_SURFACE",
+        "geometry_signature": "5bc57b892c87fe3af0814015cb4623a34c1b95d302cec35623a9e09db021e7cc",
+        "maximum_combined_deviation_kind": "UNCOVERED_NEAREST_SURFACE",
+        "maximum_combined_sample_deviation_m": 0.009247751723558066,
+        "maximum_inward_crossing_m": 0.001349715599626581,
+        "maximum_inward_crossing_sample_index": 1785,
+        "maximum_inward_crossing_source_point_m": [
+          -0.004305048276992803,
+          -0.568692162848303,
+          0.43896874752635817
+        ],
+        "maximum_inward_crossing_target_point_m": [
+          -0.0029627265606440504,
+          -0.5685510791508257,
+          0.43896874752635817
+        ],
+        "maximum_undercoverage_m": 0.009247751723558066,
+        "piece_count": 32,
+        "source_point_coverage_ratio": 0.8984721537703302
+      },
+      "convexHull": {
+        "exact_brep_face_index_1_based": 128,
+        "exact_brep_sample_count": 2029,
+        "exact_surface_status": "FAIL_CROSSES_INWARD_CAD_SURFACE",
+        "geometry_signature": "6711e0d0ba192b12acbb9deb4c388969b18350689496f41c1520c6b18dd89a50",
+        "maximum_combined_deviation_kind": "COVERED_NORMAL_EXIT",
+        "maximum_combined_sample_deviation_m": 0.0006812053973147838,
+        "maximum_inward_crossing_m": 0.0006812053973147838,
+        "maximum_inward_crossing_sample_index": 70,
+        "maximum_inward_crossing_source_point_m": [
+          -0.010715582938329485,
+          -0.5076999997339199,
+          0.41003491999836
+        ],
+        "maximum_inward_crossing_target_point_m": [
+          -0.010038109255456888,
+          -0.507628794380569,
+          0.41003491999836
+        ],
+        "maximum_undercoverage_m": 8.355024607674283e-09,
+        "piece_count": 1,
+        "source_point_coverage_ratio": 0.929029078363726
+      }
+    }
+  },
+  "runtime": {
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physx": "107.3.26"
+  },
+  "runtime_hold_claim": "NOT_MADE",
+  "schema_version": 1,
+  "scope": "SUPPLIER_CAD_TRIMMED_BREP_CONTACT_FACE_VS_ISAAC_COOKED_CONVEX_UNION",
+  "stage_saved": false,
+  "status": "PASS_DETERMINISTIC_MEASUREMENT_FAIL_EXACT_SURFACE_GATE",
+  "task8_optimization_candidate": "NOT_AUTHORED",
+  "task_local_approximation_tolerance": "HARD_BLOCKER_NOT_DERIVED_OR_MEASURED",
+  "timeline_started": false
+}

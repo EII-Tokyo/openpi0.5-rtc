@@ -38,6 +38,11 @@ def build_contract(root: Path) -> dict[str, object]:
         root,
         "reports/aloha1_mapping/aloha1_official_collider_surface_certificate.json",
     )
+    finger_brep_path, finger_brep = _load(
+        root,
+        "reports/aloha1_mapping/"
+        "aloha1_supplier_cad_finger_brep_cooked_certificate.json",
+    )
     if resolution["status"] != "PASS":
         raise ValueError("CAD/link source resolution must pass")
     historical_identity_blockers = geometry["identity_blockers"]
@@ -52,6 +57,7 @@ def build_contract(root: Path) -> dict[str, object]:
             (static_path, static),
             (resolution_path, resolution),
             (certificate_path, certificate),
+            (finger_brep_path, finger_brep),
         )
     ]
     contract: dict[str, object] = {
@@ -80,9 +86,24 @@ def build_contract(root: Path) -> dict[str, object]:
         "surface_error_acceptance": certificate["acceptance_status"],
         "surface_certificate_link_count": certificate["summary"]["link_count"],
         "surface_certificate_summary": certificate["summary"],
+        "supplier_finger_exact_brep_gate": finger_brep["comparison"][
+            "exact_surface_status"
+        ],
+        "supplier_finger_decomposition_comparison": finger_brep["comparison"][
+            "decomposition_comparison"
+        ],
+        "supplier_finger_exact_asset_decision": finger_brep["comparison"][
+            "asset_decision"
+        ],
+        "supplier_finger_task_local_acceptance": finger_brep[
+            "task_local_approximation_tolerance"
+        ],
+        "supplier_finger_exact_numeric_tolerance_m": finger_brep[
+            "comparison_numeric_tolerance_m"
+        ],
         "formal_candidate_gate": "BLOCKED",
         "final_or_default_asset_modified": False,
-        "interpretation": "The former bar/prop/wrist identity blockers are resolved by explicit source boundaries: the supplier STEP remains fused/invalid where observed, while byte-identical pinned Interbotix link meshes provide robot-description geometry. Every physical link now has a deterministic finite-sample convex-hull surface/volume certificate. The contract remains PARTIAL because no official or task-derived numerical acceptance error budget has yet been proven; no tolerance was fitted from successful grasp videos.",
+        "interpretation": "The former bar/prop/wrist identity blockers are resolved by explicit source boundaries: the supplier STEP remains fused/invalid where observed, while byte-identical pinned Interbotix link meshes provide robot-description geometry. Every physical link has a deterministic finite-sample convex-hull surface/volume certificate. Exact trimmed B-Rep sampling further proves that both the current single hull and default 32-piece decomposition cross each handed finger's inward CAD face beyond a derived numerical floor; decomposition improves the left crossing but worsens the right and is not promoted. The contract remains PARTIAL because the task-local acceptable approximation error has not been derived or measured; no tolerance was fitted from successful grasp videos.",
     }
     contract["deterministic_signature"] = hashlib.sha256(
         json.dumps(contract, sort_keys=True, separators=(",", ":")).encode()
@@ -101,13 +122,19 @@ def _markdown(contract: dict[str, Any]) -> str:
             f"- Unresolved CAD/link records: `{contract['unresolved_identity_blocker_count']}`",
             f"- Unresolved suffixes: `{contract['unresolved_link_suffixes']}`",
             f"- Formal candidate gate: **{contract['formal_candidate_gate']}**",
+            f"- Exact supplier-finger B-Rep gate: **{contract['supplier_finger_exact_brep_gate']}**",
+            f"- Default decomposition comparison: **{contract['supplier_finger_decomposition_comparison']}**",
             "",
             "The supplier STEP remains authoritative for the geometry it exposes, and its fused "
             "gripper/invalid wrist boundaries are preserved. Byte-identical pinned Interbotix "
             "meshes supply the link-level identities. Every physical link now has a numerical "
-            "convex-hull surface/volume certificate. Promotion remains blocked because the "
-            "acceptance error budget is not defined; successful grasp videos were not used to "
-            "fit a tolerance. Existing static/swept tests remain rejection evidence. "
+            "convex-hull surface/volume certificate. Two fresh FreeCAD processes sampled the "
+            "exact trimmed finger-pad B-Rep faces, and two fresh Isaac 5.1 processes cooked both "
+            "single hull and default decomposition. All four profiles cross the inward CAD face "
+            "beyond the derived numerical floor; decomposition is mixed/worse across handed "
+            "sides. Promotion remains blocked because the task-local acceptable approximation "
+            "error is not defined; successful grasp videos were not used to fit a tolerance. "
+            "Existing static/swept tests remain rejection evidence. "
             "No collider is accepted because a grasp happened to pass, and no final/default asset "
             "was changed.",
             "",

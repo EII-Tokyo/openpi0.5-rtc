@@ -1,0 +1,167 @@
+{
+  "capture_count": 4,
+  "captures": [
+    {
+      "acceptance": "worst point, target, deviation vector and CAD normal are unobscured",
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/supplier_cad_cooking/failure_screenshots/screenshots_annotated/left_convex_hull_contact_deviation_annotated.png",
+      "annotated_sha256": "861259f456a956f08052a3903163e87017f5afc0c4188da43f817d7b404015f1",
+      "annotated_size_px": [
+        1920,
+        960
+      ],
+      "approximation": "convexHull",
+      "camera": {
+        "azimuth_deg": -58,
+        "coordinate_frame": "supplier CAD assembly metres",
+        "elevation_deg": 24,
+        "type": "matplotlib_orthographic_like_3d_projection"
+      },
+      "phase": "offline_cooking_geometry_failure",
+      "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/supplier_cad_cooking/failure_screenshots/screenshots_raw/left_convex_hull_contact_deviation_raw.png",
+      "raw_sha256": "f53011d7892b400c3f64d6592d568ce8aa06b2003d1f97800e02ce6fbedccfad",
+      "raw_size_px": [
+        1560,
+        960
+      ],
+      "side": "left",
+      "target": "supplier-CAD inward contact surface cooked deviation",
+      "visual_review_note": "Attempt 3 individually reviewed: overview and actual-scale close-up expose the worst supplier-CAD mesh source point, cooked target, deviation vector, and CAD inward normal; no label overlap or cropping. PASS applies only to screenshot evidence quality, not the collider geometry gate. This mesh-bound evidence is subordinate to the exact B-Rep certificate.",
+      "visual_review_status": "PASS"
+    },
+    {
+      "acceptance": "worst point, target, deviation vector and CAD normal are unobscured",
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/supplier_cad_cooking/failure_screenshots/screenshots_annotated/left_convex_decomposition_contact_deviation_annotated.png",
+      "annotated_sha256": "0e45cc9fbc38fe9f668f6fd752e03d67526abc00b5d7e5a1fbbd250fe0857aad",
+      "annotated_size_px": [
+        1920,
+        960
+      ],
+      "approximation": "convexDecomposition",
+      "camera": {
+        "azimuth_deg": -58,
+        "coordinate_frame": "supplier CAD assembly metres",
+        "elevation_deg": 24,
+        "type": "matplotlib_orthographic_like_3d_projection"
+      },
+      "phase": "offline_cooking_geometry_failure",
+      "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/supplier_cad_cooking/failure_screenshots/screenshots_raw/left_convex_decomposition_contact_deviation_raw.png",
+      "raw_sha256": "85fe135c22b14658a8a46c621fe86e5fcc99ec4e5c4fef8d2f98104394cf1ab4",
+      "raw_size_px": [
+        1560,
+        960
+      ],
+      "side": "left",
+      "target": "supplier-CAD inward contact surface cooked deviation",
+      "visual_review_note": "Attempt 3 individually reviewed: overview and actual-scale close-up expose the worst supplier-CAD mesh source point, cooked target, deviation vector, and CAD inward normal; no label overlap or cropping. PASS applies only to screenshot evidence quality, not the collider geometry gate. This mesh-bound evidence is subordinate to the exact B-Rep certificate.",
+      "visual_review_status": "PASS"
+    },
+    {
+      "acceptance": "worst point, target, deviation vector and CAD normal are unobscured",
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/supplier_cad_cooking/failure_screenshots/screenshots_annotated/right_convex_hull_contact_deviation_annotated.png",
+      "annotated_sha256": "2cd492f7d58807a1da43cf51d057ddba2b0c0c1fba8a1f34a5044fe651b62542",
+      "annotated_size_px": [
+        1920,
+        960
+      ],
+      "approximation": "convexHull",
+      "camera": {
+        "azimuth_deg": 122,
+        "coordinate_frame": "supplier CAD assembly metres",
+        "elevation_deg": 24,
+        "type": "matplotlib_orthographic_like_3d_projection"
+      },
+      "phase": "offline_cooking_geometry_failure",
+      "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/supplier_cad_cooking/failure_screenshots/screenshots_raw/right_convex_hull_contact_deviation_raw.png",
+      "raw_sha256": "32d0f400012e761ffa31d7a9a79bd14e6bc9c84e54e980159d888762d42ea6dd",
+      "raw_size_px": [
+        1560,
+        960
+      ],
+      "side": "right",
+      "target": "supplier-CAD inward contact surface cooked deviation",
+      "visual_review_note": "Attempt 3 individually reviewed: overview and actual-scale close-up expose the worst supplier-CAD mesh source point, cooked target, deviation vector, and CAD inward normal; no label overlap or cropping. PASS applies only to screenshot evidence quality, not the collider geometry gate. This mesh-bound evidence is subordinate to the exact B-Rep certificate.",
+      "visual_review_status": "PASS"
+    },
+    {
+      "acceptance": "worst point, target, deviation vector and CAD normal are unobscured",
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/supplier_cad_cooking/failure_screenshots/screenshots_annotated/right_convex_decomposition_contact_deviation_annotated.png",
+      "annotated_sha256": "d344f1bb097d79c5e8307aefcef101e81685ff1ed50cd7bbfdcf432594f262ab",
+      "annotated_size_px": [
+        1920,
+        960
+      ],
+      "approximation": "convexDecomposition",
+      "camera": {
+        "azimuth_deg": 122,
+        "coordinate_frame": "supplier CAD assembly metres",
+        "elevation_deg": 24,
+        "type": "matplotlib_orthographic_like_3d_projection"
+      },
+      "phase": "offline_cooking_geometry_failure",
+      "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/supplier_cad_cooking/failure_screenshots/screenshots_raw/right_convex_decomposition_contact_deviation_raw.png",
+      "raw_sha256": "46e59a910bdd7ae574238632cdb4a16d7a3aafadc8eebc0441abf819b6b398cf",
+      "raw_size_px": [
+        1560,
+        960
+      ],
+      "side": "right",
+      "target": "supplier-CAD inward contact surface cooked deviation",
+      "visual_review_note": "Attempt 3 individually reviewed: overview and actual-scale close-up expose the worst supplier-CAD mesh source point, cooked target, deviation vector, and CAD inward normal; no label overlap or cropping. PASS applies only to screenshot evidence quality, not the collider geometry gate. This mesh-bound evidence is subordinate to the exact B-Rep certificate.",
+      "visual_review_status": "PASS"
+    }
+  ],
+  "final_or_default_collider_modified": false,
+  "geometry_certificate_status": "PASS_COOKING_DETERMINISTIC",
+  "geometry_classification": "DECOMPOSITION_MIXED_OR_WORSE",
+  "geometry_failure_count": 4,
+  "geometry_gate_status": "FAIL",
+  "geometry_profiles": [
+    {
+      "approximation": "convexDecomposition",
+      "geometry_status": "FAIL_EXCEEDS_TESSELLATION_ERROR_BUDGET",
+      "maximum_contact_surface_deviation_m": 0.0005611887142591565,
+      "side": "left",
+      "tessellation_error_budget_m": 0.0002
+    },
+    {
+      "approximation": "convexHull",
+      "geometry_status": "FAIL_EXCEEDS_TESSELLATION_ERROR_BUDGET",
+      "maximum_contact_surface_deviation_m": 0.0007985385918076927,
+      "side": "left",
+      "tessellation_error_budget_m": 0.0002
+    },
+    {
+      "approximation": "convexDecomposition",
+      "geometry_status": "FAIL_EXCEEDS_TESSELLATION_ERROR_BUDGET",
+      "maximum_contact_surface_deviation_m": 0.001328298515331884,
+      "side": "right",
+      "tessellation_error_budget_m": 0.0002
+    },
+    {
+      "approximation": "convexHull",
+      "geometry_status": "FAIL_EXCEEDS_TESSELLATION_ERROR_BUDGET",
+      "maximum_contact_surface_deviation_m": 0.0007985395572629467,
+      "side": "right",
+      "tessellation_error_budget_m": 0.0002
+    }
+  ],
+  "interpretation": "Screenshot PASS means the evidence is legible; it does not mean the cooked collider geometry passed its numerical gate.",
+  "retake_history": [
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/supplier_cad_cooking/failure_screenshots/attempt1_rejected",
+      "attempt": 1,
+      "status": "REJECTED_VECTOR_NOT_LEGIBLE"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/supplier_cad_cooking/failure_screenshots/attempt2_rejected_title_overlap",
+      "attempt": 2,
+      "status": "REJECTED_TITLE_OVERLAP_RAW"
+    }
+  ],
+  "runtime_video_reason": "no dynamic simulation was run; static cooked-geometry failure only",
+  "runtime_video_required": false,
+  "schema_version": 1,
+  "scope": "OFFLINE_COOKED_GEOMETRY_FAILURE_SCREENSHOTS_NOT_RUNTIME_CONTACT",
+  "screenshot_evidence_status": "PASS",
+  "timeline_started": false
+}

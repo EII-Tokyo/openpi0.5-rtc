@@ -37,6 +37,18 @@ def test_explicit_source_boundaries_remove_false_cad_identity_blockers() -> None
         "HARD_BLOCKER_ERROR_BUDGET_NOT_DEFINED"
     )
     assert contract["surface_certificate_link_count"] == 11
+    assert contract["supplier_finger_exact_brep_gate"] == (
+        "ALL_PROFILES_CROSS_INWARD_CAD_SURFACE"
+    )
+    assert contract["supplier_finger_decomposition_comparison"] == (
+        "DECOMPOSITION_MIXED_OR_WORSE"
+    )
+    assert contract["supplier_finger_exact_asset_decision"] == (
+        "REJECTED_EXACT_CAD_CONTACT_GATE"
+    )
+    assert contract["supplier_finger_task_local_acceptance"] == (
+        "HARD_BLOCKER_NOT_DERIVED_OR_MEASURED"
+    )
 
 
 def test_report_matches_deterministic_contract() -> None:

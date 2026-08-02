@@ -1,0 +1,374 @@
+{
+  "asset_decision": "DIAGNOSTIC_ONLY_NOT_PROMOTED",
+  "comparison": {
+    "by_side": {
+      "left": {
+        "decomposition_max_deviation_m": 0.0005611887142591565,
+        "hull_max_deviation_m": 0.0007985385918076927,
+        "hull_minus_decomposition_m": 0.0002373498775485362
+      },
+      "right": {
+        "decomposition_max_deviation_m": 0.001328298515331884,
+        "hull_max_deviation_m": 0.0007985395572629467,
+        "hull_minus_decomposition_m": -0.0005297589580689373
+      }
+    },
+    "classification": "DECOMPOSITION_MIXED_OR_WORSE",
+    "final_or_default_collider_modified": false,
+    "runtime_hold_claim": "NOT_MADE"
+  },
+  "deterministic_records": [
+    {
+      "approximation": "convexHull",
+      "deterministic": true,
+      "run_geometry_signatures": [
+        "e3951f3ecc904e82b45c0fc297c2b7ce0fd0b2e6d17a91e03f9afb0e7911d18c",
+        "e3951f3ecc904e82b45c0fc297c2b7ce0fd0b2e6d17a91e03f9afb0e7911d18c"
+      ],
+      "side": "left"
+    },
+    {
+      "approximation": "convexDecomposition",
+      "deterministic": true,
+      "run_geometry_signatures": [
+        "a7d3ae8f384708eea37bb9e88d4963819b1188ccfe6d8b55f5534f7315da4804",
+        "a7d3ae8f384708eea37bb9e88d4963819b1188ccfe6d8b55f5534f7315da4804"
+      ],
+      "side": "left"
+    },
+    {
+      "approximation": "convexHull",
+      "deterministic": true,
+      "run_geometry_signatures": [
+        "6711e0d0ba192b12acbb9deb4c388969b18350689496f41c1520c6b18dd89a50",
+        "6711e0d0ba192b12acbb9deb4c388969b18350689496f41c1520c6b18dd89a50"
+      ],
+      "side": "right"
+    },
+    {
+      "approximation": "convexDecomposition",
+      "deterministic": true,
+      "run_geometry_signatures": [
+        "5bc57b892c87fe3af0814015cb4623a34c1b95d302cec35623a9e09db021e7cc",
+        "5bc57b892c87fe3af0814015cb4623a34c1b95d302cec35623a9e09db021e7cc"
+      ],
+      "side": "right"
+    }
+  ],
+  "deterministic_signature": "fd68a3ccd13230c2849977ec88610f1ca9b1f18e966b156889c316e6bdb44015",
+  "final_or_default_collider_modified": false,
+  "fresh_process_count": 2,
+  "local_api": {
+    "convex_decomposition_api": {
+      "defaults": {
+        "errorPercentage": {
+          "authored": false,
+          "type": "float",
+          "value": 10.0
+        },
+        "hullVertexLimit": {
+          "authored": false,
+          "type": "int",
+          "value": 64
+        },
+        "maxConvexHulls": {
+          "authored": false,
+          "type": "int",
+          "value": 32
+        },
+        "minThickness": {
+          "authored": false,
+          "type": "float",
+          "value": 0.0010000000474974513
+        },
+        "shrinkWrap": {
+          "authored": false,
+          "type": "bool",
+          "value": false
+        },
+        "voxelResolution": {
+          "authored": false,
+          "type": "int",
+          "value": 500000
+        }
+      },
+      "plugin_schema_type": "PhysxSchemaPhysxConvexDecompositionCollisionAPI",
+      "python_class": "pxr.PhysxSchema.PhysxConvexDecompositionCollisionAPI",
+      "schema_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/extscache/omni.usd.schema.physx-107.3.26+107.3.3.lx64.r.cp311.u353"
+    },
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "mesh_collision_api": {
+      "approximation_readback": "convexDecomposition",
+      "python_class": "pxr.UsdPhysics.MeshCollisionAPI",
+      "supported_tokens_tested": [
+        "convexHull",
+        "convexDecomposition"
+      ]
+    },
+    "physx": "107.3.26",
+    "urdf_importer": {
+      "binding": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.importer.urdf/isaacsim/asset/importer/urdf/_urdf.cpython-311-x86_64-linux-gnu.so",
+      "convex_decomp_after_false": false,
+      "convex_decomp_after_true": true,
+      "convex_decomp_initial": false,
+      "root": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.importer.urdf",
+      "version": "2.4.30"
+    }
+  },
+  "profiles_by_side": {
+    "left": {
+      "convexDecomposition": {
+        "cad_face_index": 117,
+        "cad_face_normal": [
+          -0.9945218953682733,
+          0.10452846326765405,
+          5.701881674690907e-16
+        ],
+        "contact_envelope": {
+          "contact_sample_count": 124,
+          "maximum_contact_surface_deviation_m": 0.0005611887142591565,
+          "maximum_contributing_piece_count": 1,
+          "maximum_deviation_kind": "UNCOVERED_NEAREST_SURFACE",
+          "maximum_deviation_sample_index": 29,
+          "maximum_deviation_source_point_m": [
+            0.008929322242736817,
+            -0.5265958862304687,
+            0.3998526611328125
+          ],
+          "maximum_deviation_target_point_m": [
+            0.008966351488158745,
+            -0.526555771249184,
+            0.4004111881207655
+          ],
+          "maximum_inward_crossing_sample_index": 45,
+          "maximum_inward_crossing_source_point_m": [
+            0.009697388648986817,
+            -0.5192882690429688,
+            0.4063526611328125
+          ],
+          "maximum_inward_crossing_target_point_m": [
+            0.009194813938851543,
+            -0.5192354463123962,
+            0.4063526611328125
+          ],
+          "method": "ANALYTIC_NORMAL_RAY_UNION_FOR_COVERED_POINTS_AND_EXACT_TRIANGLE_NEAREST_SURFACE_FOR_UNCOVERED_POINTS",
+          "positive_exit_distance_max_m": 0.0005053430321402522,
+          "positive_exit_distance_mean_m": 0.00023268376939483993,
+          "positive_exit_distance_min_m": 2.1431689924244247e-06,
+          "positive_exit_distance_p95_m": 0.00043661192095721565,
+          "source_point_coverage_ratio": 0.6854838709677419,
+          "source_point_covered_count": 85,
+          "status": "FAIL_EXCEEDS_TESSELLATION_ERROR_BUDGET",
+          "tessellation_error_budget_m": 0.0002,
+          "uncovered_count": 39,
+          "uncovered_nearest_surface_max_m": 0.0005611887142591565,
+          "uncovered_nearest_surface_mean_m": 0.00011103091339651566,
+          "uncovered_nearest_surface_min_m": 6.332993504609696e-11,
+          "uncovered_nearest_surface_normal_projection_max_m": -6.298300703559399e-11,
+          "uncovered_nearest_surface_normal_projection_min_m": -0.0002696287712844398
+        },
+        "geometry_signature": "a7d3ae8f384708eea37bb9e88d4963819b1188ccfe6d8b55f5534f7315da4804",
+        "piece_count": 32,
+        "source_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/tessellation_angular_controlled/run_a/left_finger.obj",
+        "source_sha256": "c6710d0fe5b2030a32722d9df5c0b553c771c9d61d92b8ddaec36c94c5963488",
+        "sum_piece_volume_m3": 4.261869698583932e-05
+      },
+      "convexHull": {
+        "cad_face_index": 117,
+        "cad_face_normal": [
+          -0.9945218953682733,
+          0.10452846326765405,
+          5.701881674690907e-16
+        ],
+        "contact_envelope": {
+          "contact_sample_count": 124,
+          "maximum_contact_surface_deviation_m": 0.0007985385918076927,
+          "maximum_contributing_piece_count": 1,
+          "maximum_deviation_kind": "COVERED_NORMAL_EXIT",
+          "maximum_deviation_sample_index": 122,
+          "maximum_deviation_source_point_m": [
+            0.011098672866821289,
+            -0.5077000122070313,
+            0.4081510925292969
+          ],
+          "maximum_deviation_target_point_m": [
+            0.01030450875297199,
+            -0.5076165421951697,
+            0.4081510925292969
+          ],
+          "maximum_inward_crossing_sample_index": 122,
+          "maximum_inward_crossing_source_point_m": [
+            0.011098672866821289,
+            -0.5077000122070313,
+            0.4081510925292969
+          ],
+          "maximum_inward_crossing_target_point_m": [
+            0.01030450875297199,
+            -0.5076165421951697,
+            0.4081510925292969
+          ],
+          "method": "ANALYTIC_NORMAL_RAY_UNION_FOR_COVERED_POINTS_AND_EXACT_TRIANGLE_NEAREST_SURFACE_FOR_UNCOVERED_POINTS",
+          "positive_exit_distance_max_m": 0.0007985385918076927,
+          "positive_exit_distance_mean_m": 0.0005101599205292676,
+          "positive_exit_distance_min_m": 7.033469660661702e-05,
+          "positive_exit_distance_p95_m": 0.0007429102108279838,
+          "source_point_coverage_ratio": 0.9112903225806451,
+          "source_point_covered_count": 113,
+          "status": "FAIL_EXCEEDS_TESSELLATION_ERROR_BUDGET",
+          "tessellation_error_budget_m": 0.0002,
+          "uncovered_count": 11,
+          "uncovered_nearest_surface_max_m": 7.659486889163385e-09,
+          "uncovered_nearest_surface_mean_m": 3.0660303030927155e-09,
+          "uncovered_nearest_surface_min_m": 5.484568687911686e-10,
+          "uncovered_nearest_surface_normal_projection_max_m": 1.7252217027593785e-18,
+          "uncovered_nearest_surface_normal_projection_min_m": -9.810399716848369e-10
+        },
+        "geometry_signature": "e3951f3ecc904e82b45c0fc297c2b7ce0fd0b2e6d17a91e03f9afb0e7911d18c",
+        "piece_count": 1,
+        "source_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/tessellation_angular_controlled/run_a/left_finger.obj",
+        "source_sha256": "c6710d0fe5b2030a32722d9df5c0b553c771c9d61d92b8ddaec36c94c5963488",
+        "sum_piece_volume_m3": 5.515565395090596e-05
+      }
+    },
+    "right": {
+      "convexDecomposition": {
+        "cad_face_index": 128,
+        "cad_face_normal": [
+          0.9945218953682733,
+          0.10452846326765403,
+          -1.727189390844111e-15
+        ],
+        "contact_envelope": {
+          "contact_sample_count": 124,
+          "maximum_contact_surface_deviation_m": 0.001328298515331884,
+          "maximum_contributing_piece_count": 1,
+          "maximum_deviation_kind": "COVERED_NORMAL_EXIT",
+          "maximum_deviation_sample_index": 23,
+          "maximum_deviation_source_point_m": [
+            -0.010715582847595216,
+            -0.5077000122070313,
+            0.42674999999999996
+          ],
+          "maximum_deviation_target_point_m": [
+            -0.009394560890512486,
+            -0.507561167204463,
+            0.42674999999999996
+          ],
+          "maximum_inward_crossing_sample_index": 23,
+          "maximum_inward_crossing_source_point_m": [
+            -0.010715582847595216,
+            -0.5077000122070313,
+            0.42674999999999996
+          ],
+          "maximum_inward_crossing_target_point_m": [
+            -0.009394560890512486,
+            -0.507561167204463,
+            0.42674999999999996
+          ],
+          "method": "ANALYTIC_NORMAL_RAY_UNION_FOR_COVERED_POINTS_AND_EXACT_TRIANGLE_NEAREST_SURFACE_FOR_UNCOVERED_POINTS",
+          "positive_exit_distance_max_m": 0.001328298515331884,
+          "positive_exit_distance_mean_m": 0.001037445550739285,
+          "positive_exit_distance_min_m": 0.0004742593470546975,
+          "positive_exit_distance_p95_m": 0.001273209985025549,
+          "source_point_coverage_ratio": 0.9516129032258065,
+          "source_point_covered_count": 118,
+          "status": "FAIL_EXCEEDS_TESSELLATION_ERROR_BUDGET",
+          "tessellation_error_budget_m": 0.0002,
+          "uncovered_count": 6,
+          "uncovered_nearest_surface_max_m": 0.00035580253601075196,
+          "uncovered_nearest_surface_mean_m": 0.00019707277668168952,
+          "uncovered_nearest_surface_min_m": 1.5103816986106189e-05,
+          "uncovered_nearest_surface_normal_projection_max_m": 3.7191492315934585e-05,
+          "uncovered_nearest_surface_normal_projection_min_m": -0.00014765958952356472
+        },
+        "geometry_signature": "5bc57b892c87fe3af0814015cb4623a34c1b95d302cec35623a9e09db021e7cc",
+        "piece_count": 32,
+        "source_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/tessellation_angular_controlled/run_a/right_finger.obj",
+        "source_sha256": "b0979c5d55fee448dab512dc75b1251bab17d94892decd01de9a6e76c01482d1",
+        "sum_piece_volume_m3": 4.2783565145592156e-05
+      },
+      "convexHull": {
+        "cad_face_index": 128,
+        "cad_face_normal": [
+          0.9945218953682733,
+          0.10452846326765403,
+          -1.727189390844111e-15
+        ],
+        "contact_envelope": {
+          "contact_sample_count": 124,
+          "maximum_contact_surface_deviation_m": 0.0007985395572629467,
+          "maximum_contributing_piece_count": 1,
+          "maximum_deviation_kind": "COVERED_NORMAL_EXIT",
+          "maximum_deviation_sample_index": 1,
+          "maximum_deviation_source_point_m": [
+            -0.010898892402648927,
+            -0.5077000122070313,
+            0.44545156860351565
+          ],
+          "maximum_deviation_target_point_m": [
+            -0.01010472732863324,
+            -0.5076165420942522,
+            0.44545156860351565
+          ],
+          "maximum_inward_crossing_sample_index": 1,
+          "maximum_inward_crossing_source_point_m": [
+            -0.010898892402648927,
+            -0.5077000122070313,
+            0.44545156860351565
+          ],
+          "maximum_inward_crossing_target_point_m": [
+            -0.01010472732863324,
+            -0.5076165420942522,
+            0.44545156860351565
+          ],
+          "method": "ANALYTIC_NORMAL_RAY_UNION_FOR_COVERED_POINTS_AND_EXACT_TRIANGLE_NEAREST_SURFACE_FOR_UNCOVERED_POINTS",
+          "positive_exit_distance_max_m": 0.0007985395572629467,
+          "positive_exit_distance_mean_m": 0.0004885437639625599,
+          "positive_exit_distance_min_m": 3.068214791832339e-10,
+          "positive_exit_distance_p95_m": 0.0007398310382849144,
+          "source_point_coverage_ratio": 0.9516129032258065,
+          "source_point_covered_count": 118,
+          "status": "FAIL_EXCEEDS_TESSELLATION_ERROR_BUDGET",
+          "tessellation_error_budget_m": 0.0002,
+          "uncovered_count": 6,
+          "uncovered_nearest_surface_max_m": 5.509084850578459e-09,
+          "uncovered_nearest_surface_mean_m": 1.3669605900093754e-09,
+          "uncovered_nearest_surface_min_m": 4.7157456325464164e-11,
+          "uncovered_nearest_surface_normal_projection_max_m": -4.711251496055768e-11,
+          "uncovered_nearest_surface_normal_projection_min_m": -9.579591432260151e-10
+        },
+        "geometry_signature": "6711e0d0ba192b12acbb9deb4c388969b18350689496f41c1520c6b18dd89a50",
+        "piece_count": 1,
+        "source_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/tessellation_angular_controlled/run_a/right_finger.obj",
+        "source_sha256": "b0979c5d55fee448dab512dc75b1251bab17d94892decd01de9a6e76c01482d1",
+        "sum_piece_volume_m3": 5.524336300047537e-05
+      }
+    }
+  },
+  "raw_runs": [
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/supplier_cad_cooking/run1.json",
+      "process_id": 2519077,
+      "sha256": "ebdcd90f28ff50cb11270ebb94abb555cd73f2c49941e14e1b8feea8ec79ed21"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/supplier_cad_cooking/run2.json",
+      "process_id": 2520640,
+      "sha256": "ab3ceed793a0b0c74b218f39b2760ac704236b8b371495b76f99228d17cce75b"
+    }
+  ],
+  "runtime": {
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physx": "107.3.26"
+  },
+  "runtime_hold_claim": "NOT_MADE",
+  "schema_version": 1,
+  "scope": "SUPPLIER_CAD_FINGER_LOCAL_CONTACT_GEOMETRY_ONLY",
+  "source_identity_boundary": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_finger_cooked_source_identity_boundary.json",
+  "stage_saved": false,
+  "status": "PASS_COOKING_DETERMINISTIC",
+  "task8_runtime_optimization": "NOT_RUN",
+  "timeline_started": false
+}

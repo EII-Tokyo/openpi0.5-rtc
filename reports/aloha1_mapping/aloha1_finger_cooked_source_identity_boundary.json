@@ -1,0 +1,137 @@
+{
+  "classification": "LEGACY_COOKED_SOURCE_NOT_CURRENT_SUPPLIER_SOURCE",
+  "deterministic_signature": "e72f5b047a9975509ee1f76669c469261231df55243a2ca681367cf1933a985f",
+  "final_or_default_asset_modified": false,
+  "interpretation": [
+    "The legacy report's cooked vertices remain valid only for its recorded gym-aloha STL hashes.",
+    "Different source hashes are sufficient to reject provenance reuse for the supplier-CAD proof.",
+    "Triangle count, volume and sorted AABB extents are supplemental numeric differences; no fitted similarity tolerance is used.",
+    "No conclusion about supplier-CAD convex decomposition accuracy is made from the legacy hold result."
+  ],
+  "isaac_runtime_started": false,
+  "legacy_cooked_geometry_reusable_for_supplier_cad": false,
+  "legacy_report_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_correct_finger_collider_comparison.json",
+  "legacy_report_sha256": "4b57d3086b7211011e3272832324a8e442c844d8907dbd226f9b3845da97be9c",
+  "next_gate": "REQUIRES_SUPPLIER_CAD_COOKED_READBACK",
+  "records": {
+    "left": {
+      "cooked_piece_count_in_legacy_report": 32,
+      "exact_source_hash_match": false,
+      "legacy_cooked_source": {
+        "aabb_max_m": [
+          0.0305,
+          -0.02960000038146973,
+          0.08
+        ],
+        "aabb_min_m": [
+          -0.0305,
+          -0.054,
+          -0.01
+        ],
+        "authority": "HISTORICAL_GYM_ALOHA_CUSTOM_FINGER_STL",
+        "face_count": 1666,
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/gym-aloha/gym_aloha/assets/vx300s_10_custom_finger_left.stl",
+        "sha256": "df73ae5b9058e5d50a6409ac2ab687dade75053a86591bb5e23ab051dbf2d659",
+        "signed_volume_abs_m3": 2.7532569862127057e-05,
+        "sorted_aabb_extent_m": [
+          0.02439999961853027,
+          0.061,
+          0.09
+        ],
+        "vertex_count": 829
+      },
+      "signed_volume_abs_m3_difference": 7.6243626829814394e-06,
+      "signed_volume_abs_ratio_legacy_over_supplier": 0.7831334496205289,
+      "sorted_aabb_extent_m_difference": [
+        0.003067250251770022,
+        0.006999999999999951,
+        0.0061575927734374425
+      ],
+      "source_identity_gate": "FAIL_EXACT_SOURCE_IDENTITY",
+      "supplier_cad": {
+        "aabb_max_m": [
+          0.029811279296875,
+          -0.49325,
+          0.45385266113281253
+        ],
+        "aabb_min_m": [
+          0.002344029426574707,
+          -0.5894075927734375,
+          0.3998526611328125
+        ],
+        "authority": "SUPPLIER_ASSEMBLY_EMBEDDED_HANDED_FINGER_BREP_TESSELLATION",
+        "face_count": 1662,
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/tessellation_angular_controlled/run_a/left_finger.obj",
+        "sha256": "c6710d0fe5b2030a32722d9df5c0b553c771c9d61d92b8ddaec36c94c5963488",
+        "signed_volume_abs_m3": 3.51569325451085e-05,
+        "sorted_aabb_extent_m": [
+          0.027467249870300293,
+          0.05400000000000005,
+          0.09615759277343744
+        ],
+        "vertex_count": 831
+      }
+    },
+    "right": {
+      "cooked_piece_count_in_legacy_report": 32,
+      "exact_source_hash_match": false,
+      "legacy_cooked_source": {
+        "aabb_max_m": [
+          0.0305,
+          0.054,
+          0.08
+        ],
+        "aabb_min_m": [
+          -0.0305,
+          0.02960000038146973,
+          -0.01
+        ],
+        "authority": "HISTORICAL_GYM_ALOHA_CUSTOM_FINGER_STL",
+        "face_count": 1666,
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/gym-aloha/gym_aloha/assets/vx300s_10_custom_finger_right.stl",
+        "sha256": "56fb3cc1236d4193106038adf8e457c7252ae9e86c7cee6dabf0578c53666358",
+        "signed_volume_abs_m3": 2.7533054943464822e-05,
+        "sorted_aabb_extent_m": [
+          0.02439999961853027,
+          0.061,
+          0.09
+        ],
+        "vertex_count": 829
+      },
+      "signed_volume_abs_m3_difference": 7.6238856583028145e-06,
+      "signed_volume_abs_ratio_legacy_over_supplier": 0.7831470677536857,
+      "sorted_aabb_extent_m_difference": [
+        0.0030672512054443386,
+        0.007000000000000006,
+        0.0061575927734374425
+      ],
+      "source_identity_gate": "FAIL_EXACT_SOURCE_IDENTITY",
+      "supplier_cad": {
+        "aabb_max_m": [
+          -0.0021442489624023437,
+          -0.49325,
+          0.45375
+        ],
+        "aabb_min_m": [
+          -0.029611499786376953,
+          -0.5894075927734375,
+          0.39975
+        ],
+        "authority": "SUPPLIER_ASSEMBLY_EMBEDDED_HANDED_FINGER_BREP_TESSELLATION",
+        "face_count": 1662,
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/tessellation_angular_controlled/run_a/right_finger.obj",
+        "sha256": "b0979c5d55fee448dab512dc75b1251bab17d94892decd01de9a6e76c01482d1",
+        "signed_volume_abs_m3": 3.515694060176764e-05,
+        "sorted_aabb_extent_m": [
+          0.02746725082397461,
+          0.05399999999999999,
+          0.09615759277343744
+        ],
+        "vertex_count": 831
+      }
+    }
+  },
+  "schema_version": 1,
+  "scope": "OFFLINE_SOURCE_PROVENANCE_AND_INVARIANT_GEOMETRY_METRICS",
+  "status": "PASS_SOURCE_MISMATCH_DETECTED"
+}
