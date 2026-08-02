@@ -1,0 +1,403 @@
+{
+  "broken_candidate_runtime_probe": {
+    "absolute_log_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha-task7-finger-orientation-reaudit/current_candidate_q_geometry.log",
+    "reason": "The deliberately removed helper bodies prevent ee_gripper/finger joints and mimic from forming a valid articulation, so this candidate cannot serve as runtime gripper evidence.",
+    "sha256": "a4586497cd918b7c277f6f90d5e491d6a27310c7fa76f6b29e76dbcdb003431a",
+    "status": "FAIL"
+  },
+  "classification": "ILLEGAL_STATIC_Q_ZERO_BYPASSED_RUNTIME_LIMITS",
+  "collider_authoring": {
+    "collider_paths": [
+      "/vx300s_right/follower_right_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh",
+      "/vx300s_right/follower_right_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh"
+    ],
+    "distinct_rigid_link_paths": true,
+    "left_right_meshes_merged": false,
+    "source": "runtime-composed USD inventory from capture report"
+  },
+  "disputed_screenshot": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-task7-physicsrules-root-cause/screenshots_attempt2/follower_right/screenshots_raw/follower_right_whole_arm_oblique_raw.png",
+    "capture_semantics": "STATIC_USD_RENDER_NO_PHYSICS_RESET_OR_JOINT_READBACK",
+    "corrected_review_report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7_virtual_helper_failure_screenshot_review_right.json",
+    "corrected_review_report_sha256": "2e77da5232d549a5fc932fc4d8660bfc9c295757cc2ac2bf7085609772dac212",
+    "sha256": "def4192f77482782cda74c80c4c8374dd3d6eee218584e368fc5fdef663aa32d",
+    "stage": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task7_physicsrules_root_cause_candidates/1.0/virtual_helpers_without_rigid_body/follower_right/follower_right_virtual_helpers_without_rigid_body.usda",
+      "root_prim": "/vx300s_right",
+      "sha256_after": "d0ffc14010f8237b5fdbe55e5a5c9761c57de8c6d7b071ce71d1a57046bfe825",
+      "sha256_before": "d0ffc14010f8237b5fdbe55e5a5c9761c57de8c6d7b071ce71d1a57046bfe825"
+    }
+  },
+  "finger_installation_orientation_from_this_image": "INCONCLUSIVE",
+  "geometry_audit": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha-task7-finger-orientation-reaudit/intact_candidate_q_geometry.json",
+    "method": {
+      "cooked_geometry_model": "UsdPhysics approximation=convexHull represented by scipy.spatial.ConvexHull of world-transformed mesh points",
+      "known_unsafe_api_not_retried": "PhysXSceneQuery.overlap_shape_any",
+      "overlap_volume": "HalfspaceIntersection followed by ConvexHull volume",
+      "pair_test": "normalized halfspace Chebyshev-margin linear program"
+    },
+    "sha256": "3a5762f3025ab1d39bc103e2d67341da1c2db1d2d83c6c3fe3c749a576717909"
+  },
+  "geometry_states": {
+    "illegal_static_q_zero": {
+      "intersection_vertex_count": 172,
+      "left_collider": "/vx300s_right/follower_right_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh",
+      "overlap_volume_m3": 3.1833401720316014e-05,
+      "readback_m": [
+        0.0,
+        0.0
+      ],
+      "relation": "OVERLAP",
+      "right_collider": "/vx300s_right/follower_right_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh",
+      "signed_chebyshev_margin_m": 0.008711389552923193,
+      "target_m": [
+        0.0,
+        0.0
+      ]
+    },
+    "legal_closed_limit": {
+      "intersection_vertex_count": 0,
+      "left_collider": "/vx300s_right/follower_right_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh",
+      "overlap_volume_m3": 0.0,
+      "readback_m": [
+        0.020999999716877937,
+        -0.020999999716877937
+      ],
+      "relation": "SEPARATED",
+      "right_collider": "/vx300s_right/follower_right_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh",
+      "signed_chebyshev_margin_m": -0.0020572846790836673,
+      "target_m": [
+        0.021,
+        -0.021
+      ]
+    },
+    "legal_open_limit": {
+      "intersection_vertex_count": 0,
+      "left_collider": "/vx300s_right/follower_right_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh",
+      "overlap_volume_m3": 0.0,
+      "readback_m": [
+        0.05700000002980232,
+        -0.05700000002980232
+      ],
+      "relation": "SEPARATED",
+      "right_collider": "/vx300s_right/follower_right_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh",
+      "signed_chebyshev_margin_m": -0.03505994786590024,
+      "target_m": [
+        0.057,
+        -0.057
+      ]
+    }
+  },
+  "impact_boundary": {
+    "final_or_default_asset_modified": false,
+    "physicsrules_machine_findings_invalidated": false,
+    "previous_failure_screenshot_pass_revoked": true,
+    "previous_user_confirmed_dynamic_grasp_videos_invalidated": false
+  },
+  "joint_authoring": {
+    "legal_limits_m": {
+      "left_finger": [
+        0.021,
+        0.057
+      ],
+      "right_finger": [
+        -0.057,
+        -0.021
+      ]
+    },
+    "records": [
+      {
+        "authored_state_position": 0.022390000522136688,
+        "axis": "Y",
+        "body0_targets": [
+          "/vx300s_right/follower_right_fingers_link"
+        ],
+        "body1_targets": [
+          "/vx300s_right/follower_right_left_finger_link"
+        ],
+        "drive_target_position": 0.022390000522136688,
+        "expected_transform_from_body0": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.49799397587776184,
+            0.0,
+            0.42705002427101135,
+            1.0
+          ]
+        ],
+        "expected_transform_from_body1": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.49799397587776184,
+            0.0,
+            0.42705002427101135,
+            1.0
+          ]
+        ],
+        "follower": "follower_right",
+        "geometry_candidate_matches_validator": true,
+        "geometry_derived_state_position": 0.0,
+        "joint_type": "PhysicsPrismaticJoint",
+        "local_pos0": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "local_pos1": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "local_rot0_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "local_rot1_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "prim_path": "/vx300s_right/joints/left_finger",
+        "prim_stack": [
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_task7_rule_candidates/1.0/Trossen/vx300s_right/1.0/configuration/vx300s_right_robot.usda",
+            "path": "/vx300s_right/joints/left_finger"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/configuration/aloha1_signal_home_targets.usda",
+            "path": "/World/follower_right/vx300s_right/joints/left_finger"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/configuration/supplier_cad_follower_right_configuration.usda",
+            "path": "/follower_right/vx300s_right/joints/left_finger"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_physics.usd",
+            "path": "/follower_right/joints/left_finger"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_robot.usd",
+            "path": "/follower_right/joints/left_finger"
+          }
+        ],
+        "residual_before": {
+          "finite": true,
+          "quaternion_l2": 0.0,
+          "translation_m": 0.022390000522136688,
+          "validator_quaternion_tolerance": 0.001,
+          "validator_translation_tolerance_m": 0.0001
+        },
+        "residual_geometry_candidate": {
+          "finite": true,
+          "quaternion_l2": 0.0,
+          "translation_m": 0.0,
+          "validator_quaternion_tolerance": 0.001,
+          "validator_translation_tolerance_m": 0.0001
+        },
+        "rule": "JointHasCorrectTransformAndState",
+        "source_layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_robot.usd",
+        "source_prim_path": "/follower_right/joints/left_finger",
+        "state_units": "meters",
+        "usd_modified": false
+      },
+      {
+        "authored_state_position": -0.022390000522136688,
+        "axis": "Y",
+        "body0_targets": [
+          "/vx300s_right/follower_right_fingers_link"
+        ],
+        "body1_targets": [
+          "/vx300s_right/follower_right_right_finger_link"
+        ],
+        "drive_target_position": null,
+        "expected_transform_from_body0": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.49799397587776184,
+            0.0,
+            0.42705002427101135,
+            1.0
+          ]
+        ],
+        "expected_transform_from_body1": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.49799397587776184,
+            0.0,
+            0.42705002427101135,
+            1.0
+          ]
+        ],
+        "follower": "follower_right",
+        "geometry_candidate_matches_validator": true,
+        "geometry_derived_state_position": 0.0,
+        "joint_type": "PhysicsPrismaticJoint",
+        "local_pos0": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "local_pos1": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "local_rot0_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "local_rot1_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "prim_path": "/vx300s_right/joints/right_finger",
+        "prim_stack": [
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_task7_rule_candidates/1.0/Trossen/vx300s_right/1.0/configuration/vx300s_right_robot.usda",
+            "path": "/vx300s_right/joints/right_finger"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/configuration/aloha1_signal_home_targets.usda",
+            "path": "/World/follower_right/vx300s_right/joints/right_finger"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/configuration/supplier_cad_follower_right_configuration.usda",
+            "path": "/follower_right/vx300s_right/joints/right_finger"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_physics.usd",
+            "path": "/follower_right/joints/right_finger"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_robot.usd",
+            "path": "/follower_right/joints/right_finger"
+          }
+        ],
+        "residual_before": {
+          "finite": true,
+          "quaternion_l2": 0.0,
+          "translation_m": 0.022390000522136688,
+          "validator_quaternion_tolerance": 0.001,
+          "validator_translation_tolerance_m": 0.0001
+        },
+        "residual_geometry_candidate": {
+          "finite": true,
+          "quaternion_l2": 0.0,
+          "translation_m": 0.0,
+          "validator_quaternion_tolerance": 0.001,
+          "validator_translation_tolerance_m": 0.0001
+        },
+        "rule": "JointHasCorrectTransformAndState",
+        "source_layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_robot.usd",
+        "source_prim_path": "/follower_right/joints/right_finger",
+        "state_units": "meters",
+        "usd_modified": false
+      }
+    ],
+    "static_geometry_state_m": [
+      0.0,
+      0.0
+    ]
+  },
+  "runtime_policy": {
+    "diagnostic_session_value": false,
+    "enabled_self_collisions": false,
+    "meaning": "Finger-pair contact is not an active articulation closing stop in this configuration; authored joint limits must prevent illegal closure."
+  },
+  "schema_version": 1,
+  "screenshot_evidence_status": "REJECTED_FOR_FINGER_GEOMETRY",
+  "source_reports": [
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7_virtual_helper_failure_screenshot_review_right.json",
+      "sha256": "2e77da5232d549a5fc932fc4d8660bfc9c295757cc2ac2bf7085609772dac212"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7_joint_state_geometry_audit.json",
+      "sha256": "9f78a6f7a7e3338f1cca7586cdf7cbe950a8c4e345d06b09a3dff46296981121"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_cad_derived_collision_replan_static.json",
+      "sha256": "61cc94457f7768146cdf35de008367223d06aa81e824609a3299934e2960e9f3"
+    }
+  ],
+  "status": "FAIL",
+  "task7": "PARTIAL",
+  "task8": "NOT_RUN",
+  "visual_evidence_legibility": "PASS"
+}

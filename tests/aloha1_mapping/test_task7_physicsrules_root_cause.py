@@ -437,13 +437,20 @@ def test_root_cause_closure_keeps_task7_partial_and_evidence_paths_absolute() ->
     assert report["original_physicsrules_finding_count"] == 20
     assert report["combined_candidate_literal_blocking_count"] == 2
     assert report["combined_candidate_literal_rule_counts"] == {"MimicAPICheck": 2}
-    assert report["failure_evidence"]["status"] == "PASS"
+    assert report["failure_evidence"]["status"] == "PARTIAL"
+    assert report["failure_evidence"]["visual_evidence_legibility"] == "PASS"
+    assert (
+        report["failure_evidence"]["finger_installation_and_collision_gate"]
+        == "NOT_RUN"
+    )
     assert len(report["failure_evidence"]["captures"]) == 4
     for capture in report["failure_evidence"]["captures"]:
         assert Path(capture["raw_absolute_path"]).is_absolute()
         assert Path(capture["annotated_absolute_path"]).is_absolute()
         assert capture["raw_sha256"]
         assert capture["annotated_sha256"]
+        assert capture["visual_evidence_legibility"] == "PASS"
+        assert capture["finger_installation_and_collision_gate"] == "NOT_RUN"
     assert report["remaining_real_blockers"] == [
         "HELPER_MASS_COM_INERTIA_SEMANTICS_NOT_PRESERVED_IN_TOPOLOGY_CANDIDATE",
         "COLLIDER_SPLIT_AND_TOPOLOGY_CANDIDATE_NOT_PROMOTED_OR_GRASP_REGRESSED",

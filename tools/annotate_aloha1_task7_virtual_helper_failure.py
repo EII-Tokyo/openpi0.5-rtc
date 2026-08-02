@@ -14,6 +14,8 @@ from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
 
+from tools.aloha1_mapping.task7_failure_screenshot_gate import classify_review
+
 
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -133,8 +135,10 @@ def _annotate(raw: Path, destination: Path, capture: dict[str, Any], report: dic
     meaning = (
         "Colored geometry is a session-only visual clone of authored colliders. "
         "Boxes identify collider groups; the purple marker identifies helper-frame "
-        "locations. It is not a contact point. Runtime parameters and final assets "
-        "were not changed."
+        "locations. It is not a contact point. This capture did not step physics, "
+        "apply a legal finger qpos, or read back the articulation. Finger orientation "
+        "and finger-pair collision response are NOT EVALUATED. Runtime parameters and "
+        "final assets were not changed."
     )
     for line in textwrap.wrap(meaning, width=48):
         draw.text((x, y), line, fill=(220, 230, 240), font=body)
@@ -170,35 +174,76 @@ def main() -> int:
         raw = Path(capture["raw_absolute_path"]).resolve(strict=True)
         annotated = annotated_root / raw.name.replace("_raw.png", "_annotated.png")
         _annotate(raw, annotated, capture, report)
-        records.append(
-            {
-                **capture,
-                "annotated_absolute_path": str(annotated.resolve(strict=True)),
-                "annotated_sha256": _sha256(annotated),
-                "visual_model_review": args.review_status,
-                "visual_review_checks": {
-                    "whole_arm_or_failure_region_visible": args.review_status,
-                    "collision_overlay_visible": args.review_status,
-                    "labels_do_not_hide_failure_region": args.review_status,
-                    "failure_reason_marked": args.review_status,
-                    "raw_and_annotated_are_distinct": args.review_status,
-                },
-            }
+        record = {
+            **capture,
+            "annotated_absolute_path": str(annotated.resolve(strict=True)),
+            "annotated_sha256": _sha256(annotated),
+            "visual_model_review": args.review_status,
+            "visual_review_checks": {
+                "whole_arm_or_failure_region_visible": args.review_status,
+                "collision_overlay_visible": args.review_status,
+                "labels_do_not_hide_failure_region": args.review_status,
+                "failure_reason_marked": args.review_status,
+                "raw_and_annotated_are_distinct": args.review_status,
+            },
+        }
+        record["review_classification"] = classify_review(
+            requested_visual_status=args.review_status,
+            capture=record,
         )
+        record["visual_model_review"] = record["review_classification"][
+            "visual_model_review"
+        ]
+        records.append(record)
+    classifications = [record["review_classification"] for record in records]
+    overall_status = (
+        "PASS"
+        if classifications and all(item["status"] == "PASS" for item in classifications)
+        else "PARTIAL"
+    )
+    geometry_status = (
+        "PASS"
+        if classifications
+        and all(
+            item["finger_installation_and_collision_gate"] == "PASS"
+            for item in classifications
+        )
+        else "NOT_RUN"
+    )
     final = {
         **report,
-        "status": "PASS" if args.review_status == "PASS" else "PARTIAL",
+        "status": overall_status,
         "reason": (
-            "REPEATED_FAILURE_SCREENSHOT_EVIDENCE_VISUALLY_REVIEWED"
-            if args.review_status == "PASS"
-            else "PENDING_VISUAL_MODEL_REVIEW"
+            "VISUAL_FAILURE_EVIDENCE_LEGIBLE_BUT_FINGER_GEOMETRY_NOT_EVALUATED"
+            if args.review_status == "PASS" and geometry_status != "PASS"
+            else (
+                "VISUAL_AND_FINGER_GEOMETRY_GATES_VERIFIED"
+                if overall_status == "PASS"
+                else "PENDING_VISUAL_MODEL_REVIEW"
+            )
         ),
         "capture_report": {
             "absolute_path": str(capture_report),
             "sha256": _sha256(capture_report),
         },
         "captures": records,
-        "visual_model_review": args.review_status,
+        "visual_model_review": (
+            "PASS"
+            if overall_status == "PASS"
+            else (
+                "PASS_LEGIBILITY_ONLY"
+                if args.review_status == "PASS"
+                else "PENDING"
+            )
+        ),
+        "visual_evidence_legibility": args.review_status,
+        "finger_installation_and_collision_gate": geometry_status,
+        "scope_boundary": (
+            "The overlay images show the rejected helper-body candidate and its "
+            "authored collider groups. They do not establish legal finger qpos, "
+            "supplier-CAD palm orientation, finger-pair collision response, or "
+            "runtime grasp validity unless a separate finger_geometry_gate passes."
+        ),
     }
     output = args.output_report.resolve()
     output.parent.mkdir(parents=True, exist_ok=True)

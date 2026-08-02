@@ -29,12 +29,24 @@ OUTPUT_JSON = (
 )
 OUTPUT_MD = OUTPUT_JSON.with_suffix(".md")
 ARTICULATION_PATH = "/workcell/vx300s_left/vx300s_left"
+ROBOT_ROOT = "/workcell/vx300s_left"
 COLLIDER_PREFIXES = (
     "/workcell/vx300s_left/vx300s_left_gripper_link/collisions/",
     "/workcell/vx300s_left/vx300s_left_gripper_prop_link/collisions/",
     "/workcell/vx300s_left/vx300s_left_left_finger_link/collisions/",
     "/workcell/vx300s_left/vx300s_left_right_finger_link/collisions/",
 )
+
+
+def _path_in_collision_scope(
+    path: str,
+    *,
+    robot_root: str,
+    collider_prefixes: tuple[str, ...],
+) -> bool:
+    return path.startswith(robot_root + "/") and any(
+        path.startswith(prefix) for prefix in collider_prefixes
+    )
 
 
 def _sha256(path: Path) -> str:
@@ -84,12 +96,16 @@ def _collision_inventory(stage: Any) -> list[dict[str, Any]]:
     from pxr import UsdGeom
     from pxr import UsdPhysics
 
-    root = stage.GetPrimAtPath("/workcell/vx300s_left")
+    root = stage.GetPrimAtPath(ROBOT_ROOT)
     records = []
     for prim in Usd.PrimRange(root, Usd.TraverseInstanceProxies()):
         path = str(prim.GetPath())
         if (
-            not any(path.startswith(prefix) for prefix in COLLIDER_PREFIXES)
+            not _path_in_collision_scope(
+                path,
+                robot_root=ROBOT_ROOT,
+                collider_prefixes=COLLIDER_PREFIXES,
+            )
             or not prim.IsA(UsdGeom.Mesh)
             or not prim.HasAPI(UsdPhysics.CollisionAPI)
         ):

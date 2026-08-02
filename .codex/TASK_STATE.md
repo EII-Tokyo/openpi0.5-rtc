@@ -2293,9 +2293,28 @@ scene design is reviewed and approved.
 - Directly removing the six empty helper rigid bodies is rejected. It creates
   57 deterministic `NonAdjacentCollisionMeshesDoNotClash` errors per
   follower in two fresh processes. Attempt 1 screenshots were rejected for
-  cropping/label overlap; attempt 2 has four raw and four annotated images,
-  all visually reviewed `PASS`, with absolute paths and hashes stored in the
-  screenshot-review reports.
+  cropping/label overlap. Attempt 2 has four raw and four annotated images that
+  remain legible failure evidence, but their former top-level visual `PASS` is
+  revoked. The capture was a static USD render with no physics reset, legal
+  finger qpos injection or joint readback, so it did not validate CAD finger
+  orientation or finger-pair collision response.
+- Corrective numeric re-audit: the pictured static `q=(0,0)` is outside the
+  authored limits (`left=[0.021,0.057] m`, `right=[-0.057,-0.021] m`) and the
+  two independent supplier-CAD colliders overlap by
+  `3.1833401720316014e-5 m^3`, signed Chebyshev margin
+  `+0.008711389552923193 m`. At legal closed
+  `q=(+0.021,-0.021) m`, the pair is `SEPARATED` with zero overlap and signed
+  margin `-0.0020572846790836673 m`; legal open is also separated. The
+  colliders are separate prims under separate finger links, not one base-merged
+  collider. Articulation self-collision remains `false`; authored limits are
+  therefore the closing stop. Classification:
+  `ILLEGAL_STATIC_Q_ZERO_BYPASSED_RUNTIME_LIMITS`.
+- The deliberately broken helper-removal candidate also cannot initialize a
+  valid gripper articulation in a fresh runtime probe: `ee_gripper` has no
+  resolved bodies and the finger joints/mimic do not enter an articulation.
+  It cannot be used as runtime finger evidence. This correction does not
+  invalidate the separate PhysicsRules count experiment or the already
+  user-confirmed five dynamic grasp videos.
 - Frame-preserving topology reparenting (NVIDIA Robot Schema row-vector
   formula) removes all six helper findings without the clash regression;
   maximum joint-frame residual is `9.313225746154785e-10`.
@@ -2319,7 +2338,8 @@ scene design is reviewed and approved.
   - `reports/aloha1_mapping/aloha1_task7_virtual_helper_mass_audit.json/.md`;
   - `reports/aloha1_mapping/aloha1_task7_physicsrules_root_cause_closure.json/.md`;
   - `reports/aloha1_mapping/aloha1_task7_virtual_helper_failure_screenshot_review_left.json`;
-  - `reports/aloha1_mapping/aloha1_task7_virtual_helper_failure_screenshot_review_right.json`.
+  - `reports/aloha1_mapping/aloha1_task7_virtual_helper_failure_screenshot_review_right.json`;
+  - `reports/aloha1_mapping/aloha1_task7_finger_pair_reaudit.json/.md`.
 - Final verification: focused `17 passed`; `tests/aloha1_mapping` `1010
   passed`; Ruff, pycompile, frozen Stage hash and four screenshot hashes
   `PASS`. Full-repository pytest stops at collection with seven unrelated

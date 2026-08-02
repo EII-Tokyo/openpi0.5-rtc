@@ -48,6 +48,12 @@ def build() -> dict[str, Any]:
                     "annotated_absolute_path": capture["annotated_absolute_path"],
                     "annotated_sha256": capture["annotated_sha256"],
                     "visual_model_review": capture["visual_model_review"],
+                    "visual_evidence_legibility": capture.get(
+                        "review_classification", {}
+                    ).get("visual_evidence_legibility", "PENDING"),
+                    "finger_installation_and_collision_gate": capture.get(
+                        "review_classification", {}
+                    ).get("finger_installation_and_collision_gate", "NOT_RUN"),
                     "failure_shown": (
                         "UNCOMPENSATED_HELPER_BODY_REMOVAL_CREATES_"
                         "NONADJACENT_COLLIDER_CLASH_FINDINGS"
@@ -108,8 +114,37 @@ def build() -> dict[str, Any]:
             "status": (
                 "PASS"
                 if len(captures) == 4
-                and all(item["visual_model_review"] == "PASS" for item in captures)
-                else "FAIL"
+                and all(
+                    item["visual_evidence_legibility"] == "PASS"
+                    and item["finger_installation_and_collision_gate"] == "PASS"
+                    for item in captures
+                )
+                else "PARTIAL"
+            ),
+            "visual_evidence_legibility": (
+                "PASS"
+                if len(captures) == 4
+                and all(
+                    item["visual_evidence_legibility"] == "PASS"
+                    for item in captures
+                )
+                else "PARTIAL"
+            ),
+            "finger_installation_and_collision_gate": (
+                "PASS"
+                if len(captures) == 4
+                and all(
+                    item["finger_installation_and_collision_gate"] == "PASS"
+                    for item in captures
+                )
+                else "NOT_RUN"
+            ),
+            "scope_boundary": (
+                "These images document the rejected virtual-helper candidate and "
+                "make the collider groups legible. They were captured without a "
+                "physics reset/readback and therefore do not validate legal finger "
+                "qpos, supplier-CAD inward-surface orientation, or finger-pair "
+                "collision response."
             ),
             "trigger": "TWO_IDENTICAL_FRESH_PROCESS_FAILURES_PER_FOLLOWER",
             "review_reports": review_inputs,
@@ -148,9 +183,11 @@ def build() -> dict[str, Any]:
         "signatures.",
         "",
         "The straightforward helper-body removal is rejected. It reproducibly creates "
-        "57 non-adjacent collider-clash findings per follower. Four vision-reviewed raw/"
-        "annotated images identify the affected helper chain and collision region; their "
-        "absolute paths and hashes are in the JSON report.",
+        "57 non-adjacent collider-clash findings per follower. Four visually legible raw/"
+        "annotated images identify the affected helper chain and collision region. Those "
+        "images were not captured from a legal runtime finger readback and therefore do "
+        "not validate supplier-CAD finger installation or finger-pair collision response; "
+        "their absolute paths and hashes are in the JSON report.",
         "",
         "The frame-preserving topology candidate avoids that clash regression, but removes "
         f"`{report['helper_mass_semantics']['removed_mass_per_follower_kg']:.9g} kg` of "

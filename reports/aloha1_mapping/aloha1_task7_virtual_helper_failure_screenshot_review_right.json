@@ -6,7 +6,7 @@
   "captures": [
     {
       "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-task7-physicsrules-root-cause/screenshots_attempt2/follower_right/screenshots_annotated/follower_right_whole_arm_oblique_annotated.png",
-      "annotated_sha256": "e197fcb782ab533ea009a7365149f65b3ec4b1542058b48c647bd0043db56220",
+      "annotated_sha256": "2797c2add5ed4d8d2ff8c36f4379d25cdea2115986552ab856dd5b6aef2d3ec0",
       "camera": {
         "orientation_wxyz": [
           0.26873263716697693,
@@ -78,8 +78,15 @@
         1600,
         1000
       ],
+      "review_classification": {
+        "finger_installation_and_collision_gate": "NOT_RUN",
+        "reason": "FINGER_GEOMETRY_AND_RUNTIME_STATE_NOT_EVALUATED",
+        "status": "PARTIAL",
+        "visual_evidence_legibility": "PASS",
+        "visual_model_review": "PASS_LEGIBILITY_ONLY"
+      },
       "view": "whole_arm_oblique",
-      "visual_model_review": "PASS",
+      "visual_model_review": "PASS_LEGIBILITY_ONLY",
       "visual_review": "PENDING",
       "visual_review_checks": {
         "collision_overlay_visible": "PASS",
@@ -91,7 +98,7 @@
     },
     {
       "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-task7-physicsrules-root-cause/screenshots_attempt2/follower_right/screenshots_annotated/follower_right_gripper_failure_closeup_annotated.png",
-      "annotated_sha256": "2ae3a3344167437702fcb23772d80d628cb75132743c4d3ada7e7694ef4c7eeb",
+      "annotated_sha256": "2e44033185032b0839ed7c6000afbddbc2d6dec1d7cce4a9395a76b728b12f3f",
       "camera": {
         "orientation_wxyz": [
           0.26873263716697693,
@@ -163,8 +170,15 @@
         1600,
         1000
       ],
+      "review_classification": {
+        "finger_installation_and_collision_gate": "NOT_RUN",
+        "reason": "FINGER_GEOMETRY_AND_RUNTIME_STATE_NOT_EVALUATED",
+        "status": "PARTIAL",
+        "visual_evidence_legibility": "PASS",
+        "visual_model_review": "PASS_LEGIBILITY_ONLY"
+      },
       "view": "gripper_failure_closeup",
-      "visual_model_review": "PASS",
+      "visual_model_review": "PASS_LEGIBILITY_ONLY",
       "visual_review": "PENDING",
       "visual_review_checks": {
         "collision_overlay_visible": "PASS",
@@ -182,6 +196,7 @@
     "interpretation": "Removing body semantics from source-empty fixed helpers changes the validator's rigid-body adjacency/ownership model and introduces 57 repeatable collision-clash findings.",
     "non_adjacent_clash_count": 57
   },
+  "finger_installation_and_collision_gate": "NOT_RUN",
   "overlay": {
     "colors": {
       "base": "red",
@@ -319,8 +334,9 @@
     ],
     "semantics": "SESSION_ONLY_NON_PHYSICAL_VISUAL_CLONES_OF_AUTHORED_COLLIDERS"
   },
-  "reason": "REPEATED_FAILURE_SCREENSHOT_EVIDENCE_VISUALLY_REVIEWED",
+  "reason": "VISUAL_FAILURE_EVIDENCE_LEGIBLE_BUT_FINGER_GEOMETRY_NOT_EVALUATED",
   "schema_version": 1,
+  "scope_boundary": "The overlay images show the rejected helper-body candidate and its authored collider groups. They do not establish legal finger qpos, supplier-CAD palm orientation, finger-pair collision response, or runtime grasp validity unless a separate finger_geometry_gate passes.",
   "source_or_final_asset_modified": false,
   "stage": {
     "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task7_physicsrules_root_cause_candidates/1.0/virtual_helpers_without_rigid_body/follower_right/follower_right_virtual_helpers_without_rigid_body.usda",
@@ -328,7 +344,7 @@
     "sha256_after": "d0ffc14010f8237b5fdbe55e5a5c9761c57de8c6d7b071ce71d1a57046bfe825",
     "sha256_before": "d0ffc14010f8237b5fdbe55e5a5c9761c57de8c6d7b071ce71d1a57046bfe825"
   },
-  "status": "PASS",
+  "status": "PARTIAL",
   "task8": "NOT_RUN",
   "validator_reports": [
     {
@@ -340,5 +356,6 @@
       "sha256": "f44c9c6d33205084a7c43850544a31de94d5a6ca3f1d59eedb5ccc6a9ff2956b"
     }
   ],
-  "visual_model_review": "PASS"
+  "visual_evidence_legibility": "PASS",
+  "visual_model_review": "PASS_LEGIBILITY_ONLY"
 }

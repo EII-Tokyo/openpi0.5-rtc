@@ -12,7 +12,7 @@
 
 The isolated combined candidate reduces the original 20 standalone-follower PhysicsRules blockers to one unsuppressed `MimicAPICheck` per follower. Both followers pass two fresh 120-frame runtime probes with identical per-side signatures.
 
-The straightforward helper-body removal is rejected. It reproducibly creates 57 non-adjacent collider-clash findings per follower. Four vision-reviewed raw/annotated images identify the affected helper chain and collision region; their absolute paths and hashes are in the JSON report.
+The straightforward helper-body removal is rejected. It reproducibly creates 57 non-adjacent collider-clash findings per follower. Four visually legible raw/annotated images identify the affected helper chain and collision region. Those images were not captured from a legal runtime finger readback and therefore do not validate supplier-CAD finger installation or finger-pair collision response; their absolute paths and hashes are in the JSON report.
 
 The frame-preserving topology candidate avoids that clash regression, but removes `0.00300000014 kg` of source-authored helper mass per follower. Those values are source placeholders, not physically calibrated measurements. The candidate therefore cannot be promoted until its mass/COM/inertia semantics are preserved and the changed collider composition passes the accepted grasp regression.
 

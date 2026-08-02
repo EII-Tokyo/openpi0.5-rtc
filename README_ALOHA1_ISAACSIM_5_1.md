@@ -370,8 +370,18 @@ still requires the already-accepted grasp regression before any promotion.
 Simply removing the six empty helper rigid bodies is rejected: two fresh
 processes per follower reproducibly create 57
 `NonAdjacentCollisionMeshesDoNotClash` findings. Four raw/annotated failure
-images were individually reviewed and retain absolute paths and hashes in the
-closure JSON. A frame-preserving reparenting candidate avoids those new clash
+images remain legible evidence of the rejected helper candidate and retain
+absolute paths and hashes in the closure JSON. Their former top-level visual
+`PASS` has been revoked: the capture script rendered static authored USD
+transforms without a physics reset or finger readback, so the images do not
+validate supplier-CAD finger orientation or finger-pair response. A controlled
+re-audit found that the pictured static `q=(0,0)` state is outside the authored
+finger limits and produces `3.18334017203e-5 m^3` left/right collider overlap;
+the legal closed state `q=(+0.021,-0.021) m` is numerically separated with zero
+overlap. The two finger colliders are distinct prims under distinct finger
+links; they were not merged at their bases. Authored articulation self-collision
+is `false`, so legal joint limits—not finger/finger contact—are the closing
+stop. A frame-preserving reparenting candidate avoids those new clash
 findings and leaves only the mimic conflict when combined with the JointState
 candidate. However, it also removes three source-authored helper inertias and
 `0.00300000014 kg` per follower. The values are identical placeholder-like
@@ -387,6 +397,7 @@ Authoritative reports:
 - `reports/aloha1_mapping/aloha1_task7_physicsrules_root_cause_closure.json`;
 - `reports/aloha1_mapping/aloha1_task7_virtual_helper_failure_screenshot_review_left.json`;
 - `reports/aloha1_mapping/aloha1_task7_virtual_helper_failure_screenshot_review_right.json`.
+- `reports/aloha1_mapping/aloha1_task7_finger_pair_reaudit.json/.md`.
 
 Final verification for this closure is `17 passed` for the focused root-cause
 suite and `1010 passed` for `tests/aloha1_mapping`; Ruff, pycompile, frozen

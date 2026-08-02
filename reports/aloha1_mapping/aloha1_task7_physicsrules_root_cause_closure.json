@@ -7,59 +7,70 @@
     "captures": [
       {
         "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-task7-physicsrules-root-cause/screenshots_attempt2/follower_left/screenshots_annotated/follower_left_whole_arm_oblique_annotated.png",
-        "annotated_sha256": "b53fbfdde1502e83c83cc9092bc93585ba4a0c9898a39679b74e192e447c53c4",
+        "annotated_sha256": "1938df6a4c763158ff23ddd1465b7dd67ca73405c1768ac41ed2f81c25c783f0",
         "failure_shown": "UNCOMPENSATED_HELPER_BODY_REMOVAL_CREATES_NONADJACENT_COLLIDER_CLASH_FINDINGS",
+        "finger_installation_and_collision_gate": "NOT_RUN",
         "follower": "follower_left",
         "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-task7-physicsrules-root-cause/screenshots_attempt2/follower_left/screenshots_raw/follower_left_whole_arm_oblique_raw.png",
         "raw_sha256": "9f6c199a52f7e2ac8a38f5030d29ca2cb6aec379981a46c925277eca59071478",
         "view": "whole_arm_oblique",
-        "visual_model_review": "PASS"
+        "visual_evidence_legibility": "PASS",
+        "visual_model_review": "PASS_LEGIBILITY_ONLY"
       },
       {
         "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-task7-physicsrules-root-cause/screenshots_attempt2/follower_left/screenshots_annotated/follower_left_gripper_failure_closeup_annotated.png",
-        "annotated_sha256": "29ed358607182f3d013a21b9bc31148b146e2a6181ace0fecfe77ee7c5446ae8",
+        "annotated_sha256": "9acad1fcd905ba32a35df171424ca7ed4b02485fe86727995b1a9eebade58b1d",
         "failure_shown": "UNCOMPENSATED_HELPER_BODY_REMOVAL_CREATES_NONADJACENT_COLLIDER_CLASH_FINDINGS",
+        "finger_installation_and_collision_gate": "NOT_RUN",
         "follower": "follower_left",
         "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-task7-physicsrules-root-cause/screenshots_attempt2/follower_left/screenshots_raw/follower_left_gripper_failure_closeup_raw.png",
         "raw_sha256": "5983b1fd547b315182e45d12d411af91fcb477d5f7590ff89bbe82e1806e8f10",
         "view": "gripper_failure_closeup",
-        "visual_model_review": "PASS"
+        "visual_evidence_legibility": "PASS",
+        "visual_model_review": "PASS_LEGIBILITY_ONLY"
       },
       {
         "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-task7-physicsrules-root-cause/screenshots_attempt2/follower_right/screenshots_annotated/follower_right_whole_arm_oblique_annotated.png",
-        "annotated_sha256": "e197fcb782ab533ea009a7365149f65b3ec4b1542058b48c647bd0043db56220",
+        "annotated_sha256": "2797c2add5ed4d8d2ff8c36f4379d25cdea2115986552ab856dd5b6aef2d3ec0",
         "failure_shown": "UNCOMPENSATED_HELPER_BODY_REMOVAL_CREATES_NONADJACENT_COLLIDER_CLASH_FINDINGS",
+        "finger_installation_and_collision_gate": "NOT_RUN",
         "follower": "follower_right",
         "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-task7-physicsrules-root-cause/screenshots_attempt2/follower_right/screenshots_raw/follower_right_whole_arm_oblique_raw.png",
         "raw_sha256": "def4192f77482782cda74c80c4c8374dd3d6eee218584e368fc5fdef663aa32d",
         "view": "whole_arm_oblique",
-        "visual_model_review": "PASS"
+        "visual_evidence_legibility": "PASS",
+        "visual_model_review": "PASS_LEGIBILITY_ONLY"
       },
       {
         "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-task7-physicsrules-root-cause/screenshots_attempt2/follower_right/screenshots_annotated/follower_right_gripper_failure_closeup_annotated.png",
-        "annotated_sha256": "2ae3a3344167437702fcb23772d80d628cb75132743c4d3ada7e7694ef4c7eeb",
+        "annotated_sha256": "2e44033185032b0839ed7c6000afbddbc2d6dec1d7cce4a9395a76b728b12f3f",
         "failure_shown": "UNCOMPENSATED_HELPER_BODY_REMOVAL_CREATES_NONADJACENT_COLLIDER_CLASH_FINDINGS",
+        "finger_installation_and_collision_gate": "NOT_RUN",
         "follower": "follower_right",
         "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-task7-physicsrules-root-cause/screenshots_attempt2/follower_right/screenshots_raw/follower_right_gripper_failure_closeup_raw.png",
         "raw_sha256": "8ac6dd949d07918173fe3648fb44a5be711b99ea4b904eb78922ed4357e5c215",
         "view": "gripper_failure_closeup",
-        "visual_model_review": "PASS"
+        "visual_evidence_legibility": "PASS",
+        "visual_model_review": "PASS_LEGIBILITY_ONLY"
       }
     ],
+    "finger_installation_and_collision_gate": "NOT_RUN",
     "review_reports": [
       {
         "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7_virtual_helper_failure_screenshot_review_left.json",
-        "sha256": "ce3bb95b14d8171c232da39af8c61af6b1cf5c4f9fe53255b5a9eac5d756facb",
-        "status": "PASS"
+        "sha256": "e59d8e744a2a9368f0efa456c8c6b09edcf0165a922b1b4d748c6801173e97bd",
+        "status": "PARTIAL"
       },
       {
         "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7_virtual_helper_failure_screenshot_review_right.json",
-        "sha256": "b83d90012d951d71c8565675614b691fd6b8720c394befd9ab252423ab1957b7",
-        "status": "PASS"
+        "sha256": "2e77da5232d549a5fc932fc4d8660bfc9c295757cc2ac2bf7085609772dac212",
+        "status": "PARTIAL"
       }
     ],
-    "status": "PASS",
-    "trigger": "TWO_IDENTICAL_FRESH_PROCESS_FAILURES_PER_FOLLOWER"
+    "scope_boundary": "These images document the rejected virtual-helper candidate and make the collider groups legible. They were captured without a physics reset/readback and therefore do not validate legal finger qpos, supplier-CAD inward-surface orientation, or finger-pair collision response.",
+    "status": "PARTIAL",
+    "trigger": "TWO_IDENTICAL_FRESH_PROCESS_FAILURES_PER_FOLLOWER",
+    "visual_evidence_legibility": "PASS"
   },
   "final_or_default_asset_modified": false,
   "frozen_stage_sha256": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9",
