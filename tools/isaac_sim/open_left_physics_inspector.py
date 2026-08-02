@@ -9,7 +9,7 @@ import omni.timeline
 import omni.ui
 import omni.usd
 import omni.physxsupportui.bindings._physxSupportUi as pxsupportui
-from pxr import UsdPhysics
+from pxr import Usd, UsdPhysics
 
 from tools.isaac_sim.left_inspector_startup import (
     LoadingStability,
@@ -25,8 +25,9 @@ TARGET_STAGE = (
 )
 LEFT_ARTICULATION_ROOT = "/World/follower_left/vx300s_left/root_joint"
 TABLE_COLLIDER = "/World/environment/worldBody/user_confirmed_table"
+INSPECTED_PATHS = (LEFT_ARTICULATION_ROOT, TABLE_COLLIDER)
+LEFT_ROBOT_ROOT = "/World/follower_left/vx300s_left"
 INSPECTOR_WINDOW_TITLE = "Physics Inspector: ###PhysicsInspector1"
-TABLE_INSPECTOR_WINDOW_TITLE = "Physics Inspector: ###PhysicsInspector2"
 EXPECTED_JOINT_ROWS = 13
 STABLE_LOADING_SAMPLES = 5
 LOADING_TIMEOUT_UPDATES = 2400
@@ -73,12 +74,30 @@ def _collect_inspector_rows(model) -> list[tuple[str, str]]:
     return rows
 
 
-async def _bind_path(app, context, inspector_window, path: str) -> None:
-    context.get_selection().set_selected_prim_paths([path], False)
+def _expanded_inspected_paths(stage) -> list[str]:
+    paths = list(INSPECTED_PATHS)
+    robot = stage.GetPrimAtPath(LEFT_ROBOT_ROOT)
+    for prim in Usd.PrimRange(robot):
+        if (
+            prim.IsA(UsdPhysics.Joint)
+            or prim.HasAPI(UsdPhysics.ArticulationRootAPI)
+            or prim.HasAPI(UsdPhysics.RigidBodyAPI)
+            or prim.HasAPI(UsdPhysics.CollisionAPI)
+        ):
+            path = str(prim.GetPath())
+            if path not in paths:
+                paths.append(path)
+    return paths
+
+
+async def _bind_paths(app, context, inspector_window, stage) -> list[str]:
+    paths = _expanded_inspected_paths(stage)
+    context.get_selection().set_selected_prim_paths(paths, False)
     inspector_window.visible = True
     inspector_window._inspector_toolbar._select_current()
     for _ in range(20):
         await app.next_update_async()
+    return paths
 
 
 def _configure_left_options(inspector_window) -> None:
@@ -91,12 +110,10 @@ def _configure_left_options(inspector_window) -> None:
     model.get_enable_gravity_model().set_value(False)
 
 
-async def _bind_both_panels(
-    app, context, left_inspector_window, table_inspector_window
-) -> None:
-    await _bind_path(app, context, left_inspector_window, LEFT_ARTICULATION_ROOT)
-    _configure_left_options(left_inspector_window)
-    await _bind_path(app, context, table_inspector_window, TABLE_COLLIDER)
+async def _bind_single_panel(app, context, inspector_window, stage) -> list[str]:
+    paths = await _bind_paths(app, context, inspector_window, stage)
+    _configure_left_options(inspector_window)
+    return paths
 
 
 async def _prepare_left_inspector() -> None:
@@ -105,7 +122,6 @@ async def _prepare_left_inspector() -> None:
     context = omni.usd.get_context()
     action_registry = omni.kit.actions.core.get_action_registry()
     inspector_window = None
-    table_inspector_window = None
 
     try:
         await app.next_update_async()
@@ -157,19 +173,8 @@ async def _prepare_left_inspector() -> None:
         if inspector_window is None:
             raise RuntimeError("Physics Inspector window was not created")
 
-        await _bind_path(app, context, inspector_window, LEFT_ARTICULATION_ROOT)
+        selected_paths = await _bind_paths(app, context, inspector_window, stage)
         _configure_left_options(inspector_window)
-        inspector_window._inspector.add_inspector_window()
-        for _ in range(30):
-            await app.next_update_async()
-            table_inspector_window = omni.ui.Workspace.get_window(
-                TABLE_INSPECTOR_WINDOW_TITLE
-            )
-            if table_inspector_window is not None:
-                break
-        if table_inspector_window is None:
-            raise RuntimeError("Second Physics Inspector window was not created")
-        await _bind_path(app, context, table_inspector_window, TABLE_COLLIDER)
         guard = RecoveryGuard()
         for update in range(ACCEPTANCE_UPDATES):
             await app.next_update_async()
@@ -184,8 +189,8 @@ async def _prepare_left_inspector() -> None:
                 )
                 inspector_window._supportui_private.enable_inspector_authoring_mode()
                 await _wait_for_stable_loading(app, context, "recovery")
-                await _bind_both_panels(
-                    app, context, inspector_window, table_inspector_window
+                selected_paths = await _bind_single_panel(
+                    app, context, inspector_window, stage
                 )
             elif decision is RecoveryDecision.FAIL:
                 print(
@@ -197,9 +202,6 @@ async def _prepare_left_inspector() -> None:
         final_state = inspector_window._supportui_private.get_inspector_state()
         selected_label = (
             inspector_window._inspector_toolbar.label_selection.model.get_value_as_string()
-        )
-        table_selected_label = (
-            table_inspector_window._inspector_toolbar.label_selection.model.get_value_as_string()
         )
         control_type = (
             inspector_window._model_inspector.get_control_type_model().get_value_as_string()
@@ -225,20 +227,17 @@ async def _prepare_left_inspector() -> None:
             flush=True,
         )
         print(
-            "CODEX_TABLE_INSPECTOR_READY "
-            f"visible={table_inspector_window.visible} selected={table_selected_label}",
+            "CODEX_INSPECTOR_SELECTION_READY "
+            f"paths={selected_paths}",
             flush=True,
         )
         for name, path in joint_rows[:20]:
             print(f"CODEX_INSPECTOR_JOINT name={name} path={path}", flush=True)
         if final_state == pxsupportui.PhysXInspectorModelState.DISABLED:
             raise RuntimeError("Inspector ended the acceptance window DISABLED")
-        if selected_label != LEFT_ARTICULATION_ROOT:
+        expected_label = f"{LEFT_ARTICULATION_ROOT} (+{len(selected_paths) - 1})"
+        if selected_label != expected_label:
             raise RuntimeError(f"Inspector selected unexpected path: {selected_label}")
-        if table_selected_label != TABLE_COLLIDER:
-            raise RuntimeError(
-                f"Table Inspector selected unexpected path: {table_selected_label}"
-            )
         if len(joint_rows) < EXPECTED_JOINT_ROWS:
             raise RuntimeError(
                 f"Inspector exposed {len(joint_rows)} joint rows; expected at least "
@@ -260,8 +259,8 @@ async def _prepare_left_inspector() -> None:
             flush=True,
         )
         print(
-            "CODEX_DUAL_INSPECTOR_ACCEPTED "
-            f"left={selected_label} table={table_selected_label} "
+            "CODEX_SINGLE_INSPECTOR_ACCEPTED "
+            f"paths={selected_paths} label={selected_label} "
             f"control={control_type} quasi_static={quasi_static} "
             f"fix_base={fix_base} gravity={gravity}",
             flush=True,

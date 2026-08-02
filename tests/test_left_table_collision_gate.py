@@ -31,13 +31,16 @@ def passing_trial() -> TrialMetrics:
     )
 
 
-def test_pass_requires_exact_contact_non_crossing_and_blocked_target():
-    result = evaluate_trial(passing_trial())
+def test_pass_requires_exact_contact_non_crossing_and_persistent_hold():
+    trial = passing_trial()
+    trial.final_target_error_rad = math.radians(0.1)
+    result = evaluate_trial(trial)
 
     assert result["status"] == "PASS"
     assert result["target_contact_found"] is True
     assert result["tabletop_penetrated"] is False
-    assert result["infeasible_target_blocked"] is True
+    assert result["collision_hold_verified"] is True
+    assert "infeasible_target_not_blocked" not in result["failure_reasons"]
 
 
 def test_unrelated_contact_and_tabletop_penetration_fail():

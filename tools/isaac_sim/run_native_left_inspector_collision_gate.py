@@ -8,6 +8,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import time
 from typing import Any
 
 
@@ -25,6 +26,8 @@ EXPECTED_STAGE_SHA256 = (
 )
 TRIAL_COUNT = 3
 TRIAL_TIMEOUT_SECONDS = 240
+REPORT_EXIT_GRACE_SECONDS = 5
+TERMINATE_GRACE_SECONDS = 15
 
 
 @dataclass(frozen=True)
@@ -104,25 +107,42 @@ def run_gate(output_root: Path) -> dict[str, Any]:
             f"Starting native Full Kit collision trial {trial_index}/{TRIAL_COUNT}",
             flush=True,
         )
-        with log_path.open("w", encoding="utf-8") as log_stream:
-            try:
-                completed = subprocess.run(
-                    launch.command,
-                    cwd=SOURCE_ROOT,
-                    env=launch.environment,
-                    stdout=log_stream,
-                    stderr=subprocess.STDOUT,
-                    text=True,
-                    timeout=TRIAL_TIMEOUT_SECONDS,
-                    check=False,
-                )
-                returncode: int | None = completed.returncode
-                timed_out = False
-            except subprocess.TimeoutExpired:
-                returncode = None
-                timed_out = True
-
         report_path = launch.output_dir / "trial.json"
+        with log_path.open("w", encoding="utf-8") as log_stream:
+            process = subprocess.Popen(
+                launch.command,
+                cwd=SOURCE_ROOT,
+                env=launch.environment,
+                stdout=log_stream,
+                stderr=subprocess.STDOUT,
+                text=True,
+            )
+            deadline = time.monotonic() + TRIAL_TIMEOUT_SECONDS
+            report_seen_at: float | None = None
+            timed_out = False
+            controlled_termination = False
+            while process.poll() is None:
+                now = time.monotonic()
+                if report_path.is_file():
+                    if report_seen_at is None:
+                        report_seen_at = now
+                    elif now - report_seen_at >= REPORT_EXIT_GRACE_SECONDS:
+                        process.terminate()
+                        controlled_termination = True
+                        break
+                if now >= deadline:
+                    process.terminate()
+                    timed_out = True
+                    break
+                time.sleep(0.25)
+            try:
+                returncode: int | None = process.wait(
+                    timeout=TERMINATE_GRACE_SECONDS
+                )
+            except subprocess.TimeoutExpired:
+                process.kill()
+                returncode = process.wait(timeout=TERMINATE_GRACE_SECONDS)
+
         if report_path.is_file():
             report = json.loads(report_path.read_text(encoding="utf-8"))
         else:
@@ -136,7 +156,7 @@ def run_gate(output_root: Path) -> dict[str, Any]:
         if timed_out:
             report["status"] = "FAIL"
             report.setdefault("failure_reasons", []).append("trial_timed_out")
-        elif returncode != 0:
+        elif returncode != 0 and not controlled_termination:
             report["status"] = "FAIL"
             report.setdefault("failure_reasons", []).append(
                 f"full_kit_exit_code_{returncode}"
@@ -147,6 +167,7 @@ def run_gate(output_root: Path) -> dict[str, Any]:
                 "trial_index": trial_index,
                 "returncode": returncode,
                 "timed_out": timed_out,
+                "controlled_termination_after_report": controlled_termination,
                 "log": str(log_path),
                 "report": str(report_path),
             }

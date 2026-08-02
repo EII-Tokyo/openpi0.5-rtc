@@ -45,11 +45,13 @@ EXPECTED_STAGE_SHA256 = (
 )
 LEFT_ARTICULATION_ROOT = "/World/follower_left/vx300s_left/root_joint"
 TABLE_COLLIDER = "/World/environment/worldBody/user_confirmed_table"
+INSPECTED_PATHS = (LEFT_ARTICULATION_ROOT, TABLE_COLLIDER)
+LEFT_ROBOT_ROOT = "/World/follower_left/vx300s_left"
 SHOULDER_JOINT = "/World/follower_left/vx300s_left/joints/shoulder"
 INSPECTOR_WINDOW_TITLE = "Physics Inspector: ###PhysicsInspector1"
-TABLE_INSPECTOR_WINDOW_TITLE = "Physics Inspector: ###PhysicsInspector2"
 EXPECTED_JOINT_ROWS = 13
-SHOULDER_TARGET_DEG = 20.0
+APPROACH_TARGET_DEG = 20.0
+HOLD_TARGET_DEG = 30.0
 LOADING_TIMEOUT_UPDATES = 2400
 INSPECTOR_TIMEOUT_UPDATES = 1200
 SIMULATION_TIMEOUT_UPDATES = 2400
@@ -142,12 +144,30 @@ def _collect_rows(model: Any) -> list[tuple[str, str]]:
     return rows
 
 
-async def _bind_path(app: Any, context: Any, window: Any, path: str) -> None:
-    context.get_selection().set_selected_prim_paths([path], False)
+def _expanded_inspected_paths(stage: Any) -> list[str]:
+    paths = list(INSPECTED_PATHS)
+    robot = stage.GetPrimAtPath(LEFT_ROBOT_ROOT)
+    for prim in Usd.PrimRange(robot):
+        if (
+            prim.IsA(UsdPhysics.Joint)
+            or prim.HasAPI(UsdPhysics.ArticulationRootAPI)
+            or prim.HasAPI(UsdPhysics.RigidBodyAPI)
+            or prim.HasAPI(UsdPhysics.CollisionAPI)
+        ):
+            path = str(prim.GetPath())
+            if path not in paths:
+                paths.append(path)
+    return paths
+
+
+async def _bind_paths(app: Any, context: Any, window: Any, stage: Any) -> list[str]:
+    paths = _expanded_inspected_paths(stage)
+    context.get_selection().set_selected_prim_paths(paths, False)
     window.visible = True
     window._inspector_toolbar._select_current()
     for _ in range(20):
         await app.next_update_async()
+    return paths
 
 
 def _configure_left(window: Any) -> None:
@@ -308,18 +328,16 @@ async def _run_trial() -> None:
                 break
         if left_window is None:
             raise RuntimeError("native Physics Inspector window was not created")
-        await _bind_path(app, context, left_window, LEFT_ARTICULATION_ROOT)
+        selected_paths = await _bind_paths(app, context, left_window, stage)
         _configure_left(left_window)
-        left_window._inspector.add_inspector_window()
-        table_window = None
-        for _ in range(INSPECTOR_TIMEOUT_UPDATES):
-            await app.next_update_async()
-            table_window = omni.ui.Workspace.get_window(TABLE_INSPECTOR_WINDOW_TITLE)
-            if table_window is not None:
-                break
-        if table_window is None:
-            raise RuntimeError("second native Physics Inspector window was not created")
-        await _bind_path(app, context, table_window, TABLE_COLLIDER)
+
+        selected_label = (
+            left_window._inspector_toolbar.label_selection.model.get_value_as_string()
+        )
+        if selected_label != f"{LEFT_ARTICULATION_ROOT} (+{len(selected_paths) - 1})":
+            raise RuntimeError(
+                f"native Inspector did not keep both selected paths: {selected_label}"
+            )
 
         rows = _collect_rows(left_window._model_inspector)
         joint_rows = [(name, path) for name, path in rows if "/joints/" in path]
@@ -340,7 +358,7 @@ async def _run_trial() -> None:
         omni.kit.commands.execute(
             "ChangeProperty",
             prop_path=target_attr.GetPath(),
-            value=SHOULDER_TARGET_DEG,
+            value=APPROACH_TARGET_DEG,
             prev=previous_target,
         )
         await _wait_native_run(
@@ -348,14 +366,17 @@ async def _run_trial() -> None:
         )
 
         hold = _new_accumulator()
-        simulation.start_authoring_simulation(
-            "drive:angular:physics:targetPosition"
+        omni.kit.commands.execute(
+            "ChangeProperty",
+            prop_path=target_attr.GetPath(),
+            value=HOLD_TARGET_DEG,
+            prev=APPROACH_TARGET_DEG,
         )
         await _wait_native_run(app, simulation, stage, edit_state["interface"], hold)
 
         joint_state = PhysxSchema.JointStateAPI.Get(shoulder, "angular")
         realized_deg = float(joint_state.GetPositionAttr().Get())
-        final_target_error_rad = math.radians(SHOULDER_TARGET_DEG - realized_deg)
+        final_target_error_rad = math.radians(HOLD_TARGET_DEG - realized_deg)
         all_pairs = sorted(approach["contact_pairs"] | hold["contact_pairs"])
         disallowed = sorted(
             approach["disallowed_pairs"] | hold["disallowed_pairs"]
@@ -398,7 +419,8 @@ async def _run_trial() -> None:
             {
                 **decision,
                 "initial_shoulder_target_deg": previous_target,
-                "commanded_shoulder_target_deg": SHOULDER_TARGET_DEG,
+                "approach_shoulder_target_deg": APPROACH_TARGET_DEG,
+                "commanded_shoulder_target_deg": HOLD_TARGET_DEG,
                 "realized_shoulder_deg": realized_deg,
                 "approach_native_steps": int(approach["native_steps"]),
                 "hold_native_steps": int(hold["native_steps"]),
@@ -406,6 +428,7 @@ async def _run_trial() -> None:
                 "approach_samples": approach["samples"],
                 "hold_samples": hold["samples"],
                 "joint_row_count": len(joint_rows),
+                "inspector_selected_paths": selected_paths,
                 "preflight": preflight,
             }
         )

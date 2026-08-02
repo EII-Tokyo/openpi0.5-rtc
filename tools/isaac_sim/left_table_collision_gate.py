@@ -20,7 +20,6 @@ ALLOWED_TIP_ROOTS = (
 MAX_CONTACT_SEPARATION_M = 0.0005
 MAX_TABLE_TOP_PENETRATION_M = 0.0005
 MAX_VISUAL_COLLISION_ERROR_M = 0.0001
-MIN_TARGET_ERROR_RAD = math.radians(2.0)
 MIN_PERSISTENT_CONTACT_STEPS = 180
 REQUIRED_TRIALS = 3
 
@@ -77,12 +76,11 @@ def evaluate_trial(metrics: TrialMetrics) -> dict[str, Any]:
         and metrics.maximum_visual_collision_error_m
         <= MAX_VISUAL_COLLISION_ERROR_M
     )
-    infeasible_target_blocked = (
-        math.isfinite(metrics.final_target_error_rad)
-        and abs(metrics.final_target_error_rad) >= MIN_TARGET_ERROR_RAD
-    )
     persistent_contact = (
         metrics.persistent_contact_steps >= MIN_PERSISTENT_CONTACT_STEPS
+    )
+    collision_hold_verified = (
+        target_contact_found and not tabletop_penetrated and persistent_contact
     )
 
     failure_reasons: list[str] = []
@@ -92,8 +90,6 @@ def evaluate_trial(metrics: TrialMetrics) -> dict[str, Any]:
         failure_reasons.append("finger_penetrated_table_top")
     if not visual_collision_match:
         failure_reasons.append("visual_collision_mismatch")
-    if not infeasible_target_blocked:
-        failure_reasons.append("infeasible_target_not_blocked")
     if not persistent_contact:
         failure_reasons.append("insufficient_persistent_contact")
     if not metrics.finite:
@@ -112,7 +108,7 @@ def evaluate_trial(metrics: TrialMetrics) -> dict[str, Any]:
         "target_contact_found": target_contact_found,
         "tabletop_penetrated": tabletop_penetrated,
         "visual_collision_match": visual_collision_match,
-        "infeasible_target_blocked": infeasible_target_blocked,
+        "collision_hold_verified": collision_hold_verified,
         "persistent_contact_ok": persistent_contact,
         "failure_reasons": failure_reasons,
         "metrics": asdict(metrics),

@@ -21,7 +21,14 @@ def test_native_trial_uses_full_inspector_authoring_path_and_exact_stage():
         "165093c3e7bf359b2ef5dbb595feb4ed976b194844830e70f387d6b882c1d6f2",
         'LEFT_ARTICULATION_ROOT = "/World/follower_left/vx300s_left/root_joint"',
         'TABLE_COLLIDER = "/World/environment/worldBody/user_confirmed_table"',
+        "INSPECTED_PATHS = (LEFT_ARTICULATION_ROOT, TABLE_COLLIDER)",
+        "_expanded_inspected_paths",
+        "prim.IsA(UsdPhysics.Joint)",
+        "prim.HasAPI(UsdPhysics.RigidBodyAPI)",
+        "prim.HasAPI(UsdPhysics.CollisionAPI)",
         'SHOULDER_JOINT = "/World/follower_left/vx300s_left/joints/shoulder"',
+        "APPROACH_TARGET_DEG = 20.0",
+        "HOLD_TARGET_DEG = 30.0",
         "PhysXInspectorModelControlType.JOINT_DRIVE",
         "get_enable_quasi_static_mode_model().set_value(True)",
         "get_fix_articulation_base_model().set_value(True)",
@@ -40,6 +47,7 @@ def test_native_trial_uses_full_inspector_authoring_path_and_exact_stage():
         "EXPECTED_JOINT_ROWS = 13",
     ):
         assert required in source
+    assert "add_inspector_window" not in source
 
 
 def test_native_trial_is_disposable_and_never_changes_robot_or_stage():
@@ -102,3 +110,16 @@ def test_runner_requires_exactly_three_independent_passing_trials():
     failed = [{**passing, "trial_index": index} for index in (1, 2, 3)]
     failed[1] = {**failed[1], "status": "FAIL"}
     assert aggregate_trial_reports(failed)["status"] == "FAIL"
+
+
+def test_runner_terminates_only_completed_disposable_child_after_report():
+    source = RUNNER_SCRIPT.read_text(encoding="utf-8")
+
+    for required in (
+        "subprocess.Popen(",
+        "report_path.is_file()",
+        "process.terminate()",
+        "process.kill()",
+        "controlled_termination",
+    ):
+        assert required in source
