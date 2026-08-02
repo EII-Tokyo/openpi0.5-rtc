@@ -1,5 +1,57 @@
 # Task State
 
+## 2026-08-02 five-pose initialization and finger-safety closure
+
+- Do **not** rerun the five user-confirmed attempt-7 MP4s. They remain
+  hash-bound historical evidence of grasp/lift/hold outcome and were not
+  modified. Attempt10 is the fresh machine-only initialization and per-frame
+  finger-safety baseline.
+- Attempt10 aggregate:
+  `reports/aloha1_mapping/aloha1_cad_derived_five_pose_runtime_finger_safe_attempt10_machine_only.json`,
+  SHA-256
+  `056c685ea078327f367d6f4392f5864d01b33bd36e6ead4f63278efb84feb9cc`.
+  Five primaries and five fresh collider repeats are machine `PASS`; each
+  sample has matching physics and initialization signatures, source-limit
+  initialization `PASS`, zero per-frame finger-safety violations and no
+  finger-pair overlap. Maximum hold drop is sample 02 at
+  `0.006202900385199744 m`, below the unchanged `0.010 m` gate.
+- The source URDF finger ranges are left `[0.021,0.057] m` and right
+  `[-0.057,-0.021] m`. The base diagnostic USD right range was confirmed
+  defective. Formal runs apply the isolated source-limit configuration only
+  through an anonymous session layer. Its runtime readback probe passes all
+  seven gates while the frozen Stage hash and root sublayers remain unchanged.
+  The candidate is `CREATED_NOT_PROMOTED`.
+- Local Isaac Sim 5.1 pair-only physical finger-collision support remains
+  `INCONCLUSIVE`; no pair collision was authored and global articulation
+  self-collision remains off. The validated closing stop is source limits plus
+  the per-frame limit/overlap guard. Pair collision is a non-blocking secondary
+  candidate, not a silently enabled feature.
+- All four negative controls have expected machine classifications and
+  vision-reviewed failure/pass screenshots. Report:
+  `reports/aloha1_mapping/aloha1_grasp_initialization_negative_controls.json`.
+- Collision screenshot review is `PASS`: 120 capture records / 240 raw and
+  annotated PNG records with frozen image and manifest hashes. Sample 02 uses
+  the opposite-axis signature-matched retake; samples 01, 03 and 05 replace
+  only the rejected release closeup. Report:
+  `reports/aloha1_mapping/aloha1_five_pose_finger_safe_collision_screenshot_review_attempt10.json`.
+- Current closure:
+  `reports/aloha1_mapping/aloha1_five_pose_initialization_finger_safety_closure.json`.
+  Grasp outcome, attempt10 safety, screenshot review, negative controls and
+  source-limit/mimic semantics are `PASS`. Task 7 remains `PARTIAL` only at
+  asset-promotion scope: the source-limit session layer and existing
+  PhysicsRules topology/collider candidates are not promoted. Task 8 remains
+  `NOT_RUN`; final/default assets and colliders are unchanged.
+- Final static verification: focused `126 passed`, complete
+  `tests/aloha1_mapping` `1053 passed`, task-owned Ruff `PASS`, repository
+  compileall `PASS`, task-owned py_compile `PASS`. Repository-wide Ruff remains
+  non-clean with 3434 pre-existing errors outside the task-owned subset; this
+  is recorded without suppression in
+  `reports/aloha1_mapping/aloha1_five_pose_initialization_finger_safety_final_verification.json`.
+- Task-owned changes were inspected and committed in three logical batches;
+  no push was performed. The earlier runtime batch is `11bde9a`, the screenshot
+  batch is `7fe2519`, and this closure/documentation batch contains the current
+  section. Pre-existing unrelated dirty files remain unstaged and preserved.
+
 ## 2026-08-02 CAD-derived Z-up five-pose Task 7 closure
 
 - The isolated Z-up/meters diagnostic Stage is frozen at

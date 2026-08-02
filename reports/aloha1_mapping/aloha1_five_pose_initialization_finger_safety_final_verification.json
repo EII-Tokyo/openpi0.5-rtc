@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "status": "PASS_TASK_SCOPE_WITH_REPOSITORY_RUFF_BOUNDARY",
+  "runtime_evidence_reused_without_rerun": true,
+  "historical_user_confirmed_mp4_rerun": false,
+  "checks": [
+    {
+      "name": "focused_pytest",
+      "command": ".venv/bin/python -m pytest -q tests/aloha1_mapping/test_grasp_initialization_contract.py tests/aloha1_mapping/test_grasp_20cm_five_pose_ik.py tests/aloha1_mapping/test_grasp_20cm_runtime_contract.py tests/aloha1_mapping/test_finger_limit_collision_semantics.py tests/aloha1_mapping/test_grasp_initialization_negative_controls.py tests/aloha1_mapping/test_five_pose_finger_safety_screenshot_review.py tests/aloha1_mapping/test_five_pose_initialization_finger_safety_closure.py",
+      "exit_code": 0,
+      "result": "126 passed",
+      "log_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/final_verification/focused_pytest.log",
+      "log_sha256": "083e8db2868cd228e118145824fff8ae575fb5d1f318d3827b19066138b83b1c"
+    },
+    {
+      "name": "aloha_mapping_pytest_final",
+      "command": ".venv/bin/python -m pytest -q tests/aloha1_mapping",
+      "exit_code": 0,
+      "result": "1053 passed",
+      "log_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/final_verification/aloha_mapping_pytest_final.log",
+      "log_sha256": "aeb51813f67e9bf1b3479fcd979ee32d98f98182121b3642d1855ed1b08381dc"
+    },
+    {
+      "name": "task_owned_ruff",
+      "command": ".venv/bin/python -m ruff check <task-owned Python files>",
+      "exit_code": 0,
+      "result": "All checks passed",
+      "log_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/final_verification/task_owned_ruff_rerun.log",
+      "log_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+    },
+    {
+      "name": "task_owned_py_compile",
+      "command": ".venv/bin/python -m py_compile <task-owned Python files>",
+      "exit_code": 0,
+      "result": "PASS",
+      "log_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/final_verification/task_owned_py_compile.log",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "repository_tools_and_aloha_tests_ruff",
+      "command": ".venv/bin/python -m ruff check tools tests/aloha1_mapping",
+      "exit_code": 1,
+      "result": "3434 pre-existing repository-wide lint errors; task-owned subset passes",
+      "classification": "NON_TASK_REPOSITORY_BOUNDARY",
+      "log_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/final_verification/ruff.log",
+      "log_sha256": "aedf134e85813d0ef0951f69d6e77c71293b27bc6b7df100d6a071bc923fa131"
+    },
+    {
+      "name": "repository_compileall",
+      "command": ".venv/bin/python -m compileall -q tools tests/aloha1_mapping",
+      "exit_code": 0,
+      "result": "PASS",
+      "log_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/final_verification/compileall.log",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "task7": "PARTIAL",
+  "task8": "NOT_RUN",
+  "final_default_asset_modified": false,
+  "final_default_collider_modified": false,
+  "real_robot": false,
+  "remote_103": false
+}

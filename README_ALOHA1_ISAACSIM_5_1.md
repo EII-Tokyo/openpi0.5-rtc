@@ -21,6 +21,7 @@ sim-to-real dynamics model and it is not yet accepted for bottle insertion.
 | Five fixed-seed random-position pickup | **PASS (diagnostic)** | successful samples 1–4 were preserved; only failed sample 5 was replanned with a downward gripper and rerecorded; candidate 119 passes a fresh deterministic pair and full-frame visual-model review, and the user confirmed the grasp is correct |
 | CAD-derived Z-up diagnostic Stage | **PASS** | frozen Stage SHA-256 `327361d2…bb9bb9`, `upAxis=Z`, `metersPerUnit=1`, gravity `[0,0,-1]`; composed world matrices and source layers are unchanged |
 | CAD-derived five-pose Z-up runtime | **PASS** | 5/5 primary plus 5/5 fresh collider repeats pass with matching per-sample signatures; critical phases and all 24 collision panels per sample pass visual review, and the user confirmed the exact hash-bound videos |
+| Five-pose initialization/finger safety attempt10 | **PASS runtime / PARTIAL promotion** | 5/5 primary + 5/5 fresh repeats pass source-limit initialization, per-frame finger safety, zero pair-overlap and deterministic gates; 120 capture records / 240 raw+annotated images pass visual review; the diagnostic source-limit session layer is not promoted |
 | Bottle tensor-velocity semantics | **PASS (diagnosis)** | V1/V2 validate COM/origin mathematics; unchanged-signature V3 yields `VERIFIED_LOCAL_PHYSX_VELOCITY_TRANSFORM_DISAGREEMENT`; internal solver cause is not claimed |
 | Correctly scoped RobotRules | **PASS gate / PARTIAL literal** | standalone left/right robot packages each repeat with 0 blocking findings and 41 configuration-advice warnings; the original 63 workcell-wrapper errors are classified `WRONG_SCOPE` one by one |
 | Correctly scoped PhysicsRules | **FAIL literal / PARTIAL root-cause closure** | standalone followers start at 10 blockers each; isolated combined candidates reduce this to one unsuppressed `MimicAPICheck` per follower in two fresh processes, but helper mass/inertia preservation and changed-collider grasp regression still block promotion |
@@ -62,6 +63,69 @@ sim-to-real dynamics model and it is not yet accepted for bottle insertion.
 
 `PASS`, `FAIL`, and `PARTIAL` are literal machine-report values. A clean
 viewport is not an acceptance criterion.
+
+## 2026-08-02 five-pose initialization and finger-safety closure
+
+The five previously user-confirmed attempt-7 MP4s were not rerun. Their exact
+hash-bound files remain valid evidence that the arm grasps a horizontal
+Bottle500, lifts it by 20 cm and holds it. They do not by themselves prove the
+new initialization and per-frame finger-safety contract, so attempt10 adds a
+separate machine-only baseline rather than replacing or modifying those
+videos.
+
+Attempt10 ran five primary trials and five collider repeats in ten fresh Isaac
+Sim 5.1 processes. All five pairs pass the unchanged grasp, lift, two-second
+hold and 10 mm drop gates; every pair has matching physics and initialization
+signatures. Both finger targets and readbacks remain inside the generated URDF
+limits (`left_finger=[0.021,0.057] m`,
+`right_finger=[-0.057,-0.021] m`), every per-frame finger-safety result is
+`PASS`, and no finger-pair overlap or unexpected pair contact is reported.
+The largest hold drop is sample 02 at `0.0062029004 m`, still below the frozen
+`0.010 m` limit.
+
+The right-finger USD limit mismatch is directly verified as
+`VERIFIED_USD_LIMIT_DEFECT`. The formal runs apply the isolated
+`finger_source_limits.usda` only through an anonymous session layer. Runtime
+readback confirms the source limits, the original Stage hash and root
+sublayers remain unchanged, and the layer is `CREATED_NOT_PROMOTED`. The
+opposed-axis PhysX mimic relationship is unchanged. A direct positive
+finger-pair-only collision-enable route remains `INCONCLUSIVE` in local 5.1;
+global articulation self-collision stays disabled. Therefore the validated
+closing stop is the source limit plus the per-frame limit/overlap guard—not an
+unproven physical finger-pair collision filter.
+
+Four fresh negative controls also pass their expected classifications:
+static load without reset, illegal zero finger positions, legal open/close
+sweep, and sample-02 environment interference. Collision evidence contains
+120 capture records and 240 hash-verified raw/annotated PNGs. Sample 02 uses a
+signature-matched opposite-axis closeup because the original view was
+occluded; samples 01, 03 and 05 replace only the release closeup. All rejection
+and retake reasons remain in the report. Screenshots are auxiliary evidence;
+runtime contact, pose, velocity, drop, source-limit and overlap telemetry is
+authoritative.
+
+Authoritative reports:
+
+- `reports/aloha1_mapping/aloha1_cad_derived_five_pose_runtime_finger_safe_attempt10_machine_only.json` (SHA-256 `056c685e…eb9bb9cc`);
+- `reports/aloha1_mapping/aloha1_five_pose_finger_safe_collision_screenshot_review_attempt10.json`;
+- `reports/aloha1_mapping/aloha1_finger_limit_collision_semantics.json`;
+- `reports/aloha1_mapping/aloha1_grasp_initialization_negative_controls.json`;
+- `reports/aloha1_mapping/aloha1_five_pose_initialization_finger_safety_closure.json`.
+
+The closure is `PARTIAL`, not because the grasp or safety runtime failed, but
+because the source-limit session layer and the separately tracked
+PhysicsRules topology/collider candidates have not been promoted into
+final/default assets. No source Stage, final/default collider, historical MP4,
+real robot or `192.168.1.103` resource was modified. Task 8 remains
+`NOT_RUN`.
+
+Fresh static verification is `126 passed` for the focused safety/closure set
+and `1053 passed` for all `tests/aloha1_mapping`; the task-owned Ruff subset,
+repository compileall and task-owned py_compile pass. Repository-wide Ruff is
+not clean: it reports 3434 pre-existing errors outside this task-owned subset,
+which is retained as an explicit repository boundary rather than silently
+suppressed. The machine manifest is
+`reports/aloha1_mapping/aloha1_five_pose_initialization_finger_safety_final_verification.json`.
 
 ## 2026-08-02 CAD-derived Z-up five-pose closure
 

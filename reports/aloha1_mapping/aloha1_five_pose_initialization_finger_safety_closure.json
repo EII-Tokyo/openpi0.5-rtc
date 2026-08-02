@@ -1,0 +1,184 @@
+{
+  "applicable_gates": {
+    "attempt10_collision_screenshot_review": true,
+    "attempt10_fresh_initialization_and_finger_safety": true,
+    "historical_user_confirmed_grasp_outcome": true,
+    "negative_controls": true,
+    "session_layer_runtime_readback": true,
+    "source_limit_and_mimic_semantics": true
+  },
+  "attempt10_collision_visual_evidence": "PASS",
+  "attempt10_finger_safety": "PASS",
+  "boundaries": {
+    "candidate_promotion_requires_user_review": true,
+    "final_default_asset_modified": false,
+    "final_default_collider_modified": false,
+    "historical_mp4_modified_or_rerecorded": false,
+    "real_robot": false,
+    "remote_103": false,
+    "runtime_telemetry_is_authoritative": true,
+    "source_stage_modified": false,
+    "visual_evidence_is_auxiliary": true
+  },
+  "evidence": {
+    "historical": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_cad_derived_five_pose_visual_review_zup_attempt7.json",
+      "sha256": "11e15c801d15b6c496f9f7f8b2bd30f6e54b4ecef5b7badbc8017890a245c66c",
+      "status": "PASS"
+    },
+    "negative_controls": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_grasp_initialization_negative_controls.json",
+      "sha256": "0ef2bb3b5ab353d776dc3d334bb3b209def368388cbbd51e42a1f56fd26636a8",
+      "status": "PASS"
+    },
+    "physics_root_cause": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7_physicsrules_root_cause_closure.json",
+      "sha256": "ec36571b64f46bdbd62a80fa2bc7786245b9a66bea3976c9b641ceeed37c012b",
+      "status": "PARTIAL"
+    },
+    "prior_task7": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_cad_derived_task7_closure_zup_attempt7.json",
+      "sha256": "ab08bb8f6d6ee1f90898af1be237c5f8b6fd671820979e4f3593285314f3b7db",
+      "status": "PARTIAL"
+    },
+    "runtime": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_cad_derived_five_pose_runtime_finger_safe_attempt10_machine_only.json",
+      "sha256": "056c685ea078327f367d6f4392f5864d01b33bd36e6ead4f63278efb84feb9cc",
+      "status": "PARTIAL"
+    },
+    "screenshot_review": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_five_pose_finger_safe_collision_screenshot_review_attempt10.json",
+      "sha256": "195d93066b319e7fc79ccdb4ec4841f4e4a9427cbdbb700b1181b5f0c87b45e5",
+      "status": "PASS"
+    },
+    "semantics": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_finger_limit_collision_semantics.json",
+      "sha256": "afce37346c52f90b1d2bdcd4eb28b25abbc7b545c2b9d9bd1d86e08afe6dab95",
+      "status": "PASS"
+    },
+    "session_probe": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_finger_source_limit_session_layer_probe.json",
+      "sha256": "82455c1af188291a8be4faa2ff6fe03a2fce575cd07940b4c39fa8ea19cc553d",
+      "status": "PASS"
+    }
+  },
+  "final_default_promotion": "NOT_PROMOTED",
+  "formal_attempt10": {
+    "fresh_process_count": 10,
+    "machine_status": "PASS",
+    "screenshot_capture_count": 120,
+    "screenshot_image_count": 240,
+    "semantic_boundary": "FRESH_RUNTIME_AND_COLLISION_SCREENSHOTS_PROVE_INITIALIZATION_AND_FINGER_SAFETY_WITH_HISTORICAL_VIDEO_BINDING"
+  },
+  "historical_attempt7": {
+    "semantic_boundary": "PROVES_GRASP_OUTCOME; DOES_NOT_PROVE_ATTEMPT10_PER_FRAME_FINGER_SAFETY",
+    "status": "PASS",
+    "user_confirmation": "PASS",
+    "videos_rerun": false
+  },
+  "mimic_status": "VERIFIED_UNCHANGED",
+  "negative_controls": "PASS",
+  "physical_pair_collision_candidate": "NOT_AUTHORED_INCONCLUSIVE",
+  "physical_pair_collision_gate_role": "NON_BLOCKING_SECONDARY_CANDIDATE; SOURCE_LIMITS_AND_PER_FRAME_OVERLAP_GUARD_ARE_THE_VALIDATED_CLOSING_STOP",
+  "physics_root_cause_status": "PARTIAL",
+  "prior_task7_asset_status": "FAIL",
+  "remaining_real_blockers": [
+    "FINGER_SOURCE_LIMIT_SESSION_LAYER_NOT_PROMOTED",
+    "HELPER_MASS_COM_INERTIA_SEMANTICS_NOT_PRESERVED_IN_TOPOLOGY_CANDIDATE",
+    "COLLIDER_SPLIT_AND_TOPOLOGY_CANDIDATE_NOT_PROMOTED_OR_GRASP_REGRESSED"
+  ],
+  "runtime_gates": {
+    "all_sample_safety_gates_pass": true,
+    "exact_five_samples": true,
+    "machine_status_pass": true,
+    "ten_fresh_processes": true
+  },
+  "runtime_grasp_outcome": "PASS",
+  "samples": [
+    {
+      "gates": {
+        "finger_safety_pass": true,
+        "initialization_contract_pass": true,
+        "initialization_signatures_match": true,
+        "physics_signatures_match": true,
+        "primary_machine_pass": true,
+        "repeat_machine_pass": true
+      },
+      "hold_drop_m": 0.000193937320122628,
+      "initialization_signature": "ae00b3367a35927414f66f9bac3c58b1a9e578459291e8c1532d7253b12b08e1",
+      "maximum_clearance_m": 0.20018182360669862,
+      "physics_deterministic_signature": "11838209dc4ca742dcdc5480f00466f35907316545cdbcbed7171bb83ef02cf6",
+      "sample_id": "sample_01",
+      "status": "PASS"
+    },
+    {
+      "gates": {
+        "finger_safety_pass": true,
+        "initialization_contract_pass": true,
+        "initialization_signatures_match": true,
+        "physics_signatures_match": true,
+        "primary_machine_pass": true,
+        "repeat_machine_pass": true
+      },
+      "hold_drop_m": 0.006202900385199744,
+      "initialization_signature": "27ebf7b1dec863d0ae8f66bafa652c0337ee5facfdab7d751fcb2035e33abbf8",
+      "maximum_clearance_m": 0.20120438132460197,
+      "physics_deterministic_signature": "a3316fb6bbbe2140f68ce0a0b47e2acb826e873ac049a117e19e8ddcb52d4863",
+      "sample_id": "sample_02",
+      "status": "PASS"
+    },
+    {
+      "gates": {
+        "finger_safety_pass": true,
+        "initialization_contract_pass": true,
+        "initialization_signatures_match": true,
+        "physics_signatures_match": true,
+        "primary_machine_pass": true,
+        "repeat_machine_pass": true
+      },
+      "hold_drop_m": 0.0007431492529592909,
+      "initialization_signature": "72dea305b66b1e6ddf692a3bceab6fa5cad4a2bf0a6b8b1d5e35fbd038c48402",
+      "maximum_clearance_m": 0.20042036757849827,
+      "physics_deterministic_signature": "8b7a32db54c0bf79d6059919f241ca1b2b215d63557627606ff90d08d7050ef1",
+      "sample_id": "sample_03",
+      "status": "PASS"
+    },
+    {
+      "gates": {
+        "finger_safety_pass": true,
+        "initialization_contract_pass": true,
+        "initialization_signatures_match": true,
+        "physics_signatures_match": true,
+        "primary_machine_pass": true,
+        "repeat_machine_pass": true
+      },
+      "hold_drop_m": 0.0016494691683948959,
+      "initialization_signature": "917764bf474191269f59f3b0a5dcbb7112c7360e88b0bb795f1081dc89c22d7e",
+      "maximum_clearance_m": 0.20158486329596476,
+      "physics_deterministic_signature": "8b05a06978c4e7b22220284f982c358c4190e360eddbc84e920d64d150969a5a",
+      "sample_id": "sample_04",
+      "status": "PASS"
+    },
+    {
+      "gates": {
+        "finger_safety_pass": true,
+        "initialization_contract_pass": true,
+        "initialization_signatures_match": true,
+        "physics_signatures_match": true,
+        "primary_machine_pass": true,
+        "repeat_machine_pass": true
+      },
+      "hold_drop_m": 0.000842787943897666,
+      "initialization_signature": "b00584b4122f9e9869ef2d4287d6b3591375073c068e0bed1a04ad52dcaccc5b",
+      "maximum_clearance_m": 0.20056605252113302,
+      "physics_deterministic_signature": "ee728e36f5bca1a90b6f4a5f8058f812cad083595ea22e669f0b8442a000f7ec",
+      "sample_id": "sample_05",
+      "status": "PASS"
+    }
+  ],
+  "schema_version": 1,
+  "source_limit_semantics": "VERIFIED_USD_LIMIT_DEFECT",
+  "status": "PARTIAL",
+  "task7": "PARTIAL",
+  "task8": "NOT_RUN"
+}
