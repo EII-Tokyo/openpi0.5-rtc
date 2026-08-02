@@ -33,18 +33,14 @@ TERMINATE_GRACE_SECONDS = 15
 def classify_runtime_errors(log_text: str) -> list[str]:
     """Return unclassified error lines relevant to physics/rendering validity."""
 
-    relevant_tags = (
-        "[omni.physx",
-        "[omni.usd",
-        "[omni.kit.renderer",
-        "[carb.graphics",
-        "[gpu.foundation",
+    known_benign_error_tags = (
+        "[isaacsim.ros2.bridge.impl.extension] ros2 bridge startup failed",
     )
     result: list[str] = []
     for line in log_text.splitlines():
         lowered = line.lower()
-        tagged_error = "[error]" in lowered and any(
-            tag in lowered for tag in relevant_tags
+        tagged_error = "[error]" in lowered and not any(
+            tag in lowered for tag in known_benign_error_tags
         )
         fatal_resource_error = (
             "fatal" in lowered

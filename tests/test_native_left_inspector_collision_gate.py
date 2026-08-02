@@ -129,7 +129,7 @@ def test_runner_terminates_only_completed_disposable_child_after_report():
 def test_runner_fails_closed_on_relevant_runtime_errors_only():
     log = "\n".join(
         (
-            "[Error] [isaacsim.ros2.bridge] bridge unavailable",
+            "[Error] [isaacsim.ros2.bridge.impl.extension] ROS2 Bridge startup failed",
             "[Error] [omni.physx.plugin] invalid collision state",
             "[Error] [omni.kit.renderer] device lost",
         )
