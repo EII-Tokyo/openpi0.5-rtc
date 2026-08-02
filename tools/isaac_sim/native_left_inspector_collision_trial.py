@@ -26,10 +26,15 @@ from tools.isaac_sim.left_table_collision_gate import (
     MAX_CONTACT_SEPARATION_M,
     TrialMetrics,
     evaluate_trial,
+    settled_support_step,
+    support_sequence_is_complete,
+)
+from tools.isaac_sim.left_inspector_startup import (
+    selection_is_exact_anchors,
+    target_change_is_isolated,
 )
 from tools.isaac_sim.verify_left_table_collision import (
     LEFT_BODY_PATHS,
-    _capture_verified_contact,
     _live_finger_geometry,
     _preflight,
 )
@@ -170,6 +175,53 @@ async def _bind_paths(app: Any, context: Any, window: Any, stage: Any) -> list[s
     return paths
 
 
+async def _isolate_interaction_selection(
+    app: Any, context: Any, window: Any
+) -> dict[str, list[str]]:
+    context.get_selection().set_selected_prim_paths(list(INSPECTED_PATHS), False)
+    for _ in range(20):
+        await app.next_update_async()
+    stage_selection = list(context.get_selection().get_selected_prim_paths())
+    inspector_selection = list(window._handler_selection.get_selection() or [])
+    selected_joint_paths = [path for path in inspector_selection if "/joints/" in path]
+    if not selection_is_exact_anchors(
+        stage_selection, inspector_selection, INSPECTED_PATHS
+    ):
+        raise RuntimeError(
+            "native Inspector interaction selection did not isolate to anchors: "
+            f"stage={stage_selection} inspector={inspector_selection}"
+        )
+    return {
+        "stage_selection_after_isolation": stage_selection,
+        "inspector_selection_after_isolation": inspector_selection,
+        "selected_joint_paths_after_isolation": selected_joint_paths,
+    }
+
+
+def _drive_targets(
+    stage: Any, joint_rows: list[tuple[str, str]]
+) -> dict[str, float]:
+    result: dict[str, float] = {}
+    for name, path in joint_rows:
+        prim = stage.GetPrimAtPath(path)
+        if prim.IsA(UsdPhysics.RevoluteJoint):
+            drive = UsdPhysics.DriveAPI.Get(prim, "angular")
+        elif prim.IsA(UsdPhysics.PrismaticJoint):
+            drive = UsdPhysics.DriveAPI.Get(prim, "linear")
+        else:
+            continue
+        attr = drive.GetTargetPositionAttr()
+        value = attr.Get() if attr else None
+        if value is not None:
+            result[name] = float(value)
+    return result
+
+
+class _InspectorValueModel:
+    def __init__(self, value: float):
+        self.as_float = value
+
+
 def _configure_left(window: Any) -> None:
     model = window._model_inspector
     model.get_control_type_model().set_value(
@@ -207,6 +259,11 @@ def _new_accumulator() -> dict[str, Any]:
         "minimum_table_local_finger_z_m": math.inf,
         "maximum_visual_collision_error_m": 0.0,
         "physical_contact_steps": 0,
+        "supported_contact_steps": 0,
+        "consecutive_supported_contact_steps": 0,
+        "maximum_consecutive_supported_contact_steps": 0,
+        "target_contact_seen": False,
+        "all_geometry_samples_finite": True,
         "native_steps": 0,
         "samples": [],
     }
@@ -224,32 +281,53 @@ def _sample_step(stage: Any, interface: Any, accumulator: dict[str, Any]) -> Non
     ]
     separation = min(target_separations, default=math.inf)
     geometry = _live_finger_geometry(stage)
+    geometry_z = geometry["minimum_table_local_finger_z_m"]
+    visual_error = geometry["maximum_visual_collision_error_m"]
+    sample_geometry_finite = math.isfinite(geometry_z) and math.isfinite(
+        visual_error
+    )
+    accumulator["all_geometry_samples_finite"] = (
+        accumulator["all_geometry_samples_finite"] and sample_geometry_finite
+    )
     accumulator["minimum_target_separation_m"] = min(
         accumulator["minimum_target_separation_m"], separation
     )
     accumulator["minimum_table_local_finger_z_m"] = min(
         accumulator["minimum_table_local_finger_z_m"],
-        geometry["minimum_table_local_finger_z_m"],
+        geometry_z,
     )
     accumulator["maximum_visual_collision_error_m"] = max(
         accumulator["maximum_visual_collision_error_m"],
-        geometry["maximum_visual_collision_error_m"],
+        visual_error,
     )
     accumulator["native_steps"] += 1
     physical = math.isfinite(separation) and separation <= MAX_CONTACT_SEPARATION_M
+    if physical:
+        accumulator["target_contact_seen"] = True
+    supported = settled_support_step(
+        target_contact_seen=accumulator["target_contact_seen"],
+        physical_contact=physical,
+        minimum_table_local_finger_z_m=geometry_z,
+    )
     accumulator["physical_contact_steps"] += int(physical)
+    accumulator["supported_contact_steps"] += int(supported)
+    if supported:
+        accumulator["consecutive_supported_contact_steps"] += 1
+    else:
+        accumulator["consecutive_supported_contact_steps"] = 0
+    accumulator["maximum_consecutive_supported_contact_steps"] = max(
+        accumulator["maximum_consecutive_supported_contact_steps"],
+        accumulator["consecutive_supported_contact_steps"],
+    )
     if accumulator["native_steps"] in (1, 30, 60, 90, 120, 150, 180):
         accumulator["samples"].append(
             {
                 "native_step": accumulator["native_steps"],
                 "minimum_target_separation_m": separation,
-                "minimum_table_local_finger_z_m": geometry[
-                    "minimum_table_local_finger_z_m"
-                ],
-                "maximum_visual_collision_error_m": geometry[
-                    "maximum_visual_collision_error_m"
-                ],
+                "minimum_table_local_finger_z_m": geometry_z,
+                "maximum_visual_collision_error_m": visual_error,
                 "physical_contact": physical,
+                "supported_contact": supported,
             }
         )
 
@@ -277,6 +355,52 @@ async def _wait_native_run(
     raise TimeoutError(
         "native Inspector authoring simulation did not start or finish within bound"
     )
+
+
+async def _capture_verified_contact_async(app: Any, output_path: Path) -> None:
+    import numpy as np
+    from isaacsim.sensors.camera import Camera
+    from omni.kit.viewport.utility import capture_viewport_to_file, get_active_viewport
+
+    from tools.aloha1_mapping.isaac_screenshot import look_at_orientation_wxyz
+
+    camera = Camera(
+        prim_path="/World/CollisionGateSessionCamera",
+        name="collision_gate_session_camera",
+        resolution=(1280, 720),
+        frequency=60,
+    )
+    camera.initialize()
+    camera.set_clipping_range(0.01, 10.0)
+    position = np.asarray((1.1, -1.1, 0.8), dtype=np.float64)
+    target = np.asarray((0.0, 0.0, 0.1), dtype=np.float64)
+    camera.set_world_pose(
+        position=position,
+        orientation=look_at_orientation_wxyz(position, target),
+        camera_axes="usd",
+    )
+    viewport = get_active_viewport()
+    if viewport is None:
+        raise RuntimeError("active viewport unavailable for evidence capture")
+    viewport.camera_path = Sdf.Path(camera.prim_path)
+    for _ in range(30):
+        await app.next_update_async()
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    helper = capture_viewport_to_file(viewport, file_path=str(output_path))
+    previous_size = -1
+    stable_updates = 0
+    for _ in range(360):
+        await app.next_update_async()
+        if not output_path.exists():
+            continue
+        size = output_path.stat().st_size
+        stable_updates = stable_updates + 1 if size > 0 and size == previous_size else 0
+        previous_size = size
+        if stable_updates >= 3:
+            break
+    del helper
+    if not output_path.exists() or output_path.stat().st_size == 0:
+        raise RuntimeError("verified contact screenshot was not created")
 
 
 async def _run_trial() -> None:
@@ -349,12 +473,52 @@ async def _run_trial() -> None:
         if state != pxsupportui.PhysXInspectorModelState.AUTHORING:
             raise RuntimeError(f"native Inspector not in AUTHORING: {state}")
 
+        selection_evidence = await _isolate_interaction_selection(
+            app, context, left_window
+        )
+        rows_after_clear = _collect_rows(left_window._model_inspector)
+        joint_rows_after_clear = [
+            (name, path) for name, path in rows_after_clear if "/joints/" in path
+        ]
+        if len(joint_rows_after_clear) < EXPECTED_JOINT_ROWS:
+            raise RuntimeError(
+                "native Inspector lost joint rows after selection clear: "
+                f"{len(joint_rows_after_clear)}"
+            )
+
         shoulder = stage.GetPrimAtPath(SHOULDER_JOINT)
         drive = UsdPhysics.DriveAPI.Get(shoulder, "angular")
         target_attr = drive.GetTargetPositionAttr()
         previous_target = float(target_attr.Get())
         simulation = left_window._inspector._inspector_simulation
         approach = _new_accumulator()
+        drive_targets_before = _drive_targets(stage, joint_rows_after_clear)
+        probe_target = previous_target + 1.0
+        left_window._inspector_panel._delegate_tree._on_value_changed(
+            _InspectorValueModel(probe_target), SHOULDER_JOINT
+        )
+        drive_targets_after_single_joint_edit = _drive_targets(
+            stage, joint_rows_after_clear
+        )
+        single_joint_target_isolated = target_change_is_isolated(
+            drive_targets_before,
+            drive_targets_after_single_joint_edit,
+            "shoulder",
+            probe_target,
+        )
+        if not single_joint_target_isolated:
+            raise RuntimeError(
+                "native Inspector propagated the shoulder target to other joints"
+            )
+        left_window._inspector_panel._delegate_tree._on_value_changed(
+            _InspectorValueModel(previous_target), SHOULDER_JOINT
+        )
+        drive_targets_after_probe_restore = _drive_targets(
+            stage, joint_rows_after_clear
+        )
+        if drive_targets_after_probe_restore != drive_targets_before:
+            raise RuntimeError("native Inspector shoulder probe did not restore")
+
         omni.kit.commands.execute(
             "ChangeProperty",
             prop_path=target_attr.GetPath(),
@@ -396,7 +560,7 @@ async def _run_trial() -> None:
                 hold["maximum_visual_collision_error_m"],
             ),
             final_target_error_rad=final_target_error_rad,
-            persistent_contact_steps=int(hold["physical_contact_steps"]),
+            persistent_contact_steps=int(hold["supported_contact_steps"]),
             finite=all(
                 math.isfinite(value)
                 for value in (
@@ -404,7 +568,9 @@ async def _run_trial() -> None:
                     approach["minimum_table_local_finger_z_m"],
                     hold["minimum_table_local_finger_z_m"],
                 )
-            ),
+            )
+            and approach["all_geometry_samples_finite"]
+            and hold["all_geometry_samples_finite"],
             within_joint_limits=-106.0 <= realized_deg <= 72.0,
             ccd_effective=(
                 preflight["scene"]["enable_ccd"]
@@ -415,6 +581,18 @@ async def _run_trial() -> None:
             physx_errors=[],
         )
         decision = evaluate_trial(metrics)
+        support_sequence_complete = support_sequence_is_complete(
+            int(hold["native_steps"]),
+            int(hold["supported_contact_steps"]),
+            int(hold["maximum_consecutive_supported_contact_steps"]),
+        )
+        if not support_sequence_complete:
+            decision["status"] = "FAIL"
+            decision["collision_hold_verified"] = False
+            decision["persistent_contact_ok"] = False
+            decision["failure_reasons"].append(
+                "incomplete_consecutive_support_sequence"
+            )
         report.update(
             {
                 **decision,
@@ -425,15 +603,35 @@ async def _run_trial() -> None:
                 "approach_native_steps": int(approach["native_steps"]),
                 "hold_native_steps": int(hold["native_steps"]),
                 "hold_physical_contact_steps": int(hold["physical_contact_steps"]),
+                "hold_supported_contact_steps": int(
+                    hold["supported_contact_steps"]
+                ),
+                "maximum_consecutive_supported_contact_steps": int(
+                    hold["maximum_consecutive_supported_contact_steps"]
+                ),
+                "support_sequence_complete": support_sequence_complete,
+                "all_geometry_samples_finite": bool(
+                    approach["all_geometry_samples_finite"]
+                    and hold["all_geometry_samples_finite"]
+                ),
                 "approach_samples": approach["samples"],
                 "hold_samples": hold["samples"],
                 "joint_row_count": len(joint_rows),
                 "inspector_selected_paths": selected_paths,
+                **selection_evidence,
+                "drive_targets_before": drive_targets_before,
+                "drive_targets_after_single_joint_edit": (
+                    drive_targets_after_single_joint_edit
+                ),
+                "drive_targets_after_probe_restore": (
+                    drive_targets_after_probe_restore
+                ),
+                "single_joint_target_isolated": single_joint_target_isolated,
                 "preflight": preflight,
             }
         )
         if report["status"] == "PASS":
-            _capture_verified_contact(app, screenshot_path)
+            await _capture_verified_contact_async(app, screenshot_path)
             report["screenshot"] = str(screenshot_path)
             report["screenshot_nonempty"] = (
                 screenshot_path.exists() and screenshot_path.stat().st_size > 0

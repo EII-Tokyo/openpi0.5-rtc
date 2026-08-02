@@ -2,6 +2,63 @@
 
 from dataclasses import dataclass
 from enum import Enum, auto
+import math
+from typing import Mapping, Sequence
+
+
+def selection_is_exact_anchors(
+    stage_selection: Sequence[str],
+    inspector_selection: Sequence[str],
+    anchors: Sequence[str],
+) -> bool:
+    """Return whether both transient selections contain exactly the anchors."""
+
+    expected = set(anchors)
+    return (
+        len(stage_selection) == len(expected)
+        and set(stage_selection) == expected
+        and len(inspector_selection) == len(expected)
+        and set(inspector_selection) == expected
+    )
+
+
+def target_change_is_isolated(
+    before: Mapping[str, float],
+    after: Mapping[str, float],
+    operated_joint: str,
+    requested_target: float,
+    tolerance: float = 1e-9,
+) -> bool:
+    """Return whether only the requested joint acquired the requested target."""
+
+    if (
+        before.keys() != after.keys()
+        or operated_joint not in before
+        or tolerance < 0
+        or not math.isfinite(requested_target)
+        or not all(math.isfinite(value) for value in before.values())
+        or not all(math.isfinite(value) for value in after.values())
+    ):
+        return False
+    if math.isclose(
+        before[operated_joint],
+        after[operated_joint],
+        rel_tol=0.0,
+        abs_tol=tolerance,
+    ):
+        return False
+    if not math.isclose(
+        after[operated_joint],
+        requested_target,
+        rel_tol=0.0,
+        abs_tol=tolerance,
+    ):
+        return False
+    return all(
+        math.isclose(after[name], value, rel_tol=0.0, abs_tol=tolerance)
+        for name, value in before.items()
+        if name != operated_joint
+    )
 
 
 @dataclass
