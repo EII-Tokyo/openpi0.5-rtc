@@ -24,13 +24,35 @@ from tools.plan_aloha1_grasp_20cm_five_pose_ik import classify_preflight_contact
 from tools.plan_aloha1_grasp_20cm_five_pose_ik import freeze_preflight_records
 from tools.plan_aloha1_grasp_20cm_five_pose_ik import is_excluded_runtime_failure_candidate
 from tools.plan_aloha1_grasp_20cm_five_pose_ik import preserve_accepted_preflight_records
+from tools.plan_aloha1_grasp_20cm_five_pose_ik import replacement_slot
+from tools.run_aloha1_grasp_20cm_five_pose_ik import _read_run_evidence
 from tools.run_aloha1_grasp_20cm_five_pose_ik import build_five_pose_summary
+from tools.run_aloha1_grasp_20cm_five_pose_ik import resume_verified_runtime_records
 from tools.run_aloha1_grasp_20cm_five_pose_ik import reuse_accepted_runtime_records
 
 ROOT = Path(__file__).resolve().parents[2]
 CONFIG = ROOT / "configs/aloha1_grasp_20cm_five_pose_ik.yaml"
 GUI_SCRIPT = ROOT / "tools/run_aloha1_grasp_20cm_gui.py"
 RUNNER_SCRIPT = ROOT / "tools/run_aloha1_grasp_20cm_five_pose_ik.py"
+
+
+def test_replacement_slot_preserves_noncontiguous_user_accepted_samples() -> None:
+    selected = [
+        {"sample_id": "sample_01"},
+        {"sample_id": "sample_03"},
+        {"sample_id": "sample_04"},
+    ]
+    assert replacement_slot(selected, ["sample_02", "sample_05"]) == (
+        "sample_02",
+        1,
+    )
+    selected.append({"sample_id": "sample_02"})
+    assert replacement_slot(selected, ["sample_02", "sample_05"]) == (
+        "sample_05",
+        4,
+    )
+    selected.append({"sample_id": "sample_05"})
+    assert replacement_slot(selected, ["sample_02", "sample_05"]) is None
 
 
 def _horizontal_world_from_object() -> np.ndarray:
@@ -104,22 +126,10 @@ def test_five_pose_config_freezes_joint_sampling_and_diversity() -> None:
         config["frozen_inputs"]["task7a_structure_validation"]["sha256"]
         == "668a1c83e14d28de50c3fa18c773c6f60ec2feb2263eac985546c2bb7e52048a"
     )
-    assert (
-        config["formal_structure"]["sample_01"]["bottle_center_world_x_m"]
-        == 0.0
-    )
-    assert (
-        config["formal_structure"]["sample_01"]["bottle_center_y_sign"]
-        == "positive"
-    )
-    assert (
-        config["formal_structure"]["sample_04"]["bottle_center_world_x_m"]
-        == 0.0
-    )
-    assert (
-        config["formal_structure"]["sample_04"]["bottle_center_y_sign"]
-        == "negative"
-    )
+    assert config["formal_structure"]["sample_01"]["bottle_center_world_x_m"] == 0.0
+    assert config["formal_structure"]["sample_01"]["bottle_center_y_sign"] == "positive"
+    assert config["formal_structure"]["sample_04"]["bottle_center_world_x_m"] == 0.0
+    assert config["formal_structure"]["sample_04"]["bottle_center_y_sign"] == "negative"
     assert config["runtime"]["allow_runtime_resampling"] is False
     assert config["runtime"]["required_primary_videos"] == 5
     assert config["boundaries"]["task8"] == "NOT_RUN"
@@ -130,19 +140,11 @@ def test_five_pose_config_uses_official_acceleration_limited_lula_path() -> None
     trajectory = config["arm_trajectory"]
 
     assert trajectory["mode"] == "LULA_CSPACE_ACCELERATION_LIMITED"
-    assert trajectory["velocity_limits_rad_s"] == pytest.approx(
-        [np.pi] * 6
-    )
+    assert trajectory["velocity_limits_rad_s"] == pytest.approx([np.pi] * 6)
     assert trajectory["acceleration_limits_rad_s2"] == [5.0] * 6
-    assert trajectory["jerk_limit_status"] == (
-        "NOT_SET_NO_EXACT_MODEL_OFFICIAL_VALUE"
-    )
-    assert trajectory["classification"] == (
-        "DIAGNOSTIC_ONLY_NOT_FINAL_CONTROL_MAPPING"
-    )
-    assert trajectory["source"]["local_path"].endswith(
-        "vx300s_joint_limits.yaml"
-    )
+    assert trajectory["jerk_limit_status"] == ("NOT_SET_NO_EXACT_MODEL_OFFICIAL_VALUE")
+    assert trajectory["classification"] == ("DIAGNOSTIC_ONLY_NOT_FINAL_CONTROL_MAPPING")
+    assert trajectory["source"]["local_path"].endswith("vx300s_joint_limits.yaml")
     assert len(trajectory["source"]["sha256"]) == 64
     gui_source = GUI_SCRIPT.read_text(encoding="utf-8")
     runner_source = RUNNER_SCRIPT.read_text(encoding="utf-8")
@@ -163,14 +165,9 @@ def test_bottle_transform_places_cad_center_on_vertical_centerline() -> None:
         yaw_delta_rad=np.deg2rad(47.0),
     )
 
-    center = (
-        result[:3, :3] @ np.array([0.0, 0.0, 0.103])
-        + result[:3, 3]
-    )
+    center = result[:3, :3] @ np.array([0.0, 0.0, 0.103]) + result[:3, 3]
     assert center[:2] == pytest.approx([0.0, 0.08], abs=1e-12)
-    assert center[2] == pytest.approx(
-        (nominal[:3, :3] @ np.array([0.0, 0.0, 0.103]) + nominal[:3, 3])[2]
-    )
+    assert center[2] == pytest.approx((nominal[:3, :3] @ np.array([0.0, 0.0, 0.103]) + nominal[:3, 3])[2])
     assert np.linalg.det(result[:3, :3]) == pytest.approx(1.0)
 
 
@@ -238,9 +235,7 @@ def test_initial_tool_orientation_gate_uses_gripper_local_positive_x() -> None:
     root_half = float(np.sqrt(0.5))
     downward_wxyz = [root_half, 0.0, root_half, 0.0]
 
-    assert gripper_approach_axis_world(downward_wxyz) == pytest.approx(
-        [0.0, 0.0, -1.0]
-    )
+    assert gripper_approach_axis_world(downward_wxyz) == pytest.approx([0.0, 0.0, -1.0])
     result = initial_tool_orientation_gate(
         downward_wxyz,
         maximum_angle_to_world_down_deg=23.241131059202324,
@@ -321,9 +316,7 @@ def test_oriented_initial_pose_is_solved_in_task_space_and_read_back() -> None:
     )
 
     assert result["status"] == "PASS"
-    assert result["initial_arm_q_rad"] == pytest.approx(
-        [0.1, -0.2, 0.3, 0.0, 0.2, -0.1]
-    )
+    assert result["initial_arm_q_rad"] == pytest.approx([0.1, -0.2, 0.3, 0.0, 0.2, -0.1])
     assert result["fk_position_error_m"] == pytest.approx(0.0)
     assert result["fk_orientation_error_rad"] == pytest.approx(0.0)
     assert result["orientation_gate"]["status"] == "PASS"
@@ -338,11 +331,7 @@ def test_preserved_successes_are_explicit_orientation_exceptions() -> None:
             "preflight_status": "PASS",
             "initial_arm_q_rad": [float(index)] * 6,
             **(
-                {
-                    "initial_orientation_policy": (
-                        "TASK_SPACE_VALIDATED_T_O_G_ORIENTATION_THEN_LULA_IK"
-                    )
-                }
+                {"initial_orientation_policy": ("TASK_SPACE_VALIDATED_T_O_G_ORIENTATION_THEN_LULA_IK")}
                 if index == 2
                 else {}
             ),
@@ -359,20 +348,14 @@ def test_preserved_successes_are_explicit_orientation_exceptions() -> None:
         "sample_01",
         "sample_02",
     ]
-    assert preserved[0]["initial_orientation_policy"] == (
-        "USER_ACCEPTED_LEGACY_INITIAL_ORIENTATION_EXCEPTION"
-    )
-    assert preserved[1]["initial_orientation_policy"] == (
-        "TASK_SPACE_VALIDATED_T_O_G_ORIENTATION_THEN_LULA_IK"
-    )
+    assert preserved[0]["initial_orientation_policy"] == ("USER_ACCEPTED_LEGACY_INITIAL_ORIENTATION_EXCEPTION")
+    assert preserved[1]["initial_orientation_policy"] == ("TASK_SPACE_VALIDATED_T_O_G_ORIENTATION_THEN_LULA_IK")
     assert records[0].get("initial_orientation_policy") is None
 
 
 def test_runtime_reuse_keeps_only_verified_accepted_successes() -> None:
     source = {"samples": _five_runtime_pass_records()}
-    source["samples"][1]["initial_orientation_policy"] = (
-        "TASK_SPACE_VALIDATED_T_O_G_ORIENTATION_THEN_LULA_IK"
-    )
+    source["samples"][1]["initial_orientation_policy"] = "TASK_SPACE_VALIDATED_T_O_G_ORIENTATION_THEN_LULA_IK"
 
     reused = reuse_accepted_runtime_records(
         source,
@@ -383,18 +366,36 @@ def test_runtime_reuse_keeps_only_verified_accepted_successes() -> None:
         "sample_01",
         "sample_02",
     ]
+    assert all(record["execution_policy"] == "REUSED_USER_ACCEPTED_SUCCESS_NO_RERECORDING" for record in reused)
+    assert reused[0]["initial_orientation_policy"] == ("USER_ACCEPTED_LEGACY_INITIAL_ORIENTATION_EXCEPTION")
+    assert reused[1]["initial_orientation_policy"] == ("TASK_SPACE_VALIDATED_T_O_G_ORIENTATION_THEN_LULA_IK")
+    assert source["samples"][0].get("execution_policy") is None
+
+
+def test_interrupted_runtime_resume_keeps_only_complete_machine_successes() -> None:
+    source = {"samples": _five_runtime_pass_records()[:3]}
+
+    resumed = resume_verified_runtime_records(source)
+
+    assert [record["sample_id"] for record in resumed] == [
+        "sample_01",
+        "sample_02",
+        "sample_03",
+    ]
     assert all(
         record["execution_policy"]
-        == "REUSED_USER_ACCEPTED_SUCCESS_NO_RERECORDING"
-        for record in reused
-    )
-    assert reused[0]["initial_orientation_policy"] == (
-        "USER_ACCEPTED_LEGACY_INITIAL_ORIENTATION_EXCEPTION"
-    )
-    assert reused[1]["initial_orientation_policy"] == (
-        "TASK_SPACE_VALIDATED_T_O_G_ORIENTATION_THEN_LULA_IK"
+        == "RESUMED_INTERRUPTED_MACHINE_SUCCESS_NO_RERECORDING"
+        for record in resumed
     )
     assert source["samples"][0].get("execution_policy") is None
+
+
+def test_interrupted_runtime_resume_rejects_incomplete_collision_evidence() -> None:
+    source = {"samples": _five_runtime_pass_records()[:3]}
+    source["samples"][2]["collider_repeat"]["collision_record_count"] = 23
+
+    with pytest.raises(ValueError, match="not a complete success: sample_03"):
+        resume_verified_runtime_records(source)
 
 
 def test_failed_runtime_candidate_is_explicitly_excluded_by_sample() -> None:
@@ -433,6 +434,58 @@ def test_gui_supports_machine_only_screening_without_video(
     args = run_aloha1_grasp_20cm_gui._parse_args()  # noqa: SLF001
 
     assert args.skip_video_capture is True
+
+
+def test_gui_supports_sparse_collision_evidence_only(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from tools import run_aloha1_grasp_20cm_gui
+
+    monkeypatch.setattr(
+        "sys.argv",
+        [
+            "run_aloha1_grasp_20cm_gui.py",
+            "--collision-evidence-only",
+        ],
+    )
+
+    args = run_aloha1_grasp_20cm_gui._parse_args()  # noqa: SLF001
+
+    assert args.collision_evidence_only is True
+
+
+def test_missing_candidate_manifest_is_reported_without_hashing_it(
+    tmp_path: Path,
+) -> None:
+    runtime = tmp_path / "aloha1_grasp_20cm_runtime.json"
+    telemetry = tmp_path / "aloha1_grasp_20cm_telemetry.jsonl"
+    runtime.write_text(
+        '{"status":"PASS","runtime":{"initial_pose":{}},'
+        '"stage":{},"metrics":{},"boundaries":{}}\n',
+        encoding="utf-8",
+    )
+    telemetry.write_text("{}\n", encoding="utf-8")
+
+    result = _read_run_evidence(
+        artifact_root=tmp_path,
+        process={"exit_code": 0, "timed_out": False},
+        collision_repeat=False,
+        selected={
+            "world_from_object": np.eye(4).tolist(),
+            "initial_arm_q_rad": [0.0] * 6,
+        },
+        stage_sha256="0" * 64,
+        readback_tolerance_rad=0.02,
+        first_frame_jump_tolerance_rad=0.02,
+        hold_frames=12,
+    )
+
+    assert result["evidence_status"] == "FAIL"
+    assert result["candidate_manifest_sha256"] is None
+    assert any(
+        error.startswith("missing:")
+        for error in result["evidence_errors"]
+    )
 
 
 @pytest.mark.parametrize(
@@ -493,20 +546,14 @@ def test_apply_frozen_transform_preserves_t_o_g_and_input_profile() -> None:
                 "target_poses": {
                     "object_from_gripper": object_from_gripper.tolist(),
                     "grasp_ee_position_world_m": original_grasp[:3, 3].tolist(),
-                    "pregrasp_ee_position_world_m": (
-                        original_grasp[:3, 3] + [0.0, 0.0, 0.08]
-                    ).tolist(),
-                    "lift_ee_position_world_m": (
-                        original_grasp[:3, 3] + [0.0, 0.0, 0.21]
-                    ).tolist(),
+                    "pregrasp_ee_position_world_m": (original_grasp[:3, 3] + [0.0, 0.0, 0.08]).tolist(),
+                    "lift_ee_position_world_m": (original_grasp[:3, 3] + [0.0, 0.0, 0.21]).tolist(),
                     "orientation_world_wxyz": [1.0, 0.0, 0.0, 0.0],
                 },
             }
         }
     }
-    original_matrix = np.asarray(
-        profile["kinematics"]["placement"]["placement_matrix"]
-    ).copy()
+    original_matrix = np.asarray(profile["kinematics"]["placement"]["placement_matrix"]).copy()
     frozen = place_bottle_center_and_yaw(
         nominal_world_from_object=nominal,
         geometric_center_local_m=[0.0, 0.0, 0.103],
@@ -522,19 +569,12 @@ def test_apply_frozen_transform_preserves_t_o_g_and_input_profile() -> None:
     placement = result["kinematics"]["placement"]
     expected_world_from_gripper = frozen @ object_from_gripper
     assert placement["placement_matrix"] == pytest.approx(frozen)
-    assert placement["target_poses"]["object_from_gripper"] == pytest.approx(
-        object_from_gripper
-    )
-    assert placement["target_poses"][
-        "grasp_ee_position_world_m"
-    ] == pytest.approx(expected_world_from_gripper[:3, 3])
+    assert placement["target_poses"]["object_from_gripper"] == pytest.approx(object_from_gripper)
+    assert placement["target_poses"]["grasp_ee_position_world_m"] == pytest.approx(expected_world_from_gripper[:3, 3])
     assert (
-        np.asarray(placement["target_poses"]["pregrasp_ee_position_world_m"])
-        - expected_world_from_gripper[:3, 3]
+        np.asarray(placement["target_poses"]["pregrasp_ee_position_world_m"]) - expected_world_from_gripper[:3, 3]
     ) == pytest.approx([0.0, 0.0, 0.08])
-    assert np.asarray(
-        profile["kinematics"]["placement"]["placement_matrix"]
-    ) == pytest.approx(original_matrix)
+    assert np.asarray(profile["kinematics"]["placement"]["placement_matrix"]) == pytest.approx(original_matrix)
 
 
 def test_canonical_signature_is_deterministic_and_pose_sensitive() -> None:
@@ -638,13 +678,8 @@ def test_preflight_contact_policy_allows_only_confirmed_finger_table_pair() -> N
     allowed = classify_preflight_contacts(
         [
             {
-                "actor0_path": (
-                    "/World/follower_left/vx300s_left/"
-                    "follower_left_left_finger_link"
-                ),
-                "actor1_path": (
-                    "/World/environment/worldBody/user_confirmed_table"
-                ),
+                "actor0_path": ("/World/follower_left/vx300s_left/follower_left_left_finger_link"),
+                "actor1_path": ("/World/environment/worldBody/user_confirmed_table"),
                 "separation_m": -0.0002,
                 "impulse_ns": 0.001,
             }
@@ -653,13 +688,8 @@ def test_preflight_contact_policy_allows_only_confirmed_finger_table_pair() -> N
     blocked = classify_preflight_contacts(
         [
             {
-                "actor0_path": (
-                    "/World/follower_left/vx300s_left/"
-                    "follower_left_shoulder_link"
-                ),
-                "actor1_path": (
-                    "/World/environment/worldBody/user_confirmed_table"
-                ),
+                "actor0_path": ("/World/follower_left/vx300s_left/follower_left_shoulder_link"),
+                "actor1_path": ("/World/environment/worldBody/user_confirmed_table"),
                 "separation_m": -0.0002,
                 "impulse_ns": 0.001,
             }
@@ -706,3 +736,80 @@ def test_video_failure_does_not_erase_physics_machine_pass() -> None:
     assert summary["status"] == "FAIL"
     assert summary["failed_sample_ids"] == []
     assert summary["evidence_failed_sample_ids"] == ["sample_03"]
+
+
+def test_missing_video_candidate_is_reported_without_erasing_machine_pass(
+    tmp_path: Path,
+) -> None:
+    artifact_root = tmp_path / "primary"
+    artifact_root.mkdir()
+    stage_hash = "a" * 64
+    world_from_object = np.eye(4, dtype=np.float64)
+    initial_arm_q = np.asarray(
+        [-1.0, -0.1, 0.8, 2.2, 2.0, -1.2],
+        dtype=np.float64,
+    )
+    runtime = {
+        "status": "PASS",
+        "reason": "stable_20cm_hold",
+        "deterministic_signature": "b" * 64,
+        "stage": {
+            "sha256_before": stage_hash,
+            "sha256_after": stage_hash,
+        },
+        "bottle_random_position": {
+            "pose_mode": "FROZEN_CENTER_AND_YAW_TRANSFORM",
+            "world_from_object": world_from_object.tolist(),
+        },
+        "runtime": {
+            "initial_pose": {
+                "initial_arm_q_target_rad": initial_arm_q.tolist(),
+                "initial_pose_hold_frames_required": 60,
+                "initial_pose_hold_frames_observed": 60,
+                "initial_arm_max_readback_error_rad": 0.001,
+                "first_frame_jump_rad": 0.001,
+            },
+            "ik": {"status": "PASS"},
+        },
+        "metrics": {
+            "dynamic_during_formal_phases": True,
+            "finite_state": True,
+        },
+        "boundaries": {
+            "surface_gripper": False,
+            "fixed_joint": False,
+            "parent_attachment": False,
+            "task8": "NOT_RUN",
+        },
+    }
+    (artifact_root / "aloha1_grasp_20cm_runtime.json").write_text(
+        __import__("json").dumps(runtime),
+        encoding="utf-8",
+    )
+    (artifact_root / "aloha1_grasp_20cm_telemetry.jsonl").write_text(
+        '{"frame": 1, "phase": "VALIDATE"}\n',
+        encoding="utf-8",
+    )
+
+    result = _read_run_evidence(
+        artifact_root=artifact_root,
+        process={"exit_code": -15, "timed_out": True},
+        collision_repeat=False,
+        selected={
+            "world_from_object": world_from_object.tolist(),
+            "initial_arm_q_rad": initial_arm_q.tolist(),
+        },
+        stage_sha256=stage_hash,
+        readback_tolerance_rad=0.02,
+        first_frame_jump_tolerance_rad=0.02,
+        hold_frames=60,
+    )
+
+    candidate_path = (
+        artifact_root
+        / "video_attempt_001/video/candidate_manifest.json"
+    ).resolve()
+    assert result["machine_status"] == "PASS"
+    assert result["evidence_status"] == "FAIL"
+    assert result["candidate_manifest_sha256"] is None
+    assert f"missing:{candidate_path}" in result["evidence_errors"]

@@ -16,6 +16,7 @@ from tools.aloha1_mapping.grasp_20cm_isaac_bindings import IsaacGrasp20cmBinding
 from tools.aloha1_mapping.grasp_20cm_isaac_bindings import arm_phase_target_reached
 from tools.aloha1_mapping.grasp_20cm_isaac_bindings import arm_phase_timeout_reached
 from tools.aloha1_mapping.grasp_20cm_isaac_bindings import bilateral_observation_contact
+from tools.aloha1_mapping.grasp_20cm_isaac_bindings import bottle_tensor_lifecycle_plan
 from tools.aloha1_mapping.grasp_20cm_isaac_bindings import build_lula_cspace_phase_targets
 from tools.aloha1_mapping.grasp_20cm_isaac_bindings import derive_gripper_closeup_camera_geometry
 from tools.aloha1_mapping.grasp_20cm_isaac_bindings import derive_overview_camera_geometry
@@ -24,6 +25,7 @@ from tools.aloha1_mapping.grasp_20cm_isaac_bindings import initial_pose_hold_com
 from tools.aloha1_mapping.grasp_20cm_isaac_bindings import open_pregrasp_evidence_ready
 from tools.aloha1_mapping.grasp_20cm_isaac_bindings import physics_sample_duration_s
 from tools.aloha1_mapping.grasp_20cm_isaac_bindings import preload_solver_contact_ready
+from tools.aloha1_mapping.grasp_20cm_isaac_bindings import required_collider_phase_labels
 from tools.aloha1_mapping.grasp_20cm_isaac_bindings import reset_body_transition_plan
 from tools.aloha1_mapping.grasp_20cm_isaac_bindings import single_body_tensor_indices
 from tools.aloha1_mapping.grasp_20cm_isaac_bindings import solver_active_contacts
@@ -776,6 +778,61 @@ def test_open_pregrasp_collider_evidence_waits_for_open_target() -> None:
     )
 
 
+@pytest.mark.parametrize(
+    ("phase", "terminal", "observation", "contact", "expected"),
+    [
+        ("RELEASE_DYNAMIC", False, {}, {}, ["RELEASE_DYNAMIC"]),
+        (
+            "OPEN_PREGRASP",
+            False,
+            {"open_target_reached": True},
+            {},
+            ["OPEN_PREGRASP"],
+        ),
+        (
+            "BILATERAL_CONTACT",
+            False,
+            {},
+            {"bilateral_solver_active_contact": True},
+            ["BILATERAL_CONTACT"],
+        ),
+        (
+            "VERTICAL_LIFT",
+            False,
+            {"clearance_m": 0.0011},
+            {},
+            ["FIRST_SUPPORT_CLEARANCE"],
+        ),
+        ("HEIGHT_REACHED", False, {}, {}, ["HEIGHT_REACHED"]),
+        ("HOLD", True, {}, {}, ["HOLD_END"]),
+    ],
+)
+def test_required_collider_phase_labels_selects_sparse_milestones(
+    phase: str,
+    terminal: bool,  # noqa: FBT001 - parametrized input.
+    observation: dict[str, object],
+    contact: dict[str, object],
+    expected: list[str],
+) -> None:
+    assert required_collider_phase_labels(
+        phase=phase,
+        terminal=terminal,
+        observation=observation,
+        contact=contact,
+        captured=set(),
+    ) == expected
+
+
+def test_required_collider_phase_labels_does_not_recapture() -> None:
+    assert required_collider_phase_labels(
+        phase="HEIGHT_REACHED",
+        terminal=False,
+        observation={},
+        contact={},
+        captured={"HEIGHT_REACHED"},
+    ) == []
+
+
 def test_hold_duration_counts_physics_samples_not_sample_intervals() -> None:
     assert physics_sample_duration_s(
         sample_count=120,
@@ -806,6 +863,38 @@ def test_closeup_camera_looks_along_ab_and_centers_lift_interval() -> None:
     assert result["derivation"] == (
         "LOOK_ALONG_BOTTLE_AB_AND_CENTER_NOMINAL_VERTICAL_LIFT"
     )
+    assert result["axial_side"] == 1
+
+
+def test_closeup_camera_can_use_opposite_ab_side_without_changing_target() -> None:
+    axis = np.asarray([0.9912548881, 0.1319611564, 0.0])
+    grasp = np.asarray([0.0049432018, -0.1597277926, 0.0329096618])
+    baseline = derive_gripper_closeup_camera_geometry(
+        grasp_point_world_m=grasp,
+        bottle_axis_world=axis,
+        nominal_lift_m=0.210,
+    )
+    opposite = derive_gripper_closeup_camera_geometry(
+        grasp_point_world_m=grasp,
+        bottle_axis_world=axis,
+        nominal_lift_m=0.210,
+        axial_side=-1,
+    )
+    axis /= np.linalg.norm(axis)
+    baseline_target = np.asarray(baseline["target_world_m"])
+    opposite_target = np.asarray(opposite["target_world_m"])
+    opposite_position = np.asarray(opposite["position_world_m"])
+    opposite_forward = np.asarray(opposite["camera_forward_world"])
+
+    assert opposite_target == pytest.approx(baseline_target)
+    assert opposite_position[:2] - opposite_target[:2] == pytest.approx(
+        -axis[:2] * 1.25
+    )
+    assert np.dot(opposite_forward[:2], axis[:2]) > 0.0
+    assert np.linalg.norm(opposite_position - opposite_target) == pytest.approx(
+        np.hypot(1.25, 0.75)
+    )
+    assert opposite["axial_side"] == -1
 
 
 def test_gui_exposes_run_abort_reset_and_workspace_two() -> None:
@@ -816,6 +905,44 @@ def test_gui_exposes_run_abort_reset_and_workspace_two() -> None:
     assert "_move_current_process_window_to_workspace(2)" in source
     assert "subscribe_physics_on_step_events" in source
     assert "DIAGNOSTIC_ONLY_NOT_FINAL_CONTROL_MAPPING" in source
+    assert '"--closeup-axial-side"' in source
+    assert '"--bottle-tensor-lifecycle"' in source
+
+
+@pytest.mark.parametrize(
+    ("mode", "expected"),
+    [
+        ("BASELINE", ("create_initial_view",)),
+        (
+            "INITIALIZE_KINEMATIC_BODIES",
+            ("initialize_kinematic_bodies", "create_initial_view"),
+        ),
+        (
+            "RECREATE_AFTER_DYNAMIC",
+            ("create_initial_view", "recreate_after_dynamic"),
+        ),
+    ],
+)
+def test_bottle_tensor_lifecycle_plan_changes_one_operation(
+    mode: str,
+    expected: tuple[str, ...],
+) -> None:
+    assert bottle_tensor_lifecycle_plan(mode) == expected
+
+
+def test_bottle_tensor_lifecycle_rejects_unknown_mode() -> None:
+    with pytest.raises(ValueError, match="unsupported bottle tensor lifecycle"):
+        bottle_tensor_lifecycle_plan("GUESS")
+
+
+def test_runtime_telemetry_records_pose_finite_difference_velocity() -> None:
+    source = (
+        ROOT / "tools/aloha1_mapping/grasp_20cm_isaac_bindings.py"
+    ).read_text(encoding="utf-8")
+
+    assert '"pose_finite_difference_velocity"' in source
+    assert '"center_of_mass_pose_finite_difference_velocity"' in source
+    assert '"bottle_tensor_lifecycle"' in source
 
 
 def test_isaac_binding_uses_pose_synchronized_render_only_colliders() -> None:

@@ -487,6 +487,11 @@ def _parse_args() -> argparse.Namespace:
         type=Path,
         required=True,
     )
+    parser.add_argument(
+        "--expected-stage-sha256",
+        default=EXPECTED_STAGE_SHA256,
+        help="Frozen hash for the explicitly supplied diagnostic Stage.",
+    )
     parser.add_argument("--headless", action=argparse.BooleanOptionalAction, default=True)
     return parser.parse_args()
 
@@ -500,7 +505,7 @@ def main() -> int:
 
     stage_hash_before = _sha256(stage_path)
     urdf_hash = _sha256(urdf_path)
-    if stage_hash_before != EXPECTED_STAGE_SHA256:
+    if stage_hash_before != args.expected_stage_sha256:
         raise RuntimeError(f"frozen Stage SHA-256 mismatch: {stage_hash_before}")
     if urdf_hash != EXPECTED_URDF_SHA256:
         raise RuntimeError(f"frozen URDF SHA-256 mismatch: {urdf_hash}")

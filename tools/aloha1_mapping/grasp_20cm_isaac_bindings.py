@@ -36,6 +36,11 @@ PHASE_TIMEOUT_FRAMES = {
     Phase.HOLD: 240,
 }
 COLLIDER_OVERLAY_RENDER_FLUSH_UPDATES = 20
+BOTTLE_TENSOR_LIFECYCLE_MODES = {
+    "BASELINE",
+    "INITIALIZE_KINEMATIC_BODIES",
+    "RECREATE_AFTER_DYNAMIC",
+}
 
 
 def single_body_tensor_indices(*, count: int) -> np.ndarray:
@@ -61,6 +66,27 @@ def reset_body_transition_plan(
     )
 
 
+def bottle_tensor_lifecycle_plan(mode: str) -> tuple[str, ...]:
+    """Return the one-variable local PhysX tensor lifecycle experiment."""
+
+    normalized = str(mode)
+    if normalized not in BOTTLE_TENSOR_LIFECYCLE_MODES:
+        raise ValueError(
+            f"unsupported bottle tensor lifecycle: {normalized}"
+        )
+    prefix = (
+        ("initialize_kinematic_bodies",)
+        if normalized == "INITIALIZE_KINEMATIC_BODIES"
+        else ()
+    )
+    suffix = (
+        ("recreate_after_dynamic",)
+        if normalized == "RECREATE_AFTER_DYNAMIC"
+        else ()
+    )
+    return (*prefix, "create_initial_view", *suffix)
+
+
 def derive_gripper_closeup_camera_geometry(
     *,
     grasp_point_world_m: Sequence[float],
@@ -68,7 +94,8 @@ def derive_gripper_closeup_camera_geometry(
     nominal_lift_m: float,
     axial_distance_m: float = 1.25,
     elevation_m: float = 0.75,
-) -> dict[str, list[float] | float | str]:
+    axial_side: int = 1,
+) -> dict[str, list[float] | float | int | str]:
     """Derive an evidence view along AB, centered on the lift interval."""
 
     grasp = np.asarray(grasp_point_world_m, dtype=np.float64)
@@ -89,13 +116,15 @@ def derive_gripper_closeup_camera_geometry(
         or elevation_m <= 0.0
     ):
         raise ValueError("camera distances must be positive")
+    if axial_side not in {-1, 1}:
+        raise ValueError("axial_side must be either -1 or 1")
     target = grasp + np.asarray(
         [0.0, 0.0, nominal_lift_m / 2.0],
         dtype=np.float64,
     )
     position = (
         target
-        + axis * float(axial_distance_m)
+        + axis * float(axial_distance_m) * int(axial_side)
         + np.asarray([0.0, 0.0, elevation_m])
     )
     forward = target - position
@@ -107,6 +136,7 @@ def derive_gripper_closeup_camera_geometry(
         "bottle_axis_world": axis.tolist(),
         "nominal_lift_m": float(nominal_lift_m),
         "axial_distance_m": float(axial_distance_m),
+        "axial_side": int(axial_side),
         "elevation_m": float(elevation_m),
         "derivation": (
             "LOOK_ALONG_BOTTLE_AB_AND_CENTER_NOMINAL_VERTICAL_LIFT"
@@ -232,6 +262,46 @@ def open_pregrasp_evidence_ready(
     """Capture the open evidence after motion reaches its commanded target."""
 
     return bool(open_target_reached and not already_captured)
+
+
+def required_collider_phase_labels(
+    *,
+    phase: str,
+    terminal: bool,
+    observation: Mapping[str, Any],
+    contact: Mapping[str, Any],
+    captured: set[str],
+) -> list[str]:
+    """Return the exact sparse collision-evidence milestones still needed."""
+
+    labels: list[str] = []
+    if phase == Phase.RELEASE_DYNAMIC.value and "RELEASE_DYNAMIC" not in captured:
+        labels.append("RELEASE_DYNAMIC")
+    if (
+        phase == Phase.OPEN_PREGRASP.value
+        and open_pregrasp_evidence_ready(
+            open_target_reached=bool(observation.get("open_target_reached")),
+            already_captured="OPEN_PREGRASP" in captured,
+        )
+    ):
+        labels.append("OPEN_PREGRASP")
+    if (
+        phase == Phase.BILATERAL_CONTACT.value
+        and bool(contact.get("bilateral_solver_active_contact"))
+        and "BILATERAL_CONTACT" not in captured
+    ):
+        labels.append("BILATERAL_CONTACT")
+    if (
+        phase == Phase.VERTICAL_LIFT.value
+        and float(observation.get("clearance_m", 0.0)) > 0.001
+        and "FIRST_SUPPORT_CLEARANCE" not in captured
+    ):
+        labels.append("FIRST_SUPPORT_CLEARANCE")
+    if phase == Phase.HEIGHT_REACHED.value and "HEIGHT_REACHED" not in captured:
+        labels.append("HEIGHT_REACHED")
+    if terminal and phase == Phase.HOLD.value and "HOLD_END" not in captured:
+        labels.append("HOLD_END")
+    return labels
 
 
 def physics_sample_duration_s(
@@ -561,6 +631,8 @@ class IsaacGrasp20cmBindings:
         arm_acceleration_limits_rad_s2: Sequence[float] | None = None,
         additional_lift_margin_m: float = 0.0,
         capture_collider_evidence: bool = True,
+        closeup_axial_side: int = 1,
+        bottle_tensor_lifecycle: str = "BASELINE",
     ) -> None:
         import carb.settings
         from isaacsim.core.api import World
@@ -594,6 +666,7 @@ class IsaacGrasp20cmBindings:
         from tools.validate_aloha1_task7b2_horizontal_grasp import _serialize_contacts
         from tools.validate_aloha1_task7b2_horizontal_grasp import _solve_settled_bottle_runtime_ik
         from tools.validate_aloha1_task7b2_horizontal_grasp import _world_bounds
+        from tools.validate_aloha1_task7b2_horizontal_grasp import derive_pose_finite_difference_velocity
         from tools.validate_aloha1_task7b2_horizontal_grasp import read_physx_bottle_state
         from tools.validate_aloha1_task7b2_horizontal_grasp import transform_local_points_to_world_bounds
 
@@ -620,6 +693,7 @@ class IsaacGrasp20cmBindings:
         self._serialize_contacts = _serialize_contacts
         self._solve_settled_ik = _solve_settled_bottle_runtime_ik
         self._read_bottle_state = read_physx_bottle_state
+        self._derive_pose_velocity = derive_pose_finite_difference_velocity
         self._transform_collision_bounds = (
             transform_local_points_to_world_bounds
         )
@@ -745,6 +819,26 @@ class IsaacGrasp20cmBindings:
         self.capture_collider_evidence_enabled = bool(
             capture_collider_evidence
         )
+        self.closeup_axial_side = int(closeup_axial_side)
+        if self.closeup_axial_side not in {-1, 1}:
+            raise ValueError("closeup_axial_side must be either -1 or 1")
+        self.bottle_tensor_lifecycle_mode = str(
+            bottle_tensor_lifecycle
+        )
+        self.bottle_tensor_lifecycle_plan = (
+            bottle_tensor_lifecycle_plan(
+                self.bottle_tensor_lifecycle_mode
+            )
+        )
+        self.bottle_tensor_lifecycle: dict[str, Any] = {
+            "mode": self.bottle_tensor_lifecycle_mode,
+            "operation_plan": list(self.bottle_tensor_lifecycle_plan),
+            "initialize_kinematic_bodies_called": False,
+            "initialize_kinematic_bodies_return": None,
+            "rigid_body_view_creation_count": 0,
+            "kinematic_to_dynamic_transition": None,
+            "classification": "DIAGNOSTIC_ONE_VARIABLE_LIFECYCLE_ONLY",
+        }
         self.task_profile["config"]["bottle"]["session_path"] = str(
             self.config["bottle"]["session_prim"]
         )
@@ -1026,7 +1120,25 @@ class IsaacGrasp20cmBindings:
         if simulation_view is None or not simulation_view.is_valid:
             raise RuntimeError("PhysX tensor SimulationView unavailable")
         bottle_path = str(self.config["bottle"]["session_prim"])
+        self._simulation_view = simulation_view
+        self._bottle_tensor_path = bottle_path
+        if (
+            self.bottle_tensor_lifecycle_mode
+            == "INITIALIZE_KINEMATIC_BODIES"
+        ):
+            initialization_result = (
+                simulation_view.initialize_kinematic_bodies()
+            )
+            self.bottle_tensor_lifecycle[
+                "initialize_kinematic_bodies_called"
+            ] = True
+            self.bottle_tensor_lifecycle[
+                "initialize_kinematic_bodies_return"
+            ] = self._jsonable_render_value(initialization_result)
         self.bottle = simulation_view.create_rigid_body_view(bottle_path)
+        self.bottle_tensor_lifecycle[
+            "rigid_body_view_creation_count"
+        ] = 1
         if self.bottle is None or int(self.bottle.count) != 1:
             raise RuntimeError("Bottle500 PhysX rigid-body view unavailable")
         self._finger_link_views = {
@@ -1155,6 +1267,7 @@ class IsaacGrasp20cmBindings:
                 float(self.config["target"]["clearance_m"])
                 + float(self.config["target"]["hold_drop_gate_m"])
             ),
+            axial_side=self.closeup_axial_side,
         )
         specs["gripper_closeup"] = {
             "position": np.asarray(
@@ -1275,6 +1388,12 @@ class IsaacGrasp20cmBindings:
         self._video_attempt_root: Path | None = None
         self._collider_overlay_records: list[dict[str, Any]] = []
         self._captured_overlay_phases: set[str] = set()
+        self._previous_bottle_pose_state: dict[str, Any] | None = None
+        self._previous_bottle_com_state: dict[str, Any] | None = None
+        if hasattr(self, "bottle_tensor_lifecycle"):
+            self.bottle_tensor_lifecycle[
+                "kinematic_to_dynamic_transition"
+            ] = None
 
     def prepare_run(self) -> None:
         if sha256_file(self.stage_path) != self.stage_hash_before:
@@ -1567,8 +1686,43 @@ class IsaacGrasp20cmBindings:
         from pxr import UsdPhysics
 
         rigid = UsdPhysics.RigidBodyAPI(self.bottle_prim)
+        before = bool(rigid.GetKinematicEnabledAttr().Get())
         rigid.GetKinematicEnabledAttr().Set(bool(enabled))
         self._physx_sim.flush_changes()
+        recreated = False
+        if (
+            not enabled
+            and self.bottle_tensor_lifecycle_mode
+            == "RECREATE_AFTER_DYNAMIC"
+        ):
+            refreshed = self._simulation_view.create_rigid_body_view(
+                self._bottle_tensor_path
+            )
+            if refreshed is None or int(refreshed.count) != 1:
+                raise RuntimeError(
+                    "Bottle500 PhysX rigid-body view recreation failed"
+                )
+            self.bottle = refreshed
+            self.bottle_tensor_lifecycle[
+                "rigid_body_view_creation_count"
+            ] = int(
+                self.bottle_tensor_lifecycle[
+                    "rigid_body_view_creation_count"
+                ]
+            ) + 1
+            recreated = True
+        self.bottle_tensor_lifecycle[
+            "kinematic_to_dynamic_transition"
+        ] = {
+            "physics_frame": int(self._contact_frame),
+            "time_s": float(self._contact_frame * self.dt),
+            "phase": self._phase.value,
+            "before_kinematic_enabled": before,
+            "after_kinematic_enabled": bool(
+                rigid.GetKinematicEnabledAttr().Get()
+            ),
+            "rigid_body_view_recreated": recreated,
+        }
 
     def _phase_done(self, phase: Phase) -> bool:
         targets = self._trajectory.get(phase, [])
@@ -1588,6 +1742,35 @@ class IsaacGrasp20cmBindings:
         self._contact_frame = frame
         self._physx.update_transformations(True, True, False, False)
         bottle_state = self._read_bottle_state(self.bottle)
+        pose_finite_difference_velocity = (
+            self._derive_pose_velocity(
+                previous=self._previous_bottle_pose_state,
+                current=bottle_state,
+                dt_s=self.dt,
+            )
+            if self._previous_bottle_pose_state is not None
+            else None
+        )
+        current_com_pose_state = {
+            "position_world_m": list(
+                bottle_state["center_of_mass_world_m"]
+            ),
+            "orientation_wxyz": list(bottle_state["orientation_wxyz"]),
+        }
+        center_of_mass_pose_finite_difference_velocity = (
+            self._derive_pose_velocity(
+                previous=self._previous_bottle_com_state,
+                current=current_com_pose_state,
+                dt_s=self.dt,
+            )
+            if self._previous_bottle_com_state is not None
+            else None
+        )
+        self._previous_bottle_pose_state = {
+            "position_world_m": list(bottle_state["position_world_m"]),
+            "orientation_wxyz": list(bottle_state["orientation_wxyz"]),
+        }
+        self._previous_bottle_com_state = current_com_pose_state
         position = np.asarray(
             bottle_state["position_world_m"],
             dtype=np.float64,
@@ -1884,6 +2067,12 @@ class IsaacGrasp20cmBindings:
             "bottle": {
                 **bottle_state,
                 "collision_bounds": collision_bounds,
+                "pose_finite_difference_velocity": (
+                    pose_finite_difference_velocity
+                ),
+                "center_of_mass_pose_finite_difference_velocity": (
+                    center_of_mass_pose_finite_difference_velocity
+                ),
             },
             "contact_semantics": {
                 "geometric_contact_definition": "separation_m <= 0",
@@ -2222,6 +2411,38 @@ class IsaacGrasp20cmBindings:
     def has_pending_video_frame(self) -> bool:
         return bool(self._pending_capture_frames)
 
+    def pending_requires_collider_evidence(self, *, terminal: bool) -> bool:
+        """Read whether the newest physics sample is a required milestone."""
+
+        if not self.capture_collider_evidence_enabled:
+            return False
+        if len(self._pending_capture_frames) != 1:
+            return False
+        pending = self._pending_capture_frames[0]
+        telemetry = self.telemetry[int(pending["telemetry_index"])]
+        return bool(
+            required_collider_phase_labels(
+                phase=str(pending["phase"]),
+                terminal=terminal,
+                observation=telemetry["observation"],
+                contact=telemetry["contact_semantics"],
+                captured=self._captured_overlay_phases,
+            )
+        )
+
+    def discard_pending_video_frame(self) -> bool:
+        """Drop one uncaptured frame in sparse collision-evidence mode."""
+
+        if not self._pending_capture_frames:
+            return False
+        if len(self._pending_capture_frames) != 1:
+            raise RuntimeError(
+                "sparse collision capture fell behind physics: "
+                f"{len(self._pending_capture_frames)} pending frames"
+            )
+        self._pending_capture_frames.pop(0)
+        return True
+
     def capture_required_collider_evidence(
         self,
         *,
@@ -2238,50 +2459,13 @@ class IsaacGrasp20cmBindings:
         phase = str(frame_record["phase"])
         observation = telemetry["observation"]
         contact = telemetry["contact_semantics"]
-        labels: list[str] = []
-        if (
-            phase == Phase.RELEASE_DYNAMIC.value
-            and "RELEASE_DYNAMIC" not in self._captured_overlay_phases
-        ):
-            labels.append("RELEASE_DYNAMIC")
-        if (
-            phase == Phase.OPEN_PREGRASP.value
-            and open_pregrasp_evidence_ready(
-                open_target_reached=bool(
-                    observation["open_target_reached"]
-                ),
-                already_captured=(
-                    "OPEN_PREGRASP"
-                    in self._captured_overlay_phases
-                ),
-            )
-        ):
-            labels.append("OPEN_PREGRASP")
-        if (
-            phase == Phase.BILATERAL_CONTACT.value
-            and bool(contact["bilateral_solver_active_contact"])
-            and "BILATERAL_CONTACT"
-            not in self._captured_overlay_phases
-        ):
-            labels.append("BILATERAL_CONTACT")
-        if (
-            phase == Phase.VERTICAL_LIFT.value
-            and float(observation["clearance_m"]) > 0.001
-            and "FIRST_SUPPORT_CLEARANCE"
-            not in self._captured_overlay_phases
-        ):
-            labels.append("FIRST_SUPPORT_CLEARANCE")
-        if (
-            phase == Phase.HEIGHT_REACHED.value
-            and "HEIGHT_REACHED" not in self._captured_overlay_phases
-        ):
-            labels.append("HEIGHT_REACHED")
-        if (
-            terminal
-            and phase == Phase.HOLD.value
-            and "HOLD_END" not in self._captured_overlay_phases
-        ):
-            labels.append("HOLD_END")
+        labels = required_collider_phase_labels(
+            phase=phase,
+            terminal=terminal,
+            observation=observation,
+            contact=contact,
+            captured=self._captured_overlay_phases,
+        )
         if not labels:
             return []
 
@@ -2530,6 +2714,103 @@ class IsaacGrasp20cmBindings:
         self._video_capture_finalized = True
         return candidate
 
+    def finalize_collision_evidence_capture(self) -> dict[str, Any]:
+        """Finalize a sparse deterministic repeat without encoding video."""
+
+        if self._video_capture_finalized:
+            candidate_path = (
+                self._video_attempt_root / "video" / "candidate_manifest.json"
+            )
+            return json.loads(candidate_path.read_text(encoding="utf-8"))
+        if self._pending_capture_frames:
+            raise RuntimeError("cannot finalize with pending sparse frame")
+        if self._video_attempt_root is None:
+            raise RuntimeError("video attempt root is not initialized")
+        report = json.loads(self.report_path.read_text(encoding="utf-8"))
+        signature = str(report["deterministic_signature"])
+        for record in self._captured_frame_records:
+            for view_record in record["views"].values():
+                view_record["runtime_signature"] = signature
+        required_labels = [
+            "RELEASE_DYNAMIC",
+            "OPEN_PREGRASP",
+            "BILATERAL_CONTACT",
+            "FIRST_SUPPORT_CLEARANCE",
+            "HEIGHT_REACHED",
+            "HOLD_END",
+        ]
+        manifest = {
+            "schema_version": 1,
+            "runtime_signature": signature,
+            "required_full_arm_links": [
+                "base",
+                "shoulder",
+                "elbow",
+                "forearm",
+                "wrist",
+                "gripper",
+            ],
+            "capture_api": {
+                "class": "isaacsim.sensors.camera.Camera",
+                "extension": "isaacsim.sensors.camera",
+                "version_scope": "ISAAC_SIM_5_1_0_0_KIT_107_3_3",
+                "independent_render_products": True,
+                "capture_location": "SPARSE_REQUIRED_PHYSICS_MILESTONES_ONLY",
+            },
+            "collision_evidence": {
+                "enabled": True,
+                "purpose": "PAIRED_COLLIDER_SCREENSHOT_REPEAT",
+                "setting_path": self._collider_display_setting,
+                "setting_before": self._collider_display_before,
+                "setting_after": int(
+                    self._settings.get(self._collider_display_setting) or 0
+                ),
+                "required_phase_labels": required_labels,
+                "captured_phase_labels": sorted(
+                    self._captured_overlay_phases
+                ),
+                "render_evidence": self._render_evidence,
+                "records": self._collider_overlay_records,
+            },
+            "frames": self._captured_frame_records,
+        }
+        manifest_path = self._video_attempt_root / "frame_manifest.json"
+        _atomic_json(manifest_path, manifest)
+        from tools.build_aloha1_grasp_20cm_video import annotate_collision_evidence
+
+        output_root = self._video_attempt_root / "video"
+        collision = annotate_collision_evidence(
+            manifest=manifest,
+            report=report,
+            output_dir=output_root / "collision_annotated",
+        )
+        candidate = {
+            "schema_version": 1,
+            "status": collision["status"],
+            "promotion_status": collision["status"],
+            "runtime_signature": signature,
+            "videos": [],
+            "collision_evidence": collision,
+            "capture_mode": "SPARSE_COLLISION_EVIDENCE_ONLY",
+            "source_report": {
+                "absolute_path": str(self.report_path.resolve()),
+                "sha256": sha256_file(self.report_path),
+            },
+            "source_telemetry": {
+                "absolute_path": str(self.telemetry_path.resolve()),
+                "sha256": sha256_file(self.telemetry_path),
+            },
+            "source_frame_manifest": {
+                "absolute_path": str(manifest_path.resolve()),
+                "sha256": sha256_file(manifest_path),
+            },
+            "task8": "NOT_RUN",
+        }
+        candidate_path = output_root / "candidate_manifest.json"
+        _atomic_json(candidate_path, candidate)
+        self._video_capture_finalized = True
+        return candidate
+
     def save_video_capture_exception(self, exception_text: str) -> None:
         self._video_capture_error = exception_text[-12000:]
         root = self._video_attempt_root or self.artifact_root
@@ -2696,6 +2977,9 @@ class IsaacGrasp20cmBindings:
                         else "BASELINE_ZERO_ADDITIONAL_MARGIN"
                     ),
                 },
+                "bottle_tensor_lifecycle": (
+                    self.bottle_tensor_lifecycle
+                ),
             },
             "stage": {
                 "absolute_path": str(self.stage_path),

@@ -97,6 +97,33 @@ def reuse_accepted_runtime_records(
     return reused
 
 
+def resume_verified_runtime_records(
+    source: dict[str, Any],
+) -> list[dict[str, Any]]:
+    """Resume an interrupted batch without rerunning complete machine evidence.
+
+    This is deliberately distinct from user-accepted reuse: it only preserves
+    records whose clean-video primary and collision-evidence repeat both pass
+    and whose deterministic signatures are identical.
+    """
+
+    sample_ids = [str(record.get("sample_id")) for record in source.get("samples", [])]
+    if not sample_ids:
+        raise ValueError("interrupted runtime contains no completed samples")
+    if len(set(sample_ids)) != len(sample_ids):
+        raise ValueError("interrupted runtime sample_ids must be unique")
+    unexpected = sorted(set(sample_ids) - set(EXPECTED_SAMPLE_IDS))
+    if unexpected:
+        raise ValueError(f"interrupted runtime has unexpected samples: {unexpected}")
+
+    resumed = reuse_accepted_runtime_records(source, sample_ids=sample_ids)
+    for record in resumed:
+        record["execution_policy"] = (
+            "RESUMED_INTERRUPTED_MACHINE_SUCCESS_NO_RERECORDING"
+        )
+    return resumed
+
+
 def build_five_pose_summary(
     records: list[dict[str, Any]],
 ) -> dict[str, Any]:
@@ -446,7 +473,10 @@ def _read_run_evidence(
         "telemetry_nonempty": telemetry_path.stat().st_size > 0,
     }
     raw_videos = list(candidate.get("videos", []))
-    validated_videos, video_errors = _validated_video_records(raw_videos)
+    if collision_repeat:
+        validated_videos, video_errors = [], []
+    else:
+        validated_videos, video_errors = _validated_video_records(raw_videos)
     collision = candidate.get("collision_evidence", {})
     collision_records = list(collision.get("records", []))
     if collision_repeat:
@@ -495,7 +525,9 @@ def _read_run_evidence(
             "candidate_manifest_absolute_path": str(
                 candidate_path.resolve()
             ),
-            "candidate_manifest_sha256": _sha256(candidate_path),
+            "candidate_manifest_sha256": (
+                _sha256(candidate_path) if candidate_path.is_file() else None
+            ),
             "videos": validated_videos if not collision_repeat else [],
             "video_count": (
                 len(validated_videos) if not collision_repeat else 0
@@ -527,6 +559,7 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--artifact-root", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--reuse-results", type=Path)
+    parser.add_argument("--resume-results", type=Path)
     parser.add_argument("--timeout-s", type=float, default=900.0)
     return parser.parse_args()
 
@@ -564,6 +597,14 @@ def main() -> int:
     )
     if _sha256(stage_path) != stage_sha256:
         raise RuntimeError("approved Stage hash changed before runtime")
+    runtime_config_record = config["frozen_inputs"]["runtime_config"]
+    runtime_config_path = Path(str(runtime_config_record["path"]))
+    if not runtime_config_path.is_absolute():
+        runtime_config_path = ROOT / runtime_config_path
+    runtime_config_path = runtime_config_path.resolve(strict=True)
+    runtime_config_sha256 = str(runtime_config_record["sha256"])
+    if _sha256(runtime_config_path) != runtime_config_sha256:
+        raise RuntimeError("frozen runtime config hash changed before runtime")
     if not ISAAC_PYTHON.is_file():
         raise RuntimeError(f"missing project Isaac Python: {ISAAC_PYTHON}")
     timeout_s = float(args.timeout_s)
@@ -616,7 +657,41 @@ def main() -> int:
     ]
     reuse_manifest: dict[str, Any] = {"status": "NOT_USED"}
     records: list[dict[str, Any]] = []
-    if args.reuse_results is not None:
+    if args.reuse_results is not None and args.resume_results is not None:
+        raise RuntimeError(
+            "--reuse-results and --resume-results are mutually exclusive"
+        )
+    if args.resume_results is not None:
+        resume_path = args.resume_results.resolve(strict=True)
+        resume_source = json.loads(resume_path.read_text(encoding="utf-8"))
+        expected_bindings = {
+            "config": _sha256(config_path),
+            "preflight": _sha256(preflight_path),
+            "runtime_config": runtime_config_sha256,
+            "stage_after": stage_sha256,
+        }
+        observed_bindings = {
+            "config": resume_source.get("config", {}).get("sha256"),
+            "preflight": resume_source.get("preflight", {}).get("sha256"),
+            "runtime_config": resume_source.get("runtime_config", {}).get(
+                "sha256"
+            ),
+            "stage_after": resume_source.get("stage", {}).get("sha256_after"),
+        }
+        if observed_bindings != expected_bindings:
+            raise RuntimeError(
+                "interrupted runtime bindings changed: "
+                f"expected={expected_bindings}, observed={observed_bindings}"
+            )
+        records = resume_verified_runtime_records(resume_source)
+        reuse_manifest = {
+            "status": "PASS",
+            "absolute_path": str(resume_path),
+            "sha256": _sha256(resume_path),
+            "sample_ids": [str(record["sample_id"]) for record in records],
+            "policy": "RESUMED_INTERRUPTED_MACHINE_SUCCESS_NO_RERECORDING",
+        }
+    elif args.reuse_results is not None:
         reuse_path = args.reuse_results.resolve(strict=True)
         reuse_source = json.loads(reuse_path.read_text(encoding="utf-8"))
         records = reuse_accepted_runtime_records(
@@ -656,6 +731,10 @@ def main() -> int:
                 "deterministic_signature"
             ],
         },
+        "runtime_config": {
+            "absolute_path": str(runtime_config_path),
+            "sha256": runtime_config_sha256,
+        },
         "samples": records,
         "reused_successes": reuse_manifest,
         "task8": "NOT_RUN",
@@ -678,6 +757,8 @@ def main() -> int:
         common = [
             str(ISAAC_PYTHON),
             str(ISAAC_LAUNCHER),
+            "--config",
+            str(runtime_config_path),
             "--autorun",
             "--close-after-terminal",
             "--bottle-world-from-object-json",
@@ -729,6 +810,7 @@ def main() -> int:
                 *common,
                 "--artifact-root",
                 str(repeat_root),
+                "--collision-evidence-only",
             ],
             log_path=sample_root / "collider_repeat.log",
             timeout_s=timeout_s,
@@ -811,6 +893,10 @@ def main() -> int:
                 "deterministic_signature": preflight[
                     "deterministic_signature"
                 ],
+            },
+            "runtime_config": {
+                "absolute_path": str(runtime_config_path),
+                "sha256": runtime_config_sha256,
             },
             "stage": {
                 "absolute_path": str(stage_path),

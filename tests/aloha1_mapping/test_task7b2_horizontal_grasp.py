@@ -570,18 +570,42 @@ def test_bottle_state_uses_one_physx_tensor_view() -> None:
         count = 1
 
         def get_transforms(self) -> np.ndarray:
-            return np.asarray([[1.0, 2.0, 3.0, 0.1, 0.2, 0.3, 0.9]])
+            return np.asarray([[1.0, 2.0, 3.0, 0.0, 0.0, 0.0, 1.0]])
 
         def get_velocities(self) -> np.ndarray:
             return np.asarray([[0.1, 0.2, 0.3, 0.4, 0.5, 0.6]])
+
+        def get_coms(self) -> np.ndarray:
+            return np.asarray([[0.25, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]])
 
     state = horizontal_runtime.read_physx_bottle_state(Bottle())
 
     assert state["state_source"] == "OMNI_PHYSICS_TENSORS_RIGID_BODY_VIEW"
     assert state["position_world_m"] == [1.0, 2.0, 3.0]
-    assert state["orientation_wxyz"] == [0.9, 0.1, 0.2, 0.3]
+    assert state["orientation_wxyz"] == [1.0, 0.0, 0.0, 0.0]
     assert state["vertical_velocity_m_s"] == pytest.approx(0.3)
     assert state["angular_speed_rad_s"] == pytest.approx(np.linalg.norm([0.4, 0.5, 0.6]))
+    assert state["center_of_mass_local_m"] == pytest.approx(
+        [0.25, 0.0, 0.0]
+    )
+    assert state["center_of_mass_world_m"] == pytest.approx(
+        [1.25, 2.0, 3.0]
+    )
+
+
+def test_com_velocity_translates_to_stationary_prim_origin() -> None:
+    result = horizontal_runtime.translate_com_velocity_to_prim_origin(
+        linear_velocity_com_world_m_s=[0.0, 2.0, 0.0],
+        angular_velocity_world_rad_s=[0.0, 0.0, 2.0],
+        center_of_mass_offset_world_m=[1.0, 0.0, 0.0],
+    )
+
+    assert result["prim_origin_linear_velocity_world_m_s"] == pytest.approx(
+        [0.0, 0.0, 0.0]
+    )
+    assert result["derivation"] == (
+        "V_ORIGIN=V_COM-OMEGA_CROSS_R_COM_FROM_ORIGIN"
+    )
 
 
 def test_pose_finite_difference_velocity_is_independent_of_tensor_readback() -> None:

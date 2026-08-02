@@ -465,8 +465,11 @@ def _load_profile(config_path: Path) -> dict[str, Any]:
         "grasp_editor_v2_derived_yaml": frozen["grasp_editor_v2_derived_yaml"],
         "gripper_coupling_ab": frozen["gripper_coupling_ab"],
     }
+    if "kinematics_report" in frozen:
+        input_specs["kinematics_report"] = frozen["kinematics_report"]
     inputs = {name: _resolve_source(ROOT, str(spec["path"])) for name, spec in input_specs.items()}
-    inputs["kinematics_report"] = KINEMATICS_REPORT.resolve(strict=True)
+    if "kinematics_report" not in inputs:
+        inputs["kinematics_report"] = KINEMATICS_REPORT.resolve(strict=True)
     inputs["ik_correspondence_report"] = IK_CORRESPONDENCE_REPORT.resolve(strict=True)
     inputs["lula_descriptor"] = LULA_DESCRIPTOR.resolve(strict=True)
     hashes = {name: _sha256(source) for name, source in inputs.items()}
@@ -753,25 +756,101 @@ def _physical_contacts(
     ]
 
 
+def _rotate_vector_wxyz(
+    vector: Sequence[float],
+    orientation_wxyz: Sequence[float],
+) -> np.ndarray:
+    value = np.asarray(vector, dtype=np.float64)
+    quaternion = np.asarray(orientation_wxyz, dtype=np.float64)
+    if value.shape != (3,) or quaternion.shape != (4,):
+        raise ValueError("vector/quaternion shape mismatch")
+    norm = float(np.linalg.norm(quaternion))
+    if not math.isfinite(norm) or norm <= 0.0:
+        raise ValueError("orientation quaternion must be finite/nonzero")
+    quaternion /= norm
+    scalar = float(quaternion[0])
+    imaginary = quaternion[1:]
+    twice_cross = 2.0 * np.cross(imaginary, value)
+    return value + scalar * twice_cross + np.cross(
+        imaginary,
+        twice_cross,
+    )
+
+
+def translate_com_velocity_to_prim_origin(
+    *,
+    linear_velocity_com_world_m_s: Sequence[float],
+    angular_velocity_world_rad_s: Sequence[float],
+    center_of_mass_offset_world_m: Sequence[float],
+) -> dict[str, Any]:
+    """Translate the PhysX COM velocity to the rigid-prim origin."""
+
+    linear_com = np.asarray(
+        linear_velocity_com_world_m_s,
+        dtype=np.float64,
+    )
+    angular = np.asarray(
+        angular_velocity_world_rad_s,
+        dtype=np.float64,
+    )
+    com_offset = np.asarray(
+        center_of_mass_offset_world_m,
+        dtype=np.float64,
+    )
+    if any(value.shape != (3,) for value in (linear_com, angular, com_offset)):
+        raise ValueError("velocity and COM offset inputs must be 3-vectors")
+    origin_velocity = linear_com - np.cross(angular, com_offset)
+    return {
+        "prim_origin_linear_velocity_world_m_s": origin_velocity.tolist(),
+        "prim_origin_vertical_velocity_m_s": float(origin_velocity[2]),
+        "derivation": "V_ORIGIN=V_COM-OMEGA_CROSS_R_COM_FROM_ORIGIN",
+    }
+
+
 def read_physx_bottle_state(bottle: Any) -> dict[str, Any]:
     if int(bottle.count) != 1:
         raise RuntimeError(f"expected one Bottle500 rigid body, got {bottle.count}")
     transform_xyzw = np.asarray(bottle.get_transforms()[0], dtype=np.float64)
     velocity = np.asarray(bottle.get_velocities()[0], dtype=np.float64)
-    if transform_xyzw.shape != (7,) or velocity.shape != (6,):
+    com_local_xyzw = np.asarray(bottle.get_coms()[0], dtype=np.float64)
+    if (
+        transform_xyzw.shape != (7,)
+        or velocity.shape != (6,)
+        or com_local_xyzw.shape != (7,)
+    ):
         raise RuntimeError("unexpected PhysX rigid-body tensor shape")
     position = transform_xyzw[:3]
     orientation = transform_xyzw[[6, 3, 4, 5]]
     linear = velocity[:3]
     angular = velocity[3:]
+    center_of_mass_local = com_local_xyzw[:3]
+    center_of_mass_offset_world = _rotate_vector_wxyz(
+        center_of_mass_local,
+        orientation,
+    )
+    center_of_mass_world = position + center_of_mass_offset_world
+    origin_velocity = translate_com_velocity_to_prim_origin(
+        linear_velocity_com_world_m_s=linear,
+        angular_velocity_world_rad_s=angular,
+        center_of_mass_offset_world_m=center_of_mass_offset_world,
+    )
     return {
         "state_source": "OMNI_PHYSICS_TENSORS_RIGID_BODY_VIEW",
         "position_world_m": position.tolist(),
         "orientation_wxyz": orientation.tolist(),
+        "center_of_mass_local_m": center_of_mass_local.tolist(),
+        "center_of_mass_world_m": center_of_mass_world.tolist(),
+        "center_of_mass_offset_world_m": (
+            center_of_mass_offset_world.tolist()
+        ),
+        "principal_axes_orientation_local_xyzw": (
+            com_local_xyzw[3:].tolist()
+        ),
         "linear_velocity_world_m_s": linear.tolist(),
         "angular_velocity_world_rad_s": angular.tolist(),
         "vertical_velocity_m_s": float(linear[2]),
         "angular_speed_rad_s": float(np.linalg.norm(angular)),
+        **origin_velocity,
     }
 
 

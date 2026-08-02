@@ -1,0 +1,34 @@
+{
+  "blocking_issue_count": 0,
+  "category": "IsaacSim.SimReadyAssetRules",
+  "direct_nvidia_mcp_verified": true,
+  "issues": [
+    {
+      "at": null,
+      "message": "No Looks prim found in the stage, skipping MaterialsOnTopLevelOnlyRule",
+      "rule": "MaterialsOnTopLevelOnly",
+      "severity": "INFO"
+    }
+  ],
+  "official_status": "PASS",
+  "official_status_suppressed": false,
+  "real_robot_connected": false,
+  "remote_192_168_1_103_accessed": false,
+  "rule_count": 2,
+  "rules": [
+    "MaterialsOnTopLevelOnly",
+    "NoNestedMaterials"
+  ],
+  "runtime": {
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physx": "107.3.26"
+  },
+  "schema_version": 1,
+  "target_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+  "target_immutable": true,
+  "target_name": "cad_derived_zup_workcell",
+  "target_sha256_after": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9",
+  "target_sha256_before": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9",
+  "warning_count": 0
+}

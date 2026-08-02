@@ -1,0 +1,194 @@
+{
+  "blocking_issue_count": 26,
+  "category": "IsaacSim.PhysicsRules",
+  "direct_nvidia_mcp_verified": true,
+  "issues": [
+    {
+      "at": "Prim </World/follower_left/vx300s_left/joints/elbow>",
+      "message": "Joint /World/follower_left/vx300s_left/joints/elbow state not matching robot pose (0.0). From body 0: [(0, 1, 0) 66.46310424804689], from body 1: [(1, 0, 0) 0]",
+      "rule": "JointHasCorrectTransformAndState",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </World/follower_left/vx300s_left/joints/left_finger>",
+      "message": "Joint /World/follower_left/vx300s_left/joints/left_finger state not matching robot pose(0.022390000522136688). From body 0: (0.028493975877761868, 0.0033900005221366887, 0.44705002427101137), from body 1: (0.028493975877761868, -0.019, 0.44705002427101137)",
+      "rule": "JointHasCorrectTransformAndState",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </World/follower_left/vx300s_left/joints/right_finger>",
+      "message": "Joint /World/follower_left/vx300s_left/joints/right_finger state not matching robot pose(0.02239000052213669). From body 0: (0.028493975877761868, -0.04139000052213669, 0.44705002427101137), from body 1: (0.028493975877761868, -0.019, 0.44705002427101137)",
+      "rule": "JointHasCorrectTransformAndState",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </World/follower_left/vx300s_left/joints/shoulder>",
+      "message": "Joint /World/follower_left/vx300s_left/joints/shoulder state not matching robot pose (0.0). From body 0: [(0, -1, 0) 55.003948211669915], from body 1: [(1, 0, 0) 0]",
+      "rule": "JointHasCorrectTransformAndState",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </World/follower_left/vx300s_left/joints/wrist_angle>",
+      "message": "Joint /World/follower_left/vx300s_left/joints/wrist_angle state not matching robot pose (0.0). From body 0: [(0, -0.9999999999999999, 0) 17.188734054565412], from body 1: [(1, 0, 0) 0]",
+      "rule": "JointHasCorrectTransformAndState",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </World/follower_right/vx300s_right/joints/elbow>",
+      "message": "Joint /World/follower_right/vx300s_right/joints/elbow state not matching robot pose (0.0). From body 0: [(-0.5480239368858285, 3.355678800816805e-17, 0.8364626498536308) 180], from body 1: [(0, 0, 1) 180]",
+      "rule": "JointHasCorrectTransformAndState",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </World/follower_right/vx300s_right/joints/left_finger>",
+      "message": "Joint /World/follower_right/vx300s_right/joints/left_finger state not matching robot pose(0.022390000522136685). From body 0: (-0.02849397587776187, -0.04139000052213662, 0.44705002427101137), from body 1: (-0.028493975877761868, -0.018999999999999937, 0.44705002427101137)",
+      "rule": "JointHasCorrectTransformAndState",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </World/follower_right/vx300s_right/joints/right_finger>",
+      "message": "Joint /World/follower_right/vx300s_right/joints/right_finger state not matching robot pose(0.022390000522136688). From body 0: (-0.028493975877761864, 0.003390000522136751, 0.44705002427101137), from body 1: (-0.028493975877761868, -0.018999999999999937, 0.44705002427101137)",
+      "rule": "JointHasCorrectTransformAndState",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </World/follower_right/vx300s_right/joints/shoulder>",
+      "message": "Joint /World/follower_right/vx300s_right/joints/shoulder state not matching robot pose (0.0). From body 0: [(0.46177917460574186, -2.8275819404691425e-17, 0.8869949232664411) 180], from body 1: [(0, 0, 1) 180]",
+      "rule": "JointHasCorrectTransformAndState",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </World/follower_right/vx300s_right/joints/wrist_angle>",
+      "message": "Joint /World/follower_right/vx300s_right/joints/wrist_angle state not matching robot pose (0.0). From body 0: [(0.149438134204859, -9.150446636226658e-18, 0.988771077674388) 180], from body 1: [(0, 0, 1) 180]",
+      "rule": "JointHasCorrectTransformAndState",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </World/follower_left/vx300s_left/joints/right_finger>",
+      "message": "Joint /World/follower_left/vx300s_left/joints/right_finger's lower limit (-0.013799999840557575) should be > reference joint limits * gear ratio(0.020999999716877937)",
+      "rule": "MimicAPICheck",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </World/follower_right/vx300s_right/joints/right_finger>",
+      "message": "Joint /World/follower_right/vx300s_right/joints/right_finger's lower limit (-0.013799999840557575) should be > reference joint limits * gear ratio(0.020999999716877937)",
+      "rule": "MimicAPICheck",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </World/environment/worldBody/_>",
+      "message": "Rigid body /World/environment/worldBody/_ has rigid body api but no collision api",
+      "rule": "RigidBodyHasCollider",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </World/environment/worldBody/__1>",
+      "message": "Rigid body /World/environment/worldBody/__1 has rigid body api but no collision api",
+      "rule": "RigidBodyHasCollider",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </World/follower_left/vx300s_left/follower_left_ee_arm_link>",
+      "message": "Rigid body /World/follower_left/vx300s_left/follower_left_ee_arm_link has rigid body api but no collision api",
+      "rule": "RigidBodyHasCollider",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </World/follower_left/vx300s_left/follower_left_ee_gripper_link>",
+      "message": "Rigid body /World/follower_left/vx300s_left/follower_left_ee_gripper_link has rigid body api but no collision api",
+      "rule": "RigidBodyHasCollider",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </World/follower_left/vx300s_left/follower_left_fingers_link>",
+      "message": "Rigid body /World/follower_left/vx300s_left/follower_left_fingers_link has rigid body api but no collision api",
+      "rule": "RigidBodyHasCollider",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </World/follower_left/vx300s_left/follower_left_gripper_bar_link>",
+      "message": "Rigid body /World/follower_left/vx300s_left/follower_left_gripper_bar_link has rigid body api but no collision api",
+      "rule": "RigidBodyHasCollider",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </World/follower_right/vx300s_right/follower_right_ee_arm_link>",
+      "message": "Rigid body /World/follower_right/vx300s_right/follower_right_ee_arm_link has rigid body api but no collision api",
+      "rule": "RigidBodyHasCollider",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </World/follower_right/vx300s_right/follower_right_ee_gripper_link>",
+      "message": "Rigid body /World/follower_right/vx300s_right/follower_right_ee_gripper_link has rigid body api but no collision api",
+      "rule": "RigidBodyHasCollider",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </World/follower_right/vx300s_right/follower_right_fingers_link>",
+      "message": "Rigid body /World/follower_right/vx300s_right/follower_right_fingers_link has rigid body api but no collision api",
+      "rule": "RigidBodyHasCollider",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </World/follower_right/vx300s_right/follower_right_gripper_bar_link>",
+      "message": "Rigid body /World/follower_right/vx300s_right/follower_right_gripper_bar_link has rigid body api but no collision api",
+      "rule": "RigidBodyHasCollider",
+      "severity": "ERROR"
+    },
+    {
+      "at": null,
+      "message": "Uncaught error: 'NoneType' object is not subscriptable",
+      "rule": "RigidBodyHasMassAPI",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </World/environment/worldBody/floor>",
+      "message": "Rigid body /World/environment/worldBody/floor has mass api but no diagonal inertia attr",
+      "rule": "RigidBodyHasMassAPI",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </World/environment/worldBody/floor>",
+      "message": "Rigid body /World/environment/worldBody/floor has mass api but no mass attr",
+      "rule": "RigidBodyHasMassAPI",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </World/environment/worldBody/floor>",
+      "message": "Rigid body /World/environment/worldBody/floor has rigid body api but no mass api",
+      "rule": "RigidBodyHasMassAPI",
+      "severity": "ERROR"
+    }
+  ],
+  "official_status": "FAIL",
+  "official_status_suppressed": false,
+  "real_robot_connected": false,
+  "remote_192_168_1_103_accessed": false,
+  "rule_count": 12,
+  "rules": [
+    "DriveJointValueReasonable",
+    "HasArticulationRoot",
+    "InvisibleCollisionMeshHasPurposeGuide",
+    "JointHasCorrectTransformAndState",
+    "JointHasJointStateAPI",
+    "MimicAPICheck",
+    "NonAdjacentCollisionMeshesDoNotClash",
+    "PhysicsDriveAndJointState",
+    "PhysicsJointHasDriveOrMimicAPI",
+    "PhysicsJointMaxVelocity",
+    "RigidBodyHasCollider",
+    "RigidBodyHasMassAPI"
+  ],
+  "runtime": {
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physx": "107.3.26"
+  },
+  "schema_version": 1,
+  "target_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+  "target_immutable": true,
+  "target_name": "cad_derived_zup_workcell",
+  "target_sha256_after": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9",
+  "target_sha256_before": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9",
+  "warning_count": 0
+}

@@ -1,0 +1,3849 @@
+{
+  "machine_status": "PASS",
+  "promotion_status": "AWAITING_USER_CONFIRMATION_OF_EXACT_VIDEOS",
+  "review_method": "CODEX_VISION_REVIEW_OF_FIVE_CRITICAL_VIDEO_PHASES_AND_ALL_24_COLLISION_SCREENSHOT_PANELS_PER_SAMPLE",
+  "samples": [
+    {
+      "checks": {
+        "bottle_direction_visible": true,
+        "critical_occlusion": false,
+        "full_arm_visible": true,
+        "gripper_and_bottle_visible": true,
+        "gripper_points_downward": true,
+        "hold_end_visible": true,
+        "initial_pose_distinct": true,
+        "phases_visibly_distinct": true,
+        "vertical_lift_visible": true,
+        "world_z_visually_upright": true
+      },
+      "collision_manifest": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/collider_repeat/video_attempt_001/video/candidate_manifest.json",
+        "sha256": "ad03132bec3adf023286c8fc65b87359f49f9cabb7ef99fd48921de2e6d41924"
+      },
+      "collision_montages": [
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/visual_model_review/keyframe_montages/sample_01_collision_24_annotated.png",
+          "sha256": "af9ff458977c6a7d383101d697c378350690983099d0547ea55d1f31879a4eb9"
+        }
+      ],
+      "collision_runtime": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/collider_repeat/aloha1_grasp_20cm_runtime.json",
+        "sha256": "16d5b79e9084005eb2786b3cb463133512706d743356ea0db7f71dd698dd5fff"
+      },
+      "collision_screenshot_evidence": {
+        "record_count": 24,
+        "records": [
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/collider_repeat/video_attempt_001/video/collision_annotated/RELEASE_DYNAMIC/overview_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "7ce639502fa268673149fda780ced0b7d55b7b97c7f6622952dd97e672972177"
+            },
+            "mode": "normal_contact",
+            "phase_label": "RELEASE_DYNAMIC",
+            "physics_frame": 62,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/collider_repeat/video_attempt_001/frames/overview/000062.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "ddaeea17f78d9a1984e5f90960433ca7172bb50717ec9734cea17ede3f293e85"
+            },
+            "retake_reason": null,
+            "time_s": 1.0333333872258663,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/collider_repeat/video_attempt_001/video/collision_annotated/RELEASE_DYNAMIC/overview_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "023f10ae1161e490a4775adda597ffbeb6820ac92b44c04910440185f655a618"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "RELEASE_DYNAMIC",
+            "physics_frame": 62,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/collider_repeat/video_attempt_001/collider_overlay/RELEASE_DYNAMIC/overview_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "c50c0b50db2a30a3486eb659cf7a74d1a52678755f6f5a0d6af3fbf3bac07a74"
+            },
+            "retake_reason": null,
+            "time_s": 1.0333333872258663,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/collider_repeat/video_attempt_001/video/collision_annotated/RELEASE_DYNAMIC/gripper_closeup_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "d9d43310198f182b80e7b83ec158950e3aa7d6395c19362ba7791f9a7a936d57"
+            },
+            "mode": "normal_contact",
+            "phase_label": "RELEASE_DYNAMIC",
+            "physics_frame": 62,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/collider_repeat/video_attempt_001/frames/gripper_closeup/000062.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "5c6d359f4f6888fdc7c0028411567ae8dabdd13be320d637cda9cb560ad3208e"
+            },
+            "retake_reason": null,
+            "time_s": 1.0333333872258663,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/collider_repeat/video_attempt_001/video/collision_annotated/RELEASE_DYNAMIC/gripper_closeup_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "35d3322d3de08c76ccc1d94051827cd0ad7dd6ac27c48560b32ac18ac2a114bd"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "RELEASE_DYNAMIC",
+            "physics_frame": 62,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/collider_repeat/video_attempt_001/collider_overlay/RELEASE_DYNAMIC/gripper_closeup_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "57b8e83925a42f503a03d0f995c08b6f24c62884dbcd2403a68f7c2c6fd4ee0d"
+            },
+            "retake_reason": null,
+            "time_s": 1.0333333872258663,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/collider_repeat/video_attempt_001/video/collision_annotated/OPEN_PREGRASP/overview_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "532bff72c4be5d47a3d5384160f2d1e0693bd5caec166bd2fdb901b0b3239f01"
+            },
+            "mode": "normal_contact",
+            "phase_label": "OPEN_PREGRASP",
+            "physics_frame": 2003,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/collider_repeat/video_attempt_001/frames/overview/002003.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "8df5e29d35e9f6bad609c346720b861a431628430674392b42221ef23f27b697"
+            },
+            "retake_reason": null,
+            "time_s": 33.38333507440984,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/collider_repeat/video_attempt_001/video/collision_annotated/OPEN_PREGRASP/overview_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "a88bacc39b6cd1956e14b9f49fe0585540dfcd851abcad3ceeb0a19cd5ce9bc6"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "OPEN_PREGRASP",
+            "physics_frame": 2003,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/collider_repeat/video_attempt_001/collider_overlay/OPEN_PREGRASP/overview_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "f5a25e5eee2a5823356eb8c422a05bb1c5a3ca2a3613fc5d8cab03894a4e371c"
+            },
+            "retake_reason": null,
+            "time_s": 33.38333507440984,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/collider_repeat/video_attempt_001/video/collision_annotated/OPEN_PREGRASP/gripper_closeup_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "19a4c2e8effa31f1a2f1b94fec8cd738186f0b7c5823696efee7cac725a22d54"
+            },
+            "mode": "normal_contact",
+            "phase_label": "OPEN_PREGRASP",
+            "physics_frame": 2003,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/collider_repeat/video_attempt_001/frames/gripper_closeup/002003.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "b9f95c64dcbc3d658dc06fafea4293514c6da43aeb4fb25c69123453041a6041"
+            },
+            "retake_reason": null,
+            "time_s": 33.38333507440984,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/collider_repeat/video_attempt_001/video/collision_annotated/OPEN_PREGRASP/gripper_closeup_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "cf5efcb1fe11d5c45d55808d412b6939c97d912c31ee070237e1bcd74c267ee5"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "OPEN_PREGRASP",
+            "physics_frame": 2003,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/collider_repeat/video_attempt_001/collider_overlay/OPEN_PREGRASP/gripper_closeup_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "eb96fb84e04cc55b569f6165f4ea57bf051ea892d43e04737282013a7d0b4876"
+            },
+            "retake_reason": null,
+            "time_s": 33.38333507440984,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/collider_repeat/video_attempt_001/video/collision_annotated/BILATERAL_CONTACT/overview_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "ae94781aae82e2dd29f7e16b0d34f2a823a40fe0e673d8f4475fc016ab0284c2"
+            },
+            "mode": "normal_contact",
+            "phase_label": "BILATERAL_CONTACT",
+            "physics_frame": 2050,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/collider_repeat/video_attempt_001/frames/overview/002050.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "ab6584ec4b45b5f9c79798dfc54c1a4702d6df0d0d696ce1987d50d6a85da78f"
+            },
+            "retake_reason": null,
+            "time_s": 34.16666844859719,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/collider_repeat/video_attempt_001/video/collision_annotated/BILATERAL_CONTACT/overview_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "97040dfa819b7dc08561f3616c1f72a73fc86f2405c632833ed766aeba4279bb"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "BILATERAL_CONTACT",
+            "physics_frame": 2050,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/collider_repeat/video_attempt_001/collider_overlay/BILATERAL_CONTACT/overview_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "6aeb7a6eaa63de7cebb750ba6819f60a2b56dcf48ea7507b6cfef84320a45fb0"
+            },
+            "retake_reason": null,
+            "time_s": 34.16666844859719,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/collider_repeat/video_attempt_001/video/collision_annotated/BILATERAL_CONTACT/gripper_closeup_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "494d10e1949654157fb6819255f7bd708d93b461c1b623c77a14ac0a0437c28c"
+            },
+            "mode": "normal_contact",
+            "phase_label": "BILATERAL_CONTACT",
+            "physics_frame": 2050,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/collider_repeat/video_attempt_001/frames/gripper_closeup/002050.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "645713d0409546975a62ae9cabe14c0fc76289127efc5413d337bc44feb63dbe"
+            },
+            "retake_reason": null,
+            "time_s": 34.16666844859719,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/collider_repeat/video_attempt_001/video/collision_annotated/BILATERAL_CONTACT/gripper_closeup_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "7f4be1cebe3aebce5905d5458efb0e5f2ad5adbbf3837967d05f714fbce87dbf"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "BILATERAL_CONTACT",
+            "physics_frame": 2050,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/collider_repeat/video_attempt_001/collider_overlay/BILATERAL_CONTACT/gripper_closeup_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "5a0722cd3a6fba846c72d64fcaeeea690da49dfe8ffb6d0a6ab76a3d85e00812"
+            },
+            "retake_reason": null,
+            "time_s": 34.16666844859719,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/collider_repeat/video_attempt_001/video/collision_annotated/FIRST_SUPPORT_CLEARANCE/overview_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "a526bde636ee8fac651fd6c7c85452743eb68102f7642e8bd8448eeba335ccde"
+            },
+            "mode": "normal_contact",
+            "phase_label": "FIRST_SUPPORT_CLEARANCE",
+            "physics_frame": 2065,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/collider_repeat/video_attempt_001/frames/overview/002065.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "5683a4e0f9b5ffa7c0d1b6eb36d700f5f1dbdc101c7e3922ef6538a0ae5a904c"
+            },
+            "retake_reason": null,
+            "time_s": 34.41666846163571,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/collider_repeat/video_attempt_001/video/collision_annotated/FIRST_SUPPORT_CLEARANCE/overview_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "726b4e71c33a1cd8a4ca915f857852d52211efbad6f7e308f691f251666f8ca7"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "FIRST_SUPPORT_CLEARANCE",
+            "physics_frame": 2065,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/collider_repeat/video_attempt_001/collider_overlay/FIRST_SUPPORT_CLEARANCE/overview_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "39c07ae67ee9797a5ad48b4e23bda3db45e2a0c267b4eb2f38e768e2c1e16bb0"
+            },
+            "retake_reason": null,
+            "time_s": 34.41666846163571,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/collider_repeat/video_attempt_001/video/collision_annotated/FIRST_SUPPORT_CLEARANCE/gripper_closeup_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "0878ff00cc073d88dc5a215b7039205bd98947348f07c0501133b9f0e8842114"
+            },
+            "mode": "normal_contact",
+            "phase_label": "FIRST_SUPPORT_CLEARANCE",
+            "physics_frame": 2065,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/collider_repeat/video_attempt_001/frames/gripper_closeup/002065.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "c8f3f6961f10bf68e2b22cbaa7e87b1587adfb717dc2c986d6e1a928af67a4d6"
+            },
+            "retake_reason": null,
+            "time_s": 34.41666846163571,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/collider_repeat/video_attempt_001/video/collision_annotated/FIRST_SUPPORT_CLEARANCE/gripper_closeup_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "7b66ceb556410ee1829e4ad922410b737004b6a29c771a755c57b773d0ed2436"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "FIRST_SUPPORT_CLEARANCE",
+            "physics_frame": 2065,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/collider_repeat/video_attempt_001/collider_overlay/FIRST_SUPPORT_CLEARANCE/gripper_closeup_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "be13ea7bb44bcd48aac5d59f0c871929150402ede7acd938e7a485e069945d5d"
+            },
+            "retake_reason": null,
+            "time_s": 34.41666846163571,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/collider_repeat/video_attempt_001/video/collision_annotated/HEIGHT_REACHED/overview_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "955a870ad4e8f3a102876d743fe62b9eb1bea6843f39c4d5ebb66b02e776e9fe"
+            },
+            "mode": "normal_contact",
+            "phase_label": "HEIGHT_REACHED",
+            "physics_frame": 2386,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/collider_repeat/video_attempt_001/frames/overview/002386.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "6bae0540fddd9ecae10acf214c9f394f716e7945c25feb289d9b82da4afe5884"
+            },
+            "retake_reason": null,
+            "time_s": 39.76666874065995,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/collider_repeat/video_attempt_001/video/collision_annotated/HEIGHT_REACHED/overview_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "b16dccbf427de85189dd2cd35de545eda6cd00e626d87bc212c9ec0a2abfc269"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "HEIGHT_REACHED",
+            "physics_frame": 2386,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/collider_repeat/video_attempt_001/collider_overlay/HEIGHT_REACHED/overview_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "49715bf7d563f17b0d638bb64bf1a9c09a17f9377d720ff36cb3d76dadb45ca6"
+            },
+            "retake_reason": null,
+            "time_s": 39.76666874065995,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/collider_repeat/video_attempt_001/video/collision_annotated/HEIGHT_REACHED/gripper_closeup_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "075eb99085cb21abd6cd75392848c8037fce1ecd00accca0599bd86cdb091592"
+            },
+            "mode": "normal_contact",
+            "phase_label": "HEIGHT_REACHED",
+            "physics_frame": 2386,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/collider_repeat/video_attempt_001/frames/gripper_closeup/002386.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "a7bedcfcc28b214da9ac5225d235295cc088b92e294684d3c0ebd1e43bcf09cb"
+            },
+            "retake_reason": null,
+            "time_s": 39.76666874065995,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/collider_repeat/video_attempt_001/video/collision_annotated/HEIGHT_REACHED/gripper_closeup_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "285542c98404c94680998dd68bd0c24272dd9abde221d68b1468124d419a5166"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "HEIGHT_REACHED",
+            "physics_frame": 2386,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/collider_repeat/video_attempt_001/collider_overlay/HEIGHT_REACHED/gripper_closeup_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "62093f18a335bb43b07c7d9dd52e76ce995b2d291c862e6a0a058f3a25f39dd3"
+            },
+            "retake_reason": null,
+            "time_s": 39.76666874065995,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/collider_repeat/video_attempt_001/video/collision_annotated/HOLD_END/overview_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "f8af0a0040d0fdf07b9f82647bf8a65e3a2de4fc1d84f69b7340045fb56de850"
+            },
+            "mode": "normal_contact",
+            "phase_label": "HOLD_END",
+            "physics_frame": 2506,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/collider_repeat/video_attempt_001/frames/overview/002506.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "eb74d128d784a4a0c59ebea1b6954bbb970410a9cb321062a8810471c87cb6a9"
+            },
+            "retake_reason": null,
+            "time_s": 41.76666884496808,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/collider_repeat/video_attempt_001/video/collision_annotated/HOLD_END/overview_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "0f84d8081a33358081c2a8a50e9e76afc6f5bd63ef65798d875b65239fba43bf"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "HOLD_END",
+            "physics_frame": 2506,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/collider_repeat/video_attempt_001/collider_overlay/HOLD_END/overview_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "afcc987e53f2dcf418ef7caff5840e910a5df593027ee5054df5b8a6441ab730"
+            },
+            "retake_reason": null,
+            "time_s": 41.76666884496808,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/collider_repeat/video_attempt_001/video/collision_annotated/HOLD_END/gripper_closeup_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "fad893b6a8d8f515208ef517b6fbbd16849048a0255e19e737281b2291a74c50"
+            },
+            "mode": "normal_contact",
+            "phase_label": "HOLD_END",
+            "physics_frame": 2506,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/collider_repeat/video_attempt_001/frames/gripper_closeup/002506.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "c0983c58cabd60c912069e1b4555458b91645fa75382bad3b3672b5d3a62649c"
+            },
+            "retake_reason": null,
+            "time_s": 41.76666884496808,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/collider_repeat/video_attempt_001/video/collision_annotated/HOLD_END/gripper_closeup_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "ff5af3b3f47118d8b8da7021b0baa268386bd00fd89eef44e8078fd958761da2"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "HOLD_END",
+            "physics_frame": 2506,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/collider_repeat/video_attempt_001/collider_overlay/HOLD_END/gripper_closeup_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "d3e003ab400566e3752a3ba055adf5b186b6b04cf7dae377e3ed19ca1ba1a046"
+            },
+            "retake_reason": null,
+            "time_s": 41.76666884496808,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          }
+        ],
+        "status": "PASS"
+      },
+      "deterministic_signature": "e94048fa72f53b7a99eb9e4df402d475b0ecc73dead0f2355f38f88057d61e18",
+      "frame_validation": {
+        "evidence_scope": "COMPLETE_SUCCESS_TRAJECTORY",
+        "first_physics_frame": 1,
+        "frame_count": 2506,
+        "last_physics_frame": 2506,
+        "missing_physics_frames": [],
+        "phase_frame_ranges": {
+          "BILATERAL_CONTACT": [
+            2038,
+            2050
+          ],
+          "CLOSE_PRELOAD": [
+            2051,
+            2055
+          ],
+          "HEIGHT_REACHED": [
+            2386,
+            2386
+          ],
+          "HOLD": [
+            2387,
+            2506
+          ],
+          "OPEN_PREGRASP": [
+            82,
+            2003
+          ],
+          "RELEASE_DYNAMIC": [
+            62,
+            62
+          ],
+          "SETTLE": [
+            63,
+            81
+          ],
+          "SETUP_KINEMATIC": [
+            2,
+            61
+          ],
+          "VALIDATE": [
+            1,
+            1
+          ],
+          "VERTICAL_DESCENT": [
+            2004,
+            2037
+          ],
+          "VERTICAL_LIFT": [
+            2056,
+            2385
+          ]
+        },
+        "required_full_arm_links": [
+          "base",
+          "shoulder",
+          "elbow",
+          "forearm",
+          "wrist",
+          "gripper"
+        ],
+        "runtime_signature": "e94048fa72f53b7a99eb9e4df402d475b0ecc73dead0f2355f38f88057d61e18",
+        "views": [
+          "overview",
+          "gripper_closeup"
+        ]
+      },
+      "machine_status": "PASS",
+      "phase_montage": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/visual_model_review/keyframe_montages/sample_01_five_phase_raw_annotated.png",
+        "sha256": "0612691d1ce2f4a0f69c944a8a54f023e3f6520beda94645cad9dcf6bd435cce"
+      },
+      "primary_manifest": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/primary/video_attempt_001/video/candidate_manifest.json",
+        "sha256": "80d9d0287eaee96c0d020c5cdb99d77b6a804058f09d7273738bd6a1f2f36654"
+      },
+      "primary_runtime": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/primary/aloha1_grasp_20cm_runtime.json",
+        "sha256": "fa506effef4a495bc91926118fe4970b94bd068e7e899436727badaf041cca69"
+      },
+      "rejected_attempts": [],
+      "reviewed_critical_frames": {
+        "bilateral_contact": 2050,
+        "height_reached": 2386,
+        "hold_end": 2506,
+        "initial": 61,
+        "open": 2003
+      },
+      "sample_id": "sample_01",
+      "selected_evidence_reason": "FORMAL_ATTEMPT7_CAMERA_UNOBSTRUCTED",
+      "status": "PASS",
+      "user_confirmation": "NOT_RUN",
+      "videos": {
+        "annotated": {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/primary/video_attempt_001/video/aloha1_grasp_20cm_annotated_candidate.mp4",
+          "fps": 60,
+          "frame_count": 2506,
+          "probe": {
+            "duration_s": 41.766667,
+            "fps": 60.0,
+            "frame_count": 2506,
+            "pixel_format": "yuv420p",
+            "r_frame_rate": "60/1",
+            "resolution": [
+              1440,
+              680
+            ]
+          },
+          "sha256": "59438795d028760d7212aa9f7c9230f8157bee8638327cd334997f66aec07159"
+        },
+        "raw": {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/primary/video_attempt_001/video/aloha1_grasp_20cm_raw_candidate.mp4",
+          "fps": 60,
+          "frame_count": 2506,
+          "probe": {
+            "duration_s": 41.766667,
+            "fps": 60.0,
+            "frame_count": 2506,
+            "pixel_format": "yuv420p",
+            "r_frame_rate": "60/1",
+            "resolution": [
+              1440,
+              540
+            ]
+          },
+          "sha256": "88a629a2897c21bc761bebb2093081df69a891b98a1cf59e91cfc9ff7ad0c4db"
+        }
+      },
+      "visual_model_review": "PASS"
+    },
+    {
+      "checks": {
+        "bottle_direction_visible": true,
+        "critical_occlusion": false,
+        "full_arm_visible": true,
+        "gripper_and_bottle_visible": true,
+        "gripper_points_downward": true,
+        "hold_end_visible": true,
+        "initial_pose_distinct": true,
+        "phases_visibly_distinct": true,
+        "vertical_lift_visible": true,
+        "world_z_visually_upright": true
+      },
+      "collision_manifest": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/collider_repeat_retake2/video_attempt_001/video/candidate_manifest.json",
+        "sha256": "e1ab18946eab8c7bb3425e729798012985b7b7f6d18f564710439656515b67da"
+      },
+      "collision_montages": [
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/visual_model_review/sample_02_opposite_ab_collision_closeup_12_retake2.png",
+          "sha256": "bb3c4a72774f17d1786e8028501a6569723c2e27ba7bdffea342f0c7e1be407e"
+        },
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/visual_model_review/sample_02_opposite_ab_collision_overview_12_retake2.png",
+          "sha256": "5b74658eb9da31b033a24719f56d9efd5f9992b0ce72a4e23f8f040e540c478a"
+        }
+      ],
+      "collision_runtime": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/collider_repeat_retake2/aloha1_grasp_20cm_runtime.json",
+        "sha256": "90749156279256118d977b19b393e7344c4293c5879daafe9bbba390f87ed60d"
+      },
+      "collision_screenshot_evidence": {
+        "record_count": 24,
+        "records": [
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/collider_repeat_retake2/video_attempt_001/video/collision_annotated/RELEASE_DYNAMIC/overview_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "1efc802afc8e459892d9c993368de7f074d5d2da73dd4b24f443650729c84c70"
+            },
+            "mode": "normal_contact",
+            "phase_label": "RELEASE_DYNAMIC",
+            "physics_frame": 62,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/collider_repeat_retake2/video_attempt_001/frames/overview/000062.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "12549c33aff93814a90c8099300496309f76b75f7adc9e634dec9226b2cc343f"
+            },
+            "retake_reason": null,
+            "time_s": 1.0333333872258663,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/collider_repeat_retake2/video_attempt_001/video/collision_annotated/RELEASE_DYNAMIC/overview_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "6df767073a4bf7147cb24fe57ffb449cf9d6a925be1b87d412c9377ce6e4e716"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "RELEASE_DYNAMIC",
+            "physics_frame": 62,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/collider_repeat_retake2/video_attempt_001/collider_overlay/RELEASE_DYNAMIC/overview_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "b10196ee40478f0e708c3a13007f16690a606db3681c053425584df05efe685e"
+            },
+            "retake_reason": null,
+            "time_s": 1.0333333872258663,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/collider_repeat_retake2/video_attempt_001/video/collision_annotated/RELEASE_DYNAMIC/gripper_closeup_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "f6c0f42a851502c8463eb1cb4a6450148b62c2d86dc1483ac57ddc877dd3e644"
+            },
+            "mode": "normal_contact",
+            "phase_label": "RELEASE_DYNAMIC",
+            "physics_frame": 62,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/collider_repeat_retake2/video_attempt_001/frames/gripper_closeup/000062.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "65a39371c8264401df494d84bb501d2b6276e0184281d73d4923b81b7b883761"
+            },
+            "retake_reason": null,
+            "time_s": 1.0333333872258663,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/collider_repeat_retake2/video_attempt_001/video/collision_annotated/RELEASE_DYNAMIC/gripper_closeup_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "2a2400d1b7ef533807b68b3b280595c2b6668c5b90ef52b53d74268afcf133df"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "RELEASE_DYNAMIC",
+            "physics_frame": 62,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/collider_repeat_retake2/video_attempt_001/collider_overlay/RELEASE_DYNAMIC/gripper_closeup_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "10378b66c82f7623e8153b84c04d6394c404170ac56f82688f4a971fa696966d"
+            },
+            "retake_reason": null,
+            "time_s": 1.0333333872258663,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/collider_repeat_retake2/video_attempt_001/video/collision_annotated/OPEN_PREGRASP/overview_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "104fec2bf36da1065e3d3bc7cf99c1c2885d62b0ad3f9db07acc49f3c21a4ff7"
+            },
+            "mode": "normal_contact",
+            "phase_label": "OPEN_PREGRASP",
+            "physics_frame": 385,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/collider_repeat_retake2/video_attempt_001/frames/overview/000385.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "063dc107c4abc71ee55ac0f5032d5c43f176171dc3408cc676b3afeb7b5b1c22"
+            },
+            "retake_reason": null,
+            "time_s": 6.416667001321912,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/collider_repeat_retake2/video_attempt_001/video/collision_annotated/OPEN_PREGRASP/overview_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "3aaae411a3ee5a5cb5c47e8db0e7bd0954c95e12a752031589e183e9e56fa3f0"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "OPEN_PREGRASP",
+            "physics_frame": 385,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/collider_repeat_retake2/video_attempt_001/collider_overlay/OPEN_PREGRASP/overview_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "307903210a0ec2c69a231d51ed7d3a2dceac3161c5249a92e02f6bff67293d07"
+            },
+            "retake_reason": null,
+            "time_s": 6.416667001321912,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/collider_repeat_retake2/video_attempt_001/video/collision_annotated/OPEN_PREGRASP/gripper_closeup_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "552ce24b6370328599bd542d6307f8a4a8ed48fa62b9f5b89c09f8e874e0e075"
+            },
+            "mode": "normal_contact",
+            "phase_label": "OPEN_PREGRASP",
+            "physics_frame": 385,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/collider_repeat_retake2/video_attempt_001/frames/gripper_closeup/000385.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "e2e0ad357f12baba157579cbe46fb0c0c158709cce4a80baf09e541c2b3a12eb"
+            },
+            "retake_reason": null,
+            "time_s": 6.416667001321912,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/collider_repeat_retake2/video_attempt_001/video/collision_annotated/OPEN_PREGRASP/gripper_closeup_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "9c0edfee1fcb6eb39b3dcf943525558369bf4b4db6b353ceb0d3327a6ae51222"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "OPEN_PREGRASP",
+            "physics_frame": 385,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/collider_repeat_retake2/video_attempt_001/collider_overlay/OPEN_PREGRASP/gripper_closeup_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "2fc7237cb58ec1126f3c951f1c4b50f11e58752245c1812ff6d92cb9eb81cd69"
+            },
+            "retake_reason": null,
+            "time_s": 6.416667001321912,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/collider_repeat_retake2/video_attempt_001/video/collision_annotated/BILATERAL_CONTACT/overview_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "840f641eed6376be4d103584aa332501cfc48f454f9ae291c48fde6026bc828b"
+            },
+            "mode": "normal_contact",
+            "phase_label": "BILATERAL_CONTACT",
+            "physics_frame": 454,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/collider_repeat_retake2/video_attempt_001/frames/overview/000454.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "955778d243b831d70fb259e26e56b30f2d2d567043e5edd30fc62cc8aa5ed0d5"
+            },
+            "retake_reason": null,
+            "time_s": 7.566667061299086,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/collider_repeat_retake2/video_attempt_001/video/collision_annotated/BILATERAL_CONTACT/overview_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "74eee85f78402debeac11387fd4c1901da81435c54819fee36a68e349f1de53d"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "BILATERAL_CONTACT",
+            "physics_frame": 454,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/collider_repeat_retake2/video_attempt_001/collider_overlay/BILATERAL_CONTACT/overview_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "2b7673166aa8e358f81f86df8847e3067b903e210acf79b1a46a0c3af98e6935"
+            },
+            "retake_reason": null,
+            "time_s": 7.566667061299086,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/collider_repeat_retake2/video_attempt_001/video/collision_annotated/BILATERAL_CONTACT/gripper_closeup_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "21d11471174b6d74364842ac4d131e1a004e1345cebb1e6c98e7980df792d76c"
+            },
+            "mode": "normal_contact",
+            "phase_label": "BILATERAL_CONTACT",
+            "physics_frame": 454,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/collider_repeat_retake2/video_attempt_001/frames/gripper_closeup/000454.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "f7686eda671ed009b5c94e949c1d329d0c5d11a2e2f5b178fefe71f1a66a1139"
+            },
+            "retake_reason": null,
+            "time_s": 7.566667061299086,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/collider_repeat_retake2/video_attempt_001/video/collision_annotated/BILATERAL_CONTACT/gripper_closeup_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "93f425e7f4cfc28388716485d0d78b3238f4cf520db79a4e422127cab4e8ba1b"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "BILATERAL_CONTACT",
+            "physics_frame": 454,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/collider_repeat_retake2/video_attempt_001/collider_overlay/BILATERAL_CONTACT/gripper_closeup_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "f75cd360f8303ae8ca38618d003ccb0512542bfa9996667a57e5a7008334e0df"
+            },
+            "retake_reason": null,
+            "time_s": 7.566667061299086,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/collider_repeat_retake2/video_attempt_001/video/collision_annotated/FIRST_SUPPORT_CLEARANCE/overview_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "6d9330ccb27b698e9c4ed3796ec300bd19d4c89ea4dea84158bb61ff37f62ff1"
+            },
+            "mode": "normal_contact",
+            "phase_label": "FIRST_SUPPORT_CLEARANCE",
+            "physics_frame": 468,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/collider_repeat_retake2/video_attempt_001/frames/overview/000468.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "5b33a436765520b033532c49ac1a4a031b2a7f66dc72aa2dfb7d52bb4da6ded5"
+            },
+            "retake_reason": null,
+            "time_s": 7.800000406801701,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/collider_repeat_retake2/video_attempt_001/video/collision_annotated/FIRST_SUPPORT_CLEARANCE/overview_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "1fbbcdebf4afa117476566be56e3f9f5b5fa23609490432fa355bff547e265bc"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "FIRST_SUPPORT_CLEARANCE",
+            "physics_frame": 468,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/collider_repeat_retake2/video_attempt_001/collider_overlay/FIRST_SUPPORT_CLEARANCE/overview_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "2203fbfae6d619bf0754fc58be864fb41ebbd3a7d3faea77b09574e605142fa3"
+            },
+            "retake_reason": null,
+            "time_s": 7.800000406801701,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/collider_repeat_retake2/video_attempt_001/video/collision_annotated/FIRST_SUPPORT_CLEARANCE/gripper_closeup_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "e62ab29ffad1574789937ae6873acbab36b15eee0be8a791e54e42dbd06df1ed"
+            },
+            "mode": "normal_contact",
+            "phase_label": "FIRST_SUPPORT_CLEARANCE",
+            "physics_frame": 468,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/collider_repeat_retake2/video_attempt_001/frames/gripper_closeup/000468.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "4bc767e1e5c741fee53935bab970384f65635422eaa9f34a2e7aee7e690ff09f"
+            },
+            "retake_reason": null,
+            "time_s": 7.800000406801701,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/collider_repeat_retake2/video_attempt_001/video/collision_annotated/FIRST_SUPPORT_CLEARANCE/gripper_closeup_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "310fcb2dae0e42f15ac79c4a98fcff8faed24359753d5348e5af1c0a2865da80"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "FIRST_SUPPORT_CLEARANCE",
+            "physics_frame": 468,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/collider_repeat_retake2/video_attempt_001/collider_overlay/FIRST_SUPPORT_CLEARANCE/gripper_closeup_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "d4e48825e18ea58eaa4dddd1cc48e697455418398c0d74819cb044c112cbf656"
+            },
+            "retake_reason": null,
+            "time_s": 7.800000406801701,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/collider_repeat_retake2/video_attempt_001/video/collision_annotated/HEIGHT_REACHED/overview_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "af17c64491fddb11b96da993867848bdda225a0e73eaf422695b3086edcd8946"
+            },
+            "mode": "normal_contact",
+            "phase_label": "HEIGHT_REACHED",
+            "physics_frame": 587,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/collider_repeat_retake2/video_attempt_001/frames/overview/000587.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "03ca20c1c3e9ce5cdfc6ebffb19e3982dd2b85b780546eaacf942783a899984c"
+            },
+            "retake_reason": null,
+            "time_s": 9.783333843573928,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/collider_repeat_retake2/video_attempt_001/video/collision_annotated/HEIGHT_REACHED/overview_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "098240b693d1b939da1721abf5bcfa45a96c35f011d2eae7e6285a04ba8ba30c"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "HEIGHT_REACHED",
+            "physics_frame": 587,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/collider_repeat_retake2/video_attempt_001/collider_overlay/HEIGHT_REACHED/overview_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "38e38d36489673b0a2b25879a83fb6e30b4157da8c58621754a4146bd8730687"
+            },
+            "retake_reason": null,
+            "time_s": 9.783333843573928,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/collider_repeat_retake2/video_attempt_001/video/collision_annotated/HEIGHT_REACHED/gripper_closeup_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "ffd17237a7b112abb88fa9a7543dde3c179cae39c8448342d10155b6cb75505b"
+            },
+            "mode": "normal_contact",
+            "phase_label": "HEIGHT_REACHED",
+            "physics_frame": 587,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/collider_repeat_retake2/video_attempt_001/frames/gripper_closeup/000587.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "6b4d4cfdc1a5f9396a48b033a2c93a713dda65f9a0089bd42062299ba1f13b70"
+            },
+            "retake_reason": null,
+            "time_s": 9.783333843573928,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/collider_repeat_retake2/video_attempt_001/video/collision_annotated/HEIGHT_REACHED/gripper_closeup_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "3c3af5beff1e260565144df185ac64c3b98809cb35ee267dacfac7b2f62dc2d8"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "HEIGHT_REACHED",
+            "physics_frame": 587,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/collider_repeat_retake2/video_attempt_001/collider_overlay/HEIGHT_REACHED/gripper_closeup_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "13c2542c25d868bed7f60396600bd5c8491656c222214b86160a4e3ddac553b7"
+            },
+            "retake_reason": null,
+            "time_s": 9.783333843573928,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/collider_repeat_retake2/video_attempt_001/video/collision_annotated/HOLD_END/overview_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "a1fe92226b66f9f87b3882efd684e90bc9790f5a6feb14969e37d6f5b45bf589"
+            },
+            "mode": "normal_contact",
+            "phase_label": "HOLD_END",
+            "physics_frame": 707,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/collider_repeat_retake2/video_attempt_001/frames/overview/000707.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "f3e8b346ffb095514510a2d9025a8456c5cb0e56a55f42db6e3c13b14b5a7ef3"
+            },
+            "retake_reason": null,
+            "time_s": 11.783333947882056,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/collider_repeat_retake2/video_attempt_001/video/collision_annotated/HOLD_END/overview_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "c5a8e8a37e402605dacff53e84dde26353c78e9a62ed404b77b9a3c88f5ca44e"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "HOLD_END",
+            "physics_frame": 707,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/collider_repeat_retake2/video_attempt_001/collider_overlay/HOLD_END/overview_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "d9986935ebe1ca33e4517184dfdc128bf6af471ad750289257a56db8e8f4c4ec"
+            },
+            "retake_reason": null,
+            "time_s": 11.783333947882056,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/collider_repeat_retake2/video_attempt_001/video/collision_annotated/HOLD_END/gripper_closeup_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "49a2491558dd87dfbb7056c2603304e17388ae46d592ff690a406e8b748733f5"
+            },
+            "mode": "normal_contact",
+            "phase_label": "HOLD_END",
+            "physics_frame": 707,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/collider_repeat_retake2/video_attempt_001/frames/gripper_closeup/000707.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "2f777c7a68553f564fd772660268fd89014924b0ba3fae11beb2046b744af7c1"
+            },
+            "retake_reason": null,
+            "time_s": 11.783333947882056,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/collider_repeat_retake2/video_attempt_001/video/collision_annotated/HOLD_END/gripper_closeup_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "49c9749ec756eecfd871210707ad569f2ba0b31cd8069d8f01ad42a6c67c64d7"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "HOLD_END",
+            "physics_frame": 707,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/collider_repeat_retake2/video_attempt_001/collider_overlay/HOLD_END/gripper_closeup_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "5883da88d27dcd6954fb805701c48f86a09a0413878ddb8308582041dfa77950"
+            },
+            "retake_reason": null,
+            "time_s": 11.783333947882056,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          }
+        ],
+        "status": "PASS"
+      },
+      "deterministic_signature": "90da200849182aa4cadbd37c64a6b36983758fe0e23a3741acb09f1e6740a88d",
+      "frame_validation": {
+        "evidence_scope": "COMPLETE_SUCCESS_TRAJECTORY",
+        "first_physics_frame": 1,
+        "frame_count": 707,
+        "last_physics_frame": 707,
+        "missing_physics_frames": [],
+        "phase_frame_ranges": {
+          "BILATERAL_CONTACT": [
+            442,
+            454
+          ],
+          "CLOSE_PRELOAD": [
+            455,
+            459
+          ],
+          "HEIGHT_REACHED": [
+            587,
+            587
+          ],
+          "HOLD": [
+            588,
+            707
+          ],
+          "OPEN_PREGRASP": [
+            80,
+            385
+          ],
+          "RELEASE_DYNAMIC": [
+            62,
+            62
+          ],
+          "SETTLE": [
+            63,
+            79
+          ],
+          "SETUP_KINEMATIC": [
+            2,
+            61
+          ],
+          "VALIDATE": [
+            1,
+            1
+          ],
+          "VERTICAL_DESCENT": [
+            386,
+            441
+          ],
+          "VERTICAL_LIFT": [
+            460,
+            586
+          ]
+        },
+        "required_full_arm_links": [
+          "base",
+          "shoulder",
+          "elbow",
+          "forearm",
+          "wrist",
+          "gripper"
+        ],
+        "runtime_signature": "90da200849182aa4cadbd37c64a6b36983758fe0e23a3741acb09f1e6740a88d",
+        "views": [
+          "overview",
+          "gripper_closeup"
+        ]
+      },
+      "machine_status": "PASS",
+      "phase_montage": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/visual_model_review/sample_02_opposite_ab_five_phase_raw_annotated.png",
+        "sha256": "85f902ce66a7618f843aee1578838281a98fc2c8a1710c0dd0b007dce96b874d"
+      },
+      "primary_manifest": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/primary/video_attempt_001/video/candidate_manifest.json",
+        "sha256": "ac7bd959a4603a80a40748c3b2e3115066d219982cbadb80ba533bc6780a6276"
+      },
+      "primary_runtime": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/primary/aloha1_grasp_20cm_runtime.json",
+        "sha256": "b4b4d1c22203b8b3c13d9104ae65ed5fd48279052227f96f2ee4932b233714e2"
+      },
+      "rejected_attempts": [
+        {
+          "run": "formal_attempt7_sample_02_camera",
+          "status": "REJECTED_CRITICAL_LEFT_FINGER_OCCLUSION"
+        },
+        {
+          "run": "opposite_ab_collider_repeat_first_postprocess",
+          "status": "REJECTED_ARTIFACT_POSTPROCESS_OVERWRITE"
+        }
+      ],
+      "reviewed_critical_frames": {
+        "bilateral_contact": 454,
+        "height_reached": 587,
+        "hold_end": 707,
+        "initial": 61,
+        "open": 385
+      },
+      "sample_id": "sample_02",
+      "selected_evidence_reason": "OPPOSITE_AB_EVIDENCE_CAMERA_REMOVES_LEFT_FINGER_OCCLUSION_WITH_IDENTICAL_MACHINE_SIGNATURE",
+      "status": "PASS",
+      "user_confirmation": "NOT_RUN",
+      "videos": {
+        "annotated": {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/primary/video_attempt_001/video/aloha1_grasp_20cm_annotated_candidate.mp4",
+          "fps": 60,
+          "frame_count": 707,
+          "probe": {
+            "duration_s": 11.783333,
+            "fps": 60.0,
+            "frame_count": 707,
+            "pixel_format": "yuv420p",
+            "r_frame_rate": "60/1",
+            "resolution": [
+              1440,
+              680
+            ]
+          },
+          "sha256": "80607f7a94a4971d24b899a1d20eae35782308d3333fac96fbf86fb14a3314a8"
+        },
+        "raw": {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/primary/video_attempt_001/video/aloha1_grasp_20cm_raw_candidate.mp4",
+          "fps": 60,
+          "frame_count": 707,
+          "probe": {
+            "duration_s": 11.783333,
+            "fps": 60.0,
+            "frame_count": 707,
+            "pixel_format": "yuv420p",
+            "r_frame_rate": "60/1",
+            "resolution": [
+              1440,
+              540
+            ]
+          },
+          "sha256": "a8c34c2e915bbda18d464787482529259ba29adb45c73897ac49b7e0c1c9b627"
+        }
+      },
+      "visual_model_review": "PASS"
+    },
+    {
+      "checks": {
+        "bottle_direction_visible": true,
+        "critical_occlusion": false,
+        "full_arm_visible": true,
+        "gripper_and_bottle_visible": true,
+        "gripper_points_downward": true,
+        "hold_end_visible": true,
+        "initial_pose_distinct": true,
+        "phases_visibly_distinct": true,
+        "vertical_lift_visible": true,
+        "world_z_visually_upright": true
+      },
+      "collision_manifest": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/collider_repeat/video_attempt_001/video/candidate_manifest.json",
+        "sha256": "4966a301ba45096479f4c2c0eccf27bfbee694802a0f83de2be109a0b4da679e"
+      },
+      "collision_montages": [
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/visual_model_review/keyframe_montages/sample_03_collision_24_annotated.png",
+          "sha256": "abe4d8375a73f61da02e6eef293ffb08d290cf2bdbee527a83f8a26c7deb2359"
+        }
+      ],
+      "collision_runtime": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/collider_repeat/aloha1_grasp_20cm_runtime.json",
+        "sha256": "2af3e3dbef43aa80228f55c5315cc112b3ccfc8f579e094f8307d52a1630e011"
+      },
+      "collision_screenshot_evidence": {
+        "record_count": 24,
+        "records": [
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/collider_repeat/video_attempt_001/video/collision_annotated/RELEASE_DYNAMIC/overview_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "d5757b67ea623cd14d6104a12fb33914cdef5cfc3cf6c13012c652fa8c834c06"
+            },
+            "mode": "normal_contact",
+            "phase_label": "RELEASE_DYNAMIC",
+            "physics_frame": 62,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/collider_repeat/video_attempt_001/frames/overview/000062.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "88b3871cc8bcd086d0c9cd66838e21f7a7ae0419410458e943906ffcf0d25c33"
+            },
+            "retake_reason": null,
+            "time_s": 1.0333333872258663,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/collider_repeat/video_attempt_001/video/collision_annotated/RELEASE_DYNAMIC/overview_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "cb8bd2e62c4fc294ebbf727d93eda04deab1b4f442ffda23675b7cc242320847"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "RELEASE_DYNAMIC",
+            "physics_frame": 62,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/collider_repeat/video_attempt_001/collider_overlay/RELEASE_DYNAMIC/overview_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "a994989fef5260b1b7411b6a141d1a959ce08039bda2ee0cef17499ca7258444"
+            },
+            "retake_reason": null,
+            "time_s": 1.0333333872258663,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/collider_repeat/video_attempt_001/video/collision_annotated/RELEASE_DYNAMIC/gripper_closeup_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "acaea70e0d4632d26c28cb03912a84fa857f1e262f0c0941a17b2138a857d65c"
+            },
+            "mode": "normal_contact",
+            "phase_label": "RELEASE_DYNAMIC",
+            "physics_frame": 62,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/collider_repeat/video_attempt_001/frames/gripper_closeup/000062.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "051527db5fe4c0432b178c56f7ee6c1d18a44395449b095d930af10a22efd89f"
+            },
+            "retake_reason": null,
+            "time_s": 1.0333333872258663,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/collider_repeat/video_attempt_001/video/collision_annotated/RELEASE_DYNAMIC/gripper_closeup_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "ced76e7a4c6f02a8abdc1f9e12d37685b18ab8d2d981e18f3de18d678bf8a1af"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "RELEASE_DYNAMIC",
+            "physics_frame": 62,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/collider_repeat/video_attempt_001/collider_overlay/RELEASE_DYNAMIC/gripper_closeup_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "11eb41b11cb5f270a531098c7199d53a8295f1a5cb1a966aced3d060e3f7b0bf"
+            },
+            "retake_reason": null,
+            "time_s": 1.0333333872258663,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/collider_repeat/video_attempt_001/video/collision_annotated/OPEN_PREGRASP/overview_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "0f016565eafc2557e8e9cc4146a987cbaa9557ff7f51350aa433d1d30f96ecb6"
+            },
+            "mode": "normal_contact",
+            "phase_label": "OPEN_PREGRASP",
+            "physics_frame": 349,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/collider_repeat/video_attempt_001/frames/overview/000349.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "6b3f989ad0e94397f6498ff790a653b0bf306e873a09a4e02bc3f807419201e0"
+            },
+            "retake_reason": null,
+            "time_s": 5.816666970029473,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/collider_repeat/video_attempt_001/video/collision_annotated/OPEN_PREGRASP/overview_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "a9538b1ee3a30d02bbc0083ac9ccbec0e73c641494467ea7db68394b511195ad"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "OPEN_PREGRASP",
+            "physics_frame": 349,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/collider_repeat/video_attempt_001/collider_overlay/OPEN_PREGRASP/overview_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "e922bc3448c98957a365495019e9b82e7326c45d33e46a5e99a0001cd2dcb2c7"
+            },
+            "retake_reason": null,
+            "time_s": 5.816666970029473,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/collider_repeat/video_attempt_001/video/collision_annotated/OPEN_PREGRASP/gripper_closeup_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "ee215fa1c75454e8e6708b48f83a127a12687661945ef6f10a018261044da8b3"
+            },
+            "mode": "normal_contact",
+            "phase_label": "OPEN_PREGRASP",
+            "physics_frame": 349,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/collider_repeat/video_attempt_001/frames/gripper_closeup/000349.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "5c7b075f7a2821e3f281634bb095d8e0b0500885dff64c69ae9e7d323b4e3bfe"
+            },
+            "retake_reason": null,
+            "time_s": 5.816666970029473,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/collider_repeat/video_attempt_001/video/collision_annotated/OPEN_PREGRASP/gripper_closeup_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "c32ed093ed1b7a1fc7c2ed43ad1f96b0eaf56377aa36c463a172dfc943491ce7"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "OPEN_PREGRASP",
+            "physics_frame": 349,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/collider_repeat/video_attempt_001/collider_overlay/OPEN_PREGRASP/gripper_closeup_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "6386922563ff118f15d9a678923ef1f4a0557e838c34ee2a13f5f37a15eca705"
+            },
+            "retake_reason": null,
+            "time_s": 5.816666970029473,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/collider_repeat/video_attempt_001/video/collision_annotated/BILATERAL_CONTACT/overview_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "7fd686a12f2f265331f4efd326136b75ebfaee833f27375dab3d46c8622df651"
+            },
+            "mode": "normal_contact",
+            "phase_label": "BILATERAL_CONTACT",
+            "physics_frame": 416,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/collider_repeat/video_attempt_001/frames/overview/000416.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "cecbfbe3cdd9f7ab7e81bddef546756616b6ded13132cbb7014c8f720991a55b"
+            },
+            "retake_reason": null,
+            "time_s": 6.933333694934845,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/collider_repeat/video_attempt_001/video/collision_annotated/BILATERAL_CONTACT/overview_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "20a7f6f65b0750788b3baa4d57671ecc783759402fe30d3d56b85a57860650c6"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "BILATERAL_CONTACT",
+            "physics_frame": 416,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/collider_repeat/video_attempt_001/collider_overlay/BILATERAL_CONTACT/overview_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "1e57a5a48703d738aa289495238aecb9a4a9af6f53ee8c68a7f3450c5fed5dba"
+            },
+            "retake_reason": null,
+            "time_s": 6.933333694934845,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/collider_repeat/video_attempt_001/video/collision_annotated/BILATERAL_CONTACT/gripper_closeup_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "5ee91d3fd18481ad44ea2bbc5b3253a24a4691bb3a81fa1fffd2ab308cfea82d"
+            },
+            "mode": "normal_contact",
+            "phase_label": "BILATERAL_CONTACT",
+            "physics_frame": 416,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/collider_repeat/video_attempt_001/frames/gripper_closeup/000416.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "d9fe972daa3bab4e9af04ae48623bf3387d43df92df7e55f343bbbe5d15712d3"
+            },
+            "retake_reason": null,
+            "time_s": 6.933333694934845,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/collider_repeat/video_attempt_001/video/collision_annotated/BILATERAL_CONTACT/gripper_closeup_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "8755c2bbb15ff57b2ccd7f6953521f802a786ebb240ab438435ad945403b6692"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "BILATERAL_CONTACT",
+            "physics_frame": 416,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/collider_repeat/video_attempt_001/collider_overlay/BILATERAL_CONTACT/gripper_closeup_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "a6a1703177492202dd0f99a545e1b943e1d1af5480dbf14ac968afc0f786bcf3"
+            },
+            "retake_reason": null,
+            "time_s": 6.933333694934845,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/collider_repeat/video_attempt_001/video/collision_annotated/FIRST_SUPPORT_CLEARANCE/overview_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "6794e8d3a56649e2b5bedb54b616d8421c920f868c4084aae9eba5e3009807f5"
+            },
+            "mode": "normal_contact",
+            "phase_label": "FIRST_SUPPORT_CLEARANCE",
+            "physics_frame": 428,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/collider_repeat/video_attempt_001/frames/overview/000428.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "8c20c3f65f1bf490212c304ffd01f7e2fc8906e59dd78250cfcf4e1af18d1ef3"
+            },
+            "retake_reason": null,
+            "time_s": 7.133333705365658,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/collider_repeat/video_attempt_001/video/collision_annotated/FIRST_SUPPORT_CLEARANCE/overview_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "6bd5ac8c5b54ac22866e32d7d6c0e16458e7f399f7a4b3ac8855e6abe12f1b04"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "FIRST_SUPPORT_CLEARANCE",
+            "physics_frame": 428,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/collider_repeat/video_attempt_001/collider_overlay/FIRST_SUPPORT_CLEARANCE/overview_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "10dd5e3164e00adacc804ec90cda6f9c99d5c26d5412770996ef0cf9c0d4c54b"
+            },
+            "retake_reason": null,
+            "time_s": 7.133333705365658,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/collider_repeat/video_attempt_001/video/collision_annotated/FIRST_SUPPORT_CLEARANCE/gripper_closeup_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "1a67f01ca39bca45cca20b95d5ef98016e8b34176f8bdd10ddd2738dd103822e"
+            },
+            "mode": "normal_contact",
+            "phase_label": "FIRST_SUPPORT_CLEARANCE",
+            "physics_frame": 428,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/collider_repeat/video_attempt_001/frames/gripper_closeup/000428.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "0a34a821235afb20db204cea091bfb445839a622dc84dc142eecd797099e8b65"
+            },
+            "retake_reason": null,
+            "time_s": 7.133333705365658,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/collider_repeat/video_attempt_001/video/collision_annotated/FIRST_SUPPORT_CLEARANCE/gripper_closeup_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "a7a735f5436a54ab87ebedc795343d22c178e6fbde17ace18b8f5ccf5458b8d6"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "FIRST_SUPPORT_CLEARANCE",
+            "physics_frame": 428,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/collider_repeat/video_attempt_001/collider_overlay/FIRST_SUPPORT_CLEARANCE/gripper_closeup_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "78fc92347715279cfd99882e139302f6809bdfae801d6142395688beb64c9ddd"
+            },
+            "retake_reason": null,
+            "time_s": 7.133333705365658,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/collider_repeat/video_attempt_001/video/collision_annotated/HEIGHT_REACHED/overview_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "dd2d50e1e7ece6a6ae8e79c8fe2e4b2cd7f08fe62b7fa69b8e2a43647f6fca11"
+            },
+            "mode": "normal_contact",
+            "phase_label": "HEIGHT_REACHED",
+            "physics_frame": 543,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/collider_repeat/video_attempt_001/frames/overview/000543.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "c561fb35c6813293c7bfe017d457dd06f7aa4839a38b023118459a85d7cebadc"
+            },
+            "retake_reason": null,
+            "time_s": 9.05000047199428,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/collider_repeat/video_attempt_001/video/collision_annotated/HEIGHT_REACHED/overview_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "689f6214c7e6b4df8fac28a4da996629918e8d9009c195669562224a3676c251"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "HEIGHT_REACHED",
+            "physics_frame": 543,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/collider_repeat/video_attempt_001/collider_overlay/HEIGHT_REACHED/overview_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "16a3aab948d716c8e91ce22e074621b0d229a2cc00460ab85e31e96359419d94"
+            },
+            "retake_reason": null,
+            "time_s": 9.05000047199428,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/collider_repeat/video_attempt_001/video/collision_annotated/HEIGHT_REACHED/gripper_closeup_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "62261d817d13a9c57ed837affd0a2783671310a6e5f017f1b55fae3a654c76ac"
+            },
+            "mode": "normal_contact",
+            "phase_label": "HEIGHT_REACHED",
+            "physics_frame": 543,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/collider_repeat/video_attempt_001/frames/gripper_closeup/000543.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "a8e462ae444111c50ec1b179e90ea0b08b4ed3fe3424b0e7fd1d2943c4944700"
+            },
+            "retake_reason": null,
+            "time_s": 9.05000047199428,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/collider_repeat/video_attempt_001/video/collision_annotated/HEIGHT_REACHED/gripper_closeup_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "69501dc183199d423441051f158869739cf1a0e8dd53baeb60ae5d683fdf0f99"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "HEIGHT_REACHED",
+            "physics_frame": 543,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/collider_repeat/video_attempt_001/collider_overlay/HEIGHT_REACHED/gripper_closeup_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "10d66af8e4bf116dbdc25459a1566803461b05574108287690d5b3fb6a2b32d7"
+            },
+            "retake_reason": null,
+            "time_s": 9.05000047199428,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/collider_repeat/video_attempt_001/video/collision_annotated/HOLD_END/overview_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "bf02cabe4d1b952c92271ec12d6faf8add13c271cfa5e31ac8d6f72e8cfa90b1"
+            },
+            "mode": "normal_contact",
+            "phase_label": "HOLD_END",
+            "physics_frame": 663,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/collider_repeat/video_attempt_001/frames/overview/000663.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "d2ef67573a7f23af9a2b320161fe91f556fb17478b8cd3af7d8a5cff29f2a88a"
+            },
+            "retake_reason": null,
+            "time_s": 11.05000057630241,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/collider_repeat/video_attempt_001/video/collision_annotated/HOLD_END/overview_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "46c21a1f90dfcc2e894bab0a04b35d97b84168f1ac38adaa0a66fca9978704c7"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "HOLD_END",
+            "physics_frame": 663,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/collider_repeat/video_attempt_001/collider_overlay/HOLD_END/overview_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "08c91b0a60a941da8f6a9de8e3ef375e4a856bbc75c107fb68dd8ff39ee485fb"
+            },
+            "retake_reason": null,
+            "time_s": 11.05000057630241,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/collider_repeat/video_attempt_001/video/collision_annotated/HOLD_END/gripper_closeup_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "f40c2b72b2c1747176db723822cefedd771d5b9ffb1ba7c562a31cfb2981f860"
+            },
+            "mode": "normal_contact",
+            "phase_label": "HOLD_END",
+            "physics_frame": 663,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/collider_repeat/video_attempt_001/frames/gripper_closeup/000663.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "6368f1de15b54e629d676498157e62f94259d3d68a0541559db5d187f762dc90"
+            },
+            "retake_reason": null,
+            "time_s": 11.05000057630241,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/collider_repeat/video_attempt_001/video/collision_annotated/HOLD_END/gripper_closeup_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "73c5a2e9dc835a21d65fe0dbc897341b54cdffc385356444f7d264bef9d97f7a"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "HOLD_END",
+            "physics_frame": 663,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/collider_repeat/video_attempt_001/collider_overlay/HOLD_END/gripper_closeup_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "7a1386433d2befed77e0f5dd9320d8e9df966543cbce3bb32768c6654fd530ec"
+            },
+            "retake_reason": null,
+            "time_s": 11.05000057630241,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          }
+        ],
+        "status": "PASS"
+      },
+      "deterministic_signature": "c0a1899f0900825efcc978abb56059bbc934c9413f5294e9d1d5bb23aca5a4ca",
+      "frame_validation": {
+        "evidence_scope": "COMPLETE_SUCCESS_TRAJECTORY",
+        "first_physics_frame": 1,
+        "frame_count": 663,
+        "last_physics_frame": 663,
+        "missing_physics_frames": [],
+        "phase_frame_ranges": {
+          "BILATERAL_CONTACT": [
+            404,
+            416
+          ],
+          "CLOSE_PRELOAD": [
+            417,
+            421
+          ],
+          "HEIGHT_REACHED": [
+            543,
+            543
+          ],
+          "HOLD": [
+            544,
+            663
+          ],
+          "OPEN_PREGRASP": [
+            96,
+            349
+          ],
+          "RELEASE_DYNAMIC": [
+            62,
+            62
+          ],
+          "SETTLE": [
+            63,
+            95
+          ],
+          "SETUP_KINEMATIC": [
+            2,
+            61
+          ],
+          "VALIDATE": [
+            1,
+            1
+          ],
+          "VERTICAL_DESCENT": [
+            350,
+            403
+          ],
+          "VERTICAL_LIFT": [
+            422,
+            542
+          ]
+        },
+        "required_full_arm_links": [
+          "base",
+          "shoulder",
+          "elbow",
+          "forearm",
+          "wrist",
+          "gripper"
+        ],
+        "runtime_signature": "c0a1899f0900825efcc978abb56059bbc934c9413f5294e9d1d5bb23aca5a4ca",
+        "views": [
+          "overview",
+          "gripper_closeup"
+        ]
+      },
+      "machine_status": "PASS",
+      "phase_montage": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/visual_model_review/keyframe_montages/sample_03_five_phase_raw_annotated.png",
+        "sha256": "95ae70d8c51978f81e528d1a5ddfb049f5d689b4e1618d90f1f2e44aa57479f7"
+      },
+      "primary_manifest": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/primary/video_attempt_001/video/candidate_manifest.json",
+        "sha256": "a4bd02eb57a13a7c9e9c6892130e3df180a02fa88b74090bb172936ac93d9d48"
+      },
+      "primary_runtime": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/primary/aloha1_grasp_20cm_runtime.json",
+        "sha256": "cc241f9be93c86fd59233270d0adf5bfe5df90ea062563f1511712c71cbec296"
+      },
+      "rejected_attempts": [],
+      "reviewed_critical_frames": {
+        "bilateral_contact": 416,
+        "height_reached": 543,
+        "hold_end": 663,
+        "initial": 61,
+        "open": 349
+      },
+      "sample_id": "sample_03",
+      "selected_evidence_reason": "FORMAL_ATTEMPT7_CAMERA_UNOBSTRUCTED",
+      "status": "PASS",
+      "user_confirmation": "NOT_RUN",
+      "videos": {
+        "annotated": {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/primary/video_attempt_001/video/aloha1_grasp_20cm_annotated_candidate.mp4",
+          "fps": 60,
+          "frame_count": 663,
+          "probe": {
+            "duration_s": 11.05,
+            "fps": 60.0,
+            "frame_count": 663,
+            "pixel_format": "yuv420p",
+            "r_frame_rate": "60/1",
+            "resolution": [
+              1440,
+              680
+            ]
+          },
+          "sha256": "28ea418589b64e4a9b4a2a6fc0604fc70ef3570e0f36c3f28564b4a890e762d6"
+        },
+        "raw": {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/primary/video_attempt_001/video/aloha1_grasp_20cm_raw_candidate.mp4",
+          "fps": 60,
+          "frame_count": 663,
+          "probe": {
+            "duration_s": 11.05,
+            "fps": 60.0,
+            "frame_count": 663,
+            "pixel_format": "yuv420p",
+            "r_frame_rate": "60/1",
+            "resolution": [
+              1440,
+              540
+            ]
+          },
+          "sha256": "188b883e66b52f2c1ee448f79e00b258013e1b753ed57c8952e90f18d13cf70d"
+        }
+      },
+      "visual_model_review": "PASS"
+    },
+    {
+      "checks": {
+        "bottle_direction_visible": true,
+        "critical_occlusion": false,
+        "full_arm_visible": true,
+        "gripper_and_bottle_visible": true,
+        "gripper_points_downward": true,
+        "hold_end_visible": true,
+        "initial_pose_distinct": true,
+        "phases_visibly_distinct": true,
+        "vertical_lift_visible": true,
+        "world_z_visually_upright": true
+      },
+      "collision_manifest": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/collider_repeat/video_attempt_001/video/candidate_manifest.json",
+        "sha256": "f8658234745f915e88566bd19215d44d4d126f8240dd4f9c1d0a581a4b552c7c"
+      },
+      "collision_montages": [
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/visual_model_review/keyframe_montages/sample_04_collision_24_annotated.png",
+          "sha256": "0baddc6962aa557c607897ea4c3f3172e4c4331c5e1d991fb11b44e61f4e7bf9"
+        }
+      ],
+      "collision_runtime": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/collider_repeat/aloha1_grasp_20cm_runtime.json",
+        "sha256": "696136263f95dcb37c31b2809e7e6b9bff4c041dd34b56adcd307edb793d13ff"
+      },
+      "collision_screenshot_evidence": {
+        "record_count": 24,
+        "records": [
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/collider_repeat/video_attempt_001/video/collision_annotated/RELEASE_DYNAMIC/overview_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "9f0a23f77ddf664986a89e43b95bbd8baae38ddd20ceb883d33efd10305fff9b"
+            },
+            "mode": "normal_contact",
+            "phase_label": "RELEASE_DYNAMIC",
+            "physics_frame": 62,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/collider_repeat/video_attempt_001/frames/overview/000062.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "8c1124fd9980af7842e96b0516e66c39425ba19c979f9b2046a5fe981095a806"
+            },
+            "retake_reason": null,
+            "time_s": 1.0333333872258663,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/collider_repeat/video_attempt_001/video/collision_annotated/RELEASE_DYNAMIC/overview_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "b16fa9787a2016ddb982de064f488b537f788c3681e15506b2a663f8ee016787"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "RELEASE_DYNAMIC",
+            "physics_frame": 62,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/collider_repeat/video_attempt_001/collider_overlay/RELEASE_DYNAMIC/overview_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "5d5fb0d23a2203c9df9da8d3f4c50e38cd73a119ff41dd2c9c3152ab1bc006ad"
+            },
+            "retake_reason": null,
+            "time_s": 1.0333333872258663,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/collider_repeat/video_attempt_001/video/collision_annotated/RELEASE_DYNAMIC/gripper_closeup_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "e5a0df4f77424c6c78781f33a1253043b4a254e65dc6b44d65fe69036a1f1dda"
+            },
+            "mode": "normal_contact",
+            "phase_label": "RELEASE_DYNAMIC",
+            "physics_frame": 62,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/collider_repeat/video_attempt_001/frames/gripper_closeup/000062.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "01f506a6ec355d337f7362d4b8b7fba591fde613450481dbb36ce4e0f156a112"
+            },
+            "retake_reason": null,
+            "time_s": 1.0333333872258663,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/collider_repeat/video_attempt_001/video/collision_annotated/RELEASE_DYNAMIC/gripper_closeup_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "65fddeb6643387cbd7e8d08c82e8f57bd3b46e1678f585d2d15df2fb6d78bc37"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "RELEASE_DYNAMIC",
+            "physics_frame": 62,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/collider_repeat/video_attempt_001/collider_overlay/RELEASE_DYNAMIC/gripper_closeup_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "0be2b730d11caca425872127149432640ba5ec1123a67ee0d21581741cb58326"
+            },
+            "retake_reason": null,
+            "time_s": 1.0333333872258663,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/collider_repeat/video_attempt_001/video/collision_annotated/OPEN_PREGRASP/overview_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "e5c5980433b0ab4647906bb8ff58c5e6bcd6dbd85901d5f787ab9f7b4a7db911"
+            },
+            "mode": "normal_contact",
+            "phase_label": "OPEN_PREGRASP",
+            "physics_frame": 1380,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/collider_repeat/video_attempt_001/frames/overview/001380.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "4c69db1760f5bc9ac40c02378ae24dda68608d6554700b819e08f0cb14976913"
+            },
+            "retake_reason": null,
+            "time_s": 23.000001199543476,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/collider_repeat/video_attempt_001/video/collision_annotated/OPEN_PREGRASP/overview_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "f307ff1817be9e8a1619b53d38976a91a1e1c193b2f83ce49c91ace5b6327d19"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "OPEN_PREGRASP",
+            "physics_frame": 1380,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/collider_repeat/video_attempt_001/collider_overlay/OPEN_PREGRASP/overview_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "7b29dbc7c1e5754a430e18ef2168b9b5435fc59f424d31cdadcf713a22da2a51"
+            },
+            "retake_reason": null,
+            "time_s": 23.000001199543476,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/collider_repeat/video_attempt_001/video/collision_annotated/OPEN_PREGRASP/gripper_closeup_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "0692241b40e93171de8cb918d53436c0210d09aa0ed028a8dc2bceb794bdd0f6"
+            },
+            "mode": "normal_contact",
+            "phase_label": "OPEN_PREGRASP",
+            "physics_frame": 1380,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/collider_repeat/video_attempt_001/frames/gripper_closeup/001380.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "68f41aac28a904162b16ff91de8b4cecb9a47aa413cc7abf807e4e672635455d"
+            },
+            "retake_reason": null,
+            "time_s": 23.000001199543476,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/collider_repeat/video_attempt_001/video/collision_annotated/OPEN_PREGRASP/gripper_closeup_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "e16c52cf8de550ccf5320836e8fc480e25d31f1e06fa10f89949d5a66e96731a"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "OPEN_PREGRASP",
+            "physics_frame": 1380,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/collider_repeat/video_attempt_001/collider_overlay/OPEN_PREGRASP/gripper_closeup_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "a40bc4efd9454a67052fd4ef940a0fbe5157bcb76b01c7c90ed2a04f9d27d795"
+            },
+            "retake_reason": null,
+            "time_s": 23.000001199543476,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/collider_repeat/video_attempt_001/video/collision_annotated/BILATERAL_CONTACT/overview_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "2b4e143cb37969e67f9c55c353cd4f937416510f9d54c4feb634c7554d1b3569"
+            },
+            "mode": "normal_contact",
+            "phase_label": "BILATERAL_CONTACT",
+            "physics_frame": 1440,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/collider_repeat/video_attempt_001/frames/overview/001440.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "12532212f38387e37fcf0869eec892600cd41d8083164c5506ae402776cfb79c"
+            },
+            "retake_reason": null,
+            "time_s": 24.00000125169754,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/collider_repeat/video_attempt_001/video/collision_annotated/BILATERAL_CONTACT/overview_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "465eeaff10c9209ebfd2b2915b30f2454772b536b675d93b7280273791c40f11"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "BILATERAL_CONTACT",
+            "physics_frame": 1440,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/collider_repeat/video_attempt_001/collider_overlay/BILATERAL_CONTACT/overview_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "78d2a7c47706f88e69b3a98ab04ac5e391352b9d057b080d18f05f24abe47e28"
+            },
+            "retake_reason": null,
+            "time_s": 24.00000125169754,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/collider_repeat/video_attempt_001/video/collision_annotated/BILATERAL_CONTACT/gripper_closeup_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "444b7a949ab6ca50c01c92e9362e7a75fc25d110fd0b8bcb96475e36a06a08bb"
+            },
+            "mode": "normal_contact",
+            "phase_label": "BILATERAL_CONTACT",
+            "physics_frame": 1440,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/collider_repeat/video_attempt_001/frames/gripper_closeup/001440.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "10352422f30720a3c27d8ac1a74f6e6a2b1405b204746b1b1f02b57a237a8cd8"
+            },
+            "retake_reason": null,
+            "time_s": 24.00000125169754,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/collider_repeat/video_attempt_001/video/collision_annotated/BILATERAL_CONTACT/gripper_closeup_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "beb5c8e28d8c998ad679e65c955d069ee6d313558db753a4f39942d4510fb160"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "BILATERAL_CONTACT",
+            "physics_frame": 1440,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/collider_repeat/video_attempt_001/collider_overlay/BILATERAL_CONTACT/gripper_closeup_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "834c62f85a4572c805938bafd04d00ce9ae0a8afa88089cf6549d8ac1879adff"
+            },
+            "retake_reason": null,
+            "time_s": 24.00000125169754,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/collider_repeat/video_attempt_001/video/collision_annotated/FIRST_SUPPORT_CLEARANCE/overview_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "39fa743c447ec84a33d2e6643307a710475e2f5d770f99cff62872392bf859f8"
+            },
+            "mode": "normal_contact",
+            "phase_label": "FIRST_SUPPORT_CLEARANCE",
+            "physics_frame": 1454,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/collider_repeat/video_attempt_001/frames/overview/001454.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "53c1d83116f5967d3f5766368762942f8f4010c203b6ab2bdeb86208f8038da9"
+            },
+            "retake_reason": null,
+            "time_s": 24.233334597200155,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/collider_repeat/video_attempt_001/video/collision_annotated/FIRST_SUPPORT_CLEARANCE/overview_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "2b9b034adee28988995a6b40f598867899de7a51cd713b52ea50048d0a4f7b13"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "FIRST_SUPPORT_CLEARANCE",
+            "physics_frame": 1454,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/collider_repeat/video_attempt_001/collider_overlay/FIRST_SUPPORT_CLEARANCE/overview_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "4690a7594402558de1e18777ef176465193059c3c9a8e2d9777a61131cc1342a"
+            },
+            "retake_reason": null,
+            "time_s": 24.233334597200155,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/collider_repeat/video_attempt_001/video/collision_annotated/FIRST_SUPPORT_CLEARANCE/gripper_closeup_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "b73c86253f9b47819a4ce359600e64673e0a26bc261f7232ce69013d33e82440"
+            },
+            "mode": "normal_contact",
+            "phase_label": "FIRST_SUPPORT_CLEARANCE",
+            "physics_frame": 1454,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/collider_repeat/video_attempt_001/frames/gripper_closeup/001454.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "06bf38c9be1193c2ef6b0a0ea570895338b4a2465731cc24687383bd18965e58"
+            },
+            "retake_reason": null,
+            "time_s": 24.233334597200155,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/collider_repeat/video_attempt_001/video/collision_annotated/FIRST_SUPPORT_CLEARANCE/gripper_closeup_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "79bc1b9fbe79db2eaf4e5cfde12c211a2511da0f6e51502253840371dcef6800"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "FIRST_SUPPORT_CLEARANCE",
+            "physics_frame": 1454,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/collider_repeat/video_attempt_001/collider_overlay/FIRST_SUPPORT_CLEARANCE/gripper_closeup_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "77fc64d8df8cb20aef7ba7977d77e478666156d8c13ae76a244b0b11630bebfb"
+            },
+            "retake_reason": null,
+            "time_s": 24.233334597200155,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/collider_repeat/video_attempt_001/video/collision_annotated/HEIGHT_REACHED/overview_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "828f44fc9bb9bbb9a46728e559a613ef91e2e35c054928a16de605726e39ede9"
+            },
+            "mode": "normal_contact",
+            "phase_label": "HEIGHT_REACHED",
+            "physics_frame": 1647,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/collider_repeat/video_attempt_001/frames/overview/001647.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "3dc2554807d8e5a1cc2e70e3e31f08b893bc64b389cd1a5fc9e7a44106386c98"
+            },
+            "retake_reason": null,
+            "time_s": 27.45000143162906,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/collider_repeat/video_attempt_001/video/collision_annotated/HEIGHT_REACHED/overview_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "76923f9daf9f22989b2ebcdc71e4c76848c4eebeaa493314df7dbe33b3c069a1"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "HEIGHT_REACHED",
+            "physics_frame": 1647,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/collider_repeat/video_attempt_001/collider_overlay/HEIGHT_REACHED/overview_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "3d9e425cf73bd099e08a09738a5dfb4cae3a2e44e0724f2119cdfd271d746d4f"
+            },
+            "retake_reason": null,
+            "time_s": 27.45000143162906,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/collider_repeat/video_attempt_001/video/collision_annotated/HEIGHT_REACHED/gripper_closeup_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "01de6cfe3e395ff33422fdbfa40c6f81e45d1d4238c0143f5dbfd0bd9f7c8638"
+            },
+            "mode": "normal_contact",
+            "phase_label": "HEIGHT_REACHED",
+            "physics_frame": 1647,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/collider_repeat/video_attempt_001/frames/gripper_closeup/001647.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "06525c1a49ac2b53ea9a0a48cd2b803254a983aaddcc2ac6bfc5eb10f49ff1a6"
+            },
+            "retake_reason": null,
+            "time_s": 27.45000143162906,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/collider_repeat/video_attempt_001/video/collision_annotated/HEIGHT_REACHED/gripper_closeup_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "f62b4022cef05b56c2080697b73d7e84fb3e847a910d9d7feb8b2a5850acb9d2"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "HEIGHT_REACHED",
+            "physics_frame": 1647,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/collider_repeat/video_attempt_001/collider_overlay/HEIGHT_REACHED/gripper_closeup_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "06ec6b7920bfb1a07b931d67a595cb280599ac60e40d922d5bfdd879368cfa60"
+            },
+            "retake_reason": null,
+            "time_s": 27.45000143162906,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/collider_repeat/video_attempt_001/video/collision_annotated/HOLD_END/overview_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "77e42008dc70ec584392532acf38fba4c2403a60ec62c4ad3f8a8acdc6453bfd"
+            },
+            "mode": "normal_contact",
+            "phase_label": "HOLD_END",
+            "physics_frame": 1767,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/collider_repeat/video_attempt_001/frames/overview/001767.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "7df267d29f682a95e67a7fbe852b226256fad99b5bebb28894d75187d17a7626"
+            },
+            "retake_reason": null,
+            "time_s": 29.45000153593719,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/collider_repeat/video_attempt_001/video/collision_annotated/HOLD_END/overview_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "effd8c409d0549f688ca249368c05aef842d35eae5869d70edec624d7e31188d"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "HOLD_END",
+            "physics_frame": 1767,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/collider_repeat/video_attempt_001/collider_overlay/HOLD_END/overview_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "6753d55a22d98cdee2b3b32635117ddb85e5e1f83963d93366f7a408ea8e4511"
+            },
+            "retake_reason": null,
+            "time_s": 29.45000153593719,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/collider_repeat/video_attempt_001/video/collision_annotated/HOLD_END/gripper_closeup_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "8cf3d9d8d75c1aab4a4ddda17ec17ee36e8231a8e2670fb37139db25b114fd99"
+            },
+            "mode": "normal_contact",
+            "phase_label": "HOLD_END",
+            "physics_frame": 1767,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/collider_repeat/video_attempt_001/frames/gripper_closeup/001767.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "c6b67f6c90ea665b26110af7d25e1a3e1a9b8b33a401fdc49740cddff728330a"
+            },
+            "retake_reason": null,
+            "time_s": 29.45000153593719,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/collider_repeat/video_attempt_001/video/collision_annotated/HOLD_END/gripper_closeup_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "58af2ef017d3fe42064fd7fc6f6fc4b1f19aa74f02d7f99ee9892fe0e508c1b9"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "HOLD_END",
+            "physics_frame": 1767,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/collider_repeat/video_attempt_001/collider_overlay/HOLD_END/gripper_closeup_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "1e36007505c0df4d2a4197f1d6ef49605a2c766e0404e0df288d92127ccee6b5"
+            },
+            "retake_reason": null,
+            "time_s": 29.45000153593719,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          }
+        ],
+        "status": "PASS"
+      },
+      "deterministic_signature": "5b2ae3da23b5ab2ad0856a69046bacba8e7a52e65877824e9a05747e91ebb8f4",
+      "frame_validation": {
+        "evidence_scope": "COMPLETE_SUCCESS_TRAJECTORY",
+        "first_physics_frame": 1,
+        "frame_count": 1767,
+        "last_physics_frame": 1767,
+        "missing_physics_frames": [],
+        "phase_frame_ranges": {
+          "BILATERAL_CONTACT": [
+            1428,
+            1440
+          ],
+          "CLOSE_PRELOAD": [
+            1441,
+            1445
+          ],
+          "HEIGHT_REACHED": [
+            1647,
+            1647
+          ],
+          "HOLD": [
+            1648,
+            1767
+          ],
+          "OPEN_PREGRASP": [
+            91,
+            1380
+          ],
+          "RELEASE_DYNAMIC": [
+            62,
+            62
+          ],
+          "SETTLE": [
+            63,
+            90
+          ],
+          "SETUP_KINEMATIC": [
+            2,
+            61
+          ],
+          "VALIDATE": [
+            1,
+            1
+          ],
+          "VERTICAL_DESCENT": [
+            1381,
+            1427
+          ],
+          "VERTICAL_LIFT": [
+            1446,
+            1646
+          ]
+        },
+        "required_full_arm_links": [
+          "base",
+          "shoulder",
+          "elbow",
+          "forearm",
+          "wrist",
+          "gripper"
+        ],
+        "runtime_signature": "5b2ae3da23b5ab2ad0856a69046bacba8e7a52e65877824e9a05747e91ebb8f4",
+        "views": [
+          "overview",
+          "gripper_closeup"
+        ]
+      },
+      "machine_status": "PASS",
+      "phase_montage": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/visual_model_review/keyframe_montages/sample_04_five_phase_raw_annotated.png",
+        "sha256": "09975f08317b5913e334a9303d1eb54be0339cae33a3a2fe01828e705641c0a4"
+      },
+      "primary_manifest": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/primary/video_attempt_001/video/candidate_manifest.json",
+        "sha256": "32d615584d6bf0f353899f9c3a4bfa103f9f9a2bb6135ab3683173a3395d6dd9"
+      },
+      "primary_runtime": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/primary/aloha1_grasp_20cm_runtime.json",
+        "sha256": "16acf9c30bfc63b3cf789e91af173a3e461773d4144402a332d577b9b304baa6"
+      },
+      "rejected_attempts": [],
+      "reviewed_critical_frames": {
+        "bilateral_contact": 1440,
+        "height_reached": 1647,
+        "hold_end": 1767,
+        "initial": 61,
+        "open": 1380
+      },
+      "sample_id": "sample_04",
+      "selected_evidence_reason": "FORMAL_ATTEMPT7_CAMERA_UNOBSTRUCTED",
+      "status": "PASS",
+      "user_confirmation": "NOT_RUN",
+      "videos": {
+        "annotated": {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/primary/video_attempt_001/video/aloha1_grasp_20cm_annotated_candidate.mp4",
+          "fps": 60,
+          "frame_count": 1767,
+          "probe": {
+            "duration_s": 29.45,
+            "fps": 60.0,
+            "frame_count": 1767,
+            "pixel_format": "yuv420p",
+            "r_frame_rate": "60/1",
+            "resolution": [
+              1440,
+              680
+            ]
+          },
+          "sha256": "526b15f1feb245e3063773313a5c94cc533fc10e190d77c6beb0f68f2918d777"
+        },
+        "raw": {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/primary/video_attempt_001/video/aloha1_grasp_20cm_raw_candidate.mp4",
+          "fps": 60,
+          "frame_count": 1767,
+          "probe": {
+            "duration_s": 29.45,
+            "fps": 60.0,
+            "frame_count": 1767,
+            "pixel_format": "yuv420p",
+            "r_frame_rate": "60/1",
+            "resolution": [
+              1440,
+              540
+            ]
+          },
+          "sha256": "8ae5323d3f92f7503a691e4fa828fe5ec5df0ed0d74209ac4225de97a35396dc"
+        }
+      },
+      "visual_model_review": "PASS"
+    },
+    {
+      "checks": {
+        "bottle_direction_visible": true,
+        "critical_occlusion": false,
+        "full_arm_visible": true,
+        "gripper_and_bottle_visible": true,
+        "gripper_points_downward": true,
+        "hold_end_visible": true,
+        "initial_pose_distinct": true,
+        "phases_visibly_distinct": true,
+        "vertical_lift_visible": true,
+        "world_z_visually_upright": true
+      },
+      "collision_manifest": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/collider_repeat/video_attempt_001/video/candidate_manifest.json",
+        "sha256": "17136d70e350360e2786029ff562b8066f4d87231154b4a1e9fa6e1f15392d75"
+      },
+      "collision_montages": [
+        {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/visual_model_review/keyframe_montages/sample_05_collision_24_annotated.png",
+          "sha256": "fa4e7059aa3c0902cffd75f798d14056a15e5e09888cb34b56e320031972c63d"
+        }
+      ],
+      "collision_runtime": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/collider_repeat/aloha1_grasp_20cm_runtime.json",
+        "sha256": "cb4e93cec0eeab96a34b6599b9467d4a9303147d5280c3fd3169ea067cbff876"
+      },
+      "collision_screenshot_evidence": {
+        "record_count": 24,
+        "records": [
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/collider_repeat/video_attempt_001/video/collision_annotated/RELEASE_DYNAMIC/overview_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "db6562164a2ff8a4913fab9d768b97caa4b47b817cbe106c7fb55afb5cfece11"
+            },
+            "mode": "normal_contact",
+            "phase_label": "RELEASE_DYNAMIC",
+            "physics_frame": 62,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/collider_repeat/video_attempt_001/frames/overview/000062.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "7fa55814ca188eb5150194c8d3c1abac3b0753c3a0beb12cdca194f85d3c330c"
+            },
+            "retake_reason": null,
+            "time_s": 1.0333333872258663,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/collider_repeat/video_attempt_001/video/collision_annotated/RELEASE_DYNAMIC/overview_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "fc54045278c312325ea25efbd77e8aa9dec76c8236ae874d7cfb5b64324aa76d"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "RELEASE_DYNAMIC",
+            "physics_frame": 62,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/collider_repeat/video_attempt_001/collider_overlay/RELEASE_DYNAMIC/overview_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "5f81cf6b53e0e94b1b11dea96d49532db8f93f4ac0733dcfa3d7587527f697fd"
+            },
+            "retake_reason": null,
+            "time_s": 1.0333333872258663,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/collider_repeat/video_attempt_001/video/collision_annotated/RELEASE_DYNAMIC/gripper_closeup_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "b411d529add57b16538433175ac7a2e0ca61dd80854d81ec7ea07be824a90f52"
+            },
+            "mode": "normal_contact",
+            "phase_label": "RELEASE_DYNAMIC",
+            "physics_frame": 62,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/collider_repeat/video_attempt_001/frames/gripper_closeup/000062.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "8a496a65bcb31280e91e23ede0c35f79cf484ab1adab1a85318a175ffd5cd0c0"
+            },
+            "retake_reason": null,
+            "time_s": 1.0333333872258663,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/collider_repeat/video_attempt_001/video/collision_annotated/RELEASE_DYNAMIC/gripper_closeup_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "6629f5cf96418f5ac6297838255251c3484ce5bab73486ea209027c4c84a5074"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "RELEASE_DYNAMIC",
+            "physics_frame": 62,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/collider_repeat/video_attempt_001/collider_overlay/RELEASE_DYNAMIC/gripper_closeup_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "28df2902607938fc75f5f0ee335a44c83e05f1b228a9063fafc1e22933b97253"
+            },
+            "retake_reason": null,
+            "time_s": 1.0333333872258663,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/collider_repeat/video_attempt_001/video/collision_annotated/OPEN_PREGRASP/overview_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "c3fef2c077c00509079a021679f98925f92cd0165fe2dd57f232000a05acc708"
+            },
+            "mode": "normal_contact",
+            "phase_label": "OPEN_PREGRASP",
+            "physics_frame": 573,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/collider_repeat/video_attempt_001/frames/overview/000573.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "95d9389b5e45ecfa10d9616fe13ab2e9418b8c6b9e10953077b41729f62da087"
+            },
+            "retake_reason": null,
+            "time_s": 9.550000498071313,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/collider_repeat/video_attempt_001/video/collision_annotated/OPEN_PREGRASP/overview_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "bc7263d903ab3620275acccb4540ab92d1d6133fda7cd1f4b307df08df6f3313"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "OPEN_PREGRASP",
+            "physics_frame": 573,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/collider_repeat/video_attempt_001/collider_overlay/OPEN_PREGRASP/overview_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "20ecf3368248023b0e152cd508e46acf71aafa541cb5feec760d02131a508b26"
+            },
+            "retake_reason": null,
+            "time_s": 9.550000498071313,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/collider_repeat/video_attempt_001/video/collision_annotated/OPEN_PREGRASP/gripper_closeup_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "abfb2f00e0150346bf8b720e6a8649f50d34d1318508c12086d1c1fb888fd9c4"
+            },
+            "mode": "normal_contact",
+            "phase_label": "OPEN_PREGRASP",
+            "physics_frame": 573,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/collider_repeat/video_attempt_001/frames/gripper_closeup/000573.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "8c13def83ee7b79708bc810bb1b5a74a5f487daf3a787bfe03d413678433d05a"
+            },
+            "retake_reason": null,
+            "time_s": 9.550000498071313,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/collider_repeat/video_attempt_001/video/collision_annotated/OPEN_PREGRASP/gripper_closeup_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "56f928cbb7b5f1f1fc82f4feec17276213ed693fe39f7caab1472cb8252f05a7"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "OPEN_PREGRASP",
+            "physics_frame": 573,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/collider_repeat/video_attempt_001/collider_overlay/OPEN_PREGRASP/gripper_closeup_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "b279b4238a9704e44b2ab9fb81374883ea31e32837a379f4083480c4badf67a3"
+            },
+            "retake_reason": null,
+            "time_s": 9.550000498071313,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/collider_repeat/video_attempt_001/video/collision_annotated/BILATERAL_CONTACT/overview_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "db26aec589f98d959efceb81cc0f8c85aa32af3ec0126a5738a474d173e12a67"
+            },
+            "mode": "normal_contact",
+            "phase_label": "BILATERAL_CONTACT",
+            "physics_frame": 639,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/collider_repeat/video_attempt_001/frames/overview/000639.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "20812d12ebd68371ae2d13bcdd00fb152b35afdf825f6f5566d7fcf0f415ca1e"
+            },
+            "retake_reason": null,
+            "time_s": 10.650000555440784,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/collider_repeat/video_attempt_001/video/collision_annotated/BILATERAL_CONTACT/overview_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "5599e48c96b05d297a33f04ea15936428dd2992c9fea1c463dfca502ccb0c74e"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "BILATERAL_CONTACT",
+            "physics_frame": 639,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/collider_repeat/video_attempt_001/collider_overlay/BILATERAL_CONTACT/overview_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "ddc80c6e7d78022c2218b0611b21a161b2e45111a35f7978c5bf6c2947e869fb"
+            },
+            "retake_reason": null,
+            "time_s": 10.650000555440784,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/collider_repeat/video_attempt_001/video/collision_annotated/BILATERAL_CONTACT/gripper_closeup_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "f3a08ef5dc6b9a1eb5d8e42c228b32df592585a56098e1f3cdb3bdd7b870ea4f"
+            },
+            "mode": "normal_contact",
+            "phase_label": "BILATERAL_CONTACT",
+            "physics_frame": 639,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/collider_repeat/video_attempt_001/frames/gripper_closeup/000639.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "0a07f8a437ac34dad052acf6ebcf03dd35e4276c79e89959fce79d6361bce06b"
+            },
+            "retake_reason": null,
+            "time_s": 10.650000555440784,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/collider_repeat/video_attempt_001/video/collision_annotated/BILATERAL_CONTACT/gripper_closeup_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "1cd59d3a7556cca0ec7db2a8fec7fed889c5d307539d80c50c3fb53e86c398e3"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "BILATERAL_CONTACT",
+            "physics_frame": 639,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/collider_repeat/video_attempt_001/collider_overlay/BILATERAL_CONTACT/gripper_closeup_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "04b6f2cc96740e4c8d0562fcc6740acf247c86f083bb211aa3403b7a4b373988"
+            },
+            "retake_reason": null,
+            "time_s": 10.650000555440784,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/collider_repeat/video_attempt_001/video/collision_annotated/FIRST_SUPPORT_CLEARANCE/overview_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "6853d58281c53f772a9fb90010344a4a6ccaf4185133b65c6aecb365b3418bf9"
+            },
+            "mode": "normal_contact",
+            "phase_label": "FIRST_SUPPORT_CLEARANCE",
+            "physics_frame": 651,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/collider_repeat/video_attempt_001/frames/overview/000651.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "1732139474dbbf9addec66e5dd1c67789ec6f2828d14a62d4ade40226e0f2583"
+            },
+            "retake_reason": null,
+            "time_s": 10.850000565871596,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/collider_repeat/video_attempt_001/video/collision_annotated/FIRST_SUPPORT_CLEARANCE/overview_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "bcfb527d4c81fd828d7b7ef07378c0affaefe176372ea83af5c9102fbb27cedf"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "FIRST_SUPPORT_CLEARANCE",
+            "physics_frame": 651,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/collider_repeat/video_attempt_001/collider_overlay/FIRST_SUPPORT_CLEARANCE/overview_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "a6a4ae262a2ff0d88dc522fdc3514735fbb51aa4777056f04cac9c454ab829fd"
+            },
+            "retake_reason": null,
+            "time_s": 10.850000565871596,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/collider_repeat/video_attempt_001/video/collision_annotated/FIRST_SUPPORT_CLEARANCE/gripper_closeup_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "c6e60b575cf5814f2890550797ad3bc9afc3ee12f8e8c03f0ab039d14cd21134"
+            },
+            "mode": "normal_contact",
+            "phase_label": "FIRST_SUPPORT_CLEARANCE",
+            "physics_frame": 651,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/collider_repeat/video_attempt_001/frames/gripper_closeup/000651.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "8a727c5732e53b1713a4d837d977c14729cfbc41eb6228310105ce19fbdabc80"
+            },
+            "retake_reason": null,
+            "time_s": 10.850000565871596,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/collider_repeat/video_attempt_001/video/collision_annotated/FIRST_SUPPORT_CLEARANCE/gripper_closeup_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "6c30d9bfb5436f02d9a5a7e50b92c346b29673d573362bb976c1e347b6cbcee5"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "FIRST_SUPPORT_CLEARANCE",
+            "physics_frame": 651,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/collider_repeat/video_attempt_001/collider_overlay/FIRST_SUPPORT_CLEARANCE/gripper_closeup_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "4195e5f98e50baac0350272924031572298b22cfec0cb15175d8349d6e552936"
+            },
+            "retake_reason": null,
+            "time_s": 10.850000565871596,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/collider_repeat/video_attempt_001/video/collision_annotated/HEIGHT_REACHED/overview_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "e18c04f84a258d9f23970a3ed0d0fbb312d35d3bb6e6bd901c393cc5b6f7c45e"
+            },
+            "mode": "normal_contact",
+            "phase_label": "HEIGHT_REACHED",
+            "physics_frame": 768,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/collider_repeat/video_attempt_001/frames/overview/000768.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "b682baa456744b6f24bf3df141515ab78399d2a6c30b91497441210e2c75442f"
+            },
+            "retake_reason": null,
+            "time_s": 12.800000667572021,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/collider_repeat/video_attempt_001/video/collision_annotated/HEIGHT_REACHED/overview_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "67bb8c4f842e2a5022f6636898accc6520a4ca09465be797b09cc6a85dbce7ac"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "HEIGHT_REACHED",
+            "physics_frame": 768,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/collider_repeat/video_attempt_001/collider_overlay/HEIGHT_REACHED/overview_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "ca9136ff9695d9b7e063cccba759d39f4067619016f1b5359cf6e6d54efd6a2c"
+            },
+            "retake_reason": null,
+            "time_s": 12.800000667572021,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/collider_repeat/video_attempt_001/video/collision_annotated/HEIGHT_REACHED/gripper_closeup_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "9d67535a4b9cc6baee9dd80cbb63514171b9f9b327e85388489ffded0739cd8d"
+            },
+            "mode": "normal_contact",
+            "phase_label": "HEIGHT_REACHED",
+            "physics_frame": 768,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/collider_repeat/video_attempt_001/frames/gripper_closeup/000768.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "7cfd29a86a3781f83e7817808d6c8874f60ad25db750b7f9d77da754a684b979"
+            },
+            "retake_reason": null,
+            "time_s": 12.800000667572021,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/collider_repeat/video_attempt_001/video/collision_annotated/HEIGHT_REACHED/gripper_closeup_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "1984d81524dc6d7ec66e2c284a4ededd99f9bd6eba5a96b4bbc148019cc76e66"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "HEIGHT_REACHED",
+            "physics_frame": 768,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/collider_repeat/video_attempt_001/collider_overlay/HEIGHT_REACHED/gripper_closeup_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "36ebaf811d35934d02620eb33fdc5a8b1effc526815b013cf9d191cd5679d58b"
+            },
+            "retake_reason": null,
+            "time_s": 12.800000667572021,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/collider_repeat/video_attempt_001/video/collision_annotated/HOLD_END/overview_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "490980adaa05b0ef798a5b40fda0f1fc2a648baf991eae42128b341cbfe2b9d8"
+            },
+            "mode": "normal_contact",
+            "phase_label": "HOLD_END",
+            "physics_frame": 888,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/collider_repeat/video_attempt_001/frames/overview/000888.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "829406232938b390d4e05944f5db6eb7cbeda1b11496a5c383dd72561956a2cc"
+            },
+            "retake_reason": null,
+            "time_s": 14.80000077188015,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/collider_repeat/video_attempt_001/video/collision_annotated/HOLD_END/overview_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "76bb24ba6bb757160368da4f382b9262a3d84b43ed6e396f0212fa23ea132d5b"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "HOLD_END",
+            "physics_frame": 888,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/collider_repeat/video_attempt_001/collider_overlay/HOLD_END/overview_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "9b8faacf1c546f64ef0aeed0906e26fec36f40b6cb218977bc2e714431befb37"
+            },
+            "retake_reason": null,
+            "time_s": 14.80000077188015,
+            "view": "overview",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/collider_repeat/video_attempt_001/video/collision_annotated/HOLD_END/gripper_closeup_normal_contact_annotated.png",
+              "resolution": [
+                960,
+                670
+              ],
+              "sha256": "6f7c180681ac36d7f82bb4d42b24a4505158ea9c6a7a0cea987f19f71f8a839f"
+            },
+            "mode": "normal_contact",
+            "phase_label": "HOLD_END",
+            "physics_frame": 888,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/collider_repeat/video_attempt_001/frames/gripper_closeup/000888.png",
+              "resolution": [
+                960,
+                540
+              ],
+              "sha256": "d550ea6cf0cf0c9ab6af5cf194f55df7e96902df0733226d44d4a02e75756834"
+            },
+            "retake_reason": null,
+            "time_s": 14.80000077188015,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          },
+          {
+            "annotated": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/collider_repeat/video_attempt_001/video/collision_annotated/HOLD_END/gripper_closeup_physics_collider_overlay_annotated.png",
+              "resolution": [
+                1600,
+                1130
+              ],
+              "sha256": "28163f57348f6d39c462d0ae7cf823dc3e8b168fa27a739cc7a205f951d3f207"
+            },
+            "mode": "physics_collider_overlay",
+            "phase_label": "HOLD_END",
+            "physics_frame": 888,
+            "raw": {
+              "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/collider_repeat/video_attempt_001/collider_overlay/HOLD_END/gripper_closeup_raw.png",
+              "resolution": [
+                1600,
+                1000
+              ],
+              "sha256": "f53fd06a8d25d9873914675c2829791d1ffbbcb13dafe575b6d21f4c08afe244"
+            },
+            "retake_reason": null,
+            "time_s": 14.80000077188015,
+            "view": "gripper_closeup",
+            "visual_model_review": "PASS"
+          }
+        ],
+        "status": "PASS"
+      },
+      "deterministic_signature": "99a1d622b46dfcf5cfce2432234f395bc7cc2bb096e7cda20c2b2c74bbc20243",
+      "frame_validation": {
+        "evidence_scope": "COMPLETE_SUCCESS_TRAJECTORY",
+        "first_physics_frame": 1,
+        "frame_count": 888,
+        "last_physics_frame": 888,
+        "missing_physics_frames": [],
+        "phase_frame_ranges": {
+          "BILATERAL_CONTACT": [
+            627,
+            639
+          ],
+          "CLOSE_PRELOAD": [
+            640,
+            644
+          ],
+          "HEIGHT_REACHED": [
+            768,
+            768
+          ],
+          "HOLD": [
+            769,
+            888
+          ],
+          "OPEN_PREGRASP": [
+            92,
+            573
+          ],
+          "RELEASE_DYNAMIC": [
+            62,
+            62
+          ],
+          "SETTLE": [
+            63,
+            91
+          ],
+          "SETUP_KINEMATIC": [
+            2,
+            61
+          ],
+          "VALIDATE": [
+            1,
+            1
+          ],
+          "VERTICAL_DESCENT": [
+            574,
+            626
+          ],
+          "VERTICAL_LIFT": [
+            645,
+            767
+          ]
+        },
+        "required_full_arm_links": [
+          "base",
+          "shoulder",
+          "elbow",
+          "forearm",
+          "wrist",
+          "gripper"
+        ],
+        "runtime_signature": "99a1d622b46dfcf5cfce2432234f395bc7cc2bb096e7cda20c2b2c74bbc20243",
+        "views": [
+          "overview",
+          "gripper_closeup"
+        ]
+      },
+      "machine_status": "PASS",
+      "phase_montage": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/visual_model_review/keyframe_montages/sample_05_five_phase_raw_annotated.png",
+        "sha256": "fc84a9f819ea92c4c1dd543030842b98aa1ae15c5165d037bf3c4fa9360604ad"
+      },
+      "primary_manifest": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/primary/video_attempt_001/video/candidate_manifest.json",
+        "sha256": "103a2bbb7be38113b57bce51fe0232fffab17b167ac7169c5ec65470edf86cc1"
+      },
+      "primary_runtime": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/primary/aloha1_grasp_20cm_runtime.json",
+        "sha256": "8fedcd0a57cb1aca3ff030b85ffbfaa1e79bad3c5724f0090672f688adaa8472"
+      },
+      "rejected_attempts": [],
+      "reviewed_critical_frames": {
+        "bilateral_contact": 639,
+        "height_reached": 768,
+        "hold_end": 888,
+        "initial": 61,
+        "open": 573
+      },
+      "sample_id": "sample_05",
+      "selected_evidence_reason": "FORMAL_ATTEMPT7_CAMERA_UNOBSTRUCTED",
+      "status": "PASS",
+      "user_confirmation": "NOT_RUN",
+      "videos": {
+        "annotated": {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/primary/video_attempt_001/video/aloha1_grasp_20cm_annotated_candidate.mp4",
+          "fps": 60,
+          "frame_count": 888,
+          "probe": {
+            "duration_s": 14.8,
+            "fps": 60.0,
+            "frame_count": 888,
+            "pixel_format": "yuv420p",
+            "r_frame_rate": "60/1",
+            "resolution": [
+              1440,
+              680
+            ]
+          },
+          "sha256": "2f4753fddc6715829a25cb5ddcb2d32f3748af6f5c9e6de9afee01e3c1ca98d3"
+        },
+        "raw": {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/primary/video_attempt_001/video/aloha1_grasp_20cm_raw_candidate.mp4",
+          "fps": 60,
+          "frame_count": 888,
+          "probe": {
+            "duration_s": 14.8,
+            "fps": 60.0,
+            "frame_count": 888,
+            "pixel_format": "yuv420p",
+            "r_frame_rate": "60/1",
+            "resolution": [
+              1440,
+              540
+            ]
+          },
+          "sha256": "d40741b81dcf778efe95df9c820d643b05f8dfc2ff09611e838ce3c83bdb7491"
+        }
+      },
+      "visual_model_review": "PASS"
+    }
+  ],
+  "schema_version": 1,
+  "semantic_boundaries": {
+    "contact_pose_clearance_drop_and_signature_are_authoritative": true,
+    "full_arm_collider_coverage_requires_static_and_swept_reports": true,
+    "green_overlay_does_not_alone_prove_full_arm_collider_coverage": true,
+    "no_claim_of_every_video_frame_visual_review": true,
+    "screenshots_and_video_are_auxiliary": true,
+    "task8": "NOT_RUN",
+    "tensor_velocity_disagreement_not_silently_ignored": true
+  },
+  "status": "PARTIAL",
+  "task8": "NOT_RUN",
+  "user_confirmation": "NOT_RUN",
+  "visual_model_review": "PASS"
+}

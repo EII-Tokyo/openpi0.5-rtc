@@ -180,6 +180,36 @@ def _parse_args() -> argparse.Namespace:
             "recorded run."
         ),
     )
+    parser.add_argument(
+        "--collision-evidence-only",
+        action="store_true",
+        help=(
+            "Capture only the six required normal/collider milestone pairs "
+            "during a deterministic repeat; do not encode another full video."
+        ),
+    )
+    parser.add_argument(
+        "--closeup-axial-side",
+        type=int,
+        choices=(-1, 1),
+        default=1,
+        help=(
+            "Diagnostic evidence-camera side along Bottle500 AB. "
+            "Changing this does not alter physics, IK, or the trajectory."
+        ),
+    )
+    parser.add_argument(
+        "--bottle-tensor-lifecycle",
+        choices=(
+            "BASELINE",
+            "INITIALIZE_KINEMATIC_BODIES",
+            "RECREATE_AFTER_DYNAMIC",
+        ),
+        default="BASELINE",
+        help=(
+            "One-variable Isaac 5.1 rigid-body tensor lifecycle diagnostic."
+        ),
+    )
     return parser.parse_args()
 
 
@@ -541,6 +571,12 @@ def main() -> int:
         )
     if args.autorun_abort_at_phase is not None and not args.autorun:
         raise ValueError("--autorun-abort-at-phase requires --autorun")
+    if args.collision_evidence_only and (
+        args.skip_video_capture or args.skip_collider_evidence
+    ):
+        raise ValueError(
+            "--collision-evidence-only cannot be combined with either skip flag"
+        )
 
     sys.path.insert(0, str(ROOT))
     from tools.aloha1_mapping.grasp_20cm_runtime import Grasp20cmRuntimeAdapter
@@ -645,6 +681,8 @@ def main() -> int:
                 args.additional_lift_margin_m
             ),
             capture_collider_evidence=not args.skip_collider_evidence,
+            closeup_axial_side=int(args.closeup_axial_side),
+            bottle_tensor_lifecycle=str(args.bottle_tensor_lifecycle),
         )
         adapter = Grasp20cmRuntimeAdapter(bindings=bindings)
         timeline = omni.timeline.get_timeline_interface()
@@ -787,18 +825,25 @@ def main() -> int:
                         controller.refresh_models()
                         omni.kit.app.get_app().post_quit()
                         continue
-                captured = False
-                if (
-                    not args.skip_video_capture
-                    and bindings.has_pending_video_frame
-                ):
-                    timeline.pause()
-                    captured = bindings.capture_pending_render_frame()
                 terminal = (
                     not adapter.is_running
                     and adapter.phase.value
                     in {"PASS", "FAIL", "ABORTED"}
                 )
+                captured = False
+                if (
+                    not args.skip_video_capture
+                    and bindings.has_pending_video_frame
+                ):
+                    if args.collision_evidence_only and not (
+                        bindings.pending_requires_collider_evidence(
+                            terminal=terminal
+                        )
+                    ):
+                        bindings.discard_pending_video_frame()
+                    else:
+                        timeline.pause()
+                        captured = bindings.capture_pending_render_frame()
                 if captured:
                     bindings.capture_required_collider_evidence(
                         terminal=terminal,
@@ -835,7 +880,11 @@ def main() -> int:
                     and not video_state["finalized"]
                     and video_state["error"] is None
                 ):
-                    candidate = bindings.finalize_video_capture()
+                    candidate = (
+                        bindings.finalize_collision_evidence_capture()
+                        if args.collision_evidence_only
+                        else bindings.finalize_video_capture()
+                    )
                     video_state["finalized"] = True
                     controller._set_status(  # noqa: SLF001
                         f"{adapter.phase.value}; VIDEO "
