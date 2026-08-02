@@ -77,6 +77,25 @@ def reuse_accepted_runtime_records(
             "repeat_collision_evidence_complete": (
                 repeat.get("collision_record_count") == 24
             ),
+            "primary_initialization_contract_pass": (
+                primary.get("initialization_contract_status") == "PASS"
+            ),
+            "repeat_initialization_contract_pass": (
+                repeat.get("initialization_contract_status") == "PASS"
+            ),
+            "initialization_signature_equal": (
+                primary.get("initialization_signature")
+                == repeat.get("initialization_signature")
+                and primary.get("initialization_signature") is not None
+            ),
+            "primary_finger_safety_pass": (
+                primary.get("finger_safety_status") == "PASS"
+                and primary.get("finger_safety_violation_count") == 0
+            ),
+            "repeat_finger_safety_pass": (
+                repeat.get("finger_safety_status") == "PASS"
+                and repeat.get("finger_safety_violation_count") == 0
+            ),
         }
         if not all(gates.values()):
             failed = [name for name, passed in gates.items() if not passed]
@@ -157,6 +176,25 @@ def build_five_pose_summary(
                 primary.get("deterministic_signature")
                 == repeat.get("deterministic_signature")
                 and primary.get("deterministic_signature") is not None
+            ),
+            "primary_initialization_contract_pass": (
+                primary.get("initialization_contract_status") == "PASS"
+            ),
+            "repeat_initialization_contract_pass": (
+                repeat.get("initialization_contract_status") == "PASS"
+            ),
+            "paired_initialization_signature_equal": (
+                primary.get("initialization_signature")
+                == repeat.get("initialization_signature")
+                and primary.get("initialization_signature") is not None
+            ),
+            "primary_finger_safety_pass": (
+                primary.get("finger_safety_status") == "PASS"
+                and primary.get("finger_safety_violation_count") == 0
+            ),
+            "repeat_finger_safety_pass": (
+                repeat.get("finger_safety_status") == "PASS"
+                and repeat.get("finger_safety_violation_count") == 0
             ),
         }
         evidence_gates = {
@@ -396,6 +434,11 @@ def _read_run_evidence(
     )
     expected_q = np.asarray(selected["initial_arm_q_rad"], dtype=np.float64)
     initial_pose = runtime.get("runtime", {}).get("initial_pose", {})
+    initialization_contract = runtime.get("runtime", {}).get(
+        "initialization_contract",
+        {},
+    )
+    finger_safety = runtime.get("runtime", {}).get("finger_safety", {})
     actual_q = np.asarray(
         initial_pose.get("initial_arm_q_target_rad", []),
         dtype=np.float64,
@@ -471,6 +514,14 @@ def _read_run_evidence(
         "finite_state": metrics.get("finite_state") is True,
         "task8_not_run": boundaries.get("task8") == "NOT_RUN",
         "telemetry_nonempty": telemetry_path.stat().st_size > 0,
+        "initialization_contract_pass": (
+            initialization_contract.get("status") == "PASS"
+            and initialization_contract.get("signature") is not None
+        ),
+        "finger_safety_pass": (
+            finger_safety.get("status") == "PASS"
+            and finger_safety.get("violation_count") == 0
+        ),
     }
     raw_videos = list(candidate.get("videos", []))
     if collision_repeat:
@@ -509,6 +560,16 @@ def _read_run_evidence(
             "evidence_gates": gates,
             "deterministic_signature": runtime.get(
                 "deterministic_signature"
+            ),
+            "initialization_contract_status": (
+                initialization_contract.get("status")
+            ),
+            "initialization_signature": initialization_contract.get(
+                "signature"
+            ),
+            "finger_safety_status": finger_safety.get("status"),
+            "finger_safety_violation_count": finger_safety.get(
+                "violation_count"
             ),
             "runtime_report_absolute_path": str(runtime_path.resolve()),
             "runtime_report_sha256": _sha256(runtime_path),

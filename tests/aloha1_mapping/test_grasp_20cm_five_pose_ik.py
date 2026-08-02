@@ -84,6 +84,7 @@ def _five_runtime_pass_records() -> list[dict[str, object]]:
     records = []
     for index in range(5):
         signature = f"signature-{index}"
+        initialization_signature = f"initialization-{index}"
         records.append(
             {
                 "sample_id": f"sample_{index + 1:02d}",
@@ -93,6 +94,10 @@ def _five_runtime_pass_records() -> list[dict[str, object]]:
                     "machine_status": "PASS",
                     "evidence_status": "PASS",
                     "deterministic_signature": signature,
+                    "initialization_contract_status": "PASS",
+                    "initialization_signature": initialization_signature,
+                    "finger_safety_status": "PASS",
+                    "finger_safety_violation_count": 0,
                     "video_count": 2,
                 },
                 "collider_repeat": {
@@ -101,6 +106,10 @@ def _five_runtime_pass_records() -> list[dict[str, object]]:
                     "machine_status": "PASS",
                     "evidence_status": "PASS",
                     "deterministic_signature": signature,
+                    "initialization_contract_status": "PASS",
+                    "initialization_signature": initialization_signature,
+                    "finger_safety_status": "PASS",
+                    "finger_safety_violation_count": 0,
                     "collision_record_count": 24,
                 },
                 "visual_review_status": "NOT_REVIEWED",
@@ -395,6 +404,14 @@ def test_interrupted_runtime_resume_rejects_incomplete_collision_evidence() -> N
     source["samples"][2]["collider_repeat"]["collision_record_count"] = 23
 
     with pytest.raises(ValueError, match="not a complete success: sample_03"):
+        resume_verified_runtime_records(source)
+
+
+def test_interrupted_runtime_resume_rejects_missing_initialization_contract() -> None:
+    source = {"samples": _five_runtime_pass_records()[:3]}
+    source["samples"][1]["primary"].pop("initialization_signature")
+
+    with pytest.raises(ValueError, match="initialization"):
         resume_verified_runtime_records(source)
 
 
@@ -722,6 +739,19 @@ def test_one_runtime_failure_cannot_be_hidden_by_visual_pass() -> None:
     assert summary["machine_status"] == "FAIL"
     assert summary["status"] == "FAIL"
     assert summary["failed_sample_ids"] == ["sample_04"]
+
+
+def test_five_pose_summary_rejects_runtime_finger_violation() -> None:
+    records = _five_runtime_pass_records()
+    records[1]["primary"]["finger_safety_status"] = "FAIL"
+    records[1]["primary"]["finger_safety_violation_count"] = 1
+
+    summary = build_five_pose_summary(records)
+
+    assert summary["machine_status"] == "FAIL"
+    assert summary["per_sample_gates"][1]["machine_gates"][
+        "primary_finger_safety_pass"
+    ] is False
 
 
 def test_video_failure_does_not_erase_physics_machine_pass() -> None:
