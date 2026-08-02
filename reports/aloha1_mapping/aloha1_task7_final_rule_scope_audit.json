@@ -1,0 +1,1838 @@
+{
+  "correct_targets": {
+    "IsaacSim.PhysicsRules.bottle": "standalone Bottle500 rigid-body asset",
+    "IsaacSim.PhysicsRules.robot": "standalone physical robot asset, one follower at a time",
+    "IsaacSim.PhysicsRules.table": "standalone static table/environment asset",
+    "IsaacSim.PhysicsRules.workcell": "only rules whose source explicitly traverses and is meaningful for all composed bodies/joints",
+    "IsaacSim.RobotRules": "standalone Robot.usd/package whose defaultPrim is the one robot RobotAPI root",
+    "IsaacSim.SimReadyAssetRules": "composed frozen workcell review Stage"
+  },
+  "installed_rule_sources": {
+    "joint_rules.py": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.validation/isaacsim/asset/validation/joint_rules.py",
+      "sha256": "6dc43a4ed0284f61d85d22c5c24775e40c5f373facdc408236a25385109ab1ef"
+    },
+    "physics_rules.py": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.validation/isaacsim/asset/validation/physics_rules.py",
+      "sha256": "85bbe0873043eb3b229c87551b10d6e0117709e3e0f1db613b070c5540dae067"
+    },
+    "robot_rules.py": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.validation/isaacsim/asset/validation/robot_rules.py",
+      "sha256": "1fa939582107d25d4f4de14c618efac078124f6695d09179996faa25253acbb6"
+    }
+  },
+  "original_reports": {
+    "physics": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_cad_derived_zup_official_physics_rules.json",
+      "sha256": "2afead17fbbd51429a6cfaaab757cd5cfbc6c9dba96cfbe0662ba4be728f1402"
+    },
+    "robot": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_cad_derived_zup_official_robot_rules.json",
+      "sha256": "b649bd21557806fe4950b27fb450d9b47f15969ceddcaa7208da432e8d68733c"
+    }
+  },
+  "physics_rows": [
+    {
+      "applicable_to_current_target": true,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "TRUE_ASSET_DEFECT",
+      "evidence": "The installed rule is applicable to this enabled body/joint and the literal finding remains unsuppressed on the correct physical target.",
+      "literal_message": "Joint /World/follower_left/vx300s_left/joints/elbow state not matching robot pose (0.0). From body 0: [(0, 1, 0) 66.46310424804689], from body 1: [(1, 0, 0) 0]",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "JointHasCorrectTransformAndState.CheckPrim",
+        "condition": "For revolute/prismatic joints with valid body0/body1, compare the joint-state-adjusted body0 joint frame with the body1 joint frame.",
+        "file": "isaacsim/asset/validation/joint_rules.py",
+        "line": 36
+      },
+      "rule_family": "IsaacSim.PhysicsRules",
+      "rule_name": "JointHasCorrectTransformAndState",
+      "source_index": 0,
+      "target_prim_path": "Prim </World/follower_left/vx300s_left/joints/elbow>",
+      "task7_blocking": true
+    },
+    {
+      "applicable_to_current_target": true,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "TRUE_ASSET_DEFECT",
+      "evidence": "The installed rule is applicable to this enabled body/joint and the literal finding remains unsuppressed on the correct physical target.",
+      "literal_message": "Joint /World/follower_left/vx300s_left/joints/left_finger state not matching robot pose(0.022390000522136688). From body 0: (0.028493975877761868, 0.0033900005221366887, 0.44705002427101137), from body 1: (0.028493975877761868, -0.019, 0.44705002427101137)",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "JointHasCorrectTransformAndState.CheckPrim",
+        "condition": "For revolute/prismatic joints with valid body0/body1, compare the joint-state-adjusted body0 joint frame with the body1 joint frame.",
+        "file": "isaacsim/asset/validation/joint_rules.py",
+        "line": 36
+      },
+      "rule_family": "IsaacSim.PhysicsRules",
+      "rule_name": "JointHasCorrectTransformAndState",
+      "source_index": 1,
+      "target_prim_path": "Prim </World/follower_left/vx300s_left/joints/left_finger>",
+      "task7_blocking": true
+    },
+    {
+      "applicable_to_current_target": true,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "TRUE_ASSET_DEFECT",
+      "evidence": "The installed rule is applicable to this enabled body/joint and the literal finding remains unsuppressed on the correct physical target.",
+      "literal_message": "Joint /World/follower_left/vx300s_left/joints/right_finger state not matching robot pose(0.02239000052213669). From body 0: (0.028493975877761868, -0.04139000052213669, 0.44705002427101137), from body 1: (0.028493975877761868, -0.019, 0.44705002427101137)",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "JointHasCorrectTransformAndState.CheckPrim",
+        "condition": "For revolute/prismatic joints with valid body0/body1, compare the joint-state-adjusted body0 joint frame with the body1 joint frame.",
+        "file": "isaacsim/asset/validation/joint_rules.py",
+        "line": 36
+      },
+      "rule_family": "IsaacSim.PhysicsRules",
+      "rule_name": "JointHasCorrectTransformAndState",
+      "source_index": 2,
+      "target_prim_path": "Prim </World/follower_left/vx300s_left/joints/right_finger>",
+      "task7_blocking": true
+    },
+    {
+      "applicable_to_current_target": true,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "TRUE_ASSET_DEFECT",
+      "evidence": "The installed rule is applicable to this enabled body/joint and the literal finding remains unsuppressed on the correct physical target.",
+      "literal_message": "Joint /World/follower_left/vx300s_left/joints/shoulder state not matching robot pose (0.0). From body 0: [(0, -1, 0) 55.003948211669915], from body 1: [(1, 0, 0) 0]",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "JointHasCorrectTransformAndState.CheckPrim",
+        "condition": "For revolute/prismatic joints with valid body0/body1, compare the joint-state-adjusted body0 joint frame with the body1 joint frame.",
+        "file": "isaacsim/asset/validation/joint_rules.py",
+        "line": 36
+      },
+      "rule_family": "IsaacSim.PhysicsRules",
+      "rule_name": "JointHasCorrectTransformAndState",
+      "source_index": 3,
+      "target_prim_path": "Prim </World/follower_left/vx300s_left/joints/shoulder>",
+      "task7_blocking": true
+    },
+    {
+      "applicable_to_current_target": true,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "TRUE_ASSET_DEFECT",
+      "evidence": "The installed rule is applicable to this enabled body/joint and the literal finding remains unsuppressed on the correct physical target.",
+      "literal_message": "Joint /World/follower_left/vx300s_left/joints/wrist_angle state not matching robot pose (0.0). From body 0: [(0, -0.9999999999999999, 0) 17.188734054565412], from body 1: [(1, 0, 0) 0]",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "JointHasCorrectTransformAndState.CheckPrim",
+        "condition": "For revolute/prismatic joints with valid body0/body1, compare the joint-state-adjusted body0 joint frame with the body1 joint frame.",
+        "file": "isaacsim/asset/validation/joint_rules.py",
+        "line": 36
+      },
+      "rule_family": "IsaacSim.PhysicsRules",
+      "rule_name": "JointHasCorrectTransformAndState",
+      "source_index": 4,
+      "target_prim_path": "Prim </World/follower_left/vx300s_left/joints/wrist_angle>",
+      "task7_blocking": true
+    },
+    {
+      "applicable_to_current_target": true,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "TRUE_ASSET_DEFECT",
+      "evidence": "The installed rule is applicable to this enabled body/joint and the literal finding remains unsuppressed on the correct physical target.",
+      "literal_message": "Joint /World/follower_right/vx300s_right/joints/elbow state not matching robot pose (0.0). From body 0: [(-0.5480239368858285, 3.355678800816805e-17, 0.8364626498536308) 180], from body 1: [(0, 0, 1) 180]",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "JointHasCorrectTransformAndState.CheckPrim",
+        "condition": "For revolute/prismatic joints with valid body0/body1, compare the joint-state-adjusted body0 joint frame with the body1 joint frame.",
+        "file": "isaacsim/asset/validation/joint_rules.py",
+        "line": 36
+      },
+      "rule_family": "IsaacSim.PhysicsRules",
+      "rule_name": "JointHasCorrectTransformAndState",
+      "source_index": 5,
+      "target_prim_path": "Prim </World/follower_right/vx300s_right/joints/elbow>",
+      "task7_blocking": true
+    },
+    {
+      "applicable_to_current_target": true,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "TRUE_ASSET_DEFECT",
+      "evidence": "The installed rule is applicable to this enabled body/joint and the literal finding remains unsuppressed on the correct physical target.",
+      "literal_message": "Joint /World/follower_right/vx300s_right/joints/left_finger state not matching robot pose(0.022390000522136685). From body 0: (-0.02849397587776187, -0.04139000052213662, 0.44705002427101137), from body 1: (-0.028493975877761868, -0.018999999999999937, 0.44705002427101137)",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "JointHasCorrectTransformAndState.CheckPrim",
+        "condition": "For revolute/prismatic joints with valid body0/body1, compare the joint-state-adjusted body0 joint frame with the body1 joint frame.",
+        "file": "isaacsim/asset/validation/joint_rules.py",
+        "line": 36
+      },
+      "rule_family": "IsaacSim.PhysicsRules",
+      "rule_name": "JointHasCorrectTransformAndState",
+      "source_index": 6,
+      "target_prim_path": "Prim </World/follower_right/vx300s_right/joints/left_finger>",
+      "task7_blocking": true
+    },
+    {
+      "applicable_to_current_target": true,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "TRUE_ASSET_DEFECT",
+      "evidence": "The installed rule is applicable to this enabled body/joint and the literal finding remains unsuppressed on the correct physical target.",
+      "literal_message": "Joint /World/follower_right/vx300s_right/joints/right_finger state not matching robot pose(0.022390000522136688). From body 0: (-0.028493975877761864, 0.003390000522136751, 0.44705002427101137), from body 1: (-0.028493975877761868, -0.018999999999999937, 0.44705002427101137)",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "JointHasCorrectTransformAndState.CheckPrim",
+        "condition": "For revolute/prismatic joints with valid body0/body1, compare the joint-state-adjusted body0 joint frame with the body1 joint frame.",
+        "file": "isaacsim/asset/validation/joint_rules.py",
+        "line": 36
+      },
+      "rule_family": "IsaacSim.PhysicsRules",
+      "rule_name": "JointHasCorrectTransformAndState",
+      "source_index": 7,
+      "target_prim_path": "Prim </World/follower_right/vx300s_right/joints/right_finger>",
+      "task7_blocking": true
+    },
+    {
+      "applicable_to_current_target": true,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "TRUE_ASSET_DEFECT",
+      "evidence": "The installed rule is applicable to this enabled body/joint and the literal finding remains unsuppressed on the correct physical target.",
+      "literal_message": "Joint /World/follower_right/vx300s_right/joints/shoulder state not matching robot pose (0.0). From body 0: [(0.46177917460574186, -2.8275819404691425e-17, 0.8869949232664411) 180], from body 1: [(0, 0, 1) 180]",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "JointHasCorrectTransformAndState.CheckPrim",
+        "condition": "For revolute/prismatic joints with valid body0/body1, compare the joint-state-adjusted body0 joint frame with the body1 joint frame.",
+        "file": "isaacsim/asset/validation/joint_rules.py",
+        "line": 36
+      },
+      "rule_family": "IsaacSim.PhysicsRules",
+      "rule_name": "JointHasCorrectTransformAndState",
+      "source_index": 8,
+      "target_prim_path": "Prim </World/follower_right/vx300s_right/joints/shoulder>",
+      "task7_blocking": true
+    },
+    {
+      "applicable_to_current_target": true,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "TRUE_ASSET_DEFECT",
+      "evidence": "The installed rule is applicable to this enabled body/joint and the literal finding remains unsuppressed on the correct physical target.",
+      "literal_message": "Joint /World/follower_right/vx300s_right/joints/wrist_angle state not matching robot pose (0.0). From body 0: [(0.149438134204859, -9.150446636226658e-18, 0.988771077674388) 180], from body 1: [(0, 0, 1) 180]",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "JointHasCorrectTransformAndState.CheckPrim",
+        "condition": "For revolute/prismatic joints with valid body0/body1, compare the joint-state-adjusted body0 joint frame with the body1 joint frame.",
+        "file": "isaacsim/asset/validation/joint_rules.py",
+        "line": 36
+      },
+      "rule_family": "IsaacSim.PhysicsRules",
+      "rule_name": "JointHasCorrectTransformAndState",
+      "source_index": 9,
+      "target_prim_path": "Prim </World/follower_right/vx300s_right/joints/wrist_angle>",
+      "task7_blocking": true
+    },
+    {
+      "applicable_to_current_target": true,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "INCONCLUSIVE",
+      "evidence": "The literal signed-limit error remains on both standalone robots, while the validated runtime mimic motion is symmetric. No source-backed mimic mutation is authorized.",
+      "literal_message": "Joint /World/follower_left/vx300s_left/joints/right_finger's lower limit (-0.013799999840557575) should be > reference joint limits * gear ratio(0.020999999716877937)",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "MimicAPICheck.CheckPrim",
+        "condition": "For each PhysxMimicJointAPI instance, require one reference, finite mimic parameters, and limits accepted by the signed-gearing branch.",
+        "file": "isaacsim/asset/validation/joint_rules.py",
+        "line": 253
+      },
+      "rule_family": "IsaacSim.PhysicsRules",
+      "rule_name": "MimicAPICheck",
+      "source_index": 10,
+      "target_prim_path": "Prim </World/follower_left/vx300s_left/joints/right_finger>",
+      "task7_blocking": true
+    },
+    {
+      "applicable_to_current_target": true,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "INCONCLUSIVE",
+      "evidence": "The literal signed-limit error remains on both standalone robots, while the validated runtime mimic motion is symmetric. No source-backed mimic mutation is authorized.",
+      "literal_message": "Joint /World/follower_right/vx300s_right/joints/right_finger's lower limit (-0.013799999840557575) should be > reference joint limits * gear ratio(0.020999999716877937)",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "MimicAPICheck.CheckPrim",
+        "condition": "For each PhysxMimicJointAPI instance, require one reference, finite mimic parameters, and limits accepted by the signed-gearing branch.",
+        "file": "isaacsim/asset/validation/joint_rules.py",
+        "line": 253
+      },
+      "rule_family": "IsaacSim.PhysicsRules",
+      "rule_name": "MimicAPICheck",
+      "source_index": 11,
+      "target_prim_path": "Prim </World/follower_right/vx300s_right/joints/right_finger>",
+      "task7_blocking": true
+    },
+    {
+      "applicable_to_current_target": true,
+      "asset_owner": "diagnostic layer",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "TRUE_ASSET_DEFECT",
+      "evidence": "The installed rule is applicable to this enabled body/joint and the literal finding remains unsuppressed on the correct physical target.",
+      "literal_message": "Rigid body /World/environment/worldBody/_ has rigid body api but no collision api",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "RigidBodyHasCollider.CheckPrim",
+        "condition": "Every enabled UsdPhysics.RigidBodyAPI prim must contain at least one UsdPhysics.CollisionAPI prim in its traversed subtree.",
+        "file": "isaacsim/asset/validation/physics_rules.py",
+        "line": 104
+      },
+      "rule_family": "IsaacSim.PhysicsRules",
+      "rule_name": "RigidBodyHasCollider",
+      "source_index": 12,
+      "target_prim_path": "Prim </World/environment/worldBody/_>",
+      "task7_blocking": true
+    },
+    {
+      "applicable_to_current_target": true,
+      "asset_owner": "diagnostic layer",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "TRUE_ASSET_DEFECT",
+      "evidence": "The installed rule is applicable to this enabled body/joint and the literal finding remains unsuppressed on the correct physical target.",
+      "literal_message": "Rigid body /World/environment/worldBody/__1 has rigid body api but no collision api",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "RigidBodyHasCollider.CheckPrim",
+        "condition": "Every enabled UsdPhysics.RigidBodyAPI prim must contain at least one UsdPhysics.CollisionAPI prim in its traversed subtree.",
+        "file": "isaacsim/asset/validation/physics_rules.py",
+        "line": 104
+      },
+      "rule_family": "IsaacSim.PhysicsRules",
+      "rule_name": "RigidBodyHasCollider",
+      "source_index": 13,
+      "target_prim_path": "Prim </World/environment/worldBody/__1>",
+      "task7_blocking": true
+    },
+    {
+      "applicable_to_current_target": true,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "TRUE_ASSET_DEFECT",
+      "evidence": "The installed rule is applicable to this enabled body/joint and the literal finding remains unsuppressed on the correct physical target.",
+      "literal_message": "Rigid body /World/follower_left/vx300s_left/follower_left_ee_arm_link has rigid body api but no collision api",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "RigidBodyHasCollider.CheckPrim",
+        "condition": "Every enabled UsdPhysics.RigidBodyAPI prim must contain at least one UsdPhysics.CollisionAPI prim in its traversed subtree.",
+        "file": "isaacsim/asset/validation/physics_rules.py",
+        "line": 104
+      },
+      "rule_family": "IsaacSim.PhysicsRules",
+      "rule_name": "RigidBodyHasCollider",
+      "source_index": 14,
+      "target_prim_path": "Prim </World/follower_left/vx300s_left/follower_left_ee_arm_link>",
+      "task7_blocking": true
+    },
+    {
+      "applicable_to_current_target": true,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "TRUE_ASSET_DEFECT",
+      "evidence": "The installed rule is applicable to this enabled body/joint and the literal finding remains unsuppressed on the correct physical target.",
+      "literal_message": "Rigid body /World/follower_left/vx300s_left/follower_left_ee_gripper_link has rigid body api but no collision api",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "RigidBodyHasCollider.CheckPrim",
+        "condition": "Every enabled UsdPhysics.RigidBodyAPI prim must contain at least one UsdPhysics.CollisionAPI prim in its traversed subtree.",
+        "file": "isaacsim/asset/validation/physics_rules.py",
+        "line": 104
+      },
+      "rule_family": "IsaacSim.PhysicsRules",
+      "rule_name": "RigidBodyHasCollider",
+      "source_index": 15,
+      "target_prim_path": "Prim </World/follower_left/vx300s_left/follower_left_ee_gripper_link>",
+      "task7_blocking": true
+    },
+    {
+      "applicable_to_current_target": true,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "TRUE_ASSET_DEFECT",
+      "evidence": "The installed rule is applicable to this enabled body/joint and the literal finding remains unsuppressed on the correct physical target.",
+      "literal_message": "Rigid body /World/follower_left/vx300s_left/follower_left_fingers_link has rigid body api but no collision api",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "RigidBodyHasCollider.CheckPrim",
+        "condition": "Every enabled UsdPhysics.RigidBodyAPI prim must contain at least one UsdPhysics.CollisionAPI prim in its traversed subtree.",
+        "file": "isaacsim/asset/validation/physics_rules.py",
+        "line": 104
+      },
+      "rule_family": "IsaacSim.PhysicsRules",
+      "rule_name": "RigidBodyHasCollider",
+      "source_index": 16,
+      "target_prim_path": "Prim </World/follower_left/vx300s_left/follower_left_fingers_link>",
+      "task7_blocking": true
+    },
+    {
+      "applicable_to_current_target": true,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "TRUE_ASSET_DEFECT",
+      "evidence": "The installed rule is applicable to this enabled body/joint and the literal finding remains unsuppressed on the correct physical target.",
+      "literal_message": "Rigid body /World/follower_left/vx300s_left/follower_left_gripper_bar_link has rigid body api but no collision api",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "RigidBodyHasCollider.CheckPrim",
+        "condition": "Every enabled UsdPhysics.RigidBodyAPI prim must contain at least one UsdPhysics.CollisionAPI prim in its traversed subtree.",
+        "file": "isaacsim/asset/validation/physics_rules.py",
+        "line": 104
+      },
+      "rule_family": "IsaacSim.PhysicsRules",
+      "rule_name": "RigidBodyHasCollider",
+      "source_index": 17,
+      "target_prim_path": "Prim </World/follower_left/vx300s_left/follower_left_gripper_bar_link>",
+      "task7_blocking": true
+    },
+    {
+      "applicable_to_current_target": true,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "TRUE_ASSET_DEFECT",
+      "evidence": "The installed rule is applicable to this enabled body/joint and the literal finding remains unsuppressed on the correct physical target.",
+      "literal_message": "Rigid body /World/follower_right/vx300s_right/follower_right_ee_arm_link has rigid body api but no collision api",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "RigidBodyHasCollider.CheckPrim",
+        "condition": "Every enabled UsdPhysics.RigidBodyAPI prim must contain at least one UsdPhysics.CollisionAPI prim in its traversed subtree.",
+        "file": "isaacsim/asset/validation/physics_rules.py",
+        "line": 104
+      },
+      "rule_family": "IsaacSim.PhysicsRules",
+      "rule_name": "RigidBodyHasCollider",
+      "source_index": 18,
+      "target_prim_path": "Prim </World/follower_right/vx300s_right/follower_right_ee_arm_link>",
+      "task7_blocking": true
+    },
+    {
+      "applicable_to_current_target": true,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "TRUE_ASSET_DEFECT",
+      "evidence": "The installed rule is applicable to this enabled body/joint and the literal finding remains unsuppressed on the correct physical target.",
+      "literal_message": "Rigid body /World/follower_right/vx300s_right/follower_right_ee_gripper_link has rigid body api but no collision api",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "RigidBodyHasCollider.CheckPrim",
+        "condition": "Every enabled UsdPhysics.RigidBodyAPI prim must contain at least one UsdPhysics.CollisionAPI prim in its traversed subtree.",
+        "file": "isaacsim/asset/validation/physics_rules.py",
+        "line": 104
+      },
+      "rule_family": "IsaacSim.PhysicsRules",
+      "rule_name": "RigidBodyHasCollider",
+      "source_index": 19,
+      "target_prim_path": "Prim </World/follower_right/vx300s_right/follower_right_ee_gripper_link>",
+      "task7_blocking": true
+    },
+    {
+      "applicable_to_current_target": true,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "TRUE_ASSET_DEFECT",
+      "evidence": "The installed rule is applicable to this enabled body/joint and the literal finding remains unsuppressed on the correct physical target.",
+      "literal_message": "Rigid body /World/follower_right/vx300s_right/follower_right_fingers_link has rigid body api but no collision api",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "RigidBodyHasCollider.CheckPrim",
+        "condition": "Every enabled UsdPhysics.RigidBodyAPI prim must contain at least one UsdPhysics.CollisionAPI prim in its traversed subtree.",
+        "file": "isaacsim/asset/validation/physics_rules.py",
+        "line": 104
+      },
+      "rule_family": "IsaacSim.PhysicsRules",
+      "rule_name": "RigidBodyHasCollider",
+      "source_index": 20,
+      "target_prim_path": "Prim </World/follower_right/vx300s_right/follower_right_fingers_link>",
+      "task7_blocking": true
+    },
+    {
+      "applicable_to_current_target": true,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "TRUE_ASSET_DEFECT",
+      "evidence": "The installed rule is applicable to this enabled body/joint and the literal finding remains unsuppressed on the correct physical target.",
+      "literal_message": "Rigid body /World/follower_right/vx300s_right/follower_right_gripper_bar_link has rigid body api but no collision api",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "RigidBodyHasCollider.CheckPrim",
+        "condition": "Every enabled UsdPhysics.RigidBodyAPI prim must contain at least one UsdPhysics.CollisionAPI prim in its traversed subtree.",
+        "file": "isaacsim/asset/validation/physics_rules.py",
+        "line": 104
+      },
+      "rule_family": "IsaacSim.PhysicsRules",
+      "rule_name": "RigidBodyHasCollider",
+      "source_index": 21,
+      "target_prim_path": "Prim </World/follower_right/vx300s_right/follower_right_gripper_bar_link>",
+      "task7_blocking": true
+    },
+    {
+      "applicable_to_current_target": true,
+      "asset_owner": "workcell wrapper",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "INCONCLUSIVE",
+      "evidence": "Asset Validation 1.1.0 raised an internal exception without a target prim; the affected prim cannot be attributed from this issue record.",
+      "literal_message": "Uncaught error: 'NoneType' object is not subscriptable",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "RigidBodyHasMassAPI.CheckStage/check_rigid_body_prim",
+        "condition": "Traverse every RigidBodyAPI prim and require MassAPI plus authored mass, diagonal inertia, and principal axes.",
+        "file": "isaacsim/asset/validation/physics_rules.py",
+        "line": 29
+      },
+      "rule_family": "IsaacSim.PhysicsRules",
+      "rule_name": "RigidBodyHasMassAPI",
+      "source_index": 22,
+      "target_prim_path": null,
+      "task7_blocking": true
+    },
+    {
+      "applicable_to_current_target": true,
+      "asset_owner": "table",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "TRUE_ASSET_DEFECT",
+      "evidence": "The installed rule is applicable to this enabled body/joint and the literal finding remains unsuppressed on the correct physical target.",
+      "literal_message": "Rigid body /World/environment/worldBody/floor has mass api but no diagonal inertia attr",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "RigidBodyHasMassAPI.CheckStage/check_rigid_body_prim",
+        "condition": "Traverse every RigidBodyAPI prim and require MassAPI plus authored mass, diagonal inertia, and principal axes.",
+        "file": "isaacsim/asset/validation/physics_rules.py",
+        "line": 29
+      },
+      "rule_family": "IsaacSim.PhysicsRules",
+      "rule_name": "RigidBodyHasMassAPI",
+      "source_index": 23,
+      "target_prim_path": "Prim </World/environment/worldBody/floor>",
+      "task7_blocking": true
+    },
+    {
+      "applicable_to_current_target": true,
+      "asset_owner": "table",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "TRUE_ASSET_DEFECT",
+      "evidence": "The installed rule is applicable to this enabled body/joint and the literal finding remains unsuppressed on the correct physical target.",
+      "literal_message": "Rigid body /World/environment/worldBody/floor has mass api but no mass attr",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "RigidBodyHasMassAPI.CheckStage/check_rigid_body_prim",
+        "condition": "Traverse every RigidBodyAPI prim and require MassAPI plus authored mass, diagonal inertia, and principal axes.",
+        "file": "isaacsim/asset/validation/physics_rules.py",
+        "line": 29
+      },
+      "rule_family": "IsaacSim.PhysicsRules",
+      "rule_name": "RigidBodyHasMassAPI",
+      "source_index": 24,
+      "target_prim_path": "Prim </World/environment/worldBody/floor>",
+      "task7_blocking": true
+    },
+    {
+      "applicable_to_current_target": true,
+      "asset_owner": "table",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "TRUE_ASSET_DEFECT",
+      "evidence": "The installed rule is applicable to this enabled body/joint and the literal finding remains unsuppressed on the correct physical target.",
+      "literal_message": "Rigid body /World/environment/worldBody/floor has rigid body api but no mass api",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "RigidBodyHasMassAPI.CheckStage/check_rigid_body_prim",
+        "condition": "Traverse every RigidBodyAPI prim and require MassAPI plus authored mass, diagonal inertia, and principal axes.",
+        "file": "isaacsim/asset/validation/physics_rules.py",
+        "line": 29
+      },
+      "rule_family": "IsaacSim.PhysicsRules",
+      "rule_name": "RigidBodyHasMassAPI",
+      "source_index": 25,
+      "target_prim_path": "Prim </World/environment/worldBody/floor>",
+      "task7_blocking": true
+    }
+  ],
+  "robot_rows": [
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "diagnostic layer",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/environment/worldBody/user_confirmed_table, ['xformOp:scale', 'xformOp:translate', 'xformOpOrder']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 0,
+      "target_prim_path": "Prim </World/environment/worldBody/user_confirmed_table>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_left/vx300s_left/follower_left_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh, ['faceVertexCounts', 'faceVertexIndices', 'physics:approximation', 'physics:collisionEnabled', 'points', 'purpose', 'subdivisionScheme']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 1,
+      "target_prim_path": "Prim </World/follower_left/vx300s_left/follower_left_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_left/vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_000/mesh, ['faceVertexCounts', 'faceVertexIndices', 'physics:approximation', 'physics:collisionEnabled', 'points', 'purpose', 'subdivisionScheme']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 2,
+      "target_prim_path": "Prim </World/follower_left/vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_000/mesh>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_left/vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_001/mesh, ['faceVertexCounts', 'faceVertexIndices', 'physics:approximation', 'physics:collisionEnabled', 'points', 'purpose', 'subdivisionScheme']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 3,
+      "target_prim_path": "Prim </World/follower_left/vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_001/mesh>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_left/vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_002/mesh, ['faceVertexCounts', 'faceVertexIndices', 'physics:approximation', 'physics:collisionEnabled', 'points', 'purpose', 'subdivisionScheme']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 4,
+      "target_prim_path": "Prim </World/follower_left/vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_002/mesh>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_left/vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_003/mesh, ['faceVertexCounts', 'faceVertexIndices', 'physics:approximation', 'physics:collisionEnabled', 'points', 'purpose', 'subdivisionScheme']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 5,
+      "target_prim_path": "Prim </World/follower_left/vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_003/mesh>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_left/vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_004/mesh, ['faceVertexCounts', 'faceVertexIndices', 'physics:approximation', 'physics:collisionEnabled', 'points', 'purpose', 'subdivisionScheme']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 6,
+      "target_prim_path": "Prim </World/follower_left/vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_004/mesh>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_left/vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_005/mesh, ['faceVertexCounts', 'faceVertexIndices', 'physics:approximation', 'physics:collisionEnabled', 'points', 'purpose', 'subdivisionScheme']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 7,
+      "target_prim_path": "Prim </World/follower_left/vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_005/mesh>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_left/vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_006/mesh, ['faceVertexCounts', 'faceVertexIndices', 'physics:approximation', 'physics:collisionEnabled', 'points', 'purpose', 'subdivisionScheme']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 8,
+      "target_prim_path": "Prim </World/follower_left/vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_006/mesh>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_left/vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_007/mesh, ['faceVertexCounts', 'faceVertexIndices', 'physics:approximation', 'physics:collisionEnabled', 'points', 'purpose', 'subdivisionScheme']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 9,
+      "target_prim_path": "Prim </World/follower_left/vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_007/mesh>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_left/vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_008/mesh, ['faceVertexCounts', 'faceVertexIndices', 'physics:approximation', 'physics:collisionEnabled', 'points', 'purpose', 'subdivisionScheme']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 10,
+      "target_prim_path": "Prim </World/follower_left/vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_008/mesh>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_left/vx300s_left/follower_left_gripper_prop_link/materialized_baseline_fallback/gripper_prop_link/mesh, ['faceVertexCounts', 'faceVertexIndices', 'physics:approximation', 'physics:collisionEnabled', 'points', 'purpose', 'subdivisionScheme']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 11,
+      "target_prim_path": "Prim </World/follower_left/vx300s_left/follower_left_gripper_prop_link/materialized_baseline_fallback/gripper_prop_link/mesh>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_left/vx300s_left/follower_left_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh, ['faceVertexCounts', 'faceVertexIndices', 'physics:approximation', 'physics:collisionEnabled', 'points', 'purpose', 'subdivisionScheme']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 12,
+      "target_prim_path": "Prim </World/follower_left/vx300s_left/follower_left_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh, ['faceVertexCounts', 'faceVertexIndices', 'physics:approximation', 'physics:collisionEnabled', 'points', 'purpose', 'subdivisionScheme']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 13,
+      "target_prim_path": "Prim </World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh, ['faceVertexCounts', 'faceVertexIndices', 'physics:approximation', 'physics:collisionEnabled', 'points', 'purpose', 'subdivisionScheme']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 14,
+      "target_prim_path": "Prim </World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_001/mesh, ['faceVertexCounts', 'faceVertexIndices', 'physics:approximation', 'physics:collisionEnabled', 'points', 'purpose', 'subdivisionScheme']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 15,
+      "target_prim_path": "Prim </World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_001/mesh>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_002/mesh, ['faceVertexCounts', 'faceVertexIndices', 'physics:approximation', 'physics:collisionEnabled', 'points', 'purpose', 'subdivisionScheme']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 16,
+      "target_prim_path": "Prim </World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_002/mesh>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_003/mesh, ['faceVertexCounts', 'faceVertexIndices', 'physics:approximation', 'physics:collisionEnabled', 'points', 'purpose', 'subdivisionScheme']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 17,
+      "target_prim_path": "Prim </World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_003/mesh>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_left/vx300s_left/follower_left_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh, ['faceVertexCounts', 'faceVertexIndices', 'physics:approximation', 'physics:collisionEnabled', 'points', 'purpose', 'subdivisionScheme']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 18,
+      "target_prim_path": "Prim </World/follower_left/vx300s_left/follower_left_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_left/vx300s_left/follower_left_wrist_link/materialized_baseline_fallback/wrist_link/mesh, ['faceVertexCounts', 'faceVertexIndices', 'physics:approximation', 'physics:collisionEnabled', 'points', 'purpose', 'subdivisionScheme']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 19,
+      "target_prim_path": "Prim </World/follower_left/vx300s_left/follower_left_wrist_link/materialized_baseline_fallback/wrist_link/mesh>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_left/vx300s_left/joints/elbow, ['drive:angular:physics:targetPosition', 'state:angular:physics:position']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 20,
+      "target_prim_path": "Prim </World/follower_left/vx300s_left/joints/elbow>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_left/vx300s_left/joints/forearm_roll, ['drive:angular:physics:targetPosition', 'state:angular:physics:position']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 21,
+      "target_prim_path": "Prim </World/follower_left/vx300s_left/joints/forearm_roll>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_left/vx300s_left/joints/gripper, ['drive:angular:physics:targetPosition', 'state:angular:physics:position']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 22,
+      "target_prim_path": "Prim </World/follower_left/vx300s_left/joints/gripper>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_left/vx300s_left/joints/left_finger, ['drive:linear:physics:targetPosition', 'state:linear:physics:position']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 23,
+      "target_prim_path": "Prim </World/follower_left/vx300s_left/joints/left_finger>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_left/vx300s_left/joints/right_finger, ['state:linear:physics:position']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 24,
+      "target_prim_path": "Prim </World/follower_left/vx300s_left/joints/right_finger>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_left/vx300s_left/joints/shoulder, ['drive:angular:physics:targetPosition', 'state:angular:physics:position']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 25,
+      "target_prim_path": "Prim </World/follower_left/vx300s_left/joints/shoulder>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_left/vx300s_left/joints/waist, ['drive:angular:physics:targetPosition', 'state:angular:physics:position']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 26,
+      "target_prim_path": "Prim </World/follower_left/vx300s_left/joints/waist>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_left/vx300s_left/joints/wrist_angle, ['drive:angular:physics:targetPosition', 'state:angular:physics:position']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 27,
+      "target_prim_path": "Prim </World/follower_left/vx300s_left/joints/wrist_angle>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_left/vx300s_left/joints/wrist_rotate, ['drive:angular:physics:targetPosition', 'state:angular:physics:position']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 28,
+      "target_prim_path": "Prim </World/follower_left/vx300s_left/joints/wrist_rotate>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_left, ['xformOp:rotateXYZ', 'xformOp:translate', 'xformOpOrder']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 29,
+      "target_prim_path": "Prim </World/follower_left>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_right/vx300s_right/follower_right_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh, ['faceVertexCounts', 'faceVertexIndices', 'physics:approximation', 'physics:collisionEnabled', 'points', 'purpose', 'subdivisionScheme']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 30,
+      "target_prim_path": "Prim </World/follower_right/vx300s_right/follower_right_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_right/vx300s_right/follower_right_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_000/mesh, ['faceVertexCounts', 'faceVertexIndices', 'physics:approximation', 'physics:collisionEnabled', 'points', 'purpose', 'subdivisionScheme']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 31,
+      "target_prim_path": "Prim </World/follower_right/vx300s_right/follower_right_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_000/mesh>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_right/vx300s_right/follower_right_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_001/mesh, ['faceVertexCounts', 'faceVertexIndices', 'physics:approximation', 'physics:collisionEnabled', 'points', 'purpose', 'subdivisionScheme']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 32,
+      "target_prim_path": "Prim </World/follower_right/vx300s_right/follower_right_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_001/mesh>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_right/vx300s_right/follower_right_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_002/mesh, ['faceVertexCounts', 'faceVertexIndices', 'physics:approximation', 'physics:collisionEnabled', 'points', 'purpose', 'subdivisionScheme']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 33,
+      "target_prim_path": "Prim </World/follower_right/vx300s_right/follower_right_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_002/mesh>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_right/vx300s_right/follower_right_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_003/mesh, ['faceVertexCounts', 'faceVertexIndices', 'physics:approximation', 'physics:collisionEnabled', 'points', 'purpose', 'subdivisionScheme']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 34,
+      "target_prim_path": "Prim </World/follower_right/vx300s_right/follower_right_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_003/mesh>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_right/vx300s_right/follower_right_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_004/mesh, ['faceVertexCounts', 'faceVertexIndices', 'physics:approximation', 'physics:collisionEnabled', 'points', 'purpose', 'subdivisionScheme']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 35,
+      "target_prim_path": "Prim </World/follower_right/vx300s_right/follower_right_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_004/mesh>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_right/vx300s_right/follower_right_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_005/mesh, ['faceVertexCounts', 'faceVertexIndices', 'physics:approximation', 'physics:collisionEnabled', 'points', 'purpose', 'subdivisionScheme']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 36,
+      "target_prim_path": "Prim </World/follower_right/vx300s_right/follower_right_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_005/mesh>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_right/vx300s_right/follower_right_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_006/mesh, ['faceVertexCounts', 'faceVertexIndices', 'physics:approximation', 'physics:collisionEnabled', 'points', 'purpose', 'subdivisionScheme']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 37,
+      "target_prim_path": "Prim </World/follower_right/vx300s_right/follower_right_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_006/mesh>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_right/vx300s_right/follower_right_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_007/mesh, ['faceVertexCounts', 'faceVertexIndices', 'physics:approximation', 'physics:collisionEnabled', 'points', 'purpose', 'subdivisionScheme']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 38,
+      "target_prim_path": "Prim </World/follower_right/vx300s_right/follower_right_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_007/mesh>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_right/vx300s_right/follower_right_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_008/mesh, ['faceVertexCounts', 'faceVertexIndices', 'physics:approximation', 'physics:collisionEnabled', 'points', 'purpose', 'subdivisionScheme']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 39,
+      "target_prim_path": "Prim </World/follower_right/vx300s_right/follower_right_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_008/mesh>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_right/vx300s_right/follower_right_gripper_prop_link/materialized_baseline_fallback/gripper_prop_link/mesh, ['faceVertexCounts', 'faceVertexIndices', 'physics:approximation', 'physics:collisionEnabled', 'points', 'purpose', 'subdivisionScheme']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 40,
+      "target_prim_path": "Prim </World/follower_right/vx300s_right/follower_right_gripper_prop_link/materialized_baseline_fallback/gripper_prop_link/mesh>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_right/vx300s_right/follower_right_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh, ['faceVertexCounts', 'faceVertexIndices', 'physics:approximation', 'physics:collisionEnabled', 'points', 'purpose', 'subdivisionScheme']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 41,
+      "target_prim_path": "Prim </World/follower_right/vx300s_right/follower_right_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh, ['faceVertexCounts', 'faceVertexIndices', 'physics:approximation', 'physics:collisionEnabled', 'points', 'purpose', 'subdivisionScheme']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 42,
+      "target_prim_path": "Prim </World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh, ['faceVertexCounts', 'faceVertexIndices', 'physics:approximation', 'physics:collisionEnabled', 'points', 'purpose', 'subdivisionScheme']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 43,
+      "target_prim_path": "Prim </World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_001/mesh, ['faceVertexCounts', 'faceVertexIndices', 'physics:approximation', 'physics:collisionEnabled', 'points', 'purpose', 'subdivisionScheme']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 44,
+      "target_prim_path": "Prim </World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_001/mesh>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_002/mesh, ['faceVertexCounts', 'faceVertexIndices', 'physics:approximation', 'physics:collisionEnabled', 'points', 'purpose', 'subdivisionScheme']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 45,
+      "target_prim_path": "Prim </World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_002/mesh>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_003/mesh, ['faceVertexCounts', 'faceVertexIndices', 'physics:approximation', 'physics:collisionEnabled', 'points', 'purpose', 'subdivisionScheme']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 46,
+      "target_prim_path": "Prim </World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_003/mesh>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_right/vx300s_right/follower_right_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh, ['faceVertexCounts', 'faceVertexIndices', 'physics:approximation', 'physics:collisionEnabled', 'points', 'purpose', 'subdivisionScheme']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 47,
+      "target_prim_path": "Prim </World/follower_right/vx300s_right/follower_right_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_right/vx300s_right/follower_right_wrist_link/materialized_baseline_fallback/wrist_link/mesh, ['faceVertexCounts', 'faceVertexIndices', 'physics:approximation', 'physics:collisionEnabled', 'points', 'purpose', 'subdivisionScheme']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 48,
+      "target_prim_path": "Prim </World/follower_right/vx300s_right/follower_right_wrist_link/materialized_baseline_fallback/wrist_link/mesh>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_right/vx300s_right/joints/elbow, ['drive:angular:physics:targetPosition', 'state:angular:physics:position']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 49,
+      "target_prim_path": "Prim </World/follower_right/vx300s_right/joints/elbow>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_right/vx300s_right/joints/forearm_roll, ['drive:angular:physics:targetPosition', 'state:angular:physics:position']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 50,
+      "target_prim_path": "Prim </World/follower_right/vx300s_right/joints/forearm_roll>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_right/vx300s_right/joints/gripper, ['drive:angular:physics:targetPosition', 'state:angular:physics:position']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 51,
+      "target_prim_path": "Prim </World/follower_right/vx300s_right/joints/gripper>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_right/vx300s_right/joints/left_finger, ['drive:linear:physics:targetPosition', 'state:linear:physics:position']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 52,
+      "target_prim_path": "Prim </World/follower_right/vx300s_right/joints/left_finger>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_right/vx300s_right/joints/right_finger, ['state:linear:physics:position']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 53,
+      "target_prim_path": "Prim </World/follower_right/vx300s_right/joints/right_finger>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_right/vx300s_right/joints/shoulder, ['drive:angular:physics:targetPosition', 'state:angular:physics:position']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 54,
+      "target_prim_path": "Prim </World/follower_right/vx300s_right/joints/shoulder>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_right/vx300s_right/joints/waist, ['drive:angular:physics:targetPosition', 'state:angular:physics:position']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 55,
+      "target_prim_path": "Prim </World/follower_right/vx300s_right/joints/waist>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_right/vx300s_right/joints/wrist_angle, ['drive:angular:physics:targetPosition', 'state:angular:physics:position']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 56,
+      "target_prim_path": "Prim </World/follower_right/vx300s_right/joints/wrist_angle>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_right/vx300s_right/joints/wrist_rotate, ['drive:angular:physics:targetPosition', 'state:angular:physics:position']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 57,
+      "target_prim_path": "Prim </World/follower_right/vx300s_right/joints/wrist_rotate>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "robot",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Prim is overridden: /World/follower_right, ['xformOp:rotateXYZ', 'xformOp:translate', 'xformOpOrder']",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "NoOverrides.CheckPrim",
+        "condition": "Report authored attributes found through the robot asset layer stack.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 108
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "NoOverrides",
+      "source_index": 58,
+      "target_prim_path": "Prim </World/follower_right>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "workcell wrapper",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "Folder name does not match Robot name: <1.0> != <aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda>",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "RobotNaming.CheckStage",
+        "condition": "Require <Manufacturer>/<robot>/<robot.usd> or <Manufacturer>/<robot>/<version>/<robot.usd> naming.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 25
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "RobotNaming",
+      "source_index": 59,
+      "target_prim_path": "Stage </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "workcell wrapper",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "DefaultPrim in robot asset </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda> does not have a RobotAPI",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "RobotSchema.CheckStage",
+        "condition": "Require the robot asset default prim to have RobotAPI and non-missing robotLinks and robotJoints relationships.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 129
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "RobotSchema",
+      "source_index": 60,
+      "target_prim_path": "Prim </World>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "workcell wrapper",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "DefaultPrim in robot asset </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda> does not have a isaac:physics:robotJoints relationship",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "RobotSchema.CheckStage",
+        "condition": "Require the robot asset default prim to have RobotAPI and non-missing robotLinks and robotJoints relationships.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 129
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "RobotSchema",
+      "source_index": 61,
+      "target_prim_path": "Prim </World>",
+      "task7_blocking": false
+    },
+    {
+      "applicable_to_current_target": false,
+      "asset_owner": "workcell wrapper",
+      "checked_usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "classification": "WRONG_SCOPE",
+      "evidence": "The installed rule source repeatedly calls the input a robot asset; the audited input is a two-robot composed workcell. Standalone robot candidates are the applicable targets.",
+      "literal_message": "DefaultPrim in robot asset </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda> does not have a isaac:physics:robotLinks relationship",
+      "literal_severity": "ERROR",
+      "official_source": {
+        "callable": "RobotSchema.CheckStage",
+        "condition": "Require the robot asset default prim to have RobotAPI and non-missing robotLinks and robotJoints relationships.",
+        "file": "isaacsim/asset/validation/robot_rules.py",
+        "line": 129
+      },
+      "rule_family": "IsaacSim.RobotRules",
+      "rule_name": "RobotSchema",
+      "source_index": 62,
+      "target_prim_path": "Prim </World>",
+      "task7_blocking": false
+    }
+  ],
+  "runtime": {
+    "asset_validation": "1.1.0",
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physx": "107.3.26"
+  },
+  "schema_version": 1,
+  "status": "PASS",
+  "summary": {
+    "classification_counts": {
+      "INCONCLUSIVE": 3,
+      "TRUE_ASSET_DEFECT": 23,
+      "WRONG_SCOPE": 63
+    },
+    "original_physics_blocking_count": 26,
+    "original_robot_blocking_count": 63,
+    "task7_blocking_count": 26,
+    "total_classified": 89
+  },
+  "task8": "NOT_RUN"
+}

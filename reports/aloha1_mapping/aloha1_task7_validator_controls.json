@@ -1,0 +1,470 @@
+{
+  "aloha_candidates": {
+    "physics_left": {
+      "blocking_counts": [
+        10,
+        10
+      ],
+      "consistent": true,
+      "fresh_process_count": 2,
+      "report_sha256": [
+        "5f70dd9ee448ae14a814b22ae06a709a662662a68c2b4f5e4d46925faeb26743",
+        "1dcf1cc582774ab9e5b85f604b41a485c71a2e833eff408d22a016668de4ca59"
+      ],
+      "reports": [
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_cad_derived_task7_candidate_left_physics.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/task7_rule_candidates/left_physics_repeat.json"
+      ],
+      "signatures": [
+        "cfef79eb3dcba3d9cd269ce0e15934aa0d54b83fc2b9a8b9783a95c2368d1caf",
+        "cfef79eb3dcba3d9cd269ce0e15934aa0d54b83fc2b9a8b9783a95c2368d1caf"
+      ],
+      "statuses": [
+        "FAIL",
+        "FAIL"
+      ],
+      "warning_counts": [
+        0,
+        0
+      ]
+    },
+    "physics_right": {
+      "blocking_counts": [
+        10,
+        10
+      ],
+      "consistent": true,
+      "fresh_process_count": 2,
+      "report_sha256": [
+        "3077617ba64aa688003079fd8748c56d713d8296e386aba5a84ff9db35f608d9",
+        "cf722a4be703018ab2d80aa4ee03999f035d22817dce7fe412931b10cea0576e"
+      ],
+      "reports": [
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_cad_derived_task7_candidate_right_physics.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/task7_rule_candidates/right_physics_repeat.json"
+      ],
+      "signatures": [
+        "4d83dda6aa6e3a5dca0e514eeabb937d7c9135b82a56a4fc47875264d77f08ca",
+        "4d83dda6aa6e3a5dca0e514eeabb937d7c9135b82a56a4fc47875264d77f08ca"
+      ],
+      "statuses": [
+        "FAIL",
+        "FAIL"
+      ],
+      "warning_counts": [
+        0,
+        0
+      ]
+    },
+    "robot_left": {
+      "blocking_counts": [
+        0,
+        0
+      ],
+      "consistent": true,
+      "fresh_process_count": 2,
+      "report_sha256": [
+        "b307c660d5aa656d7a517ec2c024c7a27e1be9fb4c94e41b733c4d9bb5cfc6a0",
+        "7c0babbc6bee1395912d4684edda16e97be917d9104af70457acd05d65f67112"
+      ],
+      "reports": [
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_cad_derived_task7_candidate_left_robot.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/task7_rule_candidates/left_robot_repeat.json"
+      ],
+      "signatures": [
+        "dc2fc3038f38b2b763e6b3191eb1aaf2904afcfd7ffd926dc44f6d6a4e2ae6a2",
+        "dc2fc3038f38b2b763e6b3191eb1aaf2904afcfd7ffd926dc44f6d6a4e2ae6a2"
+      ],
+      "statuses": [
+        "PARTIAL",
+        "PARTIAL"
+      ],
+      "warning_counts": [
+        41,
+        41
+      ]
+    },
+    "robot_right": {
+      "blocking_counts": [
+        0,
+        0
+      ],
+      "consistent": true,
+      "fresh_process_count": 2,
+      "report_sha256": [
+        "f92146a8ba09fbc774dafa8f32ed148c320958ffbe51e4ae9a4be71586e62462",
+        "57876d17a6a1d092a7d1b28050be0ec3dc7f638162daee5d66e97fe7f9e6c53f"
+      ],
+      "reports": [
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_cad_derived_task7_candidate_right_robot.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/task7_rule_candidates/right_robot_repeat.json"
+      ],
+      "signatures": [
+        "aefd60f65101c5810e15f228db54aaa5896241676844abe17eaed6bd97d9f976",
+        "aefd60f65101c5810e15f228db54aaa5896241676844abe17eaed6bd97d9f976"
+      ],
+      "statuses": [
+        "PARTIAL",
+        "PARTIAL"
+      ],
+      "warning_counts": [
+        41,
+        41
+      ]
+    },
+    "simready_workcell": {
+      "blocking_counts": [
+        0,
+        0
+      ],
+      "consistent": true,
+      "fresh_process_count": 2,
+      "report_sha256": [
+        "1ce65a99d6a9069ad07ffe287845c2c9dc5a4054d8390032ef92130bcb30902d",
+        "4e1d2468364e121e7cae52236a62e935fe4e51b874fdeb864231eda31a088583"
+      ],
+      "reports": [
+        "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_cad_derived_task7_candidate_workcell_simready.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/task7_rule_candidates/workcell_simready_repeat.json"
+      ],
+      "signatures": [
+        "115a74e802ba9368b1fbb8eadd0cec09bdae86e625fe5597fef886e28779f207",
+        "115a74e802ba9368b1fbb8eadd0cec09bdae86e625fe5597fef886e28779f207"
+      ],
+      "statuses": [
+        "PASS",
+        "PASS"
+      ],
+      "warning_counts": [
+        0,
+        0
+      ]
+    }
+  },
+  "conclusion": "The execution chain detects all three intentional defects deterministically. The requested released-asset positive control is itself not validator-clean, so it cannot establish a globally green reference baseline.",
+  "negative_controls": {
+    "negative_collider": {
+      "delta": {
+        "added_issue_count": 11,
+        "expected_rule": "RigidBodyHasCollider",
+        "expected_target_fragment": "follower_left_base_link",
+        "matching_added_issues": [
+          {
+            "at": "Prim </negative_collider/follower_left_base_link>",
+            "message": "Rigid body /negative_collider/follower_left_base_link has rigid body api but no collision api",
+            "rule": "RigidBodyHasCollider",
+            "severity": "ERROR"
+          }
+        ],
+        "status": "PASS"
+      },
+      "fresh_runs": {
+        "blocking_counts": [
+          11,
+          11
+        ],
+        "consistent": true,
+        "fresh_process_count": 2,
+        "report_sha256": [
+          "99d8e8a3a3b53c7d5607d964ca4a4901cff4bce92bb42a605b9e7996500bec6d",
+          "99d8e8a3a3b53c7d5607d964ca4a4901cff4bce92bb42a605b9e7996500bec6d"
+        ],
+        "reports": [
+          "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/task7_final_closure/validator_controls/negative_results/run1/negative_collider.json",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/task7_final_closure/validator_controls/negative_results/run2/negative_collider.json"
+        ],
+        "signatures": [
+          "55dd617e06fb46e17bf1af1adb2fdab4fc9cdfab288c1130df5ede7c0a67cc55",
+          "55dd617e06fb46e17bf1af1adb2fdab4fc9cdfab288c1130df5ede7c0a67cc55"
+        ],
+        "statuses": [
+          "FAIL",
+          "FAIL"
+        ],
+        "warning_counts": [
+          0,
+          0
+        ]
+      },
+      "status": "PASS"
+    },
+    "negative_mass_api": {
+      "delta": {
+        "added_issue_count": 11,
+        "expected_rule": "RigidBodyHasMassAPI",
+        "expected_target_fragment": "follower_left_base_link",
+        "matching_added_issues": [
+          {
+            "at": "Prim </negative_mass_api/follower_left_base_link>",
+            "message": "Rigid body /negative_mass_api/follower_left_base_link has rigid body api but no mass api",
+            "rule": "RigidBodyHasMassAPI",
+            "severity": "ERROR"
+          }
+        ],
+        "status": "PASS"
+      },
+      "fresh_runs": {
+        "blocking_counts": [
+          11,
+          11
+        ],
+        "consistent": true,
+        "fresh_process_count": 2,
+        "report_sha256": [
+          "c5c6fd195268658d7feb9e8a6ee01f76c92dcbe63d4f16fca540f375e0cb37f2",
+          "c5c6fd195268658d7feb9e8a6ee01f76c92dcbe63d4f16fca540f375e0cb37f2"
+        ],
+        "reports": [
+          "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/task7_final_closure/validator_controls/negative_results/run1/negative_mass_api.json",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/task7_final_closure/validator_controls/negative_results/run2/negative_mass_api.json"
+        ],
+        "signatures": [
+          "43d852a2e9f8671c18296a459cd60bc06d385bddd1eb2d87c3aad22f368d8089",
+          "43d852a2e9f8671c18296a459cd60bc06d385bddd1eb2d87c3aad22f368d8089"
+        ],
+        "statuses": [
+          "FAIL",
+          "FAIL"
+        ],
+        "warning_counts": [
+          0,
+          0
+        ]
+      },
+      "status": "PASS"
+    },
+    "negative_robot_api": {
+      "delta": {
+        "added_issue_count": 42,
+        "expected_rule": "RobotSchema",
+        "expected_target_fragment": "negative_robot_api",
+        "matching_added_issues": [
+          {
+            "at": "Prim </negative_robot_api>",
+            "message": "DefaultPrim in robot asset </home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/task7_final_closure/validator_controls/negative_assets/negative_robot_api/negative_robot_api.usda> does not have a RobotAPI",
+            "rule": "RobotSchema",
+            "severity": "ERROR"
+          }
+        ],
+        "status": "PASS"
+      },
+      "fresh_runs": {
+        "blocking_counts": [
+          1,
+          1
+        ],
+        "consistent": true,
+        "fresh_process_count": 2,
+        "report_sha256": [
+          "861b51eee56378dff8a2457e86ece4d0c0ab47d2e59bacf083525e54887b040c",
+          "861b51eee56378dff8a2457e86ece4d0c0ab47d2e59bacf083525e54887b040c"
+        ],
+        "reports": [
+          "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/task7_final_closure/validator_controls/negative_results/run1/negative_robot_api.json",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/task7_final_closure/validator_controls/negative_results/run2/negative_robot_api.json"
+        ],
+        "signatures": [
+          "441e7b5db0f3e076ae4aa8bd9510ea584ea81a108f57819dd51f6946b60416f0",
+          "441e7b5db0f3e076ae4aa8bd9510ea584ea81a108f57819dd51f6946b60416f0"
+        ],
+        "statuses": [
+          "FAIL",
+          "FAIL"
+        ],
+        "warning_counts": [
+          41,
+          41
+        ]
+      },
+      "status": "PASS"
+    }
+  },
+  "positive_control": {
+    "asset": {
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/task7_final_closure/validator_controls/official_5_1_assets/UniversalRobots/ur10/ur10.usd",
+      "official_asset_root": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.1",
+      "relative_path": "Isaac/Robots/UniversalRobots/ur10/ur10.usd",
+      "sha256": "ce5aadb9fb6f1dda40e63b8aed38bf8d97ab434f630f2538753c0934c0bdc7cb"
+    },
+    "interpretation": "The released Isaac 5.1 UR10 is not clean under local Asset Validation 1.1.0: the literal results are deterministic but include blocking findings. It is therefore not misreported as a passing positive control.",
+    "physics": {
+      "blocking_counts": [
+        2,
+        2
+      ],
+      "consistent": true,
+      "fresh_process_count": 2,
+      "report_sha256": [
+        "ea346669a32a0a9a3cabfd75b9ba8906be55a7ea6d50b186f3075af192e1d0a4",
+        "ea346669a32a0a9a3cabfd75b9ba8906be55a7ea6d50b186f3075af192e1d0a4"
+      ],
+      "reports": [
+        "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/task7_final_closure/validator_controls/positive_ur10_exact_run1/physics.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/task7_final_closure/validator_controls/positive_ur10_exact_run2/physics.json"
+      ],
+      "signatures": [
+        "a3184ed1aff5f00f5a22450cd32821ee77476ee61e1de221f2a5d00d9c36e04e",
+        "a3184ed1aff5f00f5a22450cd32821ee77476ee61e1de221f2a5d00d9c36e04e"
+      ],
+      "statuses": [
+        "FAIL",
+        "FAIL"
+      ],
+      "warning_counts": [
+        0,
+        0
+      ]
+    },
+    "robot": {
+      "blocking_counts": [
+        10,
+        10
+      ],
+      "consistent": true,
+      "fresh_process_count": 2,
+      "report_sha256": [
+        "af80f8d22e39d66e01d26c0a2e62ca26cb06e6848ed557b5a8e62dc7741df100",
+        "af80f8d22e39d66e01d26c0a2e62ca26cb06e6848ed557b5a8e62dc7741df100"
+      ],
+      "reports": [
+        "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/task7_final_closure/validator_controls/positive_ur10_exact_run1/robot.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/task7_final_closure/validator_controls/positive_ur10_exact_run2/robot.json"
+      ],
+      "signatures": [
+        "55ed667d03da71e4fa99c52995131d302c50c8ed7bfb327834f799fda4a76da0",
+        "55ed667d03da71e4fa99c52995131d302c50c8ed7bfb327834f799fda4a76da0"
+      ],
+      "statuses": [
+        "FAIL",
+        "FAIL"
+      ],
+      "warning_counts": [
+        13,
+        13
+      ]
+    },
+    "status": "FAIL"
+  },
+  "schema_version": 1,
+  "scoped_physical_assets": {
+    "Bottle500_candidate": {
+      "blocking_counts": [
+        0,
+        0
+      ],
+      "consistent": true,
+      "fresh_process_count": 2,
+      "report_sha256": [
+        "206c3f775b4f6499e194f214605f676b44c51fbff65456621402a2c479116598",
+        "206c3f775b4f6499e194f214605f676b44c51fbff65456621402a2c479116598"
+      ],
+      "reports": [
+        "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/task7_final_closure/validator_controls/scoped_candidates_v3_run1/bottle.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/task7_final_closure/validator_controls/scoped_candidates_v3_run2/bottle.json"
+      ],
+      "signatures": [
+        "754beab8bef8a91a118f8ec94a29b3c6a9da88a1bb2d3efca3ca4904caac4035",
+        "754beab8bef8a91a118f8ec94a29b3c6a9da88a1bb2d3efca3ca4904caac4035"
+      ],
+      "statuses": [
+        "PARTIAL",
+        "PARTIAL"
+      ],
+      "warning_counts": [
+        41,
+        41
+      ]
+    },
+    "Bottle500_original": {
+      "blocking_counts": [
+        1,
+        1
+      ],
+      "consistent": true,
+      "fresh_process_count": 2,
+      "report_sha256": [
+        "6c144f9c72af91f209010fe4205ba0ac23594d23719db4c96c2d3db0a0f97102",
+        "6c144f9c72af91f209010fe4205ba0ac23594d23719db4c96c2d3db0a0f97102"
+      ],
+      "reports": [
+        "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/task7_final_closure/validator_controls/scoped_filtered_run1/bottle.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/task7_final_closure/validator_controls/scoped_filtered_run2/bottle.json"
+      ],
+      "signatures": [
+        "beaf8c57d5cbfd8237d2833d10dc947bda9316ed4214050192c3a15c0cfa6f90",
+        "beaf8c57d5cbfd8237d2833d10dc947bda9316ed4214050192c3a15c0cfa6f90"
+      ],
+      "statuses": [
+        "FAIL",
+        "FAIL"
+      ],
+      "warning_counts": [
+        41,
+        41
+      ]
+    },
+    "candidate_manifest": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/task7_final_closure/validator_controls/scoped_physics_candidates_v3_manifest.json",
+      "promotion": "USER_REVIEW_REQUIRED",
+      "sha256": "ff23f4b9c38330609272ba85c34484d7b263f6a9cc0d055e9fe15fdf5574919d"
+    },
+    "static_environment_candidate": {
+      "blocking_counts": [
+        0,
+        0
+      ],
+      "consistent": true,
+      "fresh_process_count": 2,
+      "report_sha256": [
+        "49d80c50434e49ae3df601814363be674d93140fb4058cc36f3d55c6af40a972",
+        "49d80c50434e49ae3df601814363be674d93140fb4058cc36f3d55c6af40a972"
+      ],
+      "reports": [
+        "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/task7_final_closure/validator_controls/scoped_candidates_v3_run1/environment.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/task7_final_closure/validator_controls/scoped_candidates_v3_run2/environment.json"
+      ],
+      "signatures": [
+        "27415dd9575cf967e4712e9c7a2a60b6f19ad81a64f37919cea6e19e9b56431e",
+        "27415dd9575cf967e4712e9c7a2a60b6f19ad81a64f37919cea6e19e9b56431e"
+      ],
+      "statuses": [
+        "PASS",
+        "PASS"
+      ],
+      "warning_counts": [
+        0,
+        0
+      ]
+    },
+    "static_environment_original": {
+      "blocking_counts": [
+        6,
+        6
+      ],
+      "consistent": true,
+      "fresh_process_count": 2,
+      "report_sha256": [
+        "e12dd729e0c44c16039b00bebc7bb375a3a3e6b953728995adad8aa2d8818f53",
+        "e12dd729e0c44c16039b00bebc7bb375a3a3e6b953728995adad8aa2d8818f53"
+      ],
+      "reports": [
+        "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/task7_final_closure/validator_controls/scoped_filtered_run1/environment.json",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/task7_final_closure/validator_controls/scoped_filtered_run2/environment.json"
+      ],
+      "signatures": [
+        "110b0be8a988e909168ec02ebdb5a250e2e53ba3895d7a3a702010cf23b789f6",
+        "110b0be8a988e909168ec02ebdb5a250e2e53ba3895d7a3a702010cf23b789f6"
+      ],
+      "statuses": [
+        "FAIL",
+        "FAIL"
+      ],
+      "warning_counts": [
+        0,
+        0
+      ]
+    }
+  },
+  "status": "PARTIAL",
+  "task8": "NOT_RUN"
+}

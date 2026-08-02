@@ -1,0 +1,21 @@
+#usda 1.0
+(
+    customLayerData = {
+        string "aloha1:frozenStageSha256" = "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9"
+        string "aloha1:scope" = "TASK7_RULE_TARGET_DIAGNOSTIC_ONLY"
+        string "aloha1:sourcePrim" = "/World/follower_right/vx300s_right"
+        bool "aloha1:workcellPlacementValidated" = 0
+    }
+    defaultPrim = "vx300s_right"
+    metersPerUnit = 1
+    subLayers = [
+        @configuration/vx300s_right_robot.usda@
+    ]
+    upAxis = "Z"
+)
+
+def Xform "vx300s_right" (
+    prepend references = @../../../../../cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda@</World/follower_right/vx300s_right>
+)
+{
+}

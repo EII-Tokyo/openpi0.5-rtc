@@ -29,12 +29,29 @@ def _serialize_issue(issue: Any) -> dict[str, Any]:
     }
 
 
+def filter_rule_classes(rules: list[Any], requested: str | None) -> list[Any]:
+    """Select installed rule classes by exact class name."""
+
+    if not requested:
+        return rules
+    names = [name.strip() for name in requested.split(",") if name.strip()]
+    available = {rule.__name__: rule for rule in rules}
+    missing = sorted(set(names) - set(available))
+    if missing:
+        raise ValueError(f"requested validator rules are unavailable: {missing}")
+    return [available[name] for name in names]
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--category", required=True)
     parser.add_argument("--target-name", required=True)
     parser.add_argument("--target", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument(
+        "--rules",
+        help="Optional comma-separated exact rule class names within the category",
+    )
     args = parser.parse_args()
     target = args.target.resolve(strict=True)
     hash_before = _sha256(target)
@@ -46,12 +63,12 @@ def main() -> int:
     stage = Usd.Stage.Open(str(target))
     if stage is None:
         raise RuntimeError(f"unable to open Stage: {target}")
-    rules = list(
+    rules = filter_rule_classes(list(
         av_core.ValidationRulesRegistry.rules(
             args.category,
             enabledOnly=False,
         )
-    )
+    ), args.rules)
     engine = av_core.ValidationEngine(init_rules=False, variants=False)
     for rule in rules:
         engine.enable_rule(rule)
@@ -78,6 +95,7 @@ def main() -> int:
         "official_status": ("FAIL" if blocking else "PARTIAL" if warnings else "PASS"),
         "rule_count": len(rules),
         "rules": sorted(rule.__name__ for rule in rules),
+        "requested_rule_filter": args.rules,
         "issues": issues,
         "blocking_issue_count": len(blocking),
         "warning_count": len(warnings),
