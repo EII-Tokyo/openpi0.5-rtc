@@ -23,16 +23,20 @@ def test_collider_contract_preserves_cad_and_pinned_tessellation_identity() -> N
     assert contract["final_or_default_asset_modified"] is False
 
 
-def test_existing_swept_checks_do_not_erase_unmapped_link_blockers() -> None:
+def test_explicit_source_boundaries_remove_false_cad_identity_blockers() -> None:
     contract = build_contract(ROOT)
 
     assert contract["existing_swept_collision_gate"] == "PASS"
     assert contract["status"] == "PARTIAL"
     assert contract["formal_candidate_gate"] == "BLOCKED"
-    assert contract["unresolved_identity_blocker_count"] == 6
-    assert "wrist_link" in contract["unresolved_link_suffixes"]
-    assert "gripper_bar_link" in contract["unresolved_link_suffixes"]
-    assert "gripper_prop_link" in contract["unresolved_link_suffixes"]
+    assert contract["unresolved_identity_blocker_count"] == 0
+    assert contract["unresolved_link_suffixes"] == []
+    assert contract["link_identity_resolution"] == "PASS"
+    assert contract["surface_error_certificate"] == "COMPLETE_NUMERICAL"
+    assert contract["surface_error_acceptance"] == (
+        "HARD_BLOCKER_ERROR_BUDGET_NOT_DEFINED"
+    )
+    assert contract["surface_certificate_link_count"] == 11
 
 
 def test_report_matches_deterministic_contract() -> None:

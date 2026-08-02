@@ -3,8 +3,8 @@
 - Status: **PARTIAL**
 - Deterministic tessellation: **PASS**
 - Existing swept collision gate: **PASS**
-- Unresolved CAD/link records: `6`
-- Unresolved suffixes: `['gripper_bar_link', 'gripper_prop_link', 'wrist_link']`
+- Unresolved CAD/link records: `0`
+- Unresolved suffixes: `[]`
 - Formal candidate gate: **BLOCKED**
 
-The source B-Rep remains authoritative. Existing static and swept tests are retained as rejection evidence, but they do not prove the missing gripper-bar, sliding-carriage or wrist registrations. No collider is accepted because a grasp happened to pass, and no final/default asset was changed.
+The supplier STEP remains authoritative for the geometry it exposes, and its fused gripper/invalid wrist boundaries are preserved. Byte-identical pinned Interbotix meshes supply the link-level identities. Every physical link now has a numerical convex-hull surface/volume certificate. Promotion remains blocked because the acceptance error budget is not defined; successful grasp videos were not used to fit a tolerance. Existing static/swept tests remain rejection evidence. No collider is accepted because a grasp happened to pass, and no final/default asset was changed.

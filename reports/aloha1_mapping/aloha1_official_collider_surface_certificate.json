@@ -1,0 +1,900 @@
+{
+  "acceptance_status": "HARD_BLOCKER_ERROR_BUDGET_NOT_DEFINED",
+  "acceptance_tolerance": null,
+  "convex_policy": "ONE_CONVEX_HULL_PER_CONNECTED_SOURCE_COMPONENT",
+  "deterministic_signature": "a9dd95a283731a193ac9d4e9c3109d56ba264af10bcac61d9bb0f6a841523b0b",
+  "final_or_default_asset_modified": false,
+  "finger_contact_surface_summary": {
+    "left_finger_link": {
+      "cad_face_center_m": [
+        0.007355284905152715,
+        -0.5415718845300294,
+        0.4268526699371185
+      ],
+      "cad_face_index": 117,
+      "cad_face_normal": [
+        -0.9945218953682733,
+        0.10452846326765405,
+        5.701881674690907e-16
+      ],
+      "sample_count": 124,
+      "sample_selection": "authoritative mesh vertices, edge midpoints and triangle centroids within the FreeCAD face AABB and 0.20 mm of its plane",
+      "source_to_hull_boundary_max_m": 0.0007977759222171227,
+      "source_to_hull_boundary_mean_m": 0.00046456224935083004,
+      "source_to_hull_boundary_min_m": 0.0,
+      "status": "FAIL_SINGLE_HULL_RECESSES_CONTACT_SURFACE",
+      "tessellation_error_budget_m": 0.0002
+    },
+    "right_finger_link": {
+      "cad_face_center_m": [
+        -0.007155504389827247,
+        -0.5415718845300294,
+        0.4267499975263585
+      ],
+      "cad_face_index": 128,
+      "cad_face_normal": [
+        0.9945218953682733,
+        0.10452846326765403,
+        -1.727189390844111e-15
+      ],
+      "sample_count": 124,
+      "sample_selection": "authoritative mesh vertices, edge midpoints and triangle centroids within the FreeCAD face AABB and 0.20 mm of its plane",
+      "source_to_hull_boundary_max_m": 0.0007977759222171227,
+      "source_to_hull_boundary_mean_m": 0.00046456235214999673,
+      "source_to_hull_boundary_min_m": 0.0,
+      "status": "FAIL_SINGLE_HULL_RECESSES_CONTACT_SURFACE",
+      "tessellation_error_budget_m": 0.0002
+    }
+  },
+  "isaac_runtime_started": false,
+  "link_suffixes": [
+    "base_link",
+    "shoulder_link",
+    "upper_arm_link",
+    "upper_forearm_link",
+    "lower_forearm_link",
+    "wrist_link",
+    "gripper_link",
+    "gripper_prop_link",
+    "gripper_bar_link",
+    "left_finger_link",
+    "right_finger_link"
+  ],
+  "method_limitations": [
+    "surface distances use deterministic finite samples, not an exact analytic Hausdorff distance",
+    "the report certifies source-to-hull geometry only; PhysX cooked readback remains a separate runtime gate",
+    "no millimetre tolerance is invented without an official or task-derived numerical error budget"
+  ],
+  "real_robot_accessed": false,
+  "records": [
+    {
+      "aabb_max_m": [
+        0.10200000000000001,
+        0.1974629821777344,
+        0.078703857421875
+      ],
+      "aabb_min_m": [
+        -0.10200000000000001,
+        -0.10200000000000001,
+        -2.884311062559264e-15
+      ],
+      "connected_component_count": 1,
+      "containment_max_halfspace_value_m": 5.551115123125783e-17,
+      "containment_numeric_tolerance_m": 2.842170943040401e-14,
+      "convex_piece_count": 1,
+      "convex_policy": "ONE_CONVEX_HULL_PER_CONNECTED_SOURCE_COMPONENT",
+      "degenerate_triangle_count": 0,
+      "hull_sample_count": 1466,
+      "hull_to_source_sample_max_m": 0.03175417418829089,
+      "hull_to_source_volume_ratio": 1.6677737109765798,
+      "hull_volume_m3": 0.0027906850969252124,
+      "link_suffix": "base_link",
+      "mirror_used": false,
+      "pieces": [
+        {
+          "containment_max_halfspace_value_m": 5.551115123125783e-17,
+          "hull_face_count": 186,
+          "hull_vertex_count": 95,
+          "hull_volume_m3": 0.0027906850969252124,
+          "piece_index": 0,
+          "source_face_count": 1998,
+          "source_signed_volume_abs_m3": 0.0016732996080691918,
+          "source_vertex_count": 1001
+        }
+      ],
+      "source_authority": "PINNED_INTERBOTIX_ALOHA_VX300S_URDF_COLLISION_MESH",
+      "source_contained_by_hulls": true,
+      "source_face_count": 1998,
+      "source_mesh_quality_status": "PASS_NO_DEGENERATE_TRIANGLES",
+      "source_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/base.stl",
+      "source_sample_count": 5996,
+      "source_scale_to_m": 0.001,
+      "source_sha256": "d100cafe656671ca8fde98fb6a4cf2d1b746995c51c61c25ad9ea2715635d146",
+      "source_signed_volume_abs_m3": 0.0016732996080691918,
+      "source_to_hull_sample_max_m": 0.045962386256318793,
+      "source_vertex_count": 1001,
+      "surface_distance_method": "DETERMINISTIC_VERTICES_EDGE_MIDPOINTS_CENTROIDS_CKDTREE_APPROXIMATION"
+    },
+    {
+      "aabb_max_m": [
+        0.0615,
+        0.06084947204589844,
+        0.0645
+      ],
+      "aabb_min_m": [
+        -0.061428184509277346,
+        -0.06211461639404297,
+        0.0
+      ],
+      "connected_component_count": 1,
+      "containment_max_halfspace_value_m": 1.3877787807814457e-17,
+      "containment_numeric_tolerance_m": 2.842170943040401e-14,
+      "convex_piece_count": 1,
+      "convex_policy": "ONE_CONVEX_HULL_PER_CONNECTED_SOURCE_COMPONENT",
+      "degenerate_triangle_count": 0,
+      "hull_sample_count": 1765,
+      "hull_to_source_sample_max_m": 0.027168446379317715,
+      "hull_to_source_volume_ratio": 2.1621784113899887,
+      "hull_volume_m3": 0.0004916400154639979,
+      "link_suffix": "shoulder_link",
+      "mirror_used": false,
+      "pieces": [
+        {
+          "containment_max_halfspace_value_m": 1.3877787807814457e-17,
+          "hull_face_count": 450,
+          "hull_vertex_count": 227,
+          "hull_volume_m3": 0.0004916400154639979,
+          "piece_index": 0,
+          "source_face_count": 1276,
+          "source_signed_volume_abs_m3": 0.000227381798316976,
+          "source_vertex_count": 640
+        }
+      ],
+      "source_authority": "PINNED_INTERBOTIX_ALOHA_VX300S_URDF_COLLISION_MESH",
+      "source_contained_by_hulls": true,
+      "source_face_count": 1276,
+      "source_mesh_quality_status": "PASS_NO_DEGENERATE_TRIANGLES",
+      "source_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/shoulder.stl",
+      "source_sample_count": 3830,
+      "source_scale_to_m": 0.001,
+      "source_sha256": "139745a74055cb0b23430bb5bc032bf68cf7bea5e4975c8f4c04107ae005f7f0",
+      "source_signed_volume_abs_m3": 0.000227381798316976,
+      "source_to_hull_sample_max_m": 0.0253224019171648,
+      "source_vertex_count": 640,
+      "surface_distance_method": "DETERMINISTIC_VERTICES_EDGE_MIDPOINTS_CENTROIDS_CKDTREE_APPROXIMATION"
+    },
+    {
+      "aabb_max_m": [
+        0.051900001525878904,
+        0.01575,
+        0.32095001220703123
+      ],
+      "aabb_min_m": [
+        -0.051899997711181645,
+        -0.07330000305175781,
+        -0.003875
+      ],
+      "connected_component_count": 4,
+      "containment_max_halfspace_value_m": 5.551115123125783e-17,
+      "containment_numeric_tolerance_m": 2.842170943040401e-14,
+      "convex_piece_count": 4,
+      "convex_policy": "ONE_CONVEX_HULL_PER_CONNECTED_SOURCE_COMPONENT",
+      "degenerate_triangle_count": 10,
+      "hull_sample_count": 1845,
+      "hull_to_source_sample_max_m": 0.053684643686392565,
+      "hull_to_source_volume_ratio": 3.6801013520804844,
+      "hull_volume_m3": 0.0018883358551853922,
+      "link_suffix": "upper_arm_link",
+      "mirror_used": false,
+      "pieces": [
+        {
+          "containment_max_halfspace_value_m": 5.551115123125783e-17,
+          "hull_face_count": 44,
+          "hull_vertex_count": 24,
+          "hull_volume_m3": 1.602912979216336e-08,
+          "piece_index": 0,
+          "source_face_count": 68,
+          "source_signed_volume_abs_m3": 1.3664151654910631e-08,
+          "source_vertex_count": 36
+        },
+        {
+          "containment_max_halfspace_value_m": 5.551115123125783e-17,
+          "hull_face_count": 44,
+          "hull_vertex_count": 24,
+          "hull_volume_m3": 1.602912924245441e-08,
+          "piece_index": 1,
+          "source_face_count": 68,
+          "source_signed_volume_abs_m3": 1.3664152663823398e-08,
+          "source_vertex_count": 36
+        },
+        {
+          "containment_max_halfspace_value_m": 2.7755575615628914e-17,
+          "hull_face_count": 28,
+          "hull_vertex_count": 16,
+          "hull_volume_m3": 2.9587501395552035e-08,
+          "piece_index": 2,
+          "source_face_count": 60,
+          "source_signed_volume_abs_m3": 1.1039482195832866e-08,
+          "source_vertex_count": 32
+        },
+        {
+          "containment_max_halfspace_value_m": 5.551115123125783e-17,
+          "hull_face_count": 208,
+          "hull_vertex_count": 106,
+          "hull_volume_m3": 0.001888274209424962,
+          "piece_index": 3,
+          "source_face_count": 1862,
+          "source_signed_volume_abs_m3": 0.000513082243448242,
+          "source_vertex_count": 931
+        }
+      ],
+      "source_authority": "PINNED_INTERBOTIX_ALOHA_VX300S_URDF_COLLISION_MESH",
+      "source_contained_by_hulls": true,
+      "source_face_count": 2058,
+      "source_mesh_quality_status": "SOURCE_HAS_DEGENERATE_TRIANGLES_RECORDED_NOT_REPAIRED",
+      "source_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/upper_arm.stl",
+      "source_sample_count": 6174,
+      "source_scale_to_m": 0.001,
+      "source_sha256": "900f236320dd3d500870c5fde763b2d47502d51e043a5c377875e70237108729",
+      "source_signed_volume_abs_m3": 0.0005131206112347565,
+      "source_to_hull_sample_max_m": 0.03076806443236509,
+      "source_vertex_count": 1035,
+      "surface_distance_method": "DETERMINISTIC_VERTICES_EDGE_MIDPOINTS_CENTROIDS_CKDTREE_APPROXIMATION"
+    },
+    {
+      "aabb_max_m": [
+        0.2,
+        0.05060000228881836,
+        0.019495006561279296
+      ],
+      "aabb_min_m": [
+        -0.003875,
+        -0.05060000228881836,
+        -0.019448677062988282
+      ],
+      "connected_component_count": 1,
+      "containment_max_halfspace_value_m": 1.0755285551056204e-16,
+      "containment_numeric_tolerance_m": 2.842170943040401e-14,
+      "convex_piece_count": 1,
+      "convex_policy": "ONE_CONVEX_HULL_PER_CONNECTED_SOURCE_COMPONENT",
+      "degenerate_triangle_count": 0,
+      "hull_sample_count": 1087,
+      "hull_to_source_sample_max_m": 0.030599451084307453,
+      "hull_to_source_volume_ratio": 2.3184910557836567,
+      "hull_volume_m3": 0.0004989086560790468,
+      "link_suffix": "upper_forearm_link",
+      "mirror_used": false,
+      "pieces": [
+        {
+          "containment_max_halfspace_value_m": 1.0755285551056204e-16,
+          "hull_face_count": 236,
+          "hull_vertex_count": 120,
+          "hull_volume_m3": 0.0004989086560790468,
+          "piece_index": 0,
+          "source_face_count": 990,
+          "source_signed_volume_abs_m3": 0.00021518679351144372,
+          "source_vertex_count": 497
+        }
+      ],
+      "source_authority": "PINNED_INTERBOTIX_ALOHA_VX300S_URDF_COLLISION_MESH",
+      "source_contained_by_hulls": true,
+      "source_face_count": 990,
+      "source_mesh_quality_status": "PASS_NO_DEGENERATE_TRIANGLES",
+      "source_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/upper_forearm.stl",
+      "source_sample_count": 2972,
+      "source_scale_to_m": 0.001,
+      "source_sha256": "4104fc54bbfb8a9b533029f1e7e3ade3d54d638372b3195daa0c98f57e0295b5",
+      "source_signed_volume_abs_m3": 0.00021518679351144372,
+      "source_to_hull_sample_max_m": 0.02055565071105957,
+      "source_vertex_count": 497,
+      "surface_distance_method": "DETERMINISTIC_VERTICES_EDGE_MIDPOINTS_CENTROIDS_CKDTREE_APPROXIMATION"
+    },
+    {
+      "aabb_max_m": [
+        0.11375,
+        0.02979999923706055,
+        0.023
+      ],
+      "aabb_min_m": [
+        -0.005300000190734864,
+        -0.04475,
+        -0.022960201263427734
+      ],
+      "connected_component_count": 5,
+      "containment_max_halfspace_value_m": 1.5612511283791264e-17,
+      "containment_numeric_tolerance_m": 2.842170943040401e-14,
+      "convex_piece_count": 5,
+      "convex_policy": "ONE_CONVEX_HULL_PER_CONNECTED_SOURCE_COMPONENT",
+      "degenerate_triangle_count": 0,
+      "hull_sample_count": 2536,
+      "hull_to_source_sample_max_m": 0.011375540111170302,
+      "hull_to_source_volume_ratio": 1.1173336592975438,
+      "hull_volume_m3": 0.00023317698821631605,
+      "link_suffix": "lower_forearm_link",
+      "mirror_used": false,
+      "pieces": [
+        {
+          "containment_max_halfspace_value_m": 3.469446951953614e-18,
+          "hull_face_count": 236,
+          "hull_vertex_count": 120,
+          "hull_volume_m3": 1.7594062129385937e-05,
+          "piece_index": 0,
+          "source_face_count": 616,
+          "source_signed_volume_abs_m3": 5.736409718702577e-06,
+          "source_vertex_count": 308
+        },
+        {
+          "containment_max_halfspace_value_m": 1.5612511283791264e-17,
+          "hull_face_count": 124,
+          "hull_vertex_count": 64,
+          "hull_volume_m3": 9.164561903966315e-05,
+          "piece_index": 1,
+          "source_face_count": 566,
+          "source_signed_volume_abs_m3": 8.741533374422902e-05,
+          "source_vertex_count": 285
+        },
+        {
+          "containment_max_halfspace_value_m": 0.0,
+          "hull_face_count": 24,
+          "hull_vertex_count": 14,
+          "hull_volume_m3": 1.4656660835378391e-05,
+          "piece_index": 2,
+          "source_face_count": 44,
+          "source_signed_volume_abs_m3": 1.3400806144578682e-05,
+          "source_vertex_count": 24
+        },
+        {
+          "containment_max_halfspace_value_m": 0.0,
+          "hull_face_count": 24,
+          "hull_vertex_count": 14,
+          "hull_volume_m3": 1.4656660835378391e-05,
+          "piece_index": 3,
+          "source_face_count": 44,
+          "source_signed_volume_abs_m3": 1.3400806144578682e-05,
+          "source_vertex_count": 24
+        },
+        {
+          "containment_max_halfspace_value_m": 1.3877787807814457e-17,
+          "hull_face_count": 204,
+          "hull_vertex_count": 104,
+          "hull_volume_m3": 9.46239853765102e-05,
+          "piece_index": 4,
+          "source_face_count": 726,
+          "source_signed_volume_abs_m3": 8.873720527773992e-05,
+          "source_vertex_count": 365
+        }
+      ],
+      "source_authority": "PINNED_INTERBOTIX_ALOHA_VX300S_URDF_COLLISION_MESH",
+      "source_contained_by_hulls": true,
+      "source_face_count": 1996,
+      "source_mesh_quality_status": "PASS_NO_DEGENERATE_TRIANGLES",
+      "source_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/lower_forearm.stl",
+      "source_sample_count": 5996,
+      "source_scale_to_m": 0.001,
+      "source_sha256": "66814e27fa728056416e25e02e89eb7d34c51d51c51e7c3df873829037ddc6b8",
+      "source_signed_volume_abs_m3": 0.00020869056102982886,
+      "source_to_hull_sample_max_m": 0.010635594759498346,
+      "source_vertex_count": 1006,
+      "surface_distance_method": "DETERMINISTIC_VERTICES_EDGE_MIDPOINTS_CENTROIDS_CKDTREE_APPROXIMATION"
+    },
+    {
+      "aabb_max_m": [
+        0.02733943557739258,
+        0.005279263019561767,
+        0.03508941268920898
+      ],
+      "aabb_min_m": [
+        -0.027660564422607423,
+        -0.06974430847167969,
+        -0.02016058921813965
+      ],
+      "connected_component_count": 3,
+      "containment_max_halfspace_value_m": 1.3877787807814457e-17,
+      "containment_numeric_tolerance_m": 2.842170943040401e-14,
+      "convex_piece_count": 3,
+      "convex_policy": "ONE_CONVEX_HULL_PER_CONNECTED_SOURCE_COMPONENT",
+      "degenerate_triangle_count": 6,
+      "hull_sample_count": 1551,
+      "hull_to_source_sample_max_m": 0.025278844808129575,
+      "hull_to_source_volume_ratio": 2.5204426786908543,
+      "hull_volume_m3": 0.00017292943480999798,
+      "link_suffix": "wrist_link",
+      "mirror_used": false,
+      "pieces": [
+        {
+          "containment_max_halfspace_value_m": 0.0,
+          "hull_face_count": 28,
+          "hull_vertex_count": 16,
+          "hull_volume_m3": 1.5559831979005833e-08,
+          "piece_index": 0,
+          "source_face_count": 28,
+          "source_signed_volume_abs_m3": 1.5559831979005836e-08,
+          "source_vertex_count": 16
+        },
+        {
+          "containment_max_halfspace_value_m": 1.734723475976807e-18,
+          "hull_face_count": 28,
+          "hull_vertex_count": 16,
+          "hull_volume_m3": 1.0870321018143594e-09,
+          "piece_index": 1,
+          "source_face_count": 28,
+          "source_signed_volume_abs_m3": 7.010294460046769e-10,
+          "source_vertex_count": 16
+        },
+        {
+          "containment_max_halfspace_value_m": 1.3877787807814457e-17,
+          "hull_face_count": 280,
+          "hull_vertex_count": 142,
+          "hull_volume_m3": 0.00017291278794591717,
+          "piece_index": 2,
+          "source_face_count": 1358,
+          "source_signed_volume_abs_m3": 6.859447814566855e-05,
+          "source_vertex_count": 679
+        }
+      ],
+      "source_authority": "PINNED_INTERBOTIX_ALOHA_VX300S_URDF_COLLISION_MESH",
+      "source_contained_by_hulls": true,
+      "source_face_count": 1414,
+      "source_mesh_quality_status": "SOURCE_HAS_DEGENERATE_TRIANGLES_RECORDED_NOT_REPAIRED",
+      "source_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/wrist.stl",
+      "source_sample_count": 4250,
+      "source_scale_to_m": 0.001,
+      "source_sha256": "90eb145c85627968c3776ae6de23ccff7e112c9dd713c46bc9acdfdaa859a048",
+      "source_signed_volume_abs_m3": 6.861073900709357e-05,
+      "source_to_hull_sample_max_m": 0.012442176510303032,
+      "source_vertex_count": 711,
+      "surface_distance_method": "DETERMINISTIC_VERTICES_EDGE_MIDPOINTS_CENTROIDS_CKDTREE_APPROXIMATION"
+    },
+    {
+      "aabb_max_m": [
+        0.019986106872558595,
+        -0.02,
+        0.035250000000000004
+      ],
+      "aabb_min_m": [
+        -0.019986106872558595,
+        -0.06282500076293945,
+        -0.02
+      ],
+      "connected_component_count": 12,
+      "containment_max_halfspace_value_m": 2.0816681711721685e-17,
+      "containment_numeric_tolerance_m": 2.842170943040401e-14,
+      "convex_piece_count": 12,
+      "convex_policy": "ONE_CONVEX_HULL_PER_CONNECTED_SOURCE_COMPONENT",
+      "degenerate_triangle_count": 0,
+      "hull_sample_count": 13724,
+      "hull_to_source_sample_max_m": 0.008171522730682952,
+      "hull_to_source_volume_ratio": 1.2229457757366111,
+      "hull_volume_m3": 7.13204086248393e-05,
+      "link_suffix": "gripper_link",
+      "mirror_used": false,
+      "pieces": [
+        {
+          "containment_max_halfspace_value_m": 6.938893903907228e-18,
+          "hull_face_count": 164,
+          "hull_vertex_count": 84,
+          "hull_volume_m3": 7.00897847335072e-05,
+          "piece_index": 0,
+          "source_face_count": 1172,
+          "source_signed_volume_abs_m3": 5.762233018522772e-05,
+          "source_vertex_count": 586
+        },
+        {
+          "containment_max_halfspace_value_m": 1.3877787807814457e-17,
+          "hull_face_count": 394,
+          "hull_vertex_count": 199,
+          "hull_volume_m3": 1.670942684783132e-07,
+          "piece_index": 1,
+          "source_face_count": 988,
+          "source_signed_volume_abs_m3": 9.867104201059934e-08,
+          "source_vertex_count": 496
+        },
+        {
+          "containment_max_halfspace_value_m": 1.3877787807814457e-17,
+          "hull_face_count": 342,
+          "hull_vertex_count": 173,
+          "hull_volume_m3": 1.2793413005718918e-07,
+          "piece_index": 2,
+          "source_face_count": 798,
+          "source_signed_volume_abs_m3": 7.037307612897187e-08,
+          "source_vertex_count": 401
+        },
+        {
+          "containment_max_halfspace_value_m": 6.938893903907228e-18,
+          "hull_face_count": 394,
+          "hull_vertex_count": 199,
+          "hull_volume_m3": 1.6709425562519285e-07,
+          "piece_index": 3,
+          "source_face_count": 894,
+          "source_signed_volume_abs_m3": 9.865137506583632e-08,
+          "source_vertex_count": 449
+        },
+        {
+          "containment_max_halfspace_value_m": 1.734723475976807e-17,
+          "hull_face_count": 394,
+          "hull_vertex_count": 199,
+          "hull_volume_m3": 1.4722802189836955e-07,
+          "piece_index": 4,
+          "source_face_count": 988,
+          "source_signed_volume_abs_m3": 7.479588101956504e-08,
+          "source_vertex_count": 496
+        },
+        {
+          "containment_max_halfspace_value_m": 1.734723475976807e-18,
+          "hull_face_count": 228,
+          "hull_vertex_count": 116,
+          "hull_volume_m3": 4.941274133865708e-09,
+          "piece_index": 5,
+          "source_face_count": 232,
+          "source_signed_volume_abs_m3": 4.941274133865709e-09,
+          "source_vertex_count": 118
+        },
+        {
+          "containment_max_halfspace_value_m": 0.0,
+          "hull_face_count": 14,
+          "hull_vertex_count": 9,
+          "hull_volume_m3": 2.0399909464369063e-09,
+          "piece_index": 6,
+          "source_face_count": 28,
+          "source_signed_volume_abs_m3": 1.3416438000036873e-09,
+          "source_vertex_count": 16
+        },
+        {
+          "containment_max_halfspace_value_m": 1.3877787807814457e-17,
+          "hull_face_count": 394,
+          "hull_vertex_count": 199,
+          "hull_volume_m3": 1.6709426847831323e-07,
+          "piece_index": 7,
+          "source_face_count": 988,
+          "source_signed_volume_abs_m3": 9.867104199876232e-08,
+          "source_vertex_count": 496
+        },
+        {
+          "containment_max_halfspace_value_m": 1.3877787807814457e-17,
+          "hull_face_count": 342,
+          "hull_vertex_count": 173,
+          "hull_volume_m3": 1.27934130056962e-07,
+          "piece_index": 8,
+          "source_face_count": 798,
+          "source_signed_volume_abs_m3": 7.037307606610906e-08,
+          "source_vertex_count": 401
+        },
+        {
+          "containment_max_halfspace_value_m": 1.734723475976807e-18,
+          "hull_face_count": 228,
+          "hull_vertex_count": 116,
+          "hull_volume_m3": 4.94127413386571e-09,
+          "piece_index": 9,
+          "source_face_count": 232,
+          "source_signed_volume_abs_m3": 4.941274133865709e-09,
+          "source_vertex_count": 118
+        },
+        {
+          "containment_max_halfspace_value_m": 6.938893903907228e-18,
+          "hull_face_count": 394,
+          "hull_vertex_count": 199,
+          "hull_volume_m3": 1.6709425562519295e-07,
+          "piece_index": 10,
+          "source_face_count": 894,
+          "source_signed_volume_abs_m3": 9.865137505037276e-08,
+          "source_vertex_count": 449
+        },
+        {
+          "containment_max_halfspace_value_m": 2.0816681711721685e-17,
+          "hull_face_count": 394,
+          "hull_vertex_count": 199,
+          "hull_volume_m3": 1.4722802189836957e-07,
+          "piece_index": 11,
+          "source_face_count": 988,
+          "source_signed_volume_abs_m3": 7.479588092185034e-08,
+          "source_vertex_count": 496
+        }
+      ],
+      "source_authority": "PINNED_INTERBOTIX_ALOHA_VX300S_URDF_COLLISION_MESH",
+      "source_contained_by_hulls": true,
+      "source_face_count": 9000,
+      "source_mesh_quality_status": "PASS_NO_DEGENERATE_TRIANGLES",
+      "source_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper.stl",
+      "source_sample_count": 27016,
+      "source_scale_to_m": 0.001,
+      "source_sha256": "786c1077bfd226f14219581b11d5f19464ca95b17132e0bb7532503568f5af90",
+      "source_signed_volume_abs_m3": 5.8318537125557525e-05,
+      "source_to_hull_sample_max_m": 0.00883481911465209,
+      "source_vertex_count": 4522,
+      "surface_distance_method": "DETERMINISTIC_VERTICES_EDGE_MIDPOINTS_CENTROIDS_CKDTREE_APPROXIMATION"
+    },
+    {
+      "aabb_max_m": [
+        0.009743346214294435,
+        -0.066,
+        0.026999406814575196
+      ],
+      "aabb_min_m": [
+        -0.009743346214294435,
+        -0.07100000000000001,
+        -0.026999406814575196
+      ],
+      "connected_component_count": 1,
+      "containment_max_halfspace_value_m": 3.469446951953614e-18,
+      "containment_numeric_tolerance_m": 2.842170943040401e-14,
+      "convex_piece_count": 1,
+      "convex_policy": "ONE_CONVEX_HULL_PER_CONNECTED_SOURCE_COMPONENT",
+      "degenerate_triangle_count": 0,
+      "hull_sample_count": 966,
+      "hull_to_source_sample_max_m": 0.006012452527522786,
+      "hull_to_source_volume_ratio": 1.2676704552018876,
+      "hull_volume_m3": 3.707694621684778e-06,
+      "link_suffix": "gripper_prop_link",
+      "mirror_used": false,
+      "pieces": [
+        {
+          "containment_max_halfspace_value_m": 3.469446951953614e-18,
+          "hull_face_count": 260,
+          "hull_vertex_count": 132,
+          "hull_volume_m3": 3.707694621684778e-06,
+          "piece_index": 0,
+          "source_face_count": 632,
+          "source_signed_volume_abs_m3": 2.9248095248021654e-06,
+          "source_vertex_count": 316
+        }
+      ],
+      "source_authority": "PINNED_INTERBOTIX_ALOHA_VX300S_URDF_COLLISION_MESH",
+      "source_contained_by_hulls": true,
+      "source_face_count": 632,
+      "source_mesh_quality_status": "PASS_NO_DEGENERATE_TRIANGLES",
+      "source_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_prop.stl",
+      "source_sample_count": 1889,
+      "source_scale_to_m": 0.001,
+      "source_sha256": "d1275a93fe2157c83dbc095617fb7e672888bdd48ec070a35ef4ab9ebd9755b0",
+      "source_signed_volume_abs_m3": 2.9248095248021654e-06,
+      "source_to_hull_sample_max_m": 0.004537842308208951,
+      "source_vertex_count": 316,
+      "surface_distance_method": "DETERMINISTIC_VERTICES_EDGE_MIDPOINTS_CENTROIDS_CKDTREE_APPROXIMATION"
+    },
+    {
+      "aabb_max_m": [
+        0.0750009994506836,
+        -0.0375,
+        0.035250000000000004
+      ],
+      "aabb_min_m": [
+        -0.07499900054931641,
+        -0.09669999694824219,
+        -0.03504999160766602
+      ],
+      "connected_component_count": 6,
+      "containment_max_halfspace_value_m": 1.3877787807814457e-17,
+      "containment_numeric_tolerance_m": 2.842170943040401e-14,
+      "convex_piece_count": 6,
+      "convex_policy": "ONE_CONVEX_HULL_PER_CONNECTED_SOURCE_COMPONENT",
+      "degenerate_triangle_count": 0,
+      "hull_sample_count": 6008,
+      "hull_to_source_sample_max_m": 0.01568826850101641,
+      "hull_to_source_volume_ratio": 3.0783420701315234,
+      "hull_volume_m3": 0.0004090513867427688,
+      "link_suffix": "gripper_bar_link",
+      "mirror_used": false,
+      "pieces": [
+        {
+          "containment_max_halfspace_value_m": 1.3877787807814457e-17,
+          "hull_face_count": 228,
+          "hull_vertex_count": 116,
+          "hull_volume_m3": 6.321071301032507e-08,
+          "piece_index": 0,
+          "source_face_count": 464,
+          "source_signed_volume_abs_m3": 3.851901477016878e-08,
+          "source_vertex_count": 232
+        },
+        {
+          "containment_max_halfspace_value_m": 6.938893903907228e-18,
+          "hull_face_count": 160,
+          "hull_vertex_count": 82,
+          "hull_volume_m3": 3.7687701767171326e-08,
+          "piece_index": 1,
+          "source_face_count": 246,
+          "source_signed_volume_abs_m3": 2.0515713477753235e-08,
+          "source_vertex_count": 125
+        },
+        {
+          "containment_max_halfspace_value_m": 6.938893903907228e-18,
+          "hull_face_count": 16,
+          "hull_vertex_count": 10,
+          "hull_volume_m3": 8.948571805588803e-07,
+          "piece_index": 2,
+          "source_face_count": 238,
+          "source_signed_volume_abs_m3": 5.474352435617117e-07,
+          "source_vertex_count": 121
+        },
+        {
+          "containment_max_halfspace_value_m": 6.938893903907228e-18,
+          "hull_face_count": 160,
+          "hull_vertex_count": 82,
+          "hull_volume_m3": 3.7700687216614036e-08,
+          "piece_index": 3,
+          "source_face_count": 246,
+          "source_signed_volume_abs_m3": 2.0518389609524535e-08,
+          "source_vertex_count": 125
+        },
+        {
+          "containment_max_halfspace_value_m": 1.3877787807814457e-17,
+          "hull_face_count": 120,
+          "hull_vertex_count": 62,
+          "hull_volume_m3": 0.0004079547197411108,
+          "piece_index": 4,
+          "source_face_count": 5930,
+          "source_signed_volume_abs_m3": 0.0001322149124537941,
+          "source_vertex_count": 2893
+        },
+        {
+          "containment_max_halfspace_value_m": 1.3877787807814457e-17,
+          "hull_face_count": 228,
+          "hull_vertex_count": 116,
+          "hull_volume_m3": 6.321071910497812e-08,
+          "piece_index": 5,
+          "source_face_count": 464,
+          "source_signed_volume_abs_m3": 3.8519041859964955e-08,
+          "source_vertex_count": 232
+        }
+      ],
+      "source_authority": "PINNED_INTERBOTIX_ALOHA_VX300S_URDF_COLLISION_MESH",
+      "source_contained_by_hulls": true,
+      "source_face_count": 7588,
+      "source_mesh_quality_status": "PASS_NO_DEGENERATE_TRIANGLES",
+      "source_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_bar.stl",
+      "source_sample_count": 22570,
+      "source_scale_to_m": 0.001,
+      "source_sha256": "a4de62c9a2ed2c78433010e4c05530a1254b1774a7651967f406120c9bf8973e",
+      "source_signed_volume_abs_m3": 0.00013288041985707322,
+      "source_to_hull_sample_max_m": 0.021154664201982303,
+      "source_vertex_count": 3728,
+      "surface_distance_method": "DETERMINISTIC_VERTICES_EDGE_MIDPOINTS_CENTROIDS_CKDTREE_APPROXIMATION"
+    },
+    {
+      "aabb_max_m": [
+        0.029811279296875,
+        -0.49325,
+        0.45385266113281253
+      ],
+      "aabb_min_m": [
+        0.002344029426574707,
+        -0.5894075927734375,
+        0.3998526611328125
+      ],
+      "connected_component_count": 1,
+      "containment_max_halfspace_value_m": 1.1102230246251565e-16,
+      "containment_numeric_tolerance_m": 2.842170943040401e-14,
+      "convex_piece_count": 1,
+      "convex_policy": "ONE_CONVEX_HULL_PER_CONNECTED_SOURCE_COMPONENT",
+      "degenerate_triangle_count": 0,
+      "hull_sample_count": 1271,
+      "hull_to_source_sample_max_m": 0.013930637344607871,
+      "hull_to_source_volume_ratio": 1.580933963962676,
+      "hull_volume_m3": 5.558078872930679e-05,
+      "inward_contact_surface": {
+        "cad_face_center_m": [
+          0.007355284905152715,
+          -0.5415718845300294,
+          0.4268526699371185
+        ],
+        "cad_face_index": 117,
+        "cad_face_normal": [
+          -0.9945218953682733,
+          0.10452846326765405,
+          5.701881674690907e-16
+        ],
+        "sample_count": 124,
+        "sample_selection": "authoritative mesh vertices, edge midpoints and triangle centroids within the FreeCAD face AABB and 0.20 mm of its plane",
+        "source_to_hull_boundary_max_m": 0.0007977759222171227,
+        "source_to_hull_boundary_mean_m": 0.00046456224935083004,
+        "source_to_hull_boundary_min_m": 0.0,
+        "status": "FAIL_SINGLE_HULL_RECESSES_CONTACT_SURFACE",
+        "tessellation_error_budget_m": 0.0002
+      },
+      "link_suffix": "left_finger_link",
+      "mirror_used": false,
+      "pieces": [
+        {
+          "containment_max_halfspace_value_m": 1.1102230246251565e-16,
+          "hull_face_count": 176,
+          "hull_vertex_count": 90,
+          "hull_volume_m3": 5.558078872930679e-05,
+          "piece_index": 0,
+          "source_face_count": 1662,
+          "source_signed_volume_abs_m3": 3.51569325451085e-05,
+          "source_vertex_count": 831
+        }
+      ],
+      "source_authority": "SUPPLIER_ASSEMBLY_EMBEDDED_HANDED_FINGER_BREP_TESSELLATION",
+      "source_contained_by_hulls": true,
+      "source_face_count": 1662,
+      "source_mesh_quality_status": "PASS_NO_DEGENERATE_TRIANGLES",
+      "source_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/tessellation_angular_controlled/run_a/left_finger.obj",
+      "source_sample_count": 4986,
+      "source_scale_to_m": 1.0,
+      "source_sha256": "c6710d0fe5b2030a32722d9df5c0b553c771c9d61d92b8ddaec36c94c5963488",
+      "source_signed_volume_abs_m3": 3.51569325451085e-05,
+      "source_to_hull_sample_max_m": 0.010482833862304697,
+      "source_vertex_count": 831,
+      "surface_distance_method": "DETERMINISTIC_VERTICES_EDGE_MIDPOINTS_CENTROIDS_CKDTREE_APPROXIMATION"
+    },
+    {
+      "aabb_max_m": [
+        -0.0021442489624023437,
+        -0.49325,
+        0.45375
+      ],
+      "aabb_min_m": [
+        -0.029611499786376953,
+        -0.5894075927734375,
+        0.39975
+      ],
+      "connected_component_count": 1,
+      "containment_max_halfspace_value_m": 1.1102230246251565e-16,
+      "containment_numeric_tolerance_m": 2.842170943040401e-14,
+      "convex_piece_count": 1,
+      "convex_policy": "ONE_CONVEX_HULL_PER_CONNECTED_SOURCE_COMPONENT",
+      "degenerate_triangle_count": 0,
+      "hull_sample_count": 1271,
+      "hull_to_source_sample_max_m": 0.01393063741789882,
+      "hull_to_source_volume_ratio": 1.5809337319418972,
+      "hull_volume_m3": 5.5580793309212124e-05,
+      "inward_contact_surface": {
+        "cad_face_center_m": [
+          -0.007155504389827247,
+          -0.5415718845300294,
+          0.4267499975263585
+        ],
+        "cad_face_index": 128,
+        "cad_face_normal": [
+          0.9945218953682733,
+          0.10452846326765403,
+          -1.727189390844111e-15
+        ],
+        "sample_count": 124,
+        "sample_selection": "authoritative mesh vertices, edge midpoints and triangle centroids within the FreeCAD face AABB and 0.20 mm of its plane",
+        "source_to_hull_boundary_max_m": 0.0007977759222171227,
+        "source_to_hull_boundary_mean_m": 0.00046456235214999673,
+        "source_to_hull_boundary_min_m": 0.0,
+        "status": "FAIL_SINGLE_HULL_RECESSES_CONTACT_SURFACE",
+        "tessellation_error_budget_m": 0.0002
+      },
+      "link_suffix": "right_finger_link",
+      "mirror_used": false,
+      "pieces": [
+        {
+          "containment_max_halfspace_value_m": 1.1102230246251565e-16,
+          "hull_face_count": 176,
+          "hull_vertex_count": 90,
+          "hull_volume_m3": 5.5580793309212124e-05,
+          "piece_index": 0,
+          "source_face_count": 1662,
+          "source_signed_volume_abs_m3": 3.515694060176764e-05,
+          "source_vertex_count": 831
+        }
+      ],
+      "source_authority": "SUPPLIER_ASSEMBLY_EMBEDDED_HANDED_FINGER_BREP_TESSELLATION",
+      "source_contained_by_hulls": true,
+      "source_face_count": 1662,
+      "source_mesh_quality_status": "PASS_NO_DEGENERATE_TRIANGLES",
+      "source_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/tessellation_angular_controlled/run_a/right_finger.obj",
+      "source_sample_count": 4986,
+      "source_scale_to_m": 1.0,
+      "source_sha256": "b0979c5d55fee448dab512dc75b1251bab17d94892decd01de9a6e76c01482d1",
+      "source_signed_volume_abs_m3": 3.515694060176764e-05,
+      "source_to_hull_sample_max_m": 0.01069514117177981,
+      "source_vertex_count": 831,
+      "surface_distance_method": "DETERMINISTIC_VERTICES_EDGE_MIDPOINTS_CENTROIDS_CKDTREE_APPROXIMATION"
+    }
+  ],
+  "schema_version": 1,
+  "scope": "ROBOT_LOCAL_OFFLINE_COLLIDER_SURFACE_CERTIFICATE_NO_USD_AUTHORING",
+  "source_completeness": "PASS",
+  "status": "PARTIAL",
+  "summary": {
+    "convex_piece_count": 36,
+    "link_count": 11,
+    "maximum_hull_to_source_sample_distance_m": 0.053684643686392565,
+    "maximum_volume_ratio": 3.6801013520804844
+  },
+  "surface_error_certificate": "COMPLETE_NUMERICAL"
+}

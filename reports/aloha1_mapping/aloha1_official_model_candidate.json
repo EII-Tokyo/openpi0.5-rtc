@@ -1,20 +1,20 @@
 {
   "asset_directory": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/official_model_contract/1.0",
   "asset_directory_created_by_this_run": false,
-  "deterministic_signature": "052fd71580dbe5c9eba3906508c1e8f1a2843859f32bcf29b6b765a45925e90e",
+  "deterministic_signature": "02fc7c0216190d37768c41a65960c77ffb6b8f4d4c1aa11c6c557430c38430c9",
   "final_or_default_asset_modified": false,
   "inputs": [
     {
-      "deterministic_signature": "50ae2b455a4a7b596cf1d1c35681c874e7b1002665068ccdfeddfea8e05e471e",
+      "deterministic_signature": "ed69318a0450fdd57127f8cfecf55563a3e96b9cd04ebd7d1a4340fd8d6a68ed",
       "id": "source_audit",
       "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_official_parameter_source_audit.json",
-      "sha256": "d9f121f8eb677fef7a1273e55c7612a7f79b949f3dd0861be93b6ce3b5cf78d6"
+      "sha256": "55e8e00fad593c92ef6b1a475af7af89eed6969b7d9abf05d5b1119f36107e95"
     },
     {
-      "deterministic_signature": "48ad0829e64e1c4f7e7c90e77eb40d0383b31bb9b312cb3e829d8c907f097818",
+      "deterministic_signature": "9712c2e43eb0c56baa7c6039eca214bfc39afbb1f6eda65261038f29a8df3b9e",
       "id": "parameter_matrix",
       "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_official_parameter_matrix.json",
-      "sha256": "e1b067e755d24754be0b08ea5dbda1804b480f484b2453bd8eb3f309b941ab9e"
+      "sha256": "d0adf5f84a5a0b7f098a0dacbd48da14a37cb3d07465cd639227048a3e31d178"
     },
     {
       "deterministic_signature": "29f705de259db323e557710480513fc7b27bf0683f33d24a37dc31b2f798d333",
@@ -23,22 +23,22 @@
       "sha256": "7bc7348f10702b05436700f7d55ea537b34d01f8326c70df0845e1ad093d4efe"
     },
     {
-      "deterministic_signature": "5105d7dda13c99a85b559a298d5314f1289c2ce18b297a98a15f43ff457cc47e",
+      "deterministic_signature": "f0bd780f2ccf1563f4c66c6e0ca9bcd98e55323fe8c5881529932709caf19c24",
       "id": "dynamics_contract",
       "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_dynamics_contract.json",
-      "sha256": "35d7ca48453ead7fa4bdca5e0fbddafd83dd4c760bedc039001ddae076e6b015"
+      "sha256": "79f697a07054507e4644420664c05b7f42b3e355260124587a2fdab4343e6855"
     },
     {
-      "deterministic_signature": "1c442b791de1595202789dc68505e9056040e77e13b0d40a6773ded98e8d2d22",
+      "deterministic_signature": "5a975dc99cf5f74479f9e9c34820c7d0eb64e8919cfdb1c8b134f4d2ab4fa2ac",
       "id": "gripper_geometry_contract",
       "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_gripper_geometry_contract.json",
-      "sha256": "b87928abbc85a41d9f2e8156d3152fdc7697a2c413a9623227af5f5a6c4549d6"
+      "sha256": "15f68006404e73c478ef0ab8c28e00b2291031a7c65256928c618532064c287a"
     },
     {
-      "deterministic_signature": "047d6d79b8edaca0a1d6f2ed8d6744b256ffeb686c11c413bede64ee9184c118",
+      "deterministic_signature": "5e985b60154b8eb224820846806a2a752bf7f594ad50502ed1a20ff8c7d5a7fc",
       "id": "collider_geometry_contract",
       "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_collider_geometry_contract.json",
-      "sha256": "335a22d9206a267bbf3861d7af1c3780f1292d771c6a24171a75e635d93d4d8c"
+      "sha256": "b18ae888763eecf4bf21c659158a4d46e43e8305be901c02342d48a184ee868c"
     },
     {
       "deterministic_signature": "d2d867ec27636710d61b6a039da2625fbba3c5b599a902efcce461739fe243e5",
@@ -61,13 +61,6 @@
         "blocking": true,
         "candidate_gate": "BLOCKED",
         "id": "dynamics_contract",
-        "reason": "MODEL_PROOF_INCOMPLETE",
-        "status": "PARTIAL"
-      },
-      {
-        "blocking": true,
-        "candidate_gate": "BLOCKED",
-        "id": "gripper_geometry_contract",
         "reason": "MODEL_PROOF_INCOMPLETE",
         "status": "PARTIAL"
       },
@@ -117,11 +110,11 @@
         "status": "PARTIAL"
       },
       {
-        "blocking": true,
-        "candidate_gate": "BLOCKED",
+        "blocking": false,
+        "candidate_gate": "PASS",
         "id": "gripper_geometry_contract",
-        "reason": "MODEL_PROOF_INCOMPLETE",
-        "status": "PARTIAL"
+        "reason": "PASS",
+        "status": "PASS"
       },
       {
         "blocking": true,

@@ -120,11 +120,65 @@ def test_repository_matrix_is_complete_and_exact_model_scoped() -> None:
     assert matrix["hard_blocker_count"] > 0
     assert not matrix["forbidden_formal_values"]
 
+    aperture = next(
+        record
+        for record in matrix["records"]
+        if record["id"] == "gripper_aperture_definition_conflict"
+    )
+    assert aperture["status"] == "VERIFIED_DERIVATION"
+    assert aperture["value"]["implemented_carriage_center_range_m"] == [
+        0.042,
+        0.114,
+    ]
+    assert aperture["conflict_state"] == (
+        "VERIFIED_OFFICIAL_SOURCE_CONFLICT_PRODUCT_PAGE_NOT_CAD_SUPPORTED"
+    )
+
     actuator_map = next(record for record in matrix["records"] if record["id"] == "actuator_id_model_map")
     assert actuator_map["value"]["1"] == "XM540-W270"
     assert actuator_map["value"]["7"] == "XM540-W270"
     assert actuator_map["value"]["8"] == "XM430-W350"
     assert actuator_map["value"]["9"] == "XM430-W350"
+
+    continuous = {
+        record["id"]: record
+        for record in matrix["records"]
+        if record["id"].startswith("estimated_continuous_torque.")
+    }
+    assert continuous["estimated_continuous_torque.XM540-W270"]["value"] == {
+        "reference_voltage_V": 12.0,
+        "estimated_continuous_torque_Nm": 2.12,
+        "fraction_of_stall": 0.2,
+        "manufacturer_estimate_not_measured_thermal_curve": True,
+    }
+    assert continuous["estimated_continuous_torque.XM430-W350"]["value"][
+        "estimated_continuous_torque_Nm"
+    ] == 0.82
+    envelope = next(
+        record
+        for record in matrix["records"]
+        if record["id"] == "continuous_actuator_envelope"
+    )
+    assert envelope["blocker"]["missing_definition"] == (
+        "measured continuous torque-speed-current thermal envelope beyond the "
+        "official 12 V 20%-of-stall estimates"
+    )
+    geometry_sources = next(
+        record
+        for record in matrix["records"]
+        if record["id"] == "cad_to_robot_link_geometry_correspondence"
+    )
+    assert geometry_sources["status"] == "VERIFIED_DERIVATION"
+    assert geometry_sources["value"]["physical_link_source_count"] == 11
+    collision = next(
+        record
+        for record in matrix["records"]
+        if record["id"] == "formal_collision_geometry"
+    )
+    assert collision["blocker"]["id"] == (
+        "HARD_BLOCKER_COLLIDER_ACCEPTANCE_ERROR_BUDGET"
+    )
+    assert matrix["hard_blocker_count"] == 5
 
     report = json.loads(REPORT.read_text(encoding="utf-8"))
     assert report["deterministic_signature"] == matrix["deterministic_signature"]

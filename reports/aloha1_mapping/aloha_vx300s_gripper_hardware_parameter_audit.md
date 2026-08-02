@@ -26,7 +26,7 @@
 ## Fail-closed boundaries
 
 - Official maximum-aperture claims: `0.116 m`, `0.114 m`
-- Aperture selection: `UNRESOLVED_FAIL_CLOSED`
+- Aperture selection: `RESOLVED_IMPLEMENTED_URDF_AND_CAD_CARRIAGE_DATUM`
 - `Current_Limit=200` is a pinned motor-config register value; using the ROBOTIS current unit gives `0.538 A`, but it is not a calibrated fingertip-force or PhysX max-force value.
 - The supplier STEP license remains `UNKNOWN_HARD_BLOCKER`; the STEP is retained only in `.codex/artifacts` and is not redistributable.
 

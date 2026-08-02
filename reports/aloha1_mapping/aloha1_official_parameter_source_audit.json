@@ -1,5 +1,5 @@
 {
-  "deterministic_signature": "50ae2b455a4a7b596cf1d1c35681c874e7b1002665068ccdfeddfea8e05e471e",
+  "deterministic_signature": "ed69318a0450fdd57127f8cfecf55563a3e96b9cd04ebd7d1a4340fd8d6a68ed",
   "findings": [],
   "formal_parameter_candidate_gate": "PASS",
   "local_mirror_observations": [
@@ -52,10 +52,13 @@
     "interbotix_vx300s_motor_config",
     "interbotix_vx300s_xacro",
     "interbotix_xs_driver",
+    "interbotix_xsarm_default_modes",
     "isaacsim_urdf_importer_2_4_30",
     "physx_schema_107_3",
     "robotis_xm430_w350_manual",
+    "robotis_xm430_w350_product",
     "robotis_xm540_w270_manual",
+    "robotis_xm540_w270_product",
     "supplier_simple_aloha_viper_step",
     "trossen_vx300s_spec"
   ],
@@ -102,7 +105,7 @@
       "status": "RESOLVED_WITH_CONFLICT_RETAINED"
     }
   ],
-  "source_count": 13,
+  "source_count": 16,
   "sources": [
     {
       "authority": "Trossen Robotics / Interbotix",
@@ -252,6 +255,27 @@
       "url": "https://github.com/Interbotix/interbotix_xs_driver/blob/da27b8b2b6c7677844f74581b82c01829a834e1c/src/xs_driver.cpp"
     },
     {
+      "authority": "Trossen Robotics / Interbotix",
+      "branch": "humble",
+      "commit": "b66d5b905725351dd71d3251a06cd3f4c777940f",
+      "evidence_class": "OFFICIAL_PINNED_SOURCE",
+      "exact_model_scope": [
+        "aloha_vx300s",
+        "vx300s"
+      ],
+      "id": "interbotix_xsarm_default_modes",
+      "license": {
+        "evidence": "LICENSE",
+        "identifier": "BSD-3-Clause",
+        "redistribution": "ALLOWED_WITH_LICENSE",
+        "status": "CONFIRMED"
+      },
+      "local_path": ".codex/artifacts/20260802-aloha1-official-model-first/sources/interbotix_manipulators_b66d5b905725351dd71d3251a06cd3f4c777940f/modes.yaml",
+      "repository": "https://github.com/Interbotix/interbotix_ros_manipulators.git",
+      "sha256": "ee7f2b5fcd367442419396c2feeaa111b7b1776d8302a4ca2dd0c4f3d13cb95f",
+      "url": "https://github.com/Interbotix/interbotix_ros_manipulators/blob/b66d5b905725351dd71d3251a06cd3f4c777940f/interbotix_ros_xsarms/interbotix_xsarm_control/config/modes.yaml"
+    },
+    {
       "authority": "NVIDIA local Isaac Sim installation",
       "branch": null,
       "commit": null,
@@ -322,6 +346,27 @@
       "evidence_class": "OFFICIAL_DIRECT",
       "exact_model_scope": [
         "aloha_vx300s",
+        "XM430-W350-T"
+      ],
+      "id": "robotis_xm430_w350_product",
+      "license": {
+        "evidence": "https://www.robotis.us/",
+        "identifier": "UNKNOWN",
+        "redistribution": "NOT_REDISTRIBUTED",
+        "status": "LINK_AND_FACT_CITATION_ONLY"
+      },
+      "local_path": ".codex/artifacts/20260802-aloha1-official-model-first/sources/web/robotis_xm430_w350_product.html",
+      "repository": null,
+      "sha256": "5d404cecc8b304a6aec1b2e8621157a87b11bcd8c7be6d0ed2244a223ad7abed",
+      "url": "https://www.robotis.us/dynamixel-xm430-w350-t/"
+    },
+    {
+      "authority": "ROBOTIS",
+      "branch": null,
+      "commit": null,
+      "evidence_class": "OFFICIAL_DIRECT",
+      "exact_model_scope": [
+        "aloha_vx300s",
         "XM540-W270"
       ],
       "id": "robotis_xm540_w270_manual",
@@ -335,6 +380,27 @@
       "repository": null,
       "sha256": "e662ccc500f61f8dc3ca8463555de4389c90dbe8c8139d24a4c968bb2d2f249a",
       "url": "https://emanual.robotis.com/docs/en/dxl/x/xm540-w270/"
+    },
+    {
+      "authority": "ROBOTIS",
+      "branch": null,
+      "commit": null,
+      "evidence_class": "OFFICIAL_DIRECT",
+      "exact_model_scope": [
+        "aloha_vx300s",
+        "XM540-W270-T"
+      ],
+      "id": "robotis_xm540_w270_product",
+      "license": {
+        "evidence": "https://www.robotis.us/",
+        "identifier": "UNKNOWN",
+        "redistribution": "NOT_REDISTRIBUTED",
+        "status": "LINK_AND_FACT_CITATION_ONLY"
+      },
+      "local_path": ".codex/artifacts/20260802-aloha1-official-model-first/sources/web/robotis_xm540_w270_product.html",
+      "repository": null,
+      "sha256": "92668f52a76463de6f6bac289f5b941606c1b030443cfb1b777c07e70982b9ba",
+      "url": "https://www.robotis.us/dynamixel-xm540-w270-t/"
     },
     {
       "authority": "ALOHA supplier public CAD package",

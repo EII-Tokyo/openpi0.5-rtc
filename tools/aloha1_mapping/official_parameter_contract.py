@@ -220,7 +220,11 @@ def _source_map(manifest: Mapping[str, Any]) -> dict[str, Mapping[str, Any]]:
     }
 
 
-def _parse_robot_description(xacro_path: Path, motor_config_path: Path) -> list[dict[str, object]]:
+def _parse_robot_description(
+    xacro_path: Path,
+    motor_config_path: Path,
+    repository_root: Path | None,
+) -> list[dict[str, object]]:
     records: list[dict[str, object]] = []
     motor_config = yaml.safe_load(motor_config_path.read_text(encoding="utf-8"))
     records.append(
@@ -235,24 +239,77 @@ def _parse_robot_description(xacro_path: Path, motor_config_path: Path) -> list[
             source_locator="joint_order",
         )
     )
-    records.append(
-        _blocker(
-            record_id="cad_to_robot_link_geometry_correspondence",
-            group="link_geometry",
-            blocker_id="HARD_BLOCKER_CAD_TO_LINK_GEOMETRY_CONTRACT_NOT_YET_PROVED",
-            missing_definition="per-link supplier B-Rep to URDF link mapping and rigid transform proof",
-            source_ids=[
-                "supplier_simple_aloha_viper_step",
-                "interbotix_aloha_vx300s_xacro",
-            ],
-            source_locator="supplier assembly product tree versus URDF link tree",
-            blocks=["formal_geometry_layer"],
-            does_not_block=["source_audit", "actuator_parameter_extraction"],
-            units="m_and_rigid_transforms",
-            frame="supplier_CAD_to_robot_local",
-            sign_convention="right_handed_non_mirrored",
-        )
+    surface_certificate_path = (
+        repository_root
+        / "reports/aloha1_mapping/aloha1_official_collider_surface_certificate.json"
+        if repository_root is not None
+        else None
     )
+    if surface_certificate_path is not None and surface_certificate_path.is_file():
+        surface_certificate = json.loads(
+            surface_certificate_path.read_text(encoding="utf-8")
+        )
+    else:
+        surface_certificate = None
+    if (
+        surface_certificate is not None
+        and surface_certificate.get("source_completeness") == "PASS"
+    ):
+        records.append(
+            _record(
+                record_id="cad_to_robot_link_geometry_correspondence",
+                group="link_geometry",
+                value={
+                    "physical_link_source_count": surface_certificate["summary"][
+                        "link_count"
+                    ],
+                    "source_authorities": {
+                        record["link_suffix"]: record["source_authority"]
+                        for record in surface_certificate["records"]
+                    },
+                    "supplier_cad_not_falsely_split_into_urdf_products": True,
+                    "official_urdf_mesh_fallback_explicit": True,
+                    "mirror_used": False,
+                },
+                units="per_link_source_identity_and_metre_scale",
+                frame="robot_link_local",
+                sign_convention="right_handed_non_mirrored",
+                source_ids=[
+                    "supplier_simple_aloha_viper_step",
+                    "interbotix_aloha_vx300s_xacro",
+                    "interbotix_manipulators_humble",
+                ],
+                source_locator=str(surface_certificate_path.resolve()),
+                derivation_kind="EXPLICIT_PER_LINK_GEOMETRY_SOURCE_BOUNDARY",
+                derivation_formula="supplier handed finger B-Reps; otherwise pinned official URDF link mesh",
+                derivation_inputs=[
+                    "supplier_simple_aloha_viper_step:embedded handed fingers",
+                    "interbotix_aloha_vx300s_xacro:link collision mesh mapping",
+                    "interbotix_manipulators_humble:pinned mesh bytes",
+                ],
+                status="VERIFIED_DERIVATION",
+                evidence_class="NUMERICAL_DERIVATION",
+            )
+        )
+    else:
+        records.append(
+            _blocker(
+                record_id="cad_to_robot_link_geometry_correspondence",
+                group="link_geometry",
+                blocker_id="HARD_BLOCKER_CAD_TO_LINK_GEOMETRY_CONTRACT_NOT_YET_PROVED",
+                missing_definition="per-link supplier B-Rep or pinned official URDF geometry source boundary",
+                source_ids=[
+                    "supplier_simple_aloha_viper_step",
+                    "interbotix_aloha_vx300s_xacro",
+                ],
+                source_locator="supplier assembly product tree versus URDF link tree",
+                blocks=["formal_geometry_layer"],
+                does_not_block=["source_audit", "actuator_parameter_extraction"],
+                units="m_and_rigid_transforms",
+                frame="supplier_CAD_to_robot_local",
+                sign_convention="right_handed_non_mirrored",
+            )
+        )
 
     root = ET.parse(xacro_path).getroot()
     properties = {
@@ -333,7 +390,9 @@ def build_parameter_matrix(
     records: list[dict[str, object]] = []
     xacro_path = _resolve(str(sources["interbotix_aloha_vx300s_xacro"]["local_path"]), repository_root)
     motor_config_path = _resolve(str(sources["interbotix_aloha_vx300s_motor_config"]["local_path"]), repository_root)
-    records.extend(_parse_robot_description(xacro_path, motor_config_path))
+    records.extend(
+        _parse_robot_description(xacro_path, motor_config_path, repository_root)
+    )
 
     records.append(
         _record(
@@ -356,11 +415,16 @@ def build_parameter_matrix(
         _blocker(
             record_id="continuous_actuator_envelope",
             group="actuator_performance",
-            blocker_id="HARD_BLOCKER_CONTINUOUS_ACTUATOR_ENVELOPE_NOT_YET_DERIVED",
-            missing_definition="continuous permissible joint-side torque-speed-current envelope under the exact voltage and thermal conditions",
+            blocker_id="HARD_BLOCKER_CONTINUOUS_TORQUE_SPEED_CURRENT_THERMAL_CURVE",
+            missing_definition=(
+                "measured continuous torque-speed-current thermal envelope beyond the "
+                "official 12 V 20%-of-stall estimates"
+            ),
             source_ids=[
                 "robotis_xm540_w270_manual",
                 "robotis_xm430_w350_manual",
+                "robotis_xm540_w270_product",
+                "robotis_xm430_w350_product",
                 "interbotix_aloha_vx300s_motor_config",
             ],
             source_locator="manufacturer performance curves, thermal limits and exact robot transmission mapping",
@@ -400,25 +464,75 @@ def build_parameter_matrix(
             conflict_state="RESOLVED_WITH_CONFLICT_RETAINED_ID6_ID7",
         )
     )
-    records.append(
-        _blocker(
-            record_id="gripper_aperture_definition_conflict",
-            group="gripper_linkage",
-            blocker_id="HARD_BLOCKER_GRIPPER_APERTURE_DEFINITION_CONFLICT",
-            missing_definition="reconcile exact-product 42-116 mm claim with official URDF symmetric 42-114 mm carriage-center interval and CAD inner-surface aperture",
-            source_ids=[
-                "trossen_vx300s_spec",
-                "interbotix_aloha_vx300s_xacro",
-                "supplier_simple_aloha_viper_step",
-            ],
-            source_locator="Gripper Specifications versus finger limits versus CAD inner surfaces",
-            blocks=["formal_gripper_aperture_contract"],
-            does_not_block=["joint_order", "arm_kinematic_contract"],
-            units="m",
-            frame="gripper_link",
-            sign_convention="left_positive_right_negative",
-        )
+    aperture_resolution_path = (
+        repository_root
+        / "reports/aloha1_mapping/aloha1_gripper_aperture_definition_resolution.json"
+        if repository_root is not None
+        else None
     )
+    if aperture_resolution_path is not None and aperture_resolution_path.is_file():
+        aperture_resolution = json.loads(
+            aperture_resolution_path.read_text(encoding="utf-8")
+        )
+    else:
+        aperture_resolution = None
+    if aperture_resolution is not None and aperture_resolution.get("status") == "PASS":
+        records.append(
+            _record(
+                record_id="gripper_aperture_definition_conflict",
+                group="gripper_linkage",
+                value={
+                    "implemented_carriage_center_range_m": aperture_resolution[
+                        "implemented_joint_range_m"
+                    ],
+                    "trossen_product_table_range_m": aperture_resolution[
+                        "trossen_product_table_range_m"
+                    ],
+                    "contact_surface_gap_is_single_scalar": False,
+                },
+                units="m",
+                frame="gripper_link_opening_axis",
+                sign_convention="left_positive_right_negative",
+                source_ids=[
+                    "trossen_vx300s_spec",
+                    "interbotix_aloha_vx300s_xacro",
+                    "supplier_simple_aloha_viper_step",
+                ],
+                source_locator=str(aperture_resolution_path.resolve()),
+                derivation_kind="CAD_DATUM_AND_PINNED_URDF_CROSSCHECK",
+                derivation_formula="distance=open_left_origin-open_right_origin; open=closed+2*0.036m",
+                derivation_inputs=[
+                    "trossen_vx300s_spec:Gripper Min/Max table",
+                    "interbotix_aloha_vx300s_xacro:left/right finger limits",
+                    "supplier_simple_aloha_viper_step:handed finger carriage datums",
+                ],
+                status="VERIFIED_DERIVATION",
+                evidence_class="NUMERICAL_DERIVATION",
+                conflict_state=aperture_resolution["source_conflict"][
+                    "classification"
+                ],
+            )
+        )
+    else:
+        records.append(
+            _blocker(
+                record_id="gripper_aperture_definition_conflict",
+                group="gripper_linkage",
+                blocker_id="HARD_BLOCKER_GRIPPER_APERTURE_DEFINITION_CONFLICT",
+                missing_definition="reconcile exact-product 42-116 mm claim with official URDF symmetric 42-114 mm carriage-center interval and CAD inner-surface aperture",
+                source_ids=[
+                    "trossen_vx300s_spec",
+                    "interbotix_aloha_vx300s_xacro",
+                    "supplier_simple_aloha_viper_step",
+                ],
+                source_locator="Gripper Specifications versus finger limits versus CAD inner surfaces",
+                blocks=["formal_gripper_aperture_contract"],
+                does_not_block=["joint_order", "arm_kinematic_contract"],
+                units="m",
+                frame="gripper_link",
+                sign_convention="left_positive_right_negative",
+            )
+        )
 
     for model, source_id, ratio, weight, performance in (
         (
@@ -499,6 +613,31 @@ def build_parameter_matrix(
             )
         )
 
+    for model, source_id, continuous_torque, stall_torque in (
+        ("XM540-W270", "robotis_xm540_w270_product", 2.12, 10.6),
+        ("XM430-W350", "robotis_xm430_w350_product", 0.82, 4.1),
+    ):
+        records.append(
+            _record(
+                record_id=f"estimated_continuous_torque.{model}",
+                group="actuator_performance",
+                value={
+                    "reference_voltage_V": 12.0,
+                    "estimated_continuous_torque_Nm": continuous_torque,
+                    "fraction_of_stall": round(continuous_torque / stall_torque, 12),
+                    "manufacturer_estimate_not_measured_thermal_curve": True,
+                },
+                units={"voltage": "V", "torque": "N*m", "fraction": "1"},
+                frame="actuator_output_horn",
+                sign_convention="unsigned_output_capacity",
+                source_ids=[source_id],
+                source_locator=(
+                    "Estimated Rated Torque and disclosure: calculated at 20% of "
+                    "stall torque"
+                ),
+            )
+        )
+
     motor_config = yaml.safe_load(motor_config_path.read_text(encoding="utf-8"))
     records.append(
         _record(
@@ -554,10 +693,14 @@ def build_parameter_matrix(
             _blocker(
                 record_id="formal_collision_geometry",
                 group="collision_geometry",
-                blocker_id="HARD_BLOCKER_COLLIDER_ERROR_CERTIFICATE_NOT_YET_DERIVED",
-                missing_definition="CAD-to-collider surface error and swept-clearance certificate for every link",
-                source_ids=["supplier_simple_aloha_viper_step", "physx_schema_107_3"],
-                source_locator="supplier B-Rep versus PhysX collision representation",
+                blocker_id="HARD_BLOCKER_COLLIDER_ACCEPTANCE_ERROR_BUDGET",
+                missing_definition="official or task-derived numerical acceptance tolerance for the complete per-link convex-hull surface/volume certificate",
+                source_ids=[
+                    "supplier_simple_aloha_viper_step",
+                    "interbotix_aloha_vx300s_xacro",
+                    "physx_schema_107_3",
+                ],
+                source_locator="complete offline surface certificate versus PhysX collision representation",
                 blocks=["formal_collision_layer"],
                 does_not_block=["source_audit", "inertial_validation"],
             ),

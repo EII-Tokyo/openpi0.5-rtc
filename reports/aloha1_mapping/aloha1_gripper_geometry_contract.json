@@ -1,9 +1,34 @@
 {
   "aperture": {
-    "blocker": "HARD_BLOCKER_GRIPPER_APERTURE_DEFINITION_CONFLICT",
-    "definition_boundary": "URDF values are carriage-center coordinates; product-page wording and CAD inner-surface aperture must not be conflated",
+    "contact_surface_gap_is_single_scalar": false,
+    "contact_surface_gap_m": {
+      "closed_reference_range_over_common_face_interval": [
+        0.00448827841608892,
+        0.021630946391984388
+      ],
+      "common_cad_y_interval_m": [
+        -0.5892507951541192,
+        -0.5076999997339198
+      ],
+      "open_derived_range_over_common_face_interval": [
+        0.07648827841608893,
+        0.0936309463919844
+      ]
+    },
+    "definition_boundary": "URDF values are carriage-center coordinates; the product-page wording remains a documented source conflict and the tilted CAD contact-surface gap is not a single scalar",
+    "implemented_joint_range_source": "PINNED_OFFICIAL_URDF_AND_CAD_CARRIAGE_DATUM",
     "no_fitted_endpoint_used": true,
-    "status": "HARD_BLOCKER_DEFINITION_CONFLICT",
+    "resolution_report": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_gripper_aperture_definition_resolution.json",
+      "sha256": "5f4a3f38bfe28844b9b60c05edff2851d7fdb8c414634ddb8fd085115b03441a"
+    },
+    "source_conflict": {
+      "classification": "VERIFIED_OFFICIAL_SOURCE_CONFLICT_PRODUCT_PAGE_NOT_CAD_SUPPORTED",
+      "difference_at_max_m": 0.002,
+      "interpretation": "The CAD carriage datums and pinned official URDF both resolve to 114 mm maximum center distance; the exact-product table says 116 mm without defining a different datum. The supplier-CAD distal inner gap is y-dependent and matches neither range.",
+      "preserved_not_silently_fitted": true
+    },
+    "status": "PASS_WITH_DOCUMENTED_OFFICIAL_SOURCE_CONFLICT",
     "trossen_exact_product_claim_m": [
       0.042,
       0.116
@@ -13,8 +38,8 @@
       0.114
     ]
   },
-  "deterministic_signature": "1c442b791de1595202789dc68505e9056040e77e13b0d40a6773ded98e8d2d22",
-  "formal_candidate_gate": "BLOCKED",
+  "deterministic_signature": "5a975dc99cf5f74479f9e9c34820c7d0eb64e8919cfdb1c8b134f4d2ab4fa2ac",
+  "formal_candidate_gate": "PASS",
   "formula_validation": {
     "arm_length_m": 0.035,
     "endpoint_max_abs_error_m": 7.91033905045424e-16,
@@ -64,5 +89,5 @@
     "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/gdrive_source_readonly/Simple Aloha Viper 2024-5-13.step",
     "sha256": "337862418769d4ea8b801d26e68930c4412f870050e60769bbf91765194dc571"
   },
-  "status": "PARTIAL"
+  "status": "PASS"
 }

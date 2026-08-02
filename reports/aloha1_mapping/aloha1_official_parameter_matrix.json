@@ -6,7 +6,7 @@
     },
     "actuator_performance": {
       "hard_blocker_count": 1,
-      "record_count": 3
+      "record_count": 5
     },
     "collision_geometry": {
       "hard_blocker_count": 1,
@@ -21,7 +21,7 @@
       "record_count": 1
     },
     "gripper_linkage": {
-      "hard_blocker_count": 1,
+      "hard_blocker_count": 0,
       "record_count": 2
     },
     "joint_kinematics": {
@@ -33,7 +33,7 @@
       "record_count": 14
     },
     "link_geometry": {
-      "hard_blocker_count": 1,
+      "hard_blocker_count": 0,
       "record_count": 2
     },
     "operating_modes": {
@@ -49,27 +49,11 @@
       "record_count": 1
     }
   },
-  "deterministic_signature": "48ad0829e64e1c4f7e7c90e77eb40d0383b31bb9b312cb3e829d8c907f097818",
+  "deterministic_signature": "9712c2e43eb0c56baa7c6039eca214bfc39afbb1f6eda65261038f29a8df3b9e",
   "forbidden_formal_values": [],
   "formal_parameter_candidate_gate": {
-    "blocking_record_count": 7,
+    "blocking_record_count": 5,
     "blocking_records": [
-      {
-        "blocker": {
-          "blocks": [
-            "formal_geometry_layer"
-          ],
-          "does_not_block": [
-            "source_audit",
-            "actuator_parameter_extraction"
-          ],
-          "id": "HARD_BLOCKER_CAD_TO_LINK_GEOMETRY_CONTRACT_NOT_YET_PROVED",
-          "missing_definition": "per-link supplier B-Rep to URDF link mapping and rigid transform proof"
-        },
-        "evidence_class": "HARD_BLOCKER",
-        "id": "cad_to_robot_link_geometry_correspondence",
-        "status": "HARD_BLOCKER"
-      },
       {
         "blocker": {
           "blocks": [
@@ -79,27 +63,11 @@
             "kinematic_contract",
             "register_unit_conversion"
           ],
-          "id": "HARD_BLOCKER_CONTINUOUS_ACTUATOR_ENVELOPE_NOT_YET_DERIVED",
-          "missing_definition": "continuous permissible joint-side torque-speed-current envelope under the exact voltage and thermal conditions"
+          "id": "HARD_BLOCKER_CONTINUOUS_TORQUE_SPEED_CURRENT_THERMAL_CURVE",
+          "missing_definition": "measured continuous torque-speed-current thermal envelope beyond the official 12 V 20%-of-stall estimates"
         },
         "evidence_class": "HARD_BLOCKER",
         "id": "continuous_actuator_envelope",
-        "status": "HARD_BLOCKER"
-      },
-      {
-        "blocker": {
-          "blocks": [
-            "formal_gripper_aperture_contract"
-          ],
-          "does_not_block": [
-            "joint_order",
-            "arm_kinematic_contract"
-          ],
-          "id": "HARD_BLOCKER_GRIPPER_APERTURE_DEFINITION_CONFLICT",
-          "missing_definition": "reconcile exact-product 42-116 mm claim with official URDF symmetric 42-114 mm carriage-center interval and CAD inner-surface aperture"
-        },
-        "evidence_class": "HARD_BLOCKER",
-        "id": "gripper_aperture_definition_conflict",
         "status": "HARD_BLOCKER"
       },
       {
@@ -127,8 +95,8 @@
             "source_audit",
             "inertial_validation"
           ],
-          "id": "HARD_BLOCKER_COLLIDER_ERROR_CERTIFICATE_NOT_YET_DERIVED",
-          "missing_definition": "CAD-to-collider surface error and swept-clearance certificate for every link"
+          "id": "HARD_BLOCKER_COLLIDER_ACCEPTANCE_ERROR_BUDGET",
+          "missing_definition": "official or task-derived numerical acceptance tolerance for the complete per-link convex-hull surface/volume certificate"
         },
         "evidence_class": "HARD_BLOCKER",
         "id": "formal_collision_geometry",
@@ -170,7 +138,7 @@
     ],
     "status": "BLOCKED"
   },
-  "hard_blocker_count": 7,
+  "hard_blocker_count": 5,
   "missing_groups": [],
   "parameter_schema_findings": [],
   "product": {
@@ -183,7 +151,7 @@
     "project_model": "aloha_vx300s",
     "robot_local_geometry_relation": "IDENTICAL_NOT_MIRRORED"
   },
-  "record_count": 45,
+  "record_count": 47,
   "records": [
     {
       "applicability": {
@@ -232,38 +200,48 @@
         "product": "aloha_vx300s",
         "robot_local_geometry_relation": "IDENTICAL_NOT_MIRRORED"
       },
-      "blocker": {
-        "blocks": [
-          "formal_geometry_layer"
-        ],
-        "does_not_block": [
-          "source_audit",
-          "actuator_parameter_extraction"
-        ],
-        "id": "HARD_BLOCKER_CAD_TO_LINK_GEOMETRY_CONTRACT_NOT_YET_PROVED",
-        "missing_definition": "per-link supplier B-Rep to URDF link mapping and rigid transform proof"
-      },
       "conflict_state": "NONE",
       "derivation": {
-        "formula": null,
+        "formula": "supplier handed finger B-Reps; otherwise pinned official URDF link mesh",
         "inputs": [
-          "supplier_simple_aloha_viper_step:supplier assembly product tree versus URDF link tree",
-          "interbotix_aloha_vx300s_xacro:supplier assembly product tree versus URDF link tree"
+          "supplier_simple_aloha_viper_step:embedded handed fingers",
+          "interbotix_aloha_vx300s_xacro:link collision mesh mapping",
+          "interbotix_manipulators_humble:pinned mesh bytes"
         ],
-        "kind": "NOT_DERIVABLE_FROM_FROZEN_OFFICIAL_SOURCES"
+        "kind": "EXPLICIT_PER_LINK_GEOMETRY_SOURCE_BOUNDARY"
       },
-      "evidence_class": "HARD_BLOCKER",
-      "frame": "supplier_CAD_to_robot_local",
+      "evidence_class": "NUMERICAL_DERIVATION",
+      "frame": "robot_link_local",
       "group": "link_geometry",
       "id": "cad_to_robot_link_geometry_correspondence",
       "sign_convention": "right_handed_non_mirrored",
       "source_ids": [
         "supplier_simple_aloha_viper_step",
-        "interbotix_aloha_vx300s_xacro"
+        "interbotix_aloha_vx300s_xacro",
+        "interbotix_manipulators_humble"
       ],
-      "source_locator": "supplier assembly product tree versus URDF link tree",
-      "status": "HARD_BLOCKER",
-      "units": "m_and_rigid_transforms"
+      "source_locator": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_official_collider_surface_certificate.json",
+      "status": "VERIFIED_DERIVATION",
+      "units": "per_link_source_identity_and_metre_scale",
+      "value": {
+        "mirror_used": false,
+        "official_urdf_mesh_fallback_explicit": true,
+        "physical_link_source_count": 11,
+        "source_authorities": {
+          "base_link": "PINNED_INTERBOTIX_ALOHA_VX300S_URDF_COLLISION_MESH",
+          "gripper_bar_link": "PINNED_INTERBOTIX_ALOHA_VX300S_URDF_COLLISION_MESH",
+          "gripper_link": "PINNED_INTERBOTIX_ALOHA_VX300S_URDF_COLLISION_MESH",
+          "gripper_prop_link": "PINNED_INTERBOTIX_ALOHA_VX300S_URDF_COLLISION_MESH",
+          "left_finger_link": "SUPPLIER_ASSEMBLY_EMBEDDED_HANDED_FINGER_BREP_TESSELLATION",
+          "lower_forearm_link": "PINNED_INTERBOTIX_ALOHA_VX300S_URDF_COLLISION_MESH",
+          "right_finger_link": "SUPPLIER_ASSEMBLY_EMBEDDED_HANDED_FINGER_BREP_TESSELLATION",
+          "shoulder_link": "PINNED_INTERBOTIX_ALOHA_VX300S_URDF_COLLISION_MESH",
+          "upper_arm_link": "PINNED_INTERBOTIX_ALOHA_VX300S_URDF_COLLISION_MESH",
+          "upper_forearm_link": "PINNED_INTERBOTIX_ALOHA_VX300S_URDF_COLLISION_MESH",
+          "wrist_link": "PINNED_INTERBOTIX_ALOHA_VX300S_URDF_COLLISION_MESH"
+        },
+        "supplier_cad_not_falsely_split_into_urdf_products": true
+      }
     },
     {
       "applicability": {
@@ -1618,8 +1596,8 @@
           "kinematic_contract",
           "register_unit_conversion"
         ],
-        "id": "HARD_BLOCKER_CONTINUOUS_ACTUATOR_ENVELOPE_NOT_YET_DERIVED",
-        "missing_definition": "continuous permissible joint-side torque-speed-current envelope under the exact voltage and thermal conditions"
+        "id": "HARD_BLOCKER_CONTINUOUS_TORQUE_SPEED_CURRENT_THERMAL_CURVE",
+        "missing_definition": "measured continuous torque-speed-current thermal envelope beyond the official 12 V 20%-of-stall estimates"
       },
       "conflict_state": "NONE",
       "derivation": {
@@ -1627,6 +1605,8 @@
         "inputs": [
           "robotis_xm540_w270_manual:manufacturer performance curves, thermal limits and exact robot transmission mapping",
           "robotis_xm430_w350_manual:manufacturer performance curves, thermal limits and exact robot transmission mapping",
+          "robotis_xm540_w270_product:manufacturer performance curves, thermal limits and exact robot transmission mapping",
+          "robotis_xm430_w350_product:manufacturer performance curves, thermal limits and exact robot transmission mapping",
           "interbotix_aloha_vx300s_motor_config:manufacturer performance curves, thermal limits and exact robot transmission mapping"
         ],
         "kind": "NOT_DERIVABLE_FROM_FROZEN_OFFICIAL_SOURCES"
@@ -1639,6 +1619,8 @@
       "source_ids": [
         "robotis_xm540_w270_manual",
         "robotis_xm430_w350_manual",
+        "robotis_xm540_w270_product",
+        "robotis_xm430_w350_product",
         "interbotix_aloha_vx300s_motor_config"
       ],
       "source_locator": "manufacturer performance curves, thermal limits and exact robot transmission mapping",
@@ -1696,29 +1678,18 @@
         "product": "aloha_vx300s",
         "robot_local_geometry_relation": "IDENTICAL_NOT_MIRRORED"
       },
-      "blocker": {
-        "blocks": [
-          "formal_gripper_aperture_contract"
-        ],
-        "does_not_block": [
-          "joint_order",
-          "arm_kinematic_contract"
-        ],
-        "id": "HARD_BLOCKER_GRIPPER_APERTURE_DEFINITION_CONFLICT",
-        "missing_definition": "reconcile exact-product 42-116 mm claim with official URDF symmetric 42-114 mm carriage-center interval and CAD inner-surface aperture"
-      },
-      "conflict_state": "NONE",
+      "conflict_state": "VERIFIED_OFFICIAL_SOURCE_CONFLICT_PRODUCT_PAGE_NOT_CAD_SUPPORTED",
       "derivation": {
-        "formula": null,
+        "formula": "distance=open_left_origin-open_right_origin; open=closed+2*0.036m",
         "inputs": [
-          "trossen_vx300s_spec:Gripper Specifications versus finger limits versus CAD inner surfaces",
-          "interbotix_aloha_vx300s_xacro:Gripper Specifications versus finger limits versus CAD inner surfaces",
-          "supplier_simple_aloha_viper_step:Gripper Specifications versus finger limits versus CAD inner surfaces"
+          "trossen_vx300s_spec:Gripper Min/Max table",
+          "interbotix_aloha_vx300s_xacro:left/right finger limits",
+          "supplier_simple_aloha_viper_step:handed finger carriage datums"
         ],
-        "kind": "NOT_DERIVABLE_FROM_FROZEN_OFFICIAL_SOURCES"
+        "kind": "CAD_DATUM_AND_PINNED_URDF_CROSSCHECK"
       },
-      "evidence_class": "HARD_BLOCKER",
-      "frame": "gripper_link",
+      "evidence_class": "NUMERICAL_DERIVATION",
+      "frame": "gripper_link_opening_axis",
       "group": "gripper_linkage",
       "id": "gripper_aperture_definition_conflict",
       "sign_convention": "left_positive_right_negative",
@@ -1727,9 +1698,20 @@
         "interbotix_aloha_vx300s_xacro",
         "supplier_simple_aloha_viper_step"
       ],
-      "source_locator": "Gripper Specifications versus finger limits versus CAD inner surfaces",
-      "status": "HARD_BLOCKER",
-      "units": "m"
+      "source_locator": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_gripper_aperture_definition_resolution.json",
+      "status": "VERIFIED_DERIVATION",
+      "units": "m",
+      "value": {
+        "contact_surface_gap_is_single_scalar": false,
+        "implemented_carriage_center_range_m": [
+          0.042,
+          0.114
+        ],
+        "trossen_product_table_range_m": [
+          0.042,
+          0.116
+        ]
+      }
     },
     {
       "applicability": {
@@ -2006,6 +1988,84 @@
       "derivation": {
         "formula": null,
         "inputs": [
+          "robotis_xm540_w270_product:Estimated Rated Torque and disclosure: calculated at 20% of stall torque"
+        ],
+        "kind": "DIRECT_TRANSCRIPTION"
+      },
+      "evidence_class": "OFFICIAL_PINNED_SOURCE",
+      "frame": "actuator_output_horn",
+      "group": "actuator_performance",
+      "id": "estimated_continuous_torque.XM540-W270",
+      "sign_convention": "unsigned_output_capacity",
+      "source_ids": [
+        "robotis_xm540_w270_product"
+      ],
+      "source_locator": "Estimated Rated Torque and disclosure: calculated at 20% of stall torque",
+      "status": "OFFICIAL_PINNED_SOURCE",
+      "units": {
+        "fraction": "1",
+        "torque": "N*m",
+        "voltage": "V"
+      },
+      "value": {
+        "estimated_continuous_torque_Nm": 2.12,
+        "fraction_of_stall": 0.2,
+        "manufacturer_estimate_not_measured_thermal_curve": true,
+        "reference_voltage_V": 12.0
+      }
+    },
+    {
+      "applicability": {
+        "instances": [
+          "follower_left",
+          "follower_right"
+        ],
+        "product": "aloha_vx300s",
+        "robot_local_geometry_relation": "IDENTICAL_NOT_MIRRORED"
+      },
+      "conflict_state": "NONE",
+      "derivation": {
+        "formula": null,
+        "inputs": [
+          "robotis_xm430_w350_product:Estimated Rated Torque and disclosure: calculated at 20% of stall torque"
+        ],
+        "kind": "DIRECT_TRANSCRIPTION"
+      },
+      "evidence_class": "OFFICIAL_PINNED_SOURCE",
+      "frame": "actuator_output_horn",
+      "group": "actuator_performance",
+      "id": "estimated_continuous_torque.XM430-W350",
+      "sign_convention": "unsigned_output_capacity",
+      "source_ids": [
+        "robotis_xm430_w350_product"
+      ],
+      "source_locator": "Estimated Rated Torque and disclosure: calculated at 20% of stall torque",
+      "status": "OFFICIAL_PINNED_SOURCE",
+      "units": {
+        "fraction": "1",
+        "torque": "N*m",
+        "voltage": "V"
+      },
+      "value": {
+        "estimated_continuous_torque_Nm": 0.82,
+        "fraction_of_stall": 0.2,
+        "manufacturer_estimate_not_measured_thermal_curve": true,
+        "reference_voltage_V": 12.0
+      }
+    },
+    {
+      "applicability": {
+        "instances": [
+          "follower_left",
+          "follower_right"
+        ],
+        "product": "aloha_vx300s",
+        "robot_local_geometry_relation": "IDENTICAL_NOT_MIRRORED"
+      },
+      "conflict_state": "NONE",
+      "derivation": {
+        "formula": null,
+        "inputs": [
           "interbotix_aloha_vx300s_motor_config:motors and shadows"
         ],
         "kind": "DIRECT_TRANSCRIPTION"
@@ -2235,15 +2295,16 @@
           "source_audit",
           "inertial_validation"
         ],
-        "id": "HARD_BLOCKER_COLLIDER_ERROR_CERTIFICATE_NOT_YET_DERIVED",
-        "missing_definition": "CAD-to-collider surface error and swept-clearance certificate for every link"
+        "id": "HARD_BLOCKER_COLLIDER_ACCEPTANCE_ERROR_BUDGET",
+        "missing_definition": "official or task-derived numerical acceptance tolerance for the complete per-link convex-hull surface/volume certificate"
       },
       "conflict_state": "NONE",
       "derivation": {
         "formula": null,
         "inputs": [
-          "supplier_simple_aloha_viper_step:supplier B-Rep versus PhysX collision representation",
-          "physx_schema_107_3:supplier B-Rep versus PhysX collision representation"
+          "supplier_simple_aloha_viper_step:complete offline surface certificate versus PhysX collision representation",
+          "interbotix_aloha_vx300s_xacro:complete offline surface certificate versus PhysX collision representation",
+          "physx_schema_107_3:complete offline surface certificate versus PhysX collision representation"
         ],
         "kind": "NOT_DERIVABLE_FROM_FROZEN_OFFICIAL_SOURCES"
       },
@@ -2254,9 +2315,10 @@
       "sign_convention": "NOT_APPLICABLE",
       "source_ids": [
         "supplier_simple_aloha_viper_step",
+        "interbotix_aloha_vx300s_xacro",
         "physx_schema_107_3"
       ],
-      "source_locator": "supplier B-Rep versus PhysX collision representation",
+      "source_locator": "complete offline surface certificate versus PhysX collision representation",
       "status": "HARD_BLOCKER",
       "units": "NOT_AVAILABLE"
     },

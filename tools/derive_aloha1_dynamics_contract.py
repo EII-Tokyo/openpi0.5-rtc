@@ -130,6 +130,13 @@ def build_contract(
         for record in matrix["records"]
         if record["id"].startswith("actuator_performance.") and record["status"] != "HARD_BLOCKER"
     ]
+    continuous_estimates = {
+        record["id"].removeprefix("estimated_continuous_torque."): record[
+            "value"
+        ]["estimated_continuous_torque_Nm"]
+        for record in matrix["records"]
+        if record["id"].startswith("estimated_continuous_torque.")
+    }
     continuous_blocker = next(record for record in matrix["records"] if record["id"] == "continuous_actuator_envelope")
     drive_blocker = next(record for record in matrix["records"] if record["id"] == "physx_joint_drive_mapping")
 
@@ -170,6 +177,8 @@ def build_contract(
             "manufacturer_tables_status": "PASS" if len(performance_records) == 2 else "FAIL",
             "models": [record["value"] for record in performance_records],
             "stall_torque_used_as_continuous": False,
+            "official_estimated_continuous_torque_Nm": continuous_estimates,
+            "continuous_estimate_is_measured_thermal_curve": False,
             "continuous_joint_envelope_status": continuous_blocker["status"],
             "continuous_joint_envelope_blocker": continuous_blocker["blocker"],
             "physx_drive_mapping_status": drive_blocker["status"],
@@ -222,8 +231,11 @@ def _markdown(contract: dict[str, Any]) -> str:
             "not misrepresented as measured physical components.",
             "",
             "The ROBOTIS voltage-conditioned stall tables are preserved, but stall torque is "
-            "not used as a continuous torque or PhysX maxForce. The exact continuous envelope "
-            "and controller-to-PhysX mapping remain narrow hard blockers; no fitted value was inserted.",
+            "not used as continuous torque or PhysX maxForce. ROBOTIS' exact-model 12 V "
+            "continuous estimates (20% of stall) are retained with their disclosure; they are "
+            "not labeled measured thermal curves. The full torque-speed-current thermal "
+            "envelope and controller-to-PhysX mapping remain narrow hard blockers; no fitted "
+            "value was inserted.",
             "",
         ]
     )

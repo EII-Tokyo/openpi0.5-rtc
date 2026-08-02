@@ -45,6 +45,30 @@ sources:
       evidence: https://emanual.robotis.com/
     exact_model_scope: [aloha_vx300s, XM430-W350]
 
+  - id: robotis_xm540_w270_product
+    authority: ROBOTIS
+    evidence_class: OFFICIAL_DIRECT
+    url: https://www.robotis.us/dynamixel-xm540-w270-t/
+    retrieved_at_utc: '2026-08-03T00:00:00Z'
+    local_path: .codex/artifacts/20260802-aloha1-official-model-first/sources/web/robotis_xm540_w270_product.html
+    sha256: 92668f52a76463de6f6bac289f5b941606c1b030443cfb1b777c07e70982b9ba
+    license:
+      <<: *web_license
+      evidence: https://www.robotis.us/
+    exact_model_scope: [aloha_vx300s, XM540-W270-T]
+
+  - id: robotis_xm430_w350_product
+    authority: ROBOTIS
+    evidence_class: OFFICIAL_DIRECT
+    url: https://www.robotis.us/dynamixel-xm430-w350-t/
+    retrieved_at_utc: '2026-08-03T00:00:00Z'
+    local_path: .codex/artifacts/20260802-aloha1-official-model-first/sources/web/robotis_xm430_w350_product.html
+    sha256: 5d404cecc8b304a6aec1b2e8621157a87b11bcd8c7be6d0ed2244a223ad7abed
+    license:
+      <<: *web_license
+      evidence: https://www.robotis.us/
+    exact_model_scope: [aloha_vx300s, XM430-W350-T]
+
   - id: interbotix_manipulators_humble
     authority: Trossen Robotics / Interbotix
     evidence_class: OFFICIAL_PINNED_SOURCE
@@ -106,6 +130,12 @@ sources:
     url: https://github.com/Interbotix/interbotix_ros_manipulators/blob/b66d5b905725351dd71d3251a06cd3f4c777940f/interbotix_ros_aloha/interbotix_aloha_descriptions/urdf/aloha_vx300s.urdf.xacro
     local_path: .codex/artifacts/20260802-aloha1-official-model-first/sources/interbotix_manipulators_b66d5b905725351dd71d3251a06cd3f4c777940f/aloha_vx300s.urdf.xacro
     sha256: 45dff1e0de2456386dbb64b851c94db2d874b6dbefb6503cb747bc55435177bd
+
+  - <<: *manipulator_file
+    id: interbotix_xsarm_default_modes
+    url: https://github.com/Interbotix/interbotix_ros_manipulators/blob/b66d5b905725351dd71d3251a06cd3f4c777940f/interbotix_ros_xsarms/interbotix_xsarm_control/config/modes.yaml
+    local_path: .codex/artifacts/20260802-aloha1-official-model-first/sources/interbotix_manipulators_b66d5b905725351dd71d3251a06cd3f4c777940f/modes.yaml
+    sha256: ee7f2b5fcd367442419396c2feeaa111b7b1776d8302a4ca2dd0c4f3d13cb95f
 
   - id: interbotix_xs_driver
     authority: Trossen Robotics / Interbotix

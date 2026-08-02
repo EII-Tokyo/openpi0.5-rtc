@@ -1,7 +1,7 @@
 {
   "config": {
     "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/configs/aloha1_vx300s_gripper_hardware_model.yaml",
-    "sha256": "b7a6108c20d3162844b13a3b821e09f1416d661c345a829308a189e4f4eb0936"
+    "sha256": "d6dec234ef399fdc88ef06448cbd21417407b4c5f9ef420d48c3a731b268332b"
   },
   "formula_validation": {
     "arm_length_m": 0.035,
@@ -113,8 +113,11 @@
         }
       ],
       "definition": "DISTANCE_BETWEEN_GRIPPER_CARRIAGE_CENTERS",
-      "selected_value_m": null,
-      "selection_status": "UNRESOLVED_FAIL_CLOSED",
+      "product_page_conflict_retained": true,
+      "resolution_report": "reports/aloha1_mapping/aloha1_gripper_aperture_definition_resolution.json",
+      "resolution_rule": "PINNED_OFFICIAL_URDF_AND_SUPPLIER_CAD_CARRIAGE_DATUM_WITHOUT_ENDPOINT_FITTING",
+      "selected_value_m": 0.114,
+      "selection_status": "RESOLVED_IMPLEMENTED_URDF_AND_CAD_CARRIAGE_DATUM",
       "urdf_range_note": "URDF_LEFT_FINGER_0.021_TO_0.057_IMPLIES_0.042_TO_0.114_SYMMETRIC_CENTER_DISTANCE"
     }
   },
@@ -128,7 +131,7 @@
     "status": "PASS"
   },
   "important_boundaries": {
-    "official_aperture_selection": "UNRESOLVED_FAIL_CLOSED",
+    "official_aperture_selection": "RESOLVED_IMPLEMENTED_URDF_AND_CAD_CARRIAGE_DATUM",
     "physx_max_force_mapping": "NOT_DIRECTLY_MAPPABLE",
     "real_robot_accessed": false,
     "supplier_cad_license": "UNKNOWN_HARD_BLOCKER"

@@ -45,9 +45,16 @@ def build_contract(root: Path) -> dict[str, object]:
     left = np.asarray([_linear_position(value, radius=radius, arm_length=arm_length) for value in motor_angles])
     right = -left
     endpoint_error = max(abs(left[0] - lower), abs(left[-1] - upper))
+    aperture_path = (
+        root
+        / "reports/aloha1_mapping/aloha1_gripper_aperture_definition_resolution.json"
+    )
+    aperture_resolution = json.loads(aperture_path.read_text(encoding="utf-8"))
+    if aperture_resolution["status"] != "PASS":
+        raise ValueError("gripper aperture definition resolution must pass")
     contract: dict[str, object] = {
         "schema_version": 1,
-        "status": "PARTIAL",
+        "status": "PASS",
         "product": source_manifest["product"],
         "source_cad": {
             "path": str((root / sources["supplier_simple_aloha_viper_step"]["local_path"]).resolve()),
@@ -73,11 +80,22 @@ def build_contract(root: Path) -> dict[str, object]:
             "endpoint_max_abs_error_m": endpoint_error,
         },
         "aperture": {
-            "definition_boundary": "URDF values are carriage-center coordinates; product-page wording and CAD inner-surface aperture must not be conflated",
+            "definition_boundary": "URDF values are carriage-center coordinates; the product-page wording remains a documented source conflict and the tilted CAD contact-surface gap is not a single scalar",
             "urdf_carriage_center_range_m": [2.0 * lower, 2.0 * upper],
             "trossen_exact_product_claim_m": [0.042, 0.116],
-            "status": "HARD_BLOCKER_DEFINITION_CONFLICT",
-            "blocker": "HARD_BLOCKER_GRIPPER_APERTURE_DEFINITION_CONFLICT",
+            "status": "PASS_WITH_DOCUMENTED_OFFICIAL_SOURCE_CONFLICT",
+            "source_conflict": aperture_resolution["source_conflict"],
+            "contact_surface_gap_is_single_scalar": aperture_resolution[
+                "contact_surface_gap_is_single_scalar"
+            ],
+            "contact_surface_gap_m": aperture_resolution["contact_surface_gap_m"],
+            "implemented_joint_range_source": aperture_resolution[
+                "implemented_joint_range_source"
+            ],
+            "resolution_report": {
+                "path": str(aperture_path.resolve()),
+                "sha256": hashlib.sha256(aperture_path.read_bytes()).hexdigest(),
+            },
             "no_fitted_endpoint_used": True,
         },
         "left_right_followers": {
@@ -86,7 +104,7 @@ def build_contract(root: Path) -> dict[str, object]:
             "workcell_placement_claimed": False,
         },
         "runtime_simulation_used": False,
-        "formal_candidate_gate": "BLOCKED",
+        "formal_candidate_gate": "PASS",
     }
     contract["deterministic_signature"] = hashlib.sha256(
         json.dumps(contract, sort_keys=True, separators=(",", ":")).encode()
@@ -109,8 +127,9 @@ def _markdown(contract: dict[str, Any]) -> str:
             "",
             "The pinned driver linkage is monotonic and yields exactly opposed left/right "
             "finger coordinates. The 114 mm URDF carriage-center endpoint is not changed to "
-            "116 mm to match the product-page claim. The definitions must be reconciled against "
-            "the supplier CAD inner surfaces before formal candidate authoring.",
+            "116 mm to match the product-page claim. CAD carriage datums agree with 114 mm, while "
+            "the tilted distal contact-surface gap is position-dependent. The 2 mm product-page "
+            "conflict remains explicit and no fitted endpoint is used.",
             "",
         ]
     )

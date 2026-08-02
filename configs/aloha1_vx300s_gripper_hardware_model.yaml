@@ -125,8 +125,11 @@ hardware:
       - value_m: 0.114
         measurement: CARRIAGE_CENTER_TO_CENTER
         source: general_robot_table
-    selected_value_m: null
-    selection_status: UNRESOLVED_FAIL_CLOSED
+    selected_value_m: 0.114
+    selection_status: RESOLVED_IMPLEMENTED_URDF_AND_CAD_CARRIAGE_DATUM
+    product_page_conflict_retained: true
+    resolution_report: reports/aloha1_mapping/aloha1_gripper_aperture_definition_resolution.json
+    resolution_rule: PINNED_OFFICIAL_URDF_AND_SUPPLIER_CAD_CARRIAGE_DATUM_WITHOUT_ENDPOINT_FITTING
     urdf_range_note: URDF_LEFT_FINGER_0.021_TO_0.057_IMPLIES_0.042_TO_0.114_SYMMETRIC_CENTER_DISTANCE
 
 simulation_description:
@@ -226,11 +229,10 @@ provenance_classes:
   temporary_diagnostic_values: []
 
 unconfirmed_physical_quantities:
-  - continuous allowable gripper torque under the installed voltage and thermal duty cycle
+  - measured continuous gripper torque-speed-current thermal curve beyond the official 12 V 20%-of-stall estimate
   - linkage efficiency and friction under load
   - finger-pad friction coefficient
   - mapping from PWM command to fingertip normal force
   - calibrated PhysX stiffness damping and max force
-  - selection between the official 114 mm and 116 mm maximum-aperture claims
 
 task8: NOT_RUN

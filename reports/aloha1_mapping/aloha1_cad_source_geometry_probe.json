@@ -1,0 +1,356 @@
+{
+  "combined_gripper_cad": {
+    "independent_bar_or_prop_product_exposed": false,
+    "is_valid": true,
+    "label": "Aloha VX Gripper 2024-4-19 v4",
+    "object_name": "Part__Feature006",
+    "shape_type": "Solid",
+    "solid_count": 1,
+    "urdf_submesh_registration": {
+      "gripper_bar_link": {
+        "distance_to_combined_cad_solid_mm": {
+          "max": 17.035984505698895,
+          "min": 0.0,
+          "p50": 3.974999999999511,
+          "p90": 8.900579071043296,
+          "p95": 11.668660736084462,
+          "within_0p20mm_fraction": 0.32421875,
+          "within_1p00mm_fraction": 0.328125
+        },
+        "gripper_frame_matrix": [
+          [
+            6.123233995736766e-17,
+            -1.0,
+            0.0,
+            -0.020175
+          ],
+          [
+            1.0,
+            6.123233995736766e-17,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "inside_or_on_combined_cad_solid_fraction": 0.314453125,
+        "mesh_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_bar.stl",
+        "mesh_sha256": "a4de62c9a2ed2c78433010e4c05530a1254b1774a7651967f406120c9bf8973e",
+        "sample_count": 512,
+        "unique_vertex_count": 3728,
+        "urdf_link_name": "follower_left_gripper_bar_link"
+      },
+      "gripper_link": {
+        "distance_to_combined_cad_solid_mm": {
+          "max": 9.900000000001967,
+          "min": 0.0,
+          "p50": 0.0,
+          "p90": 0.0,
+          "p95": 0.5000022888204967,
+          "within_0p20mm_fraction": 0.935546875,
+          "within_1p00mm_fraction": 0.96875
+        },
+        "gripper_frame_matrix": [
+          [
+            6.123233995736766e-17,
+            -1.0,
+            0.0,
+            -0.02
+          ],
+          [
+            1.0,
+            6.123233995736766e-17,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "inside_or_on_combined_cad_solid_fraction": 0.93359375,
+        "mesh_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper.stl",
+        "mesh_sha256": "786c1077bfd226f14219581b11d5f19464ca95b17132e0bb7532503568f5af90",
+        "sample_count": 512,
+        "unique_vertex_count": 4522,
+        "urdf_link_name": "follower_left_gripper_link"
+      },
+      "gripper_prop_link": {
+        "distance_to_combined_cad_solid_mm": {
+          "max": 4.199998664857503,
+          "min": 0.0,
+          "p50": 0.0,
+          "p90": 4.199998664854206,
+          "p95": 4.1999986648544905,
+          "within_0p20mm_fraction": 0.8481012658227848,
+          "within_1p00mm_fraction": 0.8544303797468354
+        },
+        "gripper_frame_matrix": [
+          [
+            6.123233995736766e-17,
+            -1.0,
+            0.0,
+            -0.020000000000000004
+          ],
+          [
+            1.0,
+            6.123233995736766e-17,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "inside_or_on_combined_cad_solid_fraction": 0.8417721518987342,
+        "mesh_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_prop.stl",
+        "mesh_sha256": "d1275a93fe2157c83dbc095617fb7e672888bdd48ec070a35ef4ab9ebd9755b0",
+        "sample_count": 316,
+        "unique_vertex_count": 316,
+        "urdf_link_name": "follower_left_gripper_prop_link"
+      }
+    }
+  },
+  "deterministic_signature": "23393eecd633506d3c6715ef895e93ed9ecc0e4b9d34e8c136514a0b1647cda4",
+  "finger_contact_surfaces": {
+    "closed_reference_gap_range_mm": [
+      4.48827841608892,
+      21.630946391984388
+    ],
+    "common_y_interval_mm": [
+      -589.2507951541191,
+      -507.69999973391975
+    ],
+    "left": {
+      "area_mm2": 2020.8974087124623,
+      "bbox_mm": {
+        "XMax": 10.91536345365491,
+        "XMin": 2.3440294657072607,
+        "YMax": -507.6999997339197,
+        "YMin": -589.2507951541191,
+        "ZMax": 453.85266993711883,
+        "ZMin": 399.8526699371185
+      },
+      "center_mm": [
+        7.355284905152715,
+        -541.5718845300294,
+        426.8526699371185
+      ],
+      "face_index": 117,
+      "normal": [
+        -0.9945218953682733,
+        0.10452846326765405,
+        5.701881674690907e-16
+      ],
+      "plane_x_mm": null
+    },
+    "right": {
+      "area_mm2": 2020.897408712456,
+      "bbox_mm": {
+        "XMax": -2.1442489503817797,
+        "XMin": -10.715582938329502,
+        "YMax": -507.69999973391975,
+        "YMin": -589.2507951541191,
+        "ZMax": 453.7499975263589,
+        "ZMin": 399.7499975263587
+      },
+      "center_mm": [
+        -7.155504389827247,
+        -541.5718845300294,
+        426.74999752635847
+      ],
+      "face_index": 128,
+      "normal": [
+        0.9945218953682733,
+        0.10452846326765403,
+        -1.727189390844111e-15
+      ],
+      "plane_x_mm": null
+    },
+    "selection_rule": "largest planar face above 1000 mm2 in the distal region Y<-520 mm with inward opening-axis normal magnitude >0.9",
+    "single_scalar_gap": false,
+    "surfaces_parallel": false
+  },
+  "mirror_used": false,
+  "official_mesh_source": {
+    "branch": "humble",
+    "commit": "b66d5b905725351dd71d3251a06cd3f4c777940f",
+    "license": "BSD-3-Clause",
+    "license_sha256": "4eab000b04ce3f3b2746e2c22c1475c83c67a55ba5caf9becc089db26a2688d4",
+    "meshes": {
+      "gripper_bar_link": {
+        "byte_identical_to_official_commit": true,
+        "filename": "gripper_bar.stl",
+        "official_fresh_clone_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/sources/official_repo_probe/interbotix_ros_manipulators_humble/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_bar.stl",
+        "project_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_bar.stl",
+        "sha256": "a4de62c9a2ed2c78433010e4c05530a1254b1774a7651967f406120c9bf8973e"
+      },
+      "gripper_finger_link": {
+        "byte_identical_to_official_commit": true,
+        "filename": "gripper_finger.stl",
+        "official_fresh_clone_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/sources/official_repo_probe/interbotix_ros_manipulators_humble/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_finger.stl",
+        "project_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_finger.stl",
+        "sha256": "a4baacd9a64df1be60ea5e98f50f3c660e1b7a1fe9684aace6004c5058c09483"
+      },
+      "gripper_link": {
+        "byte_identical_to_official_commit": true,
+        "filename": "gripper.stl",
+        "official_fresh_clone_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/sources/official_repo_probe/interbotix_ros_manipulators_humble/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper.stl",
+        "project_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper.stl",
+        "sha256": "786c1077bfd226f14219581b11d5f19464ca95b17132e0bb7532503568f5af90"
+      },
+      "gripper_prop_link": {
+        "byte_identical_to_official_commit": true,
+        "filename": "gripper_prop.stl",
+        "official_fresh_clone_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/sources/official_repo_probe/interbotix_ros_manipulators_humble/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_prop.stl",
+        "project_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_prop.stl",
+        "sha256": "d1275a93fe2157c83dbc095617fb7e672888bdd48ec070a35ef4ab9ebd9755b0"
+      },
+      "wrist_link": {
+        "byte_identical_to_official_commit": true,
+        "filename": "wrist.stl",
+        "official_fresh_clone_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/sources/official_repo_probe/interbotix_ros_manipulators_humble/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/wrist.stl",
+        "project_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/wrist.stl",
+        "sha256": "90eb145c85627968c3776ae6de23ccff7e112c9dd713c46bc9acdfdaa859a048"
+      }
+    },
+    "repository": "https://github.com/Interbotix/interbotix_ros_manipulators.git"
+  },
+  "raw_evidence": {
+    "face_runs": [
+      {
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/cad_gripper_face_probe/attempt2/run1.json",
+        "sha256": "684e88767eeb337298b4c4c425200ce64cbde2f80f2da27e0eda0fe5f79144da",
+        "signature": "d8cf7a69468e73efafe4e7d2dd0a9bcf617701e66342663130f1ca093c5b365c"
+      },
+      {
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/cad_gripper_face_probe/attempt2/run2.json",
+        "sha256": "684e88767eeb337298b4c4c425200ce64cbde2f80f2da27e0eda0fe5f79144da",
+        "signature": "d8cf7a69468e73efafe4e7d2dd0a9bcf617701e66342663130f1ca093c5b365c"
+      }
+    ],
+    "submesh_runs": [
+      {
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/cad_submesh_registration_probe/run1.json",
+        "sha256": "38c982e69b3517435d13944b6955c0401ec1cecda9fe246c11b7671e8b024bde",
+        "signature": "cb7fd049782ee15ea1e38e981bc2dce4c6daa0c948c4280756cec7ab479ae289"
+      },
+      {
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/cad_submesh_registration_probe/run2.json",
+        "sha256": "38c982e69b3517435d13944b6955c0401ec1cecda9fe246c11b7671e8b024bde",
+        "signature": "cb7fd049782ee15ea1e38e981bc2dce4c6daa0c948c4280756cec7ab479ae289"
+      }
+    ],
+    "wrist_runs": [
+      {
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/wrist_brep_validity_probe/attempt2/run1.json",
+        "sha256": "e362a08c77cd78fe51d751cc66b313c3302f642552e26ef718df23785dbe14bd",
+        "signature": "931054a24ec287f04fd971ba44156171c7bf5d4e47c44019c5a605be4eed4e37"
+      },
+      {
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/wrist_brep_validity_probe/attempt2/run2.json",
+        "sha256": "e362a08c77cd78fe51d751cc66b313c3302f642552e26ef718df23785dbe14bd",
+        "signature": "931054a24ec287f04fd971ba44156171c7bf5d4e47c44019c5a605be4eed4e37"
+      }
+    ]
+  },
+  "schema_version": 1,
+  "source_brep_repaired": false,
+  "source_cad": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/gdrive_source_readonly/Simple Aloha Viper 2024-5-13.step",
+    "read_only": true,
+    "redistribution": "UNKNOWN_HARD_BLOCKER_NOT_INCLUDED",
+    "sha256": "337862418769d4ea8b801d26e68930c4412f870050e60769bbf91765194dc571"
+  },
+  "status": "PASS",
+  "toolchain": {
+    "angular_deflection_deg": 20.0,
+    "freecad_version": "1.1.1",
+    "linear_deflection_mm": 0.2,
+    "opencascade_version": "7.8.1"
+  },
+  "two_fresh_process_determinism": "PASS",
+  "wrist_cad": {
+    "diagnostics": "Self-intersecting wire\nSelf-intersecting wire\nUnorientable shape\nUnorientable shape\nNo error\nNo error\n",
+    "label": "Simple VX Wrist Tilt v3",
+    "object_name": "Part__Feature005",
+    "shape": {
+      "area_mm2": 19932.161987082658,
+      "edge_count": 291,
+      "face_count": 117,
+      "is_null": false,
+      "is_valid": false,
+      "shape_type": "Solid",
+      "shell_count": 3,
+      "solid_count": 1,
+      "vertex_count": 184,
+      "volume_mm3": 77921.86529289279
+    },
+    "shells": [
+      {
+        "area_mm2": 19861.669485347513,
+        "edge_count": 273,
+        "face_count": 107,
+        "is_null": false,
+        "is_valid": false,
+        "shape_type": "Shell",
+        "shell_count": 1,
+        "solid_count": 0,
+        "vertex_count": 172,
+        "volume_mm3": 77938.48773627174
+      },
+      {
+        "area_mm2": 54.129673792647964,
+        "edge_count": 6,
+        "face_count": 4,
+        "is_null": false,
+        "is_valid": true,
+        "shape_type": "Shell",
+        "shell_count": 1,
+        "solid_count": 0,
+        "vertex_count": 4,
+        "volume_mm3": -15.908963203123243
+      },
+      {
+        "area_mm2": 16.3628279424971,
+        "edge_count": 12,
+        "face_count": 6,
+        "is_null": false,
+        "is_valid": true,
+        "shape_type": "Shell",
+        "shell_count": 1,
+        "solid_count": 0,
+        "vertex_count": 8,
+        "volume_mm3": -0.7094884557332694
+      }
+    ],
+    "source_brep_repaired": false
+  }
+}

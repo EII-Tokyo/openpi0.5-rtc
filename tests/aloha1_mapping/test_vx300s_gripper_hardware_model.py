@@ -107,8 +107,11 @@ def test_official_aperture_conflict_remains_fail_closed() -> None:
 
     assert {item["value_m"] for item in conflict["claims"]} == {0.114, 0.116}
     assert all(item["measurement"] == "CARRIAGE_CENTER_TO_CENTER" for item in conflict["claims"])
-    assert conflict["selection_status"] == "UNRESOLVED_FAIL_CLOSED"
-    assert conflict["selected_value_m"] is None
+    assert conflict["selection_status"] == (
+        "RESOLVED_IMPLEMENTED_URDF_AND_CAD_CARRIAGE_DATUM"
+    )
+    assert conflict["selected_value_m"] == 0.114
+    assert conflict["product_page_conflict_retained"] is True
 
 
 def test_frozen_sources_have_required_provenance_and_hashes() -> None:

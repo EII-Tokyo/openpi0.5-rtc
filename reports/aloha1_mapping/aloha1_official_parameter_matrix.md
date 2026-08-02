@@ -2,9 +2,9 @@
 
 - Matrix status: **PASS**
 - Formal candidate gate: **BLOCKED**
-- Records: `45`
-- Narrow hard blockers: `7`
-- Deterministic signature: `48ad0829e64e1c4f7e7c90e77eb40d0383b31bb9b312cb3e829d8c907f097818`
+- Records: `47`
+- Narrow hard blockers: `5`
+- Deterministic signature: `9712c2e43eb0c56baa7c6039eca214bfc39afbb1f6eda65261038f29a8df3b9e`
 
 A matrix `PASS` means all required parameter groups are explicitly inventoried and schema-valid. It does **not** mean the formal USD candidate may be authored. The candidate gate remains blocked wherever an exact physical mapping is absent.
 
@@ -13,25 +13,23 @@ A matrix `PASS` means all required parameter groups are explicitly inventoried a
 | Group | Records | Hard blockers |
 |---|---:|---:|
 | `actuator_identity` | 1 | 0 |
-| `actuator_performance` | 3 | 1 |
+| `actuator_performance` | 5 | 1 |
 | `collision_geometry` | 1 | 1 |
 | `contact_materials` | 1 | 1 |
 | `drive_mapping` | 1 | 1 |
-| `gripper_linkage` | 2 | 1 |
+| `gripper_linkage` | 2 | 0 |
 | `joint_kinematics` | 14 | 0 |
 | `link_dynamics` | 14 | 0 |
-| `link_geometry` | 2 | 1 |
+| `link_geometry` | 2 | 0 |
 | `operating_modes` | 3 | 0 |
 | `register_conversions` | 2 | 0 |
 | `solver_semantics` | 1 | 1 |
 
 ## Hard blockers
 
-- `HARD_BLOCKER_CAD_TO_LINK_GEOMETRY_CONTRACT_NOT_YET_PROVED`: per-link supplier B-Rep to URDF link mapping and rigid transform proof
-- `HARD_BLOCKER_CONTINUOUS_ACTUATOR_ENVELOPE_NOT_YET_DERIVED`: continuous permissible joint-side torque-speed-current envelope under the exact voltage and thermal conditions
-- `HARD_BLOCKER_GRIPPER_APERTURE_DEFINITION_CONFLICT`: reconcile exact-product 42-116 mm claim with official URDF symmetric 42-114 mm carriage-center interval and CAD inner-surface aperture
+- `HARD_BLOCKER_CONTINUOUS_TORQUE_SPEED_CURRENT_THERMAL_CURVE`: measured continuous torque-speed-current thermal envelope beyond the official 12 V 20%-of-stall estimates
 - `HARD_BLOCKER_PHYSX_DRIVE_PHYSICAL_DERIVATION`: physical mapping from exact actuator/controller/transmission to PhysX stiffness, damping and maxForce
-- `HARD_BLOCKER_COLLIDER_ERROR_CERTIFICATE_NOT_YET_DERIVED`: CAD-to-collider surface error and swept-clearance certificate for every link
+- `HARD_BLOCKER_COLLIDER_ACCEPTANCE_ERROR_BUDGET`: official or task-derived numerical acceptance tolerance for the complete per-link convex-hull surface/volume certificate
 - `HARD_BLOCKER_EXACT_CONTACT_MATERIAL_PROPERTIES`: exact static/dynamic friction, restitution and combine rules for finger-bottle-table material pairs
 - `HARD_BLOCKER_NUMERICAL_ERROR_BUDGET_NOT_YET_DERIVED`: documented numerical error budget selecting timestep and solver iterations for this model
 

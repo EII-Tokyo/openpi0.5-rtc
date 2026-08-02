@@ -2,7 +2,7 @@
   "baseline_inventory_status": "PASS_READ_ONLY_EVIDENCE",
   "candidate_asset_created": false,
   "candidate_status": "NOT_BUILT_BLOCKED",
-  "deterministic_signature": "f7dcbd6a0fc7cf6e959c26cb6c7712e2a2bf02884d9b0c5c7f3812acc0832d14",
+  "deterministic_signature": "79cb7979874f3e557574e4bb653fcd57f915ce943c84d28d6c50db80f3f083ca",
   "final_or_default_asset_modified": false,
   "isaac_runtime_started": false,
   "model_first_gate": {
@@ -18,13 +18,6 @@
         "blocking": true,
         "candidate_gate": "BLOCKED",
         "id": "dynamics_contract",
-        "reason": "MODEL_PROOF_INCOMPLETE",
-        "status": "PARTIAL"
-      },
-      {
-        "blocking": true,
-        "candidate_gate": "BLOCKED",
-        "id": "gripper_geometry_contract",
         "reason": "MODEL_PROOF_INCOMPLETE",
         "status": "PARTIAL"
       },
@@ -74,11 +67,11 @@
         "status": "PARTIAL"
       },
       {
-        "blocking": true,
-        "candidate_gate": "BLOCKED",
+        "blocking": false,
+        "candidate_gate": "PASS",
         "id": "gripper_geometry_contract",
-        "reason": "MODEL_PROOF_INCOMPLETE",
-        "status": "PARTIAL"
+        "reason": "PASS",
+        "status": "PASS"
       },
       {
         "blocking": true,
@@ -98,9 +91,10 @@
     "status": "BLOCKED"
   },
   "next_actions": [
-    "resolve CAD-to-link registrations and per-link collider error certificates",
-    "reconcile the 114 mm URDF carriage-center and 116 mm product-page aperture definitions against supplier CAD inner surfaces",
-    "complete continuous actuator-envelope and controller-to-PhysX derivations without using stall torque as continuous maxForce",
+    "derive a task-local collider acceptance error budget; the all-link numerical certificate is complete and the correct-finger single hull fails its 0.20 mm contact-surface budget",
+    "retain the resolved 42-114 mm CAD/URDF carriage-center range and the documented 116 mm product-page source conflict without endpoint fitting",
+    "complete the torque-speed-current thermal envelope beyond ROBOTIS' official 12 V 20%-of-stall continuous estimates",
+    "derive controller-to-PhysX stiffness, damping and maxForce without copying DYNAMIXEL integer gains",
     "obtain exact finger-bottle-table material properties or physical measurements",
     "derive a numerical timestep/solver error budget"
   ],

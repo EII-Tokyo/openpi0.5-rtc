@@ -1,0 +1,69 @@
+{
+  "cad_carriage_center_distance_m": {
+    "closed_reference": 0.042,
+    "open_derived": 0.114
+  },
+  "cad_carriage_origin_x_m": {
+    "left": 0.021099890257662776,
+    "right": -0.020900109742337226
+  },
+  "contact_surface_gap_is_single_scalar": false,
+  "contact_surface_gap_m": {
+    "closed_reference_range_over_common_face_interval": [
+      0.00448827841608892,
+      0.021630946391984388
+    ],
+    "common_cad_y_interval_m": [
+      -0.5892507951541192,
+      -0.5076999997339198
+    ],
+    "open_derived_range_over_common_face_interval": [
+      0.07648827841608893,
+      0.0936309463919844
+    ]
+  },
+  "definitions": {
+    "carriage_center_distance": "distance between the two prismatic finger-link origins along the CAD opening axis",
+    "contact_surface_gap": "distance between the two distal inward supplier-CAD faces at a named axial station; not one scalar because the faces are not parallel",
+    "product_table_range": "Trossen ViperX-300 Gripper row Min/Max; the page does not define the measurement datum"
+  },
+  "deterministic_signature": "919c88a1d242d93814057e657749626ca8eca36a088c2fd3d173610160f775e9",
+  "final_or_default_asset_modified": false,
+  "fitted_endpoint_used": false,
+  "gripper_mapping": {
+    "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_gripper_mapping.json",
+    "sha256": "9c67d96039f24438d4d5d9b36593fa5747a43f91b32eb31cf0fe1c3e4c53b2a0"
+  },
+  "implemented_joint_range_m": [
+    0.042,
+    0.114
+  ],
+  "implemented_joint_range_source": "PINNED_OFFICIAL_URDF_AND_CAD_CARRIAGE_DATUM",
+  "probe": {
+    "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_cad_source_geometry_probe.json",
+    "sha256": "38282e3da397a41e7f3a64dba6d55cc54db20d5c90a13c9dbacd63fac1303806"
+  },
+  "runtime_simulation_used": false,
+  "schema_version": 1,
+  "source_cad": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/gdrive_source_readonly/Simple Aloha Viper 2024-5-13.step",
+    "read_only": true,
+    "redistribution": "UNKNOWN_HARD_BLOCKER_NOT_INCLUDED",
+    "sha256": "337862418769d4ea8b801d26e68930c4412f870050e60769bbf91765194dc571"
+  },
+  "source_conflict": {
+    "classification": "VERIFIED_OFFICIAL_SOURCE_CONFLICT_PRODUCT_PAGE_NOT_CAD_SUPPORTED",
+    "difference_at_max_m": 0.002,
+    "interpretation": "The CAD carriage datums and pinned official URDF both resolve to 114 mm maximum center distance; the exact-product table says 116 mm without defining a different datum. The supplier-CAD distal inner gap is y-dependent and matches neither range.",
+    "preserved_not_silently_fitted": true
+  },
+  "status": "PASS",
+  "trossen_product_table_range_m": [
+    0.042,
+    0.116
+  ],
+  "urdf_carriage_center_distance_m": [
+    0.042,
+    0.114
+  ]
+}

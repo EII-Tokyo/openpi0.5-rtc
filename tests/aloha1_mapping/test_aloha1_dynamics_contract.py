@@ -51,6 +51,11 @@ def test_stall_torque_is_not_promoted_to_continuous_or_physx_max_force() -> None
 
     assert contract["actuator_contract"]["manufacturer_tables_status"] == "PASS"
     assert contract["actuator_contract"]["stall_torque_used_as_continuous"] is False
+    assert contract["actuator_contract"]["official_estimated_continuous_torque_Nm"] == {
+        "XM540-W270": 2.12,
+        "XM430-W350": 0.82,
+    }
+    assert contract["actuator_contract"]["continuous_estimate_is_measured_thermal_curve"] is False
     assert contract["actuator_contract"]["continuous_joint_envelope_status"] == "HARD_BLOCKER"
     assert contract["actuator_contract"]["physx_drive_mapping_status"] == "HARD_BLOCKER"
     assert contract["status"] == "PARTIAL"

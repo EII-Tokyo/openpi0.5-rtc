@@ -30,12 +30,19 @@ def build_contract(root: Path) -> dict[str, object]:
     semantics_path, semantics = _load(root, "reports/aloha1_mapping/aloha1_cad_link_collision_semantics.json")
     swept_path, swept = _load(root, "reports/aloha1_mapping/aloha1_cad_derived_five_pose_swept_collision.json")
     static_path, static = _load(root, "reports/aloha1_mapping/aloha1_cad_derived_collision_replan_static.json")
-    identity_blockers = geometry["identity_blockers"]
-    invalid_brep = geometry["invalid_brep_blockers"]
-    unresolved_suffixes = sorted(
-        {item["link_suffix"] for item in identity_blockers}
-        | {item.removeprefix("follower_left_").removeprefix("follower_right_") for item in invalid_brep}
+    resolution_path, resolution = _load(
+        root,
+        "reports/aloha1_mapping/aloha1_cad_link_identity_resolution.json",
     )
+    certificate_path, certificate = _load(
+        root,
+        "reports/aloha1_mapping/aloha1_official_collider_surface_certificate.json",
+    )
+    if resolution["status"] != "PASS":
+        raise ValueError("CAD/link source resolution must pass")
+    historical_identity_blockers = geometry["identity_blockers"]
+    historical_invalid_brep = geometry["invalid_brep_blockers"]
+    unresolved_suffixes: list[str] = []
     input_records = [
         {"path": str(path.resolve()), "sha256": _sha256(path), "status": data["status"]}
         for path, data in (
@@ -43,6 +50,8 @@ def build_contract(root: Path) -> dict[str, object]:
             (semantics_path, semantics),
             (swept_path, swept),
             (static_path, static),
+            (resolution_path, resolution),
+            (certificate_path, certificate),
         )
     ]
     contract: dict[str, object] = {
@@ -59,14 +68,21 @@ def build_contract(root: Path) -> dict[str, object]:
         "two_fresh_directory_determinism": geometry["two_fresh_directory_determinism"],
         "existing_swept_collision_gate": swept["status"],
         "existing_static_collision_gate": static["status"],
-        "unresolved_identity_blocker_count": len(identity_blockers) + len(invalid_brep),
+        "unresolved_identity_blocker_count": 0,
         "unresolved_link_suffixes": unresolved_suffixes,
-        "identity_blockers": identity_blockers,
-        "invalid_brep_blockers": invalid_brep,
-        "surface_error_certificate": "NOT_COMPLETE_FOR_EVERY_LINK",
+        "link_identity_resolution": resolution["status"],
+        "resolved_source_boundary_records": resolution["records"],
+        "historical_identity_blockers": historical_identity_blockers,
+        "historical_invalid_brep_blockers": historical_invalid_brep,
+        "identity_blockers": [],
+        "invalid_brep_blockers": [],
+        "surface_error_certificate": certificate["surface_error_certificate"],
+        "surface_error_acceptance": certificate["acceptance_status"],
+        "surface_certificate_link_count": certificate["summary"]["link_count"],
+        "surface_certificate_summary": certificate["summary"],
         "formal_candidate_gate": "BLOCKED",
         "final_or_default_asset_modified": False,
-        "interpretation": "Existing swept/static PASS can reject known intersections but cannot promote links lacking CAD-to-link identity or valid B-Rep registration.",
+        "interpretation": "The former bar/prop/wrist identity blockers are resolved by explicit source boundaries: the supplier STEP remains fused/invalid where observed, while byte-identical pinned Interbotix link meshes provide robot-description geometry. Every physical link now has a deterministic finite-sample convex-hull surface/volume certificate. The contract remains PARTIAL because no official or task-derived numerical acceptance error budget has yet been proven; no tolerance was fitted from successful grasp videos.",
     }
     contract["deterministic_signature"] = hashlib.sha256(
         json.dumps(contract, sort_keys=True, separators=(",", ":")).encode()
@@ -86,10 +102,14 @@ def _markdown(contract: dict[str, Any]) -> str:
             f"- Unresolved suffixes: `{contract['unresolved_link_suffixes']}`",
             f"- Formal candidate gate: **{contract['formal_candidate_gate']}**",
             "",
-            "The source B-Rep remains authoritative. Existing static and swept tests are retained "
-            "as rejection evidence, but they do not prove the missing gripper-bar, sliding-carriage "
-            "or wrist registrations. No collider is accepted because a grasp happened to pass, "
-            "and no final/default asset was changed.",
+            "The supplier STEP remains authoritative for the geometry it exposes, and its fused "
+            "gripper/invalid wrist boundaries are preserved. Byte-identical pinned Interbotix "
+            "meshes supply the link-level identities. Every physical link now has a numerical "
+            "convex-hull surface/volume certificate. Promotion remains blocked because the "
+            "acceptance error budget is not defined; successful grasp videos were not used to "
+            "fit a tolerance. Existing static/swept tests remain rejection evidence. "
+            "No collider is accepted because a grasp happened to pass, and no final/default asset "
+            "was changed.",
             "",
         ]
     )

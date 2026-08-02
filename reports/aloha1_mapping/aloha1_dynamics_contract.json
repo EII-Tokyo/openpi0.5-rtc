@@ -1,5 +1,6 @@
 {
   "actuator_contract": {
+    "continuous_estimate_is_measured_thermal_curve": false,
     "continuous_joint_envelope_blocker": {
       "blocks": [
         "formal_joint_max_force_envelope"
@@ -8,8 +9,8 @@
         "kinematic_contract",
         "register_unit_conversion"
       ],
-      "id": "HARD_BLOCKER_CONTINUOUS_ACTUATOR_ENVELOPE_NOT_YET_DERIVED",
-      "missing_definition": "continuous permissible joint-side torque-speed-current envelope under the exact voltage and thermal conditions"
+      "id": "HARD_BLOCKER_CONTINUOUS_TORQUE_SPEED_CURRENT_THERMAL_CURVE",
+      "missing_definition": "measured continuous torque-speed-current thermal envelope beyond the official 12 V 20%-of-stall estimates"
     },
     "continuous_joint_envelope_status": "HARD_BLOCKER",
     "gripper_current_limit": {
@@ -75,6 +76,10 @@
         ]
       }
     ],
+    "official_estimated_continuous_torque_Nm": {
+      "XM430-W350": 0.82,
+      "XM540-W270": 2.12
+    },
     "physx_drive_mapping_blocker": {
       "blocks": [
         "formal_physics_drive_layer"
@@ -101,7 +106,7 @@
     },
     "stall_torque_used_as_continuous": false
   },
-  "deterministic_signature": "5105d7dda13c99a85b559a298d5314f1289c2ce18b297a98a15f43ff457cc47e",
+  "deterministic_signature": "f0bd780f2ccf1563f4c66c6e0ca9bcd98e55323fe8c5881529932709caf19c24",
   "formal_candidate_gate": "BLOCKED",
   "hard_blockers": [
     {
@@ -112,8 +117,8 @@
         "kinematic_contract",
         "register_unit_conversion"
       ],
-      "id": "HARD_BLOCKER_CONTINUOUS_ACTUATOR_ENVELOPE_NOT_YET_DERIVED",
-      "missing_definition": "continuous permissible joint-side torque-speed-current envelope under the exact voltage and thermal conditions"
+      "id": "HARD_BLOCKER_CONTINUOUS_TORQUE_SPEED_CURRENT_THERMAL_CURVE",
+      "missing_definition": "measured continuous torque-speed-current thermal envelope beyond the official 12 V 20%-of-stall estimates"
     },
     {
       "blocks": [
@@ -1378,9 +1383,9 @@
       "sha256": "d9e4b32723ee71dfce26fb4e78546cfcfef147b2d7dbf5e53e3620e3d8aa96bd"
     },
     "parameter_matrix": {
-      "deterministic_signature": "48ad0829e64e1c4f7e7c90e77eb40d0383b31bb9b312cb3e829d8c907f097818",
+      "deterministic_signature": "9712c2e43eb0c56baa7c6039eca214bfc39afbb1f6eda65261038f29a8df3b9e",
       "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_official_parameter_matrix.json",
-      "sha256": "e1b067e755d24754be0b08ea5dbda1804b480f484b2453bd8eb3f309b941ab9e"
+      "sha256": "d0adf5f84a5a0b7f098a0dacbd48da14a37cb3d07465cd639227048a3e31d178"
     },
     "pinned_xacro_sha256": "45dff1e0de2456386dbb64b851c94db2d874b6dbefb6503cb747bc55435177bd",
     "right_urdf": {

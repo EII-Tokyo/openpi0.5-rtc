@@ -1,0 +1,170 @@
+{
+  "actuator_models": {
+    "XM430-W350": {
+      "continuous_estimate_fraction_of_stall": 0.2,
+      "continuous_torque_speed_current_curve": "NOT_PUBLISHED_ON_EXACT_MODEL_PRODUCT_PAGE",
+      "continuous_value_is_manufacturer_estimate": true,
+      "continuous_value_is_measured_thermal_curve": false,
+      "estimated_continuous_torque_Nm": 0.82,
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/sources/web/robotis_xm430_w350_product.html",
+      "model": "XM430-W350",
+      "no_load_speed_rpm": 46.0,
+      "reference_voltage_V": 12.0,
+      "sha256": "5d404cecc8b304a6aec1b2e8621157a87b11bcd8c7be6d0ed2244a223ad7abed",
+      "source_id": "robotis_xm430_w350_product",
+      "source_url": "https://www.robotis.us/dynamixel-xm430-w350-t/",
+      "stall_current_A": 2.3,
+      "stall_torque_Nm": 4.1,
+      "stall_torque_used_as_continuous": false
+    },
+    "XM540-W270": {
+      "continuous_estimate_fraction_of_stall": 0.2,
+      "continuous_torque_speed_current_curve": "NOT_PUBLISHED_ON_EXACT_MODEL_PRODUCT_PAGE",
+      "continuous_value_is_manufacturer_estimate": true,
+      "continuous_value_is_measured_thermal_curve": false,
+      "estimated_continuous_torque_Nm": 2.12,
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/sources/web/robotis_xm540_w270_product.html",
+      "model": "XM540-W270",
+      "no_load_speed_rpm": 30.0,
+      "reference_voltage_V": 12.0,
+      "sha256": "92668f52a76463de6f6bac289f5b941606c1b030443cfb1b777c07e70982b9ba",
+      "source_id": "robotis_xm540_w270_product",
+      "source_url": "https://www.robotis.us/dynamixel-xm540-w270-t/",
+      "stall_current_A": 4.4,
+      "stall_torque_Nm": 10.6,
+      "stall_torque_used_as_continuous": false
+    }
+  },
+  "continuous_envelope": {
+    "formal_use": "CONSERVATIVE_TORQUE_REFERENCE_NOT_A_COMPLETE_DYNAMIC_ENVELOPE",
+    "measured_continuous_torque_speed_current_thermal_curve_available": false,
+    "official_12V_estimated_torque_available": true,
+    "status": "PARTIAL"
+  },
+  "control_modes": {
+    "arm": "position",
+    "gripper": "pwm",
+    "source": "interbotix_xsarm_default_modes"
+  },
+  "deterministic_signature": "26cf6fc0822ae9c63078cc026af5c4797d1b204d6cf82c5169dd2381ae4b5a3e",
+  "engineering_inference_inserted": false,
+  "gripper_control_boundary": {
+    "current_limit_A": 0.538,
+    "current_limit_is_physx_max_force": false,
+    "current_limit_ticks": 200,
+    "current_unit_A_per_tick": 0.00269,
+    "linkage_conversion_required": true,
+    "operating_mode": "pwm",
+    "pwm_command_to_output_torque_mapping": "NOT_DEFINED_BY_OFFICIAL_SOURCES",
+    "pwm_mode_is_closed_loop_position_control": false
+  },
+  "hard_blockers": [
+    {
+      "blocks": [
+        "FORMAL_DYNAMIC_OUTPUT_ENVELOPE"
+      ],
+      "does_not_block": [
+        "SOURCE_AUDIT",
+        "12V_ESTIMATED_CONTINUOUS_TORQUE_REFERENCE"
+      ],
+      "id": "HARD_BLOCKER_CONTINUOUS_TORQUE_SPEED_CURRENT_THERMAL_CURVE"
+    },
+    {
+      "blocks": [
+        "FORMAL_PHYSX_DRIVE_LAYER"
+      ],
+      "does_not_block": [
+        "SOURCE_AUDIT",
+        "KINEMATICS",
+        "COLLIDER_GEOMETRY"
+      ],
+      "id": "HARD_BLOCKER_PHYSX_DRIVE_PHYSICAL_DERIVATION"
+    }
+  ],
+  "inputs": {
+    "modes": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/sources/interbotix_manipulators_b66d5b905725351dd71d3251a06cd3f4c777940f/modes.yaml",
+      "sha256": "ee7f2b5fcd367442419396c2feeaa111b7b1776d8302a4ca2dd0c4f3d13cb95f",
+      "source_id": "interbotix_xsarm_default_modes"
+    },
+    "motor_config": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/sources/interbotix_manipulators_b66d5b905725351dd71d3251a06cd3f4c777940f/aloha_vx300s.yaml",
+      "sha256": "999cc0863b7b1e0334c5cd75d5ed1430736d25aa13881e4c24f4bf6cb3a1924f",
+      "source_id": "interbotix_aloha_vx300s_motor_config"
+    },
+    "source_manifest": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/configs/aloha1_official_parameter_sources.yaml",
+      "sha256": "910d4585d91aaf5a2b3fb3a54dfd477d6ff940b106a6888abcd896f9e513b4d7"
+    }
+  },
+  "joint_actuator_identity": {
+    "elbow": {
+      "id": 4,
+      "model": "XM540-W270",
+      "secondary_id": 255
+    },
+    "elbow_shadow": {
+      "id": 5,
+      "model": "XM540-W270",
+      "secondary_id": 4
+    },
+    "forearm_roll": {
+      "id": 6,
+      "model": "XM540-W270",
+      "secondary_id": 255
+    },
+    "gripper": {
+      "id": 9,
+      "model": "XM430-W350",
+      "secondary_id": 255
+    },
+    "shoulder": {
+      "id": 2,
+      "model": "XM540-W270",
+      "secondary_id": 255
+    },
+    "shoulder_shadow": {
+      "id": 3,
+      "model": "XM540-W270",
+      "secondary_id": 2
+    },
+    "waist": {
+      "id": 1,
+      "model": "XM540-W270",
+      "secondary_id": 255
+    },
+    "wrist_angle": {
+      "id": 7,
+      "model": "XM540-W270",
+      "secondary_id": 255
+    },
+    "wrist_rotate": {
+      "id": 8,
+      "model": "XM430-W350",
+      "secondary_id": 255
+    }
+  },
+  "physx_drive_mapping": {
+    "damping_Nm_s_per_rad": null,
+    "hardware_integer_gain_direct_mapping": "PROHIBITED",
+    "max_force_Nm": null,
+    "reason": "ROBOTIS register gains are dimensionless firmware-controller values, while PhysX drive stiffness and damping are physical joint-space coefficients. The official sources do not publish an equivalent closed-loop transfer model for this assembled arm and PWM gripper.",
+    "status": "HARD_BLOCKER",
+    "stiffness_Nm_per_rad": null
+  },
+  "product": {
+    "follower_instances": [
+      "follower_left",
+      "follower_right"
+    ],
+    "manufacturer": "Trossen Robotics",
+    "product": "Interbotix ViperX-300 6DOF",
+    "project_model": "aloha_vx300s",
+    "robot_local_geometry_relation": "IDENTICAL_NOT_MIRRORED"
+  },
+  "real_robot_accessed": false,
+  "runtime_simulation_used": false,
+  "schema_version": 1,
+  "scope": "EXACT_ALOHA_VX300S_ACTUATOR_AND_CONTROLLER_SOURCE_BOUNDARY",
+  "status": "PARTIAL"
+}

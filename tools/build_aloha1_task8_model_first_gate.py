@@ -48,9 +48,10 @@ def main() -> int:
         "isaac_runtime_started": False,
         "final_or_default_asset_modified": False,
         "next_actions": [
-            "resolve CAD-to-link registrations and per-link collider error certificates",
-            "reconcile the 114 mm URDF carriage-center and 116 mm product-page aperture definitions against supplier CAD inner surfaces",
-            "complete continuous actuator-envelope and controller-to-PhysX derivations without using stall torque as continuous maxForce",
+            "derive a task-local collider acceptance error budget; the all-link numerical certificate is complete and the correct-finger single hull fails its 0.20 mm contact-surface budget",
+            "retain the resolved 42-114 mm CAD/URDF carriage-center range and the documented 116 mm product-page source conflict without endpoint fitting",
+            "complete the torque-speed-current thermal envelope beyond ROBOTIS' official 12 V 20%-of-stall continuous estimates",
+            "derive controller-to-PhysX stiffness, damping and maxForce without copying DYNAMIXEL integer gains",
             "obtain exact finger-bottle-table material properties or physical measurements",
             "derive a numerical timestep/solver error budget",
         ],

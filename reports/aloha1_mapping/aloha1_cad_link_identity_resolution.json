@@ -1,80 +1,19 @@
 {
-  "deterministic_signature": "5e985b60154b8eb224820846806a2a752bf7f594ad50502ed1a20ff8c7d5a7fc",
-  "existing_static_collision_gate": "PASS",
-  "existing_swept_collision_gate": "PASS",
+  "deterministic_signature": "0559480ce9329a7841d1c54b4ce477f0f8c252d019f7783e2452fd6bcd9af616",
   "final_or_default_asset_modified": false,
-  "formal_candidate_gate": "BLOCKED",
-  "historical_identity_blockers": [
-    {
-      "collider_authored": false,
-      "link_suffix": "gripper_prop_link",
-      "reason": "HARD_BLOCKER_CAD_TO_LINK_IDENTITY",
-      "robot": "follower_left",
-      "urdf_link_name": "follower_left_gripper_prop_link"
-    },
-    {
-      "collider_authored": false,
-      "link_suffix": "gripper_bar_link",
-      "reason": "HARD_BLOCKER_CAD_TO_LINK_IDENTITY",
-      "robot": "follower_left",
-      "urdf_link_name": "follower_left_gripper_bar_link"
-    },
-    {
-      "collider_authored": false,
-      "link_suffix": "gripper_prop_link",
-      "reason": "HARD_BLOCKER_CAD_TO_LINK_IDENTITY",
-      "robot": "follower_right",
-      "urdf_link_name": "follower_right_gripper_prop_link"
-    },
-    {
-      "collider_authored": false,
-      "link_suffix": "gripper_bar_link",
-      "reason": "HARD_BLOCKER_CAD_TO_LINK_IDENTITY",
-      "robot": "follower_right",
-      "urdf_link_name": "follower_right_gripper_bar_link"
-    }
-  ],
-  "historical_invalid_brep_blockers": [
-    "follower_left_wrist_link",
-    "follower_right_wrist_link"
-  ],
-  "identity_blockers": [],
-  "input_reports": [
-    {
-      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_cad_derived_collider_geometry.json",
-      "sha256": "55da6b55f5bc17a3690af454a0c7603d2d305bf4e86a7f5908d5b713a77ece4e",
-      "status": "PARTIAL"
-    },
-    {
-      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_cad_link_collision_semantics.json",
-      "sha256": "23476d42f8290839dc5e39e53b05b1e76763af7a216993a2b629386444e15683",
-      "status": "PARTIAL"
-    },
-    {
-      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_cad_derived_five_pose_swept_collision.json",
-      "sha256": "d5a21d1bad393505fd2f14ad8596a144a7af6b3d8daaa15bea4e6afe3ac2c808",
-      "status": "PASS"
-    },
-    {
-      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_cad_derived_collision_replan_static.json",
-      "sha256": "61cc94457f7768146cdf35de008367223d06aa81e824609a3299934e2960e9f3",
-      "status": "PASS"
-    },
-    {
-      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_cad_link_identity_resolution.json",
-      "sha256": "5ac2146744a9145b9cdeb496db5286fcc94f013a0fd256285be404e509b158c2",
-      "status": "PASS"
-    },
-    {
-      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_official_collider_surface_certificate.json",
-      "sha256": "f1996a54dc0df2273b4a19b12555e77dbf81fb153c176ef593c53afac4758ae6",
-      "status": "PARTIAL"
-    }
-  ],
-  "interpretation": "The former bar/prop/wrist identity blockers are resolved by explicit source boundaries: the supplier STEP remains fused/invalid where observed, while byte-identical pinned Interbotix link meshes provide robot-description geometry. Every physical link now has a deterministic finite-sample convex-hull surface/volume certificate. The contract remains PARTIAL because no official or task-derived numerical acceptance error budget has yet been proven; no tolerance was fitted from successful grasp videos.",
-  "invalid_brep_blockers": [],
-  "link_identity_resolution": "PASS",
-  "resolved_source_boundary_records": [
+  "mirror_used": false,
+  "official_mesh_source": {
+    "branch": "humble",
+    "commit": "b66d5b905725351dd71d3251a06cd3f4c777940f",
+    "license": "BSD-3-Clause",
+    "license_sha256": "4eab000b04ce3f3b2746e2c22c1475c83c67a55ba5caf9becc089db26a2688d4",
+    "repository": "https://github.com/Interbotix/interbotix_ros_manipulators.git"
+  },
+  "probe": {
+    "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_cad_source_geometry_probe.json",
+    "sha256": "38282e3da397a41e7f3a64dba6d55cc54db20d5c90a13c9dbacd63fac1303806"
+  },
+  "records": [
     {
       "authoritative_link_geometry_source": "PINNED_OFFICIAL_URDF_MESH",
       "cad_registration_metrics": {
@@ -170,28 +109,23 @@
       }
     }
   ],
+  "resolution": "CAD_IDENTITY_BLOCKERS_REPLACED_BY_EXPLICIT_GEOMETRY_SOURCE_BOUNDARIES",
+  "runtime_simulation_used": false,
   "schema_version": 1,
+  "scope": "ROBOT_LOCAL_LINK_GEOMETRY_SOURCE_RESOLUTION_NOT_COLLIDER_PROMOTION",
+  "source_brep_repaired": false,
   "source_cad": {
     "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/gdrive_source_readonly/Simple Aloha Viper 2024-5-13.step",
+    "read_only": true,
+    "redistribution": "UNKNOWN_HARD_BLOCKER_NOT_INCLUDED",
     "sha256": "337862418769d4ea8b801d26e68930c4412f870050e60769bbf91765194dc571"
   },
-  "status": "PARTIAL",
-  "surface_certificate_link_count": 11,
-  "surface_certificate_summary": {
-    "convex_piece_count": 36,
-    "link_count": 11,
-    "maximum_hull_to_source_sample_distance_m": 0.053684643686392565,
-    "maximum_volume_ratio": 3.6801013520804844
-  },
-  "surface_error_acceptance": "HARD_BLOCKER_ERROR_BUDGET_NOT_DEFINED",
-  "surface_error_certificate": "COMPLETE_NUMERICAL",
+  "status": "PASS",
   "toolchain": {
     "angular_deflection_deg": 20.0,
     "freecad_version": "1.1.1",
     "linear_deflection_mm": 0.2,
     "opencascade_version": "7.8.1"
   },
-  "two_fresh_directory_determinism": "PASS",
-  "unresolved_identity_blocker_count": 0,
-  "unresolved_link_suffixes": []
+  "two_fresh_process_determinism": "PASS"
 }
