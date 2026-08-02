@@ -255,7 +255,7 @@ def _within_limits(qpos: np.ndarray, limits: np.ndarray) -> bool:
 
 def _set_full_target(articulation: Any, target: np.ndarray) -> None:
     indices = np.arange(int(articulation.num_dof), dtype=np.int64)
-    articulation.set_joint_position_targets(
+    articulation._articulation_view.set_joint_position_targets(
         np.asarray(target, dtype=np.float64), joint_indices=indices
     )
 
