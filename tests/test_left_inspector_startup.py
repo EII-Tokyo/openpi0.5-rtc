@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from tools.isaac_sim.left_inspector_startup import (
     LoadingStability,
     RecoveryDecision,
@@ -23,3 +25,22 @@ def test_recovery_guard_allows_only_one_disabled_recovery():
     assert guard.observe(disabled=True) is RecoveryDecision.RECOVER
     assert guard.observe(disabled=False) is RecoveryDecision.KEEP_MONITORING
     assert guard.observe(disabled=True) is RecoveryDecision.FAIL
+
+
+def test_runtime_script_has_required_order_and_safety_contract():
+    source = Path("tools/isaac_sim/open_left_physics_inspector.py").read_text()
+
+    assert source.index('"perspective_camera"') < source.index(
+        '"show_physics_inspector"'
+    )
+    assert "get_stage_loading_status" in source
+    assert "enable_inspector_authoring_mode" in source
+    assert "MAX_RECOVERIES = 1" in source
+    for forbidden in (
+        "set_joint_value",
+        "set_joint_position",
+        "set_drive_target",
+        ".play(",
+        "save_stage",
+    ):
+        assert forbidden not in source
