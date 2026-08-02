@@ -18,9 +18,11 @@ TIP = (
 def passing_trial() -> TrialMetrics:
     return TrialMetrics(
         contact_pairs=[(TABLE_PATH, TIP)],
-        minimum_tip_z_m=-0.001,
+        minimum_target_separation_m=-0.00005,
+        minimum_table_local_finger_z_m=-0.00005,
+        maximum_visual_collision_error_m=0.0,
         final_target_error_rad=math.radians(8),
-        persistent_contact_steps=20,
+        persistent_contact_steps=180,
         finite=True,
         within_joint_limits=True,
         ccd_effective=True,
@@ -34,20 +36,41 @@ def test_pass_requires_exact_contact_non_crossing_and_blocked_target():
 
     assert result["status"] == "PASS"
     assert result["target_contact_found"] is True
-    assert result["bottom_crossed"] is False
+    assert result["tabletop_penetrated"] is False
     assert result["infeasible_target_blocked"] is True
 
 
-def test_unrelated_contact_and_bottom_crossing_fail():
+def test_unrelated_contact_and_tabletop_penetration_fail():
     trial = passing_trial()
     trial.contact_pairs = [("/World/environment/worldBody/__1", TIP)]
-    trial.minimum_tip_z_m = -0.017
+    trial.minimum_table_local_finger_z_m = -0.001
 
     result = evaluate_trial(trial)
 
     assert result["status"] == "FAIL"
-    assert "missing_exact_table_tip_contact" in result["failure_reasons"]
-    assert "tested_collider_crossed_table_bottom" in result["failure_reasons"]
+    assert "missing_physical_table_tip_contact" in result["failure_reasons"]
+    assert "finger_penetrated_table_top" in result["failure_reasons"]
+
+
+def test_positive_separation_contact_header_is_only_proximity():
+    trial = passing_trial()
+    trial.minimum_target_separation_m = 0.0106
+
+    result = evaluate_trial(trial)
+
+    assert result["status"] == "FAIL"
+    assert result["target_contact_found"] is False
+    assert "missing_physical_table_tip_contact" in result["failure_reasons"]
+
+
+def test_visual_collision_mismatch_fails_closed():
+    trial = passing_trial()
+    trial.maximum_visual_collision_error_m = 0.0002
+
+    result = evaluate_trial(trial)
+
+    assert result["status"] == "FAIL"
+    assert "visual_collision_mismatch" in result["failure_reasons"]
 
 
 def test_exactly_three_passing_trials_are_required():

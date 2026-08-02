@@ -17,10 +17,11 @@ ALLOWED_TIP_ROOTS = (
     "/World/follower_left/vx300s_left/follower_left_left_finger_link",
     "/World/follower_left/vx300s_left/follower_left_right_finger_link",
 )
-TABLE_BOTTOM_Z_M = -0.015
-BOTTOM_CROSSING_TOLERANCE_M = 0.0015
+MAX_CONTACT_SEPARATION_M = 0.0005
+MAX_TABLE_TOP_PENETRATION_M = 0.0005
+MAX_VISUAL_COLLISION_ERROR_M = 0.0001
 MIN_TARGET_ERROR_RAD = math.radians(2.0)
-MIN_PERSISTENT_CONTACT_STEPS = 10
+MIN_PERSISTENT_CONTACT_STEPS = 180
 REQUIRED_TRIALS = 3
 
 
@@ -29,7 +30,9 @@ class TrialMetrics:
     """Measurements needed to decide one independent collision trial."""
 
     contact_pairs: list[tuple[str, str]]
-    minimum_tip_z_m: float
+    minimum_target_separation_m: float
+    minimum_table_local_finger_z_m: float
+    maximum_visual_collision_error_m: float
     final_target_error_rad: float
     persistent_contact_steps: int
     finite: bool
@@ -59,11 +62,20 @@ def _is_target_pair(pair: tuple[str, str]) -> bool:
 def evaluate_trial(metrics: TrialMetrics) -> dict[str, Any]:
     """Evaluate one trial without importing Isaac Sim or USD modules."""
 
-    target_contact_found = any(_is_target_pair(pair) for pair in metrics.contact_pairs)
-    bottom_crossed = (
-        not math.isfinite(metrics.minimum_tip_z_m)
-        or metrics.minimum_tip_z_m
-        < TABLE_BOTTOM_Z_M - BOTTOM_CROSSING_TOLERANCE_M
+    target_contact_found = (
+        any(_is_target_pair(pair) for pair in metrics.contact_pairs)
+        and math.isfinite(metrics.minimum_target_separation_m)
+        and metrics.minimum_target_separation_m <= MAX_CONTACT_SEPARATION_M
+    )
+    tabletop_penetrated = (
+        not math.isfinite(metrics.minimum_table_local_finger_z_m)
+        or metrics.minimum_table_local_finger_z_m
+        < -MAX_TABLE_TOP_PENETRATION_M
+    )
+    visual_collision_match = (
+        math.isfinite(metrics.maximum_visual_collision_error_m)
+        and metrics.maximum_visual_collision_error_m
+        <= MAX_VISUAL_COLLISION_ERROR_M
     )
     infeasible_target_blocked = (
         math.isfinite(metrics.final_target_error_rad)
@@ -75,9 +87,11 @@ def evaluate_trial(metrics: TrialMetrics) -> dict[str, Any]:
 
     failure_reasons: list[str] = []
     if not target_contact_found:
-        failure_reasons.append("missing_exact_table_tip_contact")
-    if bottom_crossed:
-        failure_reasons.append("tested_collider_crossed_table_bottom")
+        failure_reasons.append("missing_physical_table_tip_contact")
+    if tabletop_penetrated:
+        failure_reasons.append("finger_penetrated_table_top")
+    if not visual_collision_match:
+        failure_reasons.append("visual_collision_mismatch")
     if not infeasible_target_blocked:
         failure_reasons.append("infeasible_target_not_blocked")
     if not persistent_contact:
@@ -96,7 +110,8 @@ def evaluate_trial(metrics: TrialMetrics) -> dict[str, Any]:
     return {
         "status": "PASS" if not failure_reasons else "FAIL",
         "target_contact_found": target_contact_found,
-        "bottom_crossed": bottom_crossed,
+        "tabletop_penetrated": tabletop_penetrated,
+        "visual_collision_match": visual_collision_match,
         "infeasible_target_blocked": infeasible_target_blocked,
         "persistent_contact_ok": persistent_contact,
         "failure_reasons": failure_reasons,
