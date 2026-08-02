@@ -105,6 +105,111 @@ def evaluate_finger_initialization(
     }
 
 
+def _contact_paths(contact: dict[str, object]) -> tuple[str, ...]:
+    return tuple(
+        str(contact.get(key, ""))
+        for key in (
+            "actor0_path",
+            "actor1_path",
+            "collider0_path",
+            "collider1_path",
+        )
+    )
+
+
+def _touches_path(paths: tuple[str, ...], prim_path: str) -> bool:
+    return any(path == prim_path or path.startswith(f"{prim_path}/") for path in paths)
+
+
+def evaluate_finger_runtime_frame(
+    *,
+    frame: int,
+    phase: str,
+    targets: list[float],
+    readback: list[float],
+    source_limits: dict[str, dict[str, float]],
+    pair_overlap_volume_m3: float,
+    contacts: list[dict[str, object]],
+    finger_paths: dict[str, str],
+) -> dict[str, object]:
+    """Classify a live frame without changing its commanded or measured state."""
+
+    frame_index = int(frame)
+    if frame_index < 0:
+        raise ValueError("frame must be non-negative")
+    if set(finger_paths) != set(FINGER_NAMES):
+        raise ValueError("finger_paths must contain the two explicit finger names")
+
+    initialization = evaluate_finger_initialization(
+        reset_complete=True,
+        dof_order=list(FINGER_NAMES),
+        targets=targets,
+        readback=readback,
+        source_limits=source_limits,
+        overlap_volume_m3=pair_overlap_volume_m3,
+    )
+    failure_codes = [
+        str(code)
+        for code in initialization["failure_codes"]
+        if code != "FAIL_INITIALIZATION_CONTRACT"
+    ]
+    pair_contacts: list[dict[str, object]] = []
+    environment_contacts: list[dict[str, object]] = []
+    for contact in contacts:
+        paths = _contact_paths(contact)
+        touches_left = _touches_path(paths, finger_paths["left_finger"])
+        touches_right = _touches_path(paths, finger_paths["right_finger"])
+        if touches_left and touches_right:
+            pair_contacts.append(dict(contact))
+        elif (touches_left or touches_right) and any(
+            path == "/World/environment"
+            or path.startswith("/World/environment/")
+            for path in paths
+        ):
+            environment_contacts.append(dict(contact))
+
+    if pair_contacts and "FINGER_PAIR_UNEXPECTED_CONTACT" not in failure_codes:
+        failure_codes.append("FINGER_PAIR_UNEXPECTED_CONTACT")
+    active_environment_contact = any(
+        (
+            math.isfinite(float(contact.get("impulse_ns", math.nan)))
+            and float(contact.get("impulse_ns", 0.0)) > 0.0
+        )
+        or (
+            math.isfinite(float(contact.get("separation_m", math.nan)))
+            and float(contact.get("separation_m", math.inf)) <= 0.0
+        )
+        for contact in environment_contacts
+    )
+    if (
+        "FINGER_LIMIT_VIOLATION" in failure_codes
+        and active_environment_contact
+        and "ENVIRONMENT_CONTACT_FORCED_LIMIT_VIOLATION" not in failure_codes
+    ):
+        failure_codes.append("ENVIRONMENT_CONTACT_FORCED_LIMIT_VIOLATION")
+
+    first_failure = (
+        {
+            "frame": frame_index,
+            "phase": str(phase),
+            "failure_codes": list(failure_codes),
+        }
+        if failure_codes
+        else None
+    )
+    return {
+        "status": "FAIL" if failure_codes else "PASS",
+        "frame": frame_index,
+        "phase": str(phase),
+        "failure_codes": failure_codes,
+        "limit_margins_m": initialization["limit_margins_m"],
+        "pair_overlap_volume_m3": initialization["pair_overlap_volume_m3"],
+        "finger_pair_contacts": pair_contacts,
+        "finger_environment_contacts": environment_contacts,
+        "first_failure": first_failure,
+    }
+
+
 def _canonical_value(value: Any) -> Any:
     if isinstance(value, dict):
         return {

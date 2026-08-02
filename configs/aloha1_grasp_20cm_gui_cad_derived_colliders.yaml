@@ -73,6 +73,24 @@ physics:
   solve_articulation_contact_last: true
   finger_drive_type: force
   preload_delta_m: 0.0
+finger_safety:
+  classification: DIAGNOSTIC_ONLY_NOT_FINAL_CONTROL_MAPPING
+  dof_names: [left_finger, right_finger]
+  dof_indices: [7, 8]
+  source_limits_m:
+    left_finger: {lower: 0.021, upper: 0.057}
+    right_finger: {lower: -0.057, upper: -0.021}
+  source_urdf:
+    path: generated/urdf/follower_left.urdf
+    sha256: d9e4b32723ee71dfce26fb4e78546cfcfef147b2d7dbf5e53e3620e3d8aa96bd
+    left_joint_xpath: joint[@name='left_finger']/limit
+    right_joint_xpath: joint[@name='right_finger']/limit
+    right_mimic: {joint: left_finger, multiplier: -1.0, offset: 0.0}
+  require_world_reset: true
+  require_immediate_readback: true
+  require_zero_pair_overlap: true
+  abort_on_first_runtime_violation: true
+  pair_overlap_tolerance_m3: 0.0
 evidence:
   full_arm_view: overview
   contact_view: gripper_closeup

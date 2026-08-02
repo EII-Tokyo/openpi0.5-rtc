@@ -1072,6 +1072,21 @@ def test_isaac_binding_uses_pose_synchronized_render_only_colliders() -> None:
     assert "for _ in range(COLLIDER_OVERLAY_RENDER_FLUSH_UPDATES)" in source
 
 
+def test_isaac_binding_enforces_initialization_and_per_frame_finger_safety() -> None:
+    source = (
+        ROOT / "tools/aloha1_mapping/grasp_20cm_isaac_bindings.py"
+    ).read_text(encoding="utf-8")
+
+    assert "evaluate_finger_initialization" in source
+    assert "canonical_initialization_signature" in source
+    assert "evaluate_finger_runtime_frame" in source
+    assert "self.articulation.get_dof_limits()" in source
+    assert '"initialization_contract"' in source
+    assert '"finger_safety"' in source
+    assert '"first_violation"' in source
+    assert "abort_on_first_runtime_violation" in source
+
+
 def test_button_callbacks_do_not_contain_blocking_loops() -> None:
     tree = ast.parse(GUI_SCRIPT.read_text(encoding="utf-8"))
     callback_names = {

@@ -16,11 +16,15 @@ from typing import Any
 import numpy as np
 from PIL import Image
 
+from tools.aloha1_mapping.convex_geometry_audit import convex_pair_relation
 from tools.aloha1_mapping.grasp_20cm_controller import Phase
 from tools.aloha1_mapping.grasp_20cm_controller import RunObservation
 from tools.aloha1_mapping.grasp_20cm_controller import canonical_run_signature
 from tools.aloha1_mapping.grasp_20cm_runtime import EXPECTED_DOF_ORDER
 from tools.aloha1_mapping.grasp_20cm_runtime import sha256_file
+from tools.aloha1_mapping.grasp_initialization_contract import canonical_initialization_signature
+from tools.aloha1_mapping.grasp_initialization_contract import evaluate_finger_initialization
+from tools.aloha1_mapping.grasp_initialization_contract import evaluate_finger_runtime_frame
 
 PHASE_TIMEOUT_FRAMES = {
     Phase.VALIDATE: 60,
@@ -747,6 +751,7 @@ class IsaacGrasp20cmBindings:
         from tools.aloha1_mapping.grasp_20cm_five_pose_ik import compose_initial_command
         from tools.aloha1_mapping.grasp_20cm_sampling import translate_horizontal_bottle_profile
         from tools.audit_aloha1_bottle_collision_runtime import _create_bottle_render_evidence
+        from tools.audit_aloha1_bottle_collision_runtime import _quaternion_matrix_wxyz
         from tools.audit_aloha1_bottle_collision_runtime import _update_bottle_render_evidence
         from tools.run_aloha1_grasp_editor_variant_b_gui import build_external_close_targets
         from tools.validate_aloha1_follower_finger_collision_runtime import _create_finger_render_evidence
@@ -794,6 +799,7 @@ class IsaacGrasp20cmBindings:
         self._transform_collision_bounds = (
             transform_local_points_to_world_bounds
         )
+        self._quaternion_matrix_wxyz = _quaternion_matrix_wxyz
         self._physx = get_physx_interface()
         self._physx_sim = get_physx_simulation_interface()
         self._settings = carb.settings.get_settings()
@@ -809,6 +815,28 @@ class IsaacGrasp20cmBindings:
         )
         self._collider_display_before = int(
             self._settings.get(self._collider_display_setting) or 0
+        )
+        self.finger_safety_config = dict(self.config["finger_safety"])
+        self.finger_dof_names = [
+            str(name) for name in self.finger_safety_config["dof_names"]
+        ]
+        self.finger_dof_indices = np.asarray(
+            self.finger_safety_config["dof_indices"],
+            dtype=np.int32,
+        )
+        self.source_finger_limits = {
+            str(name): {
+                "lower": float(record["lower"]),
+                "upper": float(record["upper"]),
+            }
+            for name, record in self.finger_safety_config[
+                "source_limits_m"
+            ].items()
+        }
+        self.abort_on_first_runtime_violation = bool(
+            self.finger_safety_config[
+                "abort_on_first_runtime_violation"
+            ]
         )
 
         task_profile_path = Path(
@@ -1103,6 +1131,32 @@ class IsaacGrasp20cmBindings:
             raise RuntimeError(
                 f"unexpected DOF order: {self.articulation.dof_names}"
             )
+        if [
+            list(self.articulation.dof_names)[int(index)]
+            for index in self.finger_dof_indices
+        ] != self.finger_dof_names:
+            raise RuntimeError("finger DOF names/indices do not match runtime order")
+        composed_limits = np.asarray(
+            self.articulation.get_dof_limits(),
+            dtype=np.float64,
+        )
+        if composed_limits.ndim == 3 and composed_limits.shape[0] == 1:
+            composed_limits = composed_limits[0]
+        if composed_limits.shape != (len(EXPECTED_DOF_ORDER), 2):
+            raise RuntimeError(
+                f"unexpected composed DOF limit shape: {composed_limits.shape}"
+            )
+        self.composed_finger_limits = {
+            name: {
+                "lower": float(composed_limits[int(index), 0]),
+                "upper": float(composed_limits[int(index), 1]),
+            }
+            for name, index in zip(
+                self.finger_dof_names,
+                self.finger_dof_indices,
+                strict=True,
+            )
+        }
         frozen_waypoints = self.task_profile["kinematics"]["ik"][
             "waypoints"
         ]
@@ -1340,6 +1394,92 @@ class IsaacGrasp20cmBindings:
         )
         self._reset_runtime_records()
 
+    def _finger_collider_world_points(self) -> dict[str, np.ndarray]:
+        """Return authored finger-collider points at live PhysX link poses."""
+
+        points_by_side: dict[str, np.ndarray] = {}
+        for handle in self._finger_render_handles:
+            if str(handle["category"]) != "collider":
+                continue
+            side = str(handle["side"])
+            transform = np.asarray(
+                self._finger_link_views[side].get_transforms()[0],
+                dtype=np.float64,
+            )
+            quaternion_wxyz = [
+                float(transform[6]),
+                float(transform[3]),
+                float(transform[4]),
+                float(transform[5]),
+            ]
+            rotation = self._quaternion_matrix_wxyz(quaternion_wxyz)
+            points_by_side[side] = (
+                np.asarray(handle["local_points"], dtype=np.float64)
+                @ rotation.T
+                + transform[:3]
+            )
+        if set(points_by_side) != {"left", "right"}:
+            raise RuntimeError("exactly two live finger colliders are required")
+        return points_by_side
+
+    def _finger_pair_geometry(self) -> dict[str, Any]:
+        """Measure the live authored convex-hull pair without changing physics."""
+
+        points = self._finger_collider_world_points()
+        left = points["left"]
+        right = points["right"]
+        intersection_extent = np.minimum(
+            np.max(left, axis=0),
+            np.max(right, axis=0),
+        ) - np.maximum(
+            np.min(left, axis=0),
+            np.min(right, axis=0),
+        )
+        if np.any(intersection_extent <= 0.0):
+            return {
+                "relation": "AABB_SEPARATED",
+                "overlap_volume_m3": 0.0,
+                "method": (
+                    "world AABB broad phase; convex halfspace test is only "
+                    "needed when all AABB extents overlap"
+                ),
+                "aabb_intersection_extent_m": intersection_extent.tolist(),
+            }
+        relation = convex_pair_relation(left, right)
+        return {
+            **relation,
+            "aabb_intersection_extent_m": intersection_extent.tolist(),
+        }
+
+    def _evaluate_current_finger_initialization(self) -> dict[str, Any]:
+        self._physx.update_transformations(True, True, False, False)
+        readback = np.asarray(
+            self.articulation.get_joint_positions(),
+            dtype=np.float64,
+        )
+        geometry = self._finger_pair_geometry()
+        contract = evaluate_finger_initialization(
+            reset_complete=True,
+            dof_order=self.finger_dof_names,
+            targets=self.command[self.finger_dof_indices].tolist(),
+            readback=readback[self.finger_dof_indices].tolist(),
+            source_limits=self.source_finger_limits,
+            overlap_volume_m3=float(geometry["overlap_volume_m3"]),
+        )
+        contract.update(
+            {
+                "source_limits_m": self.source_finger_limits,
+                "composed_limits_m": self.composed_finger_limits,
+                "pair_geometry": geometry,
+                "world_reset_completed": True,
+                "immediate_readback_required": bool(
+                    self.finger_safety_config["require_immediate_readback"]
+                ),
+            }
+        )
+        contract["signature"] = canonical_initialization_signature(contract)
+        return contract
+
     def _initialize_video_capture(self) -> None:
         """Create independent local-5.1 camera/render-product pairs."""
 
@@ -1510,6 +1650,12 @@ class IsaacGrasp20cmBindings:
         self._captured_overlay_phases: set[str] = set()
         self._previous_bottle_pose_state: dict[str, Any] | None = None
         self._previous_bottle_com_state: dict[str, Any] | None = None
+        self.initialization_contract = (
+            self._evaluate_current_finger_initialization()
+        )
+        self._finger_safety_records: list[dict[str, Any]] = []
+        self._finger_safety_first_violation: dict[str, Any] | None = None
+        self._finger_environment_contact_count = 0
         if hasattr(self, "bottle_tensor_lifecycle"):
             self.bottle_tensor_lifecycle[
                 "kinematic_to_dynamic_transition"
@@ -1534,6 +1680,13 @@ class IsaacGrasp20cmBindings:
                 "solve_articulation_contact_last readback is false"
             )
         self._reset_runtime_records()
+        if self.initialization_contract["status"] != "PASS":
+            raise RuntimeError(
+                "FAIL_INITIALIZATION_CONTRACT: "
+                + ",".join(
+                    self.initialization_contract["failure_codes"]
+                )
+            )
         while True:
             self._capture_attempt_index += 1
             candidate = (
@@ -2154,6 +2307,36 @@ class IsaacGrasp20cmBindings:
             self.articulation.get_joint_velocities(),
             dtype=np.float64,
         )
+        finger_pair_geometry = self._finger_pair_geometry()
+        finger_safety = evaluate_finger_runtime_frame(
+            frame=frame,
+            phase=self._phase.value,
+            targets=self.command[self.finger_dof_indices].tolist(),
+            readback=qpos[self.finger_dof_indices].tolist(),
+            source_limits=self.source_finger_limits,
+            pair_overlap_volume_m3=float(
+                finger_pair_geometry["overlap_volume_m3"]
+            ),
+            contacts=current_contacts,
+            finger_paths={
+                "left_finger": str(
+                    self.config["robot"]["left_finger_prim"]
+                ),
+                "right_finger": str(
+                    self.config["robot"]["right_finger_prim"]
+                ),
+            },
+        )
+        finger_safety["pair_geometry"] = finger_pair_geometry
+        self._finger_safety_records.append(finger_safety)
+        self._finger_environment_contact_count += len(
+            finger_safety["finger_environment_contacts"]
+        )
+        if (
+            finger_safety["status"] == "FAIL"
+            and self._finger_safety_first_violation is None
+        ):
+            self._finger_safety_first_violation = dict(finger_safety)
         arm_target_error_rad = float(
             np.max(
                 np.abs(
@@ -2335,7 +2518,10 @@ class IsaacGrasp20cmBindings:
             numerical_ejection=bool(
                 maximum_speed > 5.0 or maximum_angular > 50.0
             ),
-            forbidden_constraint=False,
+            forbidden_constraint=bool(
+                self.abort_on_first_runtime_violation
+                and finger_safety["status"] == "FAIL"
+            ),
             phase_timed_out=phase_timed_out,
             ee_vertical_displacement_m=ee_displacement,
         )
@@ -2349,6 +2535,7 @@ class IsaacGrasp20cmBindings:
             "joint_velocity_target": self.command_velocity.tolist(),
             "joint_readback": qpos.tolist(),
             "joint_velocity": qvel.tolist(),
+            "finger_safety": finger_safety,
             "arm_target_max_readback_error_rad": arm_target_error_rad,
             "bottle": {
                 **bottle_state,
@@ -2416,6 +2603,7 @@ class IsaacGrasp20cmBindings:
                 "target_m": self.command[[7, 8]].tolist(),
                 "readback_m": qpos[[7, 8]].tolist(),
                 "coupling_residual_m": coupling_residual,
+                "safety_status": finger_safety["status"],
             },
             "bottle_velocity": {
                 "linear_world_m_s": bottle_state[
@@ -3235,6 +3423,26 @@ class IsaacGrasp20cmBindings:
                 "ik": self._ik_report,
                 "coupling": self.coupling_readback,
                 "finger_drive": self.drive_readback,
+                "initialization_contract": self.initialization_contract,
+                "finger_safety": {
+                    "status": (
+                        "PASS"
+                        if self._finger_safety_first_violation is None
+                        else "FAIL"
+                    ),
+                    "violation_count": sum(
+                        record["status"] == "FAIL"
+                        for record in self._finger_safety_records
+                    ),
+                    "first_violation": self._finger_safety_first_violation,
+                    "classified_environment_contact_count": (
+                        self._finger_environment_contact_count
+                    ),
+                    "abort_on_first_runtime_violation": (
+                        self.abort_on_first_runtime_violation
+                    ),
+                    "frame_count": len(self._finger_safety_records),
+                },
                 "initial_pose": self.initial_pose_evidence,
                 "arm_phase_readback_tolerance_rad": (
                     self.arm_phase_readback_tolerance_rad
@@ -3345,6 +3553,38 @@ class IsaacGrasp20cmBindings:
                 "status": "FAIL",
                 "reason": "exception",
                 "exception": exception_text[-12000:],
+                "runtime": {
+                    "initialization_contract": getattr(
+                        self,
+                        "initialization_contract",
+                        {"status": "NOT_RUN"},
+                    ),
+                    "finger_safety": {
+                        "status": (
+                            "FAIL"
+                            if getattr(
+                                self,
+                                "_finger_safety_first_violation",
+                                None,
+                            )
+                            is not None
+                            else "NOT_RUN"
+                        ),
+                        "violation_count": sum(
+                            record["status"] == "FAIL"
+                            for record in getattr(
+                                self,
+                                "_finger_safety_records",
+                                [],
+                            )
+                        ),
+                        "first_violation": getattr(
+                            self,
+                            "_finger_safety_first_violation",
+                            None,
+                        ),
+                    },
+                },
                 "stage": {
                     "absolute_path": str(self.stage_path),
                     "sha256_before": self.stage_hash_before,

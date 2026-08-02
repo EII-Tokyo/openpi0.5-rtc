@@ -120,7 +120,7 @@ frozen_inputs:
     table_prim: /World/environment/worldBody/user_confirmed_table
   runtime_config:
     path: configs/aloha1_grasp_20cm_gui_cad_derived_colliders.yaml
-    sha256: b42a252236cd226b973f4a5020d813b0426bde6c8b48fb3352a8620dbb83d56c
+    sha256: 37c65baf67f91ee1c2608c5eaed24cea20c44d59fe1d9ce28db590747ae0a5e4
   grasp_editor_candidate:
     path: configs/aloha1_grasps/bottle500_horizontal_body_grasp.isaac_grasp.yaml
     sha256: b3307c86a44101eadd6ed2151722e7668bb7d644422378765d98eac906835cca
