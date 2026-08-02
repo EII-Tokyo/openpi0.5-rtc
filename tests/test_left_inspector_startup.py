@@ -82,13 +82,13 @@ def test_runtime_script_configures_verified_single_panel_handoff():
     assert "add_inspector_window" not in source
 
 
-def test_runtime_clears_transient_selection_only_after_association():
+def test_runtime_isolates_joint_selection_only_after_association():
     source = Path("tools/isaac_sim/open_left_physics_inspector.py").read_text()
 
-    assert "async def _clear_transient_selection" in source
-    assert "set_selected_prim_paths([], False)" in source
+    assert "async def _isolate_interaction_selection" in source
+    assert "set_selected_prim_paths(list(INSPECTED_PATHS), False)" in source
     assert "_handler_selection.get_selection()" in source
-    assert "CODEX_INSPECTOR_INTERACTION_SELECTION_CLEARED" in source
+    assert "CODEX_INSPECTOR_INTERACTION_SELECTION_ISOLATED" in source
     assert source.index("_inspector_toolbar._select_current()") < source.index(
-        "await _clear_transient_selection"
+        "await _isolate_interaction_selection"
     )

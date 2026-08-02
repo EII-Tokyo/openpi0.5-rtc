@@ -171,22 +171,26 @@ async def _bind_paths(app: Any, context: Any, window: Any, stage: Any) -> list[s
     return paths
 
 
-async def _clear_transient_selection(
+async def _isolate_interaction_selection(
     app: Any, context: Any, window: Any
 ) -> dict[str, list[str]]:
-    context.get_selection().set_selected_prim_paths([], False)
+    context.get_selection().set_selected_prim_paths(list(INSPECTED_PATHS), False)
     for _ in range(20):
         await app.next_update_async()
     stage_selection = list(context.get_selection().get_selected_prim_paths())
     inspector_selection = list(window._handler_selection.get_selection() or [])
-    if stage_selection or inspector_selection:
+    selected_joint_paths = [
+        path for path in inspector_selection if "/joints/" in path
+    ]
+    if stage_selection != list(INSPECTED_PATHS) or selected_joint_paths:
         raise RuntimeError(
-            "native Inspector interaction selection did not clear: "
+            "native Inspector interaction selection did not isolate to anchors: "
             f"stage={stage_selection} inspector={inspector_selection}"
         )
     return {
-        "stage_selection_after_clear": stage_selection,
-        "inspector_selection_after_clear": inspector_selection,
+        "stage_selection_after_isolation": stage_selection,
+        "inspector_selection_after_isolation": inspector_selection,
+        "selected_joint_paths_after_isolation": selected_joint_paths,
     }
 
 
@@ -393,7 +397,7 @@ async def _run_trial() -> None:
         if state != pxsupportui.PhysXInspectorModelState.AUTHORING:
             raise RuntimeError(f"native Inspector not in AUTHORING: {state}")
 
-        selection_evidence = await _clear_transient_selection(
+        selection_evidence = await _isolate_interaction_selection(
             app, context, left_window
         )
         rows_after_clear = _collect_rows(left_window._model_inspector)

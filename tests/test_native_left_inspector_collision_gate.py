@@ -129,9 +129,12 @@ def test_native_trial_exercises_single_joint_inspector_callback():
     source = TRIAL_SCRIPT.read_text(encoding="utf-8")
 
     for required in (
-        "_clear_transient_selection",
+        "_isolate_interaction_selection",
         "_inspector_panel._delegate_tree._on_value_changed",
         "target_change_is_isolated",
+        '"stage_selection_after_isolation"',
+        '"inspector_selection_after_isolation"',
+        '"selected_joint_paths_after_isolation"',
         '"drive_targets_before"',
         '"drive_targets_after_single_joint_edit"',
         '"drive_targets_after_probe_restore"',
