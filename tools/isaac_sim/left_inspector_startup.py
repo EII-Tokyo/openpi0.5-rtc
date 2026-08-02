@@ -2,6 +2,33 @@
 
 from dataclasses import dataclass
 from enum import Enum, auto
+import math
+from typing import Mapping
+
+
+def target_change_is_isolated(
+    before: Mapping[str, float],
+    after: Mapping[str, float],
+    operated_joint: str,
+    requested_target: float,
+    tolerance: float = 1e-9,
+) -> bool:
+    """Return whether only the requested joint acquired the requested target."""
+
+    if before.keys() != after.keys() or operated_joint not in before:
+        return False
+    if not math.isclose(
+        after[operated_joint],
+        requested_target,
+        rel_tol=0.0,
+        abs_tol=tolerance,
+    ):
+        return False
+    return all(
+        math.isclose(after[name], value, rel_tol=0.0, abs_tol=tolerance)
+        for name, value in before.items()
+        if name != operated_joint
+    )
 
 
 @dataclass

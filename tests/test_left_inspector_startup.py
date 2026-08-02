@@ -4,6 +4,7 @@ from tools.isaac_sim.left_inspector_startup import (
     LoadingStability,
     RecoveryDecision,
     RecoveryGuard,
+    target_change_is_isolated,
 )
 
 
@@ -25,6 +26,20 @@ def test_recovery_guard_allows_only_one_disabled_recovery():
     assert guard.observe(disabled=True) is RecoveryDecision.RECOVER
     assert guard.observe(disabled=False) is RecoveryDecision.KEEP_MONITORING
     assert guard.observe(disabled=True) is RecoveryDecision.FAIL
+
+
+def test_target_change_is_isolated_to_requested_joint():
+    before = {"waist": 0.0, "shoulder": -55.004, "elbow": 66.463}
+    after = {"waist": 0.0, "shoulder": 20.0, "elbow": 66.463}
+
+    assert target_change_is_isolated(before, after, "shoulder", 20.0)
+
+
+def test_target_change_rejects_launcher_multi_selection_propagation():
+    before = {"waist": 0.0, "shoulder": -55.004, "elbow": 66.463}
+    after = {"waist": 10.8, "shoulder": 10.8, "elbow": 10.8}
+
+    assert not target_change_is_isolated(before, after, "shoulder", 10.8)
 
 
 def test_runtime_script_has_required_order_and_safety_contract():
