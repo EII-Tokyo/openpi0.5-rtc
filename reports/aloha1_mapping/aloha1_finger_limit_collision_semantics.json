@@ -1,0 +1,461 @@
+{
+  "candidate": {
+    "changed_fields": [
+      "/World/follower_left/vx300s_left/joints/right_finger.physics:lowerLimit",
+      "/World/follower_left/vx300s_left/joints/right_finger.physics:upperLimit"
+    ],
+    "configuration_layer": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/finger_limit_pair_collision_candidate/1.0/configuration/finger_source_limits.usda",
+      "sha256": "2547e6fb374c213b5c6c54f200c7ced37605ab0e1a11735d0a32c0a231fd260f"
+    },
+    "final_or_default_modified": false,
+    "fresh_process_records": [
+      {
+        "composed_usd": {
+          "authored_limits": {
+            "left_finger": {
+              "lower": 0.020999999716877937,
+              "upper": 0.05700000002980232
+            },
+            "right_finger": {
+              "lower": -0.05700000002980232,
+              "upper": -0.020999999716877937
+            }
+          },
+          "mimic_api": {
+            "effective_multiplier": -1.0,
+            "effective_offset": -0.0,
+            "equation": "jointPosition + gearing * referenceJointPosition + offset = 0",
+            "gearing": 1.0,
+            "instance": "rotY",
+            "offset": 0.0
+          }
+        },
+        "deterministic_signature": "51476bbd4d6db689652f1eb4caad960bb656132e9502ff3c8aee9d29b2bec4a0",
+        "filtered_pair_inventory": [],
+        "pair_collision_support_probe": {
+          "direct_positive_pair_enable_api": false,
+          "filtered_pairs_semantics": "DISABLE_SELECTED_PAIR",
+          "global_self_collision_readback": false,
+          "reason": "pair-only collision would require articulation-wide self collision plus exhaustive filters; not mutated in this read-only probe",
+          "status": "INCONCLUSIVE"
+        },
+        "process": {
+          "command": [
+            "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/bin/python",
+            "/home/eii/project/openpi0.5-rtc-reward-learning/tools/probe_aloha1_finger_limit_collision_semantics.py",
+            "--runtime-output",
+            "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/task4/runtime/candidate_run1.json",
+            "--stage",
+            "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/finger_limit_pair_collision_candidate/1.0/aloha1_finger_source_limit_candidate.usda"
+          ],
+          "exit_code": 0,
+          "log_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/task4/runtime/candidate_run1.log",
+          "output_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/task4/runtime/candidate_run1.json"
+        },
+        "runtime": {
+          "isaac_sim": "5.1.0.0",
+          "kit": "107.3.3",
+          "physx": "107.3.26"
+        },
+        "runtime_readback": {
+          "dof_limits": {
+            "left_finger": {
+              "lower": 0.020999999716877937,
+              "upper": 0.05700000002980232
+            },
+            "right_finger": {
+              "lower": -0.05700000002980232,
+              "upper": -0.020999999716877937
+            }
+          },
+          "dof_order": [
+            "waist",
+            "shoulder",
+            "elbow",
+            "forearm_roll",
+            "wrist_angle",
+            "wrist_rotate",
+            "gripper",
+            "left_finger",
+            "right_finger"
+          ],
+          "self_collision": false
+        },
+        "stage": {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/finger_limit_pair_collision_candidate/1.0/aloha1_finger_source_limit_candidate.usda",
+          "default_prim": "/World",
+          "sha256": "5eb5217dbf81c07bdba0e64bdc6d2eaa6aa12c53a1510039c2514d9ec80e6e9f",
+          "sublayers": [
+            "configuration/finger_source_limits.usda",
+            "../../cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda"
+          ]
+        },
+        "status": "PASS"
+      },
+      {
+        "composed_usd": {
+          "authored_limits": {
+            "left_finger": {
+              "lower": 0.020999999716877937,
+              "upper": 0.05700000002980232
+            },
+            "right_finger": {
+              "lower": -0.05700000002980232,
+              "upper": -0.020999999716877937
+            }
+          },
+          "mimic_api": {
+            "effective_multiplier": -1.0,
+            "effective_offset": -0.0,
+            "equation": "jointPosition + gearing * referenceJointPosition + offset = 0",
+            "gearing": 1.0,
+            "instance": "rotY",
+            "offset": 0.0
+          }
+        },
+        "deterministic_signature": "51476bbd4d6db689652f1eb4caad960bb656132e9502ff3c8aee9d29b2bec4a0",
+        "filtered_pair_inventory": [],
+        "pair_collision_support_probe": {
+          "direct_positive_pair_enable_api": false,
+          "filtered_pairs_semantics": "DISABLE_SELECTED_PAIR",
+          "global_self_collision_readback": false,
+          "reason": "pair-only collision would require articulation-wide self collision plus exhaustive filters; not mutated in this read-only probe",
+          "status": "INCONCLUSIVE"
+        },
+        "process": {
+          "command": [
+            "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/bin/python",
+            "/home/eii/project/openpi0.5-rtc-reward-learning/tools/probe_aloha1_finger_limit_collision_semantics.py",
+            "--runtime-output",
+            "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/task4/runtime/candidate_run2.json",
+            "--stage",
+            "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/finger_limit_pair_collision_candidate/1.0/aloha1_finger_source_limit_candidate.usda"
+          ],
+          "exit_code": 0,
+          "log_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/task4/runtime/candidate_run2.log",
+          "output_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/task4/runtime/candidate_run2.json"
+        },
+        "runtime": {
+          "isaac_sim": "5.1.0.0",
+          "kit": "107.3.3",
+          "physx": "107.3.26"
+        },
+        "runtime_readback": {
+          "dof_limits": {
+            "left_finger": {
+              "lower": 0.020999999716877937,
+              "upper": 0.05700000002980232
+            },
+            "right_finger": {
+              "lower": -0.05700000002980232,
+              "upper": -0.020999999716877937
+            }
+          },
+          "dof_order": [
+            "waist",
+            "shoulder",
+            "elbow",
+            "forearm_roll",
+            "wrist_angle",
+            "wrist_rotate",
+            "gripper",
+            "left_finger",
+            "right_finger"
+          ],
+          "self_collision": false
+        },
+        "stage": {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/finger_limit_pair_collision_candidate/1.0/aloha1_finger_source_limit_candidate.usda",
+          "default_prim": "/World",
+          "sha256": "5eb5217dbf81c07bdba0e64bdc6d2eaa6aa12c53a1510039c2514d9ec80e6e9f",
+          "sublayers": [
+            "configuration/finger_source_limits.usda",
+            "../../cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda"
+          ]
+        },
+        "status": "PASS"
+      }
+    ],
+    "non_limit_invariants": {
+      "fields": {
+        "dof_order": true,
+        "filtered_pair_inventory": true,
+        "mimic_api": true,
+        "self_collision": true
+      },
+      "status": "PASS"
+    },
+    "pair_collision_authored": false,
+    "root_stage": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/finger_limit_pair_collision_candidate/1.0/aloha1_finger_source_limit_candidate.usda",
+      "sha256": "5eb5217dbf81c07bdba0e64bdc6d2eaa6aa12c53a1510039c2514d9ec80e6e9f"
+    },
+    "source_limits_m": {
+      "left_finger": {
+        "lower": 0.021,
+        "upper": 0.057
+      },
+      "right_finger": {
+        "lower": -0.057,
+        "upper": -0.021
+      }
+    },
+    "status": "CREATED_NOT_PROMOTED",
+    "verification_status": "PASS"
+  },
+  "candidate_created": true,
+  "composed_usd": {
+    "authored_limits": {
+      "left_finger": {
+        "lower": 0.020999999716877937,
+        "upper": 0.05700000002980232
+      },
+      "right_finger": {
+        "lower": -0.06419999897480011,
+        "upper": -0.013799999840557575
+      }
+    },
+    "mimic_api": {
+      "effective_multiplier": -1.0,
+      "effective_offset": -0.0,
+      "equation": "jointPosition + gearing * referenceJointPosition + offset = 0",
+      "gearing": 1.0,
+      "instance": "rotY",
+      "offset": 0.0
+    }
+  },
+  "filtered_pair_inventory": [],
+  "final_or_default_asset_modified": false,
+  "fresh_process_determinism": {
+    "run_count": 2,
+    "signatures": [
+      "5a7cab34cbb025d1200f2c3d20ef79a226edf59c5fe6f972fd6bc87ceaf4c542",
+      "5a7cab34cbb025d1200f2c3d20ef79a226edf59c5fe6f972fd6bc87ceaf4c542"
+    ],
+    "status": "PASS"
+  },
+  "frozen_stage": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+    "modified": false,
+    "sha256": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9"
+  },
+  "limit_semantics_status": "VERIFIED_USD_LIMIT_DEFECT",
+  "local_5_1_api_evidence": {
+    "filtered_pair_helper": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/extscache/omni.physx-107.3.26+107.3.3.lx64.r.cp311.u353/omni/physx/scripts/utils.py",
+    "single_articulation": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.core.prims/isaacsim/core/prims/impl/single_articulation.py"
+  },
+  "pair_collision_support_status": "INCONCLUSIVE",
+  "runtime_readback": {
+    "dof_limits": {
+      "left_finger": {
+        "lower": 0.020999999716877937,
+        "upper": 0.05700000002980232
+      },
+      "right_finger": {
+        "lower": -0.06419999897480011,
+        "upper": -0.013799999840557575
+      }
+    },
+    "dof_order": [
+      "waist",
+      "shoulder",
+      "elbow",
+      "forearm_roll",
+      "wrist_angle",
+      "wrist_rotate",
+      "gripper",
+      "left_finger",
+      "right_finger"
+    ],
+    "self_collision": false
+  },
+  "runtime_records": [
+    {
+      "composed_usd": {
+        "authored_limits": {
+          "left_finger": {
+            "lower": 0.020999999716877937,
+            "upper": 0.05700000002980232
+          },
+          "right_finger": {
+            "lower": -0.06419999897480011,
+            "upper": -0.013799999840557575
+          }
+        },
+        "mimic_api": {
+          "effective_multiplier": -1.0,
+          "effective_offset": -0.0,
+          "equation": "jointPosition + gearing * referenceJointPosition + offset = 0",
+          "gearing": 1.0,
+          "instance": "rotY",
+          "offset": 0.0
+        }
+      },
+      "deterministic_signature": "5a7cab34cbb025d1200f2c3d20ef79a226edf59c5fe6f972fd6bc87ceaf4c542",
+      "filtered_pair_inventory": [],
+      "pair_collision_support_probe": {
+        "direct_positive_pair_enable_api": false,
+        "filtered_pairs_semantics": "DISABLE_SELECTED_PAIR",
+        "global_self_collision_readback": false,
+        "reason": "pair-only collision would require articulation-wide self collision plus exhaustive filters; not mutated in this read-only probe",
+        "status": "INCONCLUSIVE"
+      },
+      "process": {
+        "command": [
+          "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/bin/python",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/tools/probe_aloha1_finger_limit_collision_semantics.py",
+          "--runtime-output",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/task4/runtime/baseline_run1.json",
+          "--stage",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda"
+        ],
+        "exit_code": 0,
+        "log_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/task4/runtime/baseline_run1.log",
+        "output_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/task4/runtime/baseline_run1.json"
+      },
+      "runtime": {
+        "isaac_sim": "5.1.0.0",
+        "kit": "107.3.3",
+        "physx": "107.3.26"
+      },
+      "runtime_readback": {
+        "dof_limits": {
+          "left_finger": {
+            "lower": 0.020999999716877937,
+            "upper": 0.05700000002980232
+          },
+          "right_finger": {
+            "lower": -0.06419999897480011,
+            "upper": -0.013799999840557575
+          }
+        },
+        "dof_order": [
+          "waist",
+          "shoulder",
+          "elbow",
+          "forearm_roll",
+          "wrist_angle",
+          "wrist_rotate",
+          "gripper",
+          "left_finger",
+          "right_finger"
+        ],
+        "self_collision": false
+      },
+      "stage": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+        "default_prim": "/World",
+        "sha256": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9",
+        "sublayers": [
+          "aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_diagnostic.usda"
+        ]
+      },
+      "status": "PASS"
+    },
+    {
+      "composed_usd": {
+        "authored_limits": {
+          "left_finger": {
+            "lower": 0.020999999716877937,
+            "upper": 0.05700000002980232
+          },
+          "right_finger": {
+            "lower": -0.06419999897480011,
+            "upper": -0.013799999840557575
+          }
+        },
+        "mimic_api": {
+          "effective_multiplier": -1.0,
+          "effective_offset": -0.0,
+          "equation": "jointPosition + gearing * referenceJointPosition + offset = 0",
+          "gearing": 1.0,
+          "instance": "rotY",
+          "offset": 0.0
+        }
+      },
+      "deterministic_signature": "5a7cab34cbb025d1200f2c3d20ef79a226edf59c5fe6f972fd6bc87ceaf4c542",
+      "filtered_pair_inventory": [],
+      "pair_collision_support_probe": {
+        "direct_positive_pair_enable_api": false,
+        "filtered_pairs_semantics": "DISABLE_SELECTED_PAIR",
+        "global_self_collision_readback": false,
+        "reason": "pair-only collision would require articulation-wide self collision plus exhaustive filters; not mutated in this read-only probe",
+        "status": "INCONCLUSIVE"
+      },
+      "process": {
+        "command": [
+          "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/bin/python",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/tools/probe_aloha1_finger_limit_collision_semantics.py",
+          "--runtime-output",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/task4/runtime/baseline_run2.json",
+          "--stage",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda"
+        ],
+        "exit_code": 0,
+        "log_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/task4/runtime/baseline_run2.log",
+        "output_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/task4/runtime/baseline_run2.json"
+      },
+      "runtime": {
+        "isaac_sim": "5.1.0.0",
+        "kit": "107.3.3",
+        "physx": "107.3.26"
+      },
+      "runtime_readback": {
+        "dof_limits": {
+          "left_finger": {
+            "lower": 0.020999999716877937,
+            "upper": 0.05700000002980232
+          },
+          "right_finger": {
+            "lower": -0.06419999897480011,
+            "upper": -0.013799999840557575
+          }
+        },
+        "dof_order": [
+          "waist",
+          "shoulder",
+          "elbow",
+          "forearm_roll",
+          "wrist_angle",
+          "wrist_rotate",
+          "gripper",
+          "left_finger",
+          "right_finger"
+        ],
+        "self_collision": false
+      },
+      "stage": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+        "default_prim": "/World",
+        "sha256": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9",
+        "sublayers": [
+          "aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_diagnostic.usda"
+        ]
+      },
+      "status": "PASS"
+    }
+  ],
+  "schema_version": 1,
+  "source_urdf": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_left.urdf",
+    "limits": {
+      "left_finger": {
+        "lower": 0.021,
+        "upper": 0.057
+      },
+      "right_finger": {
+        "lower": -0.057,
+        "upper": -0.021
+      }
+    },
+    "mimic": {
+      "joint": "left_finger",
+      "multiplier": -1.0,
+      "offset": 0.0
+    },
+    "sha256": "d9e4b32723ee71dfce26fb4e78546cfcfef147b2d7dbf5e53e3620e3d8aa96bd"
+  },
+  "status": "PASS",
+  "task8": "NOT_RUN"
+}

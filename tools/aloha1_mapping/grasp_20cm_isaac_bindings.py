@@ -1137,7 +1137,7 @@ class IsaacGrasp20cmBindings:
         ] != self.finger_dof_names:
             raise RuntimeError("finger DOF names/indices do not match runtime order")
         composed_limits = np.asarray(
-            self.articulation.get_dof_limits(),
+            self.articulation._articulation_view.get_dof_limits(),  # noqa: SLF001
             dtype=np.float64,
         )
         if composed_limits.ndim == 3 and composed_limits.shape[0] == 1:

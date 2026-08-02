@@ -1080,7 +1080,8 @@ def test_isaac_binding_enforces_initialization_and_per_frame_finger_safety() -> 
     assert "evaluate_finger_initialization" in source
     assert "canonical_initialization_signature" in source
     assert "evaluate_finger_runtime_frame" in source
-    assert "self.articulation.get_dof_limits()" in source
+    assert "self.articulation._articulation_view.get_dof_limits()" in source
+    assert "self.articulation.get_dof_limits()" not in source
     assert '"initialization_contract"' in source
     assert '"finger_safety"' in source
     assert '"first_violation"' in source

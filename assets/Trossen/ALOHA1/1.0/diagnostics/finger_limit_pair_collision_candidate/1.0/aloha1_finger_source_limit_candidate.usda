@@ -1,0 +1,12 @@
+#usda 1.0
+(
+    defaultPrim = "World"
+    subLayers = [
+        @configuration/finger_source_limits.usda@,
+        @../../cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda@
+    ]
+    customLayerData = {
+        string classification = "DIAGNOSTIC_ONLY_NOT_FINAL_CONTROL_MAPPING"
+        string promotionStatus = "NOT_PROMOTED"
+    }
+)

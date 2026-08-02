@@ -1,0 +1,20 @@
+#usda 1.0
+(
+    customLayerData = {
+        string classification = "DIAGNOSTIC_ONLY_NOT_FINAL_CONTROL_MAPPING"
+        string sourceUrdfSha256 = "d9e4b32723ee71dfce26fb4e78546cfcfef147b2d7dbf5e53e3620e3d8aa96bd"
+    }
+)
+
+over "World" {
+    over "follower_left" {
+        over "vx300s_left" {
+            over "joints" {
+                over "right_finger" {
+                    float physics:lowerLimit = -0.057
+                    float physics:upperLimit = -0.021
+                }
+            }
+        }
+    }
+}
