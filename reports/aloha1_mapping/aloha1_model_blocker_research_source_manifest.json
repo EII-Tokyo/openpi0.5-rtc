@@ -1,0 +1,256 @@
+{
+  "schema_version": 1,
+  "access_date": "2026-08-03",
+  "scope": "Stationary ALOHA 1 follower official-model blocker research",
+  "status": "PASS_SOURCE_CHAIN_FROZEN",
+  "sources": [
+    {
+      "id": "trossen_stationary_aloha_1_specifications",
+      "authority": "Trossen Robotics",
+      "kind": "official_product_documentation",
+      "url": "https://docs.trossenrobotics.com/aloha_docs/1.0/specifications.html",
+      "branch_or_tag": "ALOHA_DOCS_1.0",
+      "commit": "NOT_EXPOSED_BY_PUBLISHED_SITE",
+      "license": "SITE_DOCUMENTATION_LICENSE_NOT_ASSERTED",
+      "local_path": null,
+      "confirms": [
+        "Stationary ALOHA follower product family is ViperX 300 S Aloha Version",
+        "ALOHA finger kit is listed as VX Finger Bag"
+      ]
+    },
+    {
+      "id": "trossen_viperx_300_6dof_specifications",
+      "authority": "Trossen Robotics",
+      "kind": "official_exact_robot_documentation",
+      "url": "https://docs.trossenrobotics.com/interbotix_xsarms_docs/specifications/vx300s.html",
+      "branch_or_tag": "PUBLISHED_SITE",
+      "commit": "NOT_EXPOSED_BY_PUBLISHED_SITE",
+      "license": "SITE_DOCUMENTATION_LICENSE_NOT_ASSERTED",
+      "local_path": null,
+      "confirms": [
+        "ViperX-300 6DOF identity",
+        "arm servos XM540-W270",
+        "wrist rotate and gripper servos XM430-W350",
+        "gripper servo ID 9",
+        "published 42 to 116 mm gripper range",
+        "750 g working payload qualification"
+      ]
+    },
+    {
+      "id": "robotis_xm430_w350_manual",
+      "authority": "ROBOTIS",
+      "kind": "official_component_manual",
+      "url": "https://emanual.robotis.com/docs/en/dxl/x/xm430-w350/",
+      "branch_or_tag": "PUBLISHED_E_MANUAL",
+      "commit": "NOT_EXPOSED_BY_PUBLISHED_SITE",
+      "license": "SITE_DOCUMENTATION_LICENSE_NOT_ASSERTED",
+      "local_path": null,
+      "confirms": [
+        "current-based position mode is intended for articulated robots or grippers",
+        "Current Limit unit is approximately 2.69 mA per tick",
+        "12 V stall point is 4.1 Nm at 2.3 A and is not a continuous rating",
+        "position gain table values are internal controller coefficients rather than SI joint stiffness",
+        "operating-temperature range and over-temperature protection do not define a continuous torque duty curve"
+      ]
+    },
+    {
+      "id": "robotis_xm430_w350_performance_graph",
+      "authority": "ROBOTIS",
+      "kind": "official_component_performance_graph",
+      "url": "https://emanual.robotis.com/docs/en/dxl/x/xm430-w350/#performance-graph",
+      "branch_or_tag": "PUBLISHED_E_MANUAL",
+      "commit": "NOT_EXPOSED_BY_PUBLISHED_SITE",
+      "license": "SITE_DOCUMENTATION_LICENSE_NOT_ASSERTED",
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha-model-blocker-research/robotis/xm430_w350_performance_graph.jpg",
+      "sha256": "d1f1a0307a95b4c213aee15a9ff2a4ee4950646af7ae85df23ea5543a9b45f60",
+      "redistribution_status": "RESEARCH_EVIDENCE_ONLY"
+    },
+    {
+      "id": "robotis_xm540_w270_manual",
+      "authority": "ROBOTIS",
+      "kind": "official_component_manual",
+      "url": "https://emanual.robotis.com/docs/en/dxl/x/xm540-w270/",
+      "branch_or_tag": "PUBLISHED_E_MANUAL",
+      "commit": "NOT_EXPOSED_BY_PUBLISHED_SITE",
+      "license": "SITE_DOCUMENTATION_LICENSE_NOT_ASSERTED",
+      "local_path": null,
+      "confirms": [
+        "12 V stall point is 10.6 Nm at 4.4 A",
+        "30 rpm no-load speed at 12 V",
+        "stall torque is not a continuous rating"
+      ]
+    },
+    {
+      "id": "robotis_xm540_w270_performance_graph",
+      "authority": "ROBOTIS",
+      "kind": "official_component_performance_graph",
+      "url": "https://emanual.robotis.com/docs/en/dxl/x/xm540-w270/#performance-graph",
+      "branch_or_tag": "PUBLISHED_E_MANUAL",
+      "commit": "NOT_EXPOSED_BY_PUBLISHED_SITE",
+      "license": "SITE_DOCUMENTATION_LICENSE_NOT_ASSERTED",
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha-model-blocker-research/robotis/xm540_w270_performance_graph.jpg",
+      "sha256": "79f006b9ded330ddc62a1a41426ae09af653ed55065521dbb3d78982e6af590d",
+      "redistribution_status": "RESEARCH_EVIDENCE_ONLY"
+    },
+    {
+      "id": "interbotix_aloha_runtime",
+      "authority": "Interbotix",
+      "kind": "official_aloha_runtime_source",
+      "repository": "https://github.com/Interbotix/aloha.git",
+      "branch_or_tag": "main",
+      "commit": "4fa6b2c4428f5334441a7bee5ab2b2e8071cff93",
+      "license": "MIT",
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/sources/official_repo_probe/interbotix_aloha_main",
+      "files": [
+        {
+          "path": "aloha/robot_utils.py",
+          "sha256": "0d7ab1014210f311eebc2cdb0f5d2a58c5f870f8b875b7a05b3373413efe1179"
+        },
+        {
+          "path": "aloha/constants.py",
+          "sha256": "2b553446f77b74c959e31b01d9901c21b8fc33096f87a43e3cc5462f96674ac5"
+        },
+        {
+          "path": "aloha/real_env.py",
+          "sha256": "671c98da97566ccb9f6552c8195e453a95c1904fad92fa293ca015841a1f3628"
+        },
+        {
+          "path": "scripts/dual_side_teleop.py",
+          "sha256": "a41e081356e7c411c7503e142aad5bddd88c1dff69976a6302e89440a53eee93"
+        }
+      ],
+      "confirms": [
+        "follower gripper is switched at runtime to current_based_position",
+        "DT is 0.02 s in the ALOHA constants",
+        "application normalization anchors are not the full mechanical URDF range",
+        "some acquisition scripts explicitly set a 300-tick current limit"
+      ]
+    },
+    {
+      "id": "interbotix_ros_manipulators_pinned",
+      "authority": "Trossen Robotics / Interbotix",
+      "kind": "official_description_and_motor_configuration_source",
+      "repository": "https://github.com/Interbotix/interbotix_ros_manipulators.git",
+      "branch_or_tag": "humble",
+      "commit": "d15df61e1c91067bac7ef2d002117cef4ffe1926",
+      "license": "BSD-3-Clause",
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators",
+      "confirms": [
+        "aloha_vx300s linkage dimensions and limits",
+        "Current_Limit 200 in the pinned motor configuration",
+        "URDF mimic sign and offsets"
+      ]
+    },
+    {
+      "id": "interbotix_ros_toolboxes_compatible_snapshot",
+      "authority": "Trossen Robotics / Interbotix",
+      "kind": "official_driver_api_source",
+      "repository": "https://github.com/Interbotix/interbotix_ros_toolboxes.git",
+      "branch_or_tag": "humble",
+      "commit": "dbe4d7dd25de3b76673b5a90746248a73f606b03",
+      "inspected_head": "f52234371b9ec1cb1f5ee8241da32e6b8476fa5c",
+      "license": "BSD-3-Clause",
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha-model-blocker-research/interbotix_ros_toolboxes_humble",
+      "boundary": "generic gripper pressure mapping is not the ALOHA follower runtime control contract"
+    },
+    {
+      "id": "supplier_simple_aloha_viper_cad",
+      "authority": "supplier_public_download",
+      "kind": "supplier_step_assembly",
+      "repository": "https://drive.google.com/drive/folders/1mhJuhzT4lBnvZ9VE57UgT6vmJDFPVsBf",
+      "branch_or_tag": "NOT_APPLICABLE_STATIC_VENDOR_FILE",
+      "commit": "SHA256_PINNED_STATIC_VENDOR_FILE",
+      "license": "UNKNOWN_HARD_BLOCKER",
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/gdrive_source_readonly/Simple Aloha Viper 2024-5-13.step",
+      "sha256": "337862418769d4ea8b801d26e68930c4412f870050e60769bbf91765194dc571",
+      "redistribution_status": "NOT_AUTHORIZED"
+    },
+    {
+      "id": "nvidia_isaac_sim_5_1_physics_fundamentals",
+      "authority": "NVIDIA",
+      "kind": "official_versioned_documentation",
+      "url": "https://docs.isaacsim.omniverse.nvidia.com/5.1.0/physics/simulation_fundamentals.html",
+      "branch_or_tag": "ISAAC_SIM_5.1.0",
+      "commit": "NOT_EXPOSED_BY_PUBLISHED_SITE",
+      "license": "NVIDIA_DOCUMENTATION_TERMS",
+      "local_path": null,
+      "confirms": [
+        "collision geometry is independent from visual geometry",
+        "restOffset changes effective collision surface",
+        "contactOffset defines the contact-generation envelope",
+        "physics-material resolution and combine priority",
+        "simulation residual reporting"
+      ]
+    },
+    {
+      "id": "nvidia_isaac_sim_5_1_gain_tuner",
+      "authority": "NVIDIA",
+      "kind": "official_versioned_documentation_and_local_source",
+      "url": "https://docs.isaacsim.omniverse.nvidia.com/5.1.0/robot_setup/ext_isaacsim_robot_setup_gain_tuner.html",
+      "branch_or_tag": "ISAAC_SIM_5.1.0_GAIN_TUNER_3.0.6",
+      "commit": "LOCAL_BINARY_INSTALLATION",
+      "license": "NVIDIA_SOFTWARE_LICENSE",
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.robot_setup.gain_tuner",
+      "files": [
+        {
+          "path": "config/extension.toml",
+          "sha256": "6d02ac74958f6e0fe46e6af4b0abe601913f23a5861276ad8441ea6388952cf6"
+        },
+        {
+          "path": "isaacsim/robot_setup/gain_tuner/ui/joint_table_widget.py",
+          "sha256": "e0b11543e1033209c8cc7ee43d319971978f9064fa3088b1dfda61b014bd794a"
+        }
+      ]
+    },
+    {
+      "id": "local_usd_physics_schema",
+      "authority": "Pixar USD distributed with Isaac Sim 5.1",
+      "kind": "local_schema_source",
+      "branch_or_tag": "ISAAC_SIM_5.1.0_KIT_107.3.3",
+      "commit": "LOCAL_BINARY_INSTALLATION",
+      "license": "USD_LICENSE_AS_DISTRIBUTED",
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/extscache/omni.usd.libs-1.0.1+69cbf6ad.lx64.r.cp311/bin/usd/usdPhysics/resources/usdPhysics/schema.usda",
+      "sha256": "159780115745948d49d95d07333d52e88867495824158e2bfd54083ba95c17ce"
+    },
+    {
+      "id": "local_physx_schema_107_3_26",
+      "authority": "NVIDIA",
+      "kind": "local_schema_source",
+      "branch_or_tag": "PHYSX_107.3.26_KIT_107.3.3",
+      "commit": "LOCAL_BINARY_INSTALLATION",
+      "license": "NVIDIA_SOFTWARE_LICENSE",
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/extscache/omni.usd.schema.physx-107.3.26+107.3.3.lx64.r.cp311.u353/plugins/PhysxSchema/resources/schema.usda",
+      "sha256": "fe075bce4bde5ba7db69c6ccef0c4c26909336ab34c619129fc276f7cb4d7abc"
+    },
+    {
+      "id": "viperx_dynamic_identification_paper",
+      "authority": "peer_reviewed_primary_research",
+      "kind": "open_access_paper",
+      "url": "https://doi.org/10.1016/j.mechatronics.2025.103419",
+      "branch_or_tag": "PUBLISHED_ARTICLE",
+      "commit": "NOT_APPLICABLE",
+      "license": "CC-BY-NC_AS_STATED_BY_PUBLISHER",
+      "local_path": null,
+      "boundary": "experimental ViperX-300 arm identification; not supplier calibration for the ALOHA finger, material pair, or exact local controller"
+    },
+    {
+      "id": "viperx_dynamic_identification_author_repository",
+      "authority": "paper_author_repository",
+      "kind": "research_code",
+      "repository": "https://github.com/MomaniMutaz/ViperX-300-6DoF-Robotic-Arm-Dynamical-Model.git",
+      "branch_or_tag": "main",
+      "commit": "eeeae3f5ddb687e75f161a7f0383f43fec8c5248",
+      "license": "NO_LICENSE_FILE_RESEARCH_ONLY",
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha-model-blocker-research/viperx_dynamic_model_paper_repo",
+      "redistribution_status": "NOT_AUTHORIZED"
+    }
+  ],
+  "prohibited_source_substitutions": [
+    "Isaac Sim latest or 6.0 documentation",
+    "ALOHA 2 AVX300S parameters",
+    "generic Interbotix gripper pressure mapping as the ALOHA follower control contract",
+    "stall torque represented as continuous torque",
+    "DYNAMIXEL integer PID registers copied into PhysX SI stiffness or damping",
+    "supplier-public-download status represented as a redistribution license"
+  ]
+}

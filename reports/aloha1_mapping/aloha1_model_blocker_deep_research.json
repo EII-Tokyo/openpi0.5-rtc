@@ -1,0 +1,354 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-08-03",
+  "scope": "Stationary ALOHA 1 follower mathematical, physical, and official-source closure research",
+  "status": "PASS_RESEARCH_BOUNDARIES_ESTABLISHED",
+  "asset_acceptance_status": "NOT_CHANGED_BY_RESEARCH",
+  "task8_status": "NOT_RUN_IN_THIS_RESEARCH",
+  "real_robot_accessed": false,
+  "source_manifest": {
+    "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_model_blocker_research_source_manifest.json",
+    "status": "PASS_SOURCE_CHAIN_FROZEN"
+  },
+  "versions": {
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physx": "107.3.26",
+    "gain_tuner_extension": "3.0.6"
+  },
+  "central_finding": {
+    "statement": "The current blockers mix three different categories: quantities exactly derivable from CAD/schema/control source, numerical verification budgets derivable offline, and physical material/thermal quantities that cannot be inferred from geometry.",
+    "derivable_now": [
+      "gripper linkage displacement and Jacobian",
+      "ideal virtual-work mapping from motor torque to symmetric finger normal force",
+      "Isaac force-drive equation and units",
+      "contact/rest offset and material-combine semantics",
+      "task-local collider and solver convergence test definitions"
+    ],
+    "not_derivable_from_cad": [
+      "continuous thermal torque envelope",
+      "loaded linkage efficiency and internal friction",
+      "static and dynamic friction of the exact finger-pad and Bottle500 surface pair",
+      "restitution of the exact material pair"
+    ]
+  },
+  "runtime_control_contract_correction": {
+    "status": "VERIFIED_SOURCE_CONFLICT_REQUIRES_FOLLOWUP_CONFIG_FIX",
+    "current_project_claim": "configs/aloha1_vx300s_gripper_hardware_model.yaml records operating_mode=pwm from static modes.yaml",
+    "official_runtime_evidence": {
+      "repository": "https://github.com/Interbotix/aloha.git",
+      "commit": "4fa6b2c4428f5334441a7bee5ab2b2e8071cff93",
+      "file": "aloha/robot_utils.py",
+      "function": "setup_follower_bot",
+      "behavior": "reboots the gripper and sets it to current_based_position before torque-on"
+    },
+    "current_limit_evidence": [
+      {
+        "raw_ticks": 200,
+        "derived_ampere": 0.538,
+        "source": "pinned aloha_vx300s motor configuration",
+        "scope": "configuration default if no later override applies"
+      },
+      {
+        "raw_ticks": 300,
+        "derived_ampere": 0.807,
+        "source": "official ALOHA acquisition/teleoperation scripts",
+        "scope": "pipeline-specific runtime override"
+      }
+    ],
+    "interpretation": "There is no single evidence-backed current limit without naming the exact ALOHA pipeline. Static modes.yaml is not the final runtime control state.",
+    "production_config_modified": false
+  },
+  "gripper_mechanical_derivation": {
+    "classification": "NUMERICAL_DERIVATION_FROM_PINNED_OFFICIAL_GEOMETRY",
+    "parameters": {
+      "horn_radius_m": 0.0275,
+      "link_arm_length_m": 0.035,
+      "left_finger_coordinate_range_m": [
+        0.021,
+        0.057
+      ],
+      "right_finger_relation": "x_right=-x_left"
+    },
+    "equations": {
+      "finger_position": "x(theta)=r*sin(theta)+sqrt(L^2-r^2*cos(theta)^2)",
+      "jacobian": "J(theta)=dx/dtheta=r*cos(theta)+(r^2*sin(theta)*cos(theta))/sqrt(L^2-r^2*cos(theta)^2)",
+      "symmetric_virtual_work": "tau*dtheta=N_left*dx_left+N_right*abs(dx_right)",
+      "ideal_equal_finger_force": "N_each_ideal=tau/(2*abs(J(theta)))",
+      "friction_hold_threshold": "mu_min=mass*g/(2*N_each)"
+    },
+    "samples": [
+      {
+        "left_finger_x_m": 0.021,
+        "motor_theta_rad": -0.024028,
+        "jacobian_m_per_rad": 0.02665348465186377,
+        "ideal_newton_per_motor_nm_each_finger": 18.75927318813216
+      },
+      {
+        "left_finger_x_m": 0.039,
+        "motor_theta_rad": 0.5127316333301408,
+        "jacobian_m_per_rad": 0.036636569325349415,
+        "ideal_newton_per_motor_nm_each_finger": 13.647566057830698
+      },
+      {
+        "left_finger_x_m": 0.057,
+        "motor_theta_rad": 1.090465,
+        "jacobian_m_per_rad": 0.022209706677616257,
+        "ideal_newton_per_motor_nm_each_finger": 22.51267912979319
+      }
+    ],
+    "momentary_current_limit_estimates": [
+      {
+        "current_limit_ticks": 200,
+        "current_limit_ampere": 0.538,
+        "torque_estimation_basis": "linearized 12 V stall ratio 4.1 Nm / 2.3 A",
+        "motor_torque_nm": 0.9590434782608696,
+        "ideal_each_finger_force_n_at_x_0p021_0p039_0p057": [
+          17.990958607992138,
+          13.088609221896936,
+          21.590638097607748
+        ],
+        "ideal_mu_min_for_20g_at_same_samples": [
+          0.005452738908332598,
+          0.0074950667665958735,
+          0.0045436359757644
+        ]
+      },
+      {
+        "current_limit_ticks": 300,
+        "current_limit_ampere": 0.807,
+        "torque_estimation_basis": "linearized 12 V stall ratio 4.1 Nm / 2.3 A",
+        "motor_torque_nm": 1.4385652173913044,
+        "ideal_each_finger_force_n_at_x_0p021_0p039_0p057": [
+          26.986437911988205,
+          19.632913832845407,
+          32.38595714641163
+        ],
+        "ideal_mu_min_for_20g_at_same_samples": [
+          0.0036351592722217324,
+          0.004996711177730582,
+          0.0030290906505095997
+        ]
+      }
+    ],
+    "strict_boundary": [
+      "These are momentary stall-linearized ideal upper estimates, not continuous grip-force claims.",
+      "The derivation omits linkage efficiency, internal friction, contact-normal misalignment, controller dynamics, voltage variation, and thermal derating.",
+      "The low ideal mu_min values cannot validate the currently authored Physics Material because the actual delivered normal force is not established by this calculation."
+    ]
+  },
+  "isaac_drive_mapping": {
+    "classification": "VERIFIED_LOCAL_ISAAC_5_1_SCHEMA_AND_SOURCE",
+    "force_drive_equation": "effort=stiffness*(targetPosition-position)+damping*(targetVelocity-velocity), clamped by maxForce",
+    "gain_tuner_relations": {
+      "natural_frequency_hz": "sqrt(stiffness/effective_inertia)/(2*pi)",
+      "stiffness": "effective_inertia*(2*pi*natural_frequency_hz)^2",
+      "damping": "2*damping_ratio*sqrt(effective_inertia*stiffness)"
+    },
+    "units": {
+      "revolute_stiffness": "N*m/rad",
+      "revolute_damping": "N*m*s/rad",
+      "revolute_max_force": "N*m",
+      "prismatic_stiffness": "N/m",
+      "prismatic_damping": "N*s/m",
+      "prismatic_max_force": "N"
+    },
+    "prohibited_mapping": "DYNAMIXEL Position_P_Gain and Position_D_Gain table values are dimensionless internal-controller coefficients and shall not be copied into PhysX SI stiffness/damping.",
+    "recommended_derivation_order": [
+      "select exact runtime pipeline and current limit",
+      "derive a bounded motor torque envelope from exact-model manufacturer data",
+      "map torque through the exact linkage Jacobian and separately account for efficiency and thermal limits",
+      "obtain desired or identified closed-loop natural frequency and damping ratio",
+      "compute effective joint inertia from the verified mass model at a declared configuration",
+      "compute PhysX stiffness/damping with the local Gain Tuner 3.0.6 equations",
+      "validate command tracking, overshoot, saturation, effort, and contact force without changing unrelated parameters"
+    ]
+  },
+  "collider_research": {
+    "classification": "OFFLINE_DERIVABLE_NOT_A_HARDWARE_PARAMETER",
+    "current_evidence": {
+      "single_hull_inward_surface_recession_max_m": 0.0007977759222171227,
+      "single_hull_inward_surface_recession_mean_m": 0.00046456224935083004,
+      "convex_hull_inward_crossing_max_m_left": 0.0006812051301957348,
+      "convex_hull_inward_crossing_max_m_right": 0.0006812053973147838,
+      "convex_decomposition_inward_crossing_max_m_left": 0.0005481080863960236,
+      "convex_decomposition_inward_crossing_max_m_right": 0.001349715599626581,
+      "exact_numeric_tolerance_m": 4.76837158203125e-07,
+      "cad_tessellation_linear_deflection_m": 0.0002,
+      "compound_contact_region_piece_count": 68,
+      "compound_status": "PASS_RUNTIME_COOKED_CONTACT_REGION_GEOMETRY_NOT_PROMOTED",
+      "five_pose_swept_collision_status": "PASS_ZERO_UNEXPECTED_OVERLAP_WAYPOINTS"
+    },
+    "finding": "Convex decomposition is not monotonically more accurate on the exact inward face; its right-side maximum inward crossing is worse than the single hull. Approximation choice therefore cannot be selected by approximation name alone.",
+    "task_local_acceptance_contract": {
+      "required_geometry_domain": "the swept Bottle500 contact band over the legal finger trajectory, not the whole visual mesh volume",
+      "mandatory_signed_metrics": [
+        "no collider crossing to the wrong side of the authoritative CAD inward surface beyond numerical tolerance",
+        "maximum signed normal offset over the active contact band",
+        "contact-normal angular error relative to the authoritative CAD face",
+        "left/right symmetry after applying their distinct handed B-Reps and placements",
+        "minimum clearance to gripper bar, shell, carriage, and opposite finger over the legal q range",
+        "Bottle500 swept-volume overlap and tunneling margin"
+      ],
+      "error_budget_terms": [
+        "0.20 mm FreeCAD tessellation linear deflection",
+        "4.76837158203125e-7 m measured float32/B-Rep comparison allowance",
+        "measured transform composition residual",
+        "measured PhysX cooking deviation",
+        "Bottle500 CAD or manufacturing uncertainty",
+        "contactOffset and restOffset readback"
+      ],
+      "acceptance_rule": "Predeclare a one-sided signed surface-error bound from independent input uncertainties; do not choose it from whether the bottle happened to be held.",
+      "current_status": "ACTIONABLE_OFFLINE_WORK_REMAINS"
+    }
+  },
+  "contact_material_research": {
+    "classification": "PHYSICAL_PAIR_PROPERTY_HARD_BLOCKER",
+    "local_metadata_evidence": {
+      "supplier_finger_step": "FreeCAD exposes ShapeMaterial/Material property names, but the probe contains no populated material value for the embedded v2 finger B-Reps",
+      "project_bottle": "configs/aloha1_bottle_asset.yaml records material=null and PRIMARY_BOTTLE_MATERIAL_AND_WALL_PROPERTIES_NOT_CONFIRMED",
+      "existing_physics_value": "friction 0.7 is already labeled TEMPORARY_UNCALIBRATED"
+    },
+    "verified_isaac_semantics": {
+      "binding_scope": "physics material may bind to collider or a parent rigid body with resolution/strength determining the effective material",
+      "combine_priority": [
+        "average",
+        "min",
+        "multiply",
+        "max"
+      ],
+      "contact_offset": "distance envelope in which contact constraints begin",
+      "rest_offset": "effective separation at which shapes come to rest"
+    },
+    "missing_exact_physical_identity": [
+      "supplier ALOHA finger-pad material and surface finish",
+      "project Bottle500 body material and surface finish",
+      "dry/clean/environmental condition",
+      "static friction, dynamic friction, and restitution for that exact pair"
+    ],
+    "not_valid_substitutes": [
+      "Trossen statement that fingers may be 3D printed",
+      "visual color",
+      "generic plastic-plastic friction tables",
+      "a friction value that makes a hold test pass",
+      "NVIDIA Robotiq tutorial material values"
+    ],
+    "minimum_measurement_if_official_pair_data_remains_unavailable": "controlled incline, pull, or tribometer test on the exact pad/bottle surfaces with normal load, direction, speed, temperature, and surface condition recorded",
+    "simulation_policy": "until calibrated, any numerical friction value must remain TEMPORARY_UNCALIBRATED and must not be described as sim-to-real validated"
+  },
+  "continuous_actuator_research": {
+    "classification": "THERMAL_DUTY_HARD_BLOCKER_NARROWED",
+    "available_official_envelope": [
+      "XM430-W350 and XM540-W270 voltage-conditioned stall/no-load points",
+      "manufacturer performance graphs",
+      "current-limit register units",
+      "operating temperature and over-temperature shutdown behavior"
+    ],
+    "missing_for_continuous_claim": [
+      "continuous torque-speed-current curve at declared ambient temperature",
+      "allowable duty cycle and winding/case thermal steady state",
+      "derating across voltage and ambient temperature",
+      "gripper linkage efficiency and friction under sustained clamp"
+    ],
+    "strict_interpretation": "Stall torque is a momentary endpoint and an 80 C shutdown threshold is protection, not an allowable continuous operating curve.",
+    "resolution_paths": [
+      "obtain an exact-model ROBOTIS continuous-duty or thermal application curve",
+      "or run an approved real-hardware thermal test with current, voltage, speed, torque/load, ambient, case temperature, winding proxy, and duty cycle"
+    ]
+  },
+  "numerical_error_budget_research": {
+    "classification": "OFFLINE_DERIVABLE_NOT_A_HARDWARE_PARAMETER",
+    "fixed_model_inputs": [
+      "same USD composition and collider profile",
+      "same mass, inertia, gravity, material, drive, initial state, and trajectory",
+      "TGS solver",
+      "solve_articulation_contact_last readback",
+      "fresh Isaac process per repeat"
+    ],
+    "one_variable_at_a_time_sequence": [
+      "time step convergence at fixed high solver iterations: 60, 120, 240, 480, and if needed 960 Hz",
+      "position-iteration convergence at selected time step",
+      "velocity-iteration convergence at selected position iterations"
+    ],
+    "metrics": [
+      "joint pose and velocity trajectory error",
+      "contact onset time",
+      "signed normal and tangential impulse integrals",
+      "maximum and persistent penetration",
+      "Bottle500 pose, velocity, angular velocity, support clearance, and hold drop",
+      "drive target error and saturation duration",
+      "energy/work consistency",
+      "scene and articulation residual statistics",
+      "deterministic signature across fresh processes"
+    ],
+    "tolerance_derivation": "Use V1/V2 analytic free-motion baselines and successive fine-grid differences to estimate integration/noise floors, then combine them with the independently derived geometry budget. Select the coarsest time step and lowest iteration counts satisfying all predeclared bounds.",
+    "prohibited_method": "Do not define the error budget after observing which setting makes a grasp pass."
+  },
+  "blocker_disposition": [
+    {
+      "original_id": "HARD_BLOCKER_CONTINUOUS_TORQUE_SPEED_CURRENT_THERMAL_CURVE",
+      "new_status": "REMAINS_HARD_BLOCKER_NARROWED",
+      "reason": "momentary manufacturer curves exist; continuous thermal/duty behavior does not"
+    },
+    {
+      "original_id": "HARD_BLOCKER_PHYSX_DRIVE_PHYSICAL_DERIVATION",
+      "new_status": "PARTIALLY_DERIVED_REMAINS_CALIBRATION_BLOCKER",
+      "reason": "schema equations and linkage force mapping are solved; effective inertia, desired/identified response, efficiency, and continuous saturation remain"
+    },
+    {
+      "original_id": "HARD_BLOCKER_COLLIDER_ACCEPTANCE_ERROR_BUDGET",
+      "new_status": "RECLASSIFIED_ACTIONABLE_OFFLINE_DERIVATION",
+      "reason": "acceptance is a task-local signed geometry and swept-volume contract, not missing vendor data"
+    },
+    {
+      "original_id": "HARD_BLOCKER_EXACT_CONTACT_MATERIAL_PROPERTIES",
+      "new_status": "REMAINS_HARD_BLOCKER",
+      "reason": "exact pad and Bottle500 material/finish pair is unidentified and no exact official coefficient was found"
+    },
+    {
+      "original_id": "HARD_BLOCKER_NUMERICAL_ERROR_BUDGET_NOT_YET_DERIVED",
+      "new_status": "RECLASSIFIED_ACTIONABLE_OFFLINE_CONVERGENCE_STUDY",
+      "reason": "solver/time-step accuracy is a numerical convergence problem, not a real-hardware parameter"
+    }
+  ],
+  "recommended_next_actions": [
+    {
+      "priority": 1,
+      "action": "correct the gripper hardware-model source semantics in an isolated reviewed change: current_based_position at runtime, with pipeline-scoped Current_Limit values",
+      "requires_user_or_hardware": false
+    },
+    {
+      "priority": 2,
+      "action": "implement the task-local signed collider certificate on the Bottle500 swept contact band and evaluate the existing CAD-derived compound candidate without promoting it",
+      "requires_user_or_hardware": false
+    },
+    {
+      "priority": 3,
+      "action": "run the predeclared timestep and solver convergence matrix and generate the numerical error budget",
+      "requires_user_or_hardware": false
+    },
+    {
+      "priority": 4,
+      "action": "derive force-drive candidates from effective inertia and an identified or declared closed-loop response; keep all candidates diagnostic until verified",
+      "requires_user_or_hardware": false,
+      "boundary": "sim-to-real calibration still requires physical response/efficiency evidence"
+    },
+    {
+      "priority": 5,
+      "action": "identify exact finger-pad and Bottle500 surface materials from supplier/manufacturing records; if unavailable, prepare a controlled measurement sheet",
+      "requires_user_or_hardware": true
+    },
+    {
+      "priority": 6,
+      "action": "request an exact-model continuous-duty curve from ROBOTIS or obtain authorization for a controlled thermal test",
+      "requires_user_or_hardware": true
+    }
+  ],
+  "production_changes": {
+    "usd_modified": false,
+    "physics_parameters_modified": false,
+    "collider_modified": false,
+    "material_modified": false,
+    "controller_modified": false
+  }
+}
