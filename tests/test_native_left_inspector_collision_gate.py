@@ -134,6 +134,9 @@ def test_native_trial_exercises_single_joint_inspector_callback():
         "target_change_is_isolated",
         '"drive_targets_before"',
         '"drive_targets_after_single_joint_edit"',
+        '"drive_targets_after_probe_restore"',
         '"single_joint_target_isolated"',
+        "drive_targets_after_probe_restore != drive_targets_before",
+        "prev=previous_target",
     ):
         assert required in source

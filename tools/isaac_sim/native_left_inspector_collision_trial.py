@@ -413,8 +413,9 @@ async def _run_trial() -> None:
         simulation = left_window._inspector._inspector_simulation
         approach = _new_accumulator()
         drive_targets_before = _drive_targets(stage, joint_rows_after_clear)
+        probe_target = previous_target + 1.0
         left_window._inspector_panel._delegate_tree._on_value_changed(
-            _InspectorValueModel(APPROACH_TARGET_DEG), SHOULDER_JOINT
+            _InspectorValueModel(probe_target), SHOULDER_JOINT
         )
         drive_targets_after_single_joint_edit = _drive_targets(
             stage, joint_rows_after_clear
@@ -423,14 +424,26 @@ async def _run_trial() -> None:
             drive_targets_before,
             drive_targets_after_single_joint_edit,
             "shoulder",
-            APPROACH_TARGET_DEG,
+            probe_target,
         )
         if not single_joint_target_isolated:
             raise RuntimeError(
                 "native Inspector propagated the shoulder target to other joints"
             )
-        simulation.start_authoring_simulation(
-            "drive:angular:physics:targetPosition"
+        left_window._inspector_panel._delegate_tree._on_value_changed(
+            _InspectorValueModel(previous_target), SHOULDER_JOINT
+        )
+        drive_targets_after_probe_restore = _drive_targets(
+            stage, joint_rows_after_clear
+        )
+        if drive_targets_after_probe_restore != drive_targets_before:
+            raise RuntimeError("native Inspector shoulder probe did not restore")
+
+        omni.kit.commands.execute(
+            "ChangeProperty",
+            prop_path=target_attr.GetPath(),
+            value=APPROACH_TARGET_DEG,
+            prev=previous_target,
         )
         await _wait_native_run(
             app, simulation, stage, edit_state["interface"], approach
@@ -504,6 +517,9 @@ async def _run_trial() -> None:
                 "drive_targets_before": drive_targets_before,
                 "drive_targets_after_single_joint_edit": (
                     drive_targets_after_single_joint_edit
+                ),
+                "drive_targets_after_probe_restore": (
+                    drive_targets_after_probe_restore
                 ),
                 "single_joint_target_isolated": single_joint_target_isolated,
                 "preflight": preflight,
