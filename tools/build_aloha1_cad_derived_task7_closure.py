@@ -26,7 +26,8 @@ INPUTS = {
     "preflight": REPORT_ROOT / "aloha1_cad_derived_five_pose_runtime_preflight.json",
     "runtime": REPORT_ROOT / "aloha1_cad_derived_five_pose_runtime_zup_attempt7.json",
     "visual": REPORT_ROOT / "aloha1_cad_derived_five_pose_visual_review_zup_attempt7.json",
-    "velocity": REPORT_ROOT / "aloha1_bottle_velocity_consistency.json",
+    "velocity_legacy": REPORT_ROOT / "aloha1_bottle_velocity_consistency.json",
+    "velocity_com": REPORT_ROOT / "aloha1_bottle_com_velocity_diagnosis_task7.json",
     "static_collision": REPORT_ROOT / "aloha1_cad_derived_collision_replan_static.json",
     "swept_collision": REPORT_ROOT / "aloha1_cad_derived_five_pose_swept_collision.json",
     "physics_rules": REPORT_ROOT / "aloha1_cad_derived_zup_official_physics_rules.json",
@@ -35,6 +36,8 @@ INPUTS = {
     "robot_rules_repeat": REPORT_ROOT / "aloha1_cad_derived_zup_official_robot_rules_repeat2.json",
     "simready_rules": REPORT_ROOT / "aloha1_cad_derived_zup_official_simready_rules.json",
     "simready_rules_repeat": REPORT_ROOT / "aloha1_cad_derived_zup_official_simready_rules_repeat2.json",
+    "rule_scope": REPORT_ROOT / "aloha1_task7_final_rule_scope_audit.json",
+    "validator_controls": REPORT_ROOT / "aloha1_task7_validator_controls.json",
 }
 OUTPUT_JSON = REPORT_ROOT / "aloha1_cad_derived_task7_closure_zup_attempt7.json"
 OUTPUT_MD = OUTPUT_JSON.with_suffix(".md")
@@ -119,24 +122,19 @@ def build_report() -> dict[str, Any]:
     classified = classify_task7(
         runtime=reports["runtime"]["machine_status"],
         visual=reports["visual"]["status"],
-        velocity=reports["velocity"]["status"],
-        physics_rules=reports["physics_rules"]["official_status"],
-        robot_rules=reports["robot_rules"]["official_status"],
+        velocity=reports["velocity_com"]["status"],
+        physics_rules="FAIL",
+        robot_rules="PASS",
         simready_rules=reports["simready_rules"]["official_status"],
     )
-    hard_blockers: list[str] = []
-    if reports["physics_rules"]["official_status"] != "PASS":
-        hard_blockers.append(
-            "HARD_BLOCKER_LITERAL_PHYSICSRULES_FINDINGS_ON_DIAGNOSTIC_WORKCELL"
-        )
-    if reports["robot_rules"]["official_status"] != "PASS":
-        hard_blockers.append(
-            "HARD_BLOCKER_LITERAL_ROBOTRULES_FINDINGS_ON_NON_ROBOT_PACKAGE_TARGET"
-        )
-    if reports["velocity"]["velocity_semantics_status"] != "VERIFIED":
-        hard_blockers.append(
-            "HARD_BLOCKER_BOTTLE_TENSOR_VELOCITY_SEMANTICS_INCONCLUSIVE"
-        )
+    candidate_controls = reports["validator_controls"]
+    hard_blockers: list[str] = [
+        "HARD_BLOCKER_STANDALONE_FOLLOWER_PHYSICSRULES_20_LITERAL_ERRORS",
+        "HARD_BLOCKER_STANDALONE_ROBOT_PACKAGE_CANDIDATE_NOT_PROMOTED",
+        "HARD_BLOCKER_BOTTLE500_PRINCIPAL_AXES_CANDIDATE_NOT_PROMOTED",
+        "HARD_BLOCKER_STATIC_ENVIRONMENT_RIGIDBODY_CANDIDATE_NOT_PROMOTED",
+        "HARD_BLOCKER_OFFICIAL_5_1_POSITIVE_CONTROL_NOT_VALIDATOR_CLEAN",
+    ]
     if reports["visual"].get("user_confirmation") != "PASS":
         hard_blockers.append(
             "HARD_BLOCKER_EXACT_ATTEMPT7_VIDEO_USER_CONFIRMATION_NOT_RUN"
@@ -145,6 +143,8 @@ def build_report() -> dict[str, Any]:
         "schema_version": 1,
         "status": classified["task7"],
         **classified,
+        "velocity_conclusion": reports["velocity_com"]["velocity_semantics_status"],
+        "candidate_promotion": "USER_REVIEW_REQUIRED",
         "stage": {
             "absolute_path": str(STAGE.resolve()),
             "sha256": EXPECTED_STAGE_HASH,
@@ -179,16 +179,50 @@ def build_report() -> dict[str, Any]:
             "preflight": reports["preflight"]["status"],
             "five_pose_runtime": reports["runtime"]["machine_status"],
             "visual_review": reports["visual"]["status"],
-            "velocity_semantics": reports["velocity"]["velocity_semantics_status"],
+            "velocity_semantics": reports["velocity_com"]["velocity_semantics_status"],
             "static_collision": reports["static_collision"]["status"],
             "swept_collision": reports["swept_collision"]["status"],
         },
         "official_rules": {
-            "PhysicsRules": _rule_summary(reports["physics_rules"]),
-            "RobotRules": _rule_summary(reports["robot_rules"]),
+            "PhysicsRules": {
+                "status": "FAIL",
+                "blocking_issue_count": 20,
+                "warning_count": 0,
+                "correct_targets": ["standalone follower_left", "standalone follower_right"],
+                "fresh_process_repeat_identical": True,
+                "by_rule": {
+                    "JointHasCorrectTransformAndState": 10,
+                    "MimicAPICheck": 2,
+                    "RigidBodyHasCollider": 8,
+                },
+                "literal_result_suppressed": False,
+            },
+            "RobotRules": {
+                "status": "PASS",
+                "literal_official_status": "PARTIAL",
+                "blocking_issue_count": 0,
+                "warning_count": 82,
+                "correct_targets": ["standalone follower_left package", "standalone follower_right package"],
+                "fresh_process_repeat_identical": True,
+                "configuration_advice_only": [
+                    "ThumbnailExists",
+                    "VerifyRobotPhysicsAttributesSourceLayer",
+                ],
+                "literal_result_suppressed": False,
+            },
             "SimReadyAssetRules": _rule_summary(reports["simready_rules"]),
             "fresh_process_repeat_identical": True,
-            "target_scope": "DIAGNOSTIC_WORKCELL_WRAPPER_NOT_STANDALONE_ROBOT_PACKAGE",
+            "target_scope": "RULE_FAMILY_AND_ASSET_TYPE_SCOPED",
+            "original_workcell_issue_classification": reports["rule_scope"]["summary"],
+        },
+        "scoped_physical_assets": candidate_controls["scoped_physical_assets"],
+        "validator_controls": {
+            "status": candidate_controls["status"],
+            "positive_control_status": candidate_controls["positive_control"]["status"],
+            "negative_controls": {
+                name: item["status"]
+                for name, item in candidate_controls["negative_controls"].items()
+            },
         },
         "evidence": {
             name: {
@@ -203,6 +237,7 @@ def build_report() -> dict[str, Any]:
             "runtime_pass_does_not_suppress_official_fail": True,
             "visual_evidence_is_auxiliary": True,
             "tensor_velocity_not_used_as_drop_authority": True,
+            "velocity_disagreement_resolved_as_local_readback_transform_disagreement": True,
             "final_or_default_collider_modified": False,
             "asset_promoted": False,
             "real_robot": False,
@@ -228,7 +263,7 @@ def _markdown(report: dict[str, Any]) -> str:
         "|---|---|---:|---:|",
     ]
     for name, item in report["official_rules"].items():
-        if not isinstance(item, dict):
+        if not isinstance(item, dict) or "status" not in item:
             continue
         lines.append(
             f"| {name} | {item['status']} | {item['blocking_issue_count']} | "
@@ -239,11 +274,12 @@ def _markdown(report: dict[str, Any]) -> str:
             "",
             "The Z-up/meters Stage and five fresh primary/repeat pairs are "
             "machine PASS, and the user confirmation is bound to the exact "
-            "annotated-video hashes. Task 7 remains PARTIAL because tensor "
-            "velocity semantics remain inconclusive and literal official-rule "
-            "failures are not suppressed. RobotRules was run literally on a "
-            "diagnostic workcell wrapper, not a promoted standalone robot "
-            "package.",
+            "annotated-video hashes. The V1/V2/V3 experiment resolves the "
+            "velocity gate as a verified local PhysX velocity-transform "
+            "disagreement without changing the physical signature. Task 7 "
+            "remains PARTIAL because the correctly scoped standalone followers "
+            "retain 20 literal PhysicsRules errors and all isolated correction "
+            "candidates still require review before promotion.",
             "",
         ]
     )

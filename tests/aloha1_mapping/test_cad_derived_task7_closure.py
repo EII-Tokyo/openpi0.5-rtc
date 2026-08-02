@@ -24,13 +24,23 @@ def test_confirmed_visual_gate_removes_only_user_confirmation_blocker() -> None:
     assert "HARD_BLOCKER_EXACT_ATTEMPT7_VIDEO_USER_CONFIRMATION_NOT_RUN" not in report[
         "hard_blockers"
     ]
-    assert "HARD_BLOCKER_BOTTLE_TENSOR_VELOCITY_SEMANTICS_INCONCLUSIVE" in report[
-        "hard_blockers"
-    ]
-    assert "HARD_BLOCKER_LITERAL_PHYSICSRULES_FINDINGS_ON_DIAGNOSTIC_WORKCELL" in report[
+    assert "HARD_BLOCKER_BOTTLE_TENSOR_VELOCITY_SEMANTICS_INCONCLUSIVE" not in report[
         "hard_blockers"
     ]
     assert (
-        "HARD_BLOCKER_LITERAL_ROBOTRULES_FINDINGS_ON_NON_ROBOT_PACKAGE_TARGET"
+        report["velocity_conclusion"]
+        == "VERIFIED_LOCAL_PHYSX_VELOCITY_TRANSFORM_DISAGREEMENT"
+    )
+    assert (
+        "HARD_BLOCKER_STANDALONE_FOLLOWER_PHYSICSRULES_20_LITERAL_ERRORS"
         in report["hard_blockers"]
     )
+    assert (
+        "HARD_BLOCKER_LITERAL_ROBOTRULES_FINDINGS_ON_NON_ROBOT_PACKAGE_TARGET"
+        not in report["hard_blockers"]
+    )
+    assert report["official_rules"]["RobotRules"]["blocking_issue_count"] == 0
+    assert report["official_rules"]["PhysicsRules"]["blocking_issue_count"] == 20
+    assert report["candidate_promotion"] == "USER_REVIEW_REQUIRED"
+    assert report["task7"] == "PARTIAL"
+    assert report["task8"] == "NOT_RUN"

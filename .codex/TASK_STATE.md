@@ -21,30 +21,55 @@
   preserves signature
   `90da200849182aa4cadbd37c64a6b36983758fe0e23a3741acb09f1e6740a88d`.
   The first collision retake is preserved as
-  `REJECTED_ARTIFACT_POSTPROCESS_OVERWRITE`; retake 2 is accepted. Exact-video
-  user confirmation remains `NOT_RUN`, so the visual aggregate is `PARTIAL`:
+  `REJECTED_ARTIFACT_POSTPROCESS_OVERWRITE`; retake 2 is accepted. The user
+  confirmation is now bound to all five exact annotated-video paths, frame
+  counts and SHA-256 values, so the visual aggregate is `PASS`:
   `reports/aloha1_mapping/aloha1_cad_derived_five_pose_visual_review_zup_attempt7.json`.
-- Bottle tensor velocity semantics are `INCONCLUSIVE`. COM-point pose
-  finite differences reject a point-frame explanation; recreating the tensor
-  view after the dynamic transition has no effect and preserves the grasp
-  signature; `initialize_kinematic_bodies()` at the tested post-reset point
-  causes numerical ejection and is rejected. Tensor velocity is not used as
-  drop authority. Report:
-  `reports/aloha1_mapping/aloha1_bottle_velocity_consistency.json`.
-- Fresh-process official-rule pairs on the Z-up diagnostic workcell are
-  byte-identical: PhysicsRules `FAIL` (26 blocking), RobotRules `FAIL`
-  (63 blocking, 178 warnings), SimReadyAssetRules `PASS` (one INFO). These
-  literal results are not suppressed. RobotRules was run on the diagnostic
-  workcell wrapper, not a promoted standalone robot package.
+- Bottle velocity semantics are resolved as
+  `VERIFIED_LOCAL_PHYSX_VELOCITY_TRANSFORM_DISAGREEMENT`. V1 and V2 validate
+  the no-contact COM/origin math; V3 preserves sample 02 signature
+  `90da200849182aa4cadbd37c64a6b36983758fe0e23a3741acb09f1e6740a88d`
+  while rejecting COM-frame and sample-time explanations at the V1/V2-derived
+  `0.00295323 m/s` tolerance. No internal solver cause is claimed, no video
+  was rerecorded, and tensor velocity is not used as drop authority. Report:
+  `reports/aloha1_mapping/aloha1_bottle_com_velocity_diagnosis_task7.json`.
+- The original 63 RobotRules and 26 PhysicsRules errors are classified one by
+  one: `WRONG_SCOPE=63`, `TRUE_ASSET_DEFECT=23`, `INCONCLUSIVE=3`. Correct
+  standalone left/right RobotRules targets each have 0 blockers in two fresh
+  processes. Correct standalone follower PhysicsRules targets each retain 10
+  blockers. SimReadyAssetRules on the frozen workcell remains deterministic
+  `PASS`. Reports:
+  `reports/aloha1_mapping/aloha1_task7_final_rule_scope_audit.json` and
+  `reports/aloha1_mapping/aloha1_task7_validator_controls.json`.
+- Reference-only Bottle500 and static-environment targets exposed one invalid
+  zero-length bottle principal-axes quaternion and six static-environment
+  rigid-body/mass errors. Isolated candidates remove all blocking findings in
+  two fresh processes, but remain `USER_REVIEW_REQUIRED` and are not promoted.
+  The released Isaac 5.1 UR10 is itself not validator-clean; all three
+  intentional negative controls are nevertheless detected deterministically.
 - Current closure:
   `reports/aloha1_mapping/aloha1_cad_derived_task7_closure_zup_attempt7.json`.
-  Runtime grasp is `PASS`; Task 7 is `PARTIAL`; asset promotion is `FAIL`;
-  Task 8 remains `NOT_RUN`; final/default colliders are unchanged.
-- Protected user-started Isaac GUI PID is currently `409920` on workspace 3.
-  Do not close, move, restart, switch its Stage, or use it for headless tests.
-- Remaining closeout order: full ALOHA pytest/regression, Ruff and py_compile;
-  review the final diff; commit task-owned files in logical batches without
-  pushing. Preserve unrelated dirty files.
+  Runtime grasp and velocity diagnosis are `PASS`; Task 7 is `PARTIAL`;
+  asset promotion is `FAIL`; Task 8 remains `NOT_RUN`; final/default assets
+  are unchanged. Remaining blockers are the 20 standalone-follower
+  PhysicsRules findings and unpromoted review candidates.
+- The user-started Isaac GUI on workspace 3 was not closed, moved, switched or
+  used. All experiments used independent fresh headless processes.
+- Final static verification is complete for the Task 7 scope: focused pytest
+  is `46 passed`, the complete `tests/aloha1_mapping` regression is
+  `993 passed`, Ruff is `PASS`, and py_compile is `PASS`. Logs are under
+  `.codex/artifacts/20260802-aloha1-cad-derived-colliders/task7_final_closure/final_verification/`.
+- After the user closed every Isaac GUI, repository-wide pytest completed as
+  `343 passed, 5 failed`. Four model/policy failures are GPU-memory or
+  cancelled-checkpoint-read failures; a fresh GPU process with JAX
+  preallocation disabled still fails `test_pi0_fast_lora_model` while
+  allocating 1.95 GiB, while the exact test emits `1 passed` on CPU. The fifth
+  failure is the unrelated existing
+  `transforms_test.py::test_extract_prompt_from_task` constructor mismatch.
+  These are recorded as full-repository regression boundaries, not as Task 7
+  physics defects, and no unrelated model/transform code was modified.
+- Remaining closeout order: review the final diff; commit task-owned files in
+  logical batches without pushing. Preserve unrelated dirty files.
 
 ## 2026-08-02 CAD-derived full-body collider five-pose runtime handoff
 
