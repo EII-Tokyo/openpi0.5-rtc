@@ -18,7 +18,7 @@ def test_tabletop_zero_root_authors_meter_z_up_stage_metadata():
     assert source.count("metersPerUnit = 1") == 1
     assert source.count('upAxis = "Z"') == 1
     assert body == 'over "World"\n{\n}\n'
-    assert header.count("@") == 4
+    assert header.count("@") == 6
     assert header.index("table_support_alignment") < header.index(
         "aloha1_cad_derived_full_body_collider_gripper_decomposition_diagnostic.usda"
     )

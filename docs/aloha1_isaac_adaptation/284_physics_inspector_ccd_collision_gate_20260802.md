@@ -36,7 +36,7 @@ physxScene:enableCCD = true
 physxRigidBody:enableCCD = true  # every follower-left rigid body
 ```
 
-The persistent PhysicsScene uses `physics:timeStepsPerSecond = 240` for normal
+The persistent PhysicsScene uses `physxScene:timeStepsPerSecond = 240` for normal
 timeline operation. The collision verifier separately advances each Inspector
 stress step at exactly `1/60 s`, matching the Inspector authoring simulation's
 fixed step and exercising the coarse-step tunnelling case rather than hiding it
@@ -124,11 +124,21 @@ unchanged. Runtime artifacts remain uncommitted under `.codex/artifacts/`.
 
 ## Hash ledger
 
-The post-change ledger is intentionally pending until the reviewed USD layer
-is authored and composition checks pass.
+The reviewed layer was composed with Isaac Sim 5.1 on 2026-08-02. The runtime
+check resolved one schema-name defect in the written plan: Isaac's
+`PhysxSceneAPI.GetTimeStepsPerSecondAttr()` reads
+`physxScene:timeStepsPerSecond`, not a custom
+`physics:timeStepsPerSecond` attribute. After correcting that authored name,
+the composed values were `240`, `CCD=true`, `GPU=false`, and `SAP`; all 14
+follower-left rigid bodies had CCD enabled; and the confirmed table world Z
+bounds remained `(-0.015, 0.0)`.
 
 ```text
-post_change_root_sha256 = PENDING_TASK_3
-physics_override_sha256 = PENDING_TASK_3
-unchanged_source_layer_hashes = PENDING_TASK_3
+post_change_root_sha256 = 165093c3e7bf359b2ef5dbb595feb4ed976b194844830e70f387d6b882c1d6f2
+physics_override_sha256 = 7f631cd99086f79ca3d88c4d189209f80b0acb71f68e01b3eecfb823909305c6
+tabletop_alignment_sha256 = c9f8c656ed3a1b2722bfe0fb18dd2e5056da0320782e5dd3a7d4df2d7e845afc
+diagnostic_collider_root_sha256 = 7c76a8970e6b0dbca562304c64e9bfcd2e1ca3e790d25dfa52baf2e510b82c68
+base_collider_physics_sha256 = 352503bd2ccc8d4253fdc0561da67d2ec8bc92afba45d3112e677e4b5bb7ac9e
+base_collider_geometry_sha256 = 06295762f1f513dae63a1188e360c209ac2bbbabef730db8a103eb3ea4b1df81
+unchanged_source_layer_git_diff = clean
 ```
