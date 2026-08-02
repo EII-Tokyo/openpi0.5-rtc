@@ -23,9 +23,9 @@ sim-to-real dynamics model and it is not yet accepted for bottle insertion.
 | CAD-derived five-pose Z-up runtime | **PASS** | 5/5 primary plus 5/5 fresh collider repeats pass with matching per-sample signatures; critical phases and all 24 collision panels per sample pass visual review, and the user confirmed the exact hash-bound videos |
 | Bottle tensor-velocity semantics | **PASS (diagnosis)** | V1/V2 validate COM/origin mathematics; unchanged-signature V3 yields `VERIFIED_LOCAL_PHYSX_VELOCITY_TRANSFORM_DISAGREEMENT`; internal solver cause is not claimed |
 | Correctly scoped RobotRules | **PASS gate / PARTIAL literal** | standalone left/right robot packages each repeat with 0 blocking findings and 41 configuration-advice warnings; the original 63 workcell-wrapper errors are classified `WRONG_SCOPE` one by one |
-| Correctly scoped PhysicsRules | **FAIL** | standalone followers repeat with 10 blockers each; original Bottle500 has one invalid zero-length principal-axes quaternion; original static environment has six enabled-rigid-body/mass errors |
+| Correctly scoped PhysicsRules | **FAIL literal / PARTIAL root-cause closure** | standalone followers start at 10 blockers each; isolated combined candidates reduce this to one unsuppressed `MimicAPICheck` per follower in two fresh processes, but helper mass/inertia preservation and changed-collider grasp regression still block promotion |
 | Isolated Bottle500/environment candidates | **PARTIAL / review required** | normalized Bottle500 principal axes removes its only blocker; removing dynamic RigidBody APIs from 35 static environment prims yields 0 blockers; neither candidate is promoted |
-| CAD-derived Z-up Task 7 closure | **PARTIAL** | runtime/video/velocity diagnosis pass, but 20 standalone-follower PhysicsRules errors remain and all correction candidates require review before promotion |
+| CAD-derived Z-up Task 7 closure | **PARTIAL** | runtime/video/velocity diagnosis pass; all 20 follower PhysicsRules findings are classified, but the topology candidate is diagnostic-only and not physically equivalent or promoted |
 | Task 7 post-grasp runtime acceptance | **PASS** | Task 7A runtime/workcell, table alignment, ALOHA 6DOF IK correspondence v3, Bottle500 static hold and five-pose dynamic pickup all pass |
 | Task 7 post-grasp aggregate | **PARTIAL** | literal NVIDIA official-rule status remains FAIL with 37 unsuppressed findings, so asset-promotion readiness remains PARTIAL even though runtime/grasp acceptance passes |
 | follower_right RobotRules schema-only candidate | **PASS** | isolated wrapper passed `IsaacSim.RobotRules` twice in fresh Isaac 5.1 processes with 0 issues and an identical deterministic signature; the physical follower_right Stage and final/default assets were not modified |
@@ -143,6 +143,51 @@ Authoritative reports:
 - `reports/aloha1_mapping/aloha1_task7_final_rule_scope_audit.json`;
 - `reports/aloha1_mapping/aloha1_task7_validator_controls.json`;
 - `reports/aloha1_mapping/aloha1_cad_derived_task7_closure_zup_attempt7.json`.
+
+### Task 7 follower PhysicsRules root-cause candidate closure
+
+The 20 standalone-follower findings were tested one category at a time in
+isolated layers. A zero JointState candidate removes all 10
+`JointHasCorrectTransformAndState` findings and produces exactly the same
+120-frame runtime signatures as the frozen baseline in two fresh processes
+per follower. The current opposed-axis mimic authoring was not changed:
+PhysX 107.3 uses `q + gearing*q_ref + offset = 0`, while local Asset Validation
+1.1.0 evaluates a different interval formula. The resulting one
+`MimicAPICheck` per follower remains visible and unsuppressed.
+
+The physical `gripper_bar` collider is present inside the supplier-CAD fixed
+group. An isolated split exposes the source gripper and bar colliders and
+removes both bar findings, but changes active collider paths. It therefore
+still requires the already-accepted grasp regression before any promotion.
+
+Simply removing the six empty helper rigid bodies is rejected: two fresh
+processes per follower reproducibly create 57
+`NonAdjacentCollisionMeshesDoNotClash` findings. Four raw/annotated failure
+images were individually reviewed and retain absolute paths and hashes in the
+closure JSON. A frame-preserving reparenting candidate avoids those new clash
+findings and leaves only the mimic conflict when combined with the JointState
+candidate. However, it also removes three source-authored helper inertias and
+`0.00300000014 kg` per follower. The values are identical placeholder-like
+URDF data and are not physically calibrated; this fact does not authorize
+silently deleting them. The candidate is therefore
+`DIAGNOSTIC_ONLY_NOT_FINAL`, Task 7 remains `PARTIAL`, and Task 8 remains
+`NOT_RUN`.
+
+Authoritative reports:
+
+- `reports/aloha1_mapping/aloha1_task7_physicsrules_root_cause_matrix.json`;
+- `reports/aloha1_mapping/aloha1_task7_virtual_helper_mass_audit.json`;
+- `reports/aloha1_mapping/aloha1_task7_physicsrules_root_cause_closure.json`;
+- `reports/aloha1_mapping/aloha1_task7_virtual_helper_failure_screenshot_review_left.json`;
+- `reports/aloha1_mapping/aloha1_task7_virtual_helper_failure_screenshot_review_right.json`.
+
+Final verification for this closure is `17 passed` for the focused root-cause
+suite and `1010 passed` for `tests/aloha1_mapping`; Ruff, pycompile, frozen
+Stage integrity and all four screenshot hashes pass. Repository-wide pytest
+stops during collection with seven unrelated `transformers` import errors
+(`AutoProcessor` / `GemmaForCausalLM`) in the current project `.venv`; the
+complete bounded log is retained under
+`.codex/artifacts/20260802-aloha1-task7-physicsrules-root-cause/final_verification/`.
 
 ## 2026-07-31 20 cm grasp button and five-position acceptance
 

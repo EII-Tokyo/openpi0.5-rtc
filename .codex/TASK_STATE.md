@@ -2127,3 +2127,57 @@ scene design is reviewed and approved.
 - Next mainline action is to replay the user-approved Grasp Editor / ALOHA IK
   close-lift-hold trajectory while preserving this verified collision setup
   and changing only one diagnostic variable at a time.
+
+## 2026-08-02 Task 7 PhysicsRules root-cause candidate closure
+
+- Frozen Z-up Stage remains byte-identical at SHA-256
+  `327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9`.
+- The original standalone-follower inventory is 20 errors:
+  10 `JointHasCorrectTransformAndState`, 2 `MimicAPICheck`, and
+  8 `RigidBodyHasCollider`.
+- All candidate validation used independent fresh Isaac Sim 5.1.0.0 / Kit
+  107.3.3 / PhysX 107.3.26 processes. The matrix contains 20 validator and
+  20 runtime fresh-process results.
+- `joint_state_zero` eliminates its 10 target findings. Its 120-frame runtime
+  traces and signatures are identical to the frozen baseline for each side.
+- The current mimic is retained. PhysX 107.3 equation evidence validates the
+  opposed-axis relation; Asset Validation 1.1.0's conflicting
+  `MimicAPICheck` remains literal and unsuppressed.
+- Exposing the gripper/gripper-bar source collision meshes removes both
+  gripper-bar findings, but changes active collider paths and has not been
+  promoted or accepted-grasp regressed.
+- Directly removing the six empty helper rigid bodies is rejected. It creates
+  57 deterministic `NonAdjacentCollisionMeshesDoNotClash` errors per
+  follower in two fresh processes. Attempt 1 screenshots were rejected for
+  cropping/label overlap; attempt 2 has four raw and four annotated images,
+  all visually reviewed `PASS`, with absolute paths and hashes stored in the
+  screenshot-review reports.
+- Frame-preserving topology reparenting (NVIDIA Robot Schema row-vector
+  formula) removes all six helper findings without the clash regression;
+  maximum joint-frame residual is `9.313225746154785e-10`.
+- The combined topology + JointState candidate leaves one literal
+  `MimicAPICheck` per follower and passes two deterministic runtime repeats
+  per side. It is not physically equivalent: removing the three helper bodies
+  removes `0.003000000142492354 kg` and their authored inertias per follower.
+- The helper values are source-authored but not physically calibrated. USD
+  returns `[-inf,-inf,-inf]` for the unauthored COM; the generated URDF omits
+  the inertial origin, so effective local COM is recorded as `[0,0,0]` under
+  URDF semantics.
+- Current disposition:
+  `TASK7=PARTIAL`,
+  `FINAL_DEFAULT_ASSET_MODIFIED=false`,
+  `TASK8=NOT_RUN`.
+- Remaining real gates:
+  `HELPER_MASS_COM_INERTIA_SEMANTICS_NOT_PRESERVED_IN_TOPOLOGY_CANDIDATE` and
+  `COLLIDER_SPLIT_AND_TOPOLOGY_CANDIDATE_NOT_PROMOTED_OR_GRASP_REGRESSED`.
+- Authoritative reports:
+  - `reports/aloha1_mapping/aloha1_task7_physicsrules_root_cause_matrix.json/.md`;
+  - `reports/aloha1_mapping/aloha1_task7_virtual_helper_mass_audit.json/.md`;
+  - `reports/aloha1_mapping/aloha1_task7_physicsrules_root_cause_closure.json/.md`;
+  - `reports/aloha1_mapping/aloha1_task7_virtual_helper_failure_screenshot_review_left.json`;
+  - `reports/aloha1_mapping/aloha1_task7_virtual_helper_failure_screenshot_review_right.json`.
+- Final verification: focused `17 passed`; `tests/aloha1_mapping` `1010
+  passed`; Ruff, pycompile, frozen Stage hash and four screenshot hashes
+  `PASS`. Full-repository pytest stops at collection with seven unrelated
+  current-`.venv` `transformers` import errors; log preserved under
+  `.codex/artifacts/20260802-aloha1-task7-physicsrules-root-cause/final_verification/`.
