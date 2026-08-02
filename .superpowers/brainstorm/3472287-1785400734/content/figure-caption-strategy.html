@@ -1,0 +1,56 @@
+<h2>图表与图注的三种改法</h2>
+<p class="subtitle">以“训练试验漏斗”为例。目标是消除重叠、去掉重复意义，并让工作量数据成为视觉主体。</p>
+
+<div class="cards">
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:18px;background:#fff">
+      <div style="font-weight:700;margin-bottom:12px">训练探索漏斗</div>
+      <div style="height:18px;background:#2879b7;width:92%;margin:8px 0"></div>
+      <div style="height:18px;background:#168f86;width:72%;margin:8px 0"></div>
+      <div style="font-size:11px;color:#d94c42;margin-top:18px">图内保留边界说明与分类说明</div>
+      <div style="font-size:11px;margin-top:8px">图注再解释一次用途与边界</div>
+    </div>
+    <div class="card-body">
+      <h3>A｜局部修补</h3>
+      <p>只移动当前重叠文字。改动最少，但图内和图注仍可能重复，视觉负担较重。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:18px;background:#fff">
+      <div style="font-weight:700;margin-bottom:12px">训练探索漏斗：41 次工程尝试逐步收敛</div>
+      <div style="display:flex;align-items:center;gap:8px;margin:8px 0">
+        <span style="width:76px;font-size:11px">运行尝试</span>
+        <div style="height:18px;background:#2879b7;width:78%"></div><b>23</b>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin:8px 0">
+        <span style="width:76px;font-size:11px">留下历史</span>
+        <div style="height:18px;background:#168f86;width:54%"></div><b>16</b>
+      </div>
+      <div style="font-size:11px;color:#667085;margin-top:18px">图内只保留数据、分类图例和必要单位</div>
+      <div style="font-size:11px;margin-top:8px"><b>图 5.1</b> 训练试验漏斗。41 次尝试体现工程迭代量；运行状态不等同于真机任务成功。</div>
+    </div>
+    <div class="card-body">
+      <h3>B｜数据主体 + 合并图注（推荐）</h3>
+      <p>删除所有“这张图回答……”脚注，图内只留数据；解释和证据边界合并为一句完整图注。最适合正式汇报。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:18px;background:#fff">
+      <div style="font-weight:700;margin-bottom:12px">训练探索漏斗</div>
+      <div style="height:18px;background:#2879b7;width:92%;margin:8px 0"></div>
+      <div style="height:18px;background:#168f86;width:72%;margin:8px 0"></div>
+      <div style="font-size:11px;margin-top:18px"><b>图 5.1</b> 训练试验漏斗。</div>
+      <div style="border-left:3px solid #d99b2b;padding-left:9px;font-size:11px;margin-top:10px;color:#555">正文单独设置“如何读图”段落，解释用途、边界与结论。</div>
+    </div>
+    <div class="card-body">
+      <h3>C｜短图注 + 正文解读</h3>
+      <p>图注最简洁，但每张图都需要额外正文段落，报告会明显变长，也容易形成大块空白。</p>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <p><strong>统一原则：</strong>逐图核查坐标、图例、数值、标题、注释、图注和相邻正文；同一含义只出现一次。图内不再放长句和结论段落。</p>
+</div>

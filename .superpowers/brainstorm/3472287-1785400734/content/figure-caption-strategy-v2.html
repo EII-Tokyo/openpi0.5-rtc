@@ -1,0 +1,62 @@
+<h2>训练试验漏斗：图表说明应该放在哪里？</h2>
+<p class="subtitle">下面三种方案已改为纵向排列。每一块都模拟报告中的“图 + 图注”，请重点看信息是否清楚、有没有重复。</p>
+
+<div class="cards" style="grid-template-columns:1fr;gap:20px">
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="display:block;aspect-ratio:auto;padding:24px;background:#fff">
+      <div style="font-weight:700;font-size:18px;margin-bottom:18px">B｜图内只留数据，解释合并进图注（推荐）</div>
+      <div style="display:grid;grid-template-columns:110px 1fr 36px;align-items:center;gap:10px;margin:10px 0">
+        <span>运行尝试</span><div style="height:20px;background:#2879b7;width:92%"></div><b>23</b>
+      </div>
+      <div style="display:grid;grid-template-columns:110px 1fr 36px;align-items:center;gap:10px;margin:10px 0">
+        <span>留下训练历史</span><div style="height:20px;background:#168f86;width:64%"></div><b>16</b>
+      </div>
+      <div style="display:grid;grid-template-columns:110px 1fr 36px;align-items:center;gap:10px;margin:10px 0">
+        <span>达到 1 万步</span><div style="height:20px;background:#2879b7;width:36%"></div><b>9</b>
+      </div>
+      <div style="margin-top:22px;padding-top:14px;border-top:1px solid #d8dde6;line-height:1.7">
+        <b>图 5.1　训练试验漏斗。</b>
+        团队围绕瓶子分拣基础模型和冲洗/插入任务共开展 41 次训练尝试；
+        该图体现工程迭代量与运行稳定性，运行状态不等同于模型真机任务成功。
+      </div>
+    </div>
+    <div class="card-body">
+      <p>长句不再挤进绘图区；“图回答什么”和“不能说明什么”合成一句图注，不重复表达。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="display:block;aspect-ratio:auto;padding:24px;background:#fff">
+      <div style="font-weight:700;font-size:18px;margin-bottom:18px">A｜保留图内解释，只移动重叠文字</div>
+      <div style="display:grid;grid-template-columns:110px 1fr 36px;align-items:center;gap:10px;margin:10px 0">
+        <span>运行尝试</span><div style="height:20px;background:#2879b7;width:92%"></div><b>23</b>
+      </div>
+      <div style="margin-top:18px;color:#d94c42">共 41 次尝试；“标记结束”只代表进程状态，不代表机器人成功。</div>
+      <div style="margin-top:10px;color:#667085">这张图回答团队尝试了多少训练方向；边界是运行次数不衡量模型能力。</div>
+      <div style="margin-top:16px;padding-top:12px;border-top:1px solid #d8dde6">
+        <b>图 5.1　训练试验漏斗。</b>该图衡量工程迭代量和运行稳定性，不衡量模型真机能力。
+      </div>
+    </div>
+    <div class="card-body">
+      <p>文字虽然不再重叠，但同一个边界被说了三遍，图仍显拥挤。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="display:block;aspect-ratio:auto;padding:24px;background:#fff">
+      <div style="font-weight:700;font-size:18px;margin-bottom:18px">C｜图注很短，解释放到下一段正文</div>
+      <div style="display:grid;grid-template-columns:110px 1fr 36px;align-items:center;gap:10px;margin:10px 0">
+        <span>运行尝试</span><div style="height:20px;background:#2879b7;width:92%"></div><b>23</b>
+      </div>
+      <div style="margin-top:16px;padding-top:12px;border-top:1px solid #d8dde6">
+        <b>图 5.1　训练试验漏斗。</b>
+      </div>
+      <div style="margin-top:14px;padding:12px;background:#f4f6f8;line-height:1.7">
+        <b>正文解读：</b>团队共开展 41 次训练尝试……这些记录说明工程迭代持续进行，但不能直接表示模型真机能力。
+      </div>
+    </div>
+    <div class="card-body">
+      <p>图很干净，但每幅图都需要另起一段，篇幅更长，也更容易出现分页留白。</p>
+    </div>
+  </div>
+</div>
