@@ -58,6 +58,23 @@ def test_initialization_accepts_legal_open_pair_after_reset() -> None:
     assert result["limit_margins_m"]["right_finger"]["readback_lower"] == 0.0
 
 
+def test_initialization_accepts_exact_float32_limit_readback() -> None:
+    result = evaluate_finger_initialization(
+        reset_complete=True,
+        dof_order=["left_finger", "right_finger"],
+        targets=[0.057, -0.057],
+        readback=[0.05700000002980232, -0.05700000002980232],
+        source_limits=SOURCE_LIMITS,
+        overlap_volume_m3=0.0,
+    )
+
+    assert result["status"] == "PASS"
+    assert result["failure_codes"] == []
+    assert result["readback_numeric_semantics"] == (
+        "SOURCE_DECIMAL_OR_EXACT_FLOAT32_REPRESENTATION"
+    )
+
+
 def test_initialization_signature_excludes_process_and_output_identity() -> None:
     base = {
         "status": "PASS",

@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import struct
 from typing import Any
 
 FINGER_NAMES = ("left_finger", "right_finger")
@@ -44,6 +45,10 @@ def _validated_limits(
     return result
 
 
+def _float32_roundtrip(value: float) -> float:
+    return float(struct.unpack("f", struct.pack("f", float(value)))[0])
+
+
 def evaluate_finger_initialization(
     *,
     reset_complete: bool,
@@ -67,18 +72,30 @@ def evaluate_finger_initialization(
         failure_codes.append("FAIL_INITIALIZATION_CONTRACT")
 
     margins: dict[str, dict[str, float]] = {}
+    representable_limits: dict[str, dict[str, float]] = {}
     limit_violation = False
     for index, finger in enumerate(FINGER_NAMES):
         lower, upper = limits[finger]
         target = target_pair[index]
         actual = readback_pair[index]
+        readback_lower = min(lower, _float32_roundtrip(lower))
+        readback_upper = max(upper, _float32_roundtrip(upper))
+        representable_limits[finger] = {
+            "lower": readback_lower,
+            "upper": readback_upper,
+        }
         margins[finger] = {
             "target_lower": target - lower,
             "target_upper": upper - target,
             "readback_lower": actual - lower,
             "readback_upper": upper - actual,
         }
-        if min(margins[finger].values()) < 0.0:
+        if (
+            margins[finger]["target_lower"] < 0.0
+            or margins[finger]["target_upper"] < 0.0
+            or actual < readback_lower
+            or actual > readback_upper
+        ):
             limit_violation = True
     if target_pair[0] <= 0.0 or target_pair[1] >= 0.0:
         limit_violation = True
@@ -101,6 +118,10 @@ def evaluate_finger_initialization(
             for finger in FINGER_NAMES
         },
         "limit_margins_m": margins,
+        "readback_representable_limits_m": representable_limits,
+        "readback_numeric_semantics": (
+            "SOURCE_DECIMAL_OR_EXACT_FLOAT32_REPRESENTATION"
+        ),
         "pair_overlap_volume_m3": overlap,
     }
 

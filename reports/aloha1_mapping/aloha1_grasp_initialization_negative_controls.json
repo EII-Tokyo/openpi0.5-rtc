@@ -1,0 +1,1288 @@
+{
+  "all_fresh_processes": true,
+  "attempt_history": [
+    {
+      "attempt": "attempt1",
+      "status": "REJECTED_FLOAT32_READBACK_SEMANTICS"
+    },
+    {
+      "attempt": "attempt2",
+      "status": "REJECTED_CAMERA_OCCLUSION_AND_FIRST_FAILURE_EXPECTATION"
+    },
+    {
+      "attempt": "attempt3_initial",
+      "machine_evidence": "VALID",
+      "status": "REJECTED_NEAR_CLIP_AND_OCCLUSION"
+    },
+    {
+      "attempt": "attempt3_visual_retake_001",
+      "status": "REJECTED_ENVIRONMENT_OCCLUSION"
+    },
+    {
+      "attempt": "attempt3_visual_retake_002",
+      "status": "REJECTED_SAMPLE02_OPEN_APERTURE_CROPPING"
+    },
+    {
+      "attempt": "attempt3_visual_retake_003",
+      "status": "PASS"
+    }
+  ],
+  "control_count": 4,
+  "controls": [
+    {
+      "annotated_screenshot": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/negative_controls_attempt3/visual_retake_003/static_load_without_reset/screenshots_annotated/failure_or_control_annotated.png",
+      "annotated_screenshot_sha256": "26c5651135acf61910717ee0f9950bab56fe4918f0df9989a6b012702918432e",
+      "camera_metadata": {
+        "closeup": {
+          "clipping_range_m": [
+            0.005,
+            10.0
+          ],
+          "orientation_wxyz": [
+            0.6470710039138794,
+            0.28512993454933167,
+            0.28512993454933167,
+            0.6470710039138794
+          ],
+          "position_world_m": [
+            0.6243207504968558,
+            -0.01900000003700323,
+            0.9531527819720131
+          ],
+          "resolution": [
+            1280,
+            720
+          ],
+          "target_world_m": [
+            0.07082277443259954,
+            -0.019000000625965185,
+            0.4470500349998474
+          ],
+          "visual_scope": "FINGER_COLLIDERS_ONLY"
+        },
+        "overview": {
+          "clipping_range_m": [
+            0.01,
+            20.0
+          ],
+          "orientation_wxyz": [
+            0.26873260736465454,
+            0.16668164730072021,
+            0.5000449419021606,
+            0.8061978816986084
+          ],
+          "position_world_m": [
+            1.2325694874494744,
+            1.9898002540826099,
+            1.4966061647356315
+          ],
+          "resolution": [
+            1280,
+            720
+          ],
+          "target_world_m": [
+            -0.2740307040512562,
+            -0.01900000125169754,
+            0.25115000642836094
+          ],
+          "visual_scope": "FULL_STAGE_WITH_COLLIDER_OVERLAY"
+        }
+      },
+      "expected_failure_code": "FAIL_INITIALIZATION_CONTRACT",
+      "frame": 0,
+      "fresh_process": true,
+      "observed_failure_codes": [
+        "FAIL_INITIALIZATION_CONTRACT",
+        "FINGER_LIMIT_VIOLATION",
+        "FINGER_PAIR_OVERLAP"
+      ],
+      "original_attempt3_raw_screenshots": {
+        "closeup": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/negative_controls_attempt3/static_load_without_reset/screenshots_raw/closeup_raw.png",
+        "overview": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/negative_controls_attempt3/static_load_without_reset/screenshots_raw/overview_raw.png"
+      },
+      "pair_overlap_volume_m3": 3.183342935820552e-05,
+      "phase": "PRE_FORMAL_STEP",
+      "process": {
+        "command": [
+          "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/bin/python",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/tools/validate_aloha1_grasp_initialization_negative_controls.py",
+          "--runtime-scenario",
+          "STATIC_LOAD_WITHOUT_RESET",
+          "--runtime-output",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/negative_controls_attempt3/static_load_without_reset/machine_record.json",
+          "--screenshot-root",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/negative_controls_attempt3/static_load_without_reset/screenshots_raw"
+        ],
+        "exit_code": 0,
+        "log_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/negative_controls_attempt3/static_load_without_reset/runtime.log",
+        "process_id": 1786255,
+        "runtime_s": 14.702493771008449,
+        "timed_out": false
+      },
+      "raw_closeup_screenshot_sha256": "8337d199e8f11c19bafa6c38b6bd24547b764ab30cc989f420ae24953d4625cf",
+      "raw_screenshot": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/negative_controls_attempt3/visual_retake_003/static_load_without_reset/screenshots_raw/overview_raw.png",
+      "raw_screenshot_sha256": "ae4131bc45c7ded023faca5e82882e2ac317307db604f5629b254f467e957274",
+      "raw_screenshots": {
+        "camera_metadata": {
+          "closeup": {
+            "clipping_range_m": [
+              0.005,
+              10.0
+            ],
+            "orientation_wxyz": [
+              0.6470710039138794,
+              0.28512993454933167,
+              0.28512993454933167,
+              0.6470710039138794
+            ],
+            "position_world_m": [
+              0.6243207504968558,
+              -0.01900000003700323,
+              0.9531527819720131
+            ],
+            "resolution": [
+              1280,
+              720
+            ],
+            "target_world_m": [
+              0.07082277443259954,
+              -0.019000000625965185,
+              0.4470500349998474
+            ],
+            "visual_scope": "FINGER_COLLIDERS_ONLY"
+          },
+          "overview": {
+            "clipping_range_m": [
+              0.01,
+              20.0
+            ],
+            "orientation_wxyz": [
+              0.26873260736465454,
+              0.16668164730072021,
+              0.5000449419021606,
+              0.8061978816986084
+            ],
+            "position_world_m": [
+              1.2325694874494744,
+              1.9898002540826099,
+              1.4966061647356315
+            ],
+            "resolution": [
+              1280,
+              720
+            ],
+            "target_world_m": [
+              -0.2740307040512562,
+              -0.01900000125169754,
+              0.25115000642836094
+            ],
+            "visual_scope": "FULL_STAGE_WITH_COLLIDER_OVERLAY"
+          }
+        },
+        "closeup": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/negative_controls_attempt3/visual_retake_003/static_load_without_reset/screenshots_raw/closeup_raw.png",
+        "overview": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/negative_controls_attempt3/visual_retake_003/static_load_without_reset/screenshots_raw/overview_raw.png"
+      },
+      "readback_m": [
+        0.0,
+        0.0
+      ],
+      "scenario": "STATIC_LOAD_WITHOUT_RESET",
+      "source_or_final_asset_modified": false,
+      "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "stage_immutable": true,
+      "stage_sha256": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9",
+      "states": [
+        {
+          "dof_order": [
+            "left_finger",
+            "right_finger"
+          ],
+          "failure_codes": [
+            "FAIL_INITIALIZATION_CONTRACT",
+            "FINGER_LIMIT_VIOLATION",
+            "FINGER_PAIR_OVERLAP"
+          ],
+          "limit_margins_m": {
+            "left_finger": {
+              "readback_lower": -0.021,
+              "readback_upper": 0.057,
+              "target_lower": -0.021,
+              "target_upper": 0.057
+            },
+            "right_finger": {
+              "readback_lower": 0.057,
+              "readback_upper": -0.021,
+              "target_lower": 0.057,
+              "target_upper": -0.021
+            }
+          },
+          "pair_geometry": {
+            "hull_a": {
+              "face_count": 176,
+              "input_point_count": 831,
+              "vertex_count": 90,
+              "volume_m3": 5.5580805015597267e-05
+            },
+            "hull_b": {
+              "face_count": 176,
+              "input_point_count": 831,
+              "vertex_count": 90,
+              "volume_m3": 5.5580788466038444e-05
+            },
+            "intersection_vertex_count": 160,
+            "method": "normalized convex-hull halfspace feasibility LP; positive margin means volumetric intersection",
+            "overlap_volume_m3": 3.183342935820552e-05,
+            "relation": "OVERLAP",
+            "signed_chebyshev_margin_m": 0.008711389265954494,
+            "tolerance_m": 1e-08
+          },
+          "pair_overlap_volume_m3": 3.183342935820552e-05,
+          "readback_m": [
+            0.0,
+            0.0
+          ],
+          "readback_numeric_semantics": "SOURCE_DECIMAL_OR_EXACT_FLOAT32_REPRESENTATION",
+          "readback_representable_limits_m": {
+            "left_finger": {
+              "lower": 0.020999999716877937,
+              "upper": 0.05700000002980232
+            },
+            "right_finger": {
+              "lower": -0.05700000002980232,
+              "upper": -0.020999999716877937
+            }
+          },
+          "reset_complete": false,
+          "source_limits_m": {
+            "left_finger": {
+              "lower": 0.021,
+              "upper": 0.057
+            },
+            "right_finger": {
+              "lower": -0.057,
+              "upper": -0.021
+            }
+          },
+          "status": "FAIL",
+          "target_m": [
+            0.0,
+            0.0
+          ]
+        }
+      ],
+      "status": "EXPECTED_FAIL_OBSERVED",
+      "target_m": [
+        0.0,
+        0.0
+      ],
+      "task8": "NOT_RUN",
+      "visual_evidence_semantics": "SESSION_ONLY_COLLIDER_CLONES; OVERVIEW_FULL_STAGE; CLOSEUP_FINGER_COLLIDERS_ONLY; MACHINE_FAILURE_FROM_ORIGINAL_ATTEMPT3_RECORD",
+      "visual_model_review": "PASS",
+      "visual_model_review_details": {
+        "closeup_left_finger_collider_complete": true,
+        "closeup_right_finger_collider_complete": true,
+        "conclusion": "Full arm visible; isolated left/right collider clones complete; q=0 overlap is visually apparent and agrees with positive overlap volume.",
+        "environment_occlusion_absent_in_isolated_closeup": true,
+        "geometry_state_matches_machine_record": true,
+        "overview_full_arm_visible": true,
+        "reviewer": "Codex vision model"
+      },
+      "visual_retake_history": [
+        {
+          "batch": "attempt3_initial",
+          "status": "REJECTED_NEAR_CLIP_AND_OCCLUSION"
+        },
+        {
+          "batch": "visual_retake_001",
+          "status": "REJECTED_ENVIRONMENT_OCCLUSION"
+        },
+        {
+          "batch": "visual_retake_002",
+          "status": "REJECTED_SAMPLE02_OPEN_APERTURE_CROPPING"
+        },
+        {
+          "batch": "visual_retake_003",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "annotated_screenshot": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/negative_controls_attempt3/visual_retake_003/illegal_q_zero/screenshots_annotated/failure_or_control_annotated.png",
+      "annotated_screenshot_sha256": "f31a07cceeac56964119cdb053b8b51d8848946fc9427f42d0617e4528e4b93b",
+      "camera_metadata": {
+        "closeup": {
+          "clipping_range_m": [
+            0.005,
+            10.0
+          ],
+          "orientation_wxyz": [
+            0.6710351705551147,
+            0.22296136617660522,
+            0.2229613959789276,
+            0.6710352301597595
+          ],
+          "position_world_m": [
+            0.2417050529082292,
+            -0.018999906468847944,
+            0.9253318799445727
+          ],
+          "resolution": [
+            1280,
+            720
+          ],
+          "target_world_m": [
+            -0.20713972300291061,
+            -0.018999966931005474,
+            0.324467197060585
+          ],
+          "visual_scope": "FINGER_COLLIDERS_ONLY"
+        },
+        "overview": {
+          "clipping_range_m": [
+            0.01,
+            20.0
+          ],
+          "orientation_wxyz": [
+            0.26873260736465454,
+            0.16668164730072021,
+            0.5000449419021606,
+            0.8061978816986084
+          ],
+          "position_world_m": [
+            0.7056104896274111,
+            1.5196295606171952,
+            1.1578546944421566
+          ],
+          "resolution": [
+            1280,
+            720
+          ],
+          "target_world_m": [
+            -0.44836168736219406,
+            -0.019000008702278137,
+            0.2039043614640832
+          ],
+          "visual_scope": "FULL_STAGE_WITH_COLLIDER_OVERLAY"
+        }
+      },
+      "expected_failure_code": "FINGER_PAIR_OVERLAP",
+      "frame": 0,
+      "fresh_process": true,
+      "observed_failure_codes": [
+        "FINGER_LIMIT_VIOLATION",
+        "FINGER_PAIR_OVERLAP"
+      ],
+      "original_attempt3_raw_screenshots": {
+        "closeup": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/negative_controls_attempt3/illegal_q_zero/screenshots_raw/closeup_raw.png",
+        "overview": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/negative_controls_attempt3/illegal_q_zero/screenshots_raw/overview_raw.png"
+      },
+      "pair_overlap_volume_m3": 3.183341296966901e-05,
+      "phase": "PRE_FORMAL_STEP",
+      "process": {
+        "command": [
+          "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/bin/python",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/tools/validate_aloha1_grasp_initialization_negative_controls.py",
+          "--runtime-scenario",
+          "ILLEGAL_Q_ZERO",
+          "--runtime-output",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/negative_controls_attempt3/illegal_q_zero/machine_record.json",
+          "--screenshot-root",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/negative_controls_attempt3/illegal_q_zero/screenshots_raw"
+        ],
+        "exit_code": 0,
+        "log_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/negative_controls_attempt3/illegal_q_zero/runtime.log",
+        "process_id": 1787154,
+        "runtime_s": 15.907038134988397,
+        "timed_out": false
+      },
+      "raw_closeup_screenshot_sha256": "a8bc89b880c9f115b2c43abff75ebe898ff599140dc8b7d5c41da8fca12b5694",
+      "raw_screenshot": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/negative_controls_attempt3/visual_retake_003/illegal_q_zero/screenshots_raw/overview_raw.png",
+      "raw_screenshot_sha256": "125f85cc87a5a06dc11c14dfbae3840d7f25ce5d737e6a6710d1210024a03119",
+      "raw_screenshots": {
+        "camera_metadata": {
+          "closeup": {
+            "clipping_range_m": [
+              0.005,
+              10.0
+            ],
+            "orientation_wxyz": [
+              0.6710351705551147,
+              0.22296136617660522,
+              0.2229613959789276,
+              0.6710352301597595
+            ],
+            "position_world_m": [
+              0.2417050529082292,
+              -0.018999906468847944,
+              0.9253318799445727
+            ],
+            "resolution": [
+              1280,
+              720
+            ],
+            "target_world_m": [
+              -0.20713972300291061,
+              -0.018999966931005474,
+              0.324467197060585
+            ],
+            "visual_scope": "FINGER_COLLIDERS_ONLY"
+          },
+          "overview": {
+            "clipping_range_m": [
+              0.01,
+              20.0
+            ],
+            "orientation_wxyz": [
+              0.26873260736465454,
+              0.16668164730072021,
+              0.5000449419021606,
+              0.8061978816986084
+            ],
+            "position_world_m": [
+              0.7056104896274111,
+              1.5196295606171952,
+              1.1578546944421566
+            ],
+            "resolution": [
+              1280,
+              720
+            ],
+            "target_world_m": [
+              -0.44836168736219406,
+              -0.019000008702278137,
+              0.2039043614640832
+            ],
+            "visual_scope": "FULL_STAGE_WITH_COLLIDER_OVERLAY"
+          }
+        },
+        "closeup": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/negative_controls_attempt3/visual_retake_003/illegal_q_zero/screenshots_raw/closeup_raw.png",
+        "overview": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/negative_controls_attempt3/visual_retake_003/illegal_q_zero/screenshots_raw/overview_raw.png"
+      },
+      "readback_m": [
+        0.0,
+        0.0
+      ],
+      "scenario": "ILLEGAL_Q_ZERO",
+      "source_or_final_asset_modified": false,
+      "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/finger_limit_pair_collision_candidate/1.0/aloha1_finger_source_limit_candidate.usda",
+      "stage_immutable": true,
+      "stage_sha256": "5eb5217dbf81c07bdba0e64bdc6d2eaa6aa12c53a1510039c2514d9ec80e6e9f",
+      "states": [
+        {
+          "dof_order": [
+            "left_finger",
+            "right_finger"
+          ],
+          "failure_codes": [
+            "FINGER_LIMIT_VIOLATION",
+            "FINGER_PAIR_OVERLAP"
+          ],
+          "limit_margins_m": {
+            "left_finger": {
+              "readback_lower": -0.021,
+              "readback_upper": 0.057,
+              "target_lower": -0.021,
+              "target_upper": 0.057
+            },
+            "right_finger": {
+              "readback_lower": 0.057,
+              "readback_upper": -0.021,
+              "target_lower": 0.057,
+              "target_upper": -0.021
+            }
+          },
+          "pair_geometry": {
+            "hull_a": {
+              "face_count": 180,
+              "input_point_count": 831,
+              "vertex_count": 92,
+              "volume_m3": 5.5580799483590895e-05
+            },
+            "hull_b": {
+              "face_count": 184,
+              "input_point_count": 831,
+              "vertex_count": 94,
+              "volume_m3": 5.55807951141803e-05
+            },
+            "intersection_vertex_count": 203,
+            "method": "normalized convex-hull halfspace feasibility LP; positive margin means volumetric intersection",
+            "overlap_volume_m3": 3.183341296966901e-05,
+            "relation": "OVERLAP",
+            "signed_chebyshev_margin_m": 0.008711388339690936,
+            "tolerance_m": 1e-08
+          },
+          "pair_overlap_volume_m3": 3.183341296966901e-05,
+          "readback_m": [
+            0.0,
+            0.0
+          ],
+          "readback_numeric_semantics": "SOURCE_DECIMAL_OR_EXACT_FLOAT32_REPRESENTATION",
+          "readback_representable_limits_m": {
+            "left_finger": {
+              "lower": 0.020999999716877937,
+              "upper": 0.05700000002980232
+            },
+            "right_finger": {
+              "lower": -0.05700000002980232,
+              "upper": -0.020999999716877937
+            }
+          },
+          "reset_complete": true,
+          "source_limits_m": {
+            "left_finger": {
+              "lower": 0.021,
+              "upper": 0.057
+            },
+            "right_finger": {
+              "lower": -0.057,
+              "upper": -0.021
+            }
+          },
+          "status": "FAIL",
+          "target_m": [
+            0.0,
+            0.0
+          ]
+        }
+      ],
+      "status": "EXPECTED_FAIL_OBSERVED",
+      "target_m": [
+        0.0,
+        0.0
+      ],
+      "task8": "NOT_RUN",
+      "visual_evidence_semantics": "SESSION_ONLY_COLLIDER_CLONES; OVERVIEW_FULL_STAGE; CLOSEUP_FINGER_COLLIDERS_ONLY; MACHINE_FAILURE_FROM_ORIGINAL_ATTEMPT3_RECORD",
+      "visual_model_review": "PASS",
+      "visual_model_review_details": {
+        "closeup_left_finger_collider_complete": true,
+        "closeup_right_finger_collider_complete": true,
+        "conclusion": "Full arm visible; isolated left/right collider clones complete; illegal q=0 overlap is visually apparent and agrees with the machine failure codes.",
+        "environment_occlusion_absent_in_isolated_closeup": true,
+        "geometry_state_matches_machine_record": true,
+        "overview_full_arm_visible": true,
+        "reviewer": "Codex vision model"
+      },
+      "visual_retake_history": [
+        {
+          "batch": "attempt3_initial",
+          "status": "REJECTED_NEAR_CLIP_AND_OCCLUSION"
+        },
+        {
+          "batch": "visual_retake_001",
+          "status": "REJECTED_ENVIRONMENT_OCCLUSION"
+        },
+        {
+          "batch": "visual_retake_002",
+          "status": "REJECTED_SAMPLE02_OPEN_APERTURE_CROPPING"
+        },
+        {
+          "batch": "visual_retake_003",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "annotated_screenshot": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/negative_controls_attempt3/visual_retake_003/legal_open_close_sweep/screenshots_annotated/failure_or_control_annotated.png",
+      "annotated_screenshot_sha256": "7081ce28817020161d5fdf7e1a33d900b05cf10c76d8511981cc34f514bf8f78",
+      "camera_metadata": {
+        "closeup": {
+          "clipping_range_m": [
+            0.005,
+            10.0
+          ],
+          "orientation_wxyz": [
+            0.6710351705551147,
+            0.22296136617660522,
+            0.2229613959789276,
+            0.6710352301597595
+          ],
+          "position_world_m": [
+            0.24170506728073438,
+            -0.018999903851131313,
+            0.9253318747739078
+          ],
+          "resolution": [
+            1280,
+            720
+          ],
+          "target_world_m": [
+            -0.20713971555233002,
+            -0.018999965861439705,
+            0.324467197060585
+          ],
+          "visual_scope": "FINGER_COLLIDERS_ONLY"
+        },
+        "overview": {
+          "clipping_range_m": [
+            0.01,
+            20.0
+          ],
+          "orientation_wxyz": [
+            0.26873260736465454,
+            0.16668164730072021,
+            0.5000449419021606,
+            0.8061978816986084
+          ],
+          "position_world_m": [
+            0.7056105165185942,
+            1.5196295865379985,
+            1.1578547105130546
+          ],
+          "resolution": [
+            1280,
+            720
+          ],
+          "target_world_m": [
+            -0.44836167991161346,
+            -0.019000008702278137,
+            0.2039043614640832
+          ],
+          "visual_scope": "FULL_STAGE_WITH_COLLIDER_OVERLAY"
+        }
+      },
+      "expected_failure_code": null,
+      "frame": 0,
+      "fresh_process": true,
+      "observed_failure_codes": [],
+      "original_attempt3_raw_screenshots": {
+        "closeup": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/negative_controls_attempt3/legal_open_close_sweep/screenshots_raw/closeup_raw.png",
+        "overview": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/negative_controls_attempt3/legal_open_close_sweep/screenshots_raw/overview_raw.png"
+      },
+      "pair_overlap_volume_m3": 0.0,
+      "phase": "PRE_FORMAL_STEP",
+      "process": {
+        "command": [
+          "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/bin/python",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/tools/validate_aloha1_grasp_initialization_negative_controls.py",
+          "--runtime-scenario",
+          "LEGAL_OPEN_CLOSE_SWEEP",
+          "--runtime-output",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/negative_controls_attempt3/legal_open_close_sweep/machine_record.json",
+          "--screenshot-root",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/negative_controls_attempt3/legal_open_close_sweep/screenshots_raw"
+        ],
+        "exit_code": 0,
+        "log_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/negative_controls_attempt3/legal_open_close_sweep/runtime.log",
+        "process_id": 1788300,
+        "runtime_s": 17.111708570999326,
+        "timed_out": false
+      },
+      "raw_closeup_screenshot_sha256": "a54ae499101228828d6e26559b5ef922d564311f49520c5f9a49b0f7cb77707a",
+      "raw_screenshot": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/negative_controls_attempt3/visual_retake_003/legal_open_close_sweep/screenshots_raw/overview_raw.png",
+      "raw_screenshot_sha256": "3f970241bbcb40939da206ecb48c08303784fecb80252f26c4675180cee79ba3",
+      "raw_screenshots": {
+        "camera_metadata": {
+          "closeup": {
+            "clipping_range_m": [
+              0.005,
+              10.0
+            ],
+            "orientation_wxyz": [
+              0.6710351705551147,
+              0.22296136617660522,
+              0.2229613959789276,
+              0.6710352301597595
+            ],
+            "position_world_m": [
+              0.24170506728073438,
+              -0.018999903851131313,
+              0.9253318747739078
+            ],
+            "resolution": [
+              1280,
+              720
+            ],
+            "target_world_m": [
+              -0.20713971555233002,
+              -0.018999965861439705,
+              0.324467197060585
+            ],
+            "visual_scope": "FINGER_COLLIDERS_ONLY"
+          },
+          "overview": {
+            "clipping_range_m": [
+              0.01,
+              20.0
+            ],
+            "orientation_wxyz": [
+              0.26873260736465454,
+              0.16668164730072021,
+              0.5000449419021606,
+              0.8061978816986084
+            ],
+            "position_world_m": [
+              0.7056105165185942,
+              1.5196295865379985,
+              1.1578547105130546
+            ],
+            "resolution": [
+              1280,
+              720
+            ],
+            "target_world_m": [
+              -0.44836167991161346,
+              -0.019000008702278137,
+              0.2039043614640832
+            ],
+            "visual_scope": "FULL_STAGE_WITH_COLLIDER_OVERLAY"
+          }
+        },
+        "closeup": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/negative_controls_attempt3/visual_retake_003/legal_open_close_sweep/screenshots_raw/closeup_raw.png",
+        "overview": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/negative_controls_attempt3/visual_retake_003/legal_open_close_sweep/screenshots_raw/overview_raw.png"
+      },
+      "readback_m": [
+        0.020999999716877937,
+        -0.020999999716877937
+      ],
+      "scenario": "LEGAL_OPEN_CLOSE_SWEEP",
+      "source_or_final_asset_modified": false,
+      "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/finger_limit_pair_collision_candidate/1.0/aloha1_finger_source_limit_candidate.usda",
+      "stage_immutable": true,
+      "stage_sha256": "5eb5217dbf81c07bdba0e64bdc6d2eaa6aa12c53a1510039c2514d9ec80e6e9f",
+      "states": [
+        {
+          "dof_order": [
+            "left_finger",
+            "right_finger"
+          ],
+          "failure_codes": [],
+          "limit_margins_m": {
+            "left_finger": {
+              "readback_lower": 0.03600000002980232,
+              "readback_upper": -2.980232033378272e-11,
+              "target_lower": 0.036000000000000004,
+              "target_upper": 0.0
+            },
+            "right_finger": {
+              "readback_lower": -2.980232033378272e-11,
+              "readback_upper": 0.03600000002980232,
+              "target_lower": 0.0,
+              "target_upper": 0.036000000000000004
+            }
+          },
+          "pair_geometry": {
+            "hull_a": {
+              "face_count": 182,
+              "input_point_count": 831,
+              "vertex_count": 93,
+              "volume_m3": 5.558080079218685e-05
+            },
+            "hull_b": {
+              "face_count": 182,
+              "input_point_count": 831,
+              "vertex_count": 93,
+              "volume_m3": 5.558079389205083e-05
+            },
+            "intersection_vertex_count": 0,
+            "method": "normalized convex-hull halfspace feasibility LP; positive margin means volumetric intersection",
+            "overlap_volume_m3": 0.0,
+            "relation": "SEPARATED",
+            "signed_chebyshev_margin_m": -0.035059934239533144,
+            "tolerance_m": 1e-08
+          },
+          "pair_overlap_volume_m3": 0.0,
+          "readback_m": [
+            0.05700000002980232,
+            -0.05700000002980232
+          ],
+          "readback_numeric_semantics": "SOURCE_DECIMAL_OR_EXACT_FLOAT32_REPRESENTATION",
+          "readback_representable_limits_m": {
+            "left_finger": {
+              "lower": 0.020999999716877937,
+              "upper": 0.05700000002980232
+            },
+            "right_finger": {
+              "lower": -0.05700000002980232,
+              "upper": -0.020999999716877937
+            }
+          },
+          "reset_complete": true,
+          "source_limits_m": {
+            "left_finger": {
+              "lower": 0.021,
+              "upper": 0.057
+            },
+            "right_finger": {
+              "lower": -0.057,
+              "upper": -0.021
+            }
+          },
+          "status": "PASS",
+          "target_m": [
+            0.057,
+            -0.057
+          ]
+        },
+        {
+          "dof_order": [
+            "left_finger",
+            "right_finger"
+          ],
+          "failure_codes": [],
+          "limit_margins_m": {
+            "left_finger": {
+              "readback_lower": 0.018000000804662703,
+              "readback_upper": 0.017999999195337298,
+              "target_lower": 0.018,
+              "target_upper": 0.018000000000000002
+            },
+            "right_finger": {
+              "readback_lower": 0.017999999195337298,
+              "readback_upper": 0.018000000804662703,
+              "target_lower": 0.018000000000000002,
+              "target_upper": 0.018
+            }
+          },
+          "pair_geometry": {
+            "hull_a": {
+              "face_count": 184,
+              "input_point_count": 831,
+              "vertex_count": 94,
+              "volume_m3": 5.5580798897272954e-05
+            },
+            "hull_b": {
+              "face_count": 186,
+              "input_point_count": 831,
+              "vertex_count": 95,
+              "volume_m3": 5.558079502246855e-05
+            },
+            "intersection_vertex_count": 0,
+            "method": "normalized convex-hull halfspace feasibility LP; positive margin means volumetric intersection",
+            "overlap_volume_m3": 0.0,
+            "relation": "SEPARATED",
+            "signed_chebyshev_margin_m": -0.018558613444225377,
+            "tolerance_m": 1e-08
+          },
+          "pair_overlap_volume_m3": 0.0,
+          "readback_m": [
+            0.039000000804662704,
+            -0.039000000804662704
+          ],
+          "readback_numeric_semantics": "SOURCE_DECIMAL_OR_EXACT_FLOAT32_REPRESENTATION",
+          "readback_representable_limits_m": {
+            "left_finger": {
+              "lower": 0.020999999716877937,
+              "upper": 0.05700000002980232
+            },
+            "right_finger": {
+              "lower": -0.05700000002980232,
+              "upper": -0.020999999716877937
+            }
+          },
+          "reset_complete": true,
+          "source_limits_m": {
+            "left_finger": {
+              "lower": 0.021,
+              "upper": 0.057
+            },
+            "right_finger": {
+              "lower": -0.057,
+              "upper": -0.021
+            }
+          },
+          "status": "PASS",
+          "target_m": [
+            0.039,
+            -0.039
+          ]
+        },
+        {
+          "dof_order": [
+            "left_finger",
+            "right_finger"
+          ],
+          "failure_codes": [],
+          "limit_margins_m": {
+            "left_finger": {
+              "readback_lower": -2.831220639876175e-10,
+              "readback_upper": 0.036000000283122065,
+              "target_lower": 0.0,
+              "target_upper": 0.036000000000000004
+            },
+            "right_finger": {
+              "readback_lower": 0.036000000283122065,
+              "readback_upper": -2.831220639876175e-10,
+              "target_lower": 0.036000000000000004,
+              "target_upper": 0.0
+            }
+          },
+          "pair_geometry": {
+            "hull_a": {
+              "face_count": 180,
+              "input_point_count": 831,
+              "vertex_count": 92,
+              "volume_m3": 5.558079839086346e-05
+            },
+            "hull_b": {
+              "face_count": 186,
+              "input_point_count": 831,
+              "vertex_count": 95,
+              "volume_m3": 5.558079257238923e-05
+            },
+            "intersection_vertex_count": 0,
+            "method": "normalized convex-hull halfspace feasibility LP; positive margin means volumetric intersection",
+            "overlap_volume_m3": 0.0,
+            "relation": "SEPARATED",
+            "signed_chebyshev_margin_m": -0.0020572823712694506,
+            "tolerance_m": 1e-08
+          },
+          "pair_overlap_volume_m3": 0.0,
+          "readback_m": [
+            0.020999999716877937,
+            -0.020999999716877937
+          ],
+          "readback_numeric_semantics": "SOURCE_DECIMAL_OR_EXACT_FLOAT32_REPRESENTATION",
+          "readback_representable_limits_m": {
+            "left_finger": {
+              "lower": 0.020999999716877937,
+              "upper": 0.05700000002980232
+            },
+            "right_finger": {
+              "lower": -0.05700000002980232,
+              "upper": -0.020999999716877937
+            }
+          },
+          "reset_complete": true,
+          "source_limits_m": {
+            "left_finger": {
+              "lower": 0.021,
+              "upper": 0.057
+            },
+            "right_finger": {
+              "lower": -0.057,
+              "upper": -0.021
+            }
+          },
+          "status": "PASS",
+          "target_m": [
+            0.021,
+            -0.021
+          ]
+        }
+      ],
+      "status": "PASS",
+      "target_m": [
+        0.021,
+        -0.021
+      ],
+      "task8": "NOT_RUN",
+      "visual_evidence_semantics": "SESSION_ONLY_COLLIDER_CLONES; OVERVIEW_FULL_STAGE; CLOSEUP_FINGER_COLLIDERS_ONLY; MACHINE_FAILURE_FROM_ORIGINAL_ATTEMPT3_RECORD",
+      "visual_model_review": "PASS",
+      "visual_model_review_details": {
+        "closeup_left_finger_collider_complete": true,
+        "closeup_right_finger_collider_complete": true,
+        "conclusion": "Full arm visible; both isolated collider clones complete; legal minimum closure preserves a visible gap and machine overlap is zero.",
+        "environment_occlusion_absent_in_isolated_closeup": true,
+        "geometry_state_matches_machine_record": true,
+        "overview_full_arm_visible": true,
+        "reviewer": "Codex vision model"
+      },
+      "visual_retake_history": [
+        {
+          "batch": "attempt3_initial",
+          "status": "REJECTED_NEAR_CLIP_AND_OCCLUSION"
+        },
+        {
+          "batch": "visual_retake_001",
+          "status": "REJECTED_ENVIRONMENT_OCCLUSION"
+        },
+        {
+          "batch": "visual_retake_002",
+          "status": "REJECTED_SAMPLE02_OPEN_APERTURE_CROPPING"
+        },
+        {
+          "batch": "visual_retake_003",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "annotated_screenshot": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/negative_controls_attempt3/visual_retake_003/sample_02_environment_interference/screenshots_annotated/failure_or_control_annotated.png",
+      "annotated_screenshot_sha256": "45b16ee77548e5dcd4b4d32fb778f8fa0e0261d911bf4eb2e244482a6fe70c5d",
+      "camera_metadata": {
+        "closeup": {
+          "clipping_range_m": [
+            0.005,
+            10.0
+          ],
+          "orientation_wxyz": [
+            0.9431998133659363,
+            0.2917868196964264,
+            0.046947576105594635,
+            0.1517578661441803
+          ],
+          "position_world_m": [
+            -0.32662326842560174,
+            -0.5959964963944,
+            0.7974940166546798
+          ],
+          "resolution": [
+            1280,
+            720
+          ],
+          "target_world_m": [
+            -0.466395303606987,
+            -0.17288792878389359,
+            0.1462225466966629
+          ],
+          "visual_scope": "FINGER_COLLIDERS_ONLY"
+        },
+        "overview": {
+          "clipping_range_m": [
+            0.01,
+            20.0
+          ],
+          "orientation_wxyz": [
+            0.26873260736465454,
+            0.16668164730072021,
+            0.5000449419021606,
+            0.8061978816986084
+          ],
+          "position_world_m": [
+            0.5709120633634317,
+            1.415943635328927,
+            1.1319623026635024
+          ],
+          "resolution": [
+            1280,
+            720
+          ],
+          "target_world_m": [
+            -0.5172314941883087,
+            -0.03491444140672684,
+            0.2324302950873971
+          ],
+          "visual_scope": "FULL_STAGE_WITH_COLLIDER_OVERLAY"
+        }
+      },
+      "classification": "IMPORTED_RIGHT_FINGER_LIMIT_ESCAPE_PREEMPTS_LATER_ENVIRONMENT_CONTACT",
+      "contacts": [],
+      "dynamic_failure_raw_screenshots": {
+        "closeup": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/negative_controls_attempt3/sample_02_environment_interference/runtime/video_attempt_001/frames/gripper_closeup/000001.png",
+        "overview": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/negative_controls_attempt3/sample_02_environment_interference/runtime/video_attempt_001/frames/overview/000001.png"
+      },
+      "expected_failure_code": "FINGER_LIMIT_VIOLATION",
+      "frame": 1,
+      "fresh_process": true,
+      "historical_secondary_failure_code": "ENVIRONMENT_CONTACT_FORCED_LIMIT_VIOLATION",
+      "historical_secondary_failure_status": "NOT_REACHED_BECAUSE_FIRST_FRAME_FAILURE_MUST_ABORT",
+      "observed_failure_codes": [
+        "FINGER_LIMIT_VIOLATION"
+      ],
+      "original_attempt3_raw_screenshots": {
+        "closeup": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/negative_controls_attempt3/sample_02_environment_interference/screenshots_raw_collision_visible/closeup_raw.png",
+        "overview": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/negative_controls_attempt3/sample_02_environment_interference/screenshots_raw_collision_visible/overview_raw.png"
+      },
+      "pair_overlap_volume_m3": 0.0,
+      "phase": "VALIDATE",
+      "pose_capture_process": {
+        "command": [
+          "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/bin/python",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/tools/validate_aloha1_grasp_initialization_negative_controls.py",
+          "--pose-capture-q-json",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/negative_controls_attempt3/sample_02_environment_interference/first_failure_joint_readback.json",
+          "--runtime-output",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/negative_controls_attempt3/sample_02_environment_interference/pose_capture_record.json",
+          "--screenshot-root",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/negative_controls_attempt3/sample_02_environment_interference/screenshots_raw_collision_visible"
+        ],
+        "exit_code": 0,
+        "log_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/negative_controls_attempt3/sample_02_environment_interference/pose_capture.log",
+        "process_id": 1790608,
+        "runtime_s": 17.00994287300273,
+        "timed_out": false
+      },
+      "pose_capture_semantics": "FRESH_PROCESS_SESSION_POSE_RECONSTRUCTION_FOR_COLLIDER_VISUALIZATION; AUTHORITATIVE_FAILURE_TELEMETRY_COMES_FROM_DYNAMIC_CONTROL_PROCESS",
+      "process": {
+        "command": [
+          "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/bin/python",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/tools/run_aloha1_grasp_20cm_gui.py",
+          "--config",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/configs/aloha1_grasp_20cm_gui_cad_derived_colliders.yaml",
+          "--autorun",
+          "--close-after-terminal",
+          "--bottle-world-from-object-json",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/negative_controls_attempt3/sample_02_environment_interference/frozen_world_from_object.json",
+          "--initial-arm-q-rad",
+          "-1.6814008541847623",
+          "-0.6315895179221043",
+          "0.9675458983519907",
+          "0.13204030444106754",
+          "1.2440127928906353",
+          "-1.370775202960429",
+          "--initial-pose-hold-frames",
+          "60",
+          "--arm-phase-readback-tolerance-rad",
+          "0.02",
+          "--arm-trajectory-mode",
+          "LULA_CSPACE_ACCELERATION_LIMITED",
+          "--arm-acceleration-limits-rad-s2",
+          "5.0",
+          "5.0",
+          "5.0",
+          "5.0",
+          "5.0",
+          "5.0",
+          "--artifact-root",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/negative_controls_attempt3/sample_02_environment_interference/runtime",
+          "--skip-collider-evidence"
+        ],
+        "exit_code": 0,
+        "log_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/negative_controls_attempt3/sample_02_environment_interference/runtime.log",
+        "process_id": 1789418,
+        "runtime_s": 17.612127358006546,
+        "timed_out": false
+      },
+      "raw_closeup_screenshot_sha256": "2d662bac92fe5a8131cbff6219b66fedf6742d7365a14cdb4ceb3428f1220a6d",
+      "raw_screenshot": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/negative_controls_attempt3/visual_retake_003/sample_02_environment_interference/screenshots_raw/overview_raw.png",
+      "raw_screenshot_sha256": "710ae76e87b8bc956397e7e6287d57271f16259e2e5e1d350ec5a6f1813d1b38",
+      "raw_screenshots": {
+        "camera_metadata": {
+          "closeup": {
+            "clipping_range_m": [
+              0.005,
+              10.0
+            ],
+            "orientation_wxyz": [
+              0.9431998133659363,
+              0.2917868196964264,
+              0.046947576105594635,
+              0.1517578661441803
+            ],
+            "position_world_m": [
+              -0.32662326842560174,
+              -0.5959964963944,
+              0.7974940166546798
+            ],
+            "resolution": [
+              1280,
+              720
+            ],
+            "target_world_m": [
+              -0.466395303606987,
+              -0.17288792878389359,
+              0.1462225466966629
+            ],
+            "visual_scope": "FINGER_COLLIDERS_ONLY"
+          },
+          "overview": {
+            "clipping_range_m": [
+              0.01,
+              20.0
+            ],
+            "orientation_wxyz": [
+              0.26873260736465454,
+              0.16668164730072021,
+              0.5000449419021606,
+              0.8061978816986084
+            ],
+            "position_world_m": [
+              0.5709120633634317,
+              1.415943635328927,
+              1.1319623026635024
+            ],
+            "resolution": [
+              1280,
+              720
+            ],
+            "target_world_m": [
+              -0.5172314941883087,
+              -0.03491444140672684,
+              0.2324302950873971
+            ],
+            "visual_scope": "FULL_STAGE_WITH_COLLIDER_OVERLAY"
+          }
+        },
+        "closeup": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/negative_controls_attempt3/visual_retake_003/sample_02_environment_interference/screenshots_raw/closeup_raw.png",
+        "overview": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/negative_controls_attempt3/visual_retake_003/sample_02_environment_interference/screenshots_raw/overview_raw.png"
+      },
+      "readback_m": [
+        0.056548211723566055,
+        -0.057467974722385406
+      ],
+      "runtime_report_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/negative_controls_attempt3/sample_02_environment_interference/runtime/aloha1_grasp_20cm_runtime.json",
+      "scenario": "SAMPLE_02_ENVIRONMENT_INTERFERENCE",
+      "source_or_final_asset_modified": false,
+      "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "stage_immutable": true,
+      "stage_sha256": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9",
+      "status": "EXPECTED_FAIL_OBSERVED",
+      "target_m": [
+        0.057,
+        -0.057
+      ],
+      "task8": "NOT_RUN",
+      "telemetry_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-five-pose-finger-safety/negative_controls_attempt3/sample_02_environment_interference/runtime/aloha1_grasp_20cm_telemetry.jsonl",
+      "visual_evidence_semantics": "SESSION_ONLY_COLLIDER_CLONES; OVERVIEW_FULL_STAGE; CLOSEUP_FINGER_COLLIDERS_ONLY; MACHINE_FAILURE_FROM_ORIGINAL_ATTEMPT3_RECORD",
+      "visual_model_review": "PASS",
+      "visual_model_review_details": {
+        "closeup_left_finger_collider_complete": true,
+        "closeup_right_finger_collider_complete": true,
+        "conclusion": "Full arm visible; both isolated collider clones complete at near-maximum aperture; no pair overlap; right-finger source-limit escape is established by frame-1 telemetry, not inferred from pixels.",
+        "environment_occlusion_absent_in_isolated_closeup": true,
+        "geometry_state_matches_machine_record": true,
+        "overview_full_arm_visible": true,
+        "reviewer": "Codex vision model"
+      },
+      "visual_retake_history": [
+        {
+          "batch": "attempt3_initial",
+          "status": "REJECTED_NEAR_CLIP_AND_OCCLUSION"
+        },
+        {
+          "batch": "visual_retake_001",
+          "status": "REJECTED_ENVIRONMENT_OCCLUSION"
+        },
+        {
+          "batch": "visual_retake_002",
+          "status": "REJECTED_SAMPLE02_OPEN_APERTURE_CROPPING"
+        },
+        {
+          "batch": "visual_retake_003",
+          "status": "PASS"
+        }
+      ]
+    }
+  ],
+  "failed_controls": [],
+  "gates": {
+    "ILLEGAL_Q_ZERO": {
+      "annotated_screenshot_recorded": true,
+      "expected_classification": true,
+      "fresh_process": true,
+      "raw_screenshot_recorded": true,
+      "stage_immutable": true,
+      "visual_model_review_pass": true
+    },
+    "LEGAL_OPEN_CLOSE_SWEEP": {
+      "annotated_screenshot_recorded": true,
+      "expected_classification": true,
+      "fresh_process": true,
+      "raw_screenshot_recorded": true,
+      "stage_immutable": true,
+      "visual_model_review_pass": true
+    },
+    "SAMPLE_02_ENVIRONMENT_INTERFERENCE": {
+      "annotated_screenshot_recorded": true,
+      "expected_classification": true,
+      "fresh_process": true,
+      "raw_screenshot_recorded": true,
+      "stage_immutable": true,
+      "visual_model_review_pass": true
+    },
+    "STATIC_LOAD_WITHOUT_RESET": {
+      "annotated_screenshot_recorded": true,
+      "expected_classification": true,
+      "fresh_process": true,
+      "raw_screenshot_recorded": true,
+      "stage_immutable": true,
+      "visual_model_review_pass": true
+    }
+  },
+  "reason": "MACHINE_AND_PER_IMAGE_VISUAL_GATES_PASS",
+  "schema_version": 1,
+  "source_or_final_asset_modified": false,
+  "status": "PASS",
+  "task8": "NOT_RUN",
+  "visual_review_batch": "visual_retake_003"
+}
