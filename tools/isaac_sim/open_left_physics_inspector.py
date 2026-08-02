@@ -116,6 +116,24 @@ async def _bind_single_panel(app, context, inspector_window, stage) -> list[str]
     return paths
 
 
+async def _clear_transient_selection(app, context, inspector_window) -> None:
+    context.get_selection().set_selected_prim_paths([], False)
+    for _ in range(20):
+        await app.next_update_async()
+    stage_selection = context.get_selection().get_selected_prim_paths()
+    inspector_selection = inspector_window._handler_selection.get_selection()
+    if stage_selection or inspector_selection:
+        raise RuntimeError(
+            "Inspector interaction selection did not clear: "
+            f"stage={stage_selection} inspector={inspector_selection}"
+        )
+    print(
+        "CODEX_INSPECTOR_INTERACTION_SELECTION_CLEARED "
+        "stage_count=0 inspector_count=0",
+        flush=True,
+    )
+
+
 async def _prepare_left_inspector() -> None:
     app = omni.kit.app.get_app()
     timeline = omni.timeline.get_timeline_interface()
@@ -258,11 +276,27 @@ async def _prepare_left_inspector() -> None:
             f"state={final_state.name} recoveries={guard.recoveries}",
             flush=True,
         )
+        await _clear_transient_selection(app, context, inspector_window)
+        rows_after_clear = _collect_inspector_rows(inspector_window._model_inspector)
+        joint_rows_after_clear = [
+            (name, path) for name, path in rows_after_clear if "/joints/" in path
+        ]
+        state_after_clear = inspector_window._supportui_private.get_inspector_state()
+        if len(joint_rows_after_clear) < EXPECTED_JOINT_ROWS:
+            raise RuntimeError(
+                "Inspector lost joint rows after clearing interaction selection: "
+                f"{len(joint_rows_after_clear)}"
+            )
+        if state_after_clear != pxsupportui.PhysXInspectorModelState.AUTHORING:
+            raise RuntimeError(
+                "Inspector left AUTHORING after clearing interaction selection: "
+                f"{state_after_clear}"
+            )
         print(
             "CODEX_SINGLE_INSPECTOR_ACCEPTED "
             f"paths={selected_paths} label={selected_label} "
             f"control={control_type} quasi_static={quasi_static} "
-            f"fix_base={fix_base} gravity={gravity}",
+            f"fix_base={fix_base} gravity={gravity} interaction_selection=0",
             flush=True,
         )
     except Exception as exc:
