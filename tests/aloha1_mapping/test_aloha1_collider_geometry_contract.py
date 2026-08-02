@@ -39,6 +39,12 @@ def test_explicit_source_boundaries_remove_false_cad_identity_blockers() -> None
     assert contract["supplier_finger_decomposition_comparison"] == ("DECOMPOSITION_MIXED_OR_WORSE")
     assert contract["supplier_finger_exact_asset_decision"] == ("REJECTED_EXACT_CAD_CONTACT_GATE")
     assert contract["supplier_finger_task_local_acceptance"] == ("HARD_BLOCKER_NOT_DERIVED_OR_MEASURED")
+    assert contract["supplier_finger_task_contact_band_status"] == (
+        "FAIL_CENTRAL_TANGENCY_OUTSIDE_COMPOUND_PATCH"
+    )
+    assert contract["supplier_finger_task_contact_band_decision"] == (
+        "REJECTED_TASK_CONTACT_BAND_NOT_PROMOTED"
+    )
 
 
 def test_report_matches_deterministic_contract() -> None:
@@ -62,5 +68,6 @@ def test_compound_contact_candidate_is_recorded_without_promotion() -> None:
     assert contract["supplier_finger_compound_full_face_scope"] == ("PARTIAL_CONTACT_REGION_ONLY")
     assert contract["supplier_finger_compound_usd_status"] == ("PASS_GEOMETRY_ONLY_DIAGNOSTIC_USD")
     assert contract["supplier_finger_compound_usd_piece_count"] == 68
+    assert contract["supplier_finger_task_contact_band_minimum_patch_miss_m"] > 0.0015
     assert contract["formal_candidate_gate"] == "BLOCKED"
     assert contract["final_or_default_asset_modified"] is False

@@ -50,6 +50,10 @@ def build_contract(root: Path) -> dict[str, object]:
         root,
         "reports/aloha1_mapping/aloha1_supplier_cad_compound_contact_usd.json",
     )
+    task_band_path, task_band = _load(
+        root,
+        "reports/aloha1_mapping/aloha1_bottle_swept_contact_band_collider_certificate.json",
+    )
     if resolution["status"] != "PASS":
         raise ValueError("CAD/link source resolution must pass")
     historical_identity_blockers = geometry["identity_blockers"]
@@ -67,6 +71,7 @@ def build_contract(root: Path) -> dict[str, object]:
             (finger_brep_path, finger_brep),
             (compound_runtime_path, compound_runtime),
             (compound_usd_path, compound_usd),
+            (task_band_path, task_band),
         )
     ]
     contract: dict[str, object] = {
@@ -109,9 +114,18 @@ def build_contract(root: Path) -> dict[str, object]:
         "supplier_finger_compound_usd_status": compound_usd["status"],
         "supplier_finger_compound_usd_piece_count": compound_usd["readback"]["collision_piece_count"],
         "supplier_finger_compound_asset_decision": compound_usd["asset_decision"],
+        "supplier_finger_task_contact_band_status": task_band[
+            "task_contact_band"
+        ]["status"],
+        "supplier_finger_task_contact_band_decision": task_band[
+            "candidate_decision"
+        ],
+        "supplier_finger_task_contact_band_minimum_patch_miss_m": task_band[
+            "known_numerical_error_budget"
+        ]["minimum_patch_miss_m"],
         "formal_candidate_gate": "BLOCKED",
         "final_or_default_asset_modified": False,
-        "interpretation": "The former bar/prop/wrist identity blockers are resolved by explicit source boundaries: the supplier STEP remains fused/invalid where observed, while byte-identical pinned Interbotix link meshes provide robot-description geometry. Every physical link has a deterministic finite-sample convex-hull surface/volume certificate. Exact trimmed B-Rep sampling proves that both the current single hull and default 32-piece decomposition cross the inward CAD face; neither is promoted. A CAD-derived compound candidate now passes two fresh finger-link-local PhysX cooking runs for its central contact rectangle, and its 68-piece geometry-only USD is byte-deterministic. This resolves the local crossing construction without fitting successful grasp data, but the candidate explicitly covers only the central contact region and is not integrated into an articulation. The contract remains PARTIAL because full effective contact-surface/task-local acceptance and remaining physical dynamics mappings are not yet proven.",
+        "interpretation": "The former bar/prop/wrist identity blockers are resolved by explicit source boundaries: the supplier STEP remains fused/invalid where observed, while byte-identical pinned Interbotix link meshes provide robot-description geometry. Every physical link has a deterministic finite-sample convex-hull surface/volume certificate. Exact trimmed B-Rep sampling proves that both the current single hull and default 32-piece decomposition cross the inward CAD face; neither is promoted. A CAD-derived compound candidate passes two fresh finger-link-local PhysX cooking runs for its finite central rectangle, and its 68-piece geometry-only USD is byte-deterministic. The newer task-contact-band certificate proves that the analytic Bottle500 tangent is on the infinite CAD plane but about 1.61 mm outside that finite rectangle on both handed fingers. The compound candidate is therefore rejected for this task without using grasp success or changing the final/default collider. The contract remains PARTIAL because a corrected finite task band, complete contact-envelope readback, and remaining physical dynamics mappings are not yet proven.",
     }
     contract["deterministic_signature"] = hashlib.sha256(
         json.dumps(contract, sort_keys=True, separators=(",", ":")).encode()
@@ -134,6 +148,7 @@ def _markdown(contract: dict[str, Any]) -> str:
             f"- Default decomposition comparison: **{contract['supplier_finger_decomposition_comparison']}**",
             f"- Compound central contact region: **{contract['supplier_finger_compound_runtime_status']}**",
             f"- Compound geometry-only USD: **{contract['supplier_finger_compound_usd_status']}**",
+            f"- Bottle500 finite task contact band: **{contract['supplier_finger_task_contact_band_status']}**",
             "",
             "The supplier STEP remains authoritative for the geometry it exposes, and its fused "
             "gripper/invalid wrist boundaries are preserved. Byte-identical pinned Interbotix "
@@ -143,10 +158,13 @@ def _markdown(contract: dict[str, Any]) -> str:
             "single hull and default decomposition. All four profiles cross the inward CAD face "
             "beyond the derived numerical floor; decomposition is mixed/worse across handed "
             "sides. A CAD-derived compound candidate then removes inward-plane crossing within "
-            "a central contact rectangle in two fresh finger-link-local PhysX cooking runs. Its "
-            "68-piece geometry-only USD is deterministic, but full-face scope and articulation "
-            "integration remain incomplete. Promotion remains blocked because the effective "
-            "task contact surface and remaining physical mappings are not fully proven; "
+            "a finite central contact rectangle in two fresh finger-link-local PhysX cooking "
+            "runs. Its 68-piece geometry-only USD is deterministic. A signed Bottle500 task "
+            "certificate now proves that the analytic tangency is on the infinite CAD plane "
+            "but about 1.61 mm outside that finite patch on both fingers, so the candidate is "
+            "rejected rather than promoted. Articulation integration remains incomplete. "
+            "Promotion remains blocked because a corrected effective task contact surface and "
+            "remaining physical mappings are not fully proven; "
             "successful grasp videos were not used to fit a tolerance. "
             "Existing static/swept tests remain rejection evidence. "
             "No collider is accepted because a grasp happened to pass, and no final/default asset "

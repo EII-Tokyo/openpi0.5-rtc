@@ -2,6 +2,7 @@
 
 - Status: **PARTIAL_MODEL_PROOF**
 - Compound central contact region: **PASS_RUNTIME_COOKED_CONTACT_REGION_GEOMETRY_NOT_PROMOTED**
+- Bottle500 finite task contact band: **FAIL_CENTRAL_TANGENCY_OUTSIDE_COMPOUND_PATCH**
 - Coordinate frame: `FINGER_LINK_LOCAL_METRES`
 - Full effective contact surface: **PARTIAL_CONTACT_REGION_ONLY**
 - Geometry-only USD: **PASS_GEOMETRY_ONLY_DIAGNOSTIC_USD**
@@ -13,7 +14,7 @@
 
 ## Verified boundary
 
-The supplier-CAD central finger contact region is now proven in finger-link-local metres through two fresh Isaac 5.1 cooking processes, and the geometry-only USD is byte-identical across two fresh builds. This does not prove the complete effective finger contact surface, articulation integration, contact dynamics, calibrated drives, or material/solver mappings. The diagnostic candidate is therefore not promoted and the final/default asset remains unchanged.
+The supplier-CAD finite central rectangle cooks deterministically in finger-link-local metres through two fresh Isaac 5.1 processes, and the geometry-only USD is byte-identical across two fresh builds. The analytic Bottle500 tangent is nevertheless about 1.61 mm outside that finite patch on both handed fingers. The diagnostic candidate is rejected for the task contact band and is not promoted. This does not prove a corrected effective finger contact surface, articulation integration, contact dynamics, calibrated drives, or material/solver mappings; the final/default asset remains unchanged.
 
 This was a static collision-cooking and geometry-authoring check. No timeline was started, so a video would not provide additional physical evidence. The rejected exact-ray attempt and its annotated numerical-quantization screenshot remain part of the evidence trail.
 

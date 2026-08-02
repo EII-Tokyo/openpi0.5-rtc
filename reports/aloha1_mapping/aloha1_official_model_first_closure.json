@@ -5,9 +5,11 @@
   "compound_contact_region_coordinate_frame": "FINGER_LINK_LOCAL_METRES",
   "compound_contact_region_status": "PASS_RUNTIME_COOKED_CONTACT_REGION_GEOMETRY_NOT_PROMOTED",
   "compound_full_face_scope": "PARTIAL_CONTACT_REGION_ONLY",
+  "compound_task_contact_band_decision": "REJECTED_TASK_CONTACT_BAND_NOT_PROMOTED",
+  "compound_task_contact_band_status": "FAIL_CENTRAL_TANGENCY_OUTSIDE_COMPOUND_PATCH",
   "compound_usd_status": "PASS_GEOMETRY_ONLY_DIAGNOSTIC_USD",
   "compound_video_status": "NOT_APPLICABLE_STATIC_COOKING_ONLY",
-  "deterministic_signature": "7da44b6f2b994ec077e2bf0d02681786eea8933ece43d59e224664b5addb1d1d",
+  "deterministic_signature": "459687601eebf65138ed1b9ad0647f574629ab80c4eb53d666e145ad08b8c2fe",
   "dynamics_contract_status": "PARTIAL",
   "evidence_boundaries": {
     "diagnostic_asset_redistribution": "UNKNOWN_HARD_BLOCKER_SUPPLIER_CAD_LICENSE",
@@ -102,17 +104,17 @@
   ],
   "inputs": [
     {
-      "deterministic_signature": "ed69318a0450fdd57127f8cfecf55563a3e96b9cd04ebd7d1a4340fd8d6a68ed",
+      "deterministic_signature": "21444d8b38b5e8216999970f8d3eba678be0503ce745278c11176e5821e85c55",
       "id": "official_parameter_source_audit",
       "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_official_parameter_source_audit.json",
-      "sha256": "55e8e00fad593c92ef6b1a475af7af89eed6969b7d9abf05d5b1119f36107e95",
+      "sha256": "dee3ba07f3248fec8dcd6ec88e10156e7da6cb772df1ce77ead245461cafe4c4",
       "status": "PASS"
     },
     {
-      "deterministic_signature": "9712c2e43eb0c56baa7c6039eca214bfc39afbb1f6eda65261038f29a8df3b9e",
+      "deterministic_signature": "8267538e586c6e839de5ab1cac60088ea6640e61e4aa96ee6c2dcc79c1dde8db",
       "id": "official_parameter_matrix",
       "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_official_parameter_matrix.json",
-      "sha256": "d0adf5f84a5a0b7f098a0dacbd48da14a37cb3d07465cd639227048a3e31d178",
+      "sha256": "09df03d3f1c84536fc58a65f13cf8fa4d8b8768b216b01f0de43dfb98c46d6ae",
       "status": "PASS"
     },
     {
@@ -123,10 +125,10 @@
       "status": "PASS"
     },
     {
-      "deterministic_signature": "f0bd780f2ccf1563f4c66c6e0ca9bcd98e55323fe8c5881529932709caf19c24",
+      "deterministic_signature": "01ef4c411d6bb2e14ab4723feed5f68eb65813670d359588bd68472f5e2ff3b6",
       "id": "dynamics_contract",
       "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_dynamics_contract.json",
-      "sha256": "79f697a07054507e4644420664c05b7f42b3e355260124587a2fdab4343e6855",
+      "sha256": "e6a3b0232f9ed8cba65e48c985317bf68b5b477c5c7f712eada576e7a020bb8b",
       "status": "PARTIAL"
     },
     {
@@ -137,10 +139,10 @@
       "status": "PASS"
     },
     {
-      "deterministic_signature": "78717ac316855f20becfd89ba935b730d5a962f49f84787a4e5842d3a9ea30f6",
+      "deterministic_signature": "5d4bdb5023ad131c4ade9975420133f5d5bfa1eb1e9f1003166407f53cade5c9",
       "id": "collider_geometry_contract",
       "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_collider_geometry_contract.json",
-      "sha256": "67139c0278b9dba90b3b8576ab7e64206b5394817daf291b37c58bfa48d928d1",
+      "sha256": "d5768916d0d1d846d7367f83bc5ba60d58f5a4585eec177ceced951411f70f6c",
       "status": "PARTIAL"
     },
     {
@@ -158,6 +160,13 @@
       "status": "PASS_GEOMETRY_ONLY_DIAGNOSTIC_USD"
     },
     {
+      "deterministic_signature": "c086e003a3ea9da8b5a5cac8e96afb391ba6ed3ef2192a0ca7141d0f0dbadd75",
+      "id": "compound_task_contact_band",
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_bottle_swept_contact_band_collider_certificate.json",
+      "sha256": "bf19e8836ebf2dc37cd0ec5d0e6cbbb4afda1c1646a7dbdd7f5d34f0cac38a8b",
+      "status": "PASS_DETERMINISTIC_REJECTION"
+    },
+    {
       "deterministic_signature": "02fc7c0216190d37768c41a65960c77ffb6b8f4d4c1aa11c6c557430c38430c9",
       "id": "official_model_candidate",
       "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_official_model_candidate.json",
@@ -172,7 +181,7 @@
       "status": "NOT_RUN"
     }
   ],
-  "interpretation": "The supplier-CAD central finger contact region is now proven in finger-link-local metres through two fresh Isaac 5.1 cooking processes, and the geometry-only USD is byte-identical across two fresh builds. This does not prove the complete effective finger contact surface, articulation integration, contact dynamics, calibrated drives, or material/solver mappings. The diagnostic candidate is therefore not promoted and the final/default asset remains unchanged.",
+  "interpretation": "The supplier-CAD finite central rectangle cooks deterministically in finger-link-local metres through two fresh Isaac 5.1 processes, and the geometry-only USD is byte-identical across two fresh builds. The analytic Bottle500 tangent is nevertheless about 1.61 mm outside that finite patch on both handed fingers. The diagnostic candidate is rejected for the task contact band and is not promoted. This does not prove a corrected effective finger contact surface, articulation integration, contact dynamics, calibrated drives, or material/solver mappings; the final/default asset remains unchanged.",
   "official_model_candidate_status": "NOT_BUILT_BLOCKED",
   "official_model_runtime_status": "NOT_RUN",
   "remaining_blocker_count": 5,

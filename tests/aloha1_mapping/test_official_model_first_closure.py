@@ -14,6 +14,12 @@ def test_closure_keeps_model_gate_partial_and_candidate_unpromoted() -> None:
     assert closure["compound_contact_region_status"] == (
         "PASS_RUNTIME_COOKED_CONTACT_REGION_GEOMETRY_NOT_PROMOTED"
     )
+    assert closure["compound_task_contact_band_status"] == (
+        "FAIL_CENTRAL_TANGENCY_OUTSIDE_COMPOUND_PATCH"
+    )
+    assert closure["compound_task_contact_band_decision"] == (
+        "REJECTED_TASK_CONTACT_BAND_NOT_PROMOTED"
+    )
     assert closure["compound_usd_status"] == "PASS_GEOMETRY_ONLY_DIAGNOSTIC_USD"
     assert closure["collider_contract_status"] == "PARTIAL"
     assert closure["official_model_candidate_status"] == "NOT_BUILT_BLOCKED"

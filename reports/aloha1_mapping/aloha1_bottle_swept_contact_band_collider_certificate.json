@@ -1,0 +1,240 @@
+{
+  "bottle500": {
+    "cad_axis": "+Z",
+    "constant_radius_interval_mm": [
+      18.0,
+      120.0
+    ],
+    "contact_axial_station_mm": 69.0,
+    "geometry_authority": "PROJECT_AUTHORED_ANALYTIC_BREP",
+    "outer_radius_mm": 32.2,
+    "physical_bottle_equivalence_claimed": false
+  },
+  "candidate_decision": "REJECTED_TASK_CONTACT_BAND_NOT_PROMOTED",
+  "candidate_promoted": false,
+  "clearance_evidence": {
+    "five_pose_swept_report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_cad_derived_five_pose_swept_collision.json",
+    "five_pose_unexpected_overlap_waypoints": 0,
+    "gripper_bar_minimum_m": 0.023429990977369225,
+    "supplier_shell_minimum_m": 0.030854987925609367
+  },
+  "deterministic_signature": "c086e003a3ea9da8b5a5cac8e96afb391ba6ed3ef2192a0ca7141d0f0dbadd75",
+  "final_or_default_collider_modified": false,
+  "fingers": {
+    "left": {
+      "analytic_bottle_tangent_point_gripper_reference_m": [
+        0.13552080444282988,
+        0.03202360503085841,
+        -1.8360058992504723e-17
+      ],
+      "authoritative_contact_normal_gripper_reference": [
+        -0.10452846326765405,
+        -0.9945218953682733,
+        5.701881674690907e-16
+      ],
+      "candidate_rectangle_gripper_reference_m": [
+        [
+          0.137125706340903,
+          0.03185492304418501,
+          0.005882873888229445
+        ],
+        [
+          0.13712570634090276,
+          0.031854923044185024,
+          -0.009113552419417692
+        ],
+        [
+          0.1470947289068622,
+          0.030807136551043567,
+          -0.009113552419417859
+        ],
+        [
+          0.14709472890686243,
+          0.030807136551043553,
+          0.005882873888229334
+        ]
+      ],
+      "center_tangent_point_inside_cooked_patch": false,
+      "center_tangent_point_on_cad_plane": true,
+      "closest_rectangle_point_m": [
+        0.1371257063409029,
+        0.03185492304418502,
+        -4.2500725161431774e-17
+      ],
+      "contact_line_intersection_length_m": 0.0,
+      "contact_q_m": 0.048316874538855845,
+      "cooked_contact_normal_max_error_deg": 1.7075472925031877e-06,
+      "inside_finite_rectangle": false,
+      "legal_q_range_m": [
+        0.021,
+        0.057
+      ],
+      "maximum_cooking_surface_quantization_m": 2.9952079290325222e-09,
+      "maximum_outward_crossing_m": 2.9111855461005935e-10,
+      "minimum_in_plane_distance_to_rectangle_m": 0.001613742146399629,
+      "mirror_used": false,
+      "numeric_tolerance_m": 4.76837158203125e-07,
+      "plane_signed_distance_m": 6.175536671168739e-18,
+      "point_on_plane": true,
+      "projected_point_m": [
+        0.13552080444282988,
+        0.03202360503085842,
+        -1.8360058992504726e-17
+      ],
+      "rectangle_coordinates": [
+        0.3922850529548917,
+        -0.16098889208588968
+      ],
+      "rectangle_edge_lengths_m": [
+        0.014996426307647137,
+        0.01002393472922775
+      ],
+      "rectangle_edge_orthogonality_error": 3.74640018359617e-15,
+      "supplier_handed_brep": true,
+      "transform": {
+        "determinant": 1.0,
+        "orthonormal_residual": 0.0,
+        "roundtrip_residual_m": 0.0
+      }
+    },
+    "right": {
+      "analytic_bottle_tangent_point_gripper_reference_m": [
+        0.13552080444282988,
+        -0.03202360503085841,
+        5.561549838518037e-17
+      ],
+      "authoritative_contact_normal_gripper_reference": [
+        -0.10452846326765403,
+        0.9945218953682733,
+        -1.7271893908441104e-15
+      ],
+      "candidate_rectangle_gripper_reference_m": [
+        [
+          0.13712570393090767,
+          -0.03185492329748573,
+          -0.005882885707656715
+        ],
+        [
+          0.1371257039309079,
+          -0.031854923297485675,
+          0.009113551577510204
+        ],
+        [
+          0.1470947313062228,
+          -0.030807136298860605,
+          0.009113551577510037
+        ],
+        [
+          0.14709473130622258,
+          -0.030807136298860657,
+          -0.005882885707656882
+        ]
+      ],
+      "center_tangent_point_inside_cooked_patch": false,
+      "center_tangent_point_on_cad_plane": true,
+      "closest_rectangle_point_m": [
+        0.13712570393090776,
+        -0.03185492329748571,
+        3.122502256758253e-17
+      ],
+      "contact_line_intersection_length_m": 0.0,
+      "contact_q_m": -0.048316874538855845,
+      "cooked_contact_normal_max_error_deg": 3.078324659199975e-06,
+      "inside_finite_rectangle": false,
+      "legal_q_range_m": [
+        -0.057,
+        -0.021
+      ],
+      "maximum_cooking_surface_quantization_m": 0.0,
+      "maximum_outward_crossing_m": 6.365104554539868e-10,
+      "minimum_in_plane_distance_to_rectangle_m": 0.001613739723129554,
+      "mirror_used": false,
+      "numeric_tolerance_m": 4.76837158203125e-07,
+      "plane_signed_distance_m": 1.515533286491028e-18,
+      "point_on_plane": true,
+      "projected_point_m": [
+        0.13552080444282988,
+        -0.03202360503085841,
+        5.561549838518037e-17
+      ],
+      "rectangle_coordinates": [
+        0.39228555394790665,
+        -0.16098857267178407
+      ],
+      "rectangle_edge_lengths_m": [
+        0.01499643728516692,
+        0.010023939565074493
+      ],
+      "rectangle_edge_orthogonality_error": 1.5012693638557614e-15,
+      "supplier_handed_brep": true,
+      "transform": {
+        "determinant": 1.0,
+        "orthonormal_residual": 0.0,
+        "roundtrip_residual_m": 0.0
+      }
+    }
+  },
+  "grasp_success_used_to_set_tolerance": false,
+  "grasp_video_used": false,
+  "inputs": {
+    "bottle_build_script": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/bottle_500ml/scripts/build_bottle_freecad.py",
+      "sha256": "b077b03839b8d3e7395a98fe85d8388ed8553d344300f97cd4886c83771e7945"
+    },
+    "compound_candidate_report": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_supplier_cad_compound_contact_candidate.json",
+      "sha256": "6deba2409758c4d03a3556029188a4a9c45316e15cda930e9107ec46b25e3336"
+    },
+    "compound_geometry": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/cad_compound_contact_candidate/compound_geometry_finger_link_local.json",
+      "sha256": "af270fd586ce5173d49c43093ed77d090eeb55ac9459c37d589e6c54373594e2"
+    },
+    "compound_runtime_certificate": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_supplier_cad_compound_runtime_cooking_certificate.json",
+      "sha256": "ccc1d81bf05e60c262172327e0f685c96e4306312fe6098c8516d5586d173f12"
+    },
+    "contact_semantics": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_contact_semantics.json",
+      "sha256": "51b159fc88fd246f00508f17883d3d46be65dc72db634200a279f537496c6b06"
+    },
+    "grasp_clearance": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_supplier_cad_grasp_clearance.json",
+      "sha256": "9f23974af362dc92134a38633180360bfff8b54bc0a5eaefae8032e2240b91bc"
+    },
+    "runtime_cooked_run": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/cad_compound_contact_candidate/runtime_cooking_finger_link_local/run1.json",
+      "sha256": "ca4ec630519f5bb104d895e2607ebb77c258e74cd0d5294ad78da7a51bee6be1"
+    }
+  },
+  "known_numerical_error_budget": {
+    "brep_float_comparison_allowance_m": 4.76837158203125e-07,
+    "combination": "CONSERVATIVE_SUM_OF_INDEPENDENT_KNOWN_TERMS",
+    "complete_runtime_contact_envelope_budget": "PARTIAL",
+    "contact_offset_readback": "NOT_EXPOSED_BY_LOCAL_107_3_USD_READBACK",
+    "known_sum_m": 0.00020047983236613217,
+    "maximum_physx_cooking_surface_quantization_m": 2.9952079290325222e-09,
+    "maximum_transform_roundtrip_residual_m": 0.0,
+    "minimum_patch_miss_m": 0.001613739723129554,
+    "minimum_patch_miss_to_known_sum_ratio": 8.049386833995424,
+    "physical_bottle_geometry": "OUT_OF_SCOPE_PROJECT_CAD_IS_DIGITAL_GEOMETRY_AUTHORITY",
+    "rest_offset_readback": "UNAUTHORED_RIGID_BODY_SCHEMA_ZERO_SEMANTICS",
+    "visual_tessellation_deflection_m": 0.0002
+  },
+  "runtime": {
+    "cooking_readback_only": true,
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physx": "107.3.26"
+  },
+  "schema_version": 1,
+  "scope": "BOTTLE500_ANALYTIC_TANGENCY_VS_FINITE_COOKED_COMPOUND_PATCH",
+  "status": "PASS_DETERMINISTIC_REJECTION",
+  "task_contact_band": {
+    "central_tangency_is_sufficient_for_full_band": false,
+    "central_tangency_required": true,
+    "left_right_miss_asymmetry_m": 2.423270075053996e-09,
+    "reason": "The analytic Bottle500 tangent lies on each infinite supplier-CAD inner plane but outside the finite compound contact rectangle. The candidate therefore fails before any axial-band-length claim.",
+    "status": "FAIL_CENTRAL_TANGENCY_OUTSIDE_COMPOUND_PATCH"
+  },
+  "timeline_started": false
+}

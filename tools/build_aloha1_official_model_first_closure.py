@@ -21,6 +21,7 @@ INPUT_REPORTS = {
     "collider_geometry_contract": "aloha1_collider_geometry_contract.json",
     "compound_runtime_cooking": "aloha1_supplier_cad_compound_runtime_cooking_certificate.json",
     "compound_geometry_usd": "aloha1_supplier_cad_compound_contact_usd.json",
+    "compound_task_contact_band": "aloha1_bottle_swept_contact_band_collider_certificate.json",
     "official_model_candidate": "aloha1_official_model_candidate.json",
     "official_model_runtime": "aloha1_official_model_runtime.json",
 }
@@ -56,6 +57,7 @@ def build_closure(root: Path) -> dict[str, object]:
     collider = reports["collider_geometry_contract"]
     cooking = reports["compound_runtime_cooking"]
     compound_usd = reports["compound_geometry_usd"]
+    task_band = reports["compound_task_contact_band"]
     candidate = reports["official_model_candidate"]
     runtime = reports["official_model_runtime"]
 
@@ -81,6 +83,10 @@ def build_closure(root: Path) -> dict[str, object]:
             "compound_usd_fresh_build_determinism": compound_usd["determinism"]["status"],
         },
         "compound_contact_region_status": cooking["status"],
+        "compound_task_contact_band_status": task_band["task_contact_band"][
+            "status"
+        ],
+        "compound_task_contact_band_decision": task_band["candidate_decision"],
         "compound_contact_region_coordinate_frame": cooking["coordinate_frame"],
         "compound_full_face_scope": collider["supplier_finger_compound_full_face_scope"],
         "compound_usd_status": compound_usd["status"],
@@ -104,12 +110,13 @@ def build_closure(root: Path) -> dict[str, object]:
             )
         ),
         "interpretation": (
-            "The supplier-CAD central finger contact region is now proven in finger-link-local "
-            "metres through two fresh Isaac 5.1 cooking processes, and the geometry-only USD is "
-            "byte-identical across two fresh builds. This does not prove the complete effective "
+            "The supplier-CAD finite central rectangle cooks deterministically in finger-link-local "
+            "metres through two fresh Isaac 5.1 processes, and the geometry-only USD is byte-identical "
+            "across two fresh builds. The analytic Bottle500 tangent is nevertheless about 1.61 mm "
+            "outside that finite patch on both handed fingers. The diagnostic candidate is rejected "
+            "for the task contact band and is not promoted. This does not prove a corrected effective "
             "finger contact surface, articulation integration, contact dynamics, calibrated drives, "
-            "or material/solver mappings. The diagnostic candidate is therefore not promoted and "
-            "the final/default asset remains unchanged."
+            "or material/solver mappings; the final/default asset remains unchanged."
         ),
         "evidence_boundaries": {
             "static_cooking_only": True,
@@ -136,6 +143,7 @@ def _markdown(report: dict[str, Any]) -> str:
             "",
             f"- Status: **{report['status']}**",
             f"- Compound central contact region: **{report['compound_contact_region_status']}**",
+            f"- Bottle500 finite task contact band: **{report['compound_task_contact_band_status']}**",
             f"- Coordinate frame: `{report['compound_contact_region_coordinate_frame']}`",
             f"- Full effective contact surface: **{report['compound_full_face_scope']}**",
             f"- Geometry-only USD: **{report['compound_usd_status']}**",

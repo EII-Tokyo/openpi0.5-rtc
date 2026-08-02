@@ -1,5 +1,5 @@
 {
-  "deterministic_signature": "78717ac316855f20becfd89ba935b730d5a962f49f84787a4e5842d3a9ea30f6",
+  "deterministic_signature": "5d4bdb5023ad131c4ade9975420133f5d5bfa1eb1e9f1003166407f53cade5c9",
   "existing_static_collision_gate": "PASS",
   "existing_swept_collision_gate": "PASS",
   "final_or_default_asset_modified": false,
@@ -84,9 +84,14 @@
       "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_supplier_cad_compound_contact_usd.json",
       "sha256": "601c4127150d3b1f46d5991ec02542ea130b526e481843f568cb316454238e26",
       "status": "PASS_GEOMETRY_ONLY_DIAGNOSTIC_USD"
+    },
+    {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_bottle_swept_contact_band_collider_certificate.json",
+      "sha256": "bf19e8836ebf2dc37cd0ec5d0e6cbbb4afda1c1646a7dbdd7f5d34f0cac38a8b",
+      "status": "PASS_DETERMINISTIC_REJECTION"
     }
   ],
-  "interpretation": "The former bar/prop/wrist identity blockers are resolved by explicit source boundaries: the supplier STEP remains fused/invalid where observed, while byte-identical pinned Interbotix link meshes provide robot-description geometry. Every physical link has a deterministic finite-sample convex-hull surface/volume certificate. Exact trimmed B-Rep sampling proves that both the current single hull and default 32-piece decomposition cross the inward CAD face; neither is promoted. A CAD-derived compound candidate now passes two fresh finger-link-local PhysX cooking runs for its central contact rectangle, and its 68-piece geometry-only USD is byte-deterministic. This resolves the local crossing construction without fitting successful grasp data, but the candidate explicitly covers only the central contact region and is not integrated into an articulation. The contract remains PARTIAL because full effective contact-surface/task-local acceptance and remaining physical dynamics mappings are not yet proven.",
+  "interpretation": "The former bar/prop/wrist identity blockers are resolved by explicit source boundaries: the supplier STEP remains fused/invalid where observed, while byte-identical pinned Interbotix link meshes provide robot-description geometry. Every physical link has a deterministic finite-sample convex-hull surface/volume certificate. Exact trimmed B-Rep sampling proves that both the current single hull and default 32-piece decomposition cross the inward CAD face; neither is promoted. A CAD-derived compound candidate passes two fresh finger-link-local PhysX cooking runs for its finite central rectangle, and its 68-piece geometry-only USD is byte-deterministic. The newer task-contact-band certificate proves that the analytic Bottle500 tangent is on the infinite CAD plane but about 1.61 mm outside that finite rectangle on both handed fingers. The compound candidate is therefore rejected for this task without using grasp success or changing the final/default collider. The contract remains PARTIAL because a corrected finite task band, complete contact-envelope readback, and remaining physical dynamics mappings are not yet proven.",
   "invalid_brep_blockers": [],
   "link_identity_resolution": "PASS",
   "resolved_source_boundary_records": [
@@ -205,6 +210,9 @@
   "supplier_finger_exact_asset_decision": "REJECTED_EXACT_CAD_CONTACT_GATE",
   "supplier_finger_exact_brep_gate": "ALL_PROFILES_CROSS_INWARD_CAD_SURFACE",
   "supplier_finger_exact_numeric_tolerance_m": 4.76837158203125e-07,
+  "supplier_finger_task_contact_band_decision": "REJECTED_TASK_CONTACT_BAND_NOT_PROMOTED",
+  "supplier_finger_task_contact_band_minimum_patch_miss_m": 0.001613739723129554,
+  "supplier_finger_task_contact_band_status": "FAIL_CENTRAL_TANGENCY_OUTSIDE_COMPOUND_PATCH",
   "supplier_finger_task_local_acceptance": "HARD_BLOCKER_NOT_DERIVED_OR_MEASURED",
   "surface_certificate_link_count": 11,
   "surface_certificate_summary": {
