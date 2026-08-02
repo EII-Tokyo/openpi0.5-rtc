@@ -144,6 +144,24 @@ frozen_inputs:
   bottle_cad:
     path: assets/bottle_500ml/cad/bottle_500ml.FCStd
     sha256: 3594f60200e54181bc8480a229484293a0d386c146d3f235b32e31a0c16bbf8a
+finger_safety:
+  classification: DIAGNOSTIC_ONLY_NOT_FINAL_CONTROL_MAPPING
+  dof_names: [left_finger, right_finger]
+  dof_indices: [7, 8]
+  source_limits_m:
+    left_finger: {lower: 0.021, upper: 0.057}
+    right_finger: {lower: -0.057, upper: -0.021}
+  source_urdf:
+    path: generated/urdf/follower_left.urdf
+    sha256: d9e4b32723ee71dfce26fb4e78546cfcfef147b2d7dbf5e53e3620e3d8aa96bd
+    left_joint_xpath: joint[@name='left_finger']/limit
+    right_joint_xpath: joint[@name='right_finger']/limit
+    right_mimic: {joint: left_finger, multiplier: -1.0, offset: 0.0}
+  require_world_reset: true
+  require_immediate_readback: true
+  require_zero_pair_overlap: true
+  abort_on_first_runtime_violation: true
+  pair_overlap_tolerance_m3: 0.0
 boundaries:
   real_robot: false
   remote_103: false
