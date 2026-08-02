@@ -16,6 +16,7 @@ over "World"
         uniform token physxScene:broadphaseType = "SAP"
         bool physxScene:enableCCD = 1
         bool physxScene:enableGPUDynamics = 0
+        uniform uint physxScene:minPositionIterationCount = 64
     }
 
     over "follower_left"

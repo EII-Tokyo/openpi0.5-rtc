@@ -42,6 +42,15 @@ stress step at exactly `1/60 s`, matching the Inspector authoring simulation's
 fixed step and exercising the coarse-step tunnelling case rather than hiding it
 with 240 Hz stepping.
 
+After a strict runtime run showed 4.83 micrometres of collider penetration
+beyond the frozen bottom fail plane even with Inspector QuasiStatic behavior,
+the NVIDIA Physics Schema and gripper-tuning guidance were consulted again.
+The schema defines `physxScene:minPositionIterationCount` in the range 1--255,
+and NVIDIA recommends increasing position iterations when contact penetration
+remains. The diagnostic scene fixes this value at `64`, one deterministic
+doubling above the articulation schema default of `32`. This is not a sweep;
+the threshold, timestep, drives, collision offsets, and table remain frozen.
+
 For contact identity, NVIDIA's `PhysxContactReportAPI` documentation defines a
 force threshold and the official contact-sensor example applies the API to the
 rigid body with threshold zero. The verifier therefore applies
@@ -56,6 +65,8 @@ Official references:
 - [Omni Physics rigid bodies and CCD](https://docs.omniverse.nvidia.com/kit/docs/omni_physics/latest/dev_guide/rigid_bodies_articulations/rigid_bodies.html)
 - [Isaac API PhysicsContext CCD/GPU behavior](https://docs.isaacsim.omniverse.nvidia.com/latest/py/source/deprecated/isaacsim.core.api/docs/index.html)
 - [PhysxContactReportAPI schema reference](https://docs.omniverse.nvidia.com/kit/docs/omni_usd_schema_physics/106.1/class_physx_schema_physx_contact_report_a_p_i.html)
+- [PhysX Scene iteration schema](https://docs.omniverse.nvidia.com/kit/docs/omni_physics/106.5/dev_guide/schemas/physxschema.html)
+- [NVIDIA gripper contact tuning guidance](https://docs.omniverse.nvidia.com/kit/docs/omni_physics/110.1/dev_guide/guides/gripper_tuning_example.html)
 
 ## Existing project expert evidence
 
@@ -135,7 +146,7 @@ bounds remained `(-0.015, 0.0)`.
 
 ```text
 post_change_root_sha256 = 165093c3e7bf359b2ef5dbb595feb4ed976b194844830e70f387d6b882c1d6f2
-physics_override_sha256 = 7f631cd99086f79ca3d88c4d189209f80b0acb71f68e01b3eecfb823909305c6
+physics_override_sha256 = e8c4da828d5ccec975e81f942eb5e33759857c9489f3abc1de98e46850ff427d
 tabletop_alignment_sha256 = c9f8c656ed3a1b2722bfe0fb18dd2e5056da0320782e5dd3a7d4df2d7e845afc
 diagnostic_collider_root_sha256 = 7c76a8970e6b0dbca562304c64e9bfcd2e1ca3e790d25dfa52baf2e510b82c68
 base_collider_physics_sha256 = 352503bd2ccc8d4253fdc0561da67d2ec8bc92afba45d3112e677e4b5bb7ac9e

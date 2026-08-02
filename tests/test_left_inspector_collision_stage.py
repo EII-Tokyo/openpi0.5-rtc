@@ -28,4 +28,5 @@ def test_physics_layer_is_cpu_ccd_and_has_all_left_links():
     assert "physxScene:enableCCD = 1" in source
     assert "physxScene:enableGPUDynamics = 0" in source
     assert 'physxScene:broadphaseType = "SAP"' in source
+    assert "physxScene:minPositionIterationCount = 64" in source
     assert source.count("physxRigidBody:enableCCD = 1") == 14

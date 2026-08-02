@@ -139,6 +139,7 @@ def _preflight(stage: Any) -> dict[str, Any]:
         "enable_ccd": scene_api.GetEnableCCDAttr().Get(),
         "enable_gpu_dynamics": scene_api.GetEnableGPUDynamicsAttr().Get(),
         "broadphase_type": str(scene_api.GetBroadphaseTypeAttr().Get()),
+        "min_position_iteration_count": scene_api.GetMinPositionIterationCountAttr().Get(),
     }
     if scene != {
         "path": "/World/PhysicsScene",
@@ -146,6 +147,7 @@ def _preflight(stage: Any) -> dict[str, Any]:
         "enable_ccd": True,
         "enable_gpu_dynamics": False,
         "broadphase_type": "SAP",
+        "min_position_iteration_count": 64,
     }:
         raise RuntimeError(f"unexpected PhysicsScene: {scene}")
 

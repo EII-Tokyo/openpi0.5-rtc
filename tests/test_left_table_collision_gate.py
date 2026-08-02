@@ -78,6 +78,7 @@ def test_runtime_verifier_has_fixed_inspector_stress_contract():
         '"collider_bounds_m"',
         "PhysxSceneQuasistaticAPI.Apply",
         '"quasistatic_enabled": True',
+        '"min_position_iteration_count": 64',
     ):
         assert required in source
     for forbidden in (
