@@ -1,0 +1,105 @@
+schema_version: 1
+classification: DIAGNOSTIC_SCREENSHOT_SELECTION_NOT_ASSET_PROMOTION
+review:
+  reviewed_by: Codex visual model
+  method: functions.view_image detail=original; montage review plus targeted individual recheck
+samples:
+  sample_01:
+    default:
+      candidate_manifest: .codex/artifacts/20260802-aloha1-five-pose-finger-safety/attempt10_machine_only/sample_01/collider_repeat/video_attempt_001/video/candidate_manifest.json
+      candidate_manifest_sha256: da1df5a940b72fe7c845b89feb2e9eca2b33b6623e81920d6c5424e4b6135288
+      frame_manifest: .codex/artifacts/20260802-aloha1-five-pose-finger-safety/attempt10_machine_only/sample_01/collider_repeat/video_attempt_001/frame_manifest.json
+      frame_manifest_sha256: 8873bbd26b30ffab07f5e5bbbc4078b01593bbe75d0164bdc075a9fc28fd888f
+      disposition: ACCEPTED_VISUAL_MODEL_REVIEW
+      review_notes: Original records pass except RELEASE_DYNAMIC gripper_closeup, which is replaced below.
+    replacements:
+      - selector:
+          phase_labels: [RELEASE_DYNAMIC]
+          views: [gripper_closeup]
+        candidate_manifest: .codex/artifacts/20260802-aloha1-five-pose-finger-safety/attempt10_release_closeup_retakes/sample_01/video_attempt_001/video/candidate_manifest.json
+        candidate_manifest_sha256: 03c332d406bcc0a946e8f84e60008651969e548c6b6045ebc168a0535dd31d8f
+        frame_manifest: .codex/artifacts/20260802-aloha1-five-pose-finger-safety/attempt10_release_closeup_retakes/sample_01/video_attempt_001/frame_manifest.json
+        frame_manifest_sha256: 079bb55c19845c7d11db7fa31b5caddefeee311386759d5927ff842c3763cbc8
+        disposition: ACCEPTED_VISUAL_MODEL_REVIEW
+        reason: Original release closeup omitted both supplier-CAD fingers; subject-bounds refit and 20 paused render updates expose both fingers and Bottle500.
+        review_notes: Both fingers, inward faces, Bottle500 and collider overlay are visible without changing a physics step.
+  sample_02:
+    default:
+      candidate_manifest: .codex/artifacts/20260802-aloha1-five-pose-finger-safety/attempt10_release_closeup_retakes/sample_02_opposite_side/video_attempt_001/video/candidate_manifest.json
+      candidate_manifest_sha256: d5208b6e106aefe5bb35fcdd44276530d9107640c7ad986c83d01ddeb4c23806
+      frame_manifest: .codex/artifacts/20260802-aloha1-five-pose-finger-safety/attempt10_release_closeup_retakes/sample_02_opposite_side/video_attempt_001/frame_manifest.json
+      frame_manifest_sha256: 8b17047819a97762081b3ad48271335c0f26f31a46f932b27d57f4afc77f0f11
+      disposition: ACCEPTED_VISUAL_MODEL_REVIEW
+      review_notes: Opposite bottle-axis closeup avoids the vertical frame occlusion; all 24 records use the fresh signature-matched repeat.
+    replacements: []
+  sample_03:
+    default:
+      candidate_manifest: .codex/artifacts/20260802-aloha1-five-pose-finger-safety/attempt10_machine_only/sample_03/collider_repeat/video_attempt_001/video/candidate_manifest.json
+      candidate_manifest_sha256: 5eb6f67c1cfe930d6e8c28655579b26990e2e3a7d631e795edc20851f93bf942
+      frame_manifest: .codex/artifacts/20260802-aloha1-five-pose-finger-safety/attempt10_machine_only/sample_03/collider_repeat/video_attempt_001/frame_manifest.json
+      frame_manifest_sha256: 4011bac11baf202b8deb3421e3583444e3d6699e38a7938237e29be32f4f3c84
+      disposition: ACCEPTED_VISUAL_MODEL_REVIEW
+      review_notes: Original records pass except RELEASE_DYNAMIC gripper_closeup, which is replaced below.
+    replacements:
+      - selector:
+          phase_labels: [RELEASE_DYNAMIC]
+          views: [gripper_closeup]
+        candidate_manifest: .codex/artifacts/20260802-aloha1-five-pose-finger-safety/attempt10_release_closeup_retakes/sample_03/video_attempt_001/video/candidate_manifest.json
+        candidate_manifest_sha256: 1ce7666255f96f7ed31fad60623a529ef3c062ee21cec6c6571ee91807c8d99e
+        frame_manifest: .codex/artifacts/20260802-aloha1-five-pose-finger-safety/attempt10_release_closeup_retakes/sample_03/video_attempt_001/frame_manifest.json
+        frame_manifest_sha256: 4be343e51508ecbdd2302e96b7d549caf0c5a3aec7a8ac766cfee1934c513529
+        disposition: ACCEPTED_VISUAL_MODEL_REVIEW
+        reason: Original release closeup omitted both supplier-CAD fingers; use the signature-matched screenshot-only retake.
+        review_notes: Both fingers, inward faces, Bottle500 and collider overlay are visible.
+  sample_04:
+    default:
+      candidate_manifest: .codex/artifacts/20260802-aloha1-five-pose-finger-safety/attempt10_machine_only/sample_04/collider_repeat/video_attempt_001/video/candidate_manifest.json
+      candidate_manifest_sha256: 4e26b0b8bc09254a38c5ffb26315683b50d50775359d0b71c58221df7e488baf
+      frame_manifest: .codex/artifacts/20260802-aloha1-five-pose-finger-safety/attempt10_machine_only/sample_04/collider_repeat/video_attempt_001/frame_manifest.json
+      frame_manifest_sha256: e8f2e01b9dd91a7be66c9f11c0e49a68f9c377db7e5693b0cfc5a89a2f7c1356
+      disposition: ACCEPTED_VISUAL_MODEL_REVIEW
+      review_notes: All six phases, two views and two modes passed visual-model review in the original signature-matched repeat.
+    replacements: []
+  sample_05:
+    default:
+      candidate_manifest: .codex/artifacts/20260802-aloha1-five-pose-finger-safety/attempt10_machine_only/sample_05/collider_repeat/video_attempt_001/video/candidate_manifest.json
+      candidate_manifest_sha256: aa1ae592ee3f18a25ced134a1d06af846f364bcf6a8002e1f7b589a31854f862
+      frame_manifest: .codex/artifacts/20260802-aloha1-five-pose-finger-safety/attempt10_machine_only/sample_05/collider_repeat/video_attempt_001/frame_manifest.json
+      frame_manifest_sha256: 6570e2e587e11c217964d89db69d2b86246add89c8875357a05746a28bfaa7c9
+      disposition: ACCEPTED_VISUAL_MODEL_REVIEW
+      review_notes: Original records pass except RELEASE_DYNAMIC gripper_closeup, which is replaced below.
+    replacements:
+      - selector:
+          phase_labels: [RELEASE_DYNAMIC]
+          views: [gripper_closeup]
+        candidate_manifest: .codex/artifacts/20260802-aloha1-five-pose-finger-safety/attempt10_release_closeup_retakes/sample_05/video_attempt_001/video/candidate_manifest.json
+        candidate_manifest_sha256: b69560a42731409b50eeb30fcb48c4c7205afdfd5d41b134055eaf75a76b06fb
+        frame_manifest: .codex/artifacts/20260802-aloha1-five-pose-finger-safety/attempt10_release_closeup_retakes/sample_05/video_attempt_001/frame_manifest.json
+        frame_manifest_sha256: 57fd929cf2baf99b4127ad049539c0330294663053f25817cc45db7acc34ce68
+        disposition: ACCEPTED_VISUAL_MODEL_REVIEW
+        reason: Original release closeup omitted both supplier-CAD fingers; use the signature-matched screenshot-only retake.
+        review_notes: Both fingers, inward faces, Bottle500 and collider overlay are visible.
+retake_history:
+  - attempt: sample_01_rejected_origin_only_attempt2
+    status: REJECTED_SUBJECT_FRAMING
+    reason: Origin-only closeup did not contain the complete supplier-CAD finger geometry.
+  - attempt: sample_01_rejected_render_latency_attempt3
+    status: REJECTED_STALE_RENDER
+    reason: One paused app update did not converge the RGB render to the new camera pose.
+  - attempt: sample_01_rejected_three_updates_attempt4
+    status: REJECTED_STALE_RENDER
+    reason: Three paused app updates still showed stale framing.
+  - attempt: sample_02_invalid_wrong_initial_qpos
+    status: INVALID_OPERATOR_INPUT_EXCLUDED
+    reason: Wrong initial qpos was detected and interrupted before inclusion; it is not evidence for any sample.
+  - attempt: sample_02_original
+    status: REJECTED_CLOSEUP_OCCLUSION
+    reason: The vertical frame occluded the supplier-CAD fingers after release.
+  - attempt: final_selected_retakes
+    status: PASS
+    reason: Subject-bounds camera fit plus 20 paused render updates; runtime signatures match attempt10 and no physics parameters or steps changed.
+boundaries:
+  historical_user_confirmed_videos_rerun: false
+  final_default_asset_modified: false
+  candidate_promoted: false
+  task8: NOT_RUN
