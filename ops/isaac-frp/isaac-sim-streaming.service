@@ -1,0 +1,15 @@
+[Unit]
+Description=Isaac Sim 5.1 Full Streaming App
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/eii/Applications/isaacsim-5.1.0
+ExecStart=/home/eii/Applications/isaacsim-5.1.0/isaac-sim.streaming.sh --/app/livestream/publicEndpointAddress=127.0.0.1 --/app/livestream/port=49100
+Restart=on-failure
+RestartSec=10
+TimeoutStopSec=180
+
+[Install]
+WantedBy=default.target
