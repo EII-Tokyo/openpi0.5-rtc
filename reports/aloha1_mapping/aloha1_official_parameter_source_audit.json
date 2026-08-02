@@ -1,0 +1,383 @@
+{
+  "deterministic_signature": "50ae2b455a4a7b596cf1d1c35681c874e7b1002665068ccdfeddfea8e05e471e",
+  "findings": [],
+  "formal_parameter_candidate_gate": "PASS",
+  "local_mirror_observations": [
+    {
+      "classification": "THIRD_PARTY_AGGREGATE_LOCAL_MIRROR",
+      "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+      "id": "ros2_essentials_is_not_upstream_authority",
+      "local_repository": "external/ros2-essentials",
+      "repository": "https://github.com/j3soon/ros2-essentials.git"
+    },
+    {
+      "file": "aloha_vx300s.yaml",
+      "id": "local_aloha_sleep_positions_differ_from_pinned_upstream",
+      "local_mirror_sleep_positions": [
+        0,
+        -1.8,
+        1.55,
+        0,
+        -1.57,
+        0,
+        0
+      ],
+      "pinned_official_sleep_positions": [
+        0,
+        -2.05,
+        1.7,
+        0,
+        -2.0,
+        0,
+        0
+      ],
+      "rule": "LOCAL_SLEEP_POSE_MUST_NOT_BE_LABELED_OFFICIAL"
+    }
+  ],
+  "product": {
+    "follower_instances": [
+      "follower_left",
+      "follower_right"
+    ],
+    "manufacturer": "Trossen Robotics",
+    "product": "Interbotix ViperX-300 6DOF",
+    "project_model": "aloha_vx300s",
+    "robot_local_geometry_relation": "IDENTICAL_NOT_MIRRORED"
+  },
+  "required_source_ids": [
+    "interbotix_aloha_vx300s_motor_config",
+    "interbotix_aloha_vx300s_xacro",
+    "interbotix_core_humble",
+    "interbotix_manipulators_humble",
+    "interbotix_vx300s_motor_config",
+    "interbotix_vx300s_xacro",
+    "interbotix_xs_driver",
+    "isaacsim_urdf_importer_2_4_30",
+    "physx_schema_107_3",
+    "robotis_xm430_w350_manual",
+    "robotis_xm540_w270_manual",
+    "supplier_simple_aloha_viper_step",
+    "trossen_vx300s_spec"
+  ],
+  "schema_version": 1,
+  "source_chain_completeness": "PASS",
+  "source_conflicts": [
+    {
+      "conflicting_claims": [
+        {
+          "id6": "wrist_angle",
+          "id7": "forearm_roll",
+          "location": "Joint Limits table",
+          "source_id": "trossen_vx300s_spec"
+        },
+        {
+          "id6": "forearm_roll",
+          "id7": "wrist_angle",
+          "location": "Servo Configurations table",
+          "source_id": "trossen_vx300s_spec"
+        },
+        {
+          "id6": "forearm_roll",
+          "id7": "wrist_angle",
+          "source_id": "interbotix_vx300s_motor_config"
+        },
+        {
+          "id6": "forearm_roll",
+          "id7": "wrist_angle",
+          "source_id": "interbotix_aloha_vx300s_motor_config"
+        }
+      ],
+      "id": "trossen_vx300s_servo_id_6_7_joint_name",
+      "resolution": {
+        "basis_source_ids": [
+          "interbotix_vx300s_motor_config",
+          "interbotix_aloha_vx300s_motor_config",
+          "interbotix_vx300s_xacro",
+          "interbotix_aloha_vx300s_xacro"
+        ],
+        "does_not_erase_conflict": true,
+        "id6": "forearm_roll",
+        "id7": "wrist_angle"
+      },
+      "status": "RESOLVED_WITH_CONFLICT_RETAINED"
+    }
+  ],
+  "source_count": 13,
+  "sources": [
+    {
+      "authority": "Trossen Robotics / Interbotix",
+      "branch": "humble",
+      "commit": "b66d5b905725351dd71d3251a06cd3f4c777940f",
+      "evidence_class": "OFFICIAL_PINNED_SOURCE",
+      "exact_model_scope": [
+        "aloha_vx300s",
+        "vx300s"
+      ],
+      "id": "interbotix_aloha_vx300s_motor_config",
+      "license": {
+        "evidence": "LICENSE",
+        "identifier": "BSD-3-Clause",
+        "redistribution": "ALLOWED_WITH_LICENSE",
+        "status": "CONFIRMED"
+      },
+      "local_path": ".codex/artifacts/20260802-aloha1-official-model-first/sources/interbotix_manipulators_b66d5b905725351dd71d3251a06cd3f4c777940f/aloha_vx300s.yaml",
+      "repository": "https://github.com/Interbotix/interbotix_ros_manipulators.git",
+      "sha256": "999cc0863b7b1e0334c5cd75d5ed1430736d25aa13881e4c24f4bf6cb3a1924f",
+      "url": "https://github.com/Interbotix/interbotix_ros_manipulators/blob/b66d5b905725351dd71d3251a06cd3f4c777940f/interbotix_ros_aloha/interbotix_aloha_control/config/aloha_vx300s.yaml"
+    },
+    {
+      "authority": "Trossen Robotics / Interbotix",
+      "branch": "humble",
+      "commit": "b66d5b905725351dd71d3251a06cd3f4c777940f",
+      "evidence_class": "OFFICIAL_PINNED_SOURCE",
+      "exact_model_scope": [
+        "aloha_vx300s",
+        "vx300s"
+      ],
+      "id": "interbotix_aloha_vx300s_xacro",
+      "license": {
+        "evidence": "LICENSE",
+        "identifier": "BSD-3-Clause",
+        "redistribution": "ALLOWED_WITH_LICENSE",
+        "status": "CONFIRMED"
+      },
+      "local_path": ".codex/artifacts/20260802-aloha1-official-model-first/sources/interbotix_manipulators_b66d5b905725351dd71d3251a06cd3f4c777940f/aloha_vx300s.urdf.xacro",
+      "repository": "https://github.com/Interbotix/interbotix_ros_manipulators.git",
+      "sha256": "45dff1e0de2456386dbb64b851c94db2d874b6dbefb6503cb747bc55435177bd",
+      "url": "https://github.com/Interbotix/interbotix_ros_manipulators/blob/b66d5b905725351dd71d3251a06cd3f4c777940f/interbotix_ros_aloha/interbotix_aloha_descriptions/urdf/aloha_vx300s.urdf.xacro"
+    },
+    {
+      "authority": "Trossen Robotics / Interbotix",
+      "branch": "humble",
+      "commit": "af18d4fe24ba08e09a0f1e92afaca1863e3205de",
+      "evidence_class": "OFFICIAL_PINNED_SOURCE",
+      "exact_model_scope": [
+        "aloha_vx300s",
+        "vx300s"
+      ],
+      "id": "interbotix_core_humble",
+      "license": {
+        "evidence": "LICENSE",
+        "identifier": "BSD-3-Clause",
+        "redistribution": "ALLOWED_WITH_LICENSE",
+        "status": "CONFIRMED"
+      },
+      "local_path": ".codex/artifacts/20260802-aloha1-official-model-first/sources/interbotix_core_af18d4fe24ba08e09a0f1e92afaca1863e3205de/LICENSE",
+      "repository": "https://github.com/Interbotix/interbotix_ros_core.git",
+      "sha256": "4eab000b04ce3f3b2746e2c22c1475c83c67a55ba5caf9becc089db26a2688d4",
+      "url": "https://github.com/Interbotix/interbotix_ros_core/tree/af18d4fe24ba08e09a0f1e92afaca1863e3205de"
+    },
+    {
+      "authority": "Trossen Robotics / Interbotix",
+      "branch": "humble",
+      "commit": "b66d5b905725351dd71d3251a06cd3f4c777940f",
+      "evidence_class": "OFFICIAL_PINNED_SOURCE",
+      "exact_model_scope": [
+        "aloha_vx300s",
+        "vx300s"
+      ],
+      "id": "interbotix_manipulators_humble",
+      "license": {
+        "evidence": "LICENSE",
+        "identifier": "BSD-3-Clause",
+        "redistribution": "ALLOWED_WITH_LICENSE",
+        "status": "CONFIRMED"
+      },
+      "local_path": ".codex/artifacts/20260802-aloha1-official-model-first/sources/interbotix_manipulators_b66d5b905725351dd71d3251a06cd3f4c777940f/LICENSE",
+      "repository": "https://github.com/Interbotix/interbotix_ros_manipulators.git",
+      "sha256": "4eab000b04ce3f3b2746e2c22c1475c83c67a55ba5caf9becc089db26a2688d4",
+      "url": "https://github.com/Interbotix/interbotix_ros_manipulators/tree/b66d5b905725351dd71d3251a06cd3f4c777940f"
+    },
+    {
+      "authority": "Trossen Robotics / Interbotix",
+      "branch": "humble",
+      "commit": "b66d5b905725351dd71d3251a06cd3f4c777940f",
+      "evidence_class": "OFFICIAL_PINNED_SOURCE",
+      "exact_model_scope": [
+        "aloha_vx300s",
+        "vx300s"
+      ],
+      "id": "interbotix_vx300s_motor_config",
+      "license": {
+        "evidence": "LICENSE",
+        "identifier": "BSD-3-Clause",
+        "redistribution": "ALLOWED_WITH_LICENSE",
+        "status": "CONFIRMED"
+      },
+      "local_path": ".codex/artifacts/20260802-aloha1-official-model-first/sources/interbotix_manipulators_b66d5b905725351dd71d3251a06cd3f4c777940f/vx300s.yaml",
+      "repository": "https://github.com/Interbotix/interbotix_ros_manipulators.git",
+      "sha256": "817474206a5df79e1fcb581df8bed9867d6f793ec5915fdaa4af186b656bb532",
+      "url": "https://github.com/Interbotix/interbotix_ros_manipulators/blob/b66d5b905725351dd71d3251a06cd3f4c777940f/interbotix_ros_xsarms/interbotix_xsarm_control/config/vx300s.yaml"
+    },
+    {
+      "authority": "Trossen Robotics / Interbotix",
+      "branch": "humble",
+      "commit": "b66d5b905725351dd71d3251a06cd3f4c777940f",
+      "evidence_class": "OFFICIAL_PINNED_SOURCE",
+      "exact_model_scope": [
+        "aloha_vx300s",
+        "vx300s"
+      ],
+      "id": "interbotix_vx300s_xacro",
+      "license": {
+        "evidence": "LICENSE",
+        "identifier": "BSD-3-Clause",
+        "redistribution": "ALLOWED_WITH_LICENSE",
+        "status": "CONFIRMED"
+      },
+      "local_path": ".codex/artifacts/20260802-aloha1-official-model-first/sources/interbotix_manipulators_b66d5b905725351dd71d3251a06cd3f4c777940f/vx300s.urdf.xacro",
+      "repository": "https://github.com/Interbotix/interbotix_ros_manipulators.git",
+      "sha256": "67ba21db03fcd6e2fa6fe681bd79a1d357e3d7ce55792d60bafd862a0bdd0802",
+      "url": "https://github.com/Interbotix/interbotix_ros_manipulators/blob/b66d5b905725351dd71d3251a06cd3f4c777940f/interbotix_ros_xsarms/interbotix_xsarm_descriptions/urdf/vx300s.urdf.xacro"
+    },
+    {
+      "authority": "Trossen Robotics / Interbotix",
+      "branch": "v0.3.3",
+      "commit": "da27b8b2b6c7677844f74581b82c01829a834e1c",
+      "evidence_class": "OFFICIAL_PINNED_SOURCE",
+      "exact_model_scope": [
+        "aloha_vx300s",
+        "Dynamixel X-Series"
+      ],
+      "id": "interbotix_xs_driver",
+      "license": {
+        "evidence": "https://github.com/Interbotix/interbotix_xs_driver/blob/da27b8b2b6c7677844f74581b82c01829a834e1c/LICENSE",
+        "identifier": "BSD-3-Clause",
+        "redistribution": "ALLOWED_WITH_LICENSE",
+        "status": "CONFIRMED"
+      },
+      "local_path": ".codex/artifacts/20260802-aloha1-official-model-first/sources/interbotix_xs_driver_da27b8b2b6c7677844f74581b82c01829a834e1c/xs_driver.cpp",
+      "repository": "https://github.com/Interbotix/interbotix_xs_driver.git",
+      "sha256": "6d9b8bd613ef17094490ad1a3f82c685316b3bd21c067930b2a5199a91ba9bcb",
+      "url": "https://github.com/Interbotix/interbotix_xs_driver/blob/da27b8b2b6c7677844f74581b82c01829a834e1c/src/xs_driver.cpp"
+    },
+    {
+      "authority": "NVIDIA local Isaac Sim installation",
+      "branch": null,
+      "commit": null,
+      "evidence_class": "LOCAL_VERSION_PINNED_OFFICIAL_IMPLEMENTATION",
+      "exact_model_scope": [
+        "isaac_sim_5_1",
+        "isaacsim.asset.importer.urdf_2.4.30"
+      ],
+      "id": "isaacsim_urdf_importer_2_4_30",
+      "license": {
+        "evidence": "extension.toml package metadata",
+        "identifier": "LicenseRef-NvidiaProprietary",
+        "redistribution": "NOT_REDISTRIBUTED",
+        "status": "CONFIRMED_LOCAL_INSTALLATION"
+      },
+      "local_path": ".venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.importer.urdf/config/extension.toml",
+      "repository": null,
+      "sha256": "6ee1a8ab74c492930c792f7cabc657e022fb06dab4198ef413f6e1b359439baf",
+      "url": "local://isaacsim.asset.importer.urdf/2.4.30"
+    },
+    {
+      "authority": "NVIDIA local Isaac Sim installation",
+      "branch": null,
+      "commit": null,
+      "evidence_class": "LOCAL_VERSION_PINNED_OFFICIAL_IMPLEMENTATION",
+      "exact_model_scope": [
+        "isaac_sim_5_1",
+        "PhysX_107.3.26",
+        "Kit_107.3.3"
+      ],
+      "id": "physx_schema_107_3",
+      "license": {
+        "evidence": "omni.usd.schema.physx extension package metadata",
+        "identifier": "LicenseRef-NvidiaProprietary",
+        "redistribution": "NOT_REDISTRIBUTED",
+        "status": "CONFIRMED_LOCAL_INSTALLATION"
+      },
+      "local_path": ".venv_issac/lib/python3.11/site-packages/isaacsim/extscache/omni.usd.schema.physx-107.3.26+107.3.3.lx64.r.cp311.u353/plugins/PhysxSchema/resources/schema.usda",
+      "repository": null,
+      "sha256": "fe075bce4bde5ba7db69c6ccef0c4c26909336ab34c619129fc276f7cb4d7abc",
+      "url": "local://omni.usd.schema.physx/107.3.26+107.3.3"
+    },
+    {
+      "authority": "ROBOTIS",
+      "branch": null,
+      "commit": null,
+      "evidence_class": "OFFICIAL_DIRECT",
+      "exact_model_scope": [
+        "aloha_vx300s",
+        "XM430-W350"
+      ],
+      "id": "robotis_xm430_w350_manual",
+      "license": {
+        "evidence": "https://emanual.robotis.com/",
+        "identifier": "UNKNOWN",
+        "redistribution": "NOT_REDISTRIBUTED",
+        "status": "LINK_AND_FACT_CITATION_ONLY"
+      },
+      "local_path": ".codex/artifacts/20260802-aloha1-official-model-first/sources/web/robotis_xm430_w350.html",
+      "repository": null,
+      "sha256": "7944311f7e2670bee18ff5ef023eceb9911f4239e66d66273ea5ee21886a0fd2",
+      "url": "https://emanual.robotis.com/docs/en/dxl/x/xm430-w350/"
+    },
+    {
+      "authority": "ROBOTIS",
+      "branch": null,
+      "commit": null,
+      "evidence_class": "OFFICIAL_DIRECT",
+      "exact_model_scope": [
+        "aloha_vx300s",
+        "XM540-W270"
+      ],
+      "id": "robotis_xm540_w270_manual",
+      "license": {
+        "evidence": "https://emanual.robotis.com/",
+        "identifier": "UNKNOWN",
+        "redistribution": "NOT_REDISTRIBUTED",
+        "status": "LINK_AND_FACT_CITATION_ONLY"
+      },
+      "local_path": ".codex/artifacts/20260802-aloha1-official-model-first/sources/web/robotis_xm540_w270.html",
+      "repository": null,
+      "sha256": "e662ccc500f61f8dc3ca8463555de4389c90dbe8c8139d24a4c968bb2d2f249a",
+      "url": "https://emanual.robotis.com/docs/en/dxl/x/xm540-w270/"
+    },
+    {
+      "authority": "ALOHA supplier public CAD package",
+      "branch": null,
+      "commit": null,
+      "evidence_class": "SUPPLIER_CAD_USER_CONFIRMED",
+      "exact_model_scope": [
+        "aloha_vx300s",
+        "Simple Aloha Viper supplier assembly"
+      ],
+      "id": "supplier_simple_aloha_viper_step",
+      "license": {
+        "evidence": "reports/aloha1_mapping/aloha_public_cad_source_manifest.json",
+        "identifier": "UNKNOWN",
+        "redistribution": "LOCAL_READ_ONLY_NOT_REDISTRIBUTED",
+        "status": "UNKNOWN_HARD_BLOCKER"
+      },
+      "local_path": ".codex/artifacts/20260729-aloha-finger-palm-orientation/gdrive_source_readonly/Simple Aloha Viper 2024-5-13.step",
+      "repository": null,
+      "sha256": "337862418769d4ea8b801d26e68930c4412f870050e60769bbf91765194dc571",
+      "url": "https://drive.google.com/drive/folders/1mhJuhzT4lBnvZ9VE57UgT6vmJDFPVsBf"
+    },
+    {
+      "authority": "Trossen Robotics",
+      "branch": null,
+      "commit": null,
+      "evidence_class": "OFFICIAL_DIRECT",
+      "exact_model_scope": [
+        "aloha_vx300s",
+        "Interbotix ViperX-300 6DOF"
+      ],
+      "id": "trossen_vx300s_spec",
+      "license": {
+        "evidence": "https://docs.trossenrobotics.com/",
+        "identifier": "UNKNOWN",
+        "redistribution": "NOT_REDISTRIBUTED",
+        "status": "LINK_AND_FACT_CITATION_ONLY"
+      },
+      "local_path": ".codex/artifacts/20260802-aloha1-official-model-first/sources/web/trossen_vx300s.html",
+      "repository": null,
+      "sha256": "93313cf328da611146ea608613dd2550f3c17e7bbb47728b9f06fa297bebdff9",
+      "url": "https://docs.trossenrobotics.com/interbotix_xsarms_docs/specifications/vx300s.html"
+    }
+  ],
+  "status": "PASS"
+}

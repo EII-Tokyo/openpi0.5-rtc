@@ -1,0 +1,207 @@
+schema_version: 1
+product:
+  project_model: aloha_vx300s
+  manufacturer: Trossen Robotics
+  product: Interbotix ViperX-300 6DOF
+  follower_instances: [follower_left, follower_right]
+  robot_local_geometry_relation: IDENTICAL_NOT_MIRRORED
+
+sources:
+  - id: trossen_vx300s_spec
+    authority: Trossen Robotics
+    evidence_class: OFFICIAL_DIRECT
+    url: https://docs.trossenrobotics.com/interbotix_xsarms_docs/specifications/vx300s.html
+    retrieved_at_utc: '2026-08-02T14:47:44Z'
+    local_path: .codex/artifacts/20260802-aloha1-official-model-first/sources/web/trossen_vx300s.html
+    sha256: 93313cf328da611146ea608613dd2550f3c17e7bbb47728b9f06fa297bebdff9
+    license: &web_license
+      status: LINK_AND_FACT_CITATION_ONLY
+      identifier: UNKNOWN
+      evidence: https://docs.trossenrobotics.com/
+      redistribution: NOT_REDISTRIBUTED
+    exact_model_scope: [aloha_vx300s, Interbotix ViperX-300 6DOF]
+
+  - id: robotis_xm540_w270_manual
+    authority: ROBOTIS
+    evidence_class: OFFICIAL_DIRECT
+    url: https://emanual.robotis.com/docs/en/dxl/x/xm540-w270/
+    retrieved_at_utc: '2026-08-02T14:47:44Z'
+    local_path: .codex/artifacts/20260802-aloha1-official-model-first/sources/web/robotis_xm540_w270.html
+    sha256: e662ccc500f61f8dc3ca8463555de4389c90dbe8c8139d24a4c968bb2d2f249a
+    license:
+      <<: *web_license
+      evidence: https://emanual.robotis.com/
+    exact_model_scope: [aloha_vx300s, XM540-W270]
+
+  - id: robotis_xm430_w350_manual
+    authority: ROBOTIS
+    evidence_class: OFFICIAL_DIRECT
+    url: https://emanual.robotis.com/docs/en/dxl/x/xm430-w350/
+    retrieved_at_utc: '2026-08-02T14:47:44Z'
+    local_path: .codex/artifacts/20260802-aloha1-official-model-first/sources/web/robotis_xm430_w350.html
+    sha256: 7944311f7e2670bee18ff5ef023eceb9911f4239e66d66273ea5ee21886a0fd2
+    license:
+      <<: *web_license
+      evidence: https://emanual.robotis.com/
+    exact_model_scope: [aloha_vx300s, XM430-W350]
+
+  - id: interbotix_manipulators_humble
+    authority: Trossen Robotics / Interbotix
+    evidence_class: OFFICIAL_PINNED_SOURCE
+    repository: https://github.com/Interbotix/interbotix_ros_manipulators.git
+    branch: humble
+    commit: b66d5b905725351dd71d3251a06cd3f4c777940f
+    url: https://github.com/Interbotix/interbotix_ros_manipulators/tree/b66d5b905725351dd71d3251a06cd3f4c777940f
+    retrieved_at_utc: '2026-08-02T14:47:44Z'
+    local_path: .codex/artifacts/20260802-aloha1-official-model-first/sources/interbotix_manipulators_b66d5b905725351dd71d3251a06cd3f4c777940f/LICENSE
+    sha256: 4eab000b04ce3f3b2746e2c22c1475c83c67a55ba5caf9becc089db26a2688d4
+    license: &bsd_license
+      status: CONFIRMED
+      identifier: BSD-3-Clause
+      evidence: LICENSE
+      redistribution: ALLOWED_WITH_LICENSE
+    exact_model_scope: [aloha_vx300s, vx300s]
+
+  - id: interbotix_core_humble
+    authority: Trossen Robotics / Interbotix
+    evidence_class: OFFICIAL_PINNED_SOURCE
+    repository: https://github.com/Interbotix/interbotix_ros_core.git
+    branch: humble
+    commit: af18d4fe24ba08e09a0f1e92afaca1863e3205de
+    url: https://github.com/Interbotix/interbotix_ros_core/tree/af18d4fe24ba08e09a0f1e92afaca1863e3205de
+    retrieved_at_utc: '2026-08-02T14:47:44Z'
+    local_path: .codex/artifacts/20260802-aloha1-official-model-first/sources/interbotix_core_af18d4fe24ba08e09a0f1e92afaca1863e3205de/LICENSE
+    sha256: 4eab000b04ce3f3b2746e2c22c1475c83c67a55ba5caf9becc089db26a2688d4
+    license: *bsd_license
+    exact_model_scope: [aloha_vx300s, vx300s]
+
+  - &manipulator_file
+    id: interbotix_vx300s_motor_config
+    authority: Trossen Robotics / Interbotix
+    evidence_class: OFFICIAL_PINNED_SOURCE
+    repository: https://github.com/Interbotix/interbotix_ros_manipulators.git
+    branch: humble
+    commit: b66d5b905725351dd71d3251a06cd3f4c777940f
+    url: https://github.com/Interbotix/interbotix_ros_manipulators/blob/b66d5b905725351dd71d3251a06cd3f4c777940f/interbotix_ros_xsarms/interbotix_xsarm_control/config/vx300s.yaml
+    retrieved_at_utc: '2026-08-02T14:47:44Z'
+    local_path: .codex/artifacts/20260802-aloha1-official-model-first/sources/interbotix_manipulators_b66d5b905725351dd71d3251a06cd3f4c777940f/vx300s.yaml
+    sha256: 817474206a5df79e1fcb581df8bed9867d6f793ec5915fdaa4af186b656bb532
+    license: *bsd_license
+    exact_model_scope: [aloha_vx300s, vx300s]
+
+  - <<: *manipulator_file
+    id: interbotix_aloha_vx300s_motor_config
+    url: https://github.com/Interbotix/interbotix_ros_manipulators/blob/b66d5b905725351dd71d3251a06cd3f4c777940f/interbotix_ros_aloha/interbotix_aloha_control/config/aloha_vx300s.yaml
+    local_path: .codex/artifacts/20260802-aloha1-official-model-first/sources/interbotix_manipulators_b66d5b905725351dd71d3251a06cd3f4c777940f/aloha_vx300s.yaml
+    sha256: 999cc0863b7b1e0334c5cd75d5ed1430736d25aa13881e4c24f4bf6cb3a1924f
+
+  - <<: *manipulator_file
+    id: interbotix_vx300s_xacro
+    url: https://github.com/Interbotix/interbotix_ros_manipulators/blob/b66d5b905725351dd71d3251a06cd3f4c777940f/interbotix_ros_xsarms/interbotix_xsarm_descriptions/urdf/vx300s.urdf.xacro
+    local_path: .codex/artifacts/20260802-aloha1-official-model-first/sources/interbotix_manipulators_b66d5b905725351dd71d3251a06cd3f4c777940f/vx300s.urdf.xacro
+    sha256: 67ba21db03fcd6e2fa6fe681bd79a1d357e3d7ce55792d60bafd862a0bdd0802
+
+  - <<: *manipulator_file
+    id: interbotix_aloha_vx300s_xacro
+    url: https://github.com/Interbotix/interbotix_ros_manipulators/blob/b66d5b905725351dd71d3251a06cd3f4c777940f/interbotix_ros_aloha/interbotix_aloha_descriptions/urdf/aloha_vx300s.urdf.xacro
+    local_path: .codex/artifacts/20260802-aloha1-official-model-first/sources/interbotix_manipulators_b66d5b905725351dd71d3251a06cd3f4c777940f/aloha_vx300s.urdf.xacro
+    sha256: 45dff1e0de2456386dbb64b851c94db2d874b6dbefb6503cb747bc55435177bd
+
+  - id: interbotix_xs_driver
+    authority: Trossen Robotics / Interbotix
+    evidence_class: OFFICIAL_PINNED_SOURCE
+    repository: https://github.com/Interbotix/interbotix_xs_driver.git
+    branch: v0.3.3
+    commit: da27b8b2b6c7677844f74581b82c01829a834e1c
+    url: https://github.com/Interbotix/interbotix_xs_driver/blob/da27b8b2b6c7677844f74581b82c01829a834e1c/src/xs_driver.cpp
+    retrieved_at_utc: '2026-08-02T14:47:44Z'
+    local_path: .codex/artifacts/20260802-aloha1-official-model-first/sources/interbotix_xs_driver_da27b8b2b6c7677844f74581b82c01829a834e1c/xs_driver.cpp
+    sha256: 6d9b8bd613ef17094490ad1a3f82c685316b3bd21c067930b2a5199a91ba9bcb
+    license:
+      status: CONFIRMED
+      identifier: BSD-3-Clause
+      evidence: https://github.com/Interbotix/interbotix_xs_driver/blob/da27b8b2b6c7677844f74581b82c01829a834e1c/LICENSE
+      redistribution: ALLOWED_WITH_LICENSE
+    exact_model_scope: [aloha_vx300s, Dynamixel X-Series]
+
+  - id: supplier_simple_aloha_viper_step
+    authority: ALOHA supplier public CAD package
+    evidence_class: SUPPLIER_CAD_USER_CONFIRMED
+    url: https://drive.google.com/drive/folders/1mhJuhzT4lBnvZ9VE57UgT6vmJDFPVsBf
+    retrieved_at_utc: '2026-07-29T00:00:00Z'
+    local_path: .codex/artifacts/20260729-aloha-finger-palm-orientation/gdrive_source_readonly/Simple Aloha Viper 2024-5-13.step
+    sha256: 337862418769d4ea8b801d26e68930c4412f870050e60769bbf91765194dc571
+    license:
+      status: UNKNOWN_HARD_BLOCKER
+      identifier: UNKNOWN
+      evidence: reports/aloha1_mapping/aloha_public_cad_source_manifest.json
+      redistribution: LOCAL_READ_ONLY_NOT_REDISTRIBUTED
+    exact_model_scope: [aloha_vx300s, Simple Aloha Viper supplier assembly]
+
+  - id: isaacsim_urdf_importer_2_4_30
+    authority: NVIDIA local Isaac Sim installation
+    evidence_class: LOCAL_VERSION_PINNED_OFFICIAL_IMPLEMENTATION
+    url: local://isaacsim.asset.importer.urdf/2.4.30
+    retrieved_at_utc: '2026-08-02T14:47:44Z'
+    local_path: .venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.importer.urdf/config/extension.toml
+    sha256: 6ee1a8ab74c492930c792f7cabc657e022fb06dab4198ef413f6e1b359439baf
+    license:
+      status: CONFIRMED_LOCAL_INSTALLATION
+      identifier: LicenseRef-NvidiaProprietary
+      evidence: extension.toml package metadata
+      redistribution: NOT_REDISTRIBUTED
+    exact_model_scope: [isaac_sim_5_1, isaacsim.asset.importer.urdf_2.4.30]
+
+  - id: physx_schema_107_3
+    authority: NVIDIA local Isaac Sim installation
+    evidence_class: LOCAL_VERSION_PINNED_OFFICIAL_IMPLEMENTATION
+    url: local://omni.usd.schema.physx/107.3.26+107.3.3
+    retrieved_at_utc: '2026-08-02T14:47:44Z'
+    local_path: .venv_issac/lib/python3.11/site-packages/isaacsim/extscache/omni.usd.schema.physx-107.3.26+107.3.3.lx64.r.cp311.u353/plugins/PhysxSchema/resources/schema.usda
+    sha256: fe075bce4bde5ba7db69c6ccef0c4c26909336ab34c619129fc276f7cb4d7abc
+    license:
+      status: CONFIRMED_LOCAL_INSTALLATION
+      identifier: LicenseRef-NvidiaProprietary
+      evidence: omni.usd.schema.physx extension package metadata
+      redistribution: NOT_REDISTRIBUTED
+    exact_model_scope: [isaac_sim_5_1, PhysX_107.3.26, Kit_107.3.3]
+
+source_conflicts:
+  - id: trossen_vx300s_servo_id_6_7_joint_name
+    status: RESOLVED_WITH_CONFLICT_RETAINED
+    conflicting_claims:
+      - source_id: trossen_vx300s_spec
+        location: Joint Limits table
+        id6: wrist_angle
+        id7: forearm_roll
+      - source_id: trossen_vx300s_spec
+        location: Servo Configurations table
+        id6: forearm_roll
+        id7: wrist_angle
+      - source_id: interbotix_vx300s_motor_config
+        id6: forearm_roll
+        id7: wrist_angle
+      - source_id: interbotix_aloha_vx300s_motor_config
+        id6: forearm_roll
+        id7: wrist_angle
+    resolution:
+      id6: forearm_roll
+      id7: wrist_angle
+      basis_source_ids:
+        - interbotix_vx300s_motor_config
+        - interbotix_aloha_vx300s_motor_config
+        - interbotix_vx300s_xacro
+        - interbotix_aloha_vx300s_xacro
+      does_not_erase_conflict: true
+
+local_mirror_observations:
+  - id: ros2_essentials_is_not_upstream_authority
+    local_repository: external/ros2-essentials
+    repository: https://github.com/j3soon/ros2-essentials.git
+    commit: 66db34df28ac0037f284c8af1fce7c916c7c8d3a
+    classification: THIRD_PARTY_AGGREGATE_LOCAL_MIRROR
+  - id: local_aloha_sleep_positions_differ_from_pinned_upstream
+    file: aloha_vx300s.yaml
+    pinned_official_sleep_positions: [0, -2.05, 1.7, 0, -2.0, 0, 0]
+    local_mirror_sleep_positions: [0, -1.80, 1.55, 0, -1.57, 0, 0]
+    rule: LOCAL_SLEEP_POSE_MUST_NOT_BE_LABELED_OFFICIAL
