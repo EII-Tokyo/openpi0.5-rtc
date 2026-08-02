@@ -59,42 +59,57 @@ verifies the association label, all 13 joint rows, and authoring state.
 
 ### 2. Interaction phase
 
-After association succeeds, the launcher clears the global Stage selection
-with an empty path list and allows Inspector selection synchronization to
-settle. Clearing the global selection must not call `Use Selection` again and
-must not replace or reparse the Inspector model. The Inspector association
-label remains the original 50-prim association, while both of these transient
-interaction selections become empty:
+After association succeeds, the launcher replaces the 50-prim global Stage
+selection with the two non-joint anchors and allows Inspector selection
+synchronization to settle. This selection change must not call `Use Selection`
+again and must not replace or reparse the Inspector model. The Inspector
+association label remains the original 50-prim association, while both of
+these transient interaction selections contain only the articulation and
+table anchors:
 
 - `omni.usd` global Stage selection;
-- `InspectorSelectionHandler`'s current joint selection.
+- `InspectorSelectionHandler`'s current selection.
 
-With an empty Inspector selection, NVIDIA's value callback falls back to the
-row that emitted the change. Clicking or dragging one slider therefore writes
-only that joint's Drive Target Position. Subsequent explicit Ctrl/Shift
+Neither anchor is a joint row. NVIDIA's value callback therefore falls back to
+the row that emitted the change. Clicking or dragging one slider writes only
+that joint's Drive Target Position. Subsequent explicit Ctrl/Shift
 multi-selection remains available to the user and intentionally restores
-batch editing; the launcher itself must not start in that state.
+batch editing; the launcher itself must start with zero selected joint rows.
+
+Runtime evidence showed that an entirely empty selection changes native
+Inspector authoring behavior, while retaining these two anchors preserves the
+articulation/table simulation set. The anchors are consequently part of the
+interaction contract, not an incidental visual selection.
 
 ### 3. Disposable single-joint runtime validation
 
 A temporary Isaac Sim Full process reopens the frozen Stage and performs the
-same association and selection-clear sequence. It records all non-mimic left
+same association and joint-selection-isolation sequence. It records all non-mimic left
 joint Drive Target Position values, invokes the same Inspector row-value
 callback path for `shoulder`, and checks the result before any handoff:
 
 - the shoulder target changes to the requested value;
 - every other joint target remains bitwise or numerically unchanged within
   `1e-9` in the joint's authored units;
-- the Stage and Inspector transient selections remain either empty or contain
-  only the explicitly operated shoulder row;
+- the Stage and Inspector transient selections contain only the two non-joint
+  anchors and contain zero joint paths;
 - all 13 joint rows remain present.
 
-The validation then executes the existing native pressure-contact trial with
-the confirmed table still associated. It must retain the existing three-trial
-collision gates: exact table/finger contact, 180/180 pressure-hold contact
-steps, at most `0.5 mm` table-top penetration, at most `0.1 mm`
+The validation restores the probe target before executing the native
+pressure-contact trial with the confirmed table still associated. It must
+retain the three-trial collision gates: exact table/finger contact, 180/180
+supported hold steps (a reported contact, or after a confirmed contact a
+settled finger/table position within the same `0.5 mm` solver tolerance), at
+most `0.5 mm` table-top penetration, at most `0.1 mm`
 visual/collision disagreement, valid limits and CCD, no disallowed support
 contact, and unchanged Stage hash.
+
+This settled-support rule is required because PhysX stops emitting repeated
+contact reports when the correctly isolated single-joint system sleeps. The
+older 180/180 raw-contact result was produced by the bug itself: the shoulder
+target was copied to other selected joints, keeping the articulation moving.
+The replacement rule still requires a real allowed contact before settled
+support can count and fails closed on penetration or separation.
 
 Each validation process is disposable, never saves the Stage, never commits
 Inspector authoring results, and never touches the real robot.
@@ -107,14 +122,15 @@ verified PID. It does not save or commit the current state in which multiple
 targets equal `10.8`.
 
 A fresh Full process then loads the frozen Stage from disk, performs the
-association phase, clears transient selections, and verifies:
+association phase, isolates transient joint selection, and verifies:
 
 - exact Stage URL and frozen hash;
 - Z-up, meter scale, Perspective view, and stopped main timeline;
 - Inspector state `AUTHORING`;
 - 13 joint rows;
 - one 50-prim Inspector association containing both required anchors;
-- zero selected Stage prims and zero selected Inspector joint rows;
+- exactly the two non-joint anchors selected and zero selected Inspector joint
+  rows;
 - Joint Drive control, quasistatic on, fixed base on, and gravity off;
 - Full Kit command line and workspace index 2.
 
@@ -128,7 +144,7 @@ The workflow fails closed and does not hand off a new GUI when:
 
 - the approved Stage path or hash differs;
 - the Inspector association loses either the articulation or table anchor;
-- clearing the transient selection removes the 13 joint rows or disables
+- isolating the transient joint selection removes the 13 joint rows or disables
   authoring;
 - the Stage or Inspector selection remains multi-selected;
 - changing shoulder changes any other joint target;
@@ -156,13 +172,13 @@ logs, and screenshots remain under `.codex/artifacts/`.
 
 Implementation follows red-green-refactor:
 
-1. Add a failing source/runtime contract requiring the launcher to clear
-   global selection only after `Use Selection` and association verification.
+1. Add a failing source/runtime contract requiring the launcher to isolate
+   joint selection only after `Use Selection` and association verification.
 2. Add a pure helper test for deciding whether one target changed while all
    other targets remained unchanged.
 3. Add a failing native contract requiring the exact Inspector row callback,
-   empty transient selection, and per-joint before/after target evidence.
-4. Implement the minimal selection-clear helper and fail-closed assertions.
+   anchor-only transient selection, and per-joint before/after target evidence.
+4. Implement the minimal joint-selection-isolation helper and fail-closed assertions.
 5. Run the disposable single-joint test, then rerun all three native collision
    trials.
 6. Close the dirty process without saving and launch a clean Full handoff on
@@ -174,7 +190,7 @@ Completion requires fresh evidence for all of the following:
 
 - focused unit and startup-contract tests pass after a demonstrated red phase;
 - the native UI-equivalent edit changes shoulder and no other joint target;
-- the Inspector retains 13 rows after transient selection is cleared;
+- the Inspector retains 13 rows after transient joint selection is isolated;
 - all three native tabletop collision trials pass their existing gates;
 - the USD hash remains unchanged and no Stage is saved;
 - the current dirty `10.8` posture is discarded by process replacement;
