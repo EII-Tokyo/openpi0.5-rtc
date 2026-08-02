@@ -1,0 +1,110 @@
+{
+  "baseline_inventory_status": "PASS_READ_ONLY_EVIDENCE",
+  "candidate_asset_created": false,
+  "candidate_status": "NOT_BUILT_BLOCKED",
+  "deterministic_signature": "f7dcbd6a0fc7cf6e959c26cb6c7712e2a2bf02884d9b0c5c7f3812acc0832d14",
+  "final_or_default_asset_modified": false,
+  "isaac_runtime_started": false,
+  "model_first_gate": {
+    "blocking_gates": [
+      {
+        "blocking": true,
+        "candidate_gate": "BLOCKED",
+        "id": "parameter_matrix",
+        "reason": "MODEL_PROOF_INCOMPLETE",
+        "status": "PASS"
+      },
+      {
+        "blocking": true,
+        "candidate_gate": "BLOCKED",
+        "id": "dynamics_contract",
+        "reason": "MODEL_PROOF_INCOMPLETE",
+        "status": "PARTIAL"
+      },
+      {
+        "blocking": true,
+        "candidate_gate": "BLOCKED",
+        "id": "gripper_geometry_contract",
+        "reason": "MODEL_PROOF_INCOMPLETE",
+        "status": "PARTIAL"
+      },
+      {
+        "blocking": true,
+        "candidate_gate": "BLOCKED",
+        "id": "collider_geometry_contract",
+        "reason": "MODEL_PROOF_INCOMPLETE",
+        "status": "PARTIAL"
+      },
+      {
+        "blocking": true,
+        "candidate_gate": null,
+        "id": "runtime_contract",
+        "reason": "MODEL_PROOF_INCOMPLETE",
+        "status": "NOT_RUN"
+      }
+    ],
+    "candidate_authoring_allowed": false,
+    "required_gates": [
+      {
+        "blocking": false,
+        "candidate_gate": null,
+        "id": "source_audit",
+        "reason": "PASS",
+        "status": "PASS"
+      },
+      {
+        "blocking": true,
+        "candidate_gate": "BLOCKED",
+        "id": "parameter_matrix",
+        "reason": "MODEL_PROOF_INCOMPLETE",
+        "status": "PASS"
+      },
+      {
+        "blocking": false,
+        "candidate_gate": null,
+        "id": "kinematic_contract",
+        "reason": "PASS",
+        "status": "PASS"
+      },
+      {
+        "blocking": true,
+        "candidate_gate": "BLOCKED",
+        "id": "dynamics_contract",
+        "reason": "MODEL_PROOF_INCOMPLETE",
+        "status": "PARTIAL"
+      },
+      {
+        "blocking": true,
+        "candidate_gate": "BLOCKED",
+        "id": "gripper_geometry_contract",
+        "reason": "MODEL_PROOF_INCOMPLETE",
+        "status": "PARTIAL"
+      },
+      {
+        "blocking": true,
+        "candidate_gate": "BLOCKED",
+        "id": "collider_geometry_contract",
+        "reason": "MODEL_PROOF_INCOMPLETE",
+        "status": "PARTIAL"
+      },
+      {
+        "blocking": true,
+        "candidate_gate": null,
+        "id": "runtime_contract",
+        "reason": "MODEL_PROOF_INCOMPLETE",
+        "status": "NOT_RUN"
+      }
+    ],
+    "status": "BLOCKED"
+  },
+  "next_actions": [
+    "resolve CAD-to-link registrations and per-link collider error certificates",
+    "reconcile the 114 mm URDF carriage-center and 116 mm product-page aperture definitions against supplier CAD inner surfaces",
+    "complete continuous actuator-envelope and controller-to-PhysX derivations without using stall torque as continuous maxForce",
+    "obtain exact finger-bottle-table material properties or physical measurements",
+    "derive a numerical timestep/solver error budget"
+  ],
+  "schema_version": 1,
+  "status": "BLOCKED",
+  "task8_status": "AUTHORIZED_PAUSED_AT_MODEL_PROOF_GATE"
+}

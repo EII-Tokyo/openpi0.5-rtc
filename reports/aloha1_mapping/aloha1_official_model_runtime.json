@@ -1,0 +1,10 @@
+{
+  "deterministic_signature": "d2d867ec27636710d61b6a039da2625fbba3c5b599a902efcce461739fe243e5",
+  "final_or_default_asset_modified": false,
+  "isaac_sim_started": false,
+  "nvidia_mcp_required_at_this_gate": false,
+  "reason": "No source-complete isolated candidate exists; Isaac runtime verification is forbidden by the model-first gate.",
+  "schema_version": 1,
+  "stage_loaded": null,
+  "status": "NOT_RUN"
+}
