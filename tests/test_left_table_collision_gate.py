@@ -1,0 +1,57 @@
+import math
+
+from tools.isaac_sim.left_table_collision_gate import (
+    TABLE_PATH,
+    TrialMetrics,
+    aggregate_trials,
+    evaluate_trial,
+)
+
+
+TIP = (
+    "/World/follower_left/vx300s_left/"
+    "follower_left_left_finger_link/collisions/tip"
+)
+
+
+def passing_trial() -> TrialMetrics:
+    return TrialMetrics(
+        contact_pairs=[(TABLE_PATH, TIP)],
+        minimum_tip_z_m=-0.001,
+        final_target_error_rad=math.radians(8),
+        persistent_contact_steps=20,
+        finite=True,
+        within_joint_limits=True,
+        ccd_effective=True,
+        disallowed_tip_contacts=[],
+        physx_errors=[],
+    )
+
+
+def test_pass_requires_exact_contact_non_crossing_and_blocked_target():
+    result = evaluate_trial(passing_trial())
+
+    assert result["status"] == "PASS"
+    assert result["target_contact_found"] is True
+    assert result["bottom_crossed"] is False
+    assert result["infeasible_target_blocked"] is True
+
+
+def test_unrelated_contact_and_bottom_crossing_fail():
+    trial = passing_trial()
+    trial.contact_pairs = [("/World/environment/worldBody/__1", TIP)]
+    trial.minimum_tip_z_m = -0.017
+
+    result = evaluate_trial(trial)
+
+    assert result["status"] == "FAIL"
+    assert "missing_exact_table_tip_contact" in result["failure_reasons"]
+    assert "tested_collider_crossed_table_bottom" in result["failure_reasons"]
+
+
+def test_exactly_three_passing_trials_are_required():
+    assert aggregate_trials([evaluate_trial(passing_trial())] * 2)["status"] == "FAIL"
+    assert (
+        aggregate_trials([evaluate_trial(passing_trial()) for _ in range(3)])["status"]
+        == "PASS"
+    )
