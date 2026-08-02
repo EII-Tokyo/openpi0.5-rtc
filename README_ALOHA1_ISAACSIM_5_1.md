@@ -63,7 +63,7 @@ sim-to-real dynamics model and it is not yet accepted for bottle insertion.
 | Official parameter coverage matrix | **PASS inventory / BLOCKED candidate** | 47 source-bound records cover 12 required groups; five narrow missing derivations contain no convenient fallback values |
 | Kinematic mathematical contract | **PASS** | independent URDF FK and official Trossen POE agree at five legal samples; max translation residual `4.4841e-16 m`, max Jacobian residual `1.9581e-10`; Isaac IK was not used |
 | Dynamics mathematical contract | **PARTIAL** | all 14 inertials per follower pass; official 12 V estimated continuous torque is XM540 `2.12 N·m` and XM430 `0.82 N·m`, explicitly 20%-of-stall estimates rather than measured thermal curves; full envelope and PhysX drive mapping remain blocked |
-| Gripper/collider geometry contract | **PARTIAL** | 42–114 mm CAD/URDF carriage range and all 11 physical-link source identities are resolved; the complete numerical hull certificate shows each correct finger's inner surface can be recessed by `0.797776 mm`, above the `0.20 mm` tessellation budget; acceptance/error budget remains blocked |
+| Gripper/collider geometry contract | **PARTIAL / central contact candidate PASS** | Hull/default decomposition fail the exact inward-face gate. A CAD-derived 34-piece-per-finger compound passes two fresh finger-link-local PhysX cooking runs over its central contact rectangle and a deterministic 68-piece geometry-only USD exists; full effective contact-surface scope and promotion remain blocked |
 | Task 8 optimization | **AUTHORIZED / PAUSED_AT_MODEL_PROOF_GATE** | read-only 129-mesh baseline inventory exists; no optimization candidate, Isaac runtime, or final/default asset mutation occurred |
 
 `PASS`, `FAIL`, and `PARTIAL` are literal machine-report values. A clean
@@ -149,6 +149,26 @@ approximation: that bottle-task tolerance remains
 `HARD_BLOCKER_NOT_DERIVED_OR_MEASURED`, and no successful grasp video was used
 to fit it.
 
+An exact-CAD construction now provides a narrower positive result without
+tuning PhysX or fitting a successful grasp. Default decomposition pieces are
+clipped at the audited inward-face plane and combined with a central contact
+rectangle derived by OCCT face containment and exact B-Rep Boolean depth.
+After the audited CAD-global → finger-link transform, two fresh Isaac Sim 5.1
+processes cook 34 convex pieces per handed finger with the same signature.
+Tolerance-adjusted central-region coverage is 100% on both sides; maximum
+outward crossing is `0.291 nm` left and `0.637 nm` right against a
+finger-link-local `59.605 nm` numeric floor. The raw exact-ray ratios
+(`77.85%` left, `100%` right) remain in the report rather than being hidden.
+
+The resulting 68-piece USD is geometry-only, byte-identical across two fresh
+builds and contains no RigidBody, Mass or Articulation schema. It is
+`DIAGNOSTIC_ONLY_NOT_PROMOTED`: the proof covers only the central CAD-derived
+contact rectangle, not the full effective finger face, articulation dynamics
+or grasp behavior. The first exact-ray certificate false negative and the
+first annotation-overlap image are preserved as rejected evidence. The final
+raw/annotated numerical screenshots were individually vision-reviewed; no
+video was created because no timeline or dynamic experiment ran.
+
 The pure-math kinematic contract is `PASS`: independent URDF-chain FK agrees
 with Trossen's published POE model at home and four deterministic legal joint
 samples. Both follower URDFs have the same normalized robot-local chain and
@@ -168,6 +188,11 @@ Authoritative new reports:
 - `reports/aloha1_mapping/aloha1_gripper_geometry_contract.json/.md`;
 - `reports/aloha1_mapping/aloha1_cad_link_identity_resolution.json/.md`;
 - `reports/aloha1_mapping/aloha1_gripper_aperture_definition_resolution.json/.md`;
+- `reports/aloha1_mapping/aloha1_supplier_cad_compound_contact_candidate.json/.md`;
+- `reports/aloha1_mapping/aloha1_supplier_cad_compound_runtime_cooking_certificate.json/.md`;
+- `reports/aloha1_mapping/aloha1_supplier_cad_compound_contact_usd.json/.md`;
+- `reports/aloha1_mapping/aloha1_supplier_cad_compound_runtime_failure_screenshot_review.json/.md`;
+- `reports/aloha1_mapping/aloha1_official_model_first_closure.json/.md`;
 - `reports/aloha1_mapping/aloha1_official_collider_surface_certificate.json/.md`;
 - `reports/aloha1_mapping/aloha1_finger_cooked_source_identity_boundary.json/.md`;
 - `reports/aloha1_mapping/aloha1_supplier_cad_finger_brep_cooked_certificate.json/.md`;

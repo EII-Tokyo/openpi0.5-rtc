@@ -1,5 +1,46 @@
 # Task State
 
+## 2026-08-03 CAD-derived compound finger contact candidate
+
+- The prior Hull/default-Decomposition exact B-Rep failure is not hidden or
+  tuned. Both approximations remain rejected for exact inward-face contact;
+  the final/default collider remains unchanged.
+- A deterministic CAD-only construction clips the 32 default-decomposition
+  body pieces at the audited inward contact plane and adds two inward-only
+  triangular prisms covering an OCCT-derived centered contact rectangle per
+  handed finger. No dimension was fitted from grasp success.
+- The output is transformed with the already audited, determinant `+1`
+  CAD-global → finger-link matrices. Two fresh Isaac Sim 5.1 / PhysX 107.3.26
+  processes each cook 34 pieces per side and produce identical signature
+  `63db0e0a5c5bbc5487acf3709ddfa2d0c7540e237794c4025678d3b1e8b44510`.
+- In finger-link coordinates the prederived numeric floor is
+  `5.960464477539063e-8 m`. Central contact-region coverage is 100% after the
+  bounded OCCT/float32 adjustment; maximum outward crossing is
+  `2.9111855461005935e-10 m` left and `6.365104554539868e-10 m` right. Raw
+  exact-ray coverage remains disclosed (`0.7785467128` left, `1.0` right).
+- A 68-piece geometry-only diagnostic USD was authored twice with identical
+  root/geometry hashes. All collision approximation readbacks are
+  `convexHull`; no RigidBody, Mass or Articulation schema is present. Final
+  path:
+  `assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_compound_contact_candidate/aloha1_supplier_cad_compound_contact_candidate.usda`.
+- The candidate is `DIAGNOSTIC_ONLY_NOT_PROMOTED`. It proves only a central
+  contact rectangle and is not yet integrated into an articulation. Full
+  effective contact-surface scope, material/drive/solver derivations and
+  runtime grasp behavior remain outside this gate. Task 8 stays authorized but
+  paused at the remaining model-proof gate.
+- Failure evidence is retained: the first runtime certificate used an
+  effectively zero exact-ray tolerance and is classified
+  `REJECTED_CERTIFICATE_EXACT_RAY_FALSE_NEGATIVE`; the first annotated plot is
+  `REJECTED_ANNOTATION_OCCLUDES_SAMPLES`. The final raw and annotated numerical
+  figures pass individual visual-model review. No video applies because the
+  timeline was never started.
+- The aggregate model-first closure is `PARTIAL_MODEL_PROOF`, deterministic
+  signature
+  `7da44b6f2b994ec077e2bf0d02681786eea8933ece43d59e224664b5addb1d1d`.
+  It records five remaining official-parameter/model derivation blockers and
+  confirms `final_or_default_asset_modified=false`:
+  `reports/aloha1_mapping/aloha1_official_model_first_closure.json/.md`.
+
 ## 2026-08-02 Task 8 lightweight-optimization authorization
 
 - The user explicitly relaxed the remaining Task 7 asset-promotion gate and

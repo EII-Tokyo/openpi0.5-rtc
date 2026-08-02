@@ -1,0 +1,189 @@
+{
+  "collider_contract_status": "PARTIAL",
+  "compound_articulation_integration_status": "NOT_RUN",
+  "compound_contact_dynamics_status": "NOT_RUN",
+  "compound_contact_region_coordinate_frame": "FINGER_LINK_LOCAL_METRES",
+  "compound_contact_region_status": "PASS_RUNTIME_COOKED_CONTACT_REGION_GEOMETRY_NOT_PROMOTED",
+  "compound_full_face_scope": "PARTIAL_CONTACT_REGION_ONLY",
+  "compound_usd_status": "PASS_GEOMETRY_ONLY_DIAGNOSTIC_USD",
+  "compound_video_status": "NOT_APPLICABLE_STATIC_COOKING_ONLY",
+  "deterministic_signature": "7da44b6f2b994ec077e2bf0d02681786eea8933ece43d59e224664b5addb1d1d",
+  "dynamics_contract_status": "PARTIAL",
+  "evidence_boundaries": {
+    "diagnostic_asset_redistribution": "UNKNOWN_HARD_BLOCKER_SUPPLIER_CAD_LICENSE",
+    "static_cooking_only": true,
+    "timeline_started": false,
+    "video_reason": "NOT_APPLICABLE_STATIC_COOKING_ONLY",
+    "video_required": false
+  },
+  "final_or_default_asset_modified": false,
+  "formal_parameter_blockers": [
+    {
+      "blocker": {
+        "blocks": [
+          "formal_joint_max_force_envelope"
+        ],
+        "does_not_block": [
+          "kinematic_contract",
+          "register_unit_conversion"
+        ],
+        "id": "HARD_BLOCKER_CONTINUOUS_TORQUE_SPEED_CURRENT_THERMAL_CURVE",
+        "missing_definition": "measured continuous torque-speed-current thermal envelope beyond the official 12 V 20%-of-stall estimates"
+      },
+      "evidence_class": "HARD_BLOCKER",
+      "id": "continuous_actuator_envelope",
+      "status": "HARD_BLOCKER"
+    },
+    {
+      "blocker": {
+        "blocks": [
+          "formal_physics_drive_layer"
+        ],
+        "does_not_block": [
+          "source_audit",
+          "kinematic_contract"
+        ],
+        "id": "HARD_BLOCKER_PHYSX_DRIVE_PHYSICAL_DERIVATION",
+        "missing_definition": "physical mapping from exact actuator/controller/transmission to PhysX stiffness, damping and maxForce"
+      },
+      "evidence_class": "HARD_BLOCKER",
+      "id": "physx_joint_drive_mapping",
+      "status": "HARD_BLOCKER"
+    },
+    {
+      "blocker": {
+        "blocks": [
+          "formal_collision_layer"
+        ],
+        "does_not_block": [
+          "source_audit",
+          "inertial_validation"
+        ],
+        "id": "HARD_BLOCKER_COLLIDER_ACCEPTANCE_ERROR_BUDGET",
+        "missing_definition": "official or task-derived numerical acceptance tolerance for the complete per-link convex-hull surface/volume certificate"
+      },
+      "evidence_class": "HARD_BLOCKER",
+      "id": "formal_collision_geometry",
+      "status": "HARD_BLOCKER"
+    },
+    {
+      "blocker": {
+        "blocks": [
+          "formal_contact_material_layer",
+          "calibrated_grasp_dynamics"
+        ],
+        "does_not_block": [
+          "geometry_contract",
+          "kinematic_contract"
+        ],
+        "id": "HARD_BLOCKER_EXACT_CONTACT_MATERIAL_PROPERTIES",
+        "missing_definition": "exact static/dynamic friction, restitution and combine rules for finger-bottle-table material pairs"
+      },
+      "evidence_class": "HARD_BLOCKER",
+      "id": "finger_bottle_table_contact_materials",
+      "status": "HARD_BLOCKER"
+    },
+    {
+      "blocker": {
+        "blocks": [
+          "formal_runtime_numerical_policy"
+        ],
+        "does_not_block": [
+          "source_audit",
+          "offline_geometry_proof"
+        ],
+        "id": "HARD_BLOCKER_NUMERICAL_ERROR_BUDGET_NOT_YET_DERIVED",
+        "missing_definition": "documented numerical error budget selecting timestep and solver iterations for this model"
+      },
+      "evidence_class": "HARD_BLOCKER",
+      "id": "physics_timestep_solver_selection",
+      "status": "HARD_BLOCKER"
+    }
+  ],
+  "inputs": [
+    {
+      "deterministic_signature": "ed69318a0450fdd57127f8cfecf55563a3e96b9cd04ebd7d1a4340fd8d6a68ed",
+      "id": "official_parameter_source_audit",
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_official_parameter_source_audit.json",
+      "sha256": "55e8e00fad593c92ef6b1a475af7af89eed6969b7d9abf05d5b1119f36107e95",
+      "status": "PASS"
+    },
+    {
+      "deterministic_signature": "9712c2e43eb0c56baa7c6039eca214bfc39afbb1f6eda65261038f29a8df3b9e",
+      "id": "official_parameter_matrix",
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_official_parameter_matrix.json",
+      "sha256": "d0adf5f84a5a0b7f098a0dacbd48da14a37cb3d07465cd639227048a3e31d178",
+      "status": "PASS"
+    },
+    {
+      "deterministic_signature": "29f705de259db323e557710480513fc7b27bf0683f33d24a37dc31b2f798d333",
+      "id": "kinematic_contract",
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_kinematic_contract.json",
+      "sha256": "7bc7348f10702b05436700f7d55ea537b34d01f8326c70df0845e1ad093d4efe",
+      "status": "PASS"
+    },
+    {
+      "deterministic_signature": "f0bd780f2ccf1563f4c66c6e0ca9bcd98e55323fe8c5881529932709caf19c24",
+      "id": "dynamics_contract",
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_dynamics_contract.json",
+      "sha256": "79f697a07054507e4644420664c05b7f42b3e355260124587a2fdab4343e6855",
+      "status": "PARTIAL"
+    },
+    {
+      "deterministic_signature": "5a975dc99cf5f74479f9e9c34820c7d0eb64e8919cfdb1c8b134f4d2ab4fa2ac",
+      "id": "gripper_geometry_contract",
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_gripper_geometry_contract.json",
+      "sha256": "15f68006404e73c478ef0ab8c28e00b2291031a7c65256928c618532064c287a",
+      "status": "PASS"
+    },
+    {
+      "deterministic_signature": "78717ac316855f20becfd89ba935b730d5a962f49f84787a4e5842d3a9ea30f6",
+      "id": "collider_geometry_contract",
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_collider_geometry_contract.json",
+      "sha256": "67139c0278b9dba90b3b8576ab7e64206b5394817daf291b37c58bfa48d928d1",
+      "status": "PARTIAL"
+    },
+    {
+      "deterministic_signature": null,
+      "id": "compound_runtime_cooking",
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_supplier_cad_compound_runtime_cooking_certificate.json",
+      "sha256": "ccc1d81bf05e60c262172327e0f685c96e4306312fe6098c8516d5586d173f12",
+      "status": "PASS_RUNTIME_COOKED_CONTACT_REGION_GEOMETRY_NOT_PROMOTED"
+    },
+    {
+      "deterministic_signature": null,
+      "id": "compound_geometry_usd",
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_supplier_cad_compound_contact_usd.json",
+      "sha256": "601c4127150d3b1f46d5991ec02542ea130b526e481843f568cb316454238e26",
+      "status": "PASS_GEOMETRY_ONLY_DIAGNOSTIC_USD"
+    },
+    {
+      "deterministic_signature": "02fc7c0216190d37768c41a65960c77ffb6b8f4d4c1aa11c6c557430c38430c9",
+      "id": "official_model_candidate",
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_official_model_candidate.json",
+      "sha256": "18d06759055f77780c65470586b1fa838a9d5a9e13ada4be9e9360b5512feb45",
+      "status": "NOT_BUILT_BLOCKED"
+    },
+    {
+      "deterministic_signature": "d2d867ec27636710d61b6a039da2625fbba3c5b599a902efcce461739fe243e5",
+      "id": "official_model_runtime",
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_official_model_runtime.json",
+      "sha256": "e0d8298f5610502c20f0aa24108a9e4687268e9c40eabe45979ac7261819be09",
+      "status": "NOT_RUN"
+    }
+  ],
+  "interpretation": "The supplier-CAD central finger contact region is now proven in finger-link-local metres through two fresh Isaac 5.1 cooking processes, and the geometry-only USD is byte-identical across two fresh builds. This does not prove the complete effective finger contact surface, articulation integration, contact dynamics, calibrated drives, or material/solver mappings. The diagnostic candidate is therefore not promoted and the final/default asset remains unchanged.",
+  "official_model_candidate_status": "NOT_BUILT_BLOCKED",
+  "official_model_runtime_status": "NOT_RUN",
+  "remaining_blocker_count": 5,
+  "schema_version": 1,
+  "status": "PARTIAL_MODEL_PROOF",
+  "task8_status": "AUTHORIZED_PAUSED_AT_MODEL_PROOF_GATE",
+  "verified_gates": {
+    "compound_runtime_fresh_process_determinism": "PASS_DETERMINISTIC_FRESH_PROCESS_COOKING",
+    "compound_usd_fresh_build_determinism": "PASS_TWO_FRESH_BUILDS_BYTE_IDENTICAL",
+    "gripper_geometry_contract": "PASS",
+    "kinematic_contract": "PASS",
+    "official_source_chain": "PASS"
+  }
+}
