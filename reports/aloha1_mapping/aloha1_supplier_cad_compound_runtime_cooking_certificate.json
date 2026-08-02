@@ -1,0 +1,166 @@
+{
+  "asset_decision": "DIAGNOSTIC_ONLY_NOT_PROMOTED",
+  "coordinate_frame": "FINGER_LINK_LOCAL_METRES",
+  "diagnostic_usd_status": "NOT_CREATED",
+  "final_or_default_collider_modified": false,
+  "fingers": {
+    "left": {
+      "contact_region_status": "PASS",
+      "coordinate_frame": "FINGER_LINK_LOCAL_METRES",
+      "exact_ray_coverage_ratio": 0.7785467128027682,
+      "full_brep_face_certificate": {
+        "contact_sample_count": 2029,
+        "maximum_contact_surface_deviation_m": 0.009255582507654321,
+        "maximum_contributing_piece_count": 1,
+        "maximum_deviation_kind": "UNCOVERED_NEAREST_SURFACE",
+        "maximum_deviation_sample_index": 670,
+        "maximum_deviation_source_point_m": [
+          0.04257188479610935,
+          -0.013744605352510061,
+          5.133620537850492e-05
+        ],
+        "maximum_deviation_target_point_m": [
+          0.04592091939800492,
+          -0.013817618176136425,
+          -0.008576783167862048
+        ],
+        "maximum_inward_crossing_sample_index": 640,
+        "maximum_inward_crossing_source_point_m": [
+          0.04521760084555365,
+          -0.014022681314616998,
+          -0.02076116379462173
+        ],
+        "maximum_inward_crossing_target_point_m": [
+          0.045217600798094226,
+          -0.014022681766163286,
+          -0.02076116379462173
+        ],
+        "method": "ANALYTIC_NORMAL_RAY_UNION_FOR_COVERED_POINTS_AND_EXACT_TRIANGLE_NEAREST_SURFACE_FOR_UNCOVERED_POINTS",
+        "positive_exit_distance_max_m": 4.5403353125805816e-10,
+        "positive_exit_distance_mean_m": 2.1742155285695221e-10,
+        "positive_exit_distance_min_m": 1.1116628451102174e-13,
+        "positive_exit_distance_p95_m": 4.1730123107042155e-10,
+        "source_point_coverage_ratio": 0.35731887629374076,
+        "source_point_covered_count": 725,
+        "status": "FAIL_EXCEEDS_TESSELLATION_ERROR_BUDGET",
+        "tessellation_error_budget_m": 5.960464477539063e-08,
+        "uncovered_count": 1304,
+        "uncovered_nearest_surface_max_m": 0.009255582507654321,
+        "uncovered_nearest_surface_mean_m": 0.00014344184646802947,
+        "uncovered_nearest_surface_min_m": 2.608491723498155e-12,
+        "uncovered_nearest_surface_normal_projection_max_m": 2.0748525512246795e-11,
+        "uncovered_nearest_surface_normal_projection_min_m": -0.00035522165902138696
+      },
+      "full_face_scope": "PARTIAL_CONTACT_REGION_ONLY",
+      "maximum_outward_crossing_m": 2.9111855461005935e-10,
+      "maximum_quantization_surface_distance_m": 2.9952079290325222e-09,
+      "numeric_tolerance_m": 5.960464477539063e-08,
+      "quantization_boundary_sample_count": 64,
+      "runtime_cooked_piece_count": 34,
+      "source_piece_count": 34,
+      "tolerance_adjusted_coverage_ratio": 1.0
+    },
+    "right": {
+      "contact_region_status": "PASS",
+      "coordinate_frame": "FINGER_LINK_LOCAL_METRES",
+      "exact_ray_coverage_ratio": 1.0,
+      "full_brep_face_certificate": {
+        "contact_sample_count": 2029,
+        "maximum_contact_surface_deviation_m": 0.009447578614620318,
+        "maximum_contributing_piece_count": 1,
+        "maximum_deviation_kind": "UNCOVERED_NEAREST_SURFACE",
+        "maximum_deviation_sample_index": 1358,
+        "maximum_deviation_source_point_m": [
+          0.04257188479610935,
+          0.01374460535250998,
+          -5.133620538150252e-05
+        ],
+        "maximum_deviation_target_point_m": [
+          0.045800523819805324,
+          0.013744605352509978,
+          -0.008930110430132275
+        ],
+        "maximum_inward_crossing_sample_index": 1815,
+        "maximum_inward_crossing_source_point_m": [
+          0.07190186645065427,
+          0.016827310644667248,
+          -0.002751336205381927
+        ],
+        "maximum_inward_crossing_target_point_m": [
+          0.07190186638432484,
+          0.016827311275749587,
+          -0.002751336205381927
+        ],
+        "method": "ANALYTIC_NORMAL_RAY_UNION_FOR_COVERED_POINTS_AND_EXACT_TRIANGLE_NEAREST_SURFACE_FOR_UNCOVERED_POINTS",
+        "positive_exit_distance_max_m": 6.345585168432421e-10,
+        "positive_exit_distance_mean_m": 2.3072772328611766e-10,
+        "positive_exit_distance_min_m": 1.900996721149184e-13,
+        "positive_exit_distance_p95_m": 5.711937090848001e-10,
+        "source_point_coverage_ratio": 0.49088220798422866,
+        "source_point_covered_count": 996,
+        "status": "FAIL_EXCEEDS_TESSELLATION_ERROR_BUDGET",
+        "tessellation_error_budget_m": 5.960464477539063e-08,
+        "uncovered_count": 1033,
+        "uncovered_nearest_surface_max_m": 0.009447578614620318,
+        "uncovered_nearest_surface_mean_m": 7.651515176633527e-05,
+        "uncovered_nearest_surface_min_m": 4.724608022462885e-13,
+        "uncovered_nearest_surface_normal_projection_max_m": 3.087075675070629e-18,
+        "uncovered_nearest_surface_normal_projection_min_m": -0.00043850210390715215
+      },
+      "full_face_scope": "PARTIAL_CONTACT_REGION_ONLY",
+      "maximum_outward_crossing_m": 6.365104554539868e-10,
+      "maximum_quantization_surface_distance_m": null,
+      "numeric_tolerance_m": 5.960464477539063e-08,
+      "quantization_boundary_sample_count": 0,
+      "runtime_cooked_piece_count": 34,
+      "source_piece_count": 34,
+      "tolerance_adjusted_coverage_ratio": 1.0
+    }
+  },
+  "fresh_process_determinism": {
+    "all_runtime_contact_region_gates_pass": true,
+    "fresh_processes": true,
+    "geometry_signatures": [
+      "63db0e0a5c5bbc5487acf3709ddfa2d0c7540e237794c4025678d3b1e8b44510",
+      "63db0e0a5c5bbc5487acf3709ddfa2d0c7540e237794c4025678d3b1e8b44510"
+    ],
+    "matching_geometry_signatures": true,
+    "process_ids": [
+      2623598,
+      2625127
+    ],
+    "status": "PASS_DETERMINISTIC_FRESH_PROCESS_COOKING"
+  },
+  "rejected_attempt": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/cad_compound_contact_candidate/runtime_cooking/attempt1_exact_ray_false_negative/run1.json",
+    "original_status": "FAIL_RUNTIME_COOKED_CONTACT_REGION_GEOMETRY_NOT_PROMOTED",
+    "reason": "exact-ray containment used near-zero floating tolerance despite the prederived OCCT/float32 comparison floor",
+    "sha256": "1f5c7b1be0796242b008cba3c35ce7bc94463c704805f516e7485885d6bf2ed4",
+    "status": "REJECTED_CERTIFICATE_EXACT_RAY_FALSE_NEGATIVE"
+  },
+  "runtime": {
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physx": "107.3.26"
+  },
+  "runtime_runs": [
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/cad_compound_contact_candidate/runtime_cooking_finger_link_local/run1.json",
+      "deterministic_signature": "63db0e0a5c5bbc5487acf3709ddfa2d0c7540e237794c4025678d3b1e8b44510",
+      "process_id": 2623598,
+      "sha256": "ca4ec630519f5bb104d895e2607ebb77c258e74cd0d5294ad78da7a51bee6be1"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/cad_compound_contact_candidate/runtime_cooking_finger_link_local/run2.json",
+      "deterministic_signature": "63db0e0a5c5bbc5487acf3709ddfa2d0c7540e237794c4025678d3b1e8b44510",
+      "process_id": 2625127,
+      "sha256": "40cae95a01f559ec987b6355b12945b75860a1468ef7a3caf562310d4e9d3165"
+    }
+  ],
+  "schema_version": 1,
+  "scope": "CENTRAL_CAD_DERIVED_CONTACT_RECTANGLE_ONLY",
+  "status": "PASS_RUNTIME_COOKED_CONTACT_REGION_GEOMETRY_NOT_PROMOTED",
+  "task8_default_asset_optimization_status": "NOT_STARTED",
+  "timeline_started": false,
+  "video_status": "NOT_APPLICABLE_STATIC_COOKING_ONLY"
+}

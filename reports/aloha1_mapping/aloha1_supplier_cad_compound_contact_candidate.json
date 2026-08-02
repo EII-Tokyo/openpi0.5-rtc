@@ -1,0 +1,351 @@
+{
+  "asset_decision": "DIAGNOSTIC_ONLY_NOT_PROMOTED",
+  "contact_region_gate": "PASS",
+  "deterministic_signature": "b3c62923b86be2d1acc665576c13a0c3d0db7be2534223bd07cade9b8af363e6",
+  "final_or_default_collider_modified": false,
+  "fingers": {
+    "left": {
+      "cad_global_to_finger_link_matrix": [
+        [
+          0.0,
+          -1.0,
+          0.0,
+          -0.49899999973392
+        ],
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.021099890257662776
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.42680133373174
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "candidate_geometry_signature": "1e9fd9799079279429b374708546b9d878f1ddf889f12090672dbebe9acc897d",
+      "candidate_piece_count": 34,
+      "clipped_body_piece_count": 32,
+      "contact_prism_piece_count": 2,
+      "contact_rectangle": {
+        "area_m2": 0.00015032319847952926,
+        "cad_boolean_depth_certificate": {
+          "bisection_iterations": 48,
+          "bracket_width_mm": 4.036770917537069e-13,
+          "containment_test": "FACE_EXTRUSION_CUT_SOURCE_FINGER_BREP_VOLUME",
+          "first_infeasible_upper_bound_mm": 3.0040173513458948,
+          "initial_upper_bound_mm": 113.6517996983454,
+          "initial_upper_extrusion_volume_mm3": 17084.502043610082,
+          "lower_bound_extrusion_volume_mm3": 451.5734965422581,
+          "lower_bound_outside_volume_mm3": 1.5032319847949376e-05,
+          "maximum_feasible_lower_bound_mm": 3.004017351345491,
+          "upper_bound_outside_volume_mm3": 1.5032319847962136e-05,
+          "volume_tolerance_derivation": "FACE_AREA_MM2_TIMES_BREP_MEMBERSHIP_TOLERANCE_MM",
+          "volume_tolerance_mm3": 1.5032319847952925e-05
+        },
+        "depth_m": 0.003004017351345491,
+        "height_m": 0.014996426307647193,
+        "seed": {
+          "candidate_count": 20,
+          "mesh_centroid_plane_residual_mm": 6.949924075616887e-07,
+          "minimum_boundary_distance_mm": 8.466659593170375,
+          "point_mm": [
+            4.114045516421169,
+            -572.4102173578027,
+            425.1859944661458
+          ],
+          "selection": "MAXIMUM_EXACT_BREP_EDGE_DISTANCE_AMONG_PINNED_MESHPART_TRIANGLE_CENTROIDS",
+          "source_triangle_index": 17
+        },
+        "source_scale_lower_bound": 0.2959822010424169,
+        "width_m": 0.01002393472922775
+      },
+      "contact_region_certificate": {
+        "contact_sample_count": 289,
+        "maximum_contact_surface_deviation_m": 1.387778780781446e-17,
+        "maximum_contributing_piece_count": 3,
+        "maximum_deviation_kind": "COVERED_NORMAL_EXIT",
+        "maximum_deviation_sample_index": 195,
+        "maximum_deviation_source_point_m": [
+          0.004114045516421181,
+          -0.5724102173578026,
+          0.42237416453346194
+        ],
+        "maximum_deviation_target_point_m": [
+          0.004114045516421167,
+          -0.5724102173578026,
+          0.42237416453346194
+        ],
+        "maximum_inward_crossing_sample_index": 195,
+        "maximum_inward_crossing_source_point_m": [
+          0.004114045516421181,
+          -0.5724102173578026,
+          0.42237416453346194
+        ],
+        "maximum_inward_crossing_target_point_m": [
+          0.004114045516421167,
+          -0.5724102173578026,
+          0.42237416453346194
+        ],
+        "method": "ANALYTIC_NORMAL_RAY_UNION_FOR_COVERED_POINTS_AND_EXACT_TRIANGLE_NEAREST_SURFACE_FOR_UNCOVERED_POINTS",
+        "positive_exit_distance_max_m": 1.387778780781446e-17,
+        "positive_exit_distance_mean_m": 1.920801080666361e-18,
+        "positive_exit_distance_min_m": 0.0,
+        "positive_exit_distance_p95_m": 1.3877787807814457e-17,
+        "source_point_coverage_ratio": 1.0,
+        "source_point_covered_count": 289,
+        "status": "PASS_WITHIN_TESSELLATION_ERROR_BUDGET",
+        "tessellation_error_budget_m": 4.76837158203125e-07,
+        "uncovered_count": 0,
+        "uncovered_nearest_surface_max_m": null,
+        "uncovered_nearest_surface_mean_m": null,
+        "uncovered_nearest_surface_min_m": null,
+        "uncovered_nearest_surface_normal_projection_max_m": null,
+        "uncovered_nearest_surface_normal_projection_min_m": null
+      },
+      "contact_region_status": "PASS",
+      "discarded_body_piece_count": 0,
+      "full_brep_face_certificate": {
+        "contact_sample_count": 2029,
+        "maximum_contact_surface_deviation_m": 0.008964634488268612,
+        "maximum_contributing_piece_count": 2,
+        "maximum_deviation_kind": "UNCOVERED_NEAREST_SURFACE",
+        "maximum_deviation_sample_index": 670,
+        "maximum_deviation_source_point_m": [
+          0.007355284905152715,
+          -0.5415718845300294,
+          0.4268526699371185
+        ],
+        "maximum_deviation_target_point_m": [
+          0.007082879548046966,
+          -0.5445683676232617,
+          0.41840805295932443
+        ],
+        "maximum_inward_crossing_sample_index": 468,
+        "maximum_inward_crossing_source_point_m": [
+          0.00580143670270855,
+          -0.5563557626346226,
+          0.4328109077367836
+        ],
+        "maximum_inward_crossing_target_point_m": [
+          0.00580143670270844,
+          -0.5563557626346226,
+          0.4328109077367836
+        ],
+        "method": "ANALYTIC_NORMAL_RAY_UNION_FOR_COVERED_POINTS_AND_EXACT_TRIANGLE_NEAREST_SURFACE_FOR_UNCOVERED_POINTS",
+        "positive_exit_distance_max_m": 1.1102230246251563e-16,
+        "positive_exit_distance_mean_m": 1.560977080436634e-17,
+        "positive_exit_distance_min_m": 0.0,
+        "positive_exit_distance_p95_m": 8.326672684688675e-17,
+        "source_point_coverage_ratio": 0.6239526860522425,
+        "source_point_covered_count": 1266,
+        "status": "FAIL_EXCEEDS_TESSELLATION_ERROR_BUDGET",
+        "tessellation_error_budget_m": 4.76837158203125e-07,
+        "uncovered_count": 763,
+        "uncovered_nearest_surface_max_m": 0.008964634488268612,
+        "uncovered_nearest_surface_mean_m": 0.00018182663733233836,
+        "uncovered_nearest_surface_min_m": 2.419736634361743e-11,
+        "uncovered_nearest_surface_normal_projection_max_m": 2.5621052588548077e-17,
+        "uncovered_nearest_surface_normal_projection_min_m": -0.00030890977803490376
+      },
+      "mirror_used": false,
+      "numeric_tolerance": {
+        "brep_membership_tolerance_m": 1e-10,
+        "derivation": "MAX(BREP_MEMBERSHIP_TOLERANCE,8_FLOAT32_ULP)",
+        "float32_quantization_allowance_m": 4.76837158203125e-07,
+        "float32_ulp_at_maximum_coordinate_m": 5.960464477539063e-08,
+        "float32_ulp_multiplier": 8,
+        "maximum_sample_coordinate_m": 0.589250795154119,
+        "numeric_tolerance_m": 4.76837158203125e-07
+      },
+      "output_coordinate_frame": "FINGER_LINK_LOCAL",
+      "source_cooked_geometry_signature": "a7d3ae8f384708eea37bb9e88d4963819b1188ccfe6d8b55f5534f7315da4804",
+      "transform_determinant": 1.0
+    },
+    "right": {
+      "cad_global_to_finger_link_matrix": [
+        [
+          0.0,
+          -1.0,
+          0.0,
+          -0.49899999973392
+        ],
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.020900109742337226
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.42680133373174
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "candidate_geometry_signature": "a1d362b2cdca01425bf86c23c59210d5c58d49a455a6af6f09abdf90c87ab845",
+      "candidate_piece_count": 34,
+      "clipped_body_piece_count": 32,
+      "contact_prism_piece_count": 2,
+      "contact_rectangle": {
+        "area_m2": 0.00015032338103794342,
+        "cad_boolean_depth_certificate": {
+          "bisection_iterations": 48,
+          "bracket_width_mm": 4.036770917537069e-13,
+          "containment_test": "FACE_EXTRUSION_CUT_SOURCE_FINGER_BREP_VOLUME",
+          "first_infeasible_upper_bound_mm": 3.0040191243694316,
+          "initial_upper_bound_mm": 113.65179969834536,
+          "initial_upper_extrusion_volume_mm3": 17084.52279170239,
+          "lower_bound_extrusion_volume_mm3": 451.57431147779425,
+          "lower_bound_outside_volume_mm3": 1.5032338103684928e-05,
+          "maximum_feasible_lower_bound_mm": 3.004019124369028,
+          "upper_bound_outside_volume_mm3": 1.5032338103903626e-05,
+          "volume_tolerance_derivation": "FACE_AREA_MM2_TIMES_BREP_MEMBERSHIP_TOLERANCE_MM",
+          "volume_tolerance_mm3": 1.503233810379434e-05
+        },
+        "depth_m": 0.0030040191243690282,
+        "height_m": 0.01499643728516692,
+        "seed": {
+          "candidate_count": 20,
+          "mesh_centroid_plane_residual_mm": 6.441195241703609e-07,
+          "minimum_boundary_distance_mm": 8.466659587823381,
+          "point_mm": [
+            -3.914265001654609,
+            -572.4102173524851,
+            428.4166666666667
+          ],
+          "selection": "MAXIMUM_EXACT_BREP_EDGE_DISTANCE_AMONG_PINNED_MESHPART_TRIANGLE_CENTROIDS",
+          "source_triangle_index": 17
+        },
+        "source_scale_lower_bound": 0.2959823437396487,
+        "width_m": 0.010023939565074493
+      },
+      "contact_region_certificate": {
+        "contact_sample_count": 289,
+        "maximum_contact_surface_deviation_m": 2.775557561562892e-17,
+        "maximum_contributing_piece_count": 3,
+        "maximum_deviation_kind": "COVERED_NORMAL_EXIT",
+        "maximum_deviation_sample_index": 41,
+        "maximum_deviation_source_point_m": [
+          -0.0039797516890686755,
+          -0.5717871531415281,
+          0.4227930026847291
+        ],
+        "maximum_deviation_target_point_m": [
+          -0.003979751689068648,
+          -0.5717871531415281,
+          0.4227930026847291
+        ],
+        "maximum_inward_crossing_sample_index": 41,
+        "maximum_inward_crossing_source_point_m": [
+          -0.0039797516890686755,
+          -0.5717871531415281,
+          0.4227930026847291
+        ],
+        "maximum_inward_crossing_target_point_m": [
+          -0.003979751689068648,
+          -0.5717871531415281,
+          0.4227930026847291
+        ],
+        "method": "ANALYTIC_NORMAL_RAY_UNION_FOR_COVERED_POINTS_AND_EXACT_TRIANGLE_NEAREST_SURFACE_FOR_UNCOVERED_POINTS",
+        "positive_exit_distance_max_m": 2.775557561562892e-17,
+        "positive_exit_distance_mean_m": 9.988165619465077e-18,
+        "positive_exit_distance_min_m": 0.0,
+        "positive_exit_distance_p95_m": 2.7755575615628914e-17,
+        "source_point_coverage_ratio": 1.0,
+        "source_point_covered_count": 289,
+        "status": "PASS_WITHIN_TESSELLATION_ERROR_BUDGET",
+        "tessellation_error_budget_m": 4.76837158203125e-07,
+        "uncovered_count": 0,
+        "uncovered_nearest_surface_max_m": null,
+        "uncovered_nearest_surface_mean_m": null,
+        "uncovered_nearest_surface_min_m": null,
+        "uncovered_nearest_surface_normal_projection_max_m": null,
+        "uncovered_nearest_surface_normal_projection_min_m": null
+      },
+      "contact_region_status": "PASS",
+      "discarded_body_piece_count": 0,
+      "full_brep_face_certificate": {
+        "contact_sample_count": 2029,
+        "maximum_contact_surface_deviation_m": 0.009247751723558066,
+        "maximum_contributing_piece_count": 2,
+        "maximum_deviation_kind": "UNCOVERED_NEAREST_SURFACE",
+        "maximum_deviation_sample_index": 1358,
+        "maximum_deviation_source_point_m": [
+          -0.007155504389827247,
+          -0.5415718845300294,
+          0.4267499975263585
+        ],
+        "maximum_deviation_target_point_m": [
+          -0.007155504389827247,
+          -0.5444962702469492,
+          0.4179768065379412
+        ],
+        "maximum_inward_crossing_sample_index": 1246,
+        "maximum_inward_crossing_source_point_m": [
+          -0.007958659980516527,
+          -0.5339303695267663,
+          0.4129175342388655
+        ],
+        "maximum_inward_crossing_target_point_m": [
+          -0.007958659980516416,
+          -0.5339303695267663,
+          0.4129175342388655
+        ],
+        "method": "ANALYTIC_NORMAL_RAY_UNION_FOR_COVERED_POINTS_AND_EXACT_TRIANGLE_NEAREST_SURFACE_FOR_UNCOVERED_POINTS",
+        "positive_exit_distance_max_m": 1.1102230246251563e-16,
+        "positive_exit_distance_mean_m": 2.224404606386936e-17,
+        "positive_exit_distance_min_m": 0.0,
+        "positive_exit_distance_p95_m": 8.326672684688673e-17,
+        "source_point_coverage_ratio": 0.8984721537703302,
+        "source_point_covered_count": 1823,
+        "status": "FAIL_EXCEEDS_TESSELLATION_ERROR_BUDGET",
+        "tessellation_error_budget_m": 4.76837158203125e-07,
+        "uncovered_count": 206,
+        "uncovered_nearest_surface_max_m": 0.009247751723558066,
+        "uncovered_nearest_surface_mean_m": 0.0002365939821159878,
+        "uncovered_nearest_surface_min_m": 1.1168065808270902e-06,
+        "uncovered_nearest_surface_normal_projection_max_m": 1.5659945128837505e-17,
+        "uncovered_nearest_surface_normal_projection_min_m": -0.0003056815449914972
+      },
+      "mirror_used": false,
+      "numeric_tolerance": {
+        "brep_membership_tolerance_m": 1e-10,
+        "derivation": "MAX(BREP_MEMBERSHIP_TOLERANCE,8_FLOAT32_ULP)",
+        "float32_quantization_allowance_m": 4.76837158203125e-07,
+        "float32_ulp_at_maximum_coordinate_m": 5.960464477539063e-08,
+        "float32_ulp_multiplier": 8,
+        "maximum_sample_coordinate_m": 0.589250795154119,
+        "numeric_tolerance_m": 4.76837158203125e-07
+      },
+      "output_coordinate_frame": "FINGER_LINK_LOCAL",
+      "source_cooked_geometry_signature": "5bc57b892c87fe3af0814015cb4623a34c1b95d302cec35623a9e09db021e7cc",
+      "transform_determinant": 1.0
+    }
+  },
+  "full_face_scope": "PARTIAL_CONTACT_REGION_ONLY",
+  "geometry_output_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/cad_compound_contact_candidate/compound_geometry_finger_link_local.json",
+  "geometry_output_sha256": "af270fd586ce5173d49c43093ed77d090eeb55ac9459c37d589e6c54373594e2",
+  "isaac_runtime_cooking": "NOT_RUN",
+  "prism_deterministic_signature": "4133a4a7f1554c77ac9485c5ecce28d5f93566c8f29357ebe4278f9b42ff3cc5",
+  "prism_fresh_process_count": 2,
+  "runtime_grasp_hold": "NOT_RUN",
+  "schema_version": 1,
+  "scope": "CAD_DERIVED_CENTRAL_CONTACT_RECTANGLE_ONLY",
+  "status": "PASS_OFFLINE_CONTACT_REGION_GEOMETRY",
+  "timeline_started": false
+}

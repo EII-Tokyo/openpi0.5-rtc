@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "status": "PASS_VISUAL_MODEL_REVIEW",
+  "scope": "STATIC_NUMERIC_CERTIFICATE_FAILURE_EVIDENCE_NOT_VIEWPORT",
+  "failure_classification": "REJECTED_CERTIFICATE_EXACT_RAY_FALSE_NEGATIVE",
+  "manifest": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/cad_compound_contact_candidate/runtime_cooking/failure_evidence/screenshot_manifest.json",
+    "sha256": "a0e2f5524a76c15c5389c73c7bfa2bbe1a193f3e01840c297702ccea7a51039f"
+  },
+  "captures": [
+    {
+      "kind": "raw",
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/cad_compound_contact_candidate/runtime_cooking/failure_evidence/screenshots_raw/exact_ray_false_negative_raw.png",
+      "sha256": "9bcf5f0cf888ba43110d21e3644ca45794e12a2951cc7d5a360fb5413a658fd3",
+      "width_px": 2880,
+      "height_px": 1120,
+      "visual_model_review": "PASS_BOTH_FINGER_SAMPLE_REGIONS_COMPLETE"
+    },
+    {
+      "kind": "annotated",
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/cad_compound_contact_candidate/runtime_cooking/failure_evidence/screenshots_annotated/exact_ray_false_negative_annotated.png",
+      "sha256": "86da98a1ce0ad19d837c5b02edc8af42dc6bfa3c4f31ca00126a5c540c4bbd9d",
+      "width_px": 2880,
+      "height_px": 1120,
+      "visual_model_review": "PASS_NO_LABEL_OVERLAP_OR_SAMPLE_OCCLUSION"
+    }
+  ],
+  "retake_history": [
+    {
+      "status": "REJECTED_ANNOTATION_OCCLUDES_SAMPLES",
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/cad_compound_contact_candidate/runtime_cooking/failure_evidence/attempt1_rejected_annotation_occludes_samples/exact_ray_false_negative_annotated.png",
+      "sha256": "227a8d6e21502e9d81d62a8a7f8f1a5f44852648b7c78efa58e48274c72025a3",
+      "reason": "legend and numeric text boxes obscured contact-plane samples"
+    }
+  ],
+  "visual_conclusion": "The images clearly show why an exact zero-tolerance ray test rejected most plane samples even though every miss remains within the independently derived OCCT/float32 tolerance.",
+  "semantic_boundary": "SCREENSHOT_PASS_IS_EVIDENCE_QUALITY_ONLY; GEOMETRY_PASS_IS_CENTRAL_CONTACT_REGION_ONLY; NOT_GRASP_OR_CONTACT_DYNAMICS_PASS",
+  "video_status": "NOT_APPLICABLE_STATIC_COOKING_ONLY",
+  "final_or_default_asset_modified": false
+}
