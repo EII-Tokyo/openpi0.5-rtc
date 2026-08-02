@@ -1,4 +1,5 @@
 import math
+from pathlib import Path
 
 from tools.isaac_sim.left_table_collision_gate import (
     TABLE_PATH,
@@ -55,3 +56,29 @@ def test_exactly_three_passing_trials_are_required():
         aggregate_trials([evaluate_trial(passing_trial()) for _ in range(3)])["status"]
         == "PASS"
     )
+
+
+def test_runtime_verifier_has_fixed_inspector_stress_contract():
+    source = Path("tools/isaac_sim/verify_left_table_collision.py").read_text()
+
+    for required in (
+        "TRIAL_COUNT = 3",
+        "STRESS_DT = 1.0 / 60.0",
+        "SHOULDER_START_DEG = -55.00394821166992",
+        "SHOULDER_END_DEG = 20.0",
+        "SHOULDER_STEP_DEG = 0.5",
+        "HOLD_STEPS = 30",
+        "PhysxContactReportAPI.Apply",
+        "CreateThresholdAttr().Set(0)",
+        "get_contact_report()",
+        "capture_viewport_to_file",
+    ):
+        assert required in source
+    for forbidden in (
+        "save_stage",
+        "stage.Save",
+        "contactOffset",
+        "restOffset",
+        "set_gains",
+    ):
+        assert forbidden not in source
