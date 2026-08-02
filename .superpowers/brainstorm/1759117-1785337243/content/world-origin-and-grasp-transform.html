@@ -1,0 +1,208 @@
+<h2>世界原点在哪里？Grasp Editor 与 IK 如何连接？</h2>
+<p class="subtitle">
+  以下数值来自当前冻结 Stage 的 USD runtime readback，不是照片估计。
+  Stage：
+  <code>.../signal_correspondence/1.0/aloha1_signal_correspondence_workcell.usda</code><br>
+  SHA-256：
+  <code>d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf</code>
+</p>
+
+<div class="section">
+  <div class="label">已确认的 Stage 坐标约定</div>
+  <ul>
+    <li><strong>世界 frame W：</strong><code>/World</code>，世界矩阵为单位矩阵，原点就是 <code>W=(0,0,0)</code>。</li>
+    <li><strong>单位：</strong><code>metersPerUnit = 1.0</code>。</li>
+    <li><strong>上方向：</strong><code>upAxis = Z</code>，所以重力与垂直接近分别沿世界 <code>-Z</code>。</li>
+    <li><strong>注意：</strong>世界原点不是桌面顶面，也不是任何一台机械臂的底座原点。</li>
+  </ul>
+</div>
+
+<div class="mockup">
+  <div class="mockup-header">真正顶视图：world +Z 看向桌面</div>
+  <div class="mockup-body">
+    <svg viewBox="0 0 1040 470" style="width:100%;height:auto">
+      <defs>
+        <marker id="coordArrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+          <path d="M0,0 L9,4.5 L0,9 z" fill="#fff"/>
+        </marker>
+        <marker id="xArrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+          <path d="M0,0 L9,4.5 L0,9 z" fill="#ff7474"/>
+        </marker>
+        <marker id="yArrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+          <path d="M0,0 L9,4.5 L0,9 z" fill="#75dd8c"/>
+        </marker>
+      </defs>
+      <rect x="40" y="30" width="960" height="390" rx="16" fill="#292e39"/>
+      <rect x="115" y="95" width="810" height="275" rx="10" fill="#503e2e" opacity="0.65" stroke="#b79067" stroke-width="3"/>
+      <text x="820" y="355" fill="#e4c49e" font-size="18">table footprint</text>
+
+      <!-- World frame -->
+      <circle cx="520" cy="232" r="8" fill="#fff"/>
+      <line x1="520" y1="232" x2="690" y2="232" stroke="#ff7474" stroke-width="5" marker-end="url(#xArrow)"/>
+      <line x1="520" y1="232" x2="520" y2="90" stroke="#75dd8c" stroke-width="5" marker-end="url(#yArrow)"/>
+      <text x="696" y="238" fill="#ff8d8d" font-size="19">+X</text>
+      <text x="530" y="88" fill="#8bec9f" font-size="19">+Y</text>
+      <text x="535" y="258" fill="#fff" font-size="18">W = /World = (0,0,0)</text>
+
+      <!-- Left and right bases -->
+      <circle cx="238" cy="243" r="33" fill="#318bd1" stroke="#cceaff" stroke-width="4"/>
+      <text x="238" y="248" text-anchor="middle" fill="#fff" font-size="18">Bᴸ</text>
+      <text x="120" y="302" fill="#b9dcff" font-size="17">left base</text>
+      <text x="90" y="326" fill="#b9dcff" font-size="16">(-0.4695, -0.019, +0.020) m</text>
+
+      <circle cx="802" cy="243" r="33" fill="#e58334" stroke="#ffddb8" stroke-width="4"/>
+      <text x="802" y="248" text-anchor="middle" fill="#fff" font-size="18">Bᴿ</text>
+      <text x="820" y="302" fill="#ffd0a7" font-size="17">right base</text>
+      <text x="744" y="326" fill="#ffd0a7" font-size="16">(+0.4695, -0.019, +0.020) m</text>
+      <path d="M777 220 A35 35 0 1 1 826 267" fill="none" stroke="#ffd0a7" stroke-width="3" marker-end="url(#coordArrow)"/>
+      <text x="844" y="229" fill="#ffd0a7" font-size="15">Rz(180°)</text>
+
+      <!-- midpoint -->
+      <circle cx="520" cy="243" r="6" fill="#f6d365"/>
+      <line x1="520" y1="243" x2="520" y2="232" stroke="#f6d365" stroke-width="3"/>
+      <text x="445" y="295" fill="#f6d365" font-size="16">底座连线中点 M</text>
+      <text x="424" y="317" fill="#f6d365" font-size="16">(0, -0.019, +0.020) m</text>
+      <text x="405" y="344" fill="#ffb3b3" font-size="15">M ≠ W：不能把世界原点误当作底座中点</text>
+    </svg>
+  </div>
+</div>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">侧视：world Z 与桌面</div>
+    <div class="mockup-body">
+      <svg viewBox="0 0 520 330" style="width:100%;height:auto">
+        <defs>
+          <marker id="zArrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+            <path d="M0,0 L9,4.5 L0,9 z" fill="#6ab5ff"/>
+          </marker>
+        </defs>
+        <rect x="25" y="22" width="470" height="275" rx="12" fill="#292e39"/>
+        <line x1="135" y1="142" x2="135" y2="48" stroke="#6ab5ff" stroke-width="5" marker-end="url(#zArrow)"/>
+        <line x1="135" y1="142" x2="340" y2="142" stroke="#ff7474" stroke-width="4"/>
+        <circle cx="135" cy="142" r="7" fill="#fff"/>
+        <text x="150" y="163" fill="#fff" font-size="16">W, z = 0</text>
+        <text x="150" y="52" fill="#7fc2ff" font-size="17">+Z</text>
+
+        <line x1="85" y1="92" x2="445" y2="92" stroke="#f6d365" stroke-width="3" stroke-dasharray="7 5"/>
+        <text x="277" y="83" fill="#f6d365" font-size="15">base origins: z = +0.020 m</text>
+
+        <rect x="70" y="247" width="390" height="16" fill="#8a6647"/>
+        <line x1="70" y1="247" x2="460" y2="247" stroke="#e0b78d" stroke-width="3"/>
+        <text x="220" y="238" fill="#e0b78d" font-size="16">table top: z = −0.0909000015 m</text>
+        <text x="75" y="287" fill="#c6ccda" font-size="15">世界原点位于桌面顶面上方约 90.9 mm</text>
+      </svg>
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header">四个 frame，不应混成一个</div>
+    <div class="mockup-body">
+      <div style="padding:8px 10px">
+        <p><strong>W</strong> — Stage world：<code>/World</code></p>
+        <p><strong>B</strong> — ALOHA base：Lula 的机器人基准 frame</p>
+        <p><strong>O</strong> — Bottle500 object frame：随 dynamic bottle 一起运动</p>
+        <p><strong>G</strong> — Grasp Editor gripper frame：夹爪的已验证参考 frame</p>
+        <hr style="border-color:#505666">
+        <p style="color:#f6d365">
+          Grasp Editor 保存 <strong>T<sub>O→G</sub></strong>，
+          不是直接保存世界坐标。
+        </p>
+        <p style="color:#8fdba3">
+          IK 使用 <strong>T<sub>B→G</sub></strong>，
+          不是直接把 object-local pose 当作 base-local pose。
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="mockup" style="border-color:#62b879">
+  <div class="mockup-header" style="color:#88e49f">完整、可验证的变换链</div>
+  <div class="mockup-body">
+    <div style="display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;padding:24px;font-size:21px">
+      <div style="padding:14px 18px;border:2px solid #6ab5ff;border-radius:10px">
+        <strong>T<sub>W→O</sub>(t)</strong><br>
+        <small>Bottle runtime pose</small>
+      </div>
+      <div style="font-size:30px">×</div>
+      <div style="padding:14px 18px;border:2px solid #f6d365;border-radius:10px">
+        <strong>T<sub>O→G</sub></strong><br>
+        <small>Grasp Editor output</small>
+      </div>
+      <div style="font-size:30px">=</div>
+      <div style="padding:14px 18px;border:2px solid #8fdba3;border-radius:10px">
+        <strong>T<sub>W→G</sub>(t)</strong><br>
+        <small>world gripper target</small>
+      </div>
+    </div>
+    <div style="text-align:center;font-size:26px;padding:8px">然后：</div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;padding:18px;font-size:21px">
+      <div style="padding:14px 18px;border:2px solid #ff8c8c;border-radius:10px">
+        <strong>T<sub>W→B</sub><sup>−1</sup></strong><br>
+        <small>verified robot base pose</small>
+      </div>
+      <div style="font-size:30px">×</div>
+      <div style="padding:14px 18px;border:2px solid #8fdba3;border-radius:10px">
+        <strong>T<sub>W→G</sub>(t)</strong>
+      </div>
+      <div style="font-size:30px">=</div>
+      <div style="padding:14px 18px;border:2px solid #b798ff;border-radius:10px">
+        <strong>T<sub>B→G</sub>(t)</strong><br>
+        <small>Lula IK target</small>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>对 follower_left 的固定 base 变换</h3>
+  <pre style="white-space:pre-wrap;background:#252a34;padding:16px;border-radius:8px;color:#dce5f5">
+T_W→Bᴸ =
+[ 1  0  0  -0.4695 ]
+[ 0  1  0  -0.0190 ]
+[ 0  0  1  +0.0200 ]
+[ 0  0  0   1      ]
+  </pre>
+  <p>
+    所以 follower_left 的 IK 不能直接使用世界坐标目标。
+    必须先乘 <code>inverse(T_W→Bᴸ)</code>，或者把同一个 base pose
+    明确设置给 Lula solver 并进行 readback。两种方式只能选一种，不能重复变换。
+  </p>
+</div>
+
+<div class="section">
+  <h3>我建议的原点策略</h3>
+  <div class="option selected" data-choice="keep_frozen_world_explicit_transforms">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>保留冻结 Stage 的 /World 原点（推荐）</h3>
+      <p>
+        不移动 Stage、不改变现有 hash。所有 Grasp Editor、Bottle runtime 和 IK 报告显式保存
+        T_W→B、T_W→O、T_O→G、T_B→G，并做矩阵闭环误差检查。
+      </p>
+    </div>
+  </div>
+  <div class="option" data-choice="rebase_world_rejected">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>把 /World 重新放到桌面或底座中点（不推荐）</h3>
+      <p>
+        表面更直观，但会改变冻结 Stage、所有现有坐标、截图和报告 hash；
+        也会把“坐标管理问题”变成“资产重写问题”。
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>进入 IK 以前必须输出的机器门</h3>
+  <ul>
+    <li>四个 frame 的绝对 prim path 和各自 world matrix；</li>
+    <li><code>T_W→O × T_O→G</code> 与直接 runtime gripper preview 的位姿误差；</li>
+    <li><code>T_W→B × T_B→G</code> 回代后的 world pose 误差；</li>
+    <li>Lula 使用的 end-effector frame 与 Grasp Editor gripper frame 的固定变换；</li>
+    <li>若两者不是同一个 frame，显式保存 <code>T_EE→G</code>，禁止默认单位矩阵；</li>
+    <li>位置误差和姿态误差 gate 未通过时，不执行动态抓取。</li>
+  </ul>
+</div>

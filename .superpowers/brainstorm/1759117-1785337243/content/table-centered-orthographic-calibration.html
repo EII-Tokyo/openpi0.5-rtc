@@ -1,0 +1,215 @@
+<h2>桌面上表面中心作为抓取任务世界原点</h2>
+<p class="subtitle">
+  本页全部采用<strong>正投影</strong>，不使用透视。坐标来自冻结 Stage readback。
+  我将现有 USD 世界记为 <code>Wᵁ</code>，将桌面任务世界记为 <code>Wᵀ</code>，避免两个“世界”混淆。
+</p>
+
+<div class="section">
+  <div class="label">建议定义</div>
+  <ul>
+    <li><strong>Oᵀ：</strong>桌面上表面的几何中心。</li>
+    <li><strong>+Zᵀ：</strong>桌面法向向上。</li>
+    <li><strong>+Xᵀ：</strong>从 follower_left 底座指向 follower_right 底座。</li>
+    <li><strong>+Yᵀ：</strong><code>Zᵀ × Xᵀ</code>，从而满足 <code>Xᵀ × Yᵀ = Zᵀ</code>。</li>
+  </ul>
+</div>
+
+<div class="mockup">
+  <div class="mockup-header">正投影 1：顶视 XY（沿 −Zᵀ 看向桌面）</div>
+  <div class="mockup-body">
+    <svg viewBox="0 0 1100 620" style="width:100%;height:auto">
+      <defs>
+        <marker id="xtop" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#ff6868"/>
+        </marker>
+        <marker id="ytop" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#65da7e"/>
+        </marker>
+        <marker id="abtop" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+          <path d="M0,0 L9,4.5 L0,9 z" fill="#bde8ff"/>
+        </marker>
+      </defs>
+      <rect x="80" y="70" width="940" height="470" fill="#4c392a" opacity="0.72" stroke="#d0a879" stroke-width="4"/>
+      <text x="90" y="62" fill="#e4c49e" font-size="20">table top: 1.100 m × 0.600 m</text>
+
+      <!-- task origin and axes -->
+      <circle cx="550" cy="305" r="9" fill="#fff"/>
+      <line x1="550" y1="305" x2="790" y2="305" stroke="#ff6868" stroke-width="6" marker-end="url(#xtop)"/>
+      <line x1="550" y1="305" x2="550" y2="105" stroke="#65da7e" stroke-width="6" marker-end="url(#ytop)"/>
+      <text x="805" y="312" fill="#ff8080" font-size="24">+Xᵀ</text>
+      <text x="563" y="105" fill="#7aeb90" font-size="24">+Yᵀ</text>
+      <text x="565" y="335" fill="#fff" font-size="21">Oᵀ = (0,0,0)</text>
+
+      <!-- bases at y = -0.019 -->
+      <line x1="145" y1="320" x2="955" y2="320" stroke="#f6d365" stroke-width="2" stroke-dasharray="8 7"/>
+      <circle cx="183" cy="320" r="38" fill="#318bd1" stroke="#cceaff" stroke-width="4"/>
+      <text x="183" y="327" text-anchor="middle" fill="#fff" font-size="20">Bᴸ</text>
+      <circle cx="917" cy="320" r="38" fill="#e58334" stroke="#ffddb8" stroke-width="4"/>
+      <text x="917" y="327" text-anchor="middle" fill="#fff" font-size="20">Bᴿ</text>
+      <text x="125" y="382" fill="#b9dcff" font-size="18">Bᴸ XY = (−0.4695, −0.0190) m</text>
+      <text x="730" y="382" fill="#ffd0a7" font-size="18">Bᴿ XY = (+0.4695, −0.0190) m</text>
+      <text x="402" y="349" fill="#f6d365" font-size="17">base center line: Yᵀ = −19 mm</text>
+
+      <!-- bottle AB, exact current runtime coordinates -->
+      <line x1="502" y1="442" x2="665" y2="423" stroke="#bde8ff" stroke-width="18" stroke-linecap="round"/>
+      <line x1="502" y1="442" x2="665" y2="423" stroke="#e8f7ff" stroke-width="3" marker-end="url(#abtop)"/>
+      <text x="480" y="462" fill="#fff" font-size="20">A</text>
+      <text x="674" y="429" fill="#fff" font-size="20">B</text>
+      <text x="446" y="503" fill="#cdeeff" font-size="17">A = (−0.05808, −0.17494, +0.03291) m</text>
+      <text x="617" y="530" fill="#cdeeff" font-size="17">B = (+0.14613, −0.14782, +0.03291) m</text>
+      <text x="459" y="558" fill="#f6d365" font-size="17">AB 与 +Xᵀ 当前夹角 = 7.5643908°</text>
+
+      <!-- Z symbol out of page -->
+      <circle cx="960" cy="125" r="24" fill="none" stroke="#6ab5ff" stroke-width="4"/>
+      <circle cx="960" cy="125" r="6" fill="#6ab5ff"/>
+      <text x="992" y="132" fill="#7fc2ff" font-size="20">+Zᵀ（出屏）</text>
+    </svg>
+  </div>
+</div>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">正投影 2：前视 XZ（沿 +Yᵀ 看）</div>
+    <div class="mockup-body">
+      <svg viewBox="0 0 560 420" style="width:100%;height:auto">
+        <defs>
+          <marker id="xfront" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+            <path d="M0,0 L9,4.5 L0,9 z" fill="#ff6868"/>
+          </marker>
+          <marker id="zfront" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+            <path d="M0,0 L9,4.5 L0,9 z" fill="#6ab5ff"/>
+          </marker>
+        </defs>
+        <rect x="55" y="282" width="450" height="18" fill="#8a6647"/>
+        <line x1="55" y1="282" x2="505" y2="282" stroke="#e0b78d" stroke-width="4"/>
+        <circle cx="280" cy="282" r="7" fill="#fff"/>
+        <line x1="280" y1="282" x2="480" y2="282" stroke="#ff6868" stroke-width="5" marker-end="url(#xfront)"/>
+        <line x1="280" y1="282" x2="280" y2="72" stroke="#6ab5ff" stroke-width="5" marker-end="url(#zfront)"/>
+        <text x="484" y="310" fill="#ff8080" font-size="19">+Xᵀ</text>
+        <text x="293" y="71" fill="#7fc2ff" font-size="19">+Zᵀ</text>
+        <text x="293" y="322" fill="#fff" font-size="17">Oᵀ：桌面上表面中心</text>
+
+        <circle cx="88" cy="205" r="31" fill="#318bd1" stroke="#cceaff" stroke-width="3"/>
+        <circle cx="472" cy="205" r="31" fill="#e58334" stroke="#ffddb8" stroke-width="3"/>
+        <line x1="88" y1="205" x2="472" y2="205" stroke="#f6d365" stroke-width="2" stroke-dasharray="7 5"/>
+        <text x="140" y="189" fill="#f6d365" font-size="16">base origins Zᵀ = +0.1109000015 m</text>
+        <text x="58" y="210" fill="#fff" font-size="16">Bᴸ</text>
+        <text x="457" y="210" fill="#fff" font-size="16">Bᴿ</text>
+
+        <ellipse cx="311" cy="260" rx="45" ry="18" fill="#4b9bd3"/>
+        <text x="335" y="250" fill="#cdeeff" font-size="15">Bottle axis height</text>
+        <text x="335" y="269" fill="#cdeeff" font-size="15">Zᵀ = +0.0329110780 m</text>
+        <text x="65" y="369" fill="#bfc7d7" font-size="15">桌面顶面在 Wᵀ 中严格为 Zᵀ = 0</text>
+      </svg>
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header">正投影 3：侧视 YZ（沿 −Xᵀ 看）</div>
+    <div class="mockup-body">
+      <svg viewBox="0 0 560 420" style="width:100%;height:auto">
+        <defs>
+          <marker id="yside" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+            <path d="M0,0 L9,4.5 L0,9 z" fill="#65da7e"/>
+          </marker>
+          <marker id="zside" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+            <path d="M0,0 L9,4.5 L0,9 z" fill="#6ab5ff"/>
+          </marker>
+        </defs>
+        <rect x="55" y="282" width="450" height="18" fill="#8a6647"/>
+        <line x1="55" y1="282" x2="505" y2="282" stroke="#e0b78d" stroke-width="4"/>
+        <circle cx="280" cy="282" r="7" fill="#fff"/>
+        <line x1="280" y1="282" x2="465" y2="282" stroke="#65da7e" stroke-width="5" marker-end="url(#yside)"/>
+        <line x1="280" y1="282" x2="280" y2="72" stroke="#6ab5ff" stroke-width="5" marker-end="url(#zside)"/>
+        <text x="469" y="310" fill="#7aeb90" font-size="19">+Yᵀ</text>
+        <text x="293" y="71" fill="#7fc2ff" font-size="19">+Zᵀ</text>
+
+        <circle cx="268" cy="205" r="31" fill="#6e7291" stroke="#fff" stroke-width="3"/>
+        <text x="311" y="203" fill="#f6d365" font-size="16">bases: Yᵀ = −0.019 m</text>
+        <text x="311" y="224" fill="#f6d365" font-size="16">Zᵀ = +0.1109000015 m</text>
+
+        <ellipse cx="178" cy="260" rx="48" ry="18" fill="#4b9bd3"/>
+        <text x="75" y="238" fill="#cdeeff" font-size="15">Bottle body</text>
+        <text x="63" y="257" fill="#cdeeff" font-size="15">Yᵀ ≈ −0.16 m</text>
+        <text x="63" y="276" fill="#cdeeff" font-size="15">axis Zᵀ = +0.03291 m</text>
+        <text x="78" y="369" fill="#bfc7d7" font-size="15">这张图用于验证“从上方沿 −Zᵀ 接近”</text>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>两个世界 frame 的精确关系</h3>
+  <pre style="white-space:pre-wrap;background:#252a34;padding:16px;border-radius:8px;color:#dce5f5">
+Wᵁ = USD /World
+Wᵀ = tabletop task world
+
+T_Wᵁ→Wᵀ =
+[ 1  0  0   0                  ]
+[ 0  1  0   0                  ]
+[ 0  0  1  -0.0909000015258789 ]
+[ 0  0  0   1                  ]
+
+p_Wᵀ = inverse(T_Wᵁ→Wᵀ) · p_Wᵁ
+  </pre>
+</div>
+
+<div class="section">
+  <h3>采用 Wᵀ 后的抓取与 IK 变换</h3>
+  <div style="background:#252a34;padding:18px;border-radius:8px;font-size:20px;text-align:center">
+    <p>
+      <strong style="color:#6ab5ff">T<sub>Wᵀ→O</sub>(t)</strong>
+      ×
+      <strong style="color:#f6d365">T<sub>O→G</sub></strong>
+      =
+      <strong style="color:#8fdba3">T<sub>Wᵀ→G</sub>(t)</strong>
+    </p>
+    <p>
+      <strong style="color:#ff8c8c">T<sub>Wᵀ→B</sub><sup>−1</sup></strong>
+      ×
+      <strong style="color:#8fdba3">T<sub>Wᵀ→G</sub>(t)</strong>
+      =
+      <strong style="color:#b798ff">T<sub>B→G</sub>(t)</strong>
+      → Lula IK
+    </p>
+  </div>
+  <p>
+    中间换成桌面 frame 后，最终的 base-relative IK 目标在数学上应与直接使用 USD world 完全一致；
+    若不一致，说明变换链重复应用或漏乘了某个 frame。
+  </p>
+</div>
+
+<div class="section">
+  <h3>这确实给出了可执行的 calibration 思路</h3>
+  <ol>
+    <li>测量或从经过确认的 CAD/安装图取得桌面上表面中心 <strong>Oᵀ</strong>。</li>
+    <li>用左右底座安装中心定义 <strong>+Xᵀ</strong>，方向为 left → right。</li>
+    <li>用桌面上三个不共线实测点拟合平面法向，选择向上的方向作为 <strong>+Zᵀ</strong>。</li>
+    <li>计算 <strong>+Yᵀ = Zᵀ × Xᵀ</strong>，然后重新正交化三个轴。</li>
+    <li>分别求出 <code>T_Wᵀ→Bᴸ</code>、<code>T_Wᵀ→Bᴿ</code>；不要假设两个底座完全平行或绝对对称。</li>
+    <li>运行时把 Bottle perception/CAD pose、Grasp Editor pose 和 IK 全部转换到同一 <strong>Wᵀ</strong>。</li>
+    <li>保存标定点、拟合残差、矩阵 determinant、正交误差和日期；缺少实测点时只标记为数字 Stage readback。</li>
+  </ol>
+</div>
+
+<h3>需要你确认的唯一坐标方向</h3>
+<p class="subtitle">
+  原点采用桌面上表面中心已经明确。请确认是否接受：+Xᵀ 从左臂指向右臂，+Zᵀ 向上，+Yᵀ 按右手定则。
+</p>
+
+<div class="options">
+  <div class="option" data-choice="accept_table_frame_axes" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>接受上述 Wᵀ 坐标约定（推荐）</h3>
+      <p>与当前 Stage 的轴保持同向，只平移原点到桌面上表面中心。</p>
+    </div>
+  </div>
+  <div class="option" data-choice="change_axis_direction" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>需要改变某个轴方向</h3>
+      <p>请在终端说明希望 +X 或 +Y 指向桌面的哪一侧。</p>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,214 @@
+<h2>ALOHA 横放瓶抓取：先配置 Grasp Editor，再做 IK</h2>
+<p class="subtitle">
+  本图说明“正确的数据流”和“正确的空间关系”。示意图不提供猜测数值；
+  最终 position / orientation / joint state 必须由 Bottle500 CAD、供应商夹爪 CAD 和 Isaac Sim 5.1 runtime readback 生成。
+</p>
+
+<div class="section">
+  <div class="label">本机已确认</div>
+  <p>
+    NVIDIA <code>isaacsim.robot_setup.grasp_editor 2.0.20</code> 导出
+    <code>isaac_grasp 1.0</code>：object_frame、gripper_frame、grasp position/orientation、
+    pregrasp_cspace_position（张开）和 cspace_position（闭合）。
+  </p>
+</div>
+
+<div class="split">
+  <div class="mockup" style="border-color:#d85b5b">
+    <div class="mockup-header" style="color:#ff8a8a">当前错误流程</div>
+    <div class="mockup-body">
+      <svg viewBox="0 0 560 280" style="width:100%;height:auto">
+        <defs>
+          <marker id="badArrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+            <path d="M0,0 L8,4 L0,8 z" fill="#e36a6a"/>
+          </marker>
+        </defs>
+        <rect x="30" y="25" width="150" height="58" rx="10" fill="#343948" stroke="#687084"/>
+        <text x="105" y="50" text-anchor="middle" fill="#fff" font-size="16">Bottle CAD</text>
+        <text x="105" y="70" text-anchor="middle" fill="#b9c0d0" font-size="12">只取瓶轴/抓取点</text>
+        <line x1="180" y1="54" x2="248" y2="54" stroke="#e36a6a" stroke-width="4" marker-end="url(#badArrow)"/>
+        <rect x="250" y="25" width="130" height="58" rx="10" fill="#503b3b" stroke="#e36a6a"/>
+        <text x="315" y="50" text-anchor="middle" fill="#fff" font-size="16">直接造 EE pose</text>
+        <text x="315" y="70" text-anchor="middle" fill="#ffb2b2" font-size="12">缺少抓取验证</text>
+        <line x1="380" y1="54" x2="438" y2="54" stroke="#e36a6a" stroke-width="4" marker-end="url(#badArrow)"/>
+        <rect x="440" y="25" width="90" height="58" rx="10" fill="#343948" stroke="#687084"/>
+        <text x="485" y="59" text-anchor="middle" fill="#fff" font-size="17">Lula IK</text>
+
+        <ellipse cx="282" cy="187" rx="105" ry="38" fill="#4192d0" opacity="0.75"/>
+        <line x1="177" y1="187" x2="387" y2="187" stroke="#d8f1ff" stroke-width="3"/>
+        <text x="168" y="180" fill="#fff" font-size="15">A</text>
+        <text x="393" y="180" fill="#fff" font-size="15">B</text>
+        <rect x="205" y="125" width="28" height="96" rx="8" fill="#3384d5" stroke="#fff"/>
+        <rect x="345" y="152" width="28" height="96" rx="8" fill="#ed8b36" stroke="#fff"/>
+        <line x1="219" y1="137" x2="359" y2="164" stroke="#f36d6d" stroke-width="4" stroke-dasharray="7 5"/>
+        <text x="282" y="265" text-anchor="middle" fill="#ff9797" font-size="15">
+          IK 可收敛，但两指不在同一瓶身截面上
+        </text>
+      </svg>
+    </div>
+  </div>
+
+  <div class="mockup" style="border-color:#4fa56a">
+    <div class="mockup-header" style="color:#7ee09a">正确流程（推荐）</div>
+    <div class="mockup-body">
+      <svg viewBox="0 0 560 280" style="width:100%;height:auto">
+        <defs>
+          <marker id="goodArrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+            <path d="M0,0 L8,4 L0,8 z" fill="#65cb7f"/>
+          </marker>
+        </defs>
+        <rect x="15" y="22" width="110" height="62" rx="10" fill="#343948" stroke="#687084"/>
+        <text x="70" y="48" text-anchor="middle" fill="#fff" font-size="15">Bottle500</text>
+        <text x="70" y="69" text-anchor="middle" fill="#b9c0d0" font-size="12">object_frame</text>
+        <line x1="125" y1="53" x2="164" y2="53" stroke="#65cb7f" stroke-width="4" marker-end="url(#goodArrow)"/>
+        <rect x="166" y="16" width="170" height="74" rx="10" fill="#294738" stroke="#65cb7f"/>
+        <text x="251" y="42" text-anchor="middle" fill="#fff" font-size="16">Grasp Editor 2.0.20</text>
+        <text x="251" y="62" text-anchor="middle" fill="#baf3c8" font-size="12">物体局部 grasp pose</text>
+        <text x="251" y="79" text-anchor="middle" fill="#baf3c8" font-size="12">open / closed finger state</text>
+        <line x1="336" y1="53" x2="374" y2="53" stroke="#65cb7f" stroke-width="4" marker-end="url(#goodArrow)"/>
+        <rect x="376" y="22" width="86" height="62" rx="10" fill="#343948" stroke="#687084"/>
+        <text x="419" y="48" text-anchor="middle" fill="#fff" font-size="15">几何门</text>
+        <text x="419" y="68" text-anchor="middle" fill="#b9c0d0" font-size="12">必须 PASS</text>
+        <line x1="462" y1="53" x2="493" y2="53" stroke="#65cb7f" stroke-width="4" marker-end="url(#goodArrow)"/>
+        <rect x="495" y="22" width="52" height="62" rx="10" fill="#343948" stroke="#687084"/>
+        <text x="521" y="59" text-anchor="middle" fill="#fff" font-size="16">IK</text>
+
+        <ellipse cx="282" cy="190" rx="105" ry="38" fill="#4192d0" opacity="0.75"/>
+        <line x1="177" y1="190" x2="387" y2="190" stroke="#d8f1ff" stroke-width="3"/>
+        <text x="166" y="183" fill="#fff" font-size="15">A</text>
+        <text x="395" y="183" fill="#fff" font-size="15">B</text>
+        <rect x="258" y="105" width="26" height="95" rx="8" fill="#3384d5" stroke="#fff"/>
+        <rect x="292" y="105" width="26" height="95" rx="8" fill="#ed8b36" stroke="#fff"/>
+        <line x1="271" y1="151" x2="305" y2="151" stroke="#fff" stroke-width="4"/>
+        <line x1="282" y1="190" x2="282" y2="105" stroke="#f6d365" stroke-width="3" stroke-dasharray="6 5"/>
+        <text x="340" y="127" fill="#f6d365" font-size="13">gripper frame</text>
+        <text x="340" y="145" fill="#f6d365" font-size="12">相对 object frame 保存</text>
+        <text x="282" y="265" text-anchor="middle" fill="#8bf0a4" font-size="15">
+          两指位于同一瓶身截面，中心线 ⟂ AB
+        </text>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Grasp Editor 中我认为正确的配置方法</h3>
+  <div class="split">
+    <div class="mockup">
+      <div class="mockup-header">真正的顶视图（world +Z 看向桌面）</div>
+      <div class="mockup-body">
+        <svg viewBox="0 0 520 270" style="width:100%;height:auto">
+          <defs>
+            <marker id="axisArrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 z" fill="#cdeeff"/>
+            </marker>
+          </defs>
+          <rect x="25" y="20" width="470" height="225" rx="12" fill="#292e39"/>
+          <ellipse cx="260" cy="140" rx="145" ry="47" fill="#4b9bd3" opacity="0.8"/>
+          <line x1="115" y1="140" x2="405" y2="140" stroke="#cdeeff" stroke-width="4" marker-end="url(#axisArrow)"/>
+          <text x="96" y="133" fill="#fff" font-size="18">A</text>
+          <text x="416" y="133" fill="#fff" font-size="18">B</text>
+          <rect x="235" y="45" width="29" height="102" rx="8" fill="#3384d5" stroke="#fff" stroke-width="2"/>
+          <rect x="276" y="45" width="29" height="102" rx="8" fill="#ed8b36" stroke="#fff" stroke-width="2"/>
+          <line x1="249" y1="108" x2="290" y2="108" stroke="#fff" stroke-width="5"/>
+          <circle cx="270" cy="140" r="6" fill="#f6d365"/>
+          <line x1="270" y1="140" x2="270" y2="108" stroke="#f6d365" stroke-width="3"/>
+          <text x="315" y="82" fill="#9ed1ff" font-size="14">蓝：left_finger</text>
+          <text x="315" y="102" fill="#ffc18a" font-size="14">橙：right_finger</text>
+          <text x="315" y="122" fill="#fff" font-size="13">内侧面相向</text>
+          <text x="315" y="181" fill="#f6d365" font-size="13">目标瓶身截面中心</text>
+          <text x="60" y="226" fill="#bfc7d7" font-size="13">要求：finger contact-center line 在 XY 投影中与 AB 为 90° ± gate</text>
+        </svg>
+      </div>
+    </div>
+    <div class="mockup">
+      <div class="mockup-header">侧视图（垂直接近，不从侧面塞入）</div>
+      <div class="mockup-body">
+        <svg viewBox="0 0 520 270" style="width:100%;height:auto">
+          <defs>
+            <marker id="downArrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 z" fill="#f6d365"/>
+            </marker>
+          </defs>
+          <rect x="25" y="20" width="470" height="225" rx="12" fill="#292e39"/>
+          <rect x="45" y="212" width="430" height="14" rx="3" fill="#866447"/>
+          <text x="422" y="207" fill="#d9b58e" font-size="13">table</text>
+          <ellipse cx="270" cy="177" rx="85" ry="36" fill="#4b9bd3"/>
+          <rect x="238" y="45" width="29" height="112" rx="8" fill="#3384d5" stroke="#fff" stroke-width="2"/>
+          <rect x="279" y="45" width="29" height="112" rx="8" fill="#ed8b36" stroke="#fff" stroke-width="2"/>
+          <line x1="273" y1="25" x2="273" y2="118" stroke="#f6d365" stroke-width="4" marker-end="url(#downArrow)"/>
+          <text x="293" y="38" fill="#f6d365" font-size="14">world −Z 下降</text>
+          <circle cx="273" cy="174" r="6" fill="#f6d365"/>
+          <text x="323" y="161" fill="#f6d365" font-size="13">grasp section</text>
+          <text x="76" y="69" fill="#fff" font-size="13">pregrasp：两指张开</text>
+          <text x="76" y="89" fill="#fff" font-size="13">grasp：到位后闭合</text>
+          <text x="76" y="109" fill="#fff" font-size="13">lift：沿 world +Z</text>
+          <text x="65" y="244" fill="#bfc7d7" font-size="13">瓶子先 dynamic settle；固定/kinematic setup 不计入抓取 PASS</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>必须先于 IK 通过的 Grasp Editor 几何门</h3>
+  <ul>
+    <li><strong>object_frame：</strong>Bottle500 刚体上的稳定 frame；保存的是 gripper frame 相对它的 pose。</li>
+    <li><strong>gripper_frame：</strong>必须与 Lula 使用的末端 frame 建立并验证固定变换，不能把 wrist/gripper link 名称想当然地混用。</li>
+    <li><strong>position / orientation：</strong>来自同一瓶身截面；两指内侧区域在瓶轴两侧，接触中心线与 AB 垂直。</li>
+    <li><strong>pregrasp_cspace_position：</strong>真实 runtime DOF 名称和已验证张开值，aperture 大于该截面直径。</li>
+    <li><strong>cspace_position：</strong>真实闭合方向和合法范围；不能用镜像 finger 或 180° 临时旋转。</li>
+    <li><strong>先预览再 IK：</strong>open / close 都必须显示瓶子处在两指之间；失败就不调用 Lula。</li>
+  </ul>
+</div>
+
+<h3>主证据视频如何同时看清整臂与抓取？</h3>
+<p class="subtitle">请选择一种。我的推荐是 A，因为每一帧都保留完整关节链，同时保留接触近景。</p>
+
+<div class="cards">
+  <div class="card" data-choice="a_split_full_arm_plus_closeup" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:12px">
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:8px;height:170px">
+        <div style="background:#29313e;border:2px solid #69b7ff;border-radius:8px;padding:10px;color:#fff">
+          <strong>主画面 2/3</strong><br>
+          完整 follower：base → shoulder → elbow → wrist → fingers → bottle → table
+        </div>
+        <div style="background:#29313e;border:2px solid #f6b45e;border-radius:8px;padding:10px;color:#fff">
+          <strong>同步近景 1/3</strong><br>
+          两指内侧、Bottle500、contact/normal
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A · 同步分屏（推荐）</h3>
+      <p>所有阶段始终能看到整臂，近景同步显示局部抓取，不会丢失关节运动证据。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b_full_arm_primary_separate_closeup" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:12px">
+      <div style="background:#29313e;border:2px solid #69b7ff;border-radius:8px;height:170px;padding:12px;color:#fff">
+        <strong>主视频：整臂单视角</strong><br><br>
+        另存一条完全同步的 gripper close-up 辅助视频
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B · 两条独立同步视频</h3>
+      <p>画面最大、编码简单，但审核时必须同时打开两条视频核对相同 frame/time。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c_three_view_evidence_grid" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:12px">
+      <div style="display:grid;grid-template-columns:1.5fr 1fr;grid-template-rows:1fr 1fr;gap:7px;height:170px">
+        <div style="grid-row:1 / 3;background:#29313e;border:2px solid #69b7ff;border-radius:8px;padding:8px;color:#fff">完整整臂</div>
+        <div style="background:#29313e;border:2px solid #f6b45e;border-radius:8px;padding:8px;color:#fff">真正顶视</div>
+        <div style="background:#29313e;border:2px solid #81d695;border-radius:8px;padding:8px;color:#fff">夹爪近景</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C · 三视角证据网格</h3>
+      <p>空间关系最完整，但每个子画面较小，分辨率和编码成本最高。</p>
+    </div>
+  </div>
+</div>
