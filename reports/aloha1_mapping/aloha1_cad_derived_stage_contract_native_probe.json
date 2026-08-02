@@ -1,0 +1,62 @@
+{
+  "after_world": {
+    "default_prim": "/World",
+    "gravity_direction": [
+      0.0,
+      0.0,
+      -1.0
+    ],
+    "gravity_magnitude": 9.8100004196167,
+    "meters_per_unit": 1.0,
+    "physics_scene_prim": "/physicsScene",
+    "required_prims_valid": true,
+    "up_axis": "Z"
+  },
+  "before_world": {
+    "default_prim": "/World",
+    "meters_per_unit": 1.0,
+    "required_prims_valid": true,
+    "up_axis": "Z"
+  },
+  "classification": "DIAGNOSTIC_ONLY_STAGE_CONTRACT_NO_PHYSICS_STEP",
+  "runtime": {
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physx": "107.3.26"
+  },
+  "schema_version": 1,
+  "source_or_default_asset_modified": false,
+  "stage": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+    "composed_layer_hashes_after": {
+      "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_diagnostic.usda": "7c76a8970e6b0dbca562304c64e9bfcd2e1ca3e790d25dfa52baf2e510b82c68",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_diagnostic.usda": "eb3d2b12bb0903589856607c9f05212bf5c22182f539a413587162f4b1027459",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/geometry/cad_derived_colliders.usda": "06295762f1f513dae63a1188e360c209ac2bbbabef730db8a103eb3ea4b1df81",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/physics/cad_derived_colliders_gripper_decomposition_physics.usda": "352503bd2ccc8d4253fdc0561da67d2ec8bc92afba45d3112e677e4b5bb7ac9e",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/aloha1_signal_correspondence_workcell.usda": "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/configuration/aloha1_signal_home_targets.usda": "484f17e3c638ea729a260eb67a666954f346b37a69987d9fe4f15cf7fad9d141",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/table_support_alignment/1.0/configuration/aloha1_tabletop_world_zero.usda": "c9f8c656ed3a1b2722bfe0fb18dd2e5056da0320782e5dd3a7d4df2d7e845afc"
+    },
+    "composed_layer_hashes_before": {
+      "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_diagnostic.usda": "7c76a8970e6b0dbca562304c64e9bfcd2e1ca3e790d25dfa52baf2e510b82c68",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_diagnostic.usda": "eb3d2b12bb0903589856607c9f05212bf5c22182f539a413587162f4b1027459",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/geometry/cad_derived_colliders.usda": "06295762f1f513dae63a1188e360c209ac2bbbabef730db8a103eb3ea4b1df81",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/physics/cad_derived_colliders_gripper_decomposition_physics.usda": "352503bd2ccc8d4253fdc0561da67d2ec8bc92afba45d3112e677e4b5bb7ac9e",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/aloha1_signal_correspondence_workcell.usda": "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/configuration/aloha1_signal_home_targets.usda": "484f17e3c638ea729a260eb67a666954f346b37a69987d9fe4f15cf7fad9d141",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/table_support_alignment/1.0/configuration/aloha1_tabletop_world_zero.usda": "c9f8c656ed3a1b2722bfe0fb18dd2e5056da0320782e5dd3a7d4df2d7e845afc"
+    },
+    "required_prims": [
+      "/World/follower_left",
+      "/World/follower_right",
+      "/World/environment"
+    ],
+    "sha256_after": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9",
+    "sha256_before": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9"
+  },
+  "status": "PASS",
+  "task8": "NOT_RUN",
+  "timeline_started": false
+}

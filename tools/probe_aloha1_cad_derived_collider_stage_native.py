@@ -96,7 +96,7 @@ def main() -> int:
     )
     passed = (
         runtime == expected_runtime
-        and len(colliders) == 12
+        and len(colliders) == 34
         and all_convex
         and stage_hash_before == stage_hash_after
         and str(stage.GetDefaultPrim().GetPath()) == "/World"

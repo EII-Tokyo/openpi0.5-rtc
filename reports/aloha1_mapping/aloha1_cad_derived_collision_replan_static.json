@@ -1,0 +1,4264 @@
+{
+  "contact_subscription_created": true,
+  "deterministic_signature": "221cc1ac53bfaba0b2c2ec37c087b7d788dc7d5e70f569790bb9d49ec1eb3ae4",
+  "documented_assembly_interface_pairs": [
+    [
+      "/World/follower_left/vx300s_left/follower_left_gripper_link",
+      "/World/follower_left/vx300s_left/follower_left_gripper_prop_link"
+    ],
+    [
+      "/World/follower_left/vx300s_left/follower_left_gripper_link",
+      "/World/follower_left/vx300s_left/follower_left_left_finger_link"
+    ],
+    [
+      "/World/follower_left/vx300s_left/follower_left_gripper_link",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link"
+    ],
+    [
+      "/World/follower_right/vx300s_right/follower_right_gripper_link",
+      "/World/follower_right/vx300s_right/follower_right_gripper_prop_link"
+    ],
+    [
+      "/World/follower_right/vx300s_right/follower_right_gripper_link",
+      "/World/follower_right/vx300s_right/follower_right_left_finger_link"
+    ],
+    [
+      "/World/follower_right/vx300s_right/follower_right_gripper_link",
+      "/World/follower_right/vx300s_right/follower_right_right_finger_link"
+    ]
+  ],
+  "first_frame_jump_gate_rad": 0.02,
+  "first_frame_jump_scope": "SIX_ARM_DOF_ONLY",
+  "numerical_overlap_method": "CONVEX_HULL_HALFSPACE_LP_WORLD_TRANSFORMED_AUTHORED_POINTS",
+  "physics_frequency_hz": 60,
+  "pose_source": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_grasp_20cm_five_pose_cad_collision_replan_preflight.json",
+    "scan_preflight_candidates": false,
+    "sha256": "c7b53aad2ef672c9a85fd7c9f130d59b67847c3cfc11f6bd199ad8361dabf489"
+  },
+  "poses": [
+    {
+      "arm_q_rad": [
+        0.0,
+        -0.96,
+        1.16,
+        0.0,
+        -0.3,
+        0.0
+      ],
+      "candidate_index": null,
+      "collider_count": 42,
+      "contact_events": [],
+      "contact_point_count": 0,
+      "finger_targets_m": [
+        0.057,
+        -0.057
+      ],
+      "finite": true,
+      "first_frame_arm_jump_by_robot_rad": {
+        "follower_left": 0.00846216082572937,
+        "follower_right": 0.00846216082572937
+      },
+      "first_frame_finger_jump_by_robot_m": {
+        "follower_left": 5.848705768585205e-07,
+        "follower_right": 5.848705768585205e-07
+      },
+      "first_frame_finger_jump_gate": "RECORDED_NOT_GATED_NO_FROZEN_OFFICIAL_TOLERANCE",
+      "first_frame_jump_gate_rad": 0.02,
+      "first_frame_jump_max_abs_rad": 0.00846216082572937,
+      "gripper_state": "open",
+      "nonfinite_contact_count": 0,
+      "overlaps": [
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_base_link",
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 149,
+          "overlap_volume_m3": 2.1815471701998324e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.0013499805935558008
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_lower_forearm_link",
+            "/World/follower_left/vx300s_left/follower_left_wrist_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_wrist_link/materialized_baseline_fallback/wrist_link/mesh"
+          ],
+          "intersection_vertex_count": 167,
+          "overlap_volume_m3": 3.060412320395827e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.010742494764835395
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link",
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 244,
+          "overlap_volume_m3": 5.6999705391035826e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.011491805916451492
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link",
+            "/World/follower_left/vx300s_left/follower_left_upper_forearm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 150,
+          "overlap_volume_m3": 9.477513392541851e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.012526474971422619
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_base_link",
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 149,
+          "overlap_volume_m3": 2.1815430352417734e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.0013499785365445013
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_lower_forearm_link",
+            "/World/follower_right/vx300s_right/follower_right_wrist_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_wrist_link/materialized_baseline_fallback/wrist_link/mesh"
+          ],
+          "intersection_vertex_count": 165,
+          "overlap_volume_m3": 3.0604128065393306e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.010742494429419991
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link",
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 241,
+          "overlap_volume_m3": 5.699969218588564e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.011491793035379255
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link",
+            "/World/follower_right/vx300s_right/follower_right_upper_forearm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 148,
+          "overlap_volume_m3": 9.47755912930553e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.012526506677206117
+        }
+      ],
+      "pose_id": "home_reference",
+      "source": "PROJECT_FROZEN_HOME_REFERENCE",
+      "state_id": "home_reference:open",
+      "status": "PASS",
+      "unexpected_overlap_count": 0,
+      "unresolved_environment_contact_count": 0,
+      "within_joint_limits": true
+    },
+    {
+      "arm_q_rad": [
+        0.0,
+        -0.96,
+        1.16,
+        0.0,
+        -0.3,
+        0.0
+      ],
+      "candidate_index": null,
+      "collider_count": 42,
+      "contact_events": [],
+      "contact_point_count": 0,
+      "finger_targets_m": [
+        0.035,
+        -0.035
+      ],
+      "finite": true,
+      "first_frame_arm_jump_by_robot_rad": {
+        "follower_left": 0.008461594581604004,
+        "follower_right": 0.008461594581604004
+      },
+      "first_frame_finger_jump_by_robot_m": {
+        "follower_left": 5.960464477539062e-07,
+        "follower_right": 5.960464477539062e-07
+      },
+      "first_frame_finger_jump_gate": "RECORDED_NOT_GATED_NO_FROZEN_OFFICIAL_TOLERANCE",
+      "first_frame_jump_gate_rad": 0.02,
+      "first_frame_jump_max_abs_rad": 0.008461594581604004,
+      "gripper_state": "partially_closed",
+      "nonfinite_contact_count": 0,
+      "overlaps": [
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_base_link",
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 149,
+          "overlap_volume_m3": 2.1815471701998324e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.0013499805935558008
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_lower_forearm_link",
+            "/World/follower_left/vx300s_left/follower_left_wrist_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_wrist_link/materialized_baseline_fallback/wrist_link/mesh"
+          ],
+          "intersection_vertex_count": 167,
+          "overlap_volume_m3": 3.060412320395827e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.010742494764835395
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link",
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 244,
+          "overlap_volume_m3": 5.6999705391035826e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.011491805916451492
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link",
+            "/World/follower_left/vx300s_left/follower_left_upper_forearm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 150,
+          "overlap_volume_m3": 9.477513392541851e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.012526474971422619
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_base_link",
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 149,
+          "overlap_volume_m3": 2.1815430352417734e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.0013499785365445013
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_lower_forearm_link",
+            "/World/follower_right/vx300s_right/follower_right_wrist_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_wrist_link/materialized_baseline_fallback/wrist_link/mesh"
+          ],
+          "intersection_vertex_count": 165,
+          "overlap_volume_m3": 3.0604128065393306e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.010742494429419991
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link",
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 241,
+          "overlap_volume_m3": 5.699969218588564e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.011491793035379255
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link",
+            "/World/follower_right/vx300s_right/follower_right_upper_forearm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 148,
+          "overlap_volume_m3": 9.47755912930553e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.012526506677206117
+        }
+      ],
+      "pose_id": "home_reference",
+      "source": "PROJECT_FROZEN_HOME_REFERENCE",
+      "state_id": "home_reference:partially_closed",
+      "status": "PASS",
+      "unexpected_overlap_count": 0,
+      "unresolved_environment_contact_count": 0,
+      "within_joint_limits": true
+    },
+    {
+      "arm_q_rad": [
+        0.0,
+        -0.96,
+        1.16,
+        0.0,
+        -0.3,
+        0.0
+      ],
+      "candidate_index": null,
+      "collider_count": 42,
+      "contact_events": [],
+      "contact_point_count": 0,
+      "finger_targets_m": [
+        0.021,
+        -0.021
+      ],
+      "finite": true,
+      "first_frame_arm_jump_by_robot_rad": {
+        "follower_left": 0.008461445569992065,
+        "follower_right": 0.008461445569992065
+      },
+      "first_frame_finger_jump_by_robot_m": {
+        "follower_left": 4.6193599700927734e-07,
+        "follower_right": 4.6193599700927734e-07
+      },
+      "first_frame_finger_jump_gate": "RECORDED_NOT_GATED_NO_FROZEN_OFFICIAL_TOLERANCE",
+      "first_frame_jump_gate_rad": 0.02,
+      "first_frame_jump_max_abs_rad": 0.008461445569992065,
+      "gripper_state": "closed",
+      "nonfinite_contact_count": 0,
+      "overlaps": [
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_base_link",
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 149,
+          "overlap_volume_m3": 2.1815471701998324e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.0013499805935558008
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_lower_forearm_link",
+            "/World/follower_left/vx300s_left/follower_left_wrist_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_wrist_link/materialized_baseline_fallback/wrist_link/mesh"
+          ],
+          "intersection_vertex_count": 167,
+          "overlap_volume_m3": 3.060412320395827e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.010742494764835395
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link",
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 244,
+          "overlap_volume_m3": 5.6999705391035826e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.011491805916451492
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link",
+            "/World/follower_left/vx300s_left/follower_left_upper_forearm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 150,
+          "overlap_volume_m3": 9.477513392541851e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.012526474971422619
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_base_link",
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 149,
+          "overlap_volume_m3": 2.1815430352417734e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.0013499785365445013
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_lower_forearm_link",
+            "/World/follower_right/vx300s_right/follower_right_wrist_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_wrist_link/materialized_baseline_fallback/wrist_link/mesh"
+          ],
+          "intersection_vertex_count": 165,
+          "overlap_volume_m3": 3.0604128065393306e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.010742494429419991
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link",
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 241,
+          "overlap_volume_m3": 5.699969218588564e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.011491793035379255
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link",
+            "/World/follower_right/vx300s_right/follower_right_upper_forearm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 148,
+          "overlap_volume_m3": 9.47755912930553e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.012526506677206117
+        }
+      ],
+      "pose_id": "home_reference",
+      "source": "PROJECT_FROZEN_HOME_REFERENCE",
+      "state_id": "home_reference:closed",
+      "status": "PASS",
+      "unexpected_overlap_count": 0,
+      "unresolved_environment_contact_count": 0,
+      "within_joint_limits": true
+    },
+    {
+      "arm_q_rad": [
+        0.0,
+        -0.96,
+        1.16,
+        0.0,
+        -0.3,
+        0.0
+      ],
+      "candidate_index": null,
+      "collider_count": 42,
+      "contact_events": [],
+      "contact_point_count": 0,
+      "finger_targets_m": [
+        0.057,
+        -0.057
+      ],
+      "finite": true,
+      "first_frame_arm_jump_by_robot_rad": {
+        "follower_left": 0.00846216082572937,
+        "follower_right": 0.00846216082572937
+      },
+      "first_frame_finger_jump_by_robot_m": {
+        "follower_left": 5.848705768585205e-07,
+        "follower_right": 5.848705768585205e-07
+      },
+      "first_frame_finger_jump_gate": "RECORDED_NOT_GATED_NO_FROZEN_OFFICIAL_TOLERANCE",
+      "first_frame_jump_gate_rad": 0.02,
+      "first_frame_jump_max_abs_rad": 0.00846216082572937,
+      "gripper_state": "maximum_legal_aperture",
+      "nonfinite_contact_count": 0,
+      "overlaps": [
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_base_link",
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 149,
+          "overlap_volume_m3": 2.1815471701998324e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.0013499805935558008
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_lower_forearm_link",
+            "/World/follower_left/vx300s_left/follower_left_wrist_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_wrist_link/materialized_baseline_fallback/wrist_link/mesh"
+          ],
+          "intersection_vertex_count": 167,
+          "overlap_volume_m3": 3.060412320395827e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.010742494764835395
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link",
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 244,
+          "overlap_volume_m3": 5.6999705391035826e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.011491805916451492
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link",
+            "/World/follower_left/vx300s_left/follower_left_upper_forearm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 150,
+          "overlap_volume_m3": 9.477513392541851e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.012526474971422619
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_base_link",
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 149,
+          "overlap_volume_m3": 2.1815430352417734e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.0013499785365445013
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_lower_forearm_link",
+            "/World/follower_right/vx300s_right/follower_right_wrist_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_wrist_link/materialized_baseline_fallback/wrist_link/mesh"
+          ],
+          "intersection_vertex_count": 165,
+          "overlap_volume_m3": 3.0604128065393306e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.010742494429419991
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link",
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 241,
+          "overlap_volume_m3": 5.699969218588564e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.011491793035379255
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link",
+            "/World/follower_right/vx300s_right/follower_right_upper_forearm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 148,
+          "overlap_volume_m3": 9.47755912930553e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.012526506677206117
+        }
+      ],
+      "pose_id": "home_reference",
+      "source": "PROJECT_FROZEN_HOME_REFERENCE",
+      "state_id": "home_reference:maximum_legal_aperture",
+      "status": "PASS",
+      "unexpected_overlap_count": 0,
+      "unresolved_environment_contact_count": 0,
+      "within_joint_limits": true
+    },
+    {
+      "arm_q_rad": [
+        -1.1040045161087164,
+        -0.030416992573125468,
+        0.9269057232206808,
+        2.3672068037431204,
+        2.164949858113296,
+        -1.2841002196946323
+      ],
+      "bottle_line_yaw_deg": 115.11853333427227,
+      "candidate_index": 5,
+      "collider_count": 42,
+      "contact_events": [],
+      "contact_point_count": 0,
+      "finger_targets_m": [
+        0.057,
+        -0.057
+      ],
+      "finite": true,
+      "first_frame_arm_jump_by_robot_rad": {
+        "follower_left": 0.001505136489868164,
+        "follower_right": 0.00846216082572937
+      },
+      "first_frame_finger_jump_by_robot_m": {
+        "follower_left": 0.0009011179208755493,
+        "follower_right": 5.848705768585205e-07
+      },
+      "first_frame_finger_jump_gate": "RECORDED_NOT_GATED_NO_FROZEN_OFFICIAL_TOLERANCE",
+      "first_frame_jump_gate_rad": 0.02,
+      "first_frame_jump_max_abs_rad": 0.00846216082572937,
+      "gripper_state": "open",
+      "initial_ee_position_world_m": [
+        -0.26195514821745364,
+        -0.20301950097877608,
+        0.3571954877343208
+      ],
+      "nonfinite_contact_count": 0,
+      "overlaps": [
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_base_link",
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 148,
+          "overlap_volume_m3": 2.1815389002914885e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.0013499789864050069
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_lower_forearm_link",
+            "/World/follower_left/vx300s_left/follower_left_wrist_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_wrist_link/materialized_baseline_fallback/wrist_link/mesh"
+          ],
+          "intersection_vertex_count": 222,
+          "overlap_volume_m3": 4.88931421693622e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.013846179892216051
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link",
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 199,
+          "overlap_volume_m3": 4.8720748134127756e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.00889216065819634
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link",
+            "/World/follower_left/vx300s_left/follower_left_upper_forearm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 131,
+          "overlap_volume_m3": 7.176912828366477e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.011638658016733534
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_base_link",
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 149,
+          "overlap_volume_m3": 2.1815430352417734e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.0013499785365445013
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_lower_forearm_link",
+            "/World/follower_right/vx300s_right/follower_right_wrist_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_wrist_link/materialized_baseline_fallback/wrist_link/mesh"
+          ],
+          "intersection_vertex_count": 165,
+          "overlap_volume_m3": 3.0604128065393306e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.010742494429419991
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link",
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 241,
+          "overlap_volume_m3": 5.699969218588564e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.011491793035379255
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link",
+            "/World/follower_right/vx300s_right/follower_right_upper_forearm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 148,
+          "overlap_volume_m3": 9.47755912930553e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.012526506677206117
+        }
+      ],
+      "pose_id": "sample_01",
+      "source": "FROZEN_CAD_COLLISION_REPLAN_PREFLIGHT",
+      "state_id": "sample_01:open",
+      "status": "PASS",
+      "unexpected_overlap_count": 0,
+      "unresolved_environment_contact_count": 0,
+      "within_joint_limits": true
+    },
+    {
+      "arm_q_rad": [
+        -1.1040045161087164,
+        -0.030416992573125468,
+        0.9269057232206808,
+        2.3672068037431204,
+        2.164949858113296,
+        -1.2841002196946323
+      ],
+      "bottle_line_yaw_deg": 115.11853333427227,
+      "candidate_index": 5,
+      "collider_count": 42,
+      "contact_events": [],
+      "contact_point_count": 0,
+      "finger_targets_m": [
+        0.035,
+        -0.035
+      ],
+      "finite": true,
+      "first_frame_arm_jump_by_robot_rad": {
+        "follower_left": 0.0014984607696533203,
+        "follower_right": 0.008461594581604004
+      },
+      "first_frame_finger_jump_by_robot_m": {
+        "follower_left": 0.0009047091007232666,
+        "follower_right": 5.960464477539062e-07
+      },
+      "first_frame_finger_jump_gate": "RECORDED_NOT_GATED_NO_FROZEN_OFFICIAL_TOLERANCE",
+      "first_frame_jump_gate_rad": 0.02,
+      "first_frame_jump_max_abs_rad": 0.008461594581604004,
+      "gripper_state": "partially_closed",
+      "initial_ee_position_world_m": [
+        -0.26195514821745364,
+        -0.20301950097877608,
+        0.3571954877343208
+      ],
+      "nonfinite_contact_count": 0,
+      "overlaps": [
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_base_link",
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 148,
+          "overlap_volume_m3": 2.1815389002914885e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.0013499789864050069
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_lower_forearm_link",
+            "/World/follower_left/vx300s_left/follower_left_wrist_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_wrist_link/materialized_baseline_fallback/wrist_link/mesh"
+          ],
+          "intersection_vertex_count": 222,
+          "overlap_volume_m3": 4.88931421693622e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.013846179892216051
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link",
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 199,
+          "overlap_volume_m3": 4.8720748134127756e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.00889216065819634
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link",
+            "/World/follower_left/vx300s_left/follower_left_upper_forearm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 131,
+          "overlap_volume_m3": 7.176912828366477e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.011638658016733534
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_base_link",
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 149,
+          "overlap_volume_m3": 2.1815430352417734e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.0013499785365445013
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_lower_forearm_link",
+            "/World/follower_right/vx300s_right/follower_right_wrist_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_wrist_link/materialized_baseline_fallback/wrist_link/mesh"
+          ],
+          "intersection_vertex_count": 165,
+          "overlap_volume_m3": 3.0604128065393306e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.010742494429419991
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link",
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 241,
+          "overlap_volume_m3": 5.699969218588564e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.011491793035379255
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link",
+            "/World/follower_right/vx300s_right/follower_right_upper_forearm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 148,
+          "overlap_volume_m3": 9.47755912930553e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.012526506677206117
+        }
+      ],
+      "pose_id": "sample_01",
+      "source": "FROZEN_CAD_COLLISION_REPLAN_PREFLIGHT",
+      "state_id": "sample_01:partially_closed",
+      "status": "PASS",
+      "unexpected_overlap_count": 0,
+      "unresolved_environment_contact_count": 0,
+      "within_joint_limits": true
+    },
+    {
+      "arm_q_rad": [
+        -1.1040045161087164,
+        -0.030416992573125468,
+        0.9269057232206808,
+        2.3672068037431204,
+        2.164949858113296,
+        -1.2841002196946323
+      ],
+      "bottle_line_yaw_deg": 115.11853333427227,
+      "candidate_index": 5,
+      "collider_count": 42,
+      "contact_events": [],
+      "contact_point_count": 0,
+      "finger_targets_m": [
+        0.021,
+        -0.021
+      ],
+      "finite": true,
+      "first_frame_arm_jump_by_robot_rad": {
+        "follower_left": 0.002000093460083008,
+        "follower_right": 0.008461445569992065
+      },
+      "first_frame_finger_jump_by_robot_m": {
+        "follower_left": 0.0008198972791433334,
+        "follower_right": 4.6193599700927734e-07
+      },
+      "first_frame_finger_jump_gate": "RECORDED_NOT_GATED_NO_FROZEN_OFFICIAL_TOLERANCE",
+      "first_frame_jump_gate_rad": 0.02,
+      "first_frame_jump_max_abs_rad": 0.008461445569992065,
+      "gripper_state": "closed",
+      "initial_ee_position_world_m": [
+        -0.26195514821745364,
+        -0.20301950097877608,
+        0.3571954877343208
+      ],
+      "nonfinite_contact_count": 0,
+      "overlaps": [
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_base_link",
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 148,
+          "overlap_volume_m3": 2.1815389002914885e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.0013499789864050069
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_lower_forearm_link",
+            "/World/follower_left/vx300s_left/follower_left_wrist_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_wrist_link/materialized_baseline_fallback/wrist_link/mesh"
+          ],
+          "intersection_vertex_count": 222,
+          "overlap_volume_m3": 4.88931421693622e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.013846179892216051
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link",
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 199,
+          "overlap_volume_m3": 4.8720748134127756e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.00889216065819634
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link",
+            "/World/follower_left/vx300s_left/follower_left_upper_forearm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 131,
+          "overlap_volume_m3": 7.176912828366477e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.011638658016733534
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_base_link",
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 149,
+          "overlap_volume_m3": 2.1815430352417734e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.0013499785365445013
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_lower_forearm_link",
+            "/World/follower_right/vx300s_right/follower_right_wrist_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_wrist_link/materialized_baseline_fallback/wrist_link/mesh"
+          ],
+          "intersection_vertex_count": 165,
+          "overlap_volume_m3": 3.0604128065393306e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.010742494429419991
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link",
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 241,
+          "overlap_volume_m3": 5.699969218588564e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.011491793035379255
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link",
+            "/World/follower_right/vx300s_right/follower_right_upper_forearm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 148,
+          "overlap_volume_m3": 9.47755912930553e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.012526506677206117
+        }
+      ],
+      "pose_id": "sample_01",
+      "source": "FROZEN_CAD_COLLISION_REPLAN_PREFLIGHT",
+      "state_id": "sample_01:closed",
+      "status": "PASS",
+      "unexpected_overlap_count": 0,
+      "unresolved_environment_contact_count": 0,
+      "within_joint_limits": true
+    },
+    {
+      "arm_q_rad": [
+        -1.1040045161087164,
+        -0.030416992573125468,
+        0.9269057232206808,
+        2.3672068037431204,
+        2.164949858113296,
+        -1.2841002196946323
+      ],
+      "bottle_line_yaw_deg": 115.11853333427227,
+      "candidate_index": 5,
+      "collider_count": 42,
+      "contact_events": [],
+      "contact_point_count": 0,
+      "finger_targets_m": [
+        0.057,
+        -0.057
+      ],
+      "finite": true,
+      "first_frame_arm_jump_by_robot_rad": {
+        "follower_left": 0.001505136489868164,
+        "follower_right": 0.00846216082572937
+      },
+      "first_frame_finger_jump_by_robot_m": {
+        "follower_left": 0.0009011179208755493,
+        "follower_right": 5.848705768585205e-07
+      },
+      "first_frame_finger_jump_gate": "RECORDED_NOT_GATED_NO_FROZEN_OFFICIAL_TOLERANCE",
+      "first_frame_jump_gate_rad": 0.02,
+      "first_frame_jump_max_abs_rad": 0.00846216082572937,
+      "gripper_state": "maximum_legal_aperture",
+      "initial_ee_position_world_m": [
+        -0.26195514821745364,
+        -0.20301950097877608,
+        0.3571954877343208
+      ],
+      "nonfinite_contact_count": 0,
+      "overlaps": [
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_base_link",
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 148,
+          "overlap_volume_m3": 2.1815389002914885e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.0013499789864050069
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_lower_forearm_link",
+            "/World/follower_left/vx300s_left/follower_left_wrist_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_wrist_link/materialized_baseline_fallback/wrist_link/mesh"
+          ],
+          "intersection_vertex_count": 222,
+          "overlap_volume_m3": 4.88931421693622e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.013846179892216051
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link",
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 199,
+          "overlap_volume_m3": 4.8720748134127756e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.00889216065819634
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link",
+            "/World/follower_left/vx300s_left/follower_left_upper_forearm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 131,
+          "overlap_volume_m3": 7.176912828366477e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.011638658016733534
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_base_link",
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 149,
+          "overlap_volume_m3": 2.1815430352417734e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.0013499785365445013
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_lower_forearm_link",
+            "/World/follower_right/vx300s_right/follower_right_wrist_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_wrist_link/materialized_baseline_fallback/wrist_link/mesh"
+          ],
+          "intersection_vertex_count": 165,
+          "overlap_volume_m3": 3.0604128065393306e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.010742494429419991
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link",
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 241,
+          "overlap_volume_m3": 5.699969218588564e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.011491793035379255
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link",
+            "/World/follower_right/vx300s_right/follower_right_upper_forearm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 148,
+          "overlap_volume_m3": 9.47755912930553e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.012526506677206117
+        }
+      ],
+      "pose_id": "sample_01",
+      "source": "FROZEN_CAD_COLLISION_REPLAN_PREFLIGHT",
+      "state_id": "sample_01:maximum_legal_aperture",
+      "status": "PASS",
+      "unexpected_overlap_count": 0,
+      "unresolved_environment_contact_count": 0,
+      "within_joint_limits": true
+    },
+    {
+      "arm_q_rad": [
+        -1.6814008541847623,
+        -0.6315895179221043,
+        0.9675458983519907,
+        0.13204030444106754,
+        1.2440127928906353,
+        -1.370775202960429
+      ],
+      "bottle_line_yaw_deg": 160.2384038386413,
+      "candidate_index": 7,
+      "collider_count": 42,
+      "contact_events": [],
+      "contact_point_count": 0,
+      "finger_targets_m": [
+        0.057,
+        -0.057
+      ],
+      "finite": true,
+      "first_frame_arm_jump_by_robot_rad": {
+        "follower_left": 0.0057947635650634766,
+        "follower_right": 0.00846216082572937
+      },
+      "first_frame_finger_jump_by_robot_m": {
+        "follower_left": 0.0010227523744106293,
+        "follower_right": 5.848705768585205e-07
+      },
+      "first_frame_finger_jump_gate": "RECORDED_NOT_GATED_NO_FROZEN_OFFICIAL_TOLERANCE",
+      "first_frame_jump_gate_rad": 0.02,
+      "first_frame_jump_max_abs_rad": 0.00846216082572937,
+      "gripper_state": "open",
+      "initial_ee_position_world_m": [
+        -0.4644619750080043,
+        -0.17352045682536144,
+        0.14987596053147934
+      ],
+      "nonfinite_contact_count": 0,
+      "overlaps": [
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_base_link",
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 149,
+          "overlap_volume_m3": 2.181555440135995e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.001349987987014414
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_lower_forearm_link",
+            "/World/follower_left/vx300s_left/follower_left_wrist_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_wrist_link/materialized_baseline_fallback/wrist_link/mesh"
+          ],
+          "intersection_vertex_count": 194,
+          "overlap_volume_m3": 3.376909298653026e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.012344199439545844
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link",
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 241,
+          "overlap_volume_m3": 5.175175262912399e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.010502869154405486
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link",
+            "/World/follower_left/vx300s_left/follower_left_upper_forearm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 134,
+          "overlap_volume_m3": 7.472918830727609e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.011785057335697208
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_base_link",
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 149,
+          "overlap_volume_m3": 2.1815430352417734e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.0013499785365445013
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_lower_forearm_link",
+            "/World/follower_right/vx300s_right/follower_right_wrist_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_wrist_link/materialized_baseline_fallback/wrist_link/mesh"
+          ],
+          "intersection_vertex_count": 165,
+          "overlap_volume_m3": 3.0604128065393306e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.010742494429419991
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link",
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 241,
+          "overlap_volume_m3": 5.699969218588564e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.011491793035379255
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link",
+            "/World/follower_right/vx300s_right/follower_right_upper_forearm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 148,
+          "overlap_volume_m3": 9.47755912930553e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.012526506677206117
+        }
+      ],
+      "pose_id": "sample_02",
+      "source": "FROZEN_CAD_COLLISION_REPLAN_PREFLIGHT",
+      "state_id": "sample_02:open",
+      "status": "PASS",
+      "unexpected_overlap_count": 0,
+      "unresolved_environment_contact_count": 0,
+      "within_joint_limits": true
+    },
+    {
+      "arm_q_rad": [
+        -1.6814008541847623,
+        -0.6315895179221043,
+        0.9675458983519907,
+        0.13204030444106754,
+        1.2440127928906353,
+        -1.370775202960429
+      ],
+      "bottle_line_yaw_deg": 160.2384038386413,
+      "candidate_index": 7,
+      "collider_count": 42,
+      "contact_events": [],
+      "contact_point_count": 0,
+      "finger_targets_m": [
+        0.035,
+        -0.035
+      ],
+      "finite": true,
+      "first_frame_arm_jump_by_robot_rad": {
+        "follower_left": 0.0059278011322021484,
+        "follower_right": 0.008461594581604004
+      },
+      "first_frame_finger_jump_by_robot_m": {
+        "follower_left": 0.0010505281388759613,
+        "follower_right": 5.960464477539062e-07
+      },
+      "first_frame_finger_jump_gate": "RECORDED_NOT_GATED_NO_FROZEN_OFFICIAL_TOLERANCE",
+      "first_frame_jump_gate_rad": 0.02,
+      "first_frame_jump_max_abs_rad": 0.008461594581604004,
+      "gripper_state": "partially_closed",
+      "initial_ee_position_world_m": [
+        -0.4644619750080043,
+        -0.17352045682536144,
+        0.14987596053147934
+      ],
+      "nonfinite_contact_count": 0,
+      "overlaps": [
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_base_link",
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 149,
+          "overlap_volume_m3": 2.181555440135995e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.001349987987014414
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_lower_forearm_link",
+            "/World/follower_left/vx300s_left/follower_left_wrist_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_wrist_link/materialized_baseline_fallback/wrist_link/mesh"
+          ],
+          "intersection_vertex_count": 194,
+          "overlap_volume_m3": 3.376909298653026e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.012344199439545844
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link",
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 241,
+          "overlap_volume_m3": 5.175175262912399e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.010502869154405486
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link",
+            "/World/follower_left/vx300s_left/follower_left_upper_forearm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 134,
+          "overlap_volume_m3": 7.472918830727609e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.011785057335697208
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_base_link",
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 149,
+          "overlap_volume_m3": 2.1815430352417734e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.0013499785365445013
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_lower_forearm_link",
+            "/World/follower_right/vx300s_right/follower_right_wrist_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_wrist_link/materialized_baseline_fallback/wrist_link/mesh"
+          ],
+          "intersection_vertex_count": 165,
+          "overlap_volume_m3": 3.0604128065393306e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.010742494429419991
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link",
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 241,
+          "overlap_volume_m3": 5.699969218588564e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.011491793035379255
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link",
+            "/World/follower_right/vx300s_right/follower_right_upper_forearm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 148,
+          "overlap_volume_m3": 9.47755912930553e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.012526506677206117
+        }
+      ],
+      "pose_id": "sample_02",
+      "source": "FROZEN_CAD_COLLISION_REPLAN_PREFLIGHT",
+      "state_id": "sample_02:partially_closed",
+      "status": "PASS",
+      "unexpected_overlap_count": 0,
+      "unresolved_environment_contact_count": 0,
+      "within_joint_limits": true
+    },
+    {
+      "arm_q_rad": [
+        -1.6814008541847623,
+        -0.6315895179221043,
+        0.9675458983519907,
+        0.13204030444106754,
+        1.2440127928906353,
+        -1.370775202960429
+      ],
+      "bottle_line_yaw_deg": 160.2384038386413,
+      "candidate_index": 7,
+      "collider_count": 42,
+      "contact_events": [],
+      "contact_point_count": 0,
+      "finger_targets_m": [
+        0.021,
+        -0.021
+      ],
+      "finite": true,
+      "first_frame_arm_jump_by_robot_rad": {
+        "follower_left": 0.005706191062927246,
+        "follower_right": 0.008461445569992065
+      },
+      "first_frame_finger_jump_by_robot_m": {
+        "follower_left": 0.0010145362466573715,
+        "follower_right": 4.6193599700927734e-07
+      },
+      "first_frame_finger_jump_gate": "RECORDED_NOT_GATED_NO_FROZEN_OFFICIAL_TOLERANCE",
+      "first_frame_jump_gate_rad": 0.02,
+      "first_frame_jump_max_abs_rad": 0.008461445569992065,
+      "gripper_state": "closed",
+      "initial_ee_position_world_m": [
+        -0.4644619750080043,
+        -0.17352045682536144,
+        0.14987596053147934
+      ],
+      "nonfinite_contact_count": 0,
+      "overlaps": [
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_base_link",
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 149,
+          "overlap_volume_m3": 2.181555440135995e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.001349987987014414
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_lower_forearm_link",
+            "/World/follower_left/vx300s_left/follower_left_wrist_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_wrist_link/materialized_baseline_fallback/wrist_link/mesh"
+          ],
+          "intersection_vertex_count": 194,
+          "overlap_volume_m3": 3.376909298653026e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.012344199439545844
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link",
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 241,
+          "overlap_volume_m3": 5.175175262912399e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.010502869154405486
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link",
+            "/World/follower_left/vx300s_left/follower_left_upper_forearm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 134,
+          "overlap_volume_m3": 7.472918830727609e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.011785057335697208
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_base_link",
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 149,
+          "overlap_volume_m3": 2.1815430352417734e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.0013499785365445013
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_lower_forearm_link",
+            "/World/follower_right/vx300s_right/follower_right_wrist_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_wrist_link/materialized_baseline_fallback/wrist_link/mesh"
+          ],
+          "intersection_vertex_count": 165,
+          "overlap_volume_m3": 3.0604128065393306e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.010742494429419991
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link",
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 241,
+          "overlap_volume_m3": 5.699969218588564e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.011491793035379255
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link",
+            "/World/follower_right/vx300s_right/follower_right_upper_forearm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 148,
+          "overlap_volume_m3": 9.47755912930553e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.012526506677206117
+        }
+      ],
+      "pose_id": "sample_02",
+      "source": "FROZEN_CAD_COLLISION_REPLAN_PREFLIGHT",
+      "state_id": "sample_02:closed",
+      "status": "PASS",
+      "unexpected_overlap_count": 0,
+      "unresolved_environment_contact_count": 0,
+      "within_joint_limits": true
+    },
+    {
+      "arm_q_rad": [
+        -1.6814008541847623,
+        -0.6315895179221043,
+        0.9675458983519907,
+        0.13204030444106754,
+        1.2440127928906353,
+        -1.370775202960429
+      ],
+      "bottle_line_yaw_deg": 160.2384038386413,
+      "candidate_index": 7,
+      "collider_count": 42,
+      "contact_events": [],
+      "contact_point_count": 0,
+      "finger_targets_m": [
+        0.057,
+        -0.057
+      ],
+      "finite": true,
+      "first_frame_arm_jump_by_robot_rad": {
+        "follower_left": 0.0057947635650634766,
+        "follower_right": 0.00846216082572937
+      },
+      "first_frame_finger_jump_by_robot_m": {
+        "follower_left": 0.0010227523744106293,
+        "follower_right": 5.848705768585205e-07
+      },
+      "first_frame_finger_jump_gate": "RECORDED_NOT_GATED_NO_FROZEN_OFFICIAL_TOLERANCE",
+      "first_frame_jump_gate_rad": 0.02,
+      "first_frame_jump_max_abs_rad": 0.00846216082572937,
+      "gripper_state": "maximum_legal_aperture",
+      "initial_ee_position_world_m": [
+        -0.4644619750080043,
+        -0.17352045682536144,
+        0.14987596053147934
+      ],
+      "nonfinite_contact_count": 0,
+      "overlaps": [
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_base_link",
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 149,
+          "overlap_volume_m3": 2.181555440135995e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.001349987987014414
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_lower_forearm_link",
+            "/World/follower_left/vx300s_left/follower_left_wrist_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_wrist_link/materialized_baseline_fallback/wrist_link/mesh"
+          ],
+          "intersection_vertex_count": 194,
+          "overlap_volume_m3": 3.376909298653026e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.012344199439545844
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link",
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 241,
+          "overlap_volume_m3": 5.175175262912399e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.010502869154405486
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link",
+            "/World/follower_left/vx300s_left/follower_left_upper_forearm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 134,
+          "overlap_volume_m3": 7.472918830727609e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.011785057335697208
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_base_link",
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 149,
+          "overlap_volume_m3": 2.1815430352417734e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.0013499785365445013
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_lower_forearm_link",
+            "/World/follower_right/vx300s_right/follower_right_wrist_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_wrist_link/materialized_baseline_fallback/wrist_link/mesh"
+          ],
+          "intersection_vertex_count": 165,
+          "overlap_volume_m3": 3.0604128065393306e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.010742494429419991
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link",
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 241,
+          "overlap_volume_m3": 5.699969218588564e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.011491793035379255
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link",
+            "/World/follower_right/vx300s_right/follower_right_upper_forearm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 148,
+          "overlap_volume_m3": 9.47755912930553e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.012526506677206117
+        }
+      ],
+      "pose_id": "sample_02",
+      "source": "FROZEN_CAD_COLLISION_REPLAN_PREFLIGHT",
+      "state_id": "sample_02:maximum_legal_aperture",
+      "status": "PASS",
+      "unexpected_overlap_count": 0,
+      "unresolved_environment_contact_count": 0,
+      "within_joint_limits": true
+    },
+    {
+      "arm_q_rad": [
+        -0.335384723149798,
+        -0.5307054531575445,
+        0.03794969296906371,
+        -0.14285336701570808,
+        2.0695688186068555,
+        1.8776206395031754
+      ],
+      "bottle_line_yaw_deg": 49.68501936437167,
+      "candidate_index": 48,
+      "collider_count": 42,
+      "contact_events": [],
+      "contact_point_count": 0,
+      "finger_targets_m": [
+        0.057,
+        -0.057
+      ],
+      "finite": true,
+      "first_frame_arm_jump_by_robot_rad": {
+        "follower_left": 0.0021209716796875,
+        "follower_right": 0.00846216082572937
+      },
+      "first_frame_finger_jump_by_robot_m": {
+        "follower_left": 0.00026488304138183594,
+        "follower_right": 5.848705768585205e-07
+      },
+      "first_frame_finger_jump_gate": "RECORDED_NOT_GATED_NO_FROZEN_OFFICIAL_TOLERANCE",
+      "first_frame_jump_gate_rad": 0.02,
+      "first_frame_jump_max_abs_rad": 0.00846216082572937,
+      "gripper_state": "open",
+      "initial_ee_position_world_m": [
+        -0.3237951130250409,
+        -0.09321322747408373,
+        0.4022961880799584
+      ],
+      "nonfinite_contact_count": 0,
+      "overlaps": [
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_base_link",
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 149,
+          "overlap_volume_m3": 2.181555440125915e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.0013499841249799153
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_lower_forearm_link",
+            "/World/follower_left/vx300s_left/follower_left_wrist_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_wrist_link/materialized_baseline_fallback/wrist_link/mesh"
+          ],
+          "intersection_vertex_count": 211,
+          "overlap_volume_m3": 4.624863010857194e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.013610014109059931
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link",
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 241,
+          "overlap_volume_m3": 5.070892369748122e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.010220969104939276
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link",
+            "/World/follower_left/vx300s_left/follower_left_upper_forearm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 136,
+          "overlap_volume_m3": 4.800247255189119e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.008918547656255674
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_base_link",
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 149,
+          "overlap_volume_m3": 2.1815430352417734e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.0013499785365445013
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_lower_forearm_link",
+            "/World/follower_right/vx300s_right/follower_right_wrist_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_wrist_link/materialized_baseline_fallback/wrist_link/mesh"
+          ],
+          "intersection_vertex_count": 165,
+          "overlap_volume_m3": 3.0604128065393306e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.010742494429419991
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link",
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 241,
+          "overlap_volume_m3": 5.699969218588564e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.011491793035379255
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link",
+            "/World/follower_right/vx300s_right/follower_right_upper_forearm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 148,
+          "overlap_volume_m3": 9.47755912930553e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.012526506677206117
+        }
+      ],
+      "pose_id": "sample_03",
+      "source": "FROZEN_CAD_COLLISION_REPLAN_PREFLIGHT",
+      "state_id": "sample_03:open",
+      "status": "PASS",
+      "unexpected_overlap_count": 0,
+      "unresolved_environment_contact_count": 0,
+      "within_joint_limits": true
+    },
+    {
+      "arm_q_rad": [
+        -0.335384723149798,
+        -0.5307054531575445,
+        0.03794969296906371,
+        -0.14285336701570808,
+        2.0695688186068555,
+        1.8776206395031754
+      ],
+      "bottle_line_yaw_deg": 49.68501936437167,
+      "candidate_index": 48,
+      "collider_count": 42,
+      "contact_events": [],
+      "contact_point_count": 0,
+      "finger_targets_m": [
+        0.035,
+        -0.035
+      ],
+      "finite": true,
+      "first_frame_arm_jump_by_robot_rad": {
+        "follower_left": 0.0020377635955810547,
+        "follower_right": 0.008461594581604004
+      },
+      "first_frame_finger_jump_by_robot_m": {
+        "follower_left": 0.00010746344923973083,
+        "follower_right": 5.960464477539062e-07
+      },
+      "first_frame_finger_jump_gate": "RECORDED_NOT_GATED_NO_FROZEN_OFFICIAL_TOLERANCE",
+      "first_frame_jump_gate_rad": 0.02,
+      "first_frame_jump_max_abs_rad": 0.008461594581604004,
+      "gripper_state": "partially_closed",
+      "initial_ee_position_world_m": [
+        -0.3237951130250409,
+        -0.09321322747408373,
+        0.4022961880799584
+      ],
+      "nonfinite_contact_count": 0,
+      "overlaps": [
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_base_link",
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 149,
+          "overlap_volume_m3": 2.181555440125915e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.0013499841249799153
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_lower_forearm_link",
+            "/World/follower_left/vx300s_left/follower_left_wrist_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_wrist_link/materialized_baseline_fallback/wrist_link/mesh"
+          ],
+          "intersection_vertex_count": 211,
+          "overlap_volume_m3": 4.624863010857194e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.013610014109059931
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link",
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 241,
+          "overlap_volume_m3": 5.070892369748122e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.010220969104939276
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link",
+            "/World/follower_left/vx300s_left/follower_left_upper_forearm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 136,
+          "overlap_volume_m3": 4.800247255189119e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.008918547656255674
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_base_link",
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 149,
+          "overlap_volume_m3": 2.1815430352417734e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.0013499785365445013
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_lower_forearm_link",
+            "/World/follower_right/vx300s_right/follower_right_wrist_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_wrist_link/materialized_baseline_fallback/wrist_link/mesh"
+          ],
+          "intersection_vertex_count": 165,
+          "overlap_volume_m3": 3.0604128065393306e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.010742494429419991
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link",
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 241,
+          "overlap_volume_m3": 5.699969218588564e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.011491793035379255
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link",
+            "/World/follower_right/vx300s_right/follower_right_upper_forearm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 148,
+          "overlap_volume_m3": 9.47755912930553e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.012526506677206117
+        }
+      ],
+      "pose_id": "sample_03",
+      "source": "FROZEN_CAD_COLLISION_REPLAN_PREFLIGHT",
+      "state_id": "sample_03:partially_closed",
+      "status": "PASS",
+      "unexpected_overlap_count": 0,
+      "unresolved_environment_contact_count": 0,
+      "within_joint_limits": true
+    },
+    {
+      "arm_q_rad": [
+        -0.335384723149798,
+        -0.5307054531575445,
+        0.03794969296906371,
+        -0.14285336701570808,
+        2.0695688186068555,
+        1.8776206395031754
+      ],
+      "bottle_line_yaw_deg": 49.68501936437167,
+      "candidate_index": 48,
+      "collider_count": 42,
+      "contact_events": [],
+      "contact_point_count": 0,
+      "finger_targets_m": [
+        0.021,
+        -0.021
+      ],
+      "finite": true,
+      "first_frame_arm_jump_by_robot_rad": {
+        "follower_left": 0.002140045166015625,
+        "follower_right": 0.008461445569992065
+      },
+      "first_frame_finger_jump_by_robot_m": {
+        "follower_left": 8.178316056728363e-05,
+        "follower_right": 4.6193599700927734e-07
+      },
+      "first_frame_finger_jump_gate": "RECORDED_NOT_GATED_NO_FROZEN_OFFICIAL_TOLERANCE",
+      "first_frame_jump_gate_rad": 0.02,
+      "first_frame_jump_max_abs_rad": 0.008461445569992065,
+      "gripper_state": "closed",
+      "initial_ee_position_world_m": [
+        -0.3237951130250409,
+        -0.09321322747408373,
+        0.4022961880799584
+      ],
+      "nonfinite_contact_count": 0,
+      "overlaps": [
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_base_link",
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 149,
+          "overlap_volume_m3": 2.181555440125915e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.0013499841249799153
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_lower_forearm_link",
+            "/World/follower_left/vx300s_left/follower_left_wrist_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_wrist_link/materialized_baseline_fallback/wrist_link/mesh"
+          ],
+          "intersection_vertex_count": 211,
+          "overlap_volume_m3": 4.624863010857194e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.013610014109059931
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link",
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 241,
+          "overlap_volume_m3": 5.070892369748122e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.010220969104939276
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link",
+            "/World/follower_left/vx300s_left/follower_left_upper_forearm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 136,
+          "overlap_volume_m3": 4.800247255189119e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.008918547656255674
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_base_link",
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 149,
+          "overlap_volume_m3": 2.1815430352417734e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.0013499785365445013
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_lower_forearm_link",
+            "/World/follower_right/vx300s_right/follower_right_wrist_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_wrist_link/materialized_baseline_fallback/wrist_link/mesh"
+          ],
+          "intersection_vertex_count": 165,
+          "overlap_volume_m3": 3.0604128065393306e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.010742494429419991
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link",
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 241,
+          "overlap_volume_m3": 5.699969218588564e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.011491793035379255
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link",
+            "/World/follower_right/vx300s_right/follower_right_upper_forearm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 148,
+          "overlap_volume_m3": 9.47755912930553e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.012526506677206117
+        }
+      ],
+      "pose_id": "sample_03",
+      "source": "FROZEN_CAD_COLLISION_REPLAN_PREFLIGHT",
+      "state_id": "sample_03:closed",
+      "status": "PASS",
+      "unexpected_overlap_count": 0,
+      "unresolved_environment_contact_count": 0,
+      "within_joint_limits": true
+    },
+    {
+      "arm_q_rad": [
+        -0.335384723149798,
+        -0.5307054531575445,
+        0.03794969296906371,
+        -0.14285336701570808,
+        2.0695688186068555,
+        1.8776206395031754
+      ],
+      "bottle_line_yaw_deg": 49.68501936437167,
+      "candidate_index": 48,
+      "collider_count": 42,
+      "contact_events": [],
+      "contact_point_count": 0,
+      "finger_targets_m": [
+        0.057,
+        -0.057
+      ],
+      "finite": true,
+      "first_frame_arm_jump_by_robot_rad": {
+        "follower_left": 0.0021209716796875,
+        "follower_right": 0.00846216082572937
+      },
+      "first_frame_finger_jump_by_robot_m": {
+        "follower_left": 0.00026488304138183594,
+        "follower_right": 5.848705768585205e-07
+      },
+      "first_frame_finger_jump_gate": "RECORDED_NOT_GATED_NO_FROZEN_OFFICIAL_TOLERANCE",
+      "first_frame_jump_gate_rad": 0.02,
+      "first_frame_jump_max_abs_rad": 0.00846216082572937,
+      "gripper_state": "maximum_legal_aperture",
+      "initial_ee_position_world_m": [
+        -0.3237951130250409,
+        -0.09321322747408373,
+        0.4022961880799584
+      ],
+      "nonfinite_contact_count": 0,
+      "overlaps": [
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_base_link",
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 149,
+          "overlap_volume_m3": 2.181555440125915e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.0013499841249799153
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_lower_forearm_link",
+            "/World/follower_left/vx300s_left/follower_left_wrist_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_wrist_link/materialized_baseline_fallback/wrist_link/mesh"
+          ],
+          "intersection_vertex_count": 211,
+          "overlap_volume_m3": 4.624863010857194e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.013610014109059931
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link",
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 241,
+          "overlap_volume_m3": 5.070892369748122e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.010220969104939276
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link",
+            "/World/follower_left/vx300s_left/follower_left_upper_forearm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 136,
+          "overlap_volume_m3": 4.800247255189119e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.008918547656255674
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_base_link",
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 149,
+          "overlap_volume_m3": 2.1815430352417734e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.0013499785365445013
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_lower_forearm_link",
+            "/World/follower_right/vx300s_right/follower_right_wrist_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_wrist_link/materialized_baseline_fallback/wrist_link/mesh"
+          ],
+          "intersection_vertex_count": 165,
+          "overlap_volume_m3": 3.0604128065393306e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.010742494429419991
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link",
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 241,
+          "overlap_volume_m3": 5.699969218588564e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.011491793035379255
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link",
+            "/World/follower_right/vx300s_right/follower_right_upper_forearm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 148,
+          "overlap_volume_m3": 9.47755912930553e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.012526506677206117
+        }
+      ],
+      "pose_id": "sample_03",
+      "source": "FROZEN_CAD_COLLISION_REPLAN_PREFLIGHT",
+      "state_id": "sample_03:maximum_legal_aperture",
+      "status": "PASS",
+      "unexpected_overlap_count": 0,
+      "unresolved_environment_contact_count": 0,
+      "within_joint_limits": true
+    },
+    {
+      "arm_q_rad": [
+        -1.1180075616053566,
+        0.5308066776803066,
+        -1.1344618175484382,
+        -0.1492740527703883,
+        2.164626286363958,
+        1.737493939475642
+      ],
+      "bottle_line_yaw_deg": 11.99850162493985,
+      "candidate_index": 81,
+      "collider_count": 42,
+      "contact_events": [],
+      "contact_point_count": 0,
+      "finger_targets_m": [
+        0.057,
+        -0.057
+      ],
+      "finite": true,
+      "first_frame_arm_jump_by_robot_rad": {
+        "follower_left": 0.0040283203125,
+        "follower_right": 0.00846216082572937
+      },
+      "first_frame_finger_jump_by_robot_m": {
+        "follower_left": 0.0004992298781871796,
+        "follower_right": 5.848705768585205e-07
+      },
+      "first_frame_finger_jump_gate": "RECORDED_NOT_GATED_NO_FROZEN_OFFICIAL_TOLERANCE",
+      "first_frame_jump_gate_rad": 0.02,
+      "first_frame_jump_max_abs_rad": 0.00846216082572937,
+      "gripper_state": "open",
+      "initial_ee_position_world_m": [
+        -0.2918035827695087,
+        -0.4341098349554672,
+        0.37032754185207056
+      ],
+      "nonfinite_contact_count": 0,
+      "overlaps": [
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_base_link",
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 150,
+          "overlap_volume_m3": 2.181530630391974e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.0013499749491365461
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_lower_forearm_link",
+            "/World/follower_left/vx300s_left/follower_left_wrist_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_wrist_link/materialized_baseline_fallback/wrist_link/mesh"
+          ],
+          "intersection_vertex_count": 220,
+          "overlap_volume_m3": 4.888313162585757e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.01384535848724272
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link",
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 276,
+          "overlap_volume_m3": 5.211025035936061e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.010399169185969503
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link",
+            "/World/follower_left/vx300s_left/follower_left_upper_forearm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 129,
+          "overlap_volume_m3": 5.1273805660734865e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.010799306010408169
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_base_link",
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 149,
+          "overlap_volume_m3": 2.1815430352417734e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.0013499785365445013
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_lower_forearm_link",
+            "/World/follower_right/vx300s_right/follower_right_wrist_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_wrist_link/materialized_baseline_fallback/wrist_link/mesh"
+          ],
+          "intersection_vertex_count": 165,
+          "overlap_volume_m3": 3.0604128065393306e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.010742494429419991
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link",
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 241,
+          "overlap_volume_m3": 5.699969218588564e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.011491793035379255
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link",
+            "/World/follower_right/vx300s_right/follower_right_upper_forearm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 148,
+          "overlap_volume_m3": 9.47755912930553e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.012526506677206117
+        }
+      ],
+      "pose_id": "sample_04",
+      "source": "FROZEN_CAD_COLLISION_REPLAN_PREFLIGHT",
+      "state_id": "sample_04:open",
+      "status": "PASS",
+      "unexpected_overlap_count": 0,
+      "unresolved_environment_contact_count": 0,
+      "within_joint_limits": true
+    },
+    {
+      "arm_q_rad": [
+        -1.1180075616053566,
+        0.5308066776803066,
+        -1.1344618175484382,
+        -0.1492740527703883,
+        2.164626286363958,
+        1.737493939475642
+      ],
+      "bottle_line_yaw_deg": 11.99850162493985,
+      "candidate_index": 81,
+      "collider_count": 42,
+      "contact_events": [],
+      "contact_point_count": 0,
+      "finger_targets_m": [
+        0.035,
+        -0.035
+      ],
+      "finite": true,
+      "first_frame_arm_jump_by_robot_rad": {
+        "follower_left": 0.004044890403747559,
+        "follower_right": 0.008461594581604004
+      },
+      "first_frame_finger_jump_by_robot_m": {
+        "follower_left": 0.0004918240010738373,
+        "follower_right": 5.960464477539062e-07
+      },
+      "first_frame_finger_jump_gate": "RECORDED_NOT_GATED_NO_FROZEN_OFFICIAL_TOLERANCE",
+      "first_frame_jump_gate_rad": 0.02,
+      "first_frame_jump_max_abs_rad": 0.008461594581604004,
+      "gripper_state": "partially_closed",
+      "initial_ee_position_world_m": [
+        -0.2918035827695087,
+        -0.4341098349554672,
+        0.37032754185207056
+      ],
+      "nonfinite_contact_count": 0,
+      "overlaps": [
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_base_link",
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 150,
+          "overlap_volume_m3": 2.181530630391974e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.0013499749491365461
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_lower_forearm_link",
+            "/World/follower_left/vx300s_left/follower_left_wrist_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_wrist_link/materialized_baseline_fallback/wrist_link/mesh"
+          ],
+          "intersection_vertex_count": 220,
+          "overlap_volume_m3": 4.888313162585757e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.01384535848724272
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link",
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 276,
+          "overlap_volume_m3": 5.211025035936061e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.010399169185969503
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link",
+            "/World/follower_left/vx300s_left/follower_left_upper_forearm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 129,
+          "overlap_volume_m3": 5.1273805660734865e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.010799306010408169
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_base_link",
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 149,
+          "overlap_volume_m3": 2.1815430352417734e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.0013499785365445013
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_lower_forearm_link",
+            "/World/follower_right/vx300s_right/follower_right_wrist_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_wrist_link/materialized_baseline_fallback/wrist_link/mesh"
+          ],
+          "intersection_vertex_count": 165,
+          "overlap_volume_m3": 3.0604128065393306e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.010742494429419991
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link",
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 241,
+          "overlap_volume_m3": 5.699969218588564e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.011491793035379255
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link",
+            "/World/follower_right/vx300s_right/follower_right_upper_forearm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 148,
+          "overlap_volume_m3": 9.47755912930553e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.012526506677206117
+        }
+      ],
+      "pose_id": "sample_04",
+      "source": "FROZEN_CAD_COLLISION_REPLAN_PREFLIGHT",
+      "state_id": "sample_04:partially_closed",
+      "status": "PASS",
+      "unexpected_overlap_count": 0,
+      "unresolved_environment_contact_count": 0,
+      "within_joint_limits": true
+    },
+    {
+      "arm_q_rad": [
+        -1.1180075616053566,
+        0.5308066776803066,
+        -1.1344618175484382,
+        -0.1492740527703883,
+        2.164626286363958,
+        1.737493939475642
+      ],
+      "bottle_line_yaw_deg": 11.99850162493985,
+      "candidate_index": 81,
+      "collider_count": 42,
+      "contact_events": [],
+      "contact_point_count": 0,
+      "finger_targets_m": [
+        0.021,
+        -0.021
+      ],
+      "finite": true,
+      "first_frame_arm_jump_by_robot_rad": {
+        "follower_left": 0.004081845283508301,
+        "follower_right": 0.008461445569992065
+      },
+      "first_frame_finger_jump_by_robot_m": {
+        "follower_left": 0.00045265816152095795,
+        "follower_right": 4.6193599700927734e-07
+      },
+      "first_frame_finger_jump_gate": "RECORDED_NOT_GATED_NO_FROZEN_OFFICIAL_TOLERANCE",
+      "first_frame_jump_gate_rad": 0.02,
+      "first_frame_jump_max_abs_rad": 0.008461445569992065,
+      "gripper_state": "closed",
+      "initial_ee_position_world_m": [
+        -0.2918035827695087,
+        -0.4341098349554672,
+        0.37032754185207056
+      ],
+      "nonfinite_contact_count": 0,
+      "overlaps": [
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_base_link",
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 150,
+          "overlap_volume_m3": 2.181530630391974e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.0013499749491365461
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_lower_forearm_link",
+            "/World/follower_left/vx300s_left/follower_left_wrist_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_wrist_link/materialized_baseline_fallback/wrist_link/mesh"
+          ],
+          "intersection_vertex_count": 220,
+          "overlap_volume_m3": 4.888313162585757e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.01384535848724272
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link",
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 276,
+          "overlap_volume_m3": 5.211025035936061e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.010399169185969503
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link",
+            "/World/follower_left/vx300s_left/follower_left_upper_forearm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 129,
+          "overlap_volume_m3": 5.1273805660734865e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.010799306010408169
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_base_link",
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 149,
+          "overlap_volume_m3": 2.1815430352417734e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.0013499785365445013
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_lower_forearm_link",
+            "/World/follower_right/vx300s_right/follower_right_wrist_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_wrist_link/materialized_baseline_fallback/wrist_link/mesh"
+          ],
+          "intersection_vertex_count": 165,
+          "overlap_volume_m3": 3.0604128065393306e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.010742494429419991
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link",
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 241,
+          "overlap_volume_m3": 5.699969218588564e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.011491793035379255
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link",
+            "/World/follower_right/vx300s_right/follower_right_upper_forearm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 148,
+          "overlap_volume_m3": 9.47755912930553e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.012526506677206117
+        }
+      ],
+      "pose_id": "sample_04",
+      "source": "FROZEN_CAD_COLLISION_REPLAN_PREFLIGHT",
+      "state_id": "sample_04:closed",
+      "status": "PASS",
+      "unexpected_overlap_count": 0,
+      "unresolved_environment_contact_count": 0,
+      "within_joint_limits": true
+    },
+    {
+      "arm_q_rad": [
+        -1.1180075616053566,
+        0.5308066776803066,
+        -1.1344618175484382,
+        -0.1492740527703883,
+        2.164626286363958,
+        1.737493939475642
+      ],
+      "bottle_line_yaw_deg": 11.99850162493985,
+      "candidate_index": 81,
+      "collider_count": 42,
+      "contact_events": [],
+      "contact_point_count": 0,
+      "finger_targets_m": [
+        0.057,
+        -0.057
+      ],
+      "finite": true,
+      "first_frame_arm_jump_by_robot_rad": {
+        "follower_left": 0.0040283203125,
+        "follower_right": 0.00846216082572937
+      },
+      "first_frame_finger_jump_by_robot_m": {
+        "follower_left": 0.0004992298781871796,
+        "follower_right": 5.848705768585205e-07
+      },
+      "first_frame_finger_jump_gate": "RECORDED_NOT_GATED_NO_FROZEN_OFFICIAL_TOLERANCE",
+      "first_frame_jump_gate_rad": 0.02,
+      "first_frame_jump_max_abs_rad": 0.00846216082572937,
+      "gripper_state": "maximum_legal_aperture",
+      "initial_ee_position_world_m": [
+        -0.2918035827695087,
+        -0.4341098349554672,
+        0.37032754185207056
+      ],
+      "nonfinite_contact_count": 0,
+      "overlaps": [
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_base_link",
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 150,
+          "overlap_volume_m3": 2.181530630391974e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.0013499749491365461
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_lower_forearm_link",
+            "/World/follower_left/vx300s_left/follower_left_wrist_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_wrist_link/materialized_baseline_fallback/wrist_link/mesh"
+          ],
+          "intersection_vertex_count": 220,
+          "overlap_volume_m3": 4.888313162585757e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.01384535848724272
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link",
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 276,
+          "overlap_volume_m3": 5.211025035936061e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.010399169185969503
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link",
+            "/World/follower_left/vx300s_left/follower_left_upper_forearm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 129,
+          "overlap_volume_m3": 5.1273805660734865e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.010799306010408169
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_base_link",
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 149,
+          "overlap_volume_m3": 2.1815430352417734e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.0013499785365445013
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_lower_forearm_link",
+            "/World/follower_right/vx300s_right/follower_right_wrist_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_wrist_link/materialized_baseline_fallback/wrist_link/mesh"
+          ],
+          "intersection_vertex_count": 165,
+          "overlap_volume_m3": 3.0604128065393306e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.010742494429419991
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link",
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 241,
+          "overlap_volume_m3": 5.699969218588564e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.011491793035379255
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link",
+            "/World/follower_right/vx300s_right/follower_right_upper_forearm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 148,
+          "overlap_volume_m3": 9.47755912930553e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.012526506677206117
+        }
+      ],
+      "pose_id": "sample_04",
+      "source": "FROZEN_CAD_COLLISION_REPLAN_PREFLIGHT",
+      "state_id": "sample_04:maximum_legal_aperture",
+      "status": "PASS",
+      "unexpected_overlap_count": 0,
+      "unresolved_environment_contact_count": 0,
+      "within_joint_limits": true
+    },
+    {
+      "arm_q_rad": [
+        -1.041271786914128,
+        -0.6105211334879039,
+        -0.04256146948616544,
+        -0.04267808031846154,
+        2.1052136887828685,
+        0.5713163277273703
+      ],
+      "bottle_line_yaw_deg": 86.62051726870415,
+      "candidate_index": 248,
+      "collider_count": 42,
+      "contact_events": [],
+      "contact_point_count": 0,
+      "finger_targets_m": [
+        0.057,
+        -0.057
+      ],
+      "finite": true,
+      "first_frame_arm_jump_by_robot_rad": {
+        "follower_left": 0.003184080123901367,
+        "follower_right": 0.00846216082572937
+      },
+      "first_frame_finger_jump_by_robot_m": {
+        "follower_left": 0.00017312169075012207,
+        "follower_right": 5.848705768585205e-07
+      },
+      "first_frame_finger_jump_gate": "RECORDED_NOT_GATED_NO_FROZEN_OFFICIAL_TOLERANCE",
+      "first_frame_jump_gate_rad": 0.02,
+      "first_frame_jump_max_abs_rad": 0.00846216082572937,
+      "gripper_state": "open",
+      "initial_ee_position_world_m": [
+        -0.40644465660603624,
+        -0.13959724829902143,
+        0.4336962216240828
+      ],
+      "nonfinite_contact_count": 0,
+      "overlaps": [
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_base_link",
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 149,
+          "overlap_volume_m3": 2.1815140906356658e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.0013499673413179417
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_lower_forearm_link",
+            "/World/follower_left/vx300s_left/follower_left_wrist_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_wrist_link/materialized_baseline_fallback/wrist_link/mesh"
+          ],
+          "intersection_vertex_count": 209,
+          "overlap_volume_m3": 4.716504710274983e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.013695901982195502
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link",
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 239,
+          "overlap_volume_m3": 5.151443640590855e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.01044334800009089
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link",
+            "/World/follower_left/vx300s_left/follower_left_upper_forearm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 129,
+          "overlap_volume_m3": 4.78717044688595e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.008918920712953998
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_base_link",
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 149,
+          "overlap_volume_m3": 2.1815430352417734e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.0013499785365445013
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_lower_forearm_link",
+            "/World/follower_right/vx300s_right/follower_right_wrist_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_wrist_link/materialized_baseline_fallback/wrist_link/mesh"
+          ],
+          "intersection_vertex_count": 165,
+          "overlap_volume_m3": 3.0604128065393306e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.010742494429419991
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link",
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 241,
+          "overlap_volume_m3": 5.699969218588564e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.011491793035379255
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link",
+            "/World/follower_right/vx300s_right/follower_right_upper_forearm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 148,
+          "overlap_volume_m3": 9.47755912930553e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.012526506677206117
+        }
+      ],
+      "pose_id": "sample_05",
+      "source": "FROZEN_CAD_COLLISION_REPLAN_PREFLIGHT",
+      "state_id": "sample_05:open",
+      "status": "PASS",
+      "unexpected_overlap_count": 0,
+      "unresolved_environment_contact_count": 0,
+      "within_joint_limits": true
+    },
+    {
+      "arm_q_rad": [
+        -1.041271786914128,
+        -0.6105211334879039,
+        -0.04256146948616544,
+        -0.04267808031846154,
+        2.1052136887828685,
+        0.5713163277273703
+      ],
+      "bottle_line_yaw_deg": 86.62051726870415,
+      "candidate_index": 248,
+      "collider_count": 42,
+      "contact_events": [],
+      "contact_point_count": 0,
+      "finger_targets_m": [
+        0.035,
+        -0.035
+      ],
+      "finite": true,
+      "first_frame_arm_jump_by_robot_rad": {
+        "follower_left": 0.0031659603118896484,
+        "follower_right": 0.008461594581604004
+      },
+      "first_frame_finger_jump_by_robot_m": {
+        "follower_left": 4.8201531171798706e-05,
+        "follower_right": 5.960464477539062e-07
+      },
+      "first_frame_finger_jump_gate": "RECORDED_NOT_GATED_NO_FROZEN_OFFICIAL_TOLERANCE",
+      "first_frame_jump_gate_rad": 0.02,
+      "first_frame_jump_max_abs_rad": 0.008461594581604004,
+      "gripper_state": "partially_closed",
+      "initial_ee_position_world_m": [
+        -0.40644465660603624,
+        -0.13959724829902143,
+        0.4336962216240828
+      ],
+      "nonfinite_contact_count": 0,
+      "overlaps": [
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_base_link",
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 149,
+          "overlap_volume_m3": 2.1815140906356658e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.0013499673413179417
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_lower_forearm_link",
+            "/World/follower_left/vx300s_left/follower_left_wrist_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_wrist_link/materialized_baseline_fallback/wrist_link/mesh"
+          ],
+          "intersection_vertex_count": 209,
+          "overlap_volume_m3": 4.716504710274983e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.013695901982195502
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link",
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 239,
+          "overlap_volume_m3": 5.151443640590855e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.01044334800009089
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link",
+            "/World/follower_left/vx300s_left/follower_left_upper_forearm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 129,
+          "overlap_volume_m3": 4.78717044688595e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.008918920712953998
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_base_link",
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 149,
+          "overlap_volume_m3": 2.1815430352417734e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.0013499785365445013
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_lower_forearm_link",
+            "/World/follower_right/vx300s_right/follower_right_wrist_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_wrist_link/materialized_baseline_fallback/wrist_link/mesh"
+          ],
+          "intersection_vertex_count": 165,
+          "overlap_volume_m3": 3.0604128065393306e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.010742494429419991
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link",
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 241,
+          "overlap_volume_m3": 5.699969218588564e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.011491793035379255
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link",
+            "/World/follower_right/vx300s_right/follower_right_upper_forearm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 148,
+          "overlap_volume_m3": 9.47755912930553e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.012526506677206117
+        }
+      ],
+      "pose_id": "sample_05",
+      "source": "FROZEN_CAD_COLLISION_REPLAN_PREFLIGHT",
+      "state_id": "sample_05:partially_closed",
+      "status": "PASS",
+      "unexpected_overlap_count": 0,
+      "unresolved_environment_contact_count": 0,
+      "within_joint_limits": true
+    },
+    {
+      "arm_q_rad": [
+        -1.041271786914128,
+        -0.6105211334879039,
+        -0.04256146948616544,
+        -0.04267808031846154,
+        2.1052136887828685,
+        0.5713163277273703
+      ],
+      "bottle_line_yaw_deg": 86.62051726870415,
+      "candidate_index": 248,
+      "collider_count": 42,
+      "contact_events": [],
+      "contact_point_count": 0,
+      "finger_targets_m": [
+        0.021,
+        -0.021
+      ],
+      "finite": true,
+      "first_frame_arm_jump_by_robot_rad": {
+        "follower_left": 0.0031998157501220703,
+        "follower_right": 0.008461445569992065
+      },
+      "first_frame_finger_jump_by_robot_m": {
+        "follower_left": 3.431923687458038e-05,
+        "follower_right": 4.6193599700927734e-07
+      },
+      "first_frame_finger_jump_gate": "RECORDED_NOT_GATED_NO_FROZEN_OFFICIAL_TOLERANCE",
+      "first_frame_jump_gate_rad": 0.02,
+      "first_frame_jump_max_abs_rad": 0.008461445569992065,
+      "gripper_state": "closed",
+      "initial_ee_position_world_m": [
+        -0.40644465660603624,
+        -0.13959724829902143,
+        0.4336962216240828
+      ],
+      "nonfinite_contact_count": 0,
+      "overlaps": [
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_base_link",
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 149,
+          "overlap_volume_m3": 2.1815140906356658e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.0013499673413179417
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_lower_forearm_link",
+            "/World/follower_left/vx300s_left/follower_left_wrist_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_wrist_link/materialized_baseline_fallback/wrist_link/mesh"
+          ],
+          "intersection_vertex_count": 209,
+          "overlap_volume_m3": 4.716504710274983e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.013695901982195502
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link",
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 239,
+          "overlap_volume_m3": 5.151443640590855e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.01044334800009089
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link",
+            "/World/follower_left/vx300s_left/follower_left_upper_forearm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 129,
+          "overlap_volume_m3": 4.78717044688595e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.008918920712953998
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_base_link",
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 149,
+          "overlap_volume_m3": 2.1815430352417734e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.0013499785365445013
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_lower_forearm_link",
+            "/World/follower_right/vx300s_right/follower_right_wrist_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_wrist_link/materialized_baseline_fallback/wrist_link/mesh"
+          ],
+          "intersection_vertex_count": 165,
+          "overlap_volume_m3": 3.0604128065393306e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.010742494429419991
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link",
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 241,
+          "overlap_volume_m3": 5.699969218588564e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.011491793035379255
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link",
+            "/World/follower_right/vx300s_right/follower_right_upper_forearm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 148,
+          "overlap_volume_m3": 9.47755912930553e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.012526506677206117
+        }
+      ],
+      "pose_id": "sample_05",
+      "source": "FROZEN_CAD_COLLISION_REPLAN_PREFLIGHT",
+      "state_id": "sample_05:closed",
+      "status": "PASS",
+      "unexpected_overlap_count": 0,
+      "unresolved_environment_contact_count": 0,
+      "within_joint_limits": true
+    },
+    {
+      "arm_q_rad": [
+        -1.041271786914128,
+        -0.6105211334879039,
+        -0.04256146948616544,
+        -0.04267808031846154,
+        2.1052136887828685,
+        0.5713163277273703
+      ],
+      "bottle_line_yaw_deg": 86.62051726870415,
+      "candidate_index": 248,
+      "collider_count": 42,
+      "contact_events": [],
+      "contact_point_count": 0,
+      "finger_targets_m": [
+        0.057,
+        -0.057
+      ],
+      "finite": true,
+      "first_frame_arm_jump_by_robot_rad": {
+        "follower_left": 0.003184080123901367,
+        "follower_right": 0.00846216082572937
+      },
+      "first_frame_finger_jump_by_robot_m": {
+        "follower_left": 0.00017312169075012207,
+        "follower_right": 5.848705768585205e-07
+      },
+      "first_frame_finger_jump_gate": "RECORDED_NOT_GATED_NO_FROZEN_OFFICIAL_TOLERANCE",
+      "first_frame_jump_gate_rad": 0.02,
+      "first_frame_jump_max_abs_rad": 0.00846216082572937,
+      "gripper_state": "maximum_legal_aperture",
+      "initial_ee_position_world_m": [
+        -0.40644465660603624,
+        -0.13959724829902143,
+        0.4336962216240828
+      ],
+      "nonfinite_contact_count": 0,
+      "overlaps": [
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_base_link",
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 149,
+          "overlap_volume_m3": 2.1815140906356658e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.0013499673413179417
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_lower_forearm_link",
+            "/World/follower_left/vx300s_left/follower_left_wrist_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_wrist_link/materialized_baseline_fallback/wrist_link/mesh"
+          ],
+          "intersection_vertex_count": 209,
+          "overlap_volume_m3": 4.716504710274983e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.013695901982195502
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link",
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 239,
+          "overlap_volume_m3": 5.151443640590855e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.01044334800009089
+        },
+        {
+          "actor_pair": [
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link",
+            "/World/follower_left/vx300s_left/follower_left_upper_forearm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh",
+            "/World/follower_left/vx300s_left/follower_left_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 129,
+          "overlap_volume_m3": 4.78717044688595e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.008918920712953998
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_base_link",
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 149,
+          "overlap_volume_m3": 2.1815430352417734e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.0013499785365445013
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_lower_forearm_link",
+            "/World/follower_right/vx300s_right/follower_right_wrist_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_wrist_link/materialized_baseline_fallback/wrist_link/mesh"
+          ],
+          "intersection_vertex_count": 165,
+          "overlap_volume_m3": 3.0604128065393306e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.010742494429419991
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link",
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 241,
+          "overlap_volume_m3": 5.699969218588564e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.011491793035379255
+        },
+        {
+          "actor_pair": [
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link",
+            "/World/follower_right/vx300s_right/follower_right_upper_forearm_link"
+          ],
+          "allowed": true,
+          "classification": "ADJACENT_JOINT_INTERFACE_EXPECTED",
+          "collider_pair": [
+            "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh",
+            "/World/follower_right/vx300s_right/follower_right_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
+          ],
+          "intersection_vertex_count": 148,
+          "overlap_volume_m3": 9.47755912930553e-05,
+          "relation": "OVERLAP",
+          "signed_chebyshev_margin_m": 0.012526506677206117
+        }
+      ],
+      "pose_id": "sample_05",
+      "source": "FROZEN_CAD_COLLISION_REPLAN_PREFLIGHT",
+      "state_id": "sample_05:maximum_legal_aperture",
+      "status": "PASS",
+      "unexpected_overlap_count": 0,
+      "unresolved_environment_contact_count": 0,
+      "within_joint_limits": true
+    }
+  ],
+  "profile": "gripper_decomposition",
+  "repeat_index": 1,
+  "runtime": {
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physx": "107.3.26"
+  },
+  "schema_version": 1,
+  "scope": "CAD_DERIVED_STATIC_OVERLAP_AND_FIRST_FRAME_DIAGNOSTIC",
+  "session_diagnostics": {
+    "contact_report_body_count": 62,
+    "final_policy_modified": false,
+    "self_collision": {
+      "follower_left": {
+        "attribute": "physxArticulation:enabledSelfCollisions",
+        "before": false,
+        "changed_in_session": false,
+        "diagnostic_session_value": false
+      },
+      "follower_right": {
+        "attribute": "physxArticulation:enabledSelfCollisions",
+        "before": false,
+        "changed_in_session": false,
+        "diagnostic_session_value": false
+      }
+    },
+    "self_collision_diagnostic_enabled": false,
+    "session_layer_identifier": "anon:0x608b00e3d4e0:cad_collision_static_session.usda",
+    "session_only": true
+  },
+  "source_or_final_asset_modified": false,
+  "stage": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_diagnostic.usda",
+    "sha256_after": "7c76a8970e6b0dbca562304c64e9bfcd2e1ca3e790d25dfa52baf2e510b82c68",
+    "sha256_before": "7c76a8970e6b0dbca562304c64e9bfcd2e1ca3e790d25dfa52baf2e510b82c68"
+  },
+  "status": "PASS",
+  "summary": {
+    "failure_count": 0,
+    "failures": [],
+    "partial_count": 0,
+    "partials": [],
+    "pose_count": 24,
+    "status": "PASS"
+  },
+  "task8": "NOT_RUN",
+  "unsafe_scene_query_overlap_shape_retried": false
+}

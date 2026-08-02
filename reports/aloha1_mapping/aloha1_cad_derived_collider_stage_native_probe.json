@@ -1,66 +1,176 @@
 {
   "all_new_colliders_convex_hull": true,
-  "new_collider_count": 12,
+  "new_collider_count": 34,
   "new_colliders": [
     {
       "approximation": "convexHull",
       "collision_enabled": true,
-      "prim_path": "/World/follower_left/vx300s_left/follower_left_base_link/cad_derived_collisions/cad_derived_base_link/mesh"
+      "prim_path": "/World/follower_left/vx300s_left/follower_left_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh"
     },
     {
       "approximation": "convexHull",
       "collision_enabled": true,
-      "prim_path": "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/mesh"
+      "prim_path": "/World/follower_left/vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
     },
     {
       "approximation": "convexHull",
       "collision_enabled": true,
-      "prim_path": "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/mesh"
+      "prim_path": "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
     },
     {
       "approximation": "convexHull",
       "collision_enabled": true,
-      "prim_path": "/World/follower_left/vx300s_left/follower_left_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/mesh"
+      "prim_path": "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_001/mesh"
     },
     {
       "approximation": "convexHull",
       "collision_enabled": true,
-      "prim_path": "/World/follower_left/vx300s_left/follower_left_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/mesh"
+      "prim_path": "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_002/mesh"
     },
     {
       "approximation": "convexHull",
       "collision_enabled": true,
-      "prim_path": "/World/follower_left/vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/mesh"
+      "prim_path": "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_003/mesh"
     },
     {
       "approximation": "convexHull",
       "collision_enabled": true,
-      "prim_path": "/World/follower_right/vx300s_right/follower_right_base_link/cad_derived_collisions/cad_derived_base_link/mesh"
+      "prim_path": "/World/follower_left/vx300s_left/follower_left_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
     },
     {
       "approximation": "convexHull",
       "collision_enabled": true,
-      "prim_path": "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/mesh"
+      "prim_path": "/World/follower_left/vx300s_left/follower_left_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh"
     },
     {
       "approximation": "convexHull",
       "collision_enabled": true,
-      "prim_path": "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/mesh"
+      "prim_path": "/World/follower_left/vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_000/mesh"
     },
     {
       "approximation": "convexHull",
       "collision_enabled": true,
-      "prim_path": "/World/follower_right/vx300s_right/follower_right_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/mesh"
+      "prim_path": "/World/follower_left/vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_001/mesh"
     },
     {
       "approximation": "convexHull",
       "collision_enabled": true,
-      "prim_path": "/World/follower_right/vx300s_right/follower_right_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/mesh"
+      "prim_path": "/World/follower_left/vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_002/mesh"
     },
     {
       "approximation": "convexHull",
       "collision_enabled": true,
-      "prim_path": "/World/follower_right/vx300s_right/follower_right_gripper_link/cad_derived_collisions/cad_derived_gripper_link/mesh"
+      "prim_path": "/World/follower_left/vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_003/mesh"
+    },
+    {
+      "approximation": "convexHull",
+      "collision_enabled": true,
+      "prim_path": "/World/follower_left/vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_004/mesh"
+    },
+    {
+      "approximation": "convexHull",
+      "collision_enabled": true,
+      "prim_path": "/World/follower_left/vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_005/mesh"
+    },
+    {
+      "approximation": "convexHull",
+      "collision_enabled": true,
+      "prim_path": "/World/follower_left/vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_006/mesh"
+    },
+    {
+      "approximation": "convexHull",
+      "collision_enabled": true,
+      "prim_path": "/World/follower_left/vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_007/mesh"
+    },
+    {
+      "approximation": "convexHull",
+      "collision_enabled": true,
+      "prim_path": "/World/follower_left/vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_008/mesh"
+    },
+    {
+      "approximation": "convexHull",
+      "collision_enabled": true,
+      "prim_path": "/World/follower_right/vx300s_right/follower_right_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh"
+    },
+    {
+      "approximation": "convexHull",
+      "collision_enabled": true,
+      "prim_path": "/World/follower_right/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
+    },
+    {
+      "approximation": "convexHull",
+      "collision_enabled": true,
+      "prim_path": "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
+    },
+    {
+      "approximation": "convexHull",
+      "collision_enabled": true,
+      "prim_path": "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_001/mesh"
+    },
+    {
+      "approximation": "convexHull",
+      "collision_enabled": true,
+      "prim_path": "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_002/mesh"
+    },
+    {
+      "approximation": "convexHull",
+      "collision_enabled": true,
+      "prim_path": "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_003/mesh"
+    },
+    {
+      "approximation": "convexHull",
+      "collision_enabled": true,
+      "prim_path": "/World/follower_right/vx300s_right/follower_right_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
+    },
+    {
+      "approximation": "convexHull",
+      "collision_enabled": true,
+      "prim_path": "/World/follower_right/vx300s_right/follower_right_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh"
+    },
+    {
+      "approximation": "convexHull",
+      "collision_enabled": true,
+      "prim_path": "/World/follower_right/vx300s_right/follower_right_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_000/mesh"
+    },
+    {
+      "approximation": "convexHull",
+      "collision_enabled": true,
+      "prim_path": "/World/follower_right/vx300s_right/follower_right_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_001/mesh"
+    },
+    {
+      "approximation": "convexHull",
+      "collision_enabled": true,
+      "prim_path": "/World/follower_right/vx300s_right/follower_right_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_002/mesh"
+    },
+    {
+      "approximation": "convexHull",
+      "collision_enabled": true,
+      "prim_path": "/World/follower_right/vx300s_right/follower_right_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_003/mesh"
+    },
+    {
+      "approximation": "convexHull",
+      "collision_enabled": true,
+      "prim_path": "/World/follower_right/vx300s_right/follower_right_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_004/mesh"
+    },
+    {
+      "approximation": "convexHull",
+      "collision_enabled": true,
+      "prim_path": "/World/follower_right/vx300s_right/follower_right_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_005/mesh"
+    },
+    {
+      "approximation": "convexHull",
+      "collision_enabled": true,
+      "prim_path": "/World/follower_right/vx300s_right/follower_right_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_006/mesh"
+    },
+    {
+      "approximation": "convexHull",
+      "collision_enabled": true,
+      "prim_path": "/World/follower_right/vx300s_right/follower_right_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_007/mesh"
+    },
+    {
+      "approximation": "convexHull",
+      "collision_enabled": true,
+      "prim_path": "/World/follower_right/vx300s_right/follower_right_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_008/mesh"
     }
   ],
   "runtime": {

@@ -86,7 +86,13 @@ def test_geometry_report_is_deterministic_and_evidence_bounded() -> None:
             assert output.is_file()
             assert output.is_relative_to(ASSET_ROOT)
             assert record["approximation"] == "convexHull"
-            assert record["source_solid_count"] == record["convex_piece_count"]
+            # The diagnostic authoring step splits disconnected tessellated
+            # components into independent convexHull Mesh prims.  A single
+            # supplier STEP solid can therefore produce multiple cooked
+            # convex pieces; source_solid_count is provenance, not the USD
+            # shape count.
+            assert record["convex_piece_count"] == record["connected_components"]
+            assert record["convex_piece_count"] > 0
             assert record["triangle_count"] > 0
             assert record["vertex_count"] > 0
             assert record["connected_components"] > 0

@@ -19,12 +19,8 @@ from scipy.spatial import cKDTree
 from tools.aloha1_mapping.cad_finger_installation import CAD_GLOBAL_TO_GRIPPER_ROTATION
 
 SUPPORTED_PROFILES = {"CAD_SUBPART_COMPOUND_CONVEX_HULL"}
-SOURCE_SHA256 = (
-    "337862418769d4ea8b801d26e68930c4412f870050e60769bbf91765194dc571"
-)
-STAGE_SHA256 = (
-    "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf"
-)
+SOURCE_SHA256 = "337862418769d4ea8b801d26e68930c4412f870050e60769bbf91765194dc571"
+STAGE_SHA256 = "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf"
 MAIN_LINK_SUFFIXES = (
     "base_link",
     "shoulder_link",
@@ -73,12 +69,8 @@ def _origin_matrix(element: ET.Element | None) -> np.ndarray:
     matrix = np.eye(4, dtype=np.float64)
     if element is None:
         return matrix
-    matrix[:3, 3] = [
-        float(value) for value in element.get("xyz", "0 0 0").split()
-    ]
-    matrix[:3, :3] = _rpy_matrix(
-        [float(value) for value in element.get("rpy", "0 0 0").split()]
-    )
+    matrix[:3, 3] = [float(value) for value in element.get("xyz", "0 0 0").split()]
+    matrix[:3, :3] = _rpy_matrix([float(value) for value in element.get("rpy", "0 0 0").split()])
     return matrix
 
 
@@ -152,23 +144,15 @@ def _write_obj(path: Path, vertices: np.ndarray, faces: np.ndarray) -> None:
         "# ALOHA supplier-CAD diagnostic collision candidate",
         "# coordinate frame: owning URDF link; unit: metre",
     ]
-    lines.extend(
-        "v " + " ".join(format(float(value), ".17g") for value in point)
-        for point in vertices
-    )
-    lines.extend(
-        "f " + " ".join(str(int(index) + 1) for index in face) for face in faces
-    )
+    lines.extend("v " + " ".join(format(float(value), ".17g") for value in point) for point in vertices)
+    lines.extend("f " + " ".join(str(int(index) + 1) for index in face) for face in faces)
     path.write_text("\n".join(lines) + "\n", encoding="ascii")
 
 
 def _canonical_signature(vertices: np.ndarray, faces: np.ndarray) -> str:
     triangles = []
     for face in faces:
-        coordinates = [
-            tuple(round(float(value), 9) for value in vertices[index])
-            for index in face
-        ]
+        coordinates = [tuple(round(float(value), 9) for value in vertices[index]) for index in face]
         triangles.append(tuple(sorted(coordinates)))
     payload = json.dumps(sorted(triangles), separators=(",", ":")).encode()
     return hashlib.sha256(payload).hexdigest()
@@ -243,9 +227,7 @@ def _run_freecad(
     return output / "manifest.json", log
 
 
-def _urdf_visual_reference(
-    *, root: ET.Element, link_name: str, mesh_root: Path
-) -> tuple[np.ndarray, np.ndarray, Path]:
+def _urdf_visual_reference(*, root: ET.Element, link_name: str, mesh_root: Path) -> tuple[np.ndarray, np.ndarray, Path]:
     link = next(item for item in root.findall("link") if item.get("name") == link_name)
     visual = link.find("visual")
     if visual is None:
@@ -255,9 +237,7 @@ def _urdf_visual_reference(
         raise ValueError(f"missing visual mesh for {link_name}")
     mesh_path = mesh_root / Path(mesh.get("filename", "")).name
     vertices, faces = _load_binary_stl(mesh_path.resolve(strict=True))
-    scale = np.asarray(
-        [float(value) for value in mesh.get("scale", "1 1 1").split()]
-    )
+    scale = np.asarray([float(value) for value in mesh.get("scale", "1 1 1").split()])
     vertices = vertices * scale
     return _transform(vertices, _origin_matrix(visual.find("origin"))), faces, mesh_path
 
@@ -289,9 +269,7 @@ def _gripper_fixed_group_reference(
     )
 
 
-def _verified_toolchain(
-    run_a: dict[str, Any], run_b: dict[str, Any]
-) -> dict[str, Any]:
+def _verified_toolchain(run_a: dict[str, Any], run_b: dict[str, Any]) -> dict[str, Any]:
     expected = {
         "opencascade_version": "7.8.1",
         "mesher_api": "MeshPart.meshFromShape",
@@ -301,14 +279,10 @@ def _verified_toolchain(
     }
     for manifest in (run_a, run_b):
         if manifest["freecad_version"][:3] != ["1", "1", "1"]:
-            raise RuntimeError(
-                f"unexpected FreeCAD readback: {manifest['freecad_version']}"
-            )
+            raise RuntimeError(f"unexpected FreeCAD readback: {manifest['freecad_version']}")
         for key, value in expected.items():
             if manifest[key] != value:
-                raise RuntimeError(
-                    f"unexpected pinned toolchain value {key}: {manifest[key]}"
-                )
+                raise RuntimeError(f"unexpected pinned toolchain value {key}: {manifest[key]}")
     if any(run_a[key] != run_b[key] for key in expected):
         raise RuntimeError("FreeCAD run toolchain readbacks differ")
     if run_a["freecad_version"] != run_b["freecad_version"]:
@@ -338,9 +312,7 @@ def _cad_to_link_matrix(
     )
 
 
-def build_candidate(
-    *, source_step: Path, source_stage: Path, output_root: Path, profile: str
-) -> dict[str, Any]:
+def build_candidate(*, source_step: Path, source_stage: Path, output_root: Path, profile: str) -> dict[str, Any]:
     """Build one isolated collision candidate; profile is mandatory."""
     if profile not in SUPPORTED_PROFILES:
         raise ValueError(f"unsupported collider profile: {profile}")
@@ -379,8 +351,7 @@ def build_candidate(
     urdf_root = ET.parse(urdf).getroot()
     zero_pose = _zero_pose_link_transforms(urdf_root, "follower_left_base_link")
     mesh_root = (
-        root_dir
-        / "external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/"
+        root_dir / "external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/"
         "interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/"
         "aloha_vx300s_meshes"
     )
@@ -416,7 +387,7 @@ def build_candidate(
                 "transform_determinant": 1.0,
                 "mirror_used": False,
                 "approximation": "convexHull",
-                "convex_piece_count": left["source_solid_count"],
+                "convex_piece_count": left["connected_components"],
                 "surface_deviation": None,
             }
             continue
@@ -429,28 +400,22 @@ def build_candidate(
             record=left,
         )
         determinant = float(np.linalg.det(matrix[:3, :3]))
-        if not np.isfinite(matrix).all() or not math.isclose(
-            determinant, 1.0, abs_tol=1.0e-12
-        ):
+        if not np.isfinite(matrix).all() or not math.isclose(determinant, 1.0, abs_tol=1.0e-12):
             raise RuntimeError(f"invalid proper transform for {suffix}")
         local_vertices = _transform(vertices, matrix)
         output_obj = geometry_root / f"{suffix}.obj"
         _write_obj(output_obj, local_vertices, faces)
         if suffix == "gripper_link":
-            reference_vertices, reference_faces, reference_paths = (
-                _gripper_fixed_group_reference(
-                    root=urdf_root,
-                    zero_pose=zero_pose,
-                    mesh_root=mesh_root,
-                )
+            reference_vertices, reference_faces, reference_paths = _gripper_fixed_group_reference(
+                root=urdf_root,
+                zero_pose=zero_pose,
+                mesh_root=mesh_root,
             )
         else:
-            reference_vertices, reference_faces, reference_path = (
-                _urdf_visual_reference(
-                    root=urdf_root,
-                    link_name=f"follower_left_{suffix}",
-                    mesh_root=mesh_root,
-                )
+            reference_vertices, reference_faces, reference_path = _urdf_visual_reference(
+                root=urdf_root,
+                link_name=f"follower_left_{suffix}",
+                mesh_root=mesh_root,
             )
             reference_paths = [reference_path]
         suffix_results[suffix] = {
@@ -465,14 +430,13 @@ def build_candidate(
             "transform_determinant": determinant,
             "mirror_used": False,
             "approximation": "convexHull",
-            "convex_piece_count": left["source_solid_count"],
+            "convex_piece_count": left["connected_components"],
             "vertex_count": len(local_vertices),
             "triangle_count": len(faces),
             "aabb_link_local_m": _aabb(local_vertices),
             "canonical_geometry_sha256": _canonical_signature(local_vertices, faces),
             "output_canonical_matches_second_run": (
-                left["canonical_geometry_sha256"]
-                == right["canonical_geometry_sha256"]
+                left["canonical_geometry_sha256"] == right["canonical_geometry_sha256"]
             ),
             "urdf_visual_references": [
                 {
@@ -481,9 +445,7 @@ def build_candidate(
                 }
                 for path in reference_paths
             ],
-            "surface_deviation": _surface_deviation(
-                local_vertices, faces, reference_vertices, reference_faces
-            ),
+            "surface_deviation": _surface_deviation(local_vertices, faces, reference_vertices, reference_faces),
         }
 
     semantics_path = root_dir / "reports/aloha1_mapping/aloha1_cad_link_collision_semantics.json"
@@ -537,14 +499,11 @@ def build_candidate(
             )
 
     finger_root = (
-        root_dir
-        / ".codex/artifacts/20260729-aloha-finger-palm-orientation/"
+        root_dir / ".codex/artifacts/20260729-aloha-finger-palm-orientation/"
         "viper_gripper/tessellation_angular_controlled/run_a"
     )
     gripper_mapping = json.loads(
-        (root_dir / "reports/aloha1_mapping/aloha_public_cad_gripper_mapping.json").read_text(
-            encoding="utf-8"
-        )
+        (root_dir / "reports/aloha1_mapping/aloha_public_cad_gripper_mapping.json").read_text(encoding="utf-8")
     )
     for robot in ("follower_left", "follower_right"):
         for suffix, (filename, expected_hash) in FINGER_INPUTS.items():
@@ -641,15 +600,12 @@ def build_candidate(
                     "supplier shell against the fixed gripper+bar URDF group"
                 ),
                 "diagnostic_authoring_constraint": (
-                    "disable the duplicate baseline gripper_bar collider only "
-                    "inside the isolated diagnostic layer"
+                    "disable the duplicate baseline gripper_bar collider only inside the isolated diagnostic layer"
                 ),
             }
         ],
         "invalid_brep_blockers": [
-            record["urdf_link_name"]
-            for record in physical_records
-            if record["status"] == "HARD_BLOCKER_INVALID_BREP"
+            record["urdf_link_name"] for record in physical_records if record["status"] == "HARD_BLOCKER_INVALID_BREP"
         ],
         "collision_mesh_policy": "ONE_CONVEX_HULL_PER_SOURCE_CAD_SOLID_GROUPED_BY_OWNING_LINK",
         "accepted_finger_colliders_modified": False,

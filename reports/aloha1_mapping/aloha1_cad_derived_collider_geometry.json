@@ -3,14 +3,14 @@
   "collision_mesh_policy": "ONE_CONVEX_HULL_PER_SOURCE_CAD_SOLID_GROUPED_BY_OWNING_LINK",
   "final_or_default_asset_modified": false,
   "freecad_runs": {
-    "run_a_log": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase3_tessellation/run_a_trwujk04/freecad.log",
-    "run_a_log_sha256": "741f3c26535fd7fe882cbf068c5a3a91378842be72875ab0ec46d96ddd81620d",
-    "run_a_manifest": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase3_tessellation/run_a_trwujk04/output/manifest.json",
-    "run_a_manifest_sha256": "dd9c357fe319feff7f0761a9b58d3211b2ebdb327d5ca7f2cae3861a6e57816f",
-    "run_b_log": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase3_tessellation/run_b_nvziu2t2/freecad.log",
-    "run_b_log_sha256": "d0fe4f30b8afdbb342f2767960a6e2b050293ea611984f946e77d173e931ffbd",
-    "run_b_manifest": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase3_tessellation/run_b_nvziu2t2/output/manifest.json",
-    "run_b_manifest_sha256": "75e19e1ff11c41fde7e5e51b9ffc7163db794dbc7f49f6c2273cf5704a76a658"
+    "run_a_log": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase3_tessellation/run_a_abktfpot/freecad.log",
+    "run_a_log_sha256": "e8c887a6e53d15f63b4ff3b78504d86a6ff791752ab02e74bd6be980e8e38cd4",
+    "run_a_manifest": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase3_tessellation/run_a_abktfpot/output/manifest.json",
+    "run_a_manifest_sha256": "fd264634f3423c6cc69831825539e4035e9bb96ee2bf093ac4c418834f5c884d",
+    "run_b_log": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase3_tessellation/run_b_whitwbiq/freecad.log",
+    "run_b_log_sha256": "34b92d721523af2542be0570beb5cbd351e97e520a0d3fa4e604c0bf0ed7178f",
+    "run_b_manifest": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase3_tessellation/run_b_whitwbiq/output/manifest.json",
+    "run_b_manifest_sha256": "94894b3d4a0c6c20c7049a6bb194ecd5f919782de79c4203710fb40a1af65b21"
   },
   "identity_blockers": [
     {
@@ -277,7 +277,7 @@
       ],
       "canonical_geometry_sha256": "628b85a27c06d6729dd966a92f2ab2d8bf2360d74ef6cf104a8190965267f5e9",
       "connected_components": 4,
-      "convex_piece_count": 1,
+      "convex_piece_count": 4,
       "degenerate_triangle_count": 0,
       "downstream_authoring_rule": "AUTHOR_ON_OWNING_LINK_ONLY",
       "fixed_group_members": [
@@ -513,7 +513,7 @@
       ],
       "canonical_geometry_sha256": null,
       "connected_components": 0,
-      "convex_piece_count": 1,
+      "convex_piece_count": 0,
       "degenerate_triangle_count": 0,
       "downstream_authoring_rule": "AUTHOR_ON_OWNING_LINK_ONLY",
       "fixed_group_members": [
@@ -585,7 +585,7 @@
       ],
       "canonical_geometry_sha256": "ec8fa80167bddd0b969e0a9a8b074f220b645c2cc05a95f3ea88156fde2e5414",
       "connected_components": 9,
-      "convex_piece_count": 1,
+      "convex_piece_count": 9,
       "degenerate_triangle_count": 0,
       "downstream_authoring_rule": "AUTHOR_CAD_SHELL_ON_GRIPPER_LINK_AND_DISABLE_DUPLICATE_BASELINE_GRIPPER_BAR_COLLIDER_IN_DIAGNOSTIC_LAYER_ONLY",
       "fixed_group_members": [
@@ -838,7 +838,7 @@
       ],
       "canonical_geometry_sha256": "628b85a27c06d6729dd966a92f2ab2d8bf2360d74ef6cf104a8190965267f5e9",
       "connected_components": 4,
-      "convex_piece_count": 1,
+      "convex_piece_count": 4,
       "degenerate_triangle_count": 0,
       "downstream_authoring_rule": "AUTHOR_ON_OWNING_LINK_ONLY",
       "fixed_group_members": [
@@ -1074,7 +1074,7 @@
       ],
       "canonical_geometry_sha256": null,
       "connected_components": 0,
-      "convex_piece_count": 1,
+      "convex_piece_count": 0,
       "degenerate_triangle_count": 0,
       "downstream_authoring_rule": "AUTHOR_ON_OWNING_LINK_ONLY",
       "fixed_group_members": [
@@ -1146,7 +1146,7 @@
       ],
       "canonical_geometry_sha256": "ec8fa80167bddd0b969e0a9a8b074f220b645c2cc05a95f3ea88156fde2e5414",
       "connected_components": 9,
-      "convex_piece_count": 1,
+      "convex_piece_count": 9,
       "degenerate_triangle_count": 0,
       "downstream_authoring_rule": "AUTHOR_CAD_SHELL_ON_GRIPPER_LINK_AND_DISABLE_DUPLICATE_BASELINE_GRIPPER_BAR_COLLIDER_IN_DIAGNOSTIC_LAYER_ONLY",
       "fixed_group_members": [

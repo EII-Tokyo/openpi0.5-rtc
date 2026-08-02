@@ -1,0 +1,14 @@
+#usda 1.0
+(
+    defaultPrim = "World"
+    subLayers = [
+        @physics/cad_derived_colliders_physics.usda@,
+        @geometry/cad_derived_colliders.usda@,
+        @../../signal_correspondence/1.0/aloha1_signal_correspondence_workcell.usda@
+    ]
+)
+
+over "World"
+{
+}
+
