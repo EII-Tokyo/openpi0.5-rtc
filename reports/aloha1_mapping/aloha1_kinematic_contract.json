@@ -1,0 +1,401 @@
+{
+  "deterministic_signature": "29f705de259db323e557710480513fc7b27bf0683f33d24a37dc31b2f798d333",
+  "fk_comparison": {
+    "max_rotation_error_rad": 2.207587144933025e-16,
+    "max_translation_error_m": 4.484050470211362e-16
+  },
+  "id67_conflict_gate": "PASS_RESOLVED_WITH_CONFLICT_RETAINED",
+  "isaac_ik_used": false,
+  "jacobian_comparison": {
+    "max_abs_error": 1.95809590763929e-10
+  },
+  "joint_order_policy": "EXPLICIT_NOT_ALPHABETICAL",
+  "left_right_robot_local_identity": {
+    "determinant": 1.0,
+    "left_normalized_chain_signature": "b959a4d2c3a040582266d9f72d484528e119ea32c47d28d9e95122693044b822",
+    "mirrored": false,
+    "right_normalized_chain_signature": "b959a4d2c3a040582266d9f72d484528e119ea32c47d28d9e95122693044b822",
+    "status": "PASS",
+    "workcell_placement_claimed": false
+  },
+  "official_joint_order": [
+    "waist",
+    "shoulder",
+    "elbow",
+    "forearm_roll",
+    "wrist_angle",
+    "wrist_rotate"
+  ],
+  "official_poe_source": {
+    "locator": "Kinematic Properties/Product of Exponentials/M and Slist",
+    "sha256": "93313cf328da611146ea608613dd2550f3c17e7bbb47728b9f06fa297bebdff9",
+    "source_id": "trossen_vx300s_spec"
+  },
+  "product": {
+    "follower_instances": [
+      "follower_left",
+      "follower_right"
+    ],
+    "manufacturer": "Trossen Robotics",
+    "product": "Interbotix ViperX-300 6DOF",
+    "project_model": "aloha_vx300s",
+    "robot_local_geometry_relation": "IDENTICAL_NOT_MIRRORED"
+  },
+  "quaternion_ordering": "wxyz",
+  "runtime_simulation_used": false,
+  "samples": [
+    {
+      "id": "sample_00",
+      "jacobian_max_abs_error": 3.0840996423364686e-11,
+      "joint_positions_rad": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "poe_transform": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.536494
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.42705
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "rotation_error_rad": 0.0,
+      "translation_error_m": 0.0,
+      "urdf_transform": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.536494
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.42705
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "id": "sample_01",
+      "jacobian_max_abs_error": 4.97873409166516e-11,
+      "joint_positions_rad": [
+        0.2,
+        -0.4,
+        0.3,
+        0.7,
+        -0.2,
+        0.5
+      ],
+      "poe_transform": [
+        [
+          0.9662914263870207,
+          -0.2565733839379773,
+          -0.021236241323554787,
+          0.40278964797181394
+        ],
+        [
+          0.06528757909937152,
+          0.32399943487817495,
+          -0.9438018320674985,
+          0.0585424947735641
+        ],
+        [
+          0.24903496000818912,
+          0.9106011557500016,
+          0.3298289311756645,
+          0.5005734274430831
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "rotation_error_rad": 3.009551065217862e-17,
+      "translation_error_m": 5.594315114139762e-17,
+      "urdf_transform": [
+        [
+          0.9662914263870206,
+          -0.25657338393797735,
+          -0.021236241323554807,
+          0.4027896479718139
+        ],
+        [
+          0.0652875790993715,
+          0.3239994348781749,
+          -0.9438018320674985,
+          0.058542494773564095
+        ],
+        [
+          0.24903496000818895,
+          0.9106011557500011,
+          0.3298289311756644,
+          0.5005734274430831
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "id": "sample_02",
+      "jacobian_max_abs_error": 9.78016001518256e-11,
+      "joint_positions_rad": [
+        -0.5,
+        0.3,
+        -0.6,
+        -0.8,
+        0.4,
+        -0.7
+      ],
+      "poe_transform": [
+        [
+          0.7086394834161712,
+          0.09058174378469012,
+          0.6997321131951763,
+          0.5046344364735562
+        ],
+        [
+          -0.7054509885002075,
+          0.07268872562861353,
+          0.7050214549859943,
+          -0.3320077701684361
+        ],
+        [
+          0.012999437208676709,
+          -0.9932327505974684,
+          0.11541108167262266,
+          0.48700895284685286
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "rotation_error_rad": 2.207587144933025e-16,
+      "translation_error_m": 2.5438405243138006e-16,
+      "urdf_transform": [
+        [
+          0.708639483416171,
+          0.09058174378469025,
+          0.6997321131951759,
+          0.504634436473556
+        ],
+        [
+          -0.7054509885002072,
+          0.0726887256286136,
+          0.7050214549859942,
+          -0.33200777016843597
+        ],
+        [
+          0.012999437208676771,
+          -0.9932327505974681,
+          0.11541108167262282,
+          0.4870089528468529
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "id": "sample_03",
+      "jacobian_max_abs_error": 1.95809590763929e-10,
+      "joint_positions_rad": [
+        -1.5707913267948965,
+        -1.0733774899765125,
+        -0.9206611804270088,
+        -1.5707913267948965,
+        -0.842121364087264,
+        -1.5707913267948965
+      ],
+      "poe_transform": [
+        [
+          0.7460560075752732,
+          -0.6658831980120369,
+          1.2888226208071678e-05,
+          0.13200834197447187
+        ],
+        [
+          0.27349728525365424,
+          0.30640890521481257,
+          -0.9117635755852177,
+          0.40683968904661494
+        ],
+        [
+          0.6071240964742918,
+          0.680230217948543,
+          0.41071545146238736,
+          0.7034867663365765
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "rotation_error_rad": 2.1176241316047409e-16,
+      "translation_error_m": 4.484050470211362e-16,
+      "urdf_transform": [
+        [
+          0.7460560075752732,
+          -0.6658831980120369,
+          1.2888226207928592e-05,
+          0.13200834197447212
+        ],
+        [
+          0.2734972852536543,
+          0.30640890521481295,
+          -0.9117635755852179,
+          0.4068396890466151
+        ],
+        [
+          0.6071240964742916,
+          0.6802302179485429,
+          0.4107154514623873,
+          0.7034867663365761
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "id": "sample_04",
+      "jacobian_max_abs_error": 1.775620761534924e-10,
+      "joint_positions_rad": [
+        1.5707913267948963,
+        0.4799655442984405,
+        0.7635815477475192,
+        1.5707913267948963,
+        1.2086405070060728,
+        1.5707913267948963
+      ],
+      "poe_transform": [
+        [
+          -0.9351346402691619,
+          0.3542925409382998,
+          2.036812057336019e-06,
+          -0.16546502489819304
+        ],
+        [
+          0.11388336995178693,
+          0.3005940024198669,
+          -0.9469286265382568,
+          0.3079288976863732
+        ],
+        [
+          -0.3354903614369418,
+          -0.8855055285794032,
+          -0.3214438928308048,
+          0.02221407467269032
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "rotation_error_rad": 1.8373903757599233e-16,
+      "translation_error_m": 3.416480523755681e-16,
+      "urdf_transform": [
+        [
+          -0.9351346402691618,
+          0.3542925409382998,
+          2.0368120573871357e-06,
+          -0.1654650248981931
+        ],
+        [
+          0.11388336995178691,
+          0.3005940024198671,
+          -0.946928626538257,
+          0.30792889768637355
+        ],
+        [
+          -0.3354903614369418,
+          -0.8855055285794032,
+          -0.32144389283080504,
+          0.02221407467269027
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  ],
+  "schema_version": 1,
+  "status": "PASS",
+  "tolerances": {
+    "finite_difference_step_rad": 1e-06,
+    "jacobian": 2.2304460492503132e-08,
+    "jacobian_basis": "100*(h^2+float64_epsilon/h) central-difference numerical bound",
+    "rotation_basis": "all compared official URDF joint-origin RPY and POE home rotation entries are exact zero/identity",
+    "rotation_rad": 1e-10,
+    "translation_basis": "0.5e-6 m least-significant published decimal times 12 serial translation terms",
+    "translation_m": 6e-06
+  },
+  "unit_contract": "metres_radians",
+  "urdf_derivatives": {
+    "left": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_left.urdf",
+      "sha256": "d9e4b32723ee71dfce26fb4e78546cfcfef147b2d7dbf5e53e3620e3d8aa96bd"
+    },
+    "pinned_xacro_sha256": "45dff1e0de2456386dbb64b851c94db2d874b6dbefb6503cb747bc55435177bd",
+    "right": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_right.urdf",
+      "sha256": "268a5e5b56ce48af679256380008606f64358d6ead2619b52946b37f47fb624b"
+    }
+  }
+}

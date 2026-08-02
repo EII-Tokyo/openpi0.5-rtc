@@ -1,0 +1,84 @@
+{
+  "deterministic_signature": "047d6d79b8edaca0a1d6f2ed8d6744b256ffeb686c11c413bede64ee9184c118",
+  "existing_static_collision_gate": "PASS",
+  "existing_swept_collision_gate": "PASS",
+  "final_or_default_asset_modified": false,
+  "formal_candidate_gate": "BLOCKED",
+  "identity_blockers": [
+    {
+      "collider_authored": false,
+      "link_suffix": "gripper_prop_link",
+      "reason": "HARD_BLOCKER_CAD_TO_LINK_IDENTITY",
+      "robot": "follower_left",
+      "urdf_link_name": "follower_left_gripper_prop_link"
+    },
+    {
+      "collider_authored": false,
+      "link_suffix": "gripper_bar_link",
+      "reason": "HARD_BLOCKER_CAD_TO_LINK_IDENTITY",
+      "robot": "follower_left",
+      "urdf_link_name": "follower_left_gripper_bar_link"
+    },
+    {
+      "collider_authored": false,
+      "link_suffix": "gripper_prop_link",
+      "reason": "HARD_BLOCKER_CAD_TO_LINK_IDENTITY",
+      "robot": "follower_right",
+      "urdf_link_name": "follower_right_gripper_prop_link"
+    },
+    {
+      "collider_authored": false,
+      "link_suffix": "gripper_bar_link",
+      "reason": "HARD_BLOCKER_CAD_TO_LINK_IDENTITY",
+      "robot": "follower_right",
+      "urdf_link_name": "follower_right_gripper_bar_link"
+    }
+  ],
+  "input_reports": [
+    {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_cad_derived_collider_geometry.json",
+      "sha256": "55da6b55f5bc17a3690af454a0c7603d2d305bf4e86a7f5908d5b713a77ece4e",
+      "status": "PARTIAL"
+    },
+    {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_cad_link_collision_semantics.json",
+      "sha256": "23476d42f8290839dc5e39e53b05b1e76763af7a216993a2b629386444e15683",
+      "status": "PARTIAL"
+    },
+    {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_cad_derived_five_pose_swept_collision.json",
+      "sha256": "d5a21d1bad393505fd2f14ad8596a144a7af6b3d8daaa15bea4e6afe3ac2c808",
+      "status": "PASS"
+    },
+    {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_cad_derived_collision_replan_static.json",
+      "sha256": "61cc94457f7768146cdf35de008367223d06aa81e824609a3299934e2960e9f3",
+      "status": "PASS"
+    }
+  ],
+  "interpretation": "Existing swept/static PASS can reject known intersections but cannot promote links lacking CAD-to-link identity or valid B-Rep registration.",
+  "invalid_brep_blockers": [
+    "follower_left_wrist_link",
+    "follower_right_wrist_link"
+  ],
+  "schema_version": 1,
+  "source_cad": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/gdrive_source_readonly/Simple Aloha Viper 2024-5-13.step",
+    "sha256": "337862418769d4ea8b801d26e68930c4412f870050e60769bbf91765194dc571"
+  },
+  "status": "PARTIAL",
+  "surface_error_certificate": "NOT_COMPLETE_FOR_EVERY_LINK",
+  "toolchain": {
+    "angular_deflection_deg": 20.0,
+    "freecad_version": "1.1.1",
+    "linear_deflection_mm": 0.2,
+    "opencascade_version": "7.8.1"
+  },
+  "two_fresh_directory_determinism": "PASS",
+  "unresolved_identity_blocker_count": 6,
+  "unresolved_link_suffixes": [
+    "gripper_bar_link",
+    "gripper_prop_link",
+    "wrist_link"
+  ]
+}

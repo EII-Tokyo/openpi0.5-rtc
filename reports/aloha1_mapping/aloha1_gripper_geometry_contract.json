@@ -1,0 +1,68 @@
+{
+  "aperture": {
+    "blocker": "HARD_BLOCKER_GRIPPER_APERTURE_DEFINITION_CONFLICT",
+    "definition_boundary": "URDF values are carriage-center coordinates; product-page wording and CAD inner-surface aperture must not be conflated",
+    "no_fitted_endpoint_used": true,
+    "status": "HARD_BLOCKER_DEFINITION_CONFLICT",
+    "trossen_exact_product_claim_m": [
+      0.042,
+      0.116
+    ],
+    "urdf_carriage_center_range_m": [
+      0.042,
+      0.114
+    ]
+  },
+  "deterministic_signature": "1c442b791de1595202789dc68505e9056040e77e13b0d40a6773ded98e8d2d22",
+  "formal_candidate_gate": "BLOCKED",
+  "formula_validation": {
+    "arm_length_m": 0.035,
+    "endpoint_max_abs_error_m": 7.91033905045424e-16,
+    "formula": "x=r*sin(theta)+sqrt(L^2-(sqrt(r^2-(r*sin(theta))^2))^2)",
+    "horn_radius_m": 0.0275,
+    "left_finger_interval_m": [
+      0.02099999999999998,
+      0.05699999999999921
+    ],
+    "monotonic": true,
+    "motor_angle_interval_rad": [
+      -0.024028286115234956,
+      1.0904654998806487
+    ],
+    "right_finger_interval_m": [
+      -0.05699999999999921,
+      -0.02099999999999998
+    ],
+    "right_is_negative_left": true,
+    "sample_count": 1001,
+    "status": "PASS"
+  },
+  "left_right_followers": {
+    "relation": "same_non_mirrored_product",
+    "status": "PASS_ROBOT_LOCAL_IDENTITY",
+    "workcell_placement_claimed": false
+  },
+  "linkage_sources": {
+    "driver_sha256": "6d9b8bd613ef17094490ad1a3f82c685316b3bd21c067930b2a5199a91ba9bcb",
+    "motor_config_sha256": "999cc0863b7b1e0334c5cd75d5ed1430736d25aa13881e4c24f4bf6cb3a1924f",
+    "xacro_sha256": "45dff1e0de2456386dbb64b851c94db2d874b6dbefb6503cb747bc55435177bd"
+  },
+  "product": {
+    "follower_instances": [
+      "follower_left",
+      "follower_right"
+    ],
+    "manufacturer": "Trossen Robotics",
+    "product": "Interbotix ViperX-300 6DOF",
+    "project_model": "aloha_vx300s",
+    "robot_local_geometry_relation": "IDENTICAL_NOT_MIRRORED"
+  },
+  "runtime_simulation_used": false,
+  "schema_version": 1,
+  "source_cad": {
+    "finger_authority": "embedded_handed_v2_pair_not_standalone_v3",
+    "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/gdrive_source_readonly/Simple Aloha Viper 2024-5-13.step",
+    "sha256": "337862418769d4ea8b801d26e68930c4412f870050e60769bbf91765194dc571"
+  },
+  "status": "PARTIAL"
+}
