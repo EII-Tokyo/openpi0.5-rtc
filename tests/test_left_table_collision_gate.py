@@ -72,6 +72,7 @@ def test_runtime_verifier_has_fixed_inspector_stress_contract():
         "CreateThresholdAttr().Set(0)",
         "get_contact_report()",
         "capture_viewport_to_file",
+        "articulation._articulation_view.get_dof_limits()",
     ):
         assert required in source
     for forbidden in (

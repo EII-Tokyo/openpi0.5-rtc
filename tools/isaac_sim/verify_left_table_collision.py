@@ -236,7 +236,9 @@ def _live_tip_minimum_z(stage: Any, allowed_roots: tuple[str, ...]) -> float:
 
 
 def _normalized_limits(articulation: Any) -> np.ndarray:
-    limits = np.asarray(articulation.get_dof_limits(), dtype=np.float64)
+    limits = np.asarray(
+        articulation._articulation_view.get_dof_limits(), dtype=np.float64
+    )
     if limits.ndim == 3 and limits.shape[0] == 1:
         limits = limits[0]
     if limits.shape != (int(articulation.num_dof), 2):
