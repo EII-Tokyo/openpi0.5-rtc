@@ -77,6 +77,8 @@ policy needed for this test:
 
 - physics simulation rate: 240 Hz;
 - scene CCD enabled;
+- GPU dynamics disabled for this diagnostic PhysicsScene so swept CCD is not
+  ignored; the collision gate runs on the CPU-compatible PhysX pipeline;
 - swept CCD enabled on the follower-left articulation's dynamic links,
   including the wrist, gripper, gripper mechanism, and both finger links;
 - existing table collider retained as a static 15 mm cube;
@@ -107,17 +109,20 @@ The verifier must fail closed unless all of these are true:
 5. The selected follower-left wrist/gripper/finger colliders exist and are
    enabled.
 6. One PhysicsScene provides the expected simulation rate and scene CCD.
-7. The required dynamic follower-left links have CCD enabled.
-8. No collision group or filtered-pair rule suppresses the tested pair.
+7. GPU dynamics is disabled and the runtime confirms that CCD is effective.
+8. The required dynamic follower-left links have CCD enabled.
+9. No collision group or filtered-pair rule suppresses the tested pair.
 
 ### Contact-Seeking Motion
 
 Each trial starts from a clean Stage reset and a deterministic, collision-free
 pose. It uses normal articulation Drive Target semantics, not direct transform
 teleportation. A bounded, small-increment joint sweep approaches the tabletop
-from above. The sweep stays inside authored joint limits and stops on a hard
-timeout, a non-finite state, an unexpected collision, or successful table
-contact.
+from above. The stress gate steps PhysX at a fixed 1/60 second interval to match
+Physics Inspector authoring simulation; the persistent 240 Hz PhysicsScene is
+validated separately for normal timeline operation. The sweep stays inside
+authored joint limits and stops on a hard timeout, a non-finite state, an
+unexpected collision, or successful table contact.
 
 After the first valid table contact, the verifier commands a bounded target
 that is kinematically beyond the tabletop. The target may be below the surface;
@@ -140,6 +145,12 @@ A trial passes only when all conditions hold:
 - the articulation stays within authored joint limits;
 - no disallowed robot/environment collision is used as a substitute support;
 - no PhysX error invalidates the trial.
+
+Contact tracing applies `PhysxContactReportAPI` with threshold zero in a
+temporary Session Layer and reads PhysX contact reports after every fixed step.
+USD runtime updates remain enabled because actual transforms and world bounds
+are part of the non-crossing gate. The temporary reporting API and test posture
+are discarded at the end of each trial.
 
 The exact solver tolerance and hold interval must come from official semantics
 or a justified scale-aware derivation and be recorded in the runtime report;
@@ -241,6 +252,8 @@ relax contact policy, table geometry, or tolerance merely to obtain `PASS`.
 Completion requires fresh evidence for every item below:
 
 - official MCP/expert rationale recorded;
+- CPU-compatible PhysX dynamics is active and CCD is not ignored by a GPU
+  pipeline;
 - static Stage and physics-layer tests pass;
 - focused unit tests pass with prior RED evidence;
 - Isaac runtime report shows exactly three passing trials and no failure
