@@ -1043,6 +1043,19 @@ def test_runtime_telemetry_records_pose_finite_difference_velocity() -> None:
     assert '"bottle_tensor_lifecycle"' in source
 
 
+def test_runtime_telemetry_records_post_step_com_velocity_sample() -> None:
+    source = (
+        ROOT / "tools/aloha1_mapping/grasp_20cm_isaac_bindings.py"
+    ).read_text(encoding="utf-8")
+
+    assert "from tools.aloha1_mapping.bottle_com_velocity import build_sample" in source
+    assert "self._build_com_velocity_sample = build_sample" in source
+    assert '"synchronized_com_velocity_sample"' in source
+    assert '"callback_phase": "POST_PHYSICS_STEP"' in source
+    assert '"sampling_phase": "POST_PHYSICS_STEP"' in source
+    assert "self.physics_context.get_physics_dt()" in source
+
+
 def test_isaac_binding_uses_pose_synchronized_render_only_colliders() -> None:
     source = (
         ROOT / "tools/aloha1_mapping/grasp_20cm_isaac_bindings.py"

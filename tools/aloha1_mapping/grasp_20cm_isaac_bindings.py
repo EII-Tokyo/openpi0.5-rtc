@@ -742,6 +742,7 @@ class IsaacGrasp20cmBindings:
         from pxr import UsdGeom
         from pxr import UsdPhysics
 
+        from tools.aloha1_mapping.bottle_com_velocity import build_sample
         from tools.aloha1_mapping.grasp_20cm_five_pose_ik import apply_frozen_bottle_transform
         from tools.aloha1_mapping.grasp_20cm_five_pose_ik import compose_initial_command
         from tools.aloha1_mapping.grasp_20cm_sampling import translate_horizontal_bottle_profile
@@ -789,6 +790,7 @@ class IsaacGrasp20cmBindings:
         self._solve_settled_ik = _solve_settled_bottle_runtime_ik
         self._read_bottle_state = read_physx_bottle_state
         self._derive_pose_velocity = derive_pose_finite_difference_velocity
+        self._build_com_velocity_sample = build_sample
         self._transform_collision_bounds = (
             transform_local_points_to_world_bounds
         )
@@ -1930,6 +1932,45 @@ class IsaacGrasp20cmBindings:
             False,
         )
         bottle_state = self._read_bottle_state(self.bottle)
+        physics_dt_readback = float(
+            self.physics_context.get_physics_dt()
+        )
+        bottle_state["synchronized_com_velocity_sample"] = (
+            self._build_com_velocity_sample(
+                step_index=frame,
+                state_boundary_index=frame,
+                dt_s=physics_dt_readback,
+                sampling_phase="POST_PHYSICS_STEP",
+                actor_prim_path=self._bottle_tensor_path,
+                tensor_index=0,
+                actor_position_world_m=(
+                    bottle_state["position_world_m"]
+                ),
+                actor_orientation_world_wxyz=(
+                    bottle_state["orientation_wxyz"]
+                ),
+                center_of_mass_local_m=(
+                    bottle_state["center_of_mass_local_m"]
+                ),
+                linear_velocity_com_world_m_s=(
+                    bottle_state["linear_velocity_world_m_s"]
+                ),
+                angular_velocity_world_rad_s=(
+                    bottle_state["angular_velocity_world_rad_s"]
+                ),
+            )
+        )
+        bottle_state["sampling_contract"] = {
+            "callback_phase": "POST_PHYSICS_STEP",
+            "subscription_api": (
+                "omni.physx.IPhysx.subscribe_physics_on_step_events"
+            ),
+            "subscription_pre_step_argument": False,
+            "physics_dt_s": physics_dt_readback,
+            "source_evidence": (
+                "omni.physx.tests/PhysxInterfaceSimulationEvents.py"
+            ),
+        }
         direct_physx_transform = normalize_direct_physx_transform(
             self._physx.get_rigidbody_transformation(
                 self._bottle_tensor_path
@@ -3225,6 +3266,14 @@ class IsaacGrasp20cmBindings:
                 "bottle_tensor_lifecycle": (
                     self.bottle_tensor_lifecycle
                 ),
+                "bottle_velocity_sampling": {
+                    "callback_phase": "POST_PHYSICS_STEP",
+                    "sampling_phase": "POST_PHYSICS_STEP",
+                    "physics_dt_s": float(
+                        self.physics_context.get_physics_dt()
+                    ),
+                    "subscription_pre_step_argument": False,
+                },
             },
             "stage": {
                 "absolute_path": str(self.stage_path),

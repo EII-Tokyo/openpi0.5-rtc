@@ -1,0 +1,880 @@
+{
+  "boundaries": {
+    "physical_or_control_parameters_changed": false,
+    "real_robot": false,
+    "remote_103": false,
+    "source_or_final_asset_modified": false,
+    "task8": "NOT_RUN",
+    "video_rerecorded": false
+  },
+  "diagnosis": {
+    "alignments": {
+      "V1": {
+        "actor_origin_prediction_backward_alignment": true,
+        "com_frame_explains_origin_disagreement": false,
+        "declared_post_step_backward_alignment": true,
+        "definition": {
+          "declared": "POST_STEP v[k] compared with (p[k]-p[k-1])/dt",
+          "midpoint": "finite difference compared with 0.5*(v[k]+v[k+1])",
+          "shifted": "POST_STEP v[k] compared with (p[k+1]-p[k])/dt"
+        },
+        "midpoint_alignment": true,
+        "sampling_phase": "POST_PHYSICS_STEP",
+        "shifted_forward_alignment": true,
+        "uncorrected_actor_origin_backward_alignment": true,
+        "velocity_tolerance_m_s": 0.002953231849859763
+      },
+      "V2": {
+        "actor_origin_prediction_backward_alignment": true,
+        "com_frame_explains_origin_disagreement": true,
+        "declared_post_step_backward_alignment": true,
+        "definition": {
+          "declared": "POST_STEP v[k] compared with (p[k]-p[k-1])/dt",
+          "midpoint": "finite difference compared with 0.5*(v[k]+v[k+1])",
+          "shifted": "POST_STEP v[k] compared with (p[k+1]-p[k])/dt"
+        },
+        "midpoint_alignment": true,
+        "sampling_phase": "POST_PHYSICS_STEP",
+        "shifted_forward_alignment": true,
+        "uncorrected_actor_origin_backward_alignment": false,
+        "velocity_tolerance_m_s": 0.002953231849859763
+      },
+      "V3": {
+        "actor_origin_prediction_backward_alignment": false,
+        "com_frame_explains_origin_disagreement": false,
+        "declared_post_step_backward_alignment": false,
+        "definition": {
+          "declared": "POST_STEP v[k] compared with (p[k]-p[k-1])/dt",
+          "midpoint": "finite difference compared with 0.5*(v[k]+v[k+1])",
+          "shifted": "POST_STEP v[k] compared with (p[k+1]-p[k])/dt"
+        },
+        "midpoint_alignment": false,
+        "sampling_phase": "POST_PHYSICS_STEP",
+        "shifted_forward_alignment": false,
+        "uncorrected_actor_origin_backward_alignment": false,
+        "velocity_tolerance_m_s": 0.002953231849859763
+      }
+    },
+    "conclusion": "VERIFIED_LOCAL_PHYSX_VELOCITY_TRANSFORM_DISAGREEMENT",
+    "gates": {
+      "four_choice_conclusion_reached": true,
+      "v1_control_pass": true,
+      "v2_control_pass": true,
+      "v3_physical_signature_unchanged": true
+    },
+    "status": "PASS",
+    "tolerance": {
+      "characteristic_position_m": 0.3470194732662942,
+      "classification": "NUMERICAL_DIAGNOSTIC_NOT_HARDWARE_CALIBRATION",
+      "float32_position_ulp_per_dt_m_s": 2.4820766921016754e-06,
+      "measured_baseline_max_error_m_s": 0.0029507497731676613,
+      "physics_dt_s": 0.016666666666666666,
+      "source": "V1_V2_BASELINE_PLUS_FLOAT32_POSITION_ULP_PER_DT",
+      "velocity_tolerance_m_s": 0.002953231849859763
+    }
+  },
+  "evidence_classification": {
+    "engineering_inference": "INTERNAL_SOLVER_CAUSE_NOT_CLAIMED",
+    "numerical_calculation": [
+      "COM world pose",
+      "finite differences",
+      "signed integration",
+      "v_O=v_C-omega_cross_r_OC",
+      "V1/V2-derived tolerance"
+    ],
+    "official_source": [
+      "post-step callback flag semantics",
+      "world-space COM linear velocity contract",
+      "local COM pose contract"
+    ],
+    "runtime_readback": [
+      "signed tensor velocity",
+      "actor pose and COM pose",
+      "actor path/index",
+      "physics dt"
+    ]
+  },
+  "experiments": {
+    "V1": {
+      "analytic_command_check": {
+        "error_norm_m": 2.4832302313874325e-07,
+        "error_vector_m": [
+          1.380685716867447e-07,
+          1.8603168427944183e-07,
+          -8.940696716308594e-08
+        ],
+        "expected_com_delta_m": [
+          0.23999999463558197,
+          -0.1599999964237213,
+          0.10000000149011612
+        ],
+        "observed_com_delta_m": [
+          0.24000013270415366,
+          -0.15999981039203703,
+          0.09999991208314896
+        ]
+      },
+      "kind": "NO_CONTACT_PURE_TRANSLATION",
+      "metrics": {
+        "actor_origin_backward_fd_vs_com_velocity_uncorrected": {
+          "component_max_abs_error_m_s": [
+            2.396106596469494e-07,
+            4.3630597690302864e-07,
+            3.959983380374954e-07
+          ],
+          "component_rmse_m_s": [
+            1.9841824433009288e-07,
+            2.1209288527421236e-07,
+            6.236829917777324e-08
+          ],
+          "max_error_m_s": 5.003807504524834e-07,
+          "rmse_m_s": 1.715060702611862e-07,
+          "signed_mean_error_m_s": [
+            6.277579501443494e-08,
+            9.718816210759854e-08,
+            -4.7311184359077885e-08
+          ]
+        },
+        "actor_origin_backward_fd_vs_prediction": {
+          "component_max_abs_error_m_s": [
+            2.396106596469494e-07,
+            4.3630597690302864e-07,
+            3.959983380374954e-07
+          ],
+          "component_rmse_m_s": [
+            1.9841824433009288e-07,
+            2.1209288527421236e-07,
+            6.236829917777324e-08
+          ],
+          "max_error_m_s": 5.003807504524834e-07,
+          "rmse_m_s": 1.715060702611862e-07,
+          "signed_mean_error_m_s": [
+            6.277579501443494e-08,
+            9.718816210759854e-08,
+            -4.7311184359077885e-08
+          ]
+        },
+        "actor_origin_delta_m": [
+          0.24000013270415366,
+          -0.15999981039203703,
+          0.09999991208314896
+        ],
+        "actor_origin_forward_fd_vs_com_velocity_uncorrected": {
+          "component_max_abs_error_m_s": [
+            2.396106596469494e-07,
+            4.3630597690302864e-07,
+            3.959983380374954e-07
+          ],
+          "component_rmse_m_s": [
+            1.9841824433009288e-07,
+            2.1209288527421236e-07,
+            6.236829917777324e-08
+          ],
+          "max_error_m_s": 5.003807504524834e-07,
+          "rmse_m_s": 1.715060702611862e-07,
+          "signed_mean_error_m_s": [
+            6.277579501443494e-08,
+            9.718816210759854e-08,
+            -4.7311184359077885e-08
+          ]
+        },
+        "actor_origin_forward_fd_vs_prediction": {
+          "component_max_abs_error_m_s": [
+            2.396106596469494e-07,
+            4.3630597690302864e-07,
+            3.959983380374954e-07
+          ],
+          "component_rmse_m_s": [
+            1.9841824433009288e-07,
+            2.1209288527421236e-07,
+            6.236829917777324e-08
+          ],
+          "max_error_m_s": 5.003807504524834e-07,
+          "rmse_m_s": 1.715060702611862e-07,
+          "signed_mean_error_m_s": [
+            6.277579501443494e-08,
+            9.718816210759854e-08,
+            -4.7311184359077885e-08
+          ]
+        },
+        "actor_origin_midpoint_fd_vs_com_velocity_uncorrected": {
+          "component_max_abs_error_m_s": [
+            2.396106596469494e-07,
+            4.3630597690302864e-07,
+            3.959983380374954e-07
+          ],
+          "component_rmse_m_s": [
+            1.9841824433009288e-07,
+            2.1209288527421236e-07,
+            6.236829917777324e-08
+          ],
+          "max_error_m_s": 5.003807504524834e-07,
+          "rmse_m_s": 1.715060702611862e-07,
+          "signed_mean_error_m_s": [
+            6.277579501443494e-08,
+            9.718816210759854e-08,
+            -4.7311184359077885e-08
+          ]
+        },
+        "actor_origin_midpoint_fd_vs_prediction": {
+          "component_max_abs_error_m_s": [
+            2.396106596469494e-07,
+            4.3630597690302864e-07,
+            3.959983380374954e-07
+          ],
+          "component_rmse_m_s": [
+            1.9841824433009288e-07,
+            2.1209288527421236e-07,
+            6.236829917777324e-08
+          ],
+          "max_error_m_s": 5.003807504524834e-07,
+          "rmse_m_s": 1.715060702611862e-07,
+          "signed_mean_error_m_s": [
+            6.277579501443494e-08,
+            9.718816210759854e-08,
+            -4.7311184359077885e-08
+          ]
+        },
+        "actor_prim_path": "/World/Bottle500",
+        "com_backward_fd_vs_velocity": {
+          "component_max_abs_error_m_s": [
+            2.396106596469494e-07,
+            4.3630597690302864e-07,
+            3.959983380374954e-07
+          ],
+          "component_rmse_m_s": [
+            1.984182443309293e-07,
+            2.1209288525993805e-07,
+            6.236829917777324e-08
+          ],
+          "max_error_m_s": 5.003807504524834e-07,
+          "rmse_m_s": 1.7150607025562463e-07,
+          "signed_mean_error_m_s": [
+            6.277579501270022e-08,
+            9.718816210065965e-08,
+            -4.7311184359077885e-08
+          ]
+        },
+        "com_delta_m": [
+          0.24000013270415366,
+          -0.15999981039203703,
+          0.09999991208314896
+        ],
+        "com_forward_fd_vs_velocity": {
+          "component_max_abs_error_m_s": [
+            2.396106596469494e-07,
+            4.3630597690302864e-07,
+            3.959983380374954e-07
+          ],
+          "component_rmse_m_s": [
+            1.984182443309293e-07,
+            2.1209288525993805e-07,
+            6.236829917777324e-08
+          ],
+          "max_error_m_s": 5.003807504524834e-07,
+          "rmse_m_s": 1.7150607025562463e-07,
+          "signed_mean_error_m_s": [
+            6.277579501270022e-08,
+            9.718816210065965e-08,
+            -4.7311184359077885e-08
+          ]
+        },
+        "com_midpoint_fd_vs_velocity": {
+          "component_max_abs_error_m_s": [
+            2.396106596469494e-07,
+            4.3630597690302864e-07,
+            3.959983380374954e-07
+          ],
+          "component_rmse_m_s": [
+            1.984182443309293e-07,
+            2.1209288525993805e-07,
+            6.236829917777324e-08
+          ],
+          "max_error_m_s": 5.003807504524834e-07,
+          "rmse_m_s": 1.7150607025562463e-07,
+          "signed_mean_error_m_s": [
+            6.277579501270022e-08,
+            9.718816210065965e-08,
+            -4.7311184359077885e-08
+          ]
+        },
+        "dt_s": {
+          "maximum": 0.01666666753590107,
+          "mean": 0.01666666753590107,
+          "minimum": 0.01666666753590107
+        },
+        "maximum_angular_speed_rad_s": 0.0,
+        "maximum_com_speed_m_s": 0.1526433724230219,
+        "maximum_position_norm_m": 0.3470194732662942,
+        "mean_abs_velocity_m_s": [
+          0.11999999731779099,
+          0.07999999821186066,
+          0.05000000074505806
+        ],
+        "mean_abs_vz_m_s": 0.05000000074505806,
+        "sample_count": 121,
+        "sampling_phase": "POST_PHYSICS_STEP",
+        "signed_velocity_integral_m": 0.10000000670552231,
+        "signed_velocity_integral_vector_m": [
+          0.24000000715255787,
+          -0.1600000047683714,
+          0.10000000670552231
+        ],
+        "signed_velocity_mean_m_s": [
+          0.11999999731779099,
+          -0.07999999821186066,
+          0.05000000074505806
+        ],
+        "signed_vz_mean_m_s": 0.05000000074505806,
+        "tensor_index": 0,
+        "transition_count": 120,
+        "vx_max_m_s": 0.11999999731779099,
+        "vx_min_m_s": 0.11999999731779099,
+        "vy_max_m_s": -0.07999999821186066,
+        "vy_min_m_s": -0.07999999821186066,
+        "vz_max_m_s": 0.05000000074505806,
+        "vz_min_m_s": 0.05000000074505806
+      },
+      "runtime_valid": true
+    },
+    "V2": {
+      "analytic_command_check": {
+        "error_norm_m": 1.069076044736456e-08,
+        "error_vector_m": [
+          1.064726110229508e-08,
+          -4.163336342344337e-17,
+          9.634261582958104e-10
+        ],
+        "expected_com_delta_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "observed_com_delta_m": [
+          1.064726110229508e-08,
+          -4.163336342344337e-17,
+          9.634261582958104e-10
+        ]
+      },
+      "kind": "NO_CONTACT_PURE_ROTATION_REAL_COM_OFFSET",
+      "metrics": {
+        "actor_origin_backward_fd_vs_com_velocity_uncorrected": {
+          "component_max_abs_error_m_s": [
+            0.1769043529344315,
+            7.494005025376988e-15,
+            0.17689167530654573
+          ],
+          "component_rmse_m_s": [
+            0.13202270274310404,
+            2.940977809852617e-15,
+            0.11775500481288212
+          ],
+          "max_error_m_s": 0.17691438149204894,
+          "rmse_m_s": 0.10213754647218934,
+          "signed_mean_error_m_s": [
+            0.03589378494298835,
+            -2.08166806260472e-17,
+            0.07197619226699065
+          ]
+        },
+        "actor_origin_backward_fd_vs_prediction": {
+          "component_max_abs_error_m_s": [
+            0.0029487214132105366,
+            7.494005025376988e-15,
+            0.0029483421700150477
+          ],
+          "component_rmse_m_s": [
+            0.0019645434916768915,
+            2.940977809852617e-15,
+            0.0021988210175245236
+          ],
+          "max_error_m_s": 0.0029507497731676613,
+          "rmse_m_s": 0.0017023753011403033,
+          "signed_mean_error_m_s": [
+            -0.0011962838338222712,
+            -2.08166806260472e-17,
+            0.000604939448323329
+          ]
+        },
+        "actor_origin_delta_m": [
+          0.07178757362999022,
+          -4.163336342344337e-17,
+          0.1439523920416832
+        ],
+        "actor_origin_forward_fd_vs_com_velocity_uncorrected": {
+          "component_max_abs_error_m_s": [
+            0.1769043529344315,
+            7.494005025376988e-15,
+            0.17689167530654573
+          ],
+          "component_rmse_m_s": [
+            0.13202270274310404,
+            2.940977809852617e-15,
+            0.11775500481288212
+          ],
+          "max_error_m_s": 0.17691438149204894,
+          "rmse_m_s": 0.10213754647218934,
+          "signed_mean_error_m_s": [
+            0.03589378494298835,
+            -2.08166806260472e-17,
+            0.07197619226699065
+          ]
+        },
+        "actor_origin_forward_fd_vs_prediction": {
+          "component_max_abs_error_m_s": [
+            0.0029481147984868217,
+            7.494005025376988e-15,
+            0.0029489410764948123
+          ],
+          "component_rmse_m_s": [
+            0.001960796512698941,
+            2.940977809852617e-15,
+            0.0022021428991958847
+          ],
+          "max_error_m_s": 0.00295064420896207,
+          "rmse_m_s": 0.0017023666186313673,
+          "signed_mean_error_m_s": [
+            0.0012029836033599828,
+            -2.08166806260472e-17,
+            -0.0005915954328713739
+          ]
+        },
+        "actor_origin_midpoint_fd_vs_com_velocity_uncorrected": {
+          "component_max_abs_error_m_s": [
+            0.1769043529344315,
+            7.494005025376988e-15,
+            0.17689167530654573
+          ],
+          "component_rmse_m_s": [
+            0.13202270274310404,
+            2.940977809852617e-15,
+            0.11775500481288212
+          ],
+          "max_error_m_s": 0.17691438149204894,
+          "rmse_m_s": 0.10213754647218934,
+          "signed_mean_error_m_s": [
+            0.03589378494298835,
+            -2.08166806260472e-17,
+            0.07197619226699065
+          ]
+        },
+        "actor_origin_midpoint_fd_vs_prediction": {
+          "component_max_abs_error_m_s": [
+            1.649977606982267e-05,
+            7.494005025376988e-15,
+            1.792956380994304e-05
+          ],
+          "component_rmse_m_s": [
+            1.2281178908812249e-05,
+            2.940977809852617e-15,
+            1.095414897036731e-05
+          ],
+          "max_error_m_s": 1.842625118049488e-05,
+          "rmse_m_s": 9.5012408848398e-06,
+          "signed_mean_error_m_s": [
+            3.3498847688567964e-06,
+            -2.08166806260472e-17,
+            6.672007725976346e-06
+          ]
+        },
+        "actor_prim_path": "/World/Bottle500",
+        "com_backward_fd_vs_velocity": {
+          "component_max_abs_error_m_s": [
+            1.329065288452954e-06,
+            7.494005025376988e-15,
+            2.193598034553423e-06
+          ],
+          "component_rmse_m_s": [
+            3.5896536541732976e-07,
+            2.940977809852617e-15,
+            6.367167275654759e-07
+          ],
+          "max_error_m_s": 2.5186342985282246e-06,
+          "rmse_m_s": 4.220048675591651e-07,
+          "signed_mean_error_m_s": [
+            5.32363027349858e-09,
+            -2.08166806260472e-17,
+            4.817130540246121e-10
+          ]
+        },
+        "com_delta_m": [
+          1.064726110229508e-08,
+          -4.163336342344337e-17,
+          9.634261582958104e-10
+        ],
+        "com_forward_fd_vs_velocity": {
+          "component_max_abs_error_m_s": [
+            1.329065288452954e-06,
+            7.494005025376988e-15,
+            2.193598034553423e-06
+          ],
+          "component_rmse_m_s": [
+            3.5896536541732976e-07,
+            2.940977809852617e-15,
+            6.367167275654759e-07
+          ],
+          "max_error_m_s": 2.5186342985282246e-06,
+          "rmse_m_s": 4.220048675591651e-07,
+          "signed_mean_error_m_s": [
+            5.32363027349858e-09,
+            -2.08166806260472e-17,
+            4.817130540246121e-10
+          ]
+        },
+        "com_midpoint_fd_vs_velocity": {
+          "component_max_abs_error_m_s": [
+            1.329065288452954e-06,
+            7.494005025376988e-15,
+            2.193598034553423e-06
+          ],
+          "component_rmse_m_s": [
+            3.5896536541732976e-07,
+            2.940977809852617e-15,
+            6.367167275654759e-07
+          ],
+          "max_error_m_s": 2.5186342985282246e-06,
+          "rmse_m_s": 4.220048675591651e-07,
+          "signed_mean_error_m_s": [
+            5.32363027349858e-09,
+            -2.08166806260472e-17,
+            4.817130540246121e-10
+          ]
+        },
+        "dt_s": {
+          "maximum": 0.01666666753590107,
+          "mean": 0.01666666753590107,
+          "minimum": 0.01666666753590107
+        },
+        "maximum_angular_speed_rad_s": 2.000131607055664,
+        "maximum_com_speed_m_s": 0.0,
+        "maximum_position_norm_m": 0.1769086645061738,
+        "mean_abs_velocity_m_s": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "mean_abs_vz_m_s": 0.0,
+        "sample_count": 121,
+        "sampling_phase": "POST_PHYSICS_STEP",
+        "signed_velocity_integral_m": 0.0,
+        "signed_velocity_integral_vector_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "signed_velocity_mean_m_s": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "signed_vz_mean_m_s": 0.0,
+        "tensor_index": 0,
+        "transition_count": 120,
+        "vx_max_m_s": 0.0,
+        "vx_min_m_s": 0.0,
+        "vy_max_m_s": 0.0,
+        "vy_min_m_s": 0.0,
+        "vz_max_m_s": 0.0,
+        "vz_min_m_s": 0.0
+      },
+      "runtime_valid": true
+    },
+    "V3": {
+      "accepted_signature": "90da200849182aa4cadbd37c64a6b36983758fe0e23a3741acb09f1e6740a88d",
+      "actual_signature": "90da200849182aa4cadbd37c64a6b36983758fe0e23a3741acb09f1e6740a88d",
+      "hold_drop_m": 0.0011934366655616258,
+      "kind": "FROZEN_TASK7_SAMPLE02_CONTACT_HOLD",
+      "machine_reason": "stable_20cm_hold",
+      "machine_status": "PASS",
+      "maximum_clearance_m": 0.20033425935922536,
+      "metrics": {
+        "actor_origin_backward_fd_vs_com_velocity_uncorrected": {
+          "component_max_abs_error_m_s": [
+            0.08096051961183548,
+            0.03593096882104874,
+            0.20784792304039001
+          ],
+          "component_rmse_m_s": [
+            0.03856127757640298,
+            0.016577373443714464,
+            0.14382297358532112
+          ],
+          "max_error_m_s": 0.20865898543246,
+          "rmse_m_s": 0.08650015254233326,
+          "signed_mean_error_m_s": [
+            0.03755344070118515,
+            -0.01598631008528173,
+            -0.14238894974985042
+          ]
+        },
+        "actor_origin_backward_fd_vs_prediction": {
+          "component_max_abs_error_m_s": [
+            0.08159787823894969,
+            0.03450897339164337,
+            0.2404894262801089
+          ],
+          "component_rmse_m_s": [
+            0.03857969146582368,
+            0.016883241187919305,
+            0.11733694404994043
+          ],
+          "max_error_m_s": 0.24308941479013066,
+          "rmse_m_s": 0.07197544689125232,
+          "signed_mean_error_m_s": [
+            0.037521945494847095,
+            -0.01626185566915501,
+            -0.10371781027255794
+          ]
+        },
+        "actor_origin_delta_m": [
+          0.00037220120429992676,
+          -0.0001948624849319458,
+          0.0011612176895141602
+        ],
+        "actor_origin_forward_fd_vs_com_velocity_uncorrected": {
+          "component_max_abs_error_m_s": [
+            0.0746174305677414,
+            0.03686720319092274,
+            0.1743243932723999
+          ],
+          "component_rmse_m_s": [
+            0.03870401776816736,
+            0.016904015939102377,
+            0.14338890920910644
+          ],
+          "max_error_m_s": 0.18039826959901345,
+          "rmse_m_s": 0.0863020394321506,
+          "signed_mean_error_m_s": [
+            0.03757443847212972,
+            -0.016082268272831785,
+            -0.14221968220061615
+          ]
+        },
+        "actor_origin_forward_fd_vs_prediction": {
+          "component_max_abs_error_m_s": [
+            0.07050106475093225,
+            0.043760107890574315,
+            0.222037621626982
+          ],
+          "component_rmse_m_s": [
+            0.03868715058613323,
+            0.017166293213631337,
+            0.12016814438185051
+          ],
+          "max_error_m_s": 0.2283906175265318,
+          "rmse_m_s": 0.07355669053491505,
+          "signed_mean_error_m_s": [
+            0.037509714706843014,
+            -0.016411833712431635,
+            -0.1053412161251937
+          ]
+        },
+        "actor_origin_midpoint_fd_vs_com_velocity_uncorrected": {
+          "component_max_abs_error_m_s": [
+            0.049572302494198084,
+            0.025516256922855973,
+            0.19108615815639496
+          ],
+          "component_rmse_m_s": [
+            0.03785620048772732,
+            0.016223089217136773,
+            0.14280506773316287
+          ],
+          "max_error_m_s": 0.19334476322540314,
+          "rmse_m_s": 0.08580902809803374,
+          "signed_mean_error_m_s": [
+            0.037563939586657435,
+            -0.01603428917905676,
+            -0.1423043159752333
+          ]
+        },
+        "actor_origin_midpoint_fd_vs_prediction": {
+          "component_max_abs_error_m_s": [
+            0.05004235255821174,
+            0.024080452600593612,
+            0.16512342321034132
+          ],
+          "component_rmse_m_s": [
+            0.037838745181881996,
+            0.01649852467292786,
+            0.10925803396852739
+          ],
+          "max_error_m_s": 0.17223934671216434,
+          "rmse_m_s": 0.06743216329514795,
+          "signed_mean_error_m_s": [
+            0.0375158301008451,
+            -0.016336844690793318,
+            -0.10452951319887588
+          ]
+        },
+        "actor_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500",
+        "com_backward_fd_vs_velocity": {
+          "component_max_abs_error_m_s": [
+            0.08090005750500096,
+            0.035886316862021816,
+            0.17270355317525454
+          ],
+          "component_rmse_m_s": [
+            0.038566019367631064,
+            0.01656105440047687,
+            0.14409840817493913
+          ],
+          "max_error_m_s": 0.17370191885324224,
+          "rmse_m_s": 0.08665248142488749,
+          "signed_mean_error_m_s": [
+            0.03755472219195415,
+            -0.015974918849269944,
+            -0.14287175081459438
+          ]
+        },
+        "com_delta_m": [
+          0.000374742827658453,
+          -0.00017226986684190648,
+          0.00020366224443851833
+        ],
+        "com_forward_fd_vs_velocity": {
+          "component_max_abs_error_m_s": [
+            0.07454332736389324,
+            0.03638083507067613,
+            0.18921403003609882
+          ],
+          "component_rmse_m_s": [
+            0.03870343258456756,
+            0.016874311572635012,
+            0.14391876480622406
+          ],
+          "max_error_m_s": 0.18965102577139145,
+          "rmse_m_s": 0.08659351197448872,
+          "signed_mean_error_m_s": [
+            0.03757571996289872,
+            -0.01607087703682,
+            -0.1427024832653601
+          ]
+        },
+        "com_midpoint_fd_vs_velocity": {
+          "component_max_abs_error_m_s": [
+            0.04932732474970958,
+            0.025004070460523442,
+            0.1631334307331308
+          ],
+          "component_rmse_m_s": [
+            0.03785831648861092,
+            0.016199276160348632,
+            0.14320982827192016
+          ],
+          "max_error_m_s": 0.16568034680926613,
+          "rmse_m_s": 0.08603240395173578,
+          "signed_mean_error_m_s": [
+            0.037565221077426436,
+            -0.016022897943044973,
+            -0.14278711703997726
+          ]
+        },
+        "dt_s": {
+          "maximum": 0.016666666666666666,
+          "mean": 0.016666666666666663,
+          "minimum": 0.016666666666666666
+        },
+        "maximum_angular_speed_rad_s": 1.609373762016678,
+        "maximum_com_speed_m_s": 0.18651030182365097,
+        "maximum_position_norm_m": 0.3533697835802353,
+        "mean_abs_velocity_m_s": [
+          0.03762922561218759,
+          0.016173514656863418,
+          0.14280517011129557
+        ],
+        "mean_abs_vz_m_s": 0.14280517011129557,
+        "sample_count": 120,
+        "sampling_phase": "POST_PHYSICS_STEP",
+        "signed_velocity_integral_m": 0.2832302540540696,
+        "signed_velocity_integral_vector_m": [
+          -0.07415043509875736,
+          0.03170163625618443,
+          0.2832302540540696
+        ],
+        "signed_velocity_mean_m_s": [
+          -0.03738677399937345,
+          0.015984018280429124,
+          0.14280517011129557
+        ],
+        "signed_vz_mean_m_s": 0.14280517011129557,
+        "tensor_index": 0,
+        "transition_count": 119,
+        "vx_max_m_s": 0.014425870962440968,
+        "vx_min_m_s": -0.07922781258821487,
+        "vy_max_m_s": 0.03423194959759712,
+        "vy_min_m_s": -0.0112750343978405,
+        "vz_max_m_s": 0.18560943007469177,
+        "vz_min_m_s": 0.10430152714252472
+      },
+      "signature_unchanged": true
+    }
+  },
+  "frozen_stage": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+    "expected_sha256": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9",
+    "hash_unchanged": true,
+    "root_prim": "/World",
+    "session_only": true,
+    "sha256_after": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9",
+    "sha256_before": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9",
+    "sublayers": [
+      "aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_diagnostic.usda"
+    ]
+  },
+  "inputs": {
+    "V1": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/task7_final_closure/com_velocity_v1_attempt4/report.json",
+      "sha256": "fd81e3b17dcd047240c42933c572d6aa5c9a03cd46c5d61852a286c6edc13a4d",
+      "size_bytes": 8577
+    },
+    "V2": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/task7_final_closure/com_velocity_v2/report.json",
+      "sha256": "96a4ee20f80edd4d0e3f5e9054d33fe8b0f4ecb4c643c8eebc134d2775616065",
+      "size_bytes": 8185
+    },
+    "V3_runtime": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/task7_final_closure/com_velocity_v3_sample02/runtime/aloha1_grasp_20cm_runtime.json",
+      "sha256": "7a0aa4748b79cf4aa1800a042140492a227d3eb3de7ef39e9a2c3a2be650453a",
+      "size_bytes": 156437
+    },
+    "V3_telemetry": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/task7_final_closure/com_velocity_v3_sample02/runtime/aloha1_grasp_20cm_telemetry.jsonl",
+      "sha256": "860eb477945f93715d86a23f84032a99bb8566d577f44df8587a2a7ee5937c8e",
+      "size_bytes": 16195224
+    },
+    "accepted_aggregate": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_cad_derived_five_pose_runtime_zup_attempt7.json",
+      "sha256": "d30754201cd3de9bf53b44fe1ede29e46e3f15e0da7aa55854e073a0d4d60a43",
+      "size_bytes": 3959143
+    }
+  },
+  "official_evidence": {
+    "direct_nvidia_mcp": {
+      "local_5_1_source_remains_version_authority": true,
+      "route": "DIRECT_isaac-sim-mcp_NOT_MCPJUNGLE",
+      "status": "QUERIED"
+    },
+    "post_step_api": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/extscache/omni.physx-107.3.26+107.3.3.lx64.r.cp311.u353/omni/physx/bindings/_physx.pyi",
+      "sha256": "ff13abb83480dcc707ac2ad60062306aef7a33f885d32ed4c8ee6dfea2008e79",
+      "size_bytes": 181192
+    },
+    "tensor_api": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/extscache/omni.physics.tensors-107.3.26+107.3.3.lx64.r.cp311.u353/omni/physics/tensors/impl/api.py",
+      "sha256": "5dd16f8a37eccc94ac82338d6c1127e785cccf761cae1f6f18ef03d55b0f325f",
+      "size_bytes": 444857
+    }
+  },
+  "runtime": {
+    "callback_phase": "POST_PHYSICS_STEP",
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physx": "107.3.26",
+    "subscription_pre_step_argument": false
+  },
+  "schema_version": 1,
+  "status": "PASS",
+  "task8": "NOT_RUN",
+  "velocity_semantics_status": "VERIFIED_LOCAL_PHYSX_VELOCITY_TRANSFORM_DISAGREEMENT"
+}
