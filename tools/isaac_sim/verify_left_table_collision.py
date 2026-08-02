@@ -184,6 +184,9 @@ def _begin_contact_reporting(stage: Any) -> dict[str, Any]:
     stage.GetSessionLayer().subLayerPaths.append(layer.identifier)
     old_target = stage.GetEditTarget()
     stage.SetEditTarget(Usd.EditTarget(layer))
+    scene_prim = stage.GetPrimAtPath("/World/PhysicsScene")
+    quasistatic_api = PhysxSchema.PhysxSceneQuasistaticAPI.Apply(scene_prim)
+    quasistatic_api.CreateEnableQuasistaticAttr().Set(True)
     applied = []
     for path in LEFT_BODY_PATHS:
         prim = stage.GetPrimAtPath(path)
@@ -194,6 +197,7 @@ def _begin_contact_reporting(stage: Any) -> dict[str, Any]:
         "layer": layer,
         "old_target": old_target,
         "paths": applied,
+        "quasistatic_enabled": True,
         "interface": get_physx_simulation_interface(),
     }
 
@@ -556,6 +560,7 @@ def main() -> int:
             "shoulder_end_deg": SHOULDER_END_DEG,
             "shoulder_step_deg": SHOULDER_STEP_DEG,
             "hold_steps": HOLD_STEPS,
+            "quasistatic_enabled": True,
         },
         "trials": [],
         "failure_reasons": [],

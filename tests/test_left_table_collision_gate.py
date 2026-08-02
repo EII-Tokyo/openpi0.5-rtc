@@ -76,6 +76,8 @@ def test_runtime_verifier_has_fixed_inspector_stress_contract():
         "articulation._articulation_view.set_joint_position_targets(",
         "prim.HasAPI(UsdPhysics.CollisionAPI)",
         '"collider_bounds_m"',
+        "PhysxSceneQuasistaticAPI.Apply",
+        '"quasistatic_enabled": True',
     ):
         assert required in source
     for forbidden in (
