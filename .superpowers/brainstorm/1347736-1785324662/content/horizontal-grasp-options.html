@@ -1,0 +1,79 @@
+<h2>ALOHA 横放瓶子抓取：几何与方案选择</h2>
+<p class="subtitle">共同硬约束：瓶轴 AB ∥ 桌面 XY；夹爪连线 ⟂ AB；从上方沿世界 −Z 接近，再沿 +Z 提升。</p>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">真正顶视图（沿世界 −Z 看）</div>
+    <div class="mockup-body">
+      <svg viewBox="0 0 560 310" style="width:100%;height:auto">
+        <rect x="12" y="12" width="536" height="286" rx="18" fill="#27313b"/>
+        <rect x="132" y="126" width="296" height="70" rx="35" fill="#8cc9e8" stroke="#d7f1ff" stroke-width="3"/>
+        <rect x="416" y="136" width="48" height="50" rx="12" fill="#d4d7dc"/>
+        <line x1="146" y1="111" x2="448" y2="111" stroke="#ffcd57" stroke-width="5"/>
+        <polygon points="448,111 430,102 430,120" fill="#ffcd57"/>
+        <text x="137" y="97" fill="#ffcd57" font-size="18">A（瓶底）</text>
+        <text x="423" y="97" fill="#ffcd57" font-size="18">B（瓶口）</text>
+        <text x="231" y="88" fill="#ffcd57" font-size="18">瓶轴 AB</text>
+        <rect x="248" y="42" width="64" height="62" rx="9" fill="#3f83d1" stroke="#cfe4ff" stroke-width="3"/>
+        <rect x="248" y="218" width="64" height="62" rx="9" fill="#ea8b32" stroke="#ffe1bf" stroke-width="3"/>
+        <line x1="280" y1="79" x2="280" y2="246" stroke="#7ef0a7" stroke-width="5"/>
+        <polygon points="280,246 271,228 289,228" fill="#7ef0a7"/>
+        <text x="294" y="213" fill="#7ef0a7" font-size="17">夹爪连线</text>
+        <path d="M 315 111 A 35 35 0 0 1 280 146" fill="none" stroke="#ffffff" stroke-width="3"/>
+        <text x="314" y="145" fill="#ffffff" font-size="18">90°</text>
+        <text x="38" y="286" fill="#c9d3dc" font-size="15">蓝 = left_finger；橙 = right_finger；两侧内表面朝向瓶身</text>
+      </svg>
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header">侧视图（瓶轴指向画面内/外）</div>
+    <div class="mockup-body">
+      <svg viewBox="0 0 560 310" style="width:100%;height:auto">
+        <rect x="12" y="12" width="536" height="286" rx="18" fill="#27313b"/>
+        <rect x="30" y="246" width="500" height="24" rx="4" fill="#8a6a4a"/>
+        <text x="40" y="292" fill="#e4c4a1" font-size="16">真实 table collider</text>
+        <circle cx="280" cy="212" r="34" fill="#8cc9e8" stroke="#d7f1ff" stroke-width="3"/>
+        <circle cx="280" cy="212" r="4" fill="#ffcd57"/>
+        <text x="324" y="218" fill="#d7f1ff" font-size="17">Bottle500 横放截面</text>
+        <rect x="210" y="68" width="34" height="92" rx="8" fill="#3f83d1"/>
+        <rect x="316" y="68" width="34" height="92" rx="8" fill="#ea8b32"/>
+        <rect x="218" y="42" width="124" height="38" rx="10" fill="#66788a"/>
+        <line x1="280" y1="92" x2="280" y2="180" stroke="#ff6b6b" stroke-width="5"/>
+        <polygon points="280,180 271,161 289,161" fill="#ff6b6b"/>
+        <text x="292" y="132" fill="#ff9b9b" font-size="18">接近 −Z</text>
+        <line x1="385" y1="222" x2="385" y2="125" stroke="#7ef0a7" stroke-width="5"/>
+        <polygon points="385,125 376,144 394,144" fill="#7ef0a7"/>
+        <text x="398" y="177" fill="#7ef0a7" font-size="18">提升 +Z</text>
+        <line x1="280" y1="246" x2="280" y2="212" stroke="#ffffff" stroke-dasharray="7 6" stroke-width="2"/>
+        <text x="36" y="33" fill="#c9d3dc" font-size="15">setup 可 kinematic；settle 起必须 dynamic + gravity</text>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="hybrid" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>CAD + episode 18 + Isaac FK/IK（推荐）</h3>
+      <p>CAD 决定 AB、主体圆柱抓取段和横放支撑高度；episode 18 决定 open→close→lift 的阶段和方向；Isaac 5.1 FK/IK 计算上方预抓取、−Z 下降与 +Z 提升关节目标。每个目标都能追溯，不直接照搬不同坐标系的 14D。</p>
+    </div>
+  </div>
+  <div class="option" data-choice="literal_replay" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>直接重放 episode 18 的左臂 7D</h3>
+      <p>最接近真实动作记录，但真实瓶型、桌面/底座变换、gripper 归一化与数字 Stage 不完全相同；可能无法保证世界 −Z 接近，也容易把数据延迟误当作目标。只适合诊断对照。</p>
+    </div>
+  </div>
+  <div class="option" data-choice="cad_only" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>纯 CAD 规范路径</h3>
+      <p>选择 CAD 主圆柱段中点并规划严格笛卡尔垂直路径，几何最干净；但会丢失 episode 18 的真实开合节奏和 lift-onset 依据，不适合作为第一选择。</p>
+    </div>
+  </div>
+</div>
+
+<p class="subtitle">建议选择 A。无论选择哪种方案，旧的“竖瓶 + shoulder 侧向扫入”均保持作废，Task 8 保持 NOT_RUN。</p>
