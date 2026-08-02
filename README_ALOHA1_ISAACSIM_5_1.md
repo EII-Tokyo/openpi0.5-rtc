@@ -59,11 +59,11 @@ sim-to-real dynamics model and it is not yet accepted for bottle insertion.
 | Supplier-CAD Task 7 aggregate | **FAIL** | historical physical-target result: follower_left remains PARTIAL and the prior follower_right report still contains 5 PhysicsRules and 4 RobotRules blocking findings; a new schema-only right candidate now passes RobotRules 0/0, but it does not rewrite that historical physical report or clear the remaining PhysicsRules/source-evidence boundaries |
 | Task 7 certified-pose screenshots | **PARTIAL** | follower_left: 6 raw + 6 annotated PASS; follower_right robot-local: 7 raw + 7 annotated visual PASS, while numeric runtime remains PARTIAL because mimic accuracy fails |
 | CAD render/tessellation determinism | PASS | `aloha_viper_gripper_screenshot_review.json`, `aloha_viper_finger_tessellation.json` |
-| Official exact-model source chain | **PASS** | 13/13 required Trossen, ROBOTIS, pinned Interbotix, supplier-CAD and local Isaac 5.1 sources are hash-verified; ID 6/7 conflict is retained |
-| Official parameter coverage matrix | **PASS inventory / BLOCKED candidate** | 45 source-bound records cover 12 required groups; seven narrow missing derivations contain no convenient fallback values |
+| Official exact-model source chain | **PASS** | 16/16 required Trossen, ROBOTIS, pinned Interbotix, supplier-CAD and local Isaac 5.1 sources are hash-verified; ID 6/7 conflict is retained |
+| Official parameter coverage matrix | **PASS inventory / BLOCKED candidate** | 47 source-bound records cover 12 required groups; five narrow missing derivations contain no convenient fallback values |
 | Kinematic mathematical contract | **PASS** | independent URDF FK and official Trossen POE agree at five legal samples; max translation residual `4.4841e-16 m`, max Jacobian residual `1.9581e-10`; Isaac IK was not used |
-| Dynamics mathematical contract | **PARTIAL** | all 14 inertials per follower pass finite/positive-definite/triangle/parallel-axis checks; continuous actuator envelope and PhysX drive mapping remain blocked |
-| Gripper/collider geometry contract | **PARTIAL** | linkage formula is monotonic and symmetric; 114/116 mm definition conflict and six CAD/link registration records remain unresolved |
+| Dynamics mathematical contract | **PARTIAL** | all 14 inertials per follower pass; official 12 V estimated continuous torque is XM540 `2.12 N·m` and XM430 `0.82 N·m`, explicitly 20%-of-stall estimates rather than measured thermal curves; full envelope and PhysX drive mapping remain blocked |
+| Gripper/collider geometry contract | **PARTIAL** | 42–114 mm CAD/URDF carriage range and all 11 physical-link source identities are resolved; the complete numerical hull certificate shows each correct finger's inner surface can be recessed by `0.797776 mm`, above the `0.20 mm` tessellation budget; acceptance/error budget remains blocked |
 | Task 8 optimization | **AUTHORIZED / PAUSED_AT_MODEL_PROOF_GATE** | read-only 129-mesh baseline inventory exists; no optimization candidate, Isaac runtime, or final/default asset mutation occurred |
 
 `PASS`, `FAIL`, and `PARTIAL` are literal machine-report values. A clean
@@ -105,13 +105,30 @@ its differing sleep pose is not labeled official.
 
 The source audit and parameter matrix are machine `PASS`, but this means the
 coverage is complete—not that every physical value is known. Formal candidate
-generation is currently `BLOCKED` by seven narrow records: CAD-to-link
-registration, continuous actuator envelope, the 114/116 mm gripper aperture
-definition conflict, controller-to-PhysX drive mapping, complete per-link
-collider error certificates, exact contact material properties and a derived
+generation is currently `BLOCKED` by five narrow records: the measured
+continuous torque-speed-current thermal envelope beyond ROBOTIS' exact-model
+12 V estimates, controller-to-PhysX drive mapping, a task-local collider
+acceptance/error budget, exact contact material properties and a derived
 solver/timestep error budget. No stall torque was promoted to continuous
 `maxForce`; no DYNAMIXEL integer PID was copied into PhysX stiffness/damping;
 no default friction or solver value was inserted.
+
+The ROBOTIS product pages now provide explicit estimated continuous-torque
+references: `2.12 N·m` for XM540-W270 and `0.82 N·m` for XM430-W350 at 12 V.
+Both pages state that these are estimates calculated as 20% of stall torque;
+they are not relabeled as measured thermal curves. The pinned Interbotix mode
+configuration uses `position` for the arm and `pwm` for the gripper, so the
+gripper `Current_Limit=200` (`0.538 A`) is not copied into PhysX `maxForce`.
+
+The supplier-CAD/official-URDF geometry boundary is also resolved without
+falsely splitting the fused supplier gripper solid. All 11 physical links now
+have explicit source identities and a deterministic convex-hull surface/volume
+certificate. A local contact-face calculation on the correct handed fingers
+finds that a single hull recesses parts of both inward surfaces by
+`0.7977759222 mm` (`0.0007977759222 m`), exceeding the frozen
+FreeCAD tessellation budget `0.20 mm`. This is geometric evidence for keeping
+decomposition/compound collision as an isolated diagnostic candidate, not an
+automatic final-collider promotion.
 
 The pure-math kinematic contract is `PASS`: independent URDF-chain FK agrees
 with Trossen's published POE model at home and four deterministic legal joint
@@ -128,7 +145,11 @@ Authoritative new reports:
 - `reports/aloha1_mapping/aloha1_official_parameter_matrix.json/.md`;
 - `reports/aloha1_mapping/aloha1_kinematic_contract.json/.md`;
 - `reports/aloha1_mapping/aloha1_dynamics_contract.json/.md`;
+- `reports/aloha1_mapping/aloha1_actuator_drive_source_boundary.json/.md`;
 - `reports/aloha1_mapping/aloha1_gripper_geometry_contract.json/.md`;
+- `reports/aloha1_mapping/aloha1_cad_link_identity_resolution.json/.md`;
+- `reports/aloha1_mapping/aloha1_gripper_aperture_definition_resolution.json/.md`;
+- `reports/aloha1_mapping/aloha1_official_collider_surface_certificate.json/.md`;
 - `reports/aloha1_mapping/aloha1_collider_geometry_contract.json/.md`;
 - `reports/aloha1_mapping/aloha1_official_model_candidate.json`;
 - `reports/aloha1_mapping/aloha1_official_model_runtime.json`;

@@ -2269,12 +2269,12 @@ scene design is reviewed and approved.
   experiment-led lightweight candidate plan is superseded before candidate
   authoring. Current status is
   `TASK8=AUTHORIZED_PAUSED_AT_MODEL_PROOF_GATE`.
-- Exact source audit: `PASS`; 13/13 required records are frozen by URL,
+- Exact source audit: `PASS`; 16/16 required records are frozen by URL,
   branch/commit where applicable, local path, SHA-256 and license boundary.
   Supplier STEP redistribution remains `UNKNOWN_HARD_BLOCKER` and the original
   CAD stays outside Git.
 - Parameter matrix: `PASS` coverage / `BLOCKED` formal candidate. It contains
-  45 records over 12 groups and seven narrow hard blockers, with no
+  47 records over 12 groups and five narrow hard blockers, with no
   `ENGINEERING_INFERENCE`, `TEMPORARY_UNCALIBRATED` or
   `DIAGNOSTIC_ONLY_NOT_FINAL` value admitted to the formal gate.
 - Kinematic contract: `PASS`; official Trossen POE versus independent URDF FK
@@ -2283,18 +2283,26 @@ scene design is reviewed and approved.
   five deterministic legal samples. Isaac IK/runtime was not used.
 - Left/right normalized robot-local chains match exactly with determinant
   `+1`; this does not claim a workcell installation transform.
-- Inertial contract: `PASS` for 14 source-authored links per follower;
-  dynamics aggregate remains `PARTIAL` because continuous actuator envelopes
-  and PhysX drive mapping are not yet derived. Stall torque is not used as a
-  continuous torque or PhysX maxForce.
-- Gripper linkage formula: `PASS` at 1001 samples; the Xacro carriage-center
-  range `42–114 mm` versus exact-product page `42–116 mm` remains an explicit
-  definition conflict pending CAD inner-surface proof.
-- Collider geometry contract: `PARTIAL`; deterministic FreeCAD 1.1.1 / OCCT
-  7.8.1 tessellation and existing swept/static checks pass, but
-  `gripper_bar_link`, `gripper_prop_link` and `wrist_link` still account for
-  six unresolved follower records. Existing grasp success does not promote
-  those colliders.
+- Inertial contract: `PASS` for 14 source-authored links per follower.
+  ROBOTIS exact-model 12 V product pages add estimated continuous torque
+  references of `2.12 N·m` (XM540-W270) and `0.82 N·m` (XM430-W350), each
+  explicitly disclosed as 20% of stall rather than a measured thermal curve.
+  Dynamics remains `PARTIAL` because the full torque-speed-current thermal
+  envelope and controller-to-PhysX mapping are not derived. Stall torque and
+  the gripper's `Current_Limit=200` (`0.538 A`) are not used as PhysX maxForce.
+- Gripper linkage formula: `PASS` at 1001 samples. Supplier CAD and the pinned
+  official URDF both establish the implemented `42–114 mm` carriage-center
+  interval. The exact-product page's undefined `42–116 mm` statement remains
+  a documented official-source conflict; no endpoint was fitted.
+- All 11 physical-link geometry-source identities are explicit. Fused/invalid
+  supplier B-Reps are not falsely split or repaired; byte-identical pinned
+  Interbotix meshes provide the corresponding official link source boundary.
+- Collider geometry contract: `PARTIAL`; every physical link has a complete
+  deterministic finite-sample convex-hull surface/volume certificate. The
+  correct left/right finger inward faces are recessed by up to
+  `0.0007977759222171227 m` under a single hull, above the frozen `0.0002 m`
+  tessellation budget. The remaining blocker is a task-local acceptance/error
+  budget and cooked-runtime verification, not a missing numerical certificate.
 - `aloha1_official_model_candidate.json` is `NOT_BUILT_BLOCKED` and
   `aloha1_official_model_runtime.json` is `NOT_RUN`. No Isaac process was
   launched; no diagnostic candidate directory, final/default asset or collider
