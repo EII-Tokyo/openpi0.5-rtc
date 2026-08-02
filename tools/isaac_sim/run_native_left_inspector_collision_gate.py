@@ -30,6 +30,32 @@ REPORT_EXIT_GRACE_SECONDS = 5
 TERMINATE_GRACE_SECONDS = 15
 
 
+def classify_runtime_errors(log_text: str) -> list[str]:
+    """Return unclassified error lines relevant to physics/rendering validity."""
+
+    relevant_tags = (
+        "[omni.physx",
+        "[omni.usd",
+        "[omni.kit.renderer",
+        "[carb.graphics",
+        "[gpu.foundation",
+    )
+    result: list[str] = []
+    for line in log_text.splitlines():
+        lowered = line.lower()
+        tagged_error = "[error]" in lowered and any(
+            tag in lowered for tag in relevant_tags
+        )
+        fatal_resource_error = (
+            "fatal" in lowered
+            or "out of memory" in lowered
+            or "cuda_error_out_of_memory" in lowered
+        )
+        if tagged_error or fatal_resource_error:
+            result.append(line.strip())
+    return result
+
+
 @dataclass(frozen=True)
 class TrialLaunch:
     command: list[str]
@@ -84,6 +110,8 @@ def aggregate_trial_reports(reports: list[dict[str, Any]]) -> dict[str, Any]:
             failure_reasons.append(f"trial_{index:02d}_stage_save_not_disproved")
         if report.get("real_robot_touched") is not False:
             failure_reasons.append(f"trial_{index:02d}_real_robot_touch_not_disproved")
+        if report.get("runtime_errors", []):
+            failure_reasons.append(f"trial_{index:02d}_runtime_errors")
 
     return {
         "status": "PASS" if not failure_reasons else "FAIL",
@@ -153,6 +181,18 @@ def run_gate(output_root: Path) -> dict[str, Any]:
                 "real_robot_touched": None,
                 "failure_reasons": ["missing_trial_report"],
             }
+        runtime_errors = classify_runtime_errors(
+            log_path.read_text(encoding="utf-8", errors="replace")
+        )
+        report["runtime_error_scan_complete"] = True
+        report["runtime_errors"] = runtime_errors
+        if isinstance(report.get("metrics"), dict):
+            report["metrics"]["physx_errors"] = runtime_errors
+        if runtime_errors:
+            report["status"] = "FAIL"
+            report.setdefault("failure_reasons", []).append(
+                "unclassified_runtime_errors"
+            )
         if timed_out:
             report["status"] = "FAIL"
             report.setdefault("failure_reasons", []).append("trial_timed_out")

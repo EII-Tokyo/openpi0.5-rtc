@@ -4,6 +4,7 @@ from tools.isaac_sim.left_inspector_startup import (
     LoadingStability,
     RecoveryDecision,
     RecoveryGuard,
+    selection_is_exact_anchors,
     target_change_is_isolated,
 )
 
@@ -40,6 +41,29 @@ def test_target_change_rejects_launcher_multi_selection_propagation():
     after = {"waist": 10.8, "shoulder": 10.8, "elbow": 10.8}
 
     assert not target_change_is_isolated(before, after, "shoulder", 10.8)
+
+
+def test_target_change_requires_an_actual_finite_change():
+    same = {"waist": 0.0, "shoulder": 20.0}
+    assert not target_change_is_isolated(same, same, "shoulder", 20.0)
+    assert not target_change_is_isolated(
+        {"waist": 0.0, "shoulder": 1.0},
+        {"waist": 0.0, "shoulder": float("nan")},
+        "shoulder",
+        float("nan"),
+    )
+
+
+def test_interaction_selection_requires_exact_anchor_sets():
+    anchors = ("/root", "/table")
+    assert selection_is_exact_anchors(
+        ["/root", "/table"], ["/table", "/root"], anchors
+    )
+    assert not selection_is_exact_anchors(["/root", "/table"], [], anchors)
+    assert not selection_is_exact_anchors(["/root"], ["/root"], anchors)
+    assert not selection_is_exact_anchors(
+        ["/root", "/table"], ["/root", "/table", "/extra"], anchors
+    )
 
 
 def test_runtime_script_has_required_order_and_safety_contract():
@@ -89,6 +113,11 @@ def test_runtime_isolates_joint_selection_only_after_association():
     assert "set_selected_prim_paths(list(INSPECTED_PATHS), False)" in source
     assert "_handler_selection.get_selection()" in source
     assert "CODEX_INSPECTOR_INTERACTION_SELECTION_ISOLATED" in source
+    assert "EXPECTED_ASSOCIATED_PATHS = 50" in source
+    assert "len(selected_paths) != EXPECTED_ASSOCIATED_PATHS" in source
+    assert "len(joint_rows) != EXPECTED_JOINT_ROWS" in source
+    assert "_sha256(stage_file) != EXPECTED_STAGE_SHA256" in source
+    assert "app.post_quit()" in source
     assert source.index("_inspector_toolbar._select_current()") < source.index(
         "await _isolate_interaction_selection"
     )

@@ -77,6 +77,21 @@ def settled_support_step(
     )
 
 
+def support_sequence_is_complete(
+    native_steps: int,
+    supported_steps: int,
+    consecutive_supported_steps: int,
+    expected_steps: int = MIN_PERSISTENT_CONTACT_STEPS,
+) -> bool:
+    """Require one exact, gap-free supported hold sequence."""
+
+    return (
+        native_steps == expected_steps
+        and supported_steps == expected_steps
+        and consecutive_supported_steps == expected_steps
+    )
+
+
 def evaluate_trial(metrics: TrialMetrics) -> dict[str, Any]:
     """Evaluate one trial without importing Isaac Sim or USD modules."""
 

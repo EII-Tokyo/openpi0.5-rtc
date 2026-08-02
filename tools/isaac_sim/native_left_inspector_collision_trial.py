@@ -27,11 +27,14 @@ from tools.isaac_sim.left_table_collision_gate import (
     TrialMetrics,
     evaluate_trial,
     settled_support_step,
+    support_sequence_is_complete,
 )
-from tools.isaac_sim.left_inspector_startup import target_change_is_isolated
+from tools.isaac_sim.left_inspector_startup import (
+    selection_is_exact_anchors,
+    target_change_is_isolated,
+)
 from tools.isaac_sim.verify_left_table_collision import (
     LEFT_BODY_PATHS,
-    _capture_verified_contact,
     _live_finger_geometry,
     _preflight,
 )
@@ -180,10 +183,10 @@ async def _isolate_interaction_selection(
         await app.next_update_async()
     stage_selection = list(context.get_selection().get_selected_prim_paths())
     inspector_selection = list(window._handler_selection.get_selection() or [])
-    selected_joint_paths = [
-        path for path in inspector_selection if "/joints/" in path
-    ]
-    if stage_selection != list(INSPECTED_PATHS) or selected_joint_paths:
+    selected_joint_paths = [path for path in inspector_selection if "/joints/" in path]
+    if not selection_is_exact_anchors(
+        stage_selection, inspector_selection, INSPECTED_PATHS
+    ):
         raise RuntimeError(
             "native Inspector interaction selection did not isolate to anchors: "
             f"stage={stage_selection} inspector={inspector_selection}"
@@ -257,6 +260,8 @@ def _new_accumulator() -> dict[str, Any]:
         "maximum_visual_collision_error_m": 0.0,
         "physical_contact_steps": 0,
         "supported_contact_steps": 0,
+        "consecutive_supported_contact_steps": 0,
+        "maximum_consecutive_supported_contact_steps": 0,
         "target_contact_seen": False,
         "native_steps": 0,
         "samples": [],
@@ -299,6 +304,14 @@ def _sample_step(stage: Any, interface: Any, accumulator: dict[str, Any]) -> Non
     )
     accumulator["physical_contact_steps"] += int(physical)
     accumulator["supported_contact_steps"] += int(supported)
+    if supported:
+        accumulator["consecutive_supported_contact_steps"] += 1
+    else:
+        accumulator["consecutive_supported_contact_steps"] = 0
+    accumulator["maximum_consecutive_supported_contact_steps"] = max(
+        accumulator["maximum_consecutive_supported_contact_steps"],
+        accumulator["consecutive_supported_contact_steps"],
+    )
     if accumulator["native_steps"] in (1, 30, 60, 90, 120, 150, 180):
         accumulator["samples"].append(
             {
@@ -339,6 +352,52 @@ async def _wait_native_run(
     raise TimeoutError(
         "native Inspector authoring simulation did not start or finish within bound"
     )
+
+
+async def _capture_verified_contact_async(app: Any, output_path: Path) -> None:
+    import numpy as np
+    from isaacsim.sensors.camera import Camera
+    from omni.kit.viewport.utility import capture_viewport_to_file, get_active_viewport
+
+    from tools.aloha1_mapping.isaac_screenshot import look_at_orientation_wxyz
+
+    camera = Camera(
+        prim_path="/World/CollisionGateSessionCamera",
+        name="collision_gate_session_camera",
+        resolution=(1280, 720),
+        frequency=60,
+    )
+    camera.initialize()
+    camera.set_clipping_range(0.01, 10.0)
+    position = np.asarray((1.1, -1.1, 0.8), dtype=np.float64)
+    target = np.asarray((0.0, 0.0, 0.1), dtype=np.float64)
+    camera.set_world_pose(
+        position=position,
+        orientation=look_at_orientation_wxyz(position, target),
+        camera_axes="usd",
+    )
+    viewport = get_active_viewport()
+    if viewport is None:
+        raise RuntimeError("active viewport unavailable for evidence capture")
+    viewport.camera_path = Sdf.Path(camera.prim_path)
+    for _ in range(30):
+        await app.next_update_async()
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    helper = capture_viewport_to_file(viewport, file_path=str(output_path))
+    previous_size = -1
+    stable_updates = 0
+    for _ in range(360):
+        await app.next_update_async()
+        if not output_path.exists():
+            continue
+        size = output_path.stat().st_size
+        stable_updates = stable_updates + 1 if size > 0 and size == previous_size else 0
+        previous_size = size
+        if stable_updates >= 3:
+            break
+    del helper
+    if not output_path.exists() or output_path.stat().st_size == 0:
+        raise RuntimeError("verified contact screenshot was not created")
 
 
 async def _run_trial() -> None:
@@ -517,6 +576,18 @@ async def _run_trial() -> None:
             physx_errors=[],
         )
         decision = evaluate_trial(metrics)
+        support_sequence_complete = support_sequence_is_complete(
+            int(hold["native_steps"]),
+            int(hold["supported_contact_steps"]),
+            int(hold["maximum_consecutive_supported_contact_steps"]),
+        )
+        if not support_sequence_complete:
+            decision["status"] = "FAIL"
+            decision["collision_hold_verified"] = False
+            decision["persistent_contact_ok"] = False
+            decision["failure_reasons"].append(
+                "incomplete_consecutive_support_sequence"
+            )
         report.update(
             {
                 **decision,
@@ -530,6 +601,10 @@ async def _run_trial() -> None:
                 "hold_supported_contact_steps": int(
                     hold["supported_contact_steps"]
                 ),
+                "maximum_consecutive_supported_contact_steps": int(
+                    hold["maximum_consecutive_supported_contact_steps"]
+                ),
+                "support_sequence_complete": support_sequence_complete,
                 "approach_samples": approach["samples"],
                 "hold_samples": hold["samples"],
                 "joint_row_count": len(joint_rows),
@@ -547,7 +622,7 @@ async def _run_trial() -> None:
             }
         )
         if report["status"] == "PASS":
-            _capture_verified_contact(app, screenshot_path)
+            await _capture_verified_contact_async(app, screenshot_path)
             report["screenshot"] = str(screenshot_path)
             report["screenshot_nonempty"] = (
                 screenshot_path.exists() and screenshot_path.stat().st_size > 0

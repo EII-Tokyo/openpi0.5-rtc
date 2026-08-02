@@ -5,6 +5,7 @@ import pytest
 from tools.isaac_sim.run_native_left_inspector_collision_gate import (
     aggregate_trial_reports,
     build_trial_launch,
+    classify_runtime_errors,
 )
 
 
@@ -59,7 +60,6 @@ def test_native_trial_is_disposable_and_never_changes_robot_or_stage():
         ".play(",
         "set_joint_position",
         "set_joint_value",
-        "set_world_pose",
         "set_local_pose",
         "set_gains",
         "contactOffset",
@@ -69,6 +69,7 @@ def test_native_trial_is_disposable_and_never_changes_robot_or_stage():
         "192.168.1.103",
     ):
         assert forbidden not in source
+    assert "camera.set_world_pose" in source
 
 
 def test_runner_builds_full_kit_launch_with_unique_trial_environment(tmp_path):
@@ -125,6 +126,20 @@ def test_runner_terminates_only_completed_disposable_child_after_report():
         assert required in source
 
 
+def test_runner_fails_closed_on_relevant_runtime_errors_only():
+    log = "\n".join(
+        (
+            "[Error] [isaacsim.ros2.bridge] bridge unavailable",
+            "[Error] [omni.physx.plugin] invalid collision state",
+            "[Error] [omni.kit.renderer] device lost",
+        )
+    )
+    assert classify_runtime_errors(log) == [
+        "[Error] [omni.physx.plugin] invalid collision state",
+        "[Error] [omni.kit.renderer] device lost",
+    ]
+
+
 def test_native_trial_exercises_single_joint_inspector_callback():
     source = TRIAL_SCRIPT.read_text(encoding="utf-8")
 
@@ -137,6 +152,9 @@ def test_native_trial_exercises_single_joint_inspector_callback():
         '"selected_joint_paths_after_isolation"',
         '"supported_contact_steps"',
         '"hold_supported_contact_steps"',
+        '"maximum_consecutive_supported_contact_steps"',
+        "support_sequence_is_complete",
+        "async def _capture_verified_contact_async",
         '"drive_targets_before"',
         '"drive_targets_after_single_joint_edit"',
         '"drive_targets_after_probe_restore"',
@@ -145,3 +163,4 @@ def test_native_trial_exercises_single_joint_inspector_callback():
         "prev=previous_target",
     ):
         assert required in source
+    assert "_capture_verified_contact(app" not in source

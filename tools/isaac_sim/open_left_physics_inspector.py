@@ -1,6 +1,8 @@
 """Open the approved ALOHA Stage and prepare follower_left Physics Inspector."""
 
 import asyncio
+import hashlib
+from pathlib import Path
 import traceback
 
 import omni.kit.actions.core
@@ -15,6 +17,7 @@ from tools.isaac_sim.left_inspector_startup import (
     LoadingStability,
     RecoveryDecision,
     RecoveryGuard,
+    selection_is_exact_anchors,
 )
 
 
@@ -23,16 +26,28 @@ TARGET_STAGE = (
     "diagnostics/cad_derived_full_body_colliders/1.0/"
     "aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_diagnostic.usda"
 )
+EXPECTED_STAGE_SHA256 = (
+    "165093c3e7bf359b2ef5dbb595feb4ed976b194844830e70f387d6b882c1d6f2"
+)
 LEFT_ARTICULATION_ROOT = "/World/follower_left/vx300s_left/root_joint"
 TABLE_COLLIDER = "/World/environment/worldBody/user_confirmed_table"
 INSPECTED_PATHS = (LEFT_ARTICULATION_ROOT, TABLE_COLLIDER)
 LEFT_ROBOT_ROOT = "/World/follower_left/vx300s_left"
 INSPECTOR_WINDOW_TITLE = "Physics Inspector: ###PhysicsInspector1"
 EXPECTED_JOINT_ROWS = 13
+EXPECTED_ASSOCIATED_PATHS = 50
 STABLE_LOADING_SAMPLES = 5
 LOADING_TIMEOUT_UPDATES = 2400
 ACCEPTANCE_UPDATES = 180
 MAX_RECOVERIES = 1
+
+
+def _sha256(file_path: Path) -> str:
+    digest = hashlib.sha256()
+    with file_path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 async def _wait_for_stable_loading(app, context, phase: str) -> tuple[str, int, int]:
@@ -124,10 +139,9 @@ async def _isolate_interaction_selection(app, context, inspector_window) -> None
     inspector_selection = list(
         inspector_window._handler_selection.get_selection() or []
     )
-    selected_joint_paths = [
-        path for path in inspector_selection if "/joints/" in path
-    ]
-    if stage_selection != list(INSPECTED_PATHS) or selected_joint_paths:
+    if not selection_is_exact_anchors(
+        stage_selection, inspector_selection, INSPECTED_PATHS
+    ):
         raise RuntimeError(
             "Inspector interaction selection did not isolate to anchors: "
             f"stage={stage_selection} inspector={inspector_selection}"
@@ -146,10 +160,14 @@ async def _prepare_left_inspector() -> None:
     context = omni.usd.get_context()
     action_registry = omni.kit.actions.core.get_action_registry()
     inspector_window = None
+    accepted = False
 
     try:
         await app.next_update_async()
         timeline.stop()
+        stage_file = Path(TARGET_STAGE)
+        if _sha256(stage_file) != EXPECTED_STAGE_SHA256:
+            raise RuntimeError("Approved Stage hash changed before GUI open")
         opened = context.open_stage(TARGET_STAGE)
         print(
             f"CODEX_STAGE_OPEN_REQUEST opened={opened} target={TARGET_STAGE}",
@@ -217,11 +235,9 @@ async def _prepare_left_inspector() -> None:
                     app, context, inspector_window, stage
                 )
             elif decision is RecoveryDecision.FAIL:
-                print(
-                    "CODEX_INSPECTOR_RECOVERY_FAILED reason=second_disabled_state",
-                    flush=True,
+                raise RuntimeError(
+                    "Inspector entered DISABLED twice during guarded recovery"
                 )
-                return
 
         final_state = inspector_window._supportui_private.get_inspector_state()
         selected_label = (
@@ -262,10 +278,14 @@ async def _prepare_left_inspector() -> None:
         expected_label = f"{LEFT_ARTICULATION_ROOT} (+{len(selected_paths) - 1})"
         if selected_label != expected_label:
             raise RuntimeError(f"Inspector selected unexpected path: {selected_label}")
-        if len(joint_rows) < EXPECTED_JOINT_ROWS:
+        if len(selected_paths) != EXPECTED_ASSOCIATED_PATHS:
             raise RuntimeError(
-                f"Inspector exposed {len(joint_rows)} joint rows; expected at least "
-                f"{EXPECTED_JOINT_ROWS}"
+                "Inspector association path count mismatch: "
+                f"{len(selected_paths)}"
+            )
+        if len(joint_rows) != EXPECTED_JOINT_ROWS:
+            raise RuntimeError(
+                f"Inspector joint row count mismatch: {len(joint_rows)}"
             )
         expected_control = str(
             int(pxsupportui.PhysXInspectorModelControlType.JOINT_DRIVE)
@@ -288,9 +308,9 @@ async def _prepare_left_inspector() -> None:
             (name, path) for name, path in rows_after_clear if "/joints/" in path
         ]
         state_after_clear = inspector_window._supportui_private.get_inspector_state()
-        if len(joint_rows_after_clear) < EXPECTED_JOINT_ROWS:
+        if len(joint_rows_after_clear) != EXPECTED_JOINT_ROWS:
             raise RuntimeError(
-                "Inspector lost joint rows after clearing interaction selection: "
+                "Inspector joint rows changed after isolating interaction selection: "
                 f"{len(joint_rows_after_clear)}"
             )
         if state_after_clear != pxsupportui.PhysXInspectorModelState.AUTHORING:
@@ -298,6 +318,9 @@ async def _prepare_left_inspector() -> None:
                 "Inspector left AUTHORING after clearing interaction selection: "
                 f"{state_after_clear}"
             )
+        if _sha256(stage_file) != EXPECTED_STAGE_SHA256:
+            raise RuntimeError("Approved Stage hash changed before GUI handoff")
+        accepted = True
         print(
             "CODEX_SINGLE_INSPECTOR_ACCEPTED "
             f"paths={selected_paths} label={selected_label} "
@@ -311,6 +334,9 @@ async def _prepare_left_inspector() -> None:
     finally:
         timeline.stop()
         print(f"CODEX_TIMELINE_STOPPED {not timeline.is_playing()}", flush=True)
+        if not accepted:
+            print("CODEX_HANDOFF_REJECTED quitting=True", flush=True)
+            app.post_quit()
 
 
 asyncio.ensure_future(_prepare_left_inspector())
