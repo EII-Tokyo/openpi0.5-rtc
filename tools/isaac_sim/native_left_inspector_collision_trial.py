@@ -27,6 +27,7 @@ from tools.isaac_sim.left_table_collision_gate import (
     TrialMetrics,
     evaluate_trial,
 )
+from tools.isaac_sim.left_inspector_startup import target_change_is_isolated
 from tools.isaac_sim.verify_left_table_collision import (
     LEFT_BODY_PATHS,
     _capture_verified_contact,
@@ -168,6 +169,49 @@ async def _bind_paths(app: Any, context: Any, window: Any, stage: Any) -> list[s
     for _ in range(20):
         await app.next_update_async()
     return paths
+
+
+async def _clear_transient_selection(
+    app: Any, context: Any, window: Any
+) -> dict[str, list[str]]:
+    context.get_selection().set_selected_prim_paths([], False)
+    for _ in range(20):
+        await app.next_update_async()
+    stage_selection = list(context.get_selection().get_selected_prim_paths())
+    inspector_selection = list(window._handler_selection.get_selection() or [])
+    if stage_selection or inspector_selection:
+        raise RuntimeError(
+            "native Inspector interaction selection did not clear: "
+            f"stage={stage_selection} inspector={inspector_selection}"
+        )
+    return {
+        "stage_selection_after_clear": stage_selection,
+        "inspector_selection_after_clear": inspector_selection,
+    }
+
+
+def _drive_targets(
+    stage: Any, joint_rows: list[tuple[str, str]]
+) -> dict[str, float]:
+    result: dict[str, float] = {}
+    for name, path in joint_rows:
+        prim = stage.GetPrimAtPath(path)
+        if prim.IsA(UsdPhysics.RevoluteJoint):
+            drive = UsdPhysics.DriveAPI.Get(prim, "angular")
+        elif prim.IsA(UsdPhysics.PrismaticJoint):
+            drive = UsdPhysics.DriveAPI.Get(prim, "linear")
+        else:
+            continue
+        attr = drive.GetTargetPositionAttr()
+        value = attr.Get() if attr else None
+        if value is not None:
+            result[name] = float(value)
+    return result
+
+
+class _InspectorValueModel:
+    def __init__(self, value: float):
+        self.as_float = value
 
 
 def _configure_left(window: Any) -> None:
@@ -349,17 +393,44 @@ async def _run_trial() -> None:
         if state != pxsupportui.PhysXInspectorModelState.AUTHORING:
             raise RuntimeError(f"native Inspector not in AUTHORING: {state}")
 
+        selection_evidence = await _clear_transient_selection(
+            app, context, left_window
+        )
+        rows_after_clear = _collect_rows(left_window._model_inspector)
+        joint_rows_after_clear = [
+            (name, path) for name, path in rows_after_clear if "/joints/" in path
+        ]
+        if len(joint_rows_after_clear) < EXPECTED_JOINT_ROWS:
+            raise RuntimeError(
+                "native Inspector lost joint rows after selection clear: "
+                f"{len(joint_rows_after_clear)}"
+            )
+
         shoulder = stage.GetPrimAtPath(SHOULDER_JOINT)
         drive = UsdPhysics.DriveAPI.Get(shoulder, "angular")
         target_attr = drive.GetTargetPositionAttr()
         previous_target = float(target_attr.Get())
         simulation = left_window._inspector._inspector_simulation
         approach = _new_accumulator()
-        omni.kit.commands.execute(
-            "ChangeProperty",
-            prop_path=target_attr.GetPath(),
-            value=APPROACH_TARGET_DEG,
-            prev=previous_target,
+        drive_targets_before = _drive_targets(stage, joint_rows_after_clear)
+        left_window._inspector_panel._delegate_tree._on_value_changed(
+            _InspectorValueModel(APPROACH_TARGET_DEG), SHOULDER_JOINT
+        )
+        drive_targets_after_single_joint_edit = _drive_targets(
+            stage, joint_rows_after_clear
+        )
+        single_joint_target_isolated = target_change_is_isolated(
+            drive_targets_before,
+            drive_targets_after_single_joint_edit,
+            "shoulder",
+            APPROACH_TARGET_DEG,
+        )
+        if not single_joint_target_isolated:
+            raise RuntimeError(
+                "native Inspector propagated the shoulder target to other joints"
+            )
+        simulation.start_authoring_simulation(
+            "drive:angular:physics:targetPosition"
         )
         await _wait_native_run(
             app, simulation, stage, edit_state["interface"], approach
@@ -429,6 +500,12 @@ async def _run_trial() -> None:
                 "hold_samples": hold["samples"],
                 "joint_row_count": len(joint_rows),
                 "inspector_selected_paths": selected_paths,
+                **selection_evidence,
+                "drive_targets_before": drive_targets_before,
+                "drive_targets_after_single_joint_edit": (
+                    drive_targets_after_single_joint_edit
+                ),
+                "single_joint_target_isolated": single_joint_target_isolated,
                 "preflight": preflight,
             }
         )
