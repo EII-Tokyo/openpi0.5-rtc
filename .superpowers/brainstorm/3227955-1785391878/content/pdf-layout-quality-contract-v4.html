@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ALOHA 报告 PDF 版式质量合同 v4</title>
+<style>
+  :root{--ink:#18212b;--muted:#65717e;--blue:#2268a8;--cyan:#42a6bd;--orange:#e9903b;--red:#c84a4a;--paper:#fff;--bg:#e9edf1;--line:#cad2da}
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans CJK SC","Microsoft YaHei",sans-serif}
+  .wrap{max-width:1500px;margin:auto;padding:32px}.title{display:flex;justify-content:space-between;align-items:end;margin-bottom:22px}
+  h1{font-size:30px;margin:0 0 7px}.sub{color:var(--muted);font-size:15px}.badge{background:#183f63;color:white;padding:8px 14px;border-radius:20px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}.card{background:white;border-radius:14px;padding:22px;box-shadow:0 8px 24px #1d304017}
+  h2{font-size:20px;margin:0 0 16px}.pages{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .page{aspect-ratio:210/297;background:#fff;border:1px solid #aeb8c1;box-shadow:0 5px 13px #23334420;padding:8%;position:relative;overflow:hidden}
+  .page:after{content:attr(data-page);position:absolute;bottom:3%;left:0;right:0;text-align:center;font:10px serif;color:#777}
+  .ph{height:7px;background:#ced5db;border-radius:2px;margin-bottom:6px}.ph.w80{width:80%}.ph.w55{width:55%}
+  .badhero{height:71%;background:linear-gradient(145deg,#6d7781,#b8c0c7);display:flex;align-items:center;justify-content:center;color:white;font-size:23px;margin:10px 0}
+  .goodhero{height:38%;background:linear-gradient(145deg,#1d527f,#75bdcb);display:flex;align-items:center;justify-content:center;color:white;font-size:20px;margin:10px 0}
+  .label{display:inline-block;padding:5px 10px;border-radius:12px;font-size:12px;font-weight:700;margin-bottom:8px}.bad{background:#ffe4e4;color:#9e2727}.good{background:#ddf3e8;color:#226f4c}
+  .rulegrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.rule{border:1px solid var(--line);border-radius:10px;padding:12px;min-height:92px}
+  .rule b{display:block;color:var(--blue);font-size:21px}.rule span{font-size:12px;color:var(--muted);line-height:1.45}
+  table{border-collapse:collapse;width:100%;font-size:13px}th,td{border-bottom:1px solid #d9dfe4;padding:9px 8px;text-align:left;vertical-align:top}th{background:#f3f6f8}
+  .pipeline{display:flex;gap:7px;align-items:center;flex-wrap:wrap}.step{background:#edf4f9;border:1px solid #b8d0e1;border-radius:8px;padding:9px 10px;font-size:12px}.arr{color:#82909c}
+  .foot{margin-top:22px;padding:16px 20px;background:#183f63;color:#eef8ff;border-radius:12px;display:flex;justify-content:space-between;gap:20px}
+  .foot b{color:#8ad7e8}.small{font-size:12px;color:var(--muted);line-height:1.6}
+  @media(max-width:1000px){.grid,.pages{grid-template-columns:1fr}.rulegrid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body><div class="wrap">
+  <div class="title"><div><h1>ALOHA 现阶段报告｜PDF 版式质量合同 v4</h1><div class="sub">调研目标：让每一页都有信息密度、图文关系和证据角色，杜绝“大图 + 两行字 + 大片空白”。</div></div><div class="badge">待确认设计 · 尚未生成正式报告</div></div>
+  <div class="grid">
+    <section class="card">
+      <h2>一眼判断：不合格页 vs 合格页</h2>
+      <div class="pages">
+        <div><span class="label bad">禁止</span><div class="page" data-page="12"><div class="ph w55"></div><div class="badhero">图片占页面 71%</div><div class="ph w80"></div><div class="ph w55"></div></div><p class="small">正文只剩约两行；图未拆分；图注和结论脱节；页面视觉重心失衡。</p></div>
+        <div><span class="label good">目标</span><div class="page" data-page="12"><div class="ph w55"></div><div class="ph"></div><div class="ph w80"></div><div class="goodhero">标准图高 ≤ 42%</div><div class="ph"></div><div class="ph"></div><div class="ph w80"></div><div class="ph"></div><div class="ph w55"></div></div><p class="small">图、图注、数据解释和结论同页闭环；保留足够正文，不制造“半空白页”。</p></div>
+      </div>
+    </section>
+    <section class="card">
+      <h2>硬性尺寸与页面密度</h2>
+      <div class="rulegrid">
+        <div class="rule"><b>≤ 42%</b><span>普通单图最大高度占正文区比例；始终保持纵横比。</span></div>
+        <div class="rule"><b>≤ 62%</b><span>仅封面主图、章节视觉页可放宽，且必须有明确叙事目的。</span></div>
+        <div class="rule"><b>≥ 30%</b><span>普通图文页的正文/表格有效信息区下限。</span></div>
+        <div class="rule"><b>≥ 5 行</b><span>标题或大图前后至少保留可读正文；不足则整体换页或重排。</span></div>
+        <div class="rule"><b>2–4 图</b><span>同类网站截图组成网格，统一裁剪和标注，避免单张截图铺满。</span></div>
+        <div class="rule"><b>≥ 9 pt</b><span>图内最终可见文字；表格不得靠无限缩小字体硬塞。</span></div>
+      </div>
+      <h2 style="margin-top:20px">浮动体策略</h2>
+      <table>
+        <tr><th>对象</th><th>执行约束</th><th>目的</th></tr>
+        <tr><td>普通图片/表格</td><td>优先页顶、页底或浮动页；不普遍强制“原地放置”</td><td>让排版器有空间组合正文</td></tr>
+        <tr><td>章节边界</td><td>设置浮动边界，防止上一章图片漂入下一章</td><td>保证证据归属清楚</td></tr>
+        <tr><td>标题与图组</td><td>预留最小垂直空间；不足时整块移到下一页</td><td>避免标题后只剩 1–2 行</td></tr>
+        <tr><td>异常页</td><td>自动渲染逐页检查；低信息密度页进入人工复核清单</td><td>在交付前发现空白与失衡</td></tr>
+      </table>
+    </section>
+    <section class="card">
+      <h2>图像的四种证据身份</h2>
+      <table>
+        <tr><th>类型</th><th>允许用途</th><th>必须标注</th></tr>
+        <tr><td>真实设备照片</td><td>系统构成、设备状态、现场环境</td><td>来源、时间/状态；sleep 照片不表述为执行瞬间</td></tr>
+        <tr><td>网站真实截图</td><td>证明数据管理、编辑、检索、质检能力</td><td>页面功能；遮盖账户、地址、密钥、设备标识</td></tr>
+        <tr><td>数据生成图表</td><td>数据规模、训练曲线、实验与问题统计</td><td>数据来源、统计口径、不确定性</td></tr>
+        <tr><td>生成式插图</td><td>封面视觉、任务概念、未来方案表达</td><td><b>“概念示意图”</b>；不得作为实验、设备或结果证据</td></tr>
+      </table>
+      <p class="small">生成图形能力用于提高叙事表现力，不生成看似真实的机器人测试照片，不生成不存在的曲线、截图或成功案例。</p>
+    </section>
+    <section class="card">
+      <h2>交付前自动预检流水线</h2>
+      <div class="pipeline">
+        <span class="step">统计与图表重建</span><span class="arr">→</span>
+        <span class="step">XeLaTeX × 2</span><span class="arr">→</span>
+        <span class="step">引用/缺图/溢出扫描</span><span class="arr">→</span>
+        <span class="step">PDF 结构检查</span><span class="arr">→</span>
+        <span class="step">逐页转 PNG</span><span class="arr">→</span>
+        <span class="step">空白率与视觉复核</span>
+      </div>
+      <table style="margin-top:15px">
+        <tr><th>检测项</th><th>不通过条件</th><th>修复方式</th></tr>
+        <tr><td>图文比例</td><td>普通页正文不足 5 行，或图高超过约束</td><td>缩图、拆图、改为网格、移动至相邻页</td></tr>
+        <tr><td>空白页</td><td>非封面/目录/章节页出现低内容覆盖</td><td>回查浮动体与强制换页</td></tr>
+        <tr><td>清晰度</td><td>最终尺寸下照片/截图不足 300 dpi</td><td>换原图或缩小印刷尺寸，禁止虚假放大</td></tr>
+        <tr><td>可读性</td><td>图内文字小于 9 pt、表格缩到难读</td><td>横向页、长表、拆表或重绘矢量图</td></tr>
+      </table>
+    </section>
+  </div>
+  <div class="foot"><div><b>版式核心原则</b><br>每张图都要回答一个问题；每个数据都要有来源；每页都要形成“证据—解释—结论”的闭环。</div><div>视觉入口：<b>http://localhost:60048/pdf-layout-quality-contract-v4.html</b></div></div>
+</div></body></html>

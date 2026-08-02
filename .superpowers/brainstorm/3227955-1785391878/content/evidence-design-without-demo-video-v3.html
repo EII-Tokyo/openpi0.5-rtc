@@ -1,0 +1,80 @@
+<h2>修正版证据设计｜不依赖现场演示视频</h2>
+<p class="subtitle">现场展示没有完整录像和计数表，因此不设计“演示视频证明页”。报告用可核验的工程数据证明工作量，用保守文字记录现场观察。</p>
+
+<div class="mockup">
+  <div class="mockup-header">证据分为三档</div>
+  <div class="mockup-body" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+    <div style="background:#dcfce7;padding:15px;border-radius:9px">
+      <div class="label">A级｜可直接核验</div>
+      <h3>工作量与系统建设</h3>
+      <ul>
+        <li>数据集数量、轨迹数、总时长、相机数</li>
+        <li>采集软件功能与测试数量</li>
+        <li>数据平台真实页面截图</li>
+        <li>训练次数、方法类别、训练时长、计算资源</li>
+        <li>实验曲线与模型迭代记录</li>
+      </ul>
+    </div>
+    <div style="background:#fef3c7;padding:15px;border-radius:9px">
+      <div class="label">B级｜现场观察</div>
+      <h3>阶段能力说明</h3>
+      <ul>
+        <li>连续展示约 1 小时</li>
+        <li>粗略估计约 2 瓶/分钟</li>
+        <li>表现出初步泛化与长程运行能力</li>
+      </ul>
+      <p><b>固定脚注：</b>无完整录像、计数表和正式测试记录，不作为统计验收值。</p>
+    </div>
+    <div style="background:#dbeafe;padding:15px;border-radius:9px">
+      <div class="label">C级｜说明性素材</div>
+      <h3>帮助专家理解</h3>
+      <ul>
+        <li>正式 sleep 状态设备照片</li>
+        <li>采集数据的静态样例图</li>
+        <li>双臂任务 TikZ 示意图</li>
+        <li>毫米级插管精度示意图</li>
+      </ul>
+      <p>不把训练数据样例称为现场展示证据。</p>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>正文页面重新分配：约 26–36 页</h3>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+    <div class="placeholder"><b>封面/摘要</b><br>正式设备照片</div>
+    <div class="placeholder"><b>任务难度</b><br>双臂长程流程示意</div>
+    <div class="placeholder"><b>当前能力</b><br>五阶段能力表，不放演示帧</div>
+    <div class="placeholder"><b>现场观察</b><br>一页观察值与证据边界</div>
+    <div class="placeholder"><b>数据采集软件</b><br>功能矩阵、流程与测试</div>
+    <div class="placeholder"><b>数据规模</b><br>总时长、轨迹和任务报表</div>
+    <div class="placeholder"><b>数据编辑平台</b><br>真实网站截图组图</div>
+    <div class="placeholder"><b>数据处理工作量</b><br>裁剪、标签与导出统计</div>
+    <div class="placeholder"><b>训练方法</b><br>方法类别和实验矩阵</div>
+    <div class="placeholder"><b>训练投入</b><br>次数、时长、计算资源</div>
+    <div class="placeholder"><b>结果与问题</b><br>无盖空拧、倒抓瓶子</div>
+    <div class="placeholder"><b>未来一年</b><br>数据、基础模型、反馈优化、插管清洗</div>
+  </div>
+</div>
+
+<div class="mockup">
+  <div class="mockup-header">“已经实现完整流程”如何呈现</div>
+  <div class="mockup-body">
+    <div style="display:flex;align-items:center;gap:7px;justify-content:center;flex-wrap:wrap">
+      <div style="background:#dbeafe;padding:12px;border-radius:8px">随机选择瓶子</div><b>→</b>
+      <div style="background:#dbeafe;padding:12px;border-radius:8px">左爪抓瓶</div><b>→</b>
+      <div style="background:#ede9fe;padding:12px;border-radius:8px">右爪旋下瓶盖</div><b>→</b>
+      <div style="background:#dcfce7;padding:12px;border-radius:8px">左臂投放瓶子</div><b>→</b>
+      <div style="background:#dcfce7;padding:12px;border-radius:8px">右臂投放瓶盖</div>
+    </div>
+    <p style="margin-top:14px">这是任务流程示意和能力说明，不伪装成现场录像。每个阶段配“难点—当前做法—已知问题”三列表。</p>
+  </div>
+</div>
+
+<div class="option" data-choice="approve-v3-no-demo-video" onclick="toggleSelect(this)">
+  <div class="letter">✓</div>
+  <div class="content">
+    <h3>批准无演示视频版本</h3>
+    <p>用数据、平台、软件和训练记录证明工作量；现场结果只作为明确标注的观察值。</p>
+  </div>
+</div>

@@ -1,0 +1,61 @@
+<h2>第一年度总结：选择主叙事</h2>
+<p class="subtitle">面向不熟悉源代码和专业缩写的验收专家。三种方案都保留数据、模型、实验、结果与未来计划，但信息优先级不同。</p>
+
+<div class="cards">
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:18px;background:linear-gradient(135deg,#eff6ff,#ecfdf5)">
+      <div class="label">推荐</div>
+      <div style="display:grid;gap:7px">
+        <div style="background:#1d4ed8;color:white;padding:10px;border-radius:8px">复杂任务与三年目标</div>
+        <div style="background:white;padding:10px;border-radius:8px">第一年已实现的完整作业链</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px">
+          <div style="background:white;padding:8px;border-radius:8px">数据采集体系</div>
+          <div style="background:white;padding:8px;border-radius:8px">数据编辑平台</div>
+        </div>
+        <div style="background:#fef3c7;padding:10px;border-radius:8px">现场展示结果与证据边界</div>
+        <div style="background:#fee2e2;padding:10px;border-radius:8px">问题 → 第二年路线</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A. 成果主线型</h3>
+      <p>先让专家看到“机器人已经能完成什么”，再解释背后的数据、平台和训练工作量。最适合年度验收。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:18px;background:#f8fafc">
+      <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap">
+        <div style="background:#dbeafe;padding:10px;border-radius:8px">采集软件</div><b>→</b>
+        <div style="background:#dcfce7;padding:10px;border-radius:8px">数据平台</div><b>→</b>
+        <div style="background:#ede9fe;padding:10px;border-radius:8px">基础训练</div><b>→</b>
+        <div style="background:#ffedd5;padding:10px;border-radius:8px">现场运行</div>
+      </div>
+      <div style="margin-top:12px;background:white;padding:12px;border-radius:8px">强化学习与数字孪生作为第二条研究线</div>
+    </div>
+    <div class="card-body">
+      <h3>B. 工程体系型</h3>
+      <p>突出从采集到训练再到部署的平台化建设，能展示工作量，但核心机器人能力出现较晚。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:18px;background:#faf5ff">
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">
+        <div style="background:white;padding:12px;border-radius:8px">任务定义</div>
+        <div style="background:white;padding:12px;border-radius:8px">数据与模型</div>
+        <div style="background:white;padding:12px;border-radius:8px">实验矩阵</div>
+        <div style="background:white;padding:12px;border-radius:8px">误差分析</div>
+      </div>
+      <div style="margin-top:10px;background:#ede9fe;padding:10px;border-radius:8px">研究问题与后续方法</div>
+    </div>
+    <div class="card-body">
+      <h3>C. 学术论文型</h3>
+      <p>结构严谨、便于后续论文整理，但对年度验收专家不够直观，容易被模型细节淹没。</p>
+    </div>
+  </div>
+</div>
+
+<div class="pros-cons">
+  <div class="pros"><h4>建议</h4><ul><li>选 A 作为正文</li><li>把 B 的工程链路做成一张总图</li><li>把 C 的技术细节放内部证据附录</li></ul></div>
+  <div class="cons"><h4>共同约束</h4><ul><li>不显示源码、文件名和内部术语</li><li>现场观察值明确标注为估计</li><li>缺失数字留“待核验”，不虚构</li></ul></div>
+</div>
