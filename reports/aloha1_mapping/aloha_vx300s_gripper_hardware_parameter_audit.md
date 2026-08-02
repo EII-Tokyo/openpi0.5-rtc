@@ -6,6 +6,8 @@
 - Actuator: `ROBOTIS XM430-W350`, DYNAMIXEL ID `9`
 - Physical gripper actuators: `1`
 - Right finger state: `DRIVER_DERIVED_NOT_INDEPENDENT_SENSOR`
+- Static gripper startup mode: `pwm`
+- ALOHA follower runtime mode: `current_based_position`
 - Task 8: `NOT_RUN`
 
 ## Verified linkage
@@ -27,23 +29,23 @@
 
 - Official maximum-aperture claims: `0.116 m`, `0.114 m`
 - Aperture selection: `RESOLVED_IMPLEMENTED_URDF_AND_CAD_CARRIAGE_DATUM`
-- `Current_Limit=200` is a pinned motor-config register value; using the ROBOTIS current unit gives `0.538 A`, but it is not a calibrated fingertip-force or PhysX max-force value.
+- `Current_Limit=200` (`0.538 A`) is the pinned motor-configuration default. Official ALOHA `dual_side_teleop` overrides both followers to `300` (`0.807 A`); the selected value is pipeline-scoped.
+- Neither current limit is a calibrated fingertip-force or PhysX max-force value.
 - The supplier STEP license remains `UNKNOWN_HARD_BLOCKER`; the STEP is retained only in `.codex/artifacts` and is not redistributable.
 
 ## Evidence classes
 
 - `direct_official_facts`: exact follower product identity, exact actuator identity and DYNAMIXEL ID, ROBOTIS register units and voltage-conditioned performance, Trossen aperture claims
-- `pinned_source_facts`: linkage dimensions, PWM operating mode, mimic sign and offset, URDF limits and dynamics, driver-derived right finger state
-- `numerical_derivations`: Current_Limit 200 multiplied by 2.69 mA per tick equals 0.538 A, symmetric URDF finger coordinates imply 42 to 114 mm carriage-center distance
+- `pinned_source_facts`: linkage dimensions, static startup PWM mode from modes.yaml, follower runtime current_based_position override from official ALOHA code, pipeline-scoped Current_Limit values, mimic sign and offset, URDF limits and dynamics, driver-derived right finger state
+- `numerical_derivations`: Current_Limit 200 multiplied by 2.69 mA per tick equals 0.538 A, Current_Limit 300 multiplied by 2.69 mA per tick equals 0.807 A, symmetric URDF finger coordinates imply 42 to 114 mm carriage-center distance
 - `runtime_readback`: none
 - `engineering_inference`: the DYNAMIXEL current register and URDF effort cannot be copied directly to PhysX max force
 - `temporary_diagnostic_values`: none
 
 ## Unconfirmed physical quantities
 
-- continuous allowable gripper torque under the installed voltage and thermal duty cycle
+- measured continuous gripper torque-speed-current thermal curve beyond the official 12 V 20%-of-stall estimate
 - linkage efficiency and friction under load
 - finger-pad friction coefficient
 - mapping from PWM command to fingertip normal force
 - calibrated PhysX stiffness damping and max force
-- selection between the official 114 mm and 116 mm maximum-aperture claims

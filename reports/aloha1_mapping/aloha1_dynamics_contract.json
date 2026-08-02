@@ -20,6 +20,21 @@
       "physx_max_force_mapping": "NOT_DIRECTLY_MAPPABLE",
       "raw_ticks": 200
     },
+    "gripper_runtime_control": {
+      "configuration_default_current_limit_ticks": 200,
+      "pipeline_overrides": {
+        "official_aloha_dual_side_teleop": {
+          "applies_to": [
+            "follower_left",
+            "follower_right"
+          ],
+          "current_limit_ticks": 300
+        }
+      },
+      "runtime_mode": "current_based_position",
+      "selection_status": "PIPELINE_SCOPED_NO_SINGLE_GLOBAL_VALUE",
+      "static_startup_mode": "pwm"
+    },
     "hardware_integer_gain_direct_mapping": "PROHIBITED",
     "manufacturer_tables_status": "PASS",
     "models": [
@@ -106,7 +121,7 @@
     },
     "stall_torque_used_as_continuous": false
   },
-  "deterministic_signature": "f0bd780f2ccf1563f4c66c6e0ca9bcd98e55323fe8c5881529932709caf19c24",
+  "deterministic_signature": "01ef4c411d6bb2e14ab4723feed5f68eb65813670d359588bd68472f5e2ff3b6",
   "formal_candidate_gate": "BLOCKED",
   "hard_blockers": [
     {
@@ -1383,9 +1398,9 @@
       "sha256": "d9e4b32723ee71dfce26fb4e78546cfcfef147b2d7dbf5e53e3620e3d8aa96bd"
     },
     "parameter_matrix": {
-      "deterministic_signature": "9712c2e43eb0c56baa7c6039eca214bfc39afbb1f6eda65261038f29a8df3b9e",
+      "deterministic_signature": "8267538e586c6e839de5ab1cac60088ea6640e61e4aa96ee6c2dcc79c1dde8db",
       "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_official_parameter_matrix.json",
-      "sha256": "d0adf5f84a5a0b7f098a0dacbd48da14a37cb3d07465cd639227048a3e31d178"
+      "sha256": "09df03d3f1c84536fc58a65f13cf8fa4d8b8768b216b01f0de43dfb98c46d6ae"
     },
     "pinned_xacro_sha256": "45dff1e0de2456386dbb64b851c94db2d874b6dbefb6503cb747bc55435177bd",
     "right_urdf": {

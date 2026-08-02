@@ -2,14 +2,16 @@
 
 - Status: **PASS**
 - Product: `Interbotix ViperX-300 6DOF` / `aloha_vx300s`
-- Frozen required sources: `16`
+- Frozen required sources: `18`
 - Formal parameter candidate gate: **PASS**
-- Deterministic signature: `ed69318a0450fdd57127f8cfecf55563a3e96b9cd04ebd7d1a4340fd8d6a68ed`
+- Deterministic signature: `21444d8b38b5e8216999970f8d3eba678be0503ce745278c11176e5821e85c55`
 
 ## Frozen source chain
 
 | ID | Authority | Evidence | Commit / SHA-256 |
 |---|---|---|---|
+| `interbotix_aloha_runtime_dual_side_teleop` | Trossen Robotics / Interbotix | `OFFICIAL_PINNED_SOURCE` | `4fa6b2c4428f5334441a7bee5ab2b2e8071cff93` |
+| `interbotix_aloha_runtime_robot_utils` | Trossen Robotics / Interbotix | `OFFICIAL_PINNED_SOURCE` | `4fa6b2c4428f5334441a7bee5ab2b2e8071cff93` |
 | `interbotix_aloha_vx300s_motor_config` | Trossen Robotics / Interbotix | `OFFICIAL_PINNED_SOURCE` | `b66d5b905725351dd71d3251a06cd3f4c777940f` |
 | `interbotix_aloha_vx300s_xacro` | Trossen Robotics / Interbotix | `OFFICIAL_PINNED_SOURCE` | `b66d5b905725351dd71d3251a06cd3f4c777940f` |
 | `interbotix_core_humble` | Trossen Robotics / Interbotix | `OFFICIAL_PINNED_SOURCE` | `af18d4fe24ba08e09a0f1e92afaca1863e3205de` |

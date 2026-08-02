@@ -76,6 +76,18 @@ def test_shadow_actuators_and_gripper_current_conversion_are_explicit() -> None:
     assert contract["actuator_contract"]["gripper_current_limit"]["raw_ticks"] == 200
     assert contract["actuator_contract"]["gripper_current_limit"]["derived_ampere"] == 0.538
     assert contract["actuator_contract"]["gripper_current_limit"]["physx_max_force_mapping"] == "NOT_DIRECTLY_MAPPABLE"
+    assert contract["actuator_contract"]["gripper_runtime_control"] == {
+        "static_startup_mode": "pwm",
+        "runtime_mode": "current_based_position",
+        "configuration_default_current_limit_ticks": 200,
+        "pipeline_overrides": {
+            "official_aloha_dual_side_teleop": {
+                "current_limit_ticks": 300,
+                "applies_to": ["follower_left", "follower_right"],
+            }
+        },
+        "selection_status": "PIPELINE_SCOPED_NO_SINGLE_GLOBAL_VALUE",
+    }
 
 
 def test_repository_report_matches_deterministic_contract() -> None:

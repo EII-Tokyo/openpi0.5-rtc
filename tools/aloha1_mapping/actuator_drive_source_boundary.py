@@ -116,6 +116,25 @@ def build_report(root: Path, source_manifest_path: Path) -> dict[str, Any]:
     modes = yaml.safe_load(modes_path.read_text(encoding="utf-8"))
     motor_path = _source_path(root, sources["interbotix_aloha_vx300s_motor_config"])
     motor_config = yaml.safe_load(motor_path.read_text(encoding="utf-8"))
+    robot_utils_path = _source_path(
+        root, sources["interbotix_aloha_runtime_robot_utils"]
+    )
+    robot_utils_text = robot_utils_path.read_text(encoding="utf-8")
+    runtime_mode = "current_based_position"
+    runtime_mode_call = (
+        "robot_set_operating_modes('single', 'gripper', "
+        f"'{runtime_mode}')"
+    )
+    if runtime_mode_call not in robot_utils_text:
+        raise ValueError("official ALOHA runtime gripper mode call is missing")
+    teleop_path = _source_path(
+        root, sources["interbotix_aloha_runtime_dual_side_teleop"]
+    )
+    teleop_text = teleop_path.read_text(encoding="utf-8")
+    if teleop_text.count(
+        "robot_set_motor_registers('single', 'gripper', 'current_limit', 300)"
+    ) != 2:
+        raise ValueError("official ALOHA dual-side current-limit overrides are missing")
     current_ticks = int(motor_config["motors"]["gripper"]["Current_Limit"])
     current_per_tick_a = 0.00269
 
@@ -139,12 +158,25 @@ def build_report(root: Path, source_manifest_path: Path) -> dict[str, Any]:
                 "sha256": _sha256(motor_path),
                 "source_id": "interbotix_aloha_vx300s_motor_config",
             },
+            "aloha_runtime_mode": {
+                "path": str(robot_utils_path),
+                "sha256": _sha256(robot_utils_path),
+                "source_id": "interbotix_aloha_runtime_robot_utils",
+            },
+            "aloha_runtime_current_override": {
+                "path": str(teleop_path),
+                "sha256": _sha256(teleop_path),
+                "source_id": "interbotix_aloha_runtime_dual_side_teleop",
+            },
         },
         "actuator_models": models,
         "control_modes": {
-            "arm": modes["groups"]["arm"]["operating_mode"],
-            "gripper": modes["singles"]["gripper"]["operating_mode"],
-            "source": "interbotix_xsarm_default_modes",
+            "arm_static": modes["groups"]["arm"]["operating_mode"],
+            "gripper_static": modes["singles"]["gripper"]["operating_mode"],
+            "follower_gripper_runtime": runtime_mode,
+            "static_source": "interbotix_xsarm_default_modes",
+            "runtime_source": "interbotix_aloha_runtime_robot_utils",
+            "status": "VERIFIED_RUNTIME_OVERRIDE",
         },
         "joint_actuator_identity": {
             name: {
@@ -157,13 +189,26 @@ def build_report(root: Path, source_manifest_path: Path) -> dict[str, Any]:
             for name, record in motor_config["motors"].items()
         },
         "gripper_control_boundary": {
-            "operating_mode": "pwm",
-            "current_limit_ticks": current_ticks,
+            "operating_mode": runtime_mode,
+            "static_startup_mode": modes["singles"]["gripper"]["operating_mode"],
             "current_unit_A_per_tick": current_per_tick_a,
-            "current_limit_A": round(current_ticks * current_per_tick_a, 12),
+            "configuration_default_current_limit": {
+                "ticks": current_ticks,
+                "ampere": round(current_ticks * current_per_tick_a, 12),
+                "source": "interbotix_aloha_vx300s_motor_config",
+            },
+            "pipeline_current_limit_overrides": [
+                {
+                    "pipeline": "official_aloha_dual_side_teleop",
+                    "ticks": 300,
+                    "ampere": round(300 * current_per_tick_a, 12),
+                    "applies_to": ["follower_left", "follower_right"],
+                    "source": "interbotix_aloha_runtime_dual_side_teleop",
+                }
+            ],
+            "current_limit_selection": "PIPELINE_SCOPED",
             "current_limit_is_physx_max_force": False,
-            "pwm_mode_is_closed_loop_position_control": False,
-            "pwm_command_to_output_torque_mapping": "NOT_DEFINED_BY_OFFICIAL_SOURCES",
+            "hardware_current_to_physx_force_mapping": "NOT_DIRECT",
             "linkage_conversion_required": True,
         },
         "physx_drive_mapping": {
@@ -176,7 +221,7 @@ def build_report(root: Path, source_manifest_path: Path) -> dict[str, Any]:
                 "ROBOTIS register gains are dimensionless firmware-controller values, "
                 "while PhysX drive stiffness and damping are physical joint-space "
                 "coefficients. The official sources do not publish an equivalent closed-loop "
-                "transfer model for this assembled arm and PWM gripper."
+                "transfer model for this assembled arm and current-based-position gripper."
             ),
         },
         "continuous_envelope": {
@@ -222,7 +267,8 @@ def render_markdown(report: dict[str, Any]) -> str:
             "",
             f"- Overall: **{report['status']}**",
             "- Arm mode: `position`",
-            "- Gripper mode: `pwm`",
+            "- Static gripper startup mode: `pwm`",
+            "- ALOHA follower runtime gripper mode: `current_based_position`",
             "- Direct DYNAMIXEL integer-gain → PhysX gain mapping: `PROHIBITED`",
             "",
             "| Model | Reference | Stall torque | Estimated continuous torque | Evidence class |",
@@ -233,10 +279,12 @@ def render_markdown(report: dict[str, Any]) -> str:
             "of stall torque. They are retained as conservative official references, not "
             "misrepresented as measured thermal torque-speed-current curves.",
             "",
-            "The pinned Interbotix configuration uses position control for the arm and PWM "
-            "control for the gripper. The 200-tick gripper Current_Limit converts to 0.538 A, "
-            "but this is not a PhysX maxForce and does not define PWM-command torque. No "
-            "physical stiffness, damping, or maxForce was guessed.",
+            "The pinned Interbotix modes file supplies a PWM startup value, but official "
+            "ALOHA runtime code switches the follower gripper to current-based position. "
+            "The motor configuration supplies 200 ticks (0.538 A); dual-side teleoperation "
+            "overrides both followers to 300 ticks (0.807 A). These limits are pipeline-scoped "
+            "and neither is a direct PhysX maxForce. No physical stiffness, damping, or "
+            "maxForce was guessed.",
             "",
         ]
     )

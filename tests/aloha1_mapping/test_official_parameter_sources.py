@@ -38,6 +38,8 @@ def _valid_manifest() -> dict[str, object]:
         if source["id"] in {
             "interbotix_manipulators_humble",
             "interbotix_core_humble",
+            "interbotix_aloha_runtime_robot_utils",
+            "interbotix_aloha_runtime_dual_side_teleop",
         }:
             source.update(
                 {
@@ -101,6 +103,8 @@ def test_required_source_set_covers_exact_product_components_and_local_isaac() -
         "interbotix_aloha_vx300s_xacro",
         "interbotix_xsarm_default_modes",
         "interbotix_xs_driver",
+        "interbotix_aloha_runtime_robot_utils",
+        "interbotix_aloha_runtime_dual_side_teleop",
         "supplier_simple_aloha_viper_step",
         "isaacsim_urdf_importer_2_4_30",
         "physx_schema_107_3",

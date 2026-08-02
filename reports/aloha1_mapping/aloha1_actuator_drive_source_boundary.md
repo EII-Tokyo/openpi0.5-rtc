@@ -2,7 +2,8 @@
 
 - Overall: **PARTIAL**
 - Arm mode: `position`
-- Gripper mode: `pwm`
+- Static gripper startup mode: `pwm`
+- ALOHA follower runtime gripper mode: `current_based_position`
 - Direct DYNAMIXEL integer-gain → PhysX gain mapping: `PROHIBITED`
 
 | Model | Reference | Stall torque | Estimated continuous torque | Evidence class |
@@ -12,4 +13,4 @@
 
 ROBOTIS explicitly labels the continuous values as estimates calculated at 20% of stall torque. They are retained as conservative official references, not misrepresented as measured thermal torque-speed-current curves.
 
-The pinned Interbotix configuration uses position control for the arm and PWM control for the gripper. The 200-tick gripper Current_Limit converts to 0.538 A, but this is not a PhysX maxForce and does not define PWM-command torque. No physical stiffness, damping, or maxForce was guessed.
+The pinned Interbotix modes file supplies a PWM startup value, but official ALOHA runtime code switches the follower gripper to current-based position. The motor configuration supplies 200 ticks (0.538 A); dual-side teleoperation overrides both followers to 300 ticks (0.807 A). These limits are pipeline-scoped and neither is a direct PhysX maxForce. No physical stiffness, damping, or maxForce was guessed.

@@ -178,7 +178,10 @@ def build_report(
         and actuator["model"] == "XM430-W350"
         and actuator["dynamixel_id"] == 9
         and actuator["physical_actuator_count"] == 1
-        and actuator["operating_mode"] == "pwm"
+        and actuator["operating_mode"] == "current_based_position"
+        and actuator["static_startup_mode"] == "pwm"
+        and actuator["runtime_mode_resolution"]["status"]
+        == "VERIFIED_RUNTIME_OVERRIDE"
         and actuator["right_finger_independently_sensed"] is False
     )
     source_pass = (
@@ -199,6 +202,8 @@ def build_report(
             "dynamixel_id": actuator["dynamixel_id"],
             "physical_actuator_count": actuator["physical_actuator_count"],
             "right_finger_state": document["hardware"]["gripper_linkage"]["right_finger_state_kind"],
+            "runtime_operating_mode": actuator["operating_mode"],
+            "static_startup_mode": actuator["static_startup_mode"],
         },
         "official_source_chain": document["official_source_chain"],
         "hardware": document["hardware"],
@@ -235,6 +240,8 @@ def _markdown(report: dict[str, Any]) -> str:
         f"- Actuator: `{identity['actuator']}`, DYNAMIXEL ID `{identity['dynamixel_id']}`",
         f"- Physical gripper actuators: `{identity['physical_actuator_count']}`",
         f"- Right finger state: `{identity['right_finger_state']}`",
+        f"- Static gripper startup mode: `{identity['static_startup_mode']}`",
+        f"- ALOHA follower runtime mode: `{identity['runtime_operating_mode']}`",
         f"- Task 8: `{report['task8']}`",
         "",
         "## Verified linkage",
@@ -256,9 +263,11 @@ def _markdown(report: dict[str, Any]) -> str:
         "",
         ("- Official maximum-aperture claims: " + ", ".join(f"`{claim['value_m']} m`" for claim in conflict["claims"])),
         f"- Aperture selection: `{conflict['selection_status']}`",
-        "- `Current_Limit=200` is a pinned motor-config register value; using the "
-        "ROBOTIS current unit gives `0.538 A`, but it is not a calibrated "
-        "fingertip-force or PhysX max-force value.",
+        "- `Current_Limit=200` (`0.538 A`) is the pinned motor-configuration "
+        "default. Official ALOHA `dual_side_teleop` overrides both followers to "
+        "`300` (`0.807 A`); the selected value is pipeline-scoped.",
+        "- Neither current limit is a calibrated fingertip-force or PhysX "
+        "max-force value.",
         "- The supplier STEP license remains `UNKNOWN_HARD_BLOCKER`; the STEP "
         "is retained only in `.codex/artifacts` and is not redistributable.",
         "",

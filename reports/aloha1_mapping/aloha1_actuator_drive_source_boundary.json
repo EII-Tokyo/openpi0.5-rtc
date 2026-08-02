@@ -42,21 +42,40 @@
     "status": "PARTIAL"
   },
   "control_modes": {
-    "arm": "position",
-    "gripper": "pwm",
-    "source": "interbotix_xsarm_default_modes"
+    "arm_static": "position",
+    "follower_gripper_runtime": "current_based_position",
+    "gripper_static": "pwm",
+    "runtime_source": "interbotix_aloha_runtime_robot_utils",
+    "static_source": "interbotix_xsarm_default_modes",
+    "status": "VERIFIED_RUNTIME_OVERRIDE"
   },
-  "deterministic_signature": "26cf6fc0822ae9c63078cc026af5c4797d1b204d6cf82c5169dd2381ae4b5a3e",
+  "deterministic_signature": "05ebfe1ac6971e6a3ae72c5ff2de7c26318be12d5d301e40566bc6a1191244f9",
   "engineering_inference_inserted": false,
   "gripper_control_boundary": {
-    "current_limit_A": 0.538,
+    "configuration_default_current_limit": {
+      "ampere": 0.538,
+      "source": "interbotix_aloha_vx300s_motor_config",
+      "ticks": 200
+    },
     "current_limit_is_physx_max_force": false,
-    "current_limit_ticks": 200,
+    "current_limit_selection": "PIPELINE_SCOPED",
     "current_unit_A_per_tick": 0.00269,
+    "hardware_current_to_physx_force_mapping": "NOT_DIRECT",
     "linkage_conversion_required": true,
-    "operating_mode": "pwm",
-    "pwm_command_to_output_torque_mapping": "NOT_DEFINED_BY_OFFICIAL_SOURCES",
-    "pwm_mode_is_closed_loop_position_control": false
+    "operating_mode": "current_based_position",
+    "pipeline_current_limit_overrides": [
+      {
+        "ampere": 0.807,
+        "applies_to": [
+          "follower_left",
+          "follower_right"
+        ],
+        "pipeline": "official_aloha_dual_side_teleop",
+        "source": "interbotix_aloha_runtime_dual_side_teleop",
+        "ticks": 300
+      }
+    ],
+    "static_startup_mode": "pwm"
   },
   "hard_blockers": [
     {
@@ -82,6 +101,16 @@
     }
   ],
   "inputs": {
+    "aloha_runtime_current_override": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/sources/official_repo_probe/interbotix_aloha_main/scripts/dual_side_teleop.py",
+      "sha256": "a41e081356e7c411c7503e142aad5bddd88c1dff69976a6302e89440a53eee93",
+      "source_id": "interbotix_aloha_runtime_dual_side_teleop"
+    },
+    "aloha_runtime_mode": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/sources/official_repo_probe/interbotix_aloha_main/aloha/robot_utils.py",
+      "sha256": "0d7ab1014210f311eebc2cdb0f5d2a58c5f870f8b875b7a05b3373413efe1179",
+      "source_id": "interbotix_aloha_runtime_robot_utils"
+    },
     "modes": {
       "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/sources/interbotix_manipulators_b66d5b905725351dd71d3251a06cd3f4c777940f/modes.yaml",
       "sha256": "ee7f2b5fcd367442419396c2feeaa111b7b1776d8302a4ca2dd0c4f3d13cb95f",
@@ -94,7 +123,7 @@
     },
     "source_manifest": {
       "path": "/home/eii/project/openpi0.5-rtc-reward-learning/configs/aloha1_official_parameter_sources.yaml",
-      "sha256": "910d4585d91aaf5a2b3fb3a54dfd477d6ff940b106a6888abcd896f9e513b4d7"
+      "sha256": "bd31b7706a590e0b8b95bd7c53c269a3f7c1913e9cca53ce83751435c8d7ccd0"
     }
   },
   "joint_actuator_identity": {
@@ -148,7 +177,7 @@
     "damping_Nm_s_per_rad": null,
     "hardware_integer_gain_direct_mapping": "PROHIBITED",
     "max_force_Nm": null,
-    "reason": "ROBOTIS register gains are dimensionless firmware-controller values, while PhysX drive stiffness and damping are physical joint-space coefficients. The official sources do not publish an equivalent closed-loop transfer model for this assembled arm and PWM gripper.",
+    "reason": "ROBOTIS register gains are dimensionless firmware-controller values, while PhysX drive stiffness and damping are physical joint-space coefficients. The official sources do not publish an equivalent closed-loop transfer model for this assembled arm and current-based-position gripper.",
     "status": "HARD_BLOCKER",
     "stiffness_Nm_per_rad": null
   },

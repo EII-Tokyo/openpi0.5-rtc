@@ -139,6 +139,11 @@ def build_contract(
     }
     continuous_blocker = next(record for record in matrix["records"] if record["id"] == "continuous_actuator_envelope")
     drive_blocker = next(record for record in matrix["records"] if record["id"] == "physx_joint_drive_mapping")
+    gripper_runtime_control = next(
+        record["value"]
+        for record in matrix["records"]
+        if record["id"] == "aloha_follower_gripper_runtime_control"
+    )
 
     contract: dict[str, object] = {
         "schema_version": 1,
@@ -195,6 +200,7 @@ def build_contract(
                 "derived_ampere": round(gripper_current_ticks * current_ampere_per_tick, 12),
                 "physx_max_force_mapping": "NOT_DIRECTLY_MAPPABLE",
             },
+            "gripper_runtime_control": gripper_runtime_control,
         },
         "formal_candidate_gate": "BLOCKED",
         "hard_blockers": [

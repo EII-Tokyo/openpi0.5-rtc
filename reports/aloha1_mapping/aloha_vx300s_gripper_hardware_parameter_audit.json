@@ -1,7 +1,7 @@
 {
   "config": {
     "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/configs/aloha1_vx300s_gripper_hardware_model.yaml",
-    "sha256": "d6dec234ef399fdc88ef06448cbd21417407b4c5f9ef420d48c3a731b268332b"
+    "sha256": "3b2bcf1297bd87695c4646664179b064979c451c5c0376635c0d7c5b2f912d09"
   },
   "formula_validation": {
     "arm_length_m": 0.035,
@@ -28,19 +28,33 @@
   "hardware": {
     "gripper_actuator": {
       "current_limit": {
-        "derived_formula": "200 * 0.00269",
-        "derived_limit_ampere": 0.538,
+        "configuration_default": {
+          "derived_formula": "200 * 0.00269",
+          "derived_limit_ampere": 0.538,
+          "raw_value": 200,
+          "source": "aloha_vx300s_motor_config"
+        },
+        "current_based_position_torque_cap_status": "NOT_ESTABLISHED",
         "physx_max_force_mapping": "NOT_DIRECTLY_MAPPABLE",
-        "pwm_mode_torque_cap_status": "NOT_ESTABLISHED",
-        "raw_value": 200,
-        "source": "aloha_vx300s_motor_config",
+        "pipeline_overrides": [
+          {
+            "applies_to": [
+              "follower_left",
+              "follower_right"
+            ],
+            "derived_limit_ampere": 0.807,
+            "pipeline": "official_aloha_dual_side_teleop",
+            "raw_value": 300
+          }
+        ],
+        "selection_status": "PIPELINE_SCOPED_NO_SINGLE_GLOBAL_VALUE",
         "unit_ampere_per_tick": 0.00269,
         "unit_source": "ROBOTIS_XM430_W350_MANUAL"
       },
       "dynamixel_id": 9,
       "manufacturer": "ROBOTIS",
       "model": "XM430-W350",
-      "operating_mode": "pwm",
+      "operating_mode": "current_based_position",
       "performance": {
         "conditions": [
           {
@@ -71,6 +85,12 @@
         "unit_percent_per_tick": 0.113
       },
       "right_finger_independently_sensed": false,
+      "runtime_mode_resolution": {
+        "runtime_source": "official_aloha_robot_utils",
+        "static_source": "xsarm_modes",
+        "status": "VERIFIED_RUNTIME_OVERRIDE"
+      },
+      "static_startup_mode": "pwm",
       "supported_operating_modes": [
         "current",
         "velocity",
@@ -128,6 +148,8 @@
     "product": "ViperX-300 6DOF",
     "project_model": "aloha_vx300s",
     "right_finger_state": "DRIVER_DERIVED_NOT_INDEPENDENT_SENSOR",
+    "runtime_operating_mode": "current_based_position",
+    "static_startup_mode": "pwm",
     "status": "PASS"
   },
   "important_boundaries": {
@@ -164,6 +186,16 @@
         "42 to 114 mm carriage-center gripper range claim"
       ],
       "url": "https://docs.trossenrobotics.com/interbotix_xsarms_docs/specifications.html"
+    },
+    "official_aloha_runtime": {
+      "branch": "main",
+      "commit": "4fa6b2c4428f5334441a7bee5ab2b2e8071cff93",
+      "confirms": [
+        "follower gripper runtime mode is current_based_position",
+        "current limit is pipeline-scoped and may override the motor configuration"
+      ],
+      "license": "MIT",
+      "repository": "https://github.com/Interbotix/aloha.git"
     },
     "official_core_repository": {
       "branch": "humble",
@@ -204,11 +236,14 @@
     ],
     "numerical_derivations": [
       "Current_Limit 200 multiplied by 2.69 mA per tick equals 0.538 A",
+      "Current_Limit 300 multiplied by 2.69 mA per tick equals 0.807 A",
       "symmetric URDF finger coordinates imply 42 to 114 mm carriage-center distance"
     ],
     "pinned_source_facts": [
       "linkage dimensions",
-      "PWM operating mode",
+      "static startup PWM mode from modes.yaml",
+      "follower runtime current_based_position override from official ALOHA code",
+      "pipeline-scoped Current_Limit values",
       "mimic sign and offset",
       "URDF limits and dynamics",
       "driver-derived right finger state"
@@ -330,6 +365,30 @@
         "sha256_matches": true
       },
       {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/sources/official_repo_probe/interbotix_aloha_main/aloha/robot_utils.py",
+        "actual_sha256": "0d7ab1014210f311eebc2cdb0f5d2a58c5f870f8b875b7a05b3373413efe1179",
+        "branch_or_tag": "main",
+        "commit": "4fa6b2c4428f5334441a7bee5ab2b2e8071cff93",
+        "exists": true,
+        "expected_sha256": "0d7ab1014210f311eebc2cdb0f5d2a58c5f870f8b875b7a05b3373413efe1179",
+        "license": "MIT",
+        "name": "official_aloha_robot_utils",
+        "repository": "https://github.com/Interbotix/aloha.git",
+        "sha256_matches": true
+      },
+      {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/sources/official_repo_probe/interbotix_aloha_main/scripts/dual_side_teleop.py",
+        "actual_sha256": "a41e081356e7c411c7503e142aad5bddd88c1dff69976a6302e89440a53eee93",
+        "branch_or_tag": "main",
+        "commit": "4fa6b2c4428f5334441a7bee5ab2b2e8071cff93",
+        "exists": true,
+        "expected_sha256": "a41e081356e7c411c7503e142aad5bddd88c1dff69976a6302e89440a53eee93",
+        "license": "MIT",
+        "name": "official_aloha_dual_side_teleop",
+        "repository": "https://github.com/Interbotix/aloha.git",
+        "sha256_matches": true
+      },
+      {
         "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/gdrive_source_readonly/Simple Aloha Viper 2024-5-13.step",
         "actual_sha256": "337862418769d4ea8b801d26e68930c4412f870050e60769bbf91765194dc571",
         "branch_or_tag": "NOT_APPLICABLE_STATIC_VENDOR_FILE",
@@ -346,11 +405,10 @@
   "status": "PASS",
   "task8": "NOT_RUN",
   "unconfirmed_physical_quantities": [
-    "continuous allowable gripper torque under the installed voltage and thermal duty cycle",
+    "measured continuous gripper torque-speed-current thermal curve beyond the official 12 V 20%-of-stall estimate",
     "linkage efficiency and friction under load",
     "finger-pad friction coefficient",
     "mapping from PWM command to fingertip normal force",
-    "calibrated PhysX stiffness damping and max force",
-    "selection between the official 114 mm and 116 mm maximum-aperture claims"
+    "calibrated PhysX stiffness damping and max force"
   ]
 }

@@ -654,6 +654,68 @@ def build_parameter_matrix(
             source_locator="motors and shadows",
         )
     )
+    robot_utils_path = _resolve(
+        str(sources["interbotix_aloha_runtime_robot_utils"]["local_path"]),
+        repository_root,
+    )
+    robot_utils_text = robot_utils_path.read_text(encoding="utf-8")
+    runtime_mode = "current_based_position"
+    runtime_call = (
+        "robot_set_operating_modes('single', 'gripper', "
+        f"'{runtime_mode}')"
+    )
+    if runtime_call not in robot_utils_text:
+        raise ValueError("official ALOHA follower gripper runtime override is missing")
+    teleop_path = _resolve(
+        str(sources["interbotix_aloha_runtime_dual_side_teleop"]["local_path"]),
+        repository_root,
+    )
+    teleop_text = teleop_path.read_text(encoding="utf-8")
+    if teleop_text.count(
+        "robot_set_motor_registers('single', 'gripper', 'current_limit', 300)"
+    ) != 2:
+        raise ValueError("official ALOHA dual-side current-limit overrides are missing")
+    records.append(
+        _record(
+            record_id="aloha_follower_gripper_runtime_control",
+            group="operating_modes",
+            value={
+                "static_startup_mode": "pwm",
+                "runtime_mode": runtime_mode,
+                "configuration_default_current_limit_ticks": int(
+                    motor_config["motors"]["gripper"]["Current_Limit"]
+                ),
+                "pipeline_overrides": {
+                    "official_aloha_dual_side_teleop": {
+                        "current_limit_ticks": 300,
+                        "applies_to": ["follower_left", "follower_right"],
+                    }
+                },
+                "selection_status": "PIPELINE_SCOPED_NO_SINGLE_GLOBAL_VALUE",
+            },
+            units={"operating_mode": "token", "current_limit": "register_ticks"},
+            frame="gripper_actuator_controller",
+            sign_convention="positive_current_limit_magnitude",
+            source_ids=[
+                "interbotix_xsarm_default_modes",
+                "interbotix_aloha_vx300s_motor_config",
+                "interbotix_aloha_runtime_robot_utils",
+                "interbotix_aloha_runtime_dual_side_teleop",
+            ],
+            source_locator=(
+                "modes.yaml gripper startup; setup_follower_bot runtime override; "
+                "dual_side_teleop current_limit overrides"
+            ),
+            derivation_kind="ORDERED_RUNTIME_CONFIGURATION_RESOLUTION",
+            derivation_formula="runtime override supersedes static startup mode",
+            derivation_inputs=[
+                "interbotix_xsarm_default_modes:singles.gripper.operating_mode",
+                "interbotix_aloha_vx300s_motor_config:motors.gripper.Current_Limit",
+                "interbotix_aloha_runtime_robot_utils:setup_follower_bot",
+                "interbotix_aloha_runtime_dual_side_teleop:opening_ceremony",
+            ],
+        )
+    )
     records.append(
         _record(
             record_id="gripper_linkage",

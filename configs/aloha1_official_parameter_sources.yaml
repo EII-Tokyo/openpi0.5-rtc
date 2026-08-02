@@ -154,6 +154,31 @@ sources:
       redistribution: ALLOWED_WITH_LICENSE
     exact_model_scope: [aloha_vx300s, Dynamixel X-Series]
 
+  - &aloha_runtime_file
+    id: interbotix_aloha_runtime_robot_utils
+    authority: Trossen Robotics / Interbotix
+    evidence_class: OFFICIAL_PINNED_SOURCE
+    repository: https://github.com/Interbotix/aloha.git
+    branch: main
+    commit: 4fa6b2c4428f5334441a7bee5ab2b2e8071cff93
+    url: https://github.com/Interbotix/aloha/blob/4fa6b2c4428f5334441a7bee5ab2b2e8071cff93/aloha/robot_utils.py
+    retrieved_at_utc: '2026-08-03T00:00:00Z'
+    local_path: .codex/artifacts/20260802-aloha1-official-model-first/sources/official_repo_probe/interbotix_aloha_main/aloha/robot_utils.py
+    sha256: 0d7ab1014210f311eebc2cdb0f5d2a58c5f870f8b875b7a05b3373413efe1179
+    license: &aloha_mit_license
+      status: CONFIRMED
+      identifier: MIT
+      evidence: https://github.com/Interbotix/aloha/blob/4fa6b2c4428f5334441a7bee5ab2b2e8071cff93/LICENSE
+      redistribution: ALLOWED_WITH_LICENSE
+    exact_model_scope: [aloha_vx300s, Stationary ALOHA 1 follower]
+
+  - <<: *aloha_runtime_file
+    id: interbotix_aloha_runtime_dual_side_teleop
+    url: https://github.com/Interbotix/aloha/blob/4fa6b2c4428f5334441a7bee5ab2b2e8071cff93/scripts/dual_side_teleop.py
+    local_path: .codex/artifacts/20260802-aloha1-official-model-first/sources/official_repo_probe/interbotix_aloha_main/scripts/dual_side_teleop.py
+    sha256: a41e081356e7c411c7503e142aad5bddd88c1dff69976a6302e89440a53eee93
+    license: *aloha_mit_license
+
   - id: supplier_simple_aloha_viper_step
     authority: ALOHA supplier public CAD package
     evidence_class: SUPPLIER_CAD_USER_CONFIRMED

@@ -41,7 +41,13 @@ def test_exact_stationary_aloha1_follower_and_motor_identity() -> None:
     assert actuator["model"] == "XM430-W350"
     assert actuator["dynamixel_id"] == 9
     assert actuator["physical_actuator_count"] == 1
-    assert actuator["operating_mode"] == "pwm"
+    assert actuator["operating_mode"] == "current_based_position"
+    assert actuator["static_startup_mode"] == "pwm"
+    assert actuator["runtime_mode_resolution"] == {
+        "status": "VERIFIED_RUNTIME_OVERRIDE",
+        "static_source": "xsarm_modes",
+        "runtime_source": "official_aloha_robot_utils",
+    }
     assert actuator["right_finger_independently_sensed"] is False
 
 
@@ -84,9 +90,20 @@ def test_register_units_and_voltage_conditions_are_not_conflated_with_physx() ->
     document = yaml.safe_load(CONFIG.read_text(encoding="utf-8"))
     actuator = document["hardware"]["gripper_actuator"]
 
-    assert actuator["current_limit"]["raw_value"] == 200
+    assert actuator["current_limit"]["configuration_default"]["raw_value"] == 200
+    assert actuator["current_limit"]["configuration_default"]["derived_limit_ampere"] == pytest.approx(0.538)
+    assert actuator["current_limit"]["pipeline_overrides"] == [
+        {
+            "pipeline": "official_aloha_dual_side_teleop",
+            "raw_value": 300,
+            "derived_limit_ampere": 0.807,
+            "applies_to": ["follower_left", "follower_right"],
+        }
+    ]
+    assert actuator["current_limit"]["selection_status"] == (
+        "PIPELINE_SCOPED_NO_SINGLE_GLOBAL_VALUE"
+    )
     assert actuator["current_limit"]["unit_ampere_per_tick"] == pytest.approx(0.00269)
-    assert actuator["current_limit"]["derived_limit_ampere"] == pytest.approx(0.538)
     assert actuator["current_limit"]["physx_max_force_mapping"] == ("NOT_DIRECTLY_MAPPABLE")
     assert actuator["pwm"]["unit_percent_per_tick"] == pytest.approx(0.113)
     assert actuator["pwm"]["manual_default_limit_raw"] == 885
@@ -124,6 +141,8 @@ def test_frozen_sources_have_required_provenance_and_hashes() -> None:
         "xs_driver",
         "xs_sdk_obj",
         "supplier_cad",
+        "official_aloha_robot_utils",
+        "official_aloha_dual_side_teleop",
     }
     assert required <= sources.keys()
 

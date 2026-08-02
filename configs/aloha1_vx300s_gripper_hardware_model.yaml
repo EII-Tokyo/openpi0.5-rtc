@@ -57,6 +57,14 @@ official_source_chain:
     branch: ros2
     inspected_head: da27b8b2b6c7677844f74581b82c01829a834e1c
     license: BSD-3-Clause
+  official_aloha_runtime:
+    repository: https://github.com/Interbotix/aloha.git
+    branch: main
+    commit: 4fa6b2c4428f5334441a7bee5ab2b2e8071cff93
+    license: MIT
+    confirms:
+      - follower gripper runtime mode is current_based_position
+      - current limit is pipeline-scoped and may override the motor configuration
 
 hardware:
   gripper_actuator:
@@ -64,7 +72,12 @@ hardware:
     model: XM430-W350
     dynamixel_id: 9
     physical_actuator_count: 1
-    operating_mode: pwm
+    operating_mode: current_based_position
+    static_startup_mode: pwm
+    runtime_mode_resolution:
+      status: VERIFIED_RUNTIME_OVERRIDE
+      static_source: xsarm_modes
+      runtime_source: official_aloha_robot_utils
     right_finger_independently_sensed: false
     supported_operating_modes:
       - current
@@ -74,13 +87,20 @@ hardware:
       - current_based_position
       - pwm
     current_limit:
-      raw_value: 200
-      source: aloha_vx300s_motor_config
       unit_ampere_per_tick: 0.00269
       unit_source: ROBOTIS_XM430_W350_MANUAL
-      derived_limit_ampere: 0.538
-      derived_formula: 200 * 0.00269
-      pwm_mode_torque_cap_status: NOT_ESTABLISHED
+      configuration_default:
+        raw_value: 200
+        source: aloha_vx300s_motor_config
+        derived_limit_ampere: 0.538
+        derived_formula: 200 * 0.00269
+      pipeline_overrides:
+        - pipeline: official_aloha_dual_side_teleop
+          raw_value: 300
+          derived_limit_ampere: 0.807
+          applies_to: [follower_left, follower_right]
+      selection_status: PIPELINE_SCOPED_NO_SINGLE_GLOBAL_VALUE
+      current_based_position_torque_cap_status: NOT_ESTABLISHED
       physx_max_force_mapping: NOT_DIRECTLY_MAPPABLE
     pwm:
       unit_percent_per_tick: 0.113
@@ -199,6 +219,20 @@ frozen_sources:
     license: BSD-3-Clause
     local_path: external/ros2-essentials/aloha_ws/src/interbotix_ros_core/interbotix_ros_xseries/interbotix_xs_sdk/src/xs_sdk_obj.cpp
     sha256: e65fb1c873274412e5634dbaa0d647858435cc5689157ca44d8cd7cca6fcc02d
+  official_aloha_robot_utils:
+    repository: https://github.com/Interbotix/aloha.git
+    branch_or_tag: main
+    commit: 4fa6b2c4428f5334441a7bee5ab2b2e8071cff93
+    license: MIT
+    local_path: .codex/artifacts/20260802-aloha1-official-model-first/sources/official_repo_probe/interbotix_aloha_main/aloha/robot_utils.py
+    sha256: 0d7ab1014210f311eebc2cdb0f5d2a58c5f870f8b875b7a05b3373413efe1179
+  official_aloha_dual_side_teleop:
+    repository: https://github.com/Interbotix/aloha.git
+    branch_or_tag: main
+    commit: 4fa6b2c4428f5334441a7bee5ab2b2e8071cff93
+    license: MIT
+    local_path: .codex/artifacts/20260802-aloha1-official-model-first/sources/official_repo_probe/interbotix_aloha_main/scripts/dual_side_teleop.py
+    sha256: a41e081356e7c411c7503e142aad5bddd88c1dff69976a6302e89440a53eee93
   supplier_cad:
     repository: https://drive.google.com/drive/folders/1mhJuhzT4lBnvZ9VE57UgT6vmJDFPVsBf
     branch_or_tag: NOT_APPLICABLE_STATIC_VENDOR_FILE
@@ -216,12 +250,15 @@ provenance_classes:
     - Trossen aperture claims
   pinned_source_facts:
     - linkage dimensions
-    - PWM operating mode
+    - static startup PWM mode from modes.yaml
+    - follower runtime current_based_position override from official ALOHA code
+    - pipeline-scoped Current_Limit values
     - mimic sign and offset
     - URDF limits and dynamics
     - driver-derived right finger state
   numerical_derivations:
     - Current_Limit 200 multiplied by 2.69 mA per tick equals 0.538 A
+    - Current_Limit 300 multiplied by 2.69 mA per tick equals 0.807 A
     - symmetric URDF finger coordinates imply 42 to 114 mm carriage-center distance
   runtime_readback: []
   engineering_inference:

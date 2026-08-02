@@ -32,9 +32,12 @@ def test_exact_aloha_modes_and_gripper_limit_semantics_are_not_conflated() -> No
     report = _build()
 
     assert report["control_modes"] == {
-        "arm": "position",
-        "gripper": "pwm",
-        "source": "interbotix_xsarm_default_modes",
+        "arm_static": "position",
+        "gripper_static": "pwm",
+        "follower_gripper_runtime": "current_based_position",
+        "static_source": "interbotix_xsarm_default_modes",
+        "runtime_source": "interbotix_aloha_runtime_robot_utils",
+        "status": "VERIFIED_RUNTIME_OVERRIDE",
     }
     actuators = report["joint_actuator_identity"]
     assert actuators["forearm_roll"]["model"] == "XM540-W270"
@@ -42,10 +45,24 @@ def test_exact_aloha_modes_and_gripper_limit_semantics_are_not_conflated() -> No
     assert actuators["wrist_rotate"]["model"] == "XM430-W350"
     assert actuators["gripper"]["model"] == "XM430-W350"
     gripper = report["gripper_control_boundary"]
-    assert gripper["current_limit_ticks"] == 200
-    assert gripper["current_limit_A"] == 0.538
+    assert gripper["operating_mode"] == "current_based_position"
+    assert gripper["configuration_default_current_limit"] == {
+        "ticks": 200,
+        "ampere": 0.538,
+        "source": "interbotix_aloha_vx300s_motor_config",
+    }
+    assert gripper["pipeline_current_limit_overrides"] == [
+        {
+            "pipeline": "official_aloha_dual_side_teleop",
+            "ticks": 300,
+            "ampere": 0.807,
+            "applies_to": ["follower_left", "follower_right"],
+            "source": "interbotix_aloha_runtime_dual_side_teleop",
+        }
+    ]
+    assert gripper["current_limit_selection"] == "PIPELINE_SCOPED"
     assert gripper["current_limit_is_physx_max_force"] is False
-    assert gripper["pwm_command_to_output_torque_mapping"] == "NOT_DEFINED_BY_OFFICIAL_SOURCES"
+    assert gripper["hardware_current_to_physx_force_mapping"] == "NOT_DIRECT"
 
 
 def test_integer_controller_gains_are_not_labeled_physical_drive_gains() -> None:

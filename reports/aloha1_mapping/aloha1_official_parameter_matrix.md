@@ -2,9 +2,9 @@
 
 - Matrix status: **PASS**
 - Formal candidate gate: **BLOCKED**
-- Records: `47`
+- Records: `48`
 - Narrow hard blockers: `5`
-- Deterministic signature: `9712c2e43eb0c56baa7c6039eca214bfc39afbb1f6eda65261038f29a8df3b9e`
+- Deterministic signature: `8267538e586c6e839de5ab1cac60088ea6640e61e4aa96ee6c2dcc79c1dde8db`
 
 A matrix `PASS` means all required parameter groups are explicitly inventoried and schema-valid. It does **not** mean the formal USD candidate may be authored. The candidate gate remains blocked wherever an exact physical mapping is absent.
 
@@ -21,7 +21,7 @@ A matrix `PASS` means all required parameter groups are explicitly inventoried a
 | `joint_kinematics` | 14 | 0 |
 | `link_dynamics` | 14 | 0 |
 | `link_geometry` | 2 | 0 |
-| `operating_modes` | 3 | 0 |
+| `operating_modes` | 4 | 0 |
 | `register_conversions` | 2 | 0 |
 | `solver_semantics` | 1 | 1 |
 

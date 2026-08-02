@@ -163,6 +163,23 @@ def test_repository_matrix_is_complete_and_exact_model_scoped() -> None:
         "measured continuous torque-speed-current thermal envelope beyond the "
         "official 12 V 20%-of-stall estimates"
     )
+    runtime_control = next(
+        record
+        for record in matrix["records"]
+        if record["id"] == "aloha_follower_gripper_runtime_control"
+    )
+    assert runtime_control["value"] == {
+        "static_startup_mode": "pwm",
+        "runtime_mode": "current_based_position",
+        "configuration_default_current_limit_ticks": 200,
+        "pipeline_overrides": {
+            "official_aloha_dual_side_teleop": {
+                "current_limit_ticks": 300,
+                "applies_to": ["follower_left", "follower_right"],
+            }
+        },
+        "selection_status": "PIPELINE_SCOPED_NO_SINGLE_GLOBAL_VALUE",
+    }
     geometry_sources = next(
         record
         for record in matrix["records"]

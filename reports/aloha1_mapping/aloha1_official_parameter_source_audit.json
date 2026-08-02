@@ -1,5 +1,5 @@
 {
-  "deterministic_signature": "ed69318a0450fdd57127f8cfecf55563a3e96b9cd04ebd7d1a4340fd8d6a68ed",
+  "deterministic_signature": "21444d8b38b5e8216999970f8d3eba678be0503ce745278c11176e5821e85c55",
   "findings": [],
   "formal_parameter_candidate_gate": "PASS",
   "local_mirror_observations": [
@@ -45,6 +45,8 @@
     "robot_local_geometry_relation": "IDENTICAL_NOT_MIRRORED"
   },
   "required_source_ids": [
+    "interbotix_aloha_runtime_dual_side_teleop",
+    "interbotix_aloha_runtime_robot_utils",
     "interbotix_aloha_vx300s_motor_config",
     "interbotix_aloha_vx300s_xacro",
     "interbotix_core_humble",
@@ -105,8 +107,50 @@
       "status": "RESOLVED_WITH_CONFLICT_RETAINED"
     }
   ],
-  "source_count": 16,
+  "source_count": 18,
   "sources": [
+    {
+      "authority": "Trossen Robotics / Interbotix",
+      "branch": "main",
+      "commit": "4fa6b2c4428f5334441a7bee5ab2b2e8071cff93",
+      "evidence_class": "OFFICIAL_PINNED_SOURCE",
+      "exact_model_scope": [
+        "aloha_vx300s",
+        "Stationary ALOHA 1 follower"
+      ],
+      "id": "interbotix_aloha_runtime_dual_side_teleop",
+      "license": {
+        "evidence": "https://github.com/Interbotix/aloha/blob/4fa6b2c4428f5334441a7bee5ab2b2e8071cff93/LICENSE",
+        "identifier": "MIT",
+        "redistribution": "ALLOWED_WITH_LICENSE",
+        "status": "CONFIRMED"
+      },
+      "local_path": ".codex/artifacts/20260802-aloha1-official-model-first/sources/official_repo_probe/interbotix_aloha_main/scripts/dual_side_teleop.py",
+      "repository": "https://github.com/Interbotix/aloha.git",
+      "sha256": "a41e081356e7c411c7503e142aad5bddd88c1dff69976a6302e89440a53eee93",
+      "url": "https://github.com/Interbotix/aloha/blob/4fa6b2c4428f5334441a7bee5ab2b2e8071cff93/scripts/dual_side_teleop.py"
+    },
+    {
+      "authority": "Trossen Robotics / Interbotix",
+      "branch": "main",
+      "commit": "4fa6b2c4428f5334441a7bee5ab2b2e8071cff93",
+      "evidence_class": "OFFICIAL_PINNED_SOURCE",
+      "exact_model_scope": [
+        "aloha_vx300s",
+        "Stationary ALOHA 1 follower"
+      ],
+      "id": "interbotix_aloha_runtime_robot_utils",
+      "license": {
+        "evidence": "https://github.com/Interbotix/aloha/blob/4fa6b2c4428f5334441a7bee5ab2b2e8071cff93/LICENSE",
+        "identifier": "MIT",
+        "redistribution": "ALLOWED_WITH_LICENSE",
+        "status": "CONFIRMED"
+      },
+      "local_path": ".codex/artifacts/20260802-aloha1-official-model-first/sources/official_repo_probe/interbotix_aloha_main/aloha/robot_utils.py",
+      "repository": "https://github.com/Interbotix/aloha.git",
+      "sha256": "0d7ab1014210f311eebc2cdb0f5d2a58c5f870f8b875b7a05b3373413efe1179",
+      "url": "https://github.com/Interbotix/aloha/blob/4fa6b2c4428f5334441a7bee5ab2b2e8071cff93/aloha/robot_utils.py"
+    },
     {
       "authority": "Trossen Robotics / Interbotix",
       "branch": "humble",
