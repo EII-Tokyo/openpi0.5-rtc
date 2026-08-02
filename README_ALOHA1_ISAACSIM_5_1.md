@@ -130,6 +130,25 @@ FreeCAD tessellation budget `0.20 mm`. This is geometric evidence for keeping
 decomposition/compound collision as an isolated diagnostic candidate, not an
 automatic final-collider promotion.
 
+That mesh-bound diagnostic has now been tightened against the STEP B-Rep
+itself. Two fresh project-pinned FreeCAD 1.1.1 / OCCT 7.8.1 processes
+evaluated `2029` deterministic points per handed finger directly on the
+audited trimmed inner-pad faces; OBJ tessellation did not supply those points.
+Two fresh Isaac Sim 5.1.0.0 / PhysX 107.3.26 processes then cooked the exact
+supplier-finger OBJ inputs as single Hull and default 32-piece Decomposition.
+The numerical comparison floor is derived as
+`max(OCCT membership tolerance, 8 × float32 ULP) = 4.76837158203125e-7 m`.
+All four cooked profiles cross the inward CAD face beyond that floor:
+Hull is about `0.681205 mm` on both sides, Decomposition is about
+`0.548108 mm` left and `1.349716 mm` right. Decomposition also leaves sampled
+local undercoverage of about `8.965 mm` left and `9.248 mm` right, while Hull
+undercoverage is only nanometres at these samples. The classification is
+`DECOMPOSITION_MIXED_OR_WORSE`; neither profile is an exact CAD contact
+surface and neither is promoted. This does not invent a task-level permitted
+approximation: that bottle-task tolerance remains
+`HARD_BLOCKER_NOT_DERIVED_OR_MEASURED`, and no successful grasp video was used
+to fit it.
+
 The pure-math kinematic contract is `PASS`: independent URDF-chain FK agrees
 with Trossen's published POE model at home and four deterministic legal joint
 samples. Both follower URDFs have the same normalized robot-local chain and
@@ -150,6 +169,9 @@ Authoritative new reports:
 - `reports/aloha1_mapping/aloha1_cad_link_identity_resolution.json/.md`;
 - `reports/aloha1_mapping/aloha1_gripper_aperture_definition_resolution.json/.md`;
 - `reports/aloha1_mapping/aloha1_official_collider_surface_certificate.json/.md`;
+- `reports/aloha1_mapping/aloha1_finger_cooked_source_identity_boundary.json/.md`;
+- `reports/aloha1_mapping/aloha1_supplier_cad_finger_brep_cooked_certificate.json/.md`;
+- `reports/aloha1_mapping/aloha1_supplier_cad_finger_brep_cooked_failure_screenshot_review.json/.md`;
 - `reports/aloha1_mapping/aloha1_collider_geometry_contract.json/.md`;
 - `reports/aloha1_mapping/aloha1_official_model_candidate.json`;
 - `reports/aloha1_mapping/aloha1_official_model_runtime.json`;

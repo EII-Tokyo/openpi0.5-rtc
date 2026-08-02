@@ -28,6 +28,28 @@
   `docs/superpowers/specs/2026-08-02-aloha1-official-model-first-design.md`
   and
   `docs/superpowers/plans/2026-08-02-aloha1-official-model-first.md`.
+- Supplier-finger cooked geometry is now audited against the exact trimmed
+  STEP B-Rep contact faces, not only OBJ samples. Two fresh FreeCAD 1.1.1 /
+  OCCT 7.8.1 processes produced identical `2029`-point-per-side samples; two
+  fresh Isaac 5.1 / PhysX 107.3.26 cooking processes produced identical Hull
+  and Decomposition geometry signatures. All four profiles cross the inward
+  CAD face beyond the derived `4.76837158203125e-7 m` numerical floor. Hull
+  crosses by about `0.681205 mm` on both sides; default Decomposition crosses
+  by `0.548108 mm` left and `1.349716 mm` right and has about `9 mm` sampled
+  local undercoverage. Classification:
+  `DECOMPOSITION_MIXED_OR_WORSE`; default/final collider unchanged; no Task 8
+  optimization candidate authored.
+- Static failure evidence is complete and visually reviewed: 4 raw + 4
+  annotated exact-B-Rep/cooked images are `PASS` for evidence legibility while
+  all four numerical geometry gates remain `FAIL`. Attempt 1 is retained as
+  `REJECTED_DECOMPOSITION_CLOSEUP_OVERDRAW_LOW_CONTRAST`; attempt 2 uses
+  decomposition wireframes and passes. No video was created because no
+  timeline or dynamic experiment ran; a video would not add physical evidence
+  to this static cooking calculation.
+- Remaining mathematical blocker is narrow: define the task-local acceptable
+  contact approximation from geometry/physics requirements or derive an exact
+  CAD compound contact construction. Do not tune decomposition parameters or
+  infer a tolerance from the already-successful five grasp videos.
 
 ## 2026-08-02 five-pose initialization and finger-safety closure
 
