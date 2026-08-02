@@ -1,0 +1,69 @@
+{
+  "blocking_issue_count": 5,
+  "category": "IsaacSim.PhysicsRules",
+  "direct_nvidia_mcp_verified": true,
+  "issues": [
+    {
+      "at": "Prim </vx300s_right/joints/right_finger>",
+      "message": "Joint /vx300s_right/joints/right_finger's lower limit (-0.013799999840557575) should be > reference joint limits * gear ratio(0.020999999716877937)",
+      "rule": "MimicAPICheck",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_right/follower_right_ee_arm_link>",
+      "message": "Rigid body /vx300s_right/follower_right_ee_arm_link has rigid body api but no collision api",
+      "rule": "RigidBodyHasCollider",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_right/follower_right_ee_gripper_link>",
+      "message": "Rigid body /vx300s_right/follower_right_ee_gripper_link has rigid body api but no collision api",
+      "rule": "RigidBodyHasCollider",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_right/follower_right_fingers_link>",
+      "message": "Rigid body /vx300s_right/follower_right_fingers_link has rigid body api but no collision api",
+      "rule": "RigidBodyHasCollider",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_right/follower_right_gripper_bar_link>",
+      "message": "Rigid body /vx300s_right/follower_right_gripper_bar_link has rigid body api but no collision api",
+      "rule": "RigidBodyHasCollider",
+      "severity": "ERROR"
+    }
+  ],
+  "official_status": "FAIL",
+  "official_status_suppressed": false,
+  "real_robot_connected": false,
+  "remote_192_168_1_103_accessed": false,
+  "requested_rule_filter": null,
+  "rule_count": 12,
+  "rules": [
+    "DriveJointValueReasonable",
+    "HasArticulationRoot",
+    "InvisibleCollisionMeshHasPurposeGuide",
+    "JointHasCorrectTransformAndState",
+    "JointHasJointStateAPI",
+    "MimicAPICheck",
+    "NonAdjacentCollisionMeshesDoNotClash",
+    "PhysicsDriveAndJointState",
+    "PhysicsJointHasDriveOrMimicAPI",
+    "PhysicsJointMaxVelocity",
+    "RigidBodyHasCollider",
+    "RigidBodyHasMassAPI"
+  ],
+  "runtime": {
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physx": "107.3.26"
+  },
+  "schema_version": 1,
+  "target_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task7_physicsrules_root_cause_candidates/1.0/joint_state_zero/follower_right/follower_right_joint_state_zero.usda",
+  "target_immutable": true,
+  "target_name": "joint_state_zero_follower_right_repeat1",
+  "target_sha256_after": "c29a47e5bb487a4c93a6c3cbde64bb0f3de88306435120a993ebdc5523fc43ef",
+  "target_sha256_before": "c29a47e5bb487a4c93a6c3cbde64bb0f3de88306435120a993ebdc5523fc43ef",
+  "warning_count": 0
+}

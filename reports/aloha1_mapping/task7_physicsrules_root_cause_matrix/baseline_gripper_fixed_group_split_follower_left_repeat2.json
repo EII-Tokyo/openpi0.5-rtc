@@ -1,0 +1,93 @@
+{
+  "blocking_issue_count": 9,
+  "category": "IsaacSim.PhysicsRules",
+  "direct_nvidia_mcp_verified": true,
+  "issues": [
+    {
+      "at": "Prim </vx300s_left/joints/elbow>",
+      "message": "Joint /vx300s_left/joints/elbow state not matching robot pose (0.0). From body 0: [(0, 1, 0) 66.46310424804689], from body 1: [(1, 0, 0) 0]",
+      "rule": "JointHasCorrectTransformAndState",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/joints/left_finger>",
+      "message": "Joint /vx300s_left/joints/left_finger state not matching robot pose(0.022390000522136688). From body 0: (0.49799397587776184, 0.022390000522136688, 0.42705002427101135), from body 1: (0.49799397587776184, 0, 0.42705002427101135)",
+      "rule": "JointHasCorrectTransformAndState",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/joints/right_finger>",
+      "message": "Joint /vx300s_left/joints/right_finger state not matching robot pose(0.022390000522136688). From body 0: (0.49799397587776184, -0.022390000522136688, 0.42705002427101135), from body 1: (0.49799397587776184, 0, 0.42705002427101135)",
+      "rule": "JointHasCorrectTransformAndState",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/joints/shoulder>",
+      "message": "Joint /vx300s_left/joints/shoulder state not matching robot pose (0.0). From body 0: [(0, -1, 0) 55.003948211669915], from body 1: [(1, 0, 0) 0]",
+      "rule": "JointHasCorrectTransformAndState",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/joints/wrist_angle>",
+      "message": "Joint /vx300s_left/joints/wrist_angle state not matching robot pose (0.0). From body 0: [(0, -0.9999999999999999, 0) 17.188734054565412], from body 1: [(1, 0, 0) 0]",
+      "rule": "JointHasCorrectTransformAndState",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/joints/right_finger>",
+      "message": "Joint /vx300s_left/joints/right_finger's lower limit (-0.013799999840557575) should be > reference joint limits * gear ratio(0.020999999716877937)",
+      "rule": "MimicAPICheck",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_ee_arm_link>",
+      "message": "Rigid body /vx300s_left/follower_left_ee_arm_link has rigid body api but no collision api",
+      "rule": "RigidBodyHasCollider",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_ee_gripper_link>",
+      "message": "Rigid body /vx300s_left/follower_left_ee_gripper_link has rigid body api but no collision api",
+      "rule": "RigidBodyHasCollider",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_fingers_link>",
+      "message": "Rigid body /vx300s_left/follower_left_fingers_link has rigid body api but no collision api",
+      "rule": "RigidBodyHasCollider",
+      "severity": "ERROR"
+    }
+  ],
+  "official_status": "FAIL",
+  "official_status_suppressed": false,
+  "real_robot_connected": false,
+  "remote_192_168_1_103_accessed": false,
+  "requested_rule_filter": null,
+  "rule_count": 12,
+  "rules": [
+    "DriveJointValueReasonable",
+    "HasArticulationRoot",
+    "InvisibleCollisionMeshHasPurposeGuide",
+    "JointHasCorrectTransformAndState",
+    "JointHasJointStateAPI",
+    "MimicAPICheck",
+    "NonAdjacentCollisionMeshesDoNotClash",
+    "PhysicsDriveAndJointState",
+    "PhysicsJointHasDriveOrMimicAPI",
+    "PhysicsJointMaxVelocity",
+    "RigidBodyHasCollider",
+    "RigidBodyHasMassAPI"
+  ],
+  "runtime": {
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physx": "107.3.26"
+  },
+  "schema_version": 1,
+  "target_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task7_physicsrules_root_cause_candidates/1.0/baseline_gripper_fixed_group_split/follower_left/follower_left_baseline_gripper_fixed_group_split.usda",
+  "target_immutable": true,
+  "target_name": "baseline_gripper_fixed_group_split_follower_left_repeat2",
+  "target_sha256_after": "d20a510fd8be3380b63759cdebc765977719653d61da398a6bf485433a467692",
+  "target_sha256_before": "d20a510fd8be3380b63759cdebc765977719653d61da398a6bf485433a467692",
+  "warning_count": 0
+}

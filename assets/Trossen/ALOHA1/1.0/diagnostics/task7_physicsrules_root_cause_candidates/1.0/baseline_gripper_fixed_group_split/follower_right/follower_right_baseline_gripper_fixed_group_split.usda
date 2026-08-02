@@ -1,0 +1,20 @@
+#usda 1.0
+(
+    customLayerData = {
+        string "aloha1:frozenStageSha256" = "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9"
+        string "aloha1:profile" = "baseline_gripper_fixed_group_split"
+        string "aloha1:scope" = "DIAGNOSTIC_ONLY_NOT_FINAL"
+        string "aloha1:sourceCandidateSha256" = "6cb5d2352b5eef4d8bdea13ca7fdeb809fc27c4fa19f885f7c6ef3c24165a4b8"
+    }
+    defaultPrim = "vx300s_right"
+    subLayers = [
+        @follower_right_baseline_gripper_fixed_group_split_override.usda@
+    ]
+)
+
+def Xform "vx300s_right" (
+    prepend references = @../../../../cad_derived_task7_rule_candidates/1.0/Trossen/vx300s_right/1.0/vx300s_right.usda@</vx300s_right>
+)
+{
+}
+

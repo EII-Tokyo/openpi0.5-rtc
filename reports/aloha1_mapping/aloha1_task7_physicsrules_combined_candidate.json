@@ -1,0 +1,121 @@
+{
+  "candidates": [
+    {
+      "follower": "follower_left",
+      "joint_state_position_count": 5,
+      "joint_states": [
+        {
+          "axis": "angular",
+          "joint_path": "/vx300s_left/joints/elbow",
+          "position_after": 0.0,
+          "position_before": 66.46310424804688
+        },
+        {
+          "axis": "linear",
+          "joint_path": "/vx300s_left/joints/left_finger",
+          "position_after": 0.0,
+          "position_before": 0.022390000522136688
+        },
+        {
+          "axis": "linear",
+          "joint_path": "/vx300s_left/joints/right_finger",
+          "position_after": 0.0,
+          "position_before": -0.022390000522136688
+        },
+        {
+          "axis": "angular",
+          "joint_path": "/vx300s_left/joints/shoulder",
+          "position_after": 0.0,
+          "position_before": -55.00394821166992
+        },
+        {
+          "axis": "angular",
+          "joint_path": "/vx300s_left/joints/wrist_angle",
+          "position_after": 0.0,
+          "position_before": -17.18873405456543
+        }
+      ],
+      "override_layer": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task7_physicsrules_root_cause_candidates/1.0/combined_topology_joint_state/follower_left/follower_left_combined_topology_joint_state_override.usda",
+        "sha256": "dc0d55fe009166c60035a38e17b3f9832473af4bcd513af0ba92649b5c420d61"
+      },
+      "source": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task7_physicsrules_root_cause_candidates/1.0/virtual_helper_topology_collapse/follower_left/follower_left_virtual_helper_topology_collapse.usda",
+        "sha256": "2d167a9f013354e05c6ec1078771472983a2fc38a004b9ef284783fb56f89816"
+      },
+      "source_modified": false,
+      "wrapper": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task7_physicsrules_root_cause_candidates/1.0/combined_topology_joint_state/follower_left/follower_left_combined_topology_joint_state.usda",
+        "default_prim": "/vx300s_left",
+        "sha256": "c1dbccfa178909f7dae5141941da10fbe6acbd6651633f4388714e24cf8baf1e",
+        "sublayers": [
+          "follower_left_combined_topology_joint_state_override.usda"
+        ]
+      }
+    },
+    {
+      "follower": "follower_right",
+      "joint_state_position_count": 5,
+      "joint_states": [
+        {
+          "axis": "angular",
+          "joint_path": "/vx300s_right/joints/elbow",
+          "position_after": 0.0,
+          "position_before": 66.46310424804688
+        },
+        {
+          "axis": "linear",
+          "joint_path": "/vx300s_right/joints/left_finger",
+          "position_after": 0.0,
+          "position_before": 0.022390000522136688
+        },
+        {
+          "axis": "linear",
+          "joint_path": "/vx300s_right/joints/right_finger",
+          "position_after": 0.0,
+          "position_before": -0.022390000522136688
+        },
+        {
+          "axis": "angular",
+          "joint_path": "/vx300s_right/joints/shoulder",
+          "position_after": 0.0,
+          "position_before": -55.00394821166992
+        },
+        {
+          "axis": "angular",
+          "joint_path": "/vx300s_right/joints/wrist_angle",
+          "position_after": 0.0,
+          "position_before": -17.18873405456543
+        }
+      ],
+      "override_layer": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task7_physicsrules_root_cause_candidates/1.0/combined_topology_joint_state/follower_right/follower_right_combined_topology_joint_state_override.usda",
+        "sha256": "f63e4cfbb68229f83420d22f656973a6dc0ee071601237c781fe42b37a85067f"
+      },
+      "source": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task7_physicsrules_root_cause_candidates/1.0/virtual_helper_topology_collapse/follower_right/follower_right_virtual_helper_topology_collapse.usda",
+        "sha256": "7b5f5cd5ca0e101438e9f28255b277104c87d801cabc8a56d59e7a68e7f14f02"
+      },
+      "source_modified": false,
+      "wrapper": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task7_physicsrules_root_cause_candidates/1.0/combined_topology_joint_state/follower_right/follower_right_combined_topology_joint_state.usda",
+        "default_prim": "/vx300s_right",
+        "sha256": "a0a75896bf4ea67be27540f90d08415e5e8a1e8d3f6082b6af2fad213a5550a1",
+        "sublayers": [
+          "follower_right_combined_topology_joint_state_override.usda"
+        ]
+      }
+    }
+  ],
+  "final_or_default_asset_modified": false,
+  "friction_timestep_solver_modified": false,
+  "frozen_stage_sha256": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9",
+  "input_profile": "virtual_helper_topology_collapse",
+  "mimic_modified": false,
+  "physics_equivalence": "PARTIAL_HELPER_MASS_NOT_CONSERVED",
+  "promotion_status": "BLOCKED_USER_REVIEW_AND_MASS_SEMANTICS",
+  "schema_version": 1,
+  "scope": "DIAGNOSTIC_ONLY_NOT_FINAL",
+  "status": "PARTIAL",
+  "task8": "NOT_RUN"
+}

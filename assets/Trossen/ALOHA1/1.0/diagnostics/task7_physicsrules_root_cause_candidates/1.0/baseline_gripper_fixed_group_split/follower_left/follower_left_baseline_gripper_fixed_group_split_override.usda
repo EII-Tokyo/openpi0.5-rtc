@@ -1,0 +1,32 @@
+#usda 1.0
+
+over "vx300s_left"
+{
+    over "follower_left_gripper_link"
+    {
+        over "collisions" (
+            active = true
+        )
+        {
+        }
+
+        over "cad_derived_collisions"
+        {
+            over "cad_derived_gripper_link" (
+                active = false
+            )
+            {
+            }
+        }
+    }
+
+    over "follower_left_gripper_bar_link"
+    {
+        over "collisions" (
+            active = true
+        )
+        {
+        }
+    }
+}
+

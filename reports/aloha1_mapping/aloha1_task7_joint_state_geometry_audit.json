@@ -1,0 +1,1337 @@
+{
+  "all_geometry_candidates_match_validator": true,
+  "candidate_authoring_allowed": false,
+  "candidate_authoring_blocker": "READ_ONLY_AUDIT_REQUIRES_SOURCE_AND_RUNTIME_COMPARISON",
+  "candidate_stages": {
+    "follower_left": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_task7_rule_candidates/1.0/Trossen/vx300s_left/1.0/vx300s_left.usda",
+      "modified": false,
+      "sha256_after": "040264d6f12b6607c7764a102d0ceb5b89797d17859a37852b2da8eacd913bd9",
+      "sha256_before": "040264d6f12b6607c7764a102d0ceb5b89797d17859a37852b2da8eacd913bd9"
+    },
+    "follower_right": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_task7_rule_candidates/1.0/Trossen/vx300s_right/1.0/vx300s_right.usda",
+      "modified": false,
+      "sha256_after": "6cb5d2352b5eef4d8bdea13ca7fdeb809fc27c4fa19f885f7c6ef3c24165a4b8",
+      "sha256_before": "6cb5d2352b5eef4d8bdea13ca7fdeb809fc27c4fa19f885f7c6ef3c24165a4b8"
+    }
+  },
+  "final_or_default_asset_modified": false,
+  "finding_count": 10,
+  "joints": [
+    {
+      "authored_state_position": 66.46310424804688,
+      "axis": "Y",
+      "body0_targets": [
+        "/vx300s_left/follower_left_upper_arm_link"
+      ],
+      "body1_targets": [
+        "/vx300s_left/follower_left_upper_forearm_link"
+      ],
+      "drive_target_position": 66.46310424804688,
+      "expected_transform_from_body0": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.05954999849200249,
+          0.0,
+          0.42705002427101135,
+          1.0
+        ]
+      ],
+      "expected_transform_from_body1": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.05954999849200249,
+          0.0,
+          0.42705002427101135,
+          1.0
+        ]
+      ],
+      "follower": "follower_left",
+      "geometry_candidate_matches_validator": true,
+      "geometry_derived_state_position": 0.0,
+      "joint_type": "PhysicsRevoluteJoint",
+      "local_pos0": [
+        0.05954999849200249,
+        0.0,
+        0.30000001192092896
+      ],
+      "local_pos1": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "local_rot0_wxyz": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "local_rot1_wxyz": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "prim_path": "/vx300s_left/joints/elbow",
+      "prim_stack": [
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_task7_rule_candidates/1.0/Trossen/vx300s_left/1.0/configuration/vx300s_left_robot.usda",
+          "path": "/vx300s_left/joints/elbow"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/configuration/aloha1_signal_home_targets.usda",
+          "path": "/World/follower_left/vx300s_left/joints/elbow"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_physics.usd",
+          "path": "/follower_left/joints/elbow"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_robot.usd",
+          "path": "/follower_left/joints/elbow"
+        }
+      ],
+      "residual_before": {
+        "finite": true,
+        "quaternion_l2": 0.571904450317305,
+        "translation_m": 0.0,
+        "validator_quaternion_tolerance": 0.001,
+        "validator_translation_tolerance_m": 0.0001
+      },
+      "residual_geometry_candidate": {
+        "finite": true,
+        "quaternion_l2": 0.0,
+        "translation_m": 0.0,
+        "validator_quaternion_tolerance": 0.001,
+        "validator_translation_tolerance_m": 0.0001
+      },
+      "rule": "JointHasCorrectTransformAndState",
+      "source_layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_robot.usd",
+      "source_prim_path": "/follower_left/joints/elbow",
+      "state_units": "degrees",
+      "usd_modified": false
+    },
+    {
+      "authored_state_position": 0.022390000522136688,
+      "axis": "Y",
+      "body0_targets": [
+        "/vx300s_left/follower_left_fingers_link"
+      ],
+      "body1_targets": [
+        "/vx300s_left/follower_left_left_finger_link"
+      ],
+      "drive_target_position": 0.022390000522136688,
+      "expected_transform_from_body0": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.49799397587776184,
+          0.0,
+          0.42705002427101135,
+          1.0
+        ]
+      ],
+      "expected_transform_from_body1": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.49799397587776184,
+          0.0,
+          0.42705002427101135,
+          1.0
+        ]
+      ],
+      "follower": "follower_left",
+      "geometry_candidate_matches_validator": true,
+      "geometry_derived_state_position": 0.0,
+      "joint_type": "PhysicsPrismaticJoint",
+      "local_pos0": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "local_pos1": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "local_rot0_wxyz": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "local_rot1_wxyz": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "prim_path": "/vx300s_left/joints/left_finger",
+      "prim_stack": [
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_task7_rule_candidates/1.0/Trossen/vx300s_left/1.0/configuration/vx300s_left_robot.usda",
+          "path": "/vx300s_left/joints/left_finger"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/configuration/aloha1_signal_home_targets.usda",
+          "path": "/World/follower_left/vx300s_left/joints/left_finger"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_physics.usd",
+          "path": "/follower_left/joints/left_finger"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_robot.usd",
+          "path": "/follower_left/joints/left_finger"
+        }
+      ],
+      "residual_before": {
+        "finite": true,
+        "quaternion_l2": 0.0,
+        "translation_m": 0.022390000522136688,
+        "validator_quaternion_tolerance": 0.001,
+        "validator_translation_tolerance_m": 0.0001
+      },
+      "residual_geometry_candidate": {
+        "finite": true,
+        "quaternion_l2": 0.0,
+        "translation_m": 0.0,
+        "validator_quaternion_tolerance": 0.001,
+        "validator_translation_tolerance_m": 0.0001
+      },
+      "rule": "JointHasCorrectTransformAndState",
+      "source_layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_robot.usd",
+      "source_prim_path": "/follower_left/joints/left_finger",
+      "state_units": "meters",
+      "usd_modified": false
+    },
+    {
+      "authored_state_position": -0.022390000522136688,
+      "axis": "Y",
+      "body0_targets": [
+        "/vx300s_left/follower_left_fingers_link"
+      ],
+      "body1_targets": [
+        "/vx300s_left/follower_left_right_finger_link"
+      ],
+      "drive_target_position": null,
+      "expected_transform_from_body0": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.49799397587776184,
+          0.0,
+          0.42705002427101135,
+          1.0
+        ]
+      ],
+      "expected_transform_from_body1": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.49799397587776184,
+          0.0,
+          0.42705002427101135,
+          1.0
+        ]
+      ],
+      "follower": "follower_left",
+      "geometry_candidate_matches_validator": true,
+      "geometry_derived_state_position": 0.0,
+      "joint_type": "PhysicsPrismaticJoint",
+      "local_pos0": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "local_pos1": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "local_rot0_wxyz": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "local_rot1_wxyz": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "prim_path": "/vx300s_left/joints/right_finger",
+      "prim_stack": [
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_task7_rule_candidates/1.0/Trossen/vx300s_left/1.0/configuration/vx300s_left_robot.usda",
+          "path": "/vx300s_left/joints/right_finger"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/configuration/aloha1_signal_home_targets.usda",
+          "path": "/World/follower_left/vx300s_left/joints/right_finger"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_physics.usd",
+          "path": "/follower_left/joints/right_finger"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_robot.usd",
+          "path": "/follower_left/joints/right_finger"
+        }
+      ],
+      "residual_before": {
+        "finite": true,
+        "quaternion_l2": 0.0,
+        "translation_m": 0.022390000522136688,
+        "validator_quaternion_tolerance": 0.001,
+        "validator_translation_tolerance_m": 0.0001
+      },
+      "residual_geometry_candidate": {
+        "finite": true,
+        "quaternion_l2": 0.0,
+        "translation_m": 0.0,
+        "validator_quaternion_tolerance": 0.001,
+        "validator_translation_tolerance_m": 0.0001
+      },
+      "rule": "JointHasCorrectTransformAndState",
+      "source_layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_robot.usd",
+      "source_prim_path": "/follower_left/joints/right_finger",
+      "state_units": "meters",
+      "usd_modified": false
+    },
+    {
+      "authored_state_position": -55.00394821166992,
+      "axis": "Y",
+      "body0_targets": [
+        "/vx300s_left/follower_left_shoulder_link"
+      ],
+      "body1_targets": [
+        "/vx300s_left/follower_left_upper_arm_link"
+      ],
+      "drive_target_position": -55.00394821166992,
+      "expected_transform_from_body0": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.1270500048995018,
+          1.0
+        ]
+      ],
+      "expected_transform_from_body1": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.1270500123500824,
+          1.0
+        ]
+      ],
+      "follower": "follower_left",
+      "geometry_candidate_matches_validator": true,
+      "geometry_derived_state_position": 0.0,
+      "joint_type": "PhysicsRevoluteJoint",
+      "local_pos0": [
+        0.0,
+        0.0,
+        0.04805000126361847
+      ],
+      "local_pos1": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "local_rot0_wxyz": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "local_rot1_wxyz": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "prim_path": "/vx300s_left/joints/shoulder",
+      "prim_stack": [
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_task7_rule_candidates/1.0/Trossen/vx300s_left/1.0/configuration/vx300s_left_robot.usda",
+          "path": "/vx300s_left/joints/shoulder"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/configuration/aloha1_signal_home_targets.usda",
+          "path": "/World/follower_left/vx300s_left/joints/shoulder"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_physics.usd",
+          "path": "/follower_left/joints/shoulder"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_robot.usd",
+          "path": "/follower_left/joints/shoulder"
+        }
+      ],
+      "residual_before": {
+        "finite": true,
+        "quaternion_l2": 0.47540525182954985,
+        "translation_m": 7.450580596923828e-09,
+        "validator_quaternion_tolerance": 0.001,
+        "validator_translation_tolerance_m": 0.0001
+      },
+      "residual_geometry_candidate": {
+        "finite": true,
+        "quaternion_l2": 0.0,
+        "translation_m": 7.450580596923828e-09,
+        "validator_quaternion_tolerance": 0.001,
+        "validator_translation_tolerance_m": 0.0001
+      },
+      "rule": "JointHasCorrectTransformAndState",
+      "source_layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_robot.usd",
+      "source_prim_path": "/follower_left/joints/shoulder",
+      "state_units": "degrees",
+      "usd_modified": false
+    },
+    {
+      "authored_state_position": -17.18873405456543,
+      "axis": "Y",
+      "body0_targets": [
+        "/vx300s_left/follower_left_lower_forearm_link"
+      ],
+      "body1_targets": [
+        "/vx300s_left/follower_left_wrist_link"
+      ],
+      "drive_target_position": -17.18873405456543,
+      "expected_transform_from_body0": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.35955000668764114,
+          0.0,
+          0.42705002427101135,
+          1.0
+        ]
+      ],
+      "expected_transform_from_body1": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.35954999923706055,
+          0.0,
+          0.42705002427101135,
+          1.0
+        ]
+      ],
+      "follower": "follower_left",
+      "geometry_candidate_matches_validator": true,
+      "geometry_derived_state_position": 0.0,
+      "joint_type": "PhysicsRevoluteJoint",
+      "local_pos0": [
+        0.10000000149011612,
+        0.0,
+        0.0
+      ],
+      "local_pos1": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "local_rot0_wxyz": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "local_rot1_wxyz": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "prim_path": "/vx300s_left/joints/wrist_angle",
+      "prim_stack": [
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_task7_rule_candidates/1.0/Trossen/vx300s_left/1.0/configuration/vx300s_left_robot.usda",
+          "path": "/vx300s_left/joints/wrist_angle"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/configuration/aloha1_signal_home_targets.usda",
+          "path": "/World/follower_left/vx300s_left/joints/wrist_angle"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_physics.usd",
+          "path": "/follower_left/joints/wrist_angle"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_robot.usd",
+          "path": "/follower_left/joints/wrist_angle"
+        }
+      ],
+      "residual_before": {
+        "finite": true,
+        "quaternion_l2": 0.14985941629148306,
+        "translation_m": 7.450580596923828e-09,
+        "validator_quaternion_tolerance": 0.001,
+        "validator_translation_tolerance_m": 0.0001
+      },
+      "residual_geometry_candidate": {
+        "finite": true,
+        "quaternion_l2": 0.0,
+        "translation_m": 7.450580596923828e-09,
+        "validator_quaternion_tolerance": 0.001,
+        "validator_translation_tolerance_m": 0.0001
+      },
+      "rule": "JointHasCorrectTransformAndState",
+      "source_layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_robot.usd",
+      "source_prim_path": "/follower_left/joints/wrist_angle",
+      "state_units": "degrees",
+      "usd_modified": false
+    },
+    {
+      "authored_state_position": 66.46310424804688,
+      "axis": "Y",
+      "body0_targets": [
+        "/vx300s_right/follower_right_upper_arm_link"
+      ],
+      "body1_targets": [
+        "/vx300s_right/follower_right_upper_forearm_link"
+      ],
+      "drive_target_position": 66.46310424804688,
+      "expected_transform_from_body0": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.05954999849200249,
+          0.0,
+          0.42705002427101135,
+          1.0
+        ]
+      ],
+      "expected_transform_from_body1": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.05954999849200249,
+          0.0,
+          0.42705002427101135,
+          1.0
+        ]
+      ],
+      "follower": "follower_right",
+      "geometry_candidate_matches_validator": true,
+      "geometry_derived_state_position": 0.0,
+      "joint_type": "PhysicsRevoluteJoint",
+      "local_pos0": [
+        0.05954999849200249,
+        0.0,
+        0.30000001192092896
+      ],
+      "local_pos1": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "local_rot0_wxyz": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "local_rot1_wxyz": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "prim_path": "/vx300s_right/joints/elbow",
+      "prim_stack": [
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_task7_rule_candidates/1.0/Trossen/vx300s_right/1.0/configuration/vx300s_right_robot.usda",
+          "path": "/vx300s_right/joints/elbow"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/configuration/aloha1_signal_home_targets.usda",
+          "path": "/World/follower_right/vx300s_right/joints/elbow"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/configuration/supplier_cad_follower_right_configuration.usda",
+          "path": "/follower_right/vx300s_right/joints/elbow"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_physics.usd",
+          "path": "/follower_right/joints/elbow"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_robot.usd",
+          "path": "/follower_right/joints/elbow"
+        }
+      ],
+      "residual_before": {
+        "finite": true,
+        "quaternion_l2": 0.571904450317305,
+        "translation_m": 0.0,
+        "validator_quaternion_tolerance": 0.001,
+        "validator_translation_tolerance_m": 0.0001
+      },
+      "residual_geometry_candidate": {
+        "finite": true,
+        "quaternion_l2": 0.0,
+        "translation_m": 0.0,
+        "validator_quaternion_tolerance": 0.001,
+        "validator_translation_tolerance_m": 0.0001
+      },
+      "rule": "JointHasCorrectTransformAndState",
+      "source_layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_robot.usd",
+      "source_prim_path": "/follower_right/joints/elbow",
+      "state_units": "degrees",
+      "usd_modified": false
+    },
+    {
+      "authored_state_position": 0.022390000522136688,
+      "axis": "Y",
+      "body0_targets": [
+        "/vx300s_right/follower_right_fingers_link"
+      ],
+      "body1_targets": [
+        "/vx300s_right/follower_right_left_finger_link"
+      ],
+      "drive_target_position": 0.022390000522136688,
+      "expected_transform_from_body0": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.49799397587776184,
+          0.0,
+          0.42705002427101135,
+          1.0
+        ]
+      ],
+      "expected_transform_from_body1": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.49799397587776184,
+          0.0,
+          0.42705002427101135,
+          1.0
+        ]
+      ],
+      "follower": "follower_right",
+      "geometry_candidate_matches_validator": true,
+      "geometry_derived_state_position": 0.0,
+      "joint_type": "PhysicsPrismaticJoint",
+      "local_pos0": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "local_pos1": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "local_rot0_wxyz": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "local_rot1_wxyz": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "prim_path": "/vx300s_right/joints/left_finger",
+      "prim_stack": [
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_task7_rule_candidates/1.0/Trossen/vx300s_right/1.0/configuration/vx300s_right_robot.usda",
+          "path": "/vx300s_right/joints/left_finger"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/configuration/aloha1_signal_home_targets.usda",
+          "path": "/World/follower_right/vx300s_right/joints/left_finger"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/configuration/supplier_cad_follower_right_configuration.usda",
+          "path": "/follower_right/vx300s_right/joints/left_finger"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_physics.usd",
+          "path": "/follower_right/joints/left_finger"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_robot.usd",
+          "path": "/follower_right/joints/left_finger"
+        }
+      ],
+      "residual_before": {
+        "finite": true,
+        "quaternion_l2": 0.0,
+        "translation_m": 0.022390000522136688,
+        "validator_quaternion_tolerance": 0.001,
+        "validator_translation_tolerance_m": 0.0001
+      },
+      "residual_geometry_candidate": {
+        "finite": true,
+        "quaternion_l2": 0.0,
+        "translation_m": 0.0,
+        "validator_quaternion_tolerance": 0.001,
+        "validator_translation_tolerance_m": 0.0001
+      },
+      "rule": "JointHasCorrectTransformAndState",
+      "source_layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_robot.usd",
+      "source_prim_path": "/follower_right/joints/left_finger",
+      "state_units": "meters",
+      "usd_modified": false
+    },
+    {
+      "authored_state_position": -0.022390000522136688,
+      "axis": "Y",
+      "body0_targets": [
+        "/vx300s_right/follower_right_fingers_link"
+      ],
+      "body1_targets": [
+        "/vx300s_right/follower_right_right_finger_link"
+      ],
+      "drive_target_position": null,
+      "expected_transform_from_body0": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.49799397587776184,
+          0.0,
+          0.42705002427101135,
+          1.0
+        ]
+      ],
+      "expected_transform_from_body1": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.49799397587776184,
+          0.0,
+          0.42705002427101135,
+          1.0
+        ]
+      ],
+      "follower": "follower_right",
+      "geometry_candidate_matches_validator": true,
+      "geometry_derived_state_position": 0.0,
+      "joint_type": "PhysicsPrismaticJoint",
+      "local_pos0": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "local_pos1": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "local_rot0_wxyz": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "local_rot1_wxyz": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "prim_path": "/vx300s_right/joints/right_finger",
+      "prim_stack": [
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_task7_rule_candidates/1.0/Trossen/vx300s_right/1.0/configuration/vx300s_right_robot.usda",
+          "path": "/vx300s_right/joints/right_finger"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/configuration/aloha1_signal_home_targets.usda",
+          "path": "/World/follower_right/vx300s_right/joints/right_finger"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/configuration/supplier_cad_follower_right_configuration.usda",
+          "path": "/follower_right/vx300s_right/joints/right_finger"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_physics.usd",
+          "path": "/follower_right/joints/right_finger"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_robot.usd",
+          "path": "/follower_right/joints/right_finger"
+        }
+      ],
+      "residual_before": {
+        "finite": true,
+        "quaternion_l2": 0.0,
+        "translation_m": 0.022390000522136688,
+        "validator_quaternion_tolerance": 0.001,
+        "validator_translation_tolerance_m": 0.0001
+      },
+      "residual_geometry_candidate": {
+        "finite": true,
+        "quaternion_l2": 0.0,
+        "translation_m": 0.0,
+        "validator_quaternion_tolerance": 0.001,
+        "validator_translation_tolerance_m": 0.0001
+      },
+      "rule": "JointHasCorrectTransformAndState",
+      "source_layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_robot.usd",
+      "source_prim_path": "/follower_right/joints/right_finger",
+      "state_units": "meters",
+      "usd_modified": false
+    },
+    {
+      "authored_state_position": -55.00394821166992,
+      "axis": "Y",
+      "body0_targets": [
+        "/vx300s_right/follower_right_shoulder_link"
+      ],
+      "body1_targets": [
+        "/vx300s_right/follower_right_upper_arm_link"
+      ],
+      "drive_target_position": -55.00394821166992,
+      "expected_transform_from_body0": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.1270500048995018,
+          1.0
+        ]
+      ],
+      "expected_transform_from_body1": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.1270500123500824,
+          1.0
+        ]
+      ],
+      "follower": "follower_right",
+      "geometry_candidate_matches_validator": true,
+      "geometry_derived_state_position": 0.0,
+      "joint_type": "PhysicsRevoluteJoint",
+      "local_pos0": [
+        0.0,
+        0.0,
+        0.04805000126361847
+      ],
+      "local_pos1": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "local_rot0_wxyz": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "local_rot1_wxyz": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "prim_path": "/vx300s_right/joints/shoulder",
+      "prim_stack": [
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_task7_rule_candidates/1.0/Trossen/vx300s_right/1.0/configuration/vx300s_right_robot.usda",
+          "path": "/vx300s_right/joints/shoulder"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/configuration/aloha1_signal_home_targets.usda",
+          "path": "/World/follower_right/vx300s_right/joints/shoulder"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/configuration/supplier_cad_follower_right_configuration.usda",
+          "path": "/follower_right/vx300s_right/joints/shoulder"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_physics.usd",
+          "path": "/follower_right/joints/shoulder"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_robot.usd",
+          "path": "/follower_right/joints/shoulder"
+        }
+      ],
+      "residual_before": {
+        "finite": true,
+        "quaternion_l2": 0.47540525182954985,
+        "translation_m": 7.450580596923828e-09,
+        "validator_quaternion_tolerance": 0.001,
+        "validator_translation_tolerance_m": 0.0001
+      },
+      "residual_geometry_candidate": {
+        "finite": true,
+        "quaternion_l2": 0.0,
+        "translation_m": 7.450580596923828e-09,
+        "validator_quaternion_tolerance": 0.001,
+        "validator_translation_tolerance_m": 0.0001
+      },
+      "rule": "JointHasCorrectTransformAndState",
+      "source_layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_robot.usd",
+      "source_prim_path": "/follower_right/joints/shoulder",
+      "state_units": "degrees",
+      "usd_modified": false
+    },
+    {
+      "authored_state_position": -17.18873405456543,
+      "axis": "Y",
+      "body0_targets": [
+        "/vx300s_right/follower_right_lower_forearm_link"
+      ],
+      "body1_targets": [
+        "/vx300s_right/follower_right_wrist_link"
+      ],
+      "drive_target_position": -17.18873405456543,
+      "expected_transform_from_body0": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.35955000668764114,
+          0.0,
+          0.42705002427101135,
+          1.0
+        ]
+      ],
+      "expected_transform_from_body1": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.35954999923706055,
+          0.0,
+          0.42705002427101135,
+          1.0
+        ]
+      ],
+      "follower": "follower_right",
+      "geometry_candidate_matches_validator": true,
+      "geometry_derived_state_position": 0.0,
+      "joint_type": "PhysicsRevoluteJoint",
+      "local_pos0": [
+        0.10000000149011612,
+        0.0,
+        0.0
+      ],
+      "local_pos1": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "local_rot0_wxyz": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "local_rot1_wxyz": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "prim_path": "/vx300s_right/joints/wrist_angle",
+      "prim_stack": [
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_task7_rule_candidates/1.0/Trossen/vx300s_right/1.0/configuration/vx300s_right_robot.usda",
+          "path": "/vx300s_right/joints/wrist_angle"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/configuration/aloha1_signal_home_targets.usda",
+          "path": "/World/follower_right/vx300s_right/joints/wrist_angle"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/configuration/supplier_cad_follower_right_configuration.usda",
+          "path": "/follower_right/vx300s_right/joints/wrist_angle"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_physics.usd",
+          "path": "/follower_right/joints/wrist_angle"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_robot.usd",
+          "path": "/follower_right/joints/wrist_angle"
+        }
+      ],
+      "residual_before": {
+        "finite": true,
+        "quaternion_l2": 0.14985941629148306,
+        "translation_m": 7.450580596923828e-09,
+        "validator_quaternion_tolerance": 0.001,
+        "validator_translation_tolerance_m": 0.0001
+      },
+      "residual_geometry_candidate": {
+        "finite": true,
+        "quaternion_l2": 0.0,
+        "translation_m": 7.450580596923828e-09,
+        "validator_quaternion_tolerance": 0.001,
+        "validator_translation_tolerance_m": 0.0001
+      },
+      "rule": "JointHasCorrectTransformAndState",
+      "source_layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_robot.usd",
+      "source_prim_path": "/follower_right/joints/wrist_angle",
+      "state_units": "degrees",
+      "usd_modified": false
+    }
+  ],
+  "local_rule_source": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.validation/isaacsim/asset/validation/joint_rules.py",
+    "class": "JointHasCorrectTransformAndState",
+    "sha256": "6dc43a4ed0284f61d85d22c5c24775e40c5f373facdc408236a25385109ab1ef",
+    "tolerances": {
+      "quaternion_l2": 0.001,
+      "translation_m": 0.0001
+    }
+  },
+  "runtime": {
+    "asset_validation": "1.1.0",
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physx": "107.3.26"
+  },
+  "schema_version": 1,
+  "stage": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+    "modified": false,
+    "sha256_after": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9",
+    "sha256_before": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9"
+  },
+  "status": "PASS",
+  "task8": "NOT_RUN"
+}

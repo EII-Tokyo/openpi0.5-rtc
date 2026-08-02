@@ -1,0 +1,344 @@
+{
+  "capture_report": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-task7-physicsrules-root-cause/screenshots_attempt2/follower_right/capture.json",
+    "sha256": "dc2239f92f2e8fb024ce1de8f475ee6bf6df30eae6e8d31a27fb077b7e8d853d"
+  },
+  "captures": [
+    {
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-task7-physicsrules-root-cause/screenshots_attempt2/follower_right/screenshots_annotated/follower_right_whole_arm_oblique_annotated.png",
+      "annotated_sha256": "e197fcb782ab533ea009a7365149f65b3ec4b1542058b48c647bd0043db56220",
+      "camera": {
+        "orientation_wxyz": [
+          0.26873263716697693,
+          0.1666816622018814,
+          0.5000449419021606,
+          0.8061978816986084
+        ],
+        "position_world_m": [
+          1.702069478825089,
+          2.0088002616767837,
+          1.4766061784279574
+        ],
+        "target_world_m": [
+          0.19546928256750107,
+          0.0,
+          0.23115001618835154
+        ]
+      },
+      "follower": "follower_right",
+      "projections": {
+        "all": {
+          "finite_point_count": 17084,
+          "maximum_px": [
+            1212.1360543457495,
+            765.2029427743307
+          ],
+          "minimum_px": [
+            306.1224275531105,
+            149.79780846924882
+          ]
+        },
+        "base": {
+          "finite_point_count": 1217,
+          "maximum_px": [
+            1212.1360543457495,
+            765.2029427743307
+          ],
+          "minimum_px": [
+            863.189246863895,
+            554.5238526613018
+          ]
+        },
+        "gripper": {
+          "finite_point_count": 7821,
+          "maximum_px": [
+            537.1772876646181,
+            419.78450760508025
+          ],
+          "minimum_px": [
+            306.1224275531105,
+            282.3228663710176
+          ]
+        },
+        "helpers": {
+          "finite_point_count": 3,
+          "maximum_px": [
+            470.86779876308634,
+            372.50151275639035
+          ],
+          "minimum_px": [
+            388.7370639608262,
+            348.6966698761401
+          ]
+        }
+      },
+      "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-task7-physicsrules-root-cause/screenshots_attempt2/follower_right/screenshots_raw/follower_right_whole_arm_oblique_raw.png",
+      "raw_sha256": "def4192f77482782cda74c80c4c8374dd3d6eee218584e368fc5fdef663aa32d",
+      "resolution": [
+        1600,
+        1000
+      ],
+      "view": "whole_arm_oblique",
+      "visual_model_review": "PASS",
+      "visual_review": "PENDING",
+      "visual_review_checks": {
+        "collision_overlay_visible": "PASS",
+        "failure_reason_marked": "PASS",
+        "labels_do_not_hide_failure_region": "PASS",
+        "raw_and_annotated_are_distinct": "PASS",
+        "whole_arm_or_failure_region_visible": "PASS"
+      }
+    },
+    {
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-task7-physicsrules-root-cause/screenshots_attempt2/follower_right/screenshots_annotated/follower_right_gripper_failure_closeup_annotated.png",
+      "annotated_sha256": "2ae3a3344167437702fcb23772d80d628cb75132743c4d3ada7e7694ef4c7eeb",
+      "camera": {
+        "orientation_wxyz": [
+          0.26873263716697693,
+          0.1666816622018814,
+          0.5000449419021606,
+          0.8061978816986084
+        ],
+        "position_world_m": [
+          0.8771095589983877,
+          0.49101571083908824,
+          0.7337930980704649
+        ],
+        "target_world_m": [
+          0.5088477730751038,
+          -3.725290298461914e-09,
+          0.42936335504055023
+        ]
+      },
+      "follower": "follower_right",
+      "projections": {
+        "all": {
+          "finite_point_count": 17084,
+          "maximum_px": [
+            2644.497578441417,
+            1574.385683905548
+          ],
+          "minimum_px": [
+            363.97219257103893,
+            -149.1396870207335
+          ]
+        },
+        "base": {
+          "finite_point_count": 1217,
+          "maximum_px": [
+            2644.497578441417,
+            1574.385683905548
+          ],
+          "minimum_px": [
+            1793.0092589311548,
+            922.6589869390042
+          ]
+        },
+        "gripper": {
+          "finite_point_count": 7821,
+          "maximum_px": [
+            1236.9313290596128,
+            744.1936616499022
+          ],
+          "minimum_px": [
+            363.97219257103893,
+            217.9836584266069
+          ]
+        },
+        "helpers": {
+          "finite_point_count": 3,
+          "maximum_px": [
+            958.9138497402781,
+            553.7038899080815
+          ],
+          "minimum_px": [
+            674.2182021401472,
+            458.24893150392717
+          ]
+        }
+      },
+      "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-task7-physicsrules-root-cause/screenshots_attempt2/follower_right/screenshots_raw/follower_right_gripper_failure_closeup_raw.png",
+      "raw_sha256": "8ac6dd949d07918173fe3648fb44a5be711b99ea4b904eb78922ed4357e5c215",
+      "resolution": [
+        1600,
+        1000
+      ],
+      "view": "gripper_failure_closeup",
+      "visual_model_review": "PASS",
+      "visual_review": "PENDING",
+      "visual_review_checks": {
+        "collision_overlay_visible": "PASS",
+        "failure_reason_marked": "PASS",
+        "labels_do_not_hide_failure_region": "PASS",
+        "raw_and_annotated_are_distinct": "PASS",
+        "whole_arm_or_failure_region_visible": "PASS"
+      }
+    }
+  ],
+  "failure": {
+    "deterministic_signature": "a1aef1e796c145189870d2941217e03846c9a80dc419e4cb0562452fcbfaa4fb",
+    "fresh_process_count": 2,
+    "hypothesis": "virtual_helpers_without_rigid_body",
+    "interpretation": "Removing body semantics from source-empty fixed helpers changes the validator's rigid-body adjacency/ownership model and introduces 57 repeatable collision-clash findings.",
+    "non_adjacent_clash_count": 57
+  },
+  "overlay": {
+    "colors": {
+      "base": "red",
+      "gripper_and_fingers": "orange",
+      "other_arm_links": "cyan"
+    },
+    "count": 21,
+    "records": [
+      {
+        "clone_prim": "/Task7VirtualHelperFailure/ColliderOverlay/collider_000",
+        "group": "base",
+        "point_count": 1217,
+        "source_prim": "/vx300s_right/follower_right_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh"
+      },
+      {
+        "clone_prim": "/Task7VirtualHelperFailure/ColliderOverlay/collider_001",
+        "group": "gripper",
+        "point_count": 3687,
+        "source_prim": "/vx300s_right/follower_right_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_000/mesh"
+      },
+      {
+        "clone_prim": "/Task7VirtualHelperFailure/ColliderOverlay/collider_002",
+        "group": "gripper",
+        "point_count": 72,
+        "source_prim": "/vx300s_right/follower_right_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_001/mesh"
+      },
+      {
+        "clone_prim": "/Task7VirtualHelperFailure/ColliderOverlay/collider_003",
+        "group": "gripper",
+        "point_count": 72,
+        "source_prim": "/vx300s_right/follower_right_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_002/mesh"
+      },
+      {
+        "clone_prim": "/Task7VirtualHelperFailure/ColliderOverlay/collider_004",
+        "group": "gripper",
+        "point_count": 72,
+        "source_prim": "/vx300s_right/follower_right_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_003/mesh"
+      },
+      {
+        "clone_prim": "/Task7VirtualHelperFailure/ColliderOverlay/collider_005",
+        "group": "gripper",
+        "point_count": 72,
+        "source_prim": "/vx300s_right/follower_right_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_004/mesh"
+      },
+      {
+        "clone_prim": "/Task7VirtualHelperFailure/ColliderOverlay/collider_006",
+        "group": "gripper",
+        "point_count": 72,
+        "source_prim": "/vx300s_right/follower_right_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_005/mesh"
+      },
+      {
+        "clone_prim": "/Task7VirtualHelperFailure/ColliderOverlay/collider_007",
+        "group": "gripper",
+        "point_count": 72,
+        "source_prim": "/vx300s_right/follower_right_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_006/mesh"
+      },
+      {
+        "clone_prim": "/Task7VirtualHelperFailure/ColliderOverlay/collider_008",
+        "group": "gripper",
+        "point_count": 72,
+        "source_prim": "/vx300s_right/follower_right_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_007/mesh"
+      },
+      {
+        "clone_prim": "/Task7VirtualHelperFailure/ColliderOverlay/collider_009",
+        "group": "gripper",
+        "point_count": 72,
+        "source_prim": "/vx300s_right/follower_right_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_008/mesh"
+      },
+      {
+        "clone_prim": "/Task7VirtualHelperFailure/ColliderOverlay/collider_010",
+        "group": "gripper",
+        "point_count": 1896,
+        "source_prim": "/vx300s_right/follower_right_gripper_prop_link/materialized_baseline_fallback/gripper_prop_link/mesh"
+      },
+      {
+        "clone_prim": "/Task7VirtualHelperFailure/ColliderOverlay/collider_011",
+        "group": "gripper",
+        "point_count": 831,
+        "source_prim": "/vx300s_right/follower_right_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh"
+      },
+      {
+        "clone_prim": "/Task7VirtualHelperFailure/ColliderOverlay/collider_012",
+        "group": "other",
+        "point_count": 580,
+        "source_prim": "/vx300s_right/follower_right_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh"
+      },
+      {
+        "clone_prim": "/Task7VirtualHelperFailure/ColliderOverlay/collider_013",
+        "group": "gripper",
+        "point_count": 831,
+        "source_prim": "/vx300s_right/follower_right_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh"
+      },
+      {
+        "clone_prim": "/Task7VirtualHelperFailure/ColliderOverlay/collider_014",
+        "group": "other",
+        "point_count": 880,
+        "source_prim": "/vx300s_right/follower_right_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh"
+      },
+      {
+        "clone_prim": "/Task7VirtualHelperFailure/ColliderOverlay/collider_015",
+        "group": "other",
+        "point_count": 1564,
+        "source_prim": "/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh"
+      },
+      {
+        "clone_prim": "/Task7VirtualHelperFailure/ColliderOverlay/collider_016",
+        "group": "other",
+        "point_count": 69,
+        "source_prim": "/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_001/mesh"
+      },
+      {
+        "clone_prim": "/Task7VirtualHelperFailure/ColliderOverlay/collider_017",
+        "group": "other",
+        "point_count": 108,
+        "source_prim": "/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_002/mesh"
+      },
+      {
+        "clone_prim": "/Task7VirtualHelperFailure/ColliderOverlay/collider_018",
+        "group": "other",
+        "point_count": 108,
+        "source_prim": "/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_003/mesh"
+      },
+      {
+        "clone_prim": "/Task7VirtualHelperFailure/ColliderOverlay/collider_019",
+        "group": "other",
+        "point_count": 495,
+        "source_prim": "/vx300s_right/follower_right_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh"
+      },
+      {
+        "clone_prim": "/Task7VirtualHelperFailure/ColliderOverlay/collider_020",
+        "group": "other",
+        "point_count": 4242,
+        "source_prim": "/vx300s_right/follower_right_wrist_link/materialized_baseline_fallback/wrist_link/mesh"
+      }
+    ],
+    "semantics": "SESSION_ONLY_NON_PHYSICAL_VISUAL_CLONES_OF_AUTHORED_COLLIDERS"
+  },
+  "reason": "REPEATED_FAILURE_SCREENSHOT_EVIDENCE_VISUALLY_REVIEWED",
+  "schema_version": 1,
+  "source_or_final_asset_modified": false,
+  "stage": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task7_physicsrules_root_cause_candidates/1.0/virtual_helpers_without_rigid_body/follower_right/follower_right_virtual_helpers_without_rigid_body.usda",
+    "root_prim": "/vx300s_right",
+    "sha256_after": "d0ffc14010f8237b5fdbe55e5a5c9761c57de8c6d7b071ce71d1a57046bfe825",
+    "sha256_before": "d0ffc14010f8237b5fdbe55e5a5c9761c57de8c6d7b071ce71d1a57046bfe825"
+  },
+  "status": "PASS",
+  "task8": "NOT_RUN",
+  "validator_reports": [
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/task7_physicsrules_root_cause_matrix/virtual_helpers_without_rigid_body_follower_right_repeat1.json",
+      "sha256": "41628ed6b5dcca57d6df07298750781b8025fc816fd98e04933287d39153c1fd"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/task7_physicsrules_root_cause_matrix/virtual_helpers_without_rigid_body_follower_right_repeat2.json",
+      "sha256": "f44c9c6d33205084a7c43850544a31de94d5a6ca3f1d59eedb5ccc6a9ff2956b"
+    }
+  ],
+  "visual_model_review": "PASS"
+}

@@ -1,0 +1,836 @@
+{
+  "candidate_stages": {
+    "follower_left": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_task7_rule_candidates/1.0/Trossen/vx300s_left/1.0/vx300s_left.usda",
+      "modified": false,
+      "sha256_after": "040264d6f12b6607c7764a102d0ceb5b89797d17859a37852b2da8eacd913bd9",
+      "sha256_before": "040264d6f12b6607c7764a102d0ceb5b89797d17859a37852b2da8eacd913bd9"
+    },
+    "follower_right": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_task7_rule_candidates/1.0/Trossen/vx300s_right/1.0/vx300s_right.usda",
+      "modified": false,
+      "sha256_after": "6cb5d2352b5eef4d8bdea13ca7fdeb809fc27c4fa19f885f7c6ef3c24165a4b8",
+      "sha256_before": "6cb5d2352b5eef4d8bdea13ca7fdeb809fc27c4fa19f885f7c6ef3c24165a4b8"
+    }
+  },
+  "classification_counts": {
+    "PHYSICAL_LINK_REQUIRES_COLLIDER": 2,
+    "VIRTUAL_HELPER_SHOULD_NOT_BE_RIGID_BODY": 6
+  },
+  "decision": {
+    "gripper_bar_duplicate_collider_allowed": false,
+    "invent_collider_without_geometry_allowed": false,
+    "next_step": "SINGLE_VARIABLE_ISOLATED_CANDIDATES",
+    "remove_rigid_body_api_without_regression_allowed": false
+  },
+  "final_or_default_asset_modified": false,
+  "finding_count": 8,
+  "findings": [
+    {
+      "candidate_action": "TEST_REMOVE_RIGID_BODY_API_WITH_ARTICULATION_REGRESSION",
+      "classification": "VIRTUAL_HELPER_SHOULD_NOT_BE_RIGID_BODY",
+      "fixed_group_coverage": {
+        "applies": false
+      },
+      "follower": "follower_left",
+      "official_finding": {
+        "at": "Prim </vx300s_left/follower_left_ee_arm_link>",
+        "message": "Rigid body /vx300s_left/follower_left_ee_arm_link has rigid body api but no collision api",
+        "rule": "RigidBodyHasCollider",
+        "severity": "ERROR"
+      },
+      "prim_path": "/vx300s_left/follower_left_ee_arm_link",
+      "source_urdf": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_left.urdf",
+        "classification": "VIRTUAL_HELPER_SHOULD_NOT_BE_RIGID_BODY",
+        "collision_count": 0,
+        "collision_meshes": [],
+        "incoming_joints": [
+          {
+            "child": "follower_left_ee_arm_link",
+            "name": "ee_arm",
+            "parent": "follower_left_gripper_link",
+            "type": "fixed"
+          }
+        ],
+        "inertial_count": 1,
+        "link_name": "follower_left_ee_arm_link",
+        "outgoing_joints": [
+          {
+            "child": "follower_left_gripper_prop_link",
+            "name": "gripper",
+            "parent": "follower_left_ee_arm_link",
+            "type": "continuous"
+          },
+          {
+            "child": "follower_left_gripper_bar_link",
+            "name": "gripper_bar",
+            "parent": "follower_left_ee_arm_link",
+            "type": "fixed"
+          }
+        ],
+        "sha256": "d9e4b32723ee71dfce26fb4e78546cfcfef147b2d7dbf5e53e3620e3d8aa96bd",
+        "visual_count": 0,
+        "visual_meshes": []
+      },
+      "suffix": "ee_arm_link",
+      "usd": {
+        "active": true,
+        "applied_schemas": [
+          "IsaacLinkAPI",
+          "PhysxRigidBodyAPI",
+          "PhysicsRigidBodyAPI",
+          "PhysicsMassAPI"
+        ],
+        "children": [
+          {
+            "active": true,
+            "path": "/vx300s_left/follower_left_ee_arm_link/collisions"
+          }
+        ],
+        "descendant_collision_count": 0,
+        "descendant_collision_paths": [],
+        "has_rigid_body_api": true,
+        "prim_path": "/vx300s_left/follower_left_ee_arm_link",
+        "prim_stack": [
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_task7_rule_candidates/1.0/Trossen/vx300s_left/1.0/configuration/vx300s_left_robot.usda",
+            "path": "/vx300s_left/follower_left_ee_arm_link",
+            "specifier": "Sdf.SpecifierOver"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/physics/physics_inspector_collision_gate_physics.usda",
+            "path": "/World/follower_left/vx300s_left/follower_left_ee_arm_link",
+            "specifier": "Sdf.SpecifierOver"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_physics.usd",
+            "path": "/follower_left/follower_left_ee_arm_link",
+            "specifier": "Sdf.SpecifierOver"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_base.usd",
+            "path": "/follower_left/follower_left_ee_arm_link",
+            "specifier": "Sdf.SpecifierDef"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_robot.usd",
+            "path": "/follower_left/follower_left_ee_arm_link",
+            "specifier": "Sdf.SpecifierOver"
+          }
+        ],
+        "type_name": "Xform"
+      },
+      "usd_modified": false
+    },
+    {
+      "candidate_action": "TEST_REMOVE_RIGID_BODY_API_WITH_ARTICULATION_REGRESSION",
+      "classification": "VIRTUAL_HELPER_SHOULD_NOT_BE_RIGID_BODY",
+      "fixed_group_coverage": {
+        "applies": false
+      },
+      "follower": "follower_left",
+      "official_finding": {
+        "at": "Prim </vx300s_left/follower_left_ee_gripper_link>",
+        "message": "Rigid body /vx300s_left/follower_left_ee_gripper_link has rigid body api but no collision api",
+        "rule": "RigidBodyHasCollider",
+        "severity": "ERROR"
+      },
+      "prim_path": "/vx300s_left/follower_left_ee_gripper_link",
+      "source_urdf": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_left.urdf",
+        "classification": "VIRTUAL_HELPER_SHOULD_NOT_BE_RIGID_BODY",
+        "collision_count": 0,
+        "collision_meshes": [],
+        "incoming_joints": [
+          {
+            "child": "follower_left_ee_gripper_link",
+            "name": "ee_gripper",
+            "parent": "follower_left_fingers_link",
+            "type": "fixed"
+          }
+        ],
+        "inertial_count": 1,
+        "link_name": "follower_left_ee_gripper_link",
+        "outgoing_joints": [],
+        "sha256": "d9e4b32723ee71dfce26fb4e78546cfcfef147b2d7dbf5e53e3620e3d8aa96bd",
+        "visual_count": 0,
+        "visual_meshes": []
+      },
+      "suffix": "ee_gripper_link",
+      "usd": {
+        "active": true,
+        "applied_schemas": [
+          "IsaacLinkAPI",
+          "PhysxRigidBodyAPI",
+          "PhysicsRigidBodyAPI",
+          "PhysicsMassAPI"
+        ],
+        "children": [
+          {
+            "active": true,
+            "path": "/vx300s_left/follower_left_ee_gripper_link/collisions"
+          }
+        ],
+        "descendant_collision_count": 0,
+        "descendant_collision_paths": [],
+        "has_rigid_body_api": true,
+        "prim_path": "/vx300s_left/follower_left_ee_gripper_link",
+        "prim_stack": [
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_task7_rule_candidates/1.0/Trossen/vx300s_left/1.0/configuration/vx300s_left_robot.usda",
+            "path": "/vx300s_left/follower_left_ee_gripper_link",
+            "specifier": "Sdf.SpecifierOver"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/physics/physics_inspector_collision_gate_physics.usda",
+            "path": "/World/follower_left/vx300s_left/follower_left_ee_gripper_link",
+            "specifier": "Sdf.SpecifierOver"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_physics.usd",
+            "path": "/follower_left/follower_left_ee_gripper_link",
+            "specifier": "Sdf.SpecifierOver"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_base.usd",
+            "path": "/follower_left/follower_left_ee_gripper_link",
+            "specifier": "Sdf.SpecifierDef"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_robot.usd",
+            "path": "/follower_left/follower_left_ee_gripper_link",
+            "specifier": "Sdf.SpecifierOver"
+          }
+        ],
+        "type_name": "Xform"
+      },
+      "usd_modified": false
+    },
+    {
+      "candidate_action": "TEST_REMOVE_RIGID_BODY_API_WITH_ARTICULATION_REGRESSION",
+      "classification": "VIRTUAL_HELPER_SHOULD_NOT_BE_RIGID_BODY",
+      "fixed_group_coverage": {
+        "applies": false
+      },
+      "follower": "follower_left",
+      "official_finding": {
+        "at": "Prim </vx300s_left/follower_left_fingers_link>",
+        "message": "Rigid body /vx300s_left/follower_left_fingers_link has rigid body api but no collision api",
+        "rule": "RigidBodyHasCollider",
+        "severity": "ERROR"
+      },
+      "prim_path": "/vx300s_left/follower_left_fingers_link",
+      "source_urdf": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_left.urdf",
+        "classification": "VIRTUAL_HELPER_SHOULD_NOT_BE_RIGID_BODY",
+        "collision_count": 0,
+        "collision_meshes": [],
+        "incoming_joints": [
+          {
+            "child": "follower_left_fingers_link",
+            "name": "ee_bar",
+            "parent": "follower_left_gripper_bar_link",
+            "type": "fixed"
+          }
+        ],
+        "inertial_count": 1,
+        "link_name": "follower_left_fingers_link",
+        "outgoing_joints": [
+          {
+            "child": "follower_left_left_finger_link",
+            "name": "left_finger",
+            "parent": "follower_left_fingers_link",
+            "type": "prismatic"
+          },
+          {
+            "child": "follower_left_right_finger_link",
+            "name": "right_finger",
+            "parent": "follower_left_fingers_link",
+            "type": "prismatic"
+          },
+          {
+            "child": "follower_left_ee_gripper_link",
+            "name": "ee_gripper",
+            "parent": "follower_left_fingers_link",
+            "type": "fixed"
+          }
+        ],
+        "sha256": "d9e4b32723ee71dfce26fb4e78546cfcfef147b2d7dbf5e53e3620e3d8aa96bd",
+        "visual_count": 0,
+        "visual_meshes": []
+      },
+      "suffix": "fingers_link",
+      "usd": {
+        "active": true,
+        "applied_schemas": [
+          "IsaacLinkAPI",
+          "PhysxRigidBodyAPI",
+          "PhysicsRigidBodyAPI",
+          "PhysicsMassAPI"
+        ],
+        "children": [
+          {
+            "active": true,
+            "path": "/vx300s_left/follower_left_fingers_link/collisions"
+          }
+        ],
+        "descendant_collision_count": 0,
+        "descendant_collision_paths": [],
+        "has_rigid_body_api": true,
+        "prim_path": "/vx300s_left/follower_left_fingers_link",
+        "prim_stack": [
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_task7_rule_candidates/1.0/Trossen/vx300s_left/1.0/configuration/vx300s_left_robot.usda",
+            "path": "/vx300s_left/follower_left_fingers_link",
+            "specifier": "Sdf.SpecifierOver"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/physics/physics_inspector_collision_gate_physics.usda",
+            "path": "/World/follower_left/vx300s_left/follower_left_fingers_link",
+            "specifier": "Sdf.SpecifierOver"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_physics.usd",
+            "path": "/follower_left/follower_left_fingers_link",
+            "specifier": "Sdf.SpecifierOver"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_base.usd",
+            "path": "/follower_left/follower_left_fingers_link",
+            "specifier": "Sdf.SpecifierDef"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_robot.usd",
+            "path": "/follower_left/follower_left_fingers_link",
+            "specifier": "Sdf.SpecifierOver"
+          }
+        ],
+        "type_name": "Xform"
+      },
+      "usd_modified": false
+    },
+    {
+      "candidate_action": "TEST_COLLIDER_OWNERSHIP_OR_FIXED_BODY_TOPOLOGY_IN_ISOLATION",
+      "classification": "PHYSICAL_LINK_REQUIRES_COLLIDER",
+      "fixed_group_coverage": {
+        "applies": true,
+        "interpretation": "The source link is physical, but the isolated CAD diagnostic intentionally assigns the supplier fixed-group compound collider to gripper_link and deactivates the baseline gripper_bar collider to avoid duplicate coverage.",
+        "owner_collider_path": "/World/follower_left/vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_000/mesh",
+        "owner_link_suffix": "gripper_link",
+        "source_rule": "supplier Part__Feature006 covers the fixed gripper+bar group; the source gripper_bar collision instance is deactivated in the diagnostic layer to avoid duplicate coverage"
+      },
+      "follower": "follower_left",
+      "official_finding": {
+        "at": "Prim </vx300s_left/follower_left_gripper_bar_link>",
+        "message": "Rigid body /vx300s_left/follower_left_gripper_bar_link has rigid body api but no collision api",
+        "rule": "RigidBodyHasCollider",
+        "severity": "ERROR"
+      },
+      "prim_path": "/vx300s_left/follower_left_gripper_bar_link",
+      "source_urdf": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_left.urdf",
+        "classification": "PHYSICAL_LINK_REQUIRES_COLLIDER",
+        "collision_count": 1,
+        "collision_meshes": [
+          "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_bar.stl"
+        ],
+        "incoming_joints": [
+          {
+            "child": "follower_left_gripper_bar_link",
+            "name": "gripper_bar",
+            "parent": "follower_left_ee_arm_link",
+            "type": "fixed"
+          }
+        ],
+        "inertial_count": 1,
+        "link_name": "follower_left_gripper_bar_link",
+        "outgoing_joints": [
+          {
+            "child": "follower_left_fingers_link",
+            "name": "ee_bar",
+            "parent": "follower_left_gripper_bar_link",
+            "type": "fixed"
+          }
+        ],
+        "sha256": "d9e4b32723ee71dfce26fb4e78546cfcfef147b2d7dbf5e53e3620e3d8aa96bd",
+        "visual_count": 1,
+        "visual_meshes": [
+          "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_bar.stl"
+        ]
+      },
+      "suffix": "gripper_bar_link",
+      "usd": {
+        "active": true,
+        "applied_schemas": [
+          "IsaacLinkAPI",
+          "PhysxRigidBodyAPI",
+          "PhysicsRigidBodyAPI",
+          "PhysicsMassAPI"
+        ],
+        "children": [
+          {
+            "active": true,
+            "path": "/vx300s_left/follower_left_gripper_bar_link/visuals"
+          },
+          {
+            "active": false,
+            "path": "/vx300s_left/follower_left_gripper_bar_link/collisions"
+          }
+        ],
+        "descendant_collision_count": 0,
+        "descendant_collision_paths": [],
+        "has_rigid_body_api": true,
+        "prim_path": "/vx300s_left/follower_left_gripper_bar_link",
+        "prim_stack": [
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_task7_rule_candidates/1.0/Trossen/vx300s_left/1.0/configuration/vx300s_left_robot.usda",
+            "path": "/vx300s_left/follower_left_gripper_bar_link",
+            "specifier": "Sdf.SpecifierOver"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/physics/physics_inspector_collision_gate_physics.usda",
+            "path": "/World/follower_left/vx300s_left/follower_left_gripper_bar_link",
+            "specifier": "Sdf.SpecifierOver"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/physics/cad_derived_colliders_gripper_decomposition_physics.usda",
+            "path": "/World/follower_left/vx300s_left/follower_left_gripper_bar_link",
+            "specifier": "Sdf.SpecifierOver"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_physics.usd",
+            "path": "/follower_left/follower_left_gripper_bar_link",
+            "specifier": "Sdf.SpecifierOver"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_base.usd",
+            "path": "/follower_left/follower_left_gripper_bar_link",
+            "specifier": "Sdf.SpecifierDef"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_robot.usd",
+            "path": "/follower_left/follower_left_gripper_bar_link",
+            "specifier": "Sdf.SpecifierOver"
+          }
+        ],
+        "type_name": "Xform"
+      },
+      "usd_modified": false
+    },
+    {
+      "candidate_action": "TEST_REMOVE_RIGID_BODY_API_WITH_ARTICULATION_REGRESSION",
+      "classification": "VIRTUAL_HELPER_SHOULD_NOT_BE_RIGID_BODY",
+      "fixed_group_coverage": {
+        "applies": false
+      },
+      "follower": "follower_right",
+      "official_finding": {
+        "at": "Prim </vx300s_right/follower_right_ee_arm_link>",
+        "message": "Rigid body /vx300s_right/follower_right_ee_arm_link has rigid body api but no collision api",
+        "rule": "RigidBodyHasCollider",
+        "severity": "ERROR"
+      },
+      "prim_path": "/vx300s_right/follower_right_ee_arm_link",
+      "source_urdf": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_right.urdf",
+        "classification": "VIRTUAL_HELPER_SHOULD_NOT_BE_RIGID_BODY",
+        "collision_count": 0,
+        "collision_meshes": [],
+        "incoming_joints": [
+          {
+            "child": "follower_right_ee_arm_link",
+            "name": "ee_arm",
+            "parent": "follower_right_gripper_link",
+            "type": "fixed"
+          }
+        ],
+        "inertial_count": 1,
+        "link_name": "follower_right_ee_arm_link",
+        "outgoing_joints": [
+          {
+            "child": "follower_right_gripper_prop_link",
+            "name": "gripper",
+            "parent": "follower_right_ee_arm_link",
+            "type": "continuous"
+          },
+          {
+            "child": "follower_right_gripper_bar_link",
+            "name": "gripper_bar",
+            "parent": "follower_right_ee_arm_link",
+            "type": "fixed"
+          }
+        ],
+        "sha256": "268a5e5b56ce48af679256380008606f64358d6ead2619b52946b37f47fb624b",
+        "visual_count": 0,
+        "visual_meshes": []
+      },
+      "suffix": "ee_arm_link",
+      "usd": {
+        "active": true,
+        "applied_schemas": [
+          "IsaacLinkAPI",
+          "PhysicsRigidBodyAPI",
+          "PhysicsMassAPI"
+        ],
+        "children": [
+          {
+            "active": true,
+            "path": "/vx300s_right/follower_right_ee_arm_link/collisions"
+          }
+        ],
+        "descendant_collision_count": 0,
+        "descendant_collision_paths": [],
+        "has_rigid_body_api": true,
+        "prim_path": "/vx300s_right/follower_right_ee_arm_link",
+        "prim_stack": [
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_task7_rule_candidates/1.0/Trossen/vx300s_right/1.0/configuration/vx300s_right_robot.usda",
+            "path": "/vx300s_right/follower_right_ee_arm_link",
+            "specifier": "Sdf.SpecifierOver"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/configuration/supplier_cad_follower_right_configuration.usda",
+            "path": "/follower_right/vx300s_right/follower_right_ee_arm_link",
+            "specifier": "Sdf.SpecifierOver"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_physics.usd",
+            "path": "/follower_right/follower_right_ee_arm_link",
+            "specifier": "Sdf.SpecifierOver"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_base.usd",
+            "path": "/follower_right/follower_right_ee_arm_link",
+            "specifier": "Sdf.SpecifierDef"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_robot.usd",
+            "path": "/follower_right/follower_right_ee_arm_link",
+            "specifier": "Sdf.SpecifierOver"
+          }
+        ],
+        "type_name": "Xform"
+      },
+      "usd_modified": false
+    },
+    {
+      "candidate_action": "TEST_REMOVE_RIGID_BODY_API_WITH_ARTICULATION_REGRESSION",
+      "classification": "VIRTUAL_HELPER_SHOULD_NOT_BE_RIGID_BODY",
+      "fixed_group_coverage": {
+        "applies": false
+      },
+      "follower": "follower_right",
+      "official_finding": {
+        "at": "Prim </vx300s_right/follower_right_ee_gripper_link>",
+        "message": "Rigid body /vx300s_right/follower_right_ee_gripper_link has rigid body api but no collision api",
+        "rule": "RigidBodyHasCollider",
+        "severity": "ERROR"
+      },
+      "prim_path": "/vx300s_right/follower_right_ee_gripper_link",
+      "source_urdf": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_right.urdf",
+        "classification": "VIRTUAL_HELPER_SHOULD_NOT_BE_RIGID_BODY",
+        "collision_count": 0,
+        "collision_meshes": [],
+        "incoming_joints": [
+          {
+            "child": "follower_right_ee_gripper_link",
+            "name": "ee_gripper",
+            "parent": "follower_right_fingers_link",
+            "type": "fixed"
+          }
+        ],
+        "inertial_count": 1,
+        "link_name": "follower_right_ee_gripper_link",
+        "outgoing_joints": [],
+        "sha256": "268a5e5b56ce48af679256380008606f64358d6ead2619b52946b37f47fb624b",
+        "visual_count": 0,
+        "visual_meshes": []
+      },
+      "suffix": "ee_gripper_link",
+      "usd": {
+        "active": true,
+        "applied_schemas": [
+          "IsaacLinkAPI",
+          "PhysicsRigidBodyAPI",
+          "PhysicsMassAPI"
+        ],
+        "children": [
+          {
+            "active": true,
+            "path": "/vx300s_right/follower_right_ee_gripper_link/collisions"
+          }
+        ],
+        "descendant_collision_count": 0,
+        "descendant_collision_paths": [],
+        "has_rigid_body_api": true,
+        "prim_path": "/vx300s_right/follower_right_ee_gripper_link",
+        "prim_stack": [
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_task7_rule_candidates/1.0/Trossen/vx300s_right/1.0/configuration/vx300s_right_robot.usda",
+            "path": "/vx300s_right/follower_right_ee_gripper_link",
+            "specifier": "Sdf.SpecifierOver"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/configuration/supplier_cad_follower_right_configuration.usda",
+            "path": "/follower_right/vx300s_right/follower_right_ee_gripper_link",
+            "specifier": "Sdf.SpecifierOver"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_physics.usd",
+            "path": "/follower_right/follower_right_ee_gripper_link",
+            "specifier": "Sdf.SpecifierOver"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_base.usd",
+            "path": "/follower_right/follower_right_ee_gripper_link",
+            "specifier": "Sdf.SpecifierDef"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_robot.usd",
+            "path": "/follower_right/follower_right_ee_gripper_link",
+            "specifier": "Sdf.SpecifierOver"
+          }
+        ],
+        "type_name": "Xform"
+      },
+      "usd_modified": false
+    },
+    {
+      "candidate_action": "TEST_REMOVE_RIGID_BODY_API_WITH_ARTICULATION_REGRESSION",
+      "classification": "VIRTUAL_HELPER_SHOULD_NOT_BE_RIGID_BODY",
+      "fixed_group_coverage": {
+        "applies": false
+      },
+      "follower": "follower_right",
+      "official_finding": {
+        "at": "Prim </vx300s_right/follower_right_fingers_link>",
+        "message": "Rigid body /vx300s_right/follower_right_fingers_link has rigid body api but no collision api",
+        "rule": "RigidBodyHasCollider",
+        "severity": "ERROR"
+      },
+      "prim_path": "/vx300s_right/follower_right_fingers_link",
+      "source_urdf": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_right.urdf",
+        "classification": "VIRTUAL_HELPER_SHOULD_NOT_BE_RIGID_BODY",
+        "collision_count": 0,
+        "collision_meshes": [],
+        "incoming_joints": [
+          {
+            "child": "follower_right_fingers_link",
+            "name": "ee_bar",
+            "parent": "follower_right_gripper_bar_link",
+            "type": "fixed"
+          }
+        ],
+        "inertial_count": 1,
+        "link_name": "follower_right_fingers_link",
+        "outgoing_joints": [
+          {
+            "child": "follower_right_left_finger_link",
+            "name": "left_finger",
+            "parent": "follower_right_fingers_link",
+            "type": "prismatic"
+          },
+          {
+            "child": "follower_right_right_finger_link",
+            "name": "right_finger",
+            "parent": "follower_right_fingers_link",
+            "type": "prismatic"
+          },
+          {
+            "child": "follower_right_ee_gripper_link",
+            "name": "ee_gripper",
+            "parent": "follower_right_fingers_link",
+            "type": "fixed"
+          }
+        ],
+        "sha256": "268a5e5b56ce48af679256380008606f64358d6ead2619b52946b37f47fb624b",
+        "visual_count": 0,
+        "visual_meshes": []
+      },
+      "suffix": "fingers_link",
+      "usd": {
+        "active": true,
+        "applied_schemas": [
+          "IsaacLinkAPI",
+          "PhysicsRigidBodyAPI",
+          "PhysicsMassAPI"
+        ],
+        "children": [
+          {
+            "active": true,
+            "path": "/vx300s_right/follower_right_fingers_link/collisions"
+          }
+        ],
+        "descendant_collision_count": 0,
+        "descendant_collision_paths": [],
+        "has_rigid_body_api": true,
+        "prim_path": "/vx300s_right/follower_right_fingers_link",
+        "prim_stack": [
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_task7_rule_candidates/1.0/Trossen/vx300s_right/1.0/configuration/vx300s_right_robot.usda",
+            "path": "/vx300s_right/follower_right_fingers_link",
+            "specifier": "Sdf.SpecifierOver"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/configuration/supplier_cad_follower_right_configuration.usda",
+            "path": "/follower_right/vx300s_right/follower_right_fingers_link",
+            "specifier": "Sdf.SpecifierOver"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_physics.usd",
+            "path": "/follower_right/follower_right_fingers_link",
+            "specifier": "Sdf.SpecifierOver"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_base.usd",
+            "path": "/follower_right/follower_right_fingers_link",
+            "specifier": "Sdf.SpecifierDef"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_robot.usd",
+            "path": "/follower_right/follower_right_fingers_link",
+            "specifier": "Sdf.SpecifierOver"
+          }
+        ],
+        "type_name": "Xform"
+      },
+      "usd_modified": false
+    },
+    {
+      "candidate_action": "TEST_COLLIDER_OWNERSHIP_OR_FIXED_BODY_TOPOLOGY_IN_ISOLATION",
+      "classification": "PHYSICAL_LINK_REQUIRES_COLLIDER",
+      "fixed_group_coverage": {
+        "applies": true,
+        "interpretation": "The source link is physical, but the isolated CAD diagnostic intentionally assigns the supplier fixed-group compound collider to gripper_link and deactivates the baseline gripper_bar collider to avoid duplicate coverage.",
+        "owner_collider_path": "/World/follower_right/vx300s_right/follower_right_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_000/mesh",
+        "owner_link_suffix": "gripper_link",
+        "source_rule": "supplier Part__Feature006 covers the fixed gripper+bar group; the source gripper_bar collision instance is deactivated in the diagnostic layer to avoid duplicate coverage"
+      },
+      "follower": "follower_right",
+      "official_finding": {
+        "at": "Prim </vx300s_right/follower_right_gripper_bar_link>",
+        "message": "Rigid body /vx300s_right/follower_right_gripper_bar_link has rigid body api but no collision api",
+        "rule": "RigidBodyHasCollider",
+        "severity": "ERROR"
+      },
+      "prim_path": "/vx300s_right/follower_right_gripper_bar_link",
+      "source_urdf": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_right.urdf",
+        "classification": "PHYSICAL_LINK_REQUIRES_COLLIDER",
+        "collision_count": 1,
+        "collision_meshes": [
+          "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_bar.stl"
+        ],
+        "incoming_joints": [
+          {
+            "child": "follower_right_gripper_bar_link",
+            "name": "gripper_bar",
+            "parent": "follower_right_ee_arm_link",
+            "type": "fixed"
+          }
+        ],
+        "inertial_count": 1,
+        "link_name": "follower_right_gripper_bar_link",
+        "outgoing_joints": [
+          {
+            "child": "follower_right_fingers_link",
+            "name": "ee_bar",
+            "parent": "follower_right_gripper_bar_link",
+            "type": "fixed"
+          }
+        ],
+        "sha256": "268a5e5b56ce48af679256380008606f64358d6ead2619b52946b37f47fb624b",
+        "visual_count": 1,
+        "visual_meshes": [
+          "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_bar.stl"
+        ]
+      },
+      "suffix": "gripper_bar_link",
+      "usd": {
+        "active": true,
+        "applied_schemas": [
+          "IsaacLinkAPI",
+          "PhysicsRigidBodyAPI",
+          "PhysicsMassAPI"
+        ],
+        "children": [
+          {
+            "active": true,
+            "path": "/vx300s_right/follower_right_gripper_bar_link/visuals"
+          },
+          {
+            "active": false,
+            "path": "/vx300s_right/follower_right_gripper_bar_link/collisions"
+          }
+        ],
+        "descendant_collision_count": 0,
+        "descendant_collision_paths": [],
+        "has_rigid_body_api": true,
+        "prim_path": "/vx300s_right/follower_right_gripper_bar_link",
+        "prim_stack": [
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_task7_rule_candidates/1.0/Trossen/vx300s_right/1.0/configuration/vx300s_right_robot.usda",
+            "path": "/vx300s_right/follower_right_gripper_bar_link",
+            "specifier": "Sdf.SpecifierOver"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/physics/cad_derived_colliders_gripper_decomposition_physics.usda",
+            "path": "/World/follower_right/vx300s_right/follower_right_gripper_bar_link",
+            "specifier": "Sdf.SpecifierOver"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/configuration/supplier_cad_follower_right_configuration.usda",
+            "path": "/follower_right/vx300s_right/follower_right_gripper_bar_link",
+            "specifier": "Sdf.SpecifierOver"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_physics.usd",
+            "path": "/follower_right/follower_right_gripper_bar_link",
+            "specifier": "Sdf.SpecifierOver"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_base.usd",
+            "path": "/follower_right/follower_right_gripper_bar_link",
+            "specifier": "Sdf.SpecifierDef"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_robot.usd",
+            "path": "/follower_right/follower_right_gripper_bar_link",
+            "specifier": "Sdf.SpecifierOver"
+          }
+        ],
+        "type_name": "Xform"
+      },
+      "usd_modified": false
+    }
+  ],
+  "fixed_group_evidence": {
+    "readback": {
+      "count": 2,
+      "owner_collider_paths": [
+        "/World/follower_left/vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_000/mesh",
+        "/World/follower_right/vx300s_right/follower_right_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_000/mesh"
+      ],
+      "rule": "supplier Part__Feature006 covers the fixed gripper+bar group; the source gripper_bar collision instance is deactivated in the diagnostic layer to avoid duplicate coverage"
+    },
+    "report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_cad_derived_collider_stage.json",
+    "report_sha256": "26976920f50c6a99bacba3fabcaa0d90a6befaa0cb5589257c9e377dc4ece9bf"
+  },
+  "local_rule_source": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.validation/isaacsim/asset/validation/physics_rules.py",
+    "class": "RigidBodyHasCollider",
+    "sha256": "85bbe0873043eb3b229c87551b10d6e0117709e3e0f1db613b070c5540dae067"
+  },
+  "schema_version": 1,
+  "stage": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+    "modified": false,
+    "sha256_after": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9",
+    "sha256_before": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9"
+  },
+  "status": "PASS",
+  "task8": "NOT_RUN"
+}

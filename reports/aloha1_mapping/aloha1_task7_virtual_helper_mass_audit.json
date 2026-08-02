@@ -1,0 +1,413 @@
+{
+  "final_or_default_asset_modified": false,
+  "followers": [
+    {
+      "follower": "follower_left",
+      "helper_bodies": [
+        {
+          "authored_properties": {
+            "center_of_mass": false,
+            "diagonal_inertia": true,
+            "mass": true,
+            "principal_axes": true
+          },
+          "center_of_mass_authored": false,
+          "center_of_mass_effective_local_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "center_of_mass_effective_source": "URDF_INERTIAL_ORIGIN_DEFAULT_IDENTITY",
+          "center_of_mass_raw_readback": [
+            "-inf",
+            "-inf",
+            "-inf"
+          ],
+          "diagonal_inertia_kg_m2": [
+            9.999999747378752e-05,
+            9.999999747378752e-05,
+            9.999999747378752e-05
+          ],
+          "mass_kg": 0.0010000000474974513,
+          "prim_path": "/vx300s_left/follower_left_ee_arm_link",
+          "principal_axes_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "transfer_target": "/vx300s_left/follower_left_gripper_link",
+          "world_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.47211897373199463,
+              0.0,
+              0.42705002427101135,
+              1.0
+            ]
+          ]
+        },
+        {
+          "authored_properties": {
+            "center_of_mass": false,
+            "diagonal_inertia": true,
+            "mass": true,
+            "principal_axes": true
+          },
+          "center_of_mass_authored": false,
+          "center_of_mass_effective_local_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "center_of_mass_effective_source": "URDF_INERTIAL_ORIGIN_DEFAULT_IDENTITY",
+          "center_of_mass_raw_readback": [
+            "-inf",
+            "-inf",
+            "-inf"
+          ],
+          "diagonal_inertia_kg_m2": [
+            9.999999747378752e-05,
+            9.999999747378752e-05,
+            9.999999747378752e-05
+          ],
+          "mass_kg": 0.0010000000474974513,
+          "prim_path": "/vx300s_left/follower_left_fingers_link",
+          "principal_axes_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "transfer_target": "/vx300s_left/follower_left_gripper_bar_link",
+          "world_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.49799397587776184,
+              0.0,
+              0.42705002427101135,
+              1.0
+            ]
+          ]
+        },
+        {
+          "authored_properties": {
+            "center_of_mass": false,
+            "diagonal_inertia": true,
+            "mass": true,
+            "principal_axes": true
+          },
+          "center_of_mass_authored": false,
+          "center_of_mass_effective_local_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "center_of_mass_effective_source": "URDF_INERTIAL_ORIGIN_DEFAULT_IDENTITY",
+          "center_of_mass_raw_readback": [
+            "-inf",
+            "-inf",
+            "-inf"
+          ],
+          "diagonal_inertia_kg_m2": [
+            9.999999747378752e-05,
+            9.999999747378752e-05,
+            9.999999747378752e-05
+          ],
+          "mass_kg": 0.0010000000474974513,
+          "prim_path": "/vx300s_left/follower_left_ee_gripper_link",
+          "principal_axes_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "transfer_target": "/vx300s_left/follower_left_gripper_bar_link",
+          "world_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.5364939570426941,
+              0.0,
+              0.42705002427101135,
+              1.0
+            ]
+          ]
+        }
+      ],
+      "source": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task7_physicsrules_root_cause_candidates/1.0/baseline_gripper_fixed_group_split/follower_left/follower_left_baseline_gripper_fixed_group_split.usda",
+        "modified": false,
+        "sha256_after": "d20a510fd8be3380b63759cdebc765977719653d61da398a6bf485433a467692",
+        "sha256_before": "d20a510fd8be3380b63759cdebc765977719653d61da398a6bf485433a467692"
+      },
+      "total_helper_mass_kg": 0.003000000142492354
+    },
+    {
+      "follower": "follower_right",
+      "helper_bodies": [
+        {
+          "authored_properties": {
+            "center_of_mass": false,
+            "diagonal_inertia": true,
+            "mass": true,
+            "principal_axes": true
+          },
+          "center_of_mass_authored": false,
+          "center_of_mass_effective_local_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "center_of_mass_effective_source": "URDF_INERTIAL_ORIGIN_DEFAULT_IDENTITY",
+          "center_of_mass_raw_readback": [
+            "-inf",
+            "-inf",
+            "-inf"
+          ],
+          "diagonal_inertia_kg_m2": [
+            9.999999747378752e-05,
+            9.999999747378752e-05,
+            9.999999747378752e-05
+          ],
+          "mass_kg": 0.0010000000474974513,
+          "prim_path": "/vx300s_right/follower_right_ee_arm_link",
+          "principal_axes_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "transfer_target": "/vx300s_right/follower_right_gripper_link",
+          "world_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.47211897373199463,
+              0.0,
+              0.42705002427101135,
+              1.0
+            ]
+          ]
+        },
+        {
+          "authored_properties": {
+            "center_of_mass": false,
+            "diagonal_inertia": true,
+            "mass": true,
+            "principal_axes": true
+          },
+          "center_of_mass_authored": false,
+          "center_of_mass_effective_local_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "center_of_mass_effective_source": "URDF_INERTIAL_ORIGIN_DEFAULT_IDENTITY",
+          "center_of_mass_raw_readback": [
+            "-inf",
+            "-inf",
+            "-inf"
+          ],
+          "diagonal_inertia_kg_m2": [
+            9.999999747378752e-05,
+            9.999999747378752e-05,
+            9.999999747378752e-05
+          ],
+          "mass_kg": 0.0010000000474974513,
+          "prim_path": "/vx300s_right/follower_right_fingers_link",
+          "principal_axes_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "transfer_target": "/vx300s_right/follower_right_gripper_bar_link",
+          "world_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.49799397587776184,
+              0.0,
+              0.42705002427101135,
+              1.0
+            ]
+          ]
+        },
+        {
+          "authored_properties": {
+            "center_of_mass": false,
+            "diagonal_inertia": true,
+            "mass": true,
+            "principal_axes": true
+          },
+          "center_of_mass_authored": false,
+          "center_of_mass_effective_local_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "center_of_mass_effective_source": "URDF_INERTIAL_ORIGIN_DEFAULT_IDENTITY",
+          "center_of_mass_raw_readback": [
+            "-inf",
+            "-inf",
+            "-inf"
+          ],
+          "diagonal_inertia_kg_m2": [
+            9.999999747378752e-05,
+            9.999999747378752e-05,
+            9.999999747378752e-05
+          ],
+          "mass_kg": 0.0010000000474974513,
+          "prim_path": "/vx300s_right/follower_right_ee_gripper_link",
+          "principal_axes_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "transfer_target": "/vx300s_right/follower_right_gripper_bar_link",
+          "world_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.5364939570426941,
+              0.0,
+              0.42705002427101135,
+              1.0
+            ]
+          ]
+        }
+      ],
+      "source": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task7_physicsrules_root_cause_candidates/1.0/baseline_gripper_fixed_group_split/follower_right/follower_right_baseline_gripper_fixed_group_split.usda",
+        "modified": false,
+        "sha256_after": "41fff9b22994aea71fb5d3d7f39bb02c42f8095ceaf26d1f889dbe3b09b04076",
+        "sha256_before": "41fff9b22994aea71fb5d3d7f39bb02c42f8095ceaf26d1f889dbe3b09b04076"
+      },
+      "total_helper_mass_kg": 0.003000000142492354
+    }
+  ],
+  "frozen_stage_sha256": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9",
+  "physical_calibration_status": "SOURCE_AUTHORED_PLACEHOLDER_NOT_PHYSICALLY_VERIFIED",
+  "reason": "Each helper carries authored positive mass; removing its rigid-body semantics without exact mass/inertia aggregation changes dynamics.",
+  "runtime": {
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physx": "107.3.26"
+  },
+  "schema_version": 1,
+  "scope": "READ_ONLY_AUTHORED_HELPER_MASS_AUDIT",
+  "source_urdf": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_left.urdf",
+    "helper_diagonal_inertia_kg_m2": [
+      0.0001,
+      0.0001,
+      0.0001
+    ],
+    "helper_inertial_origin_authored": false,
+    "helper_mass_kg": 0.001,
+    "sha256": "d9e4b32723ee71dfce26fb4e78546cfcfef147b2d7dbf5e53e3620e3d8aa96bd"
+  },
+  "status": "PASS",
+  "task8": "NOT_RUN",
+  "uncompensated_collapse_allowed": false
+}

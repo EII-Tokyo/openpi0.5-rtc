@@ -1,0 +1,23 @@
+#usda 1.0
+
+over "vx300s_right"
+{
+    over "follower_right_ee_arm_link" (
+        delete apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+    }
+
+    over "follower_right_ee_gripper_link" (
+        delete apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+    }
+
+    over "follower_right_fingers_link" (
+        delete apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+    }
+}
+

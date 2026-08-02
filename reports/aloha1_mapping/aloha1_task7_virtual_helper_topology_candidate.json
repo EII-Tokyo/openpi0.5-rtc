@@ -1,0 +1,329 @@
+{
+  "candidates": [
+    {
+      "disabled_fixed_joint_count": 3,
+      "disabled_fixed_joints": [
+        {
+          "enabled_after": false,
+          "enabled_before": true,
+          "joint_path": "/vx300s_left/joints/ee_arm"
+        },
+        {
+          "enabled_after": false,
+          "enabled_before": true,
+          "joint_path": "/vx300s_left/joints/ee_bar"
+        },
+        {
+          "enabled_after": false,
+          "enabled_before": true,
+          "joint_path": "/vx300s_left/joints/ee_gripper"
+        }
+      ],
+      "follower": "follower_left",
+      "helper_body_count": 3,
+      "helpers": [
+        {
+          "applied_schemas_after": [
+            "IsaacLinkAPI"
+          ],
+          "applied_schemas_before": [
+            "IsaacLinkAPI",
+            "PhysxRigidBodyAPI",
+            "PhysicsRigidBodyAPI",
+            "PhysicsMassAPI"
+          ],
+          "has_mass_after": false,
+          "has_rigid_body_after": false,
+          "prim_path": "/vx300s_left/follower_left_ee_arm_link"
+        },
+        {
+          "applied_schemas_after": [
+            "IsaacLinkAPI"
+          ],
+          "applied_schemas_before": [
+            "IsaacLinkAPI",
+            "PhysxRigidBodyAPI",
+            "PhysicsRigidBodyAPI",
+            "PhysicsMassAPI"
+          ],
+          "has_mass_after": false,
+          "has_rigid_body_after": false,
+          "prim_path": "/vx300s_left/follower_left_fingers_link"
+        },
+        {
+          "applied_schemas_after": [
+            "IsaacLinkAPI"
+          ],
+          "applied_schemas_before": [
+            "IsaacLinkAPI",
+            "PhysxRigidBodyAPI",
+            "PhysicsRigidBodyAPI",
+            "PhysicsMassAPI"
+          ],
+          "has_mass_after": false,
+          "has_rigid_body_after": false,
+          "prim_path": "/vx300s_left/follower_left_ee_gripper_link"
+        }
+      ],
+      "maximum_joint_world_frame_residual": 9.313225746154785e-10,
+      "override_layer": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task7_physicsrules_root_cause_candidates/1.0/virtual_helper_topology_collapse/follower_left/follower_left_virtual_helper_topology_collapse_override.usda",
+        "sha256": "514f072bff7a12a66371acae74707473c353706e9ef5778a10351ea6036b7ca6"
+      },
+      "reparented_joint_count": 4,
+      "reparented_joints": [
+        {
+          "joint_path": "/vx300s_left/joints/gripper",
+          "joint_world_frame_residual": 9.313225746154785e-10,
+          "new_body0_path": "/vx300s_left/follower_left_gripper_link",
+          "new_local_pos0": [
+            0.04849998280405998,
+            0.0,
+            0.0
+          ],
+          "new_local_rot0_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "old_body0_path": "/vx300s_left/follower_left_ee_arm_link"
+        },
+        {
+          "joint_path": "/vx300s_left/joints/gripper_bar",
+          "joint_world_frame_residual": 0.0,
+          "new_body0_path": "/vx300s_left/follower_left_gripper_link",
+          "new_local_pos0": [
+            0.04282498359680176,
+            0.0,
+            0.0
+          ],
+          "new_local_rot0_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "old_body0_path": "/vx300s_left/follower_left_ee_arm_link"
+        },
+        {
+          "joint_path": "/vx300s_left/joints/left_finger",
+          "joint_world_frame_residual": 0.0,
+          "new_body0_path": "/vx300s_left/follower_left_gripper_bar_link",
+          "new_local_pos0": [
+            0.025875002145767212,
+            0.0,
+            0.0
+          ],
+          "new_local_rot0_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "old_body0_path": "/vx300s_left/follower_left_fingers_link"
+        },
+        {
+          "joint_path": "/vx300s_left/joints/right_finger",
+          "joint_world_frame_residual": 0.0,
+          "new_body0_path": "/vx300s_left/follower_left_gripper_bar_link",
+          "new_local_pos0": [
+            0.025875002145767212,
+            0.0,
+            0.0
+          ],
+          "new_local_rot0_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "old_body0_path": "/vx300s_left/follower_left_fingers_link"
+        }
+      ],
+      "root_prim": "/vx300s_left",
+      "source": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task7_physicsrules_root_cause_candidates/1.0/baseline_gripper_fixed_group_split/follower_left/follower_left_baseline_gripper_fixed_group_split.usda",
+        "sha256": "d20a510fd8be3380b63759cdebc765977719653d61da398a6bf485433a467692"
+      },
+      "source_modified": false,
+      "wrapper": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task7_physicsrules_root_cause_candidates/1.0/virtual_helper_topology_collapse/follower_left/follower_left_virtual_helper_topology_collapse.usda",
+        "default_prim": "/vx300s_left",
+        "sha256": "2d167a9f013354e05c6ec1078771472983a2fc38a004b9ef284783fb56f89816",
+        "sublayers": [
+          "follower_left_virtual_helper_topology_collapse_override.usda"
+        ]
+      }
+    },
+    {
+      "disabled_fixed_joint_count": 3,
+      "disabled_fixed_joints": [
+        {
+          "enabled_after": false,
+          "enabled_before": true,
+          "joint_path": "/vx300s_right/joints/ee_arm"
+        },
+        {
+          "enabled_after": false,
+          "enabled_before": true,
+          "joint_path": "/vx300s_right/joints/ee_bar"
+        },
+        {
+          "enabled_after": false,
+          "enabled_before": true,
+          "joint_path": "/vx300s_right/joints/ee_gripper"
+        }
+      ],
+      "follower": "follower_right",
+      "helper_body_count": 3,
+      "helpers": [
+        {
+          "applied_schemas_after": [
+            "IsaacLinkAPI"
+          ],
+          "applied_schemas_before": [
+            "IsaacLinkAPI",
+            "PhysicsRigidBodyAPI",
+            "PhysicsMassAPI"
+          ],
+          "has_mass_after": false,
+          "has_rigid_body_after": false,
+          "prim_path": "/vx300s_right/follower_right_ee_arm_link"
+        },
+        {
+          "applied_schemas_after": [
+            "IsaacLinkAPI"
+          ],
+          "applied_schemas_before": [
+            "IsaacLinkAPI",
+            "PhysicsRigidBodyAPI",
+            "PhysicsMassAPI"
+          ],
+          "has_mass_after": false,
+          "has_rigid_body_after": false,
+          "prim_path": "/vx300s_right/follower_right_fingers_link"
+        },
+        {
+          "applied_schemas_after": [
+            "IsaacLinkAPI"
+          ],
+          "applied_schemas_before": [
+            "IsaacLinkAPI",
+            "PhysicsRigidBodyAPI",
+            "PhysicsMassAPI"
+          ],
+          "has_mass_after": false,
+          "has_rigid_body_after": false,
+          "prim_path": "/vx300s_right/follower_right_ee_gripper_link"
+        }
+      ],
+      "maximum_joint_world_frame_residual": 9.313225746154785e-10,
+      "override_layer": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task7_physicsrules_root_cause_candidates/1.0/virtual_helper_topology_collapse/follower_right/follower_right_virtual_helper_topology_collapse_override.usda",
+        "sha256": "a3544c6ffe4a804f7b5a86152e2238d9742f4696a776030c3a87799476045ef0"
+      },
+      "reparented_joint_count": 4,
+      "reparented_joints": [
+        {
+          "joint_path": "/vx300s_right/joints/gripper",
+          "joint_world_frame_residual": 9.313225746154785e-10,
+          "new_body0_path": "/vx300s_right/follower_right_gripper_link",
+          "new_local_pos0": [
+            0.04849998280405998,
+            0.0,
+            0.0
+          ],
+          "new_local_rot0_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "old_body0_path": "/vx300s_right/follower_right_ee_arm_link"
+        },
+        {
+          "joint_path": "/vx300s_right/joints/gripper_bar",
+          "joint_world_frame_residual": 0.0,
+          "new_body0_path": "/vx300s_right/follower_right_gripper_link",
+          "new_local_pos0": [
+            0.04282498359680176,
+            0.0,
+            0.0
+          ],
+          "new_local_rot0_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "old_body0_path": "/vx300s_right/follower_right_ee_arm_link"
+        },
+        {
+          "joint_path": "/vx300s_right/joints/left_finger",
+          "joint_world_frame_residual": 0.0,
+          "new_body0_path": "/vx300s_right/follower_right_gripper_bar_link",
+          "new_local_pos0": [
+            0.025875002145767212,
+            0.0,
+            0.0
+          ],
+          "new_local_rot0_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "old_body0_path": "/vx300s_right/follower_right_fingers_link"
+        },
+        {
+          "joint_path": "/vx300s_right/joints/right_finger",
+          "joint_world_frame_residual": 0.0,
+          "new_body0_path": "/vx300s_right/follower_right_gripper_bar_link",
+          "new_local_pos0": [
+            0.025875002145767212,
+            0.0,
+            0.0
+          ],
+          "new_local_rot0_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "old_body0_path": "/vx300s_right/follower_right_fingers_link"
+        }
+      ],
+      "root_prim": "/vx300s_right",
+      "source": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task7_physicsrules_root_cause_candidates/1.0/baseline_gripper_fixed_group_split/follower_right/follower_right_baseline_gripper_fixed_group_split.usda",
+        "sha256": "41fff9b22994aea71fb5d3d7f39bb02c42f8095ceaf26d1f889dbe3b09b04076"
+      },
+      "source_modified": false,
+      "wrapper": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task7_physicsrules_root_cause_candidates/1.0/virtual_helper_topology_collapse/follower_right/follower_right_virtual_helper_topology_collapse.usda",
+        "default_prim": "/vx300s_right",
+        "sha256": "7b5f5cd5ca0e101438e9f28255b277104c87d801cabc8a56d59e7a68e7f14f02",
+        "sublayers": [
+          "follower_right_virtual_helper_topology_collapse_override.usda"
+        ]
+      }
+    }
+  ],
+  "final_or_default_asset_modified": false,
+  "geometry_topology_status": "PASS",
+  "frozen_stage_sha256": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9",
+  "input_profile": "baseline_gripper_fixed_group_split",
+  "joint_state_modified": false,
+  "local_runtime_formula_probe_required": true,
+  "mass_semantics_modified": true,
+  "mimic_modified": false,
+  "official_formula_source": "DIRECT_NVIDIA_ISAAC_MCP_ROBOT_SCHEMA_MASKING_OPS_REPARENT_BODY0",
+  "other_physics_parameters_modified": false,
+  "physics_equivalence": "PARTIAL_HELPER_MASS_NOT_CONSERVED",
+  "promotion_status": "BLOCKED_HELPER_MASS_INERTIA_SEMANTICS",
+  "schema_version": 1,
+  "scope": "DIAGNOSTIC_ONLY_NOT_FINAL",
+  "status": "PARTIAL",
+  "task8": "NOT_RUN"
+}

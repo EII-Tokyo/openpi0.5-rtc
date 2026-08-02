@@ -1,0 +1,105 @@
+{
+  "combined_candidate_literal_blocking_count": 2,
+  "combined_candidate_literal_rule_counts": {
+    "MimicAPICheck": 2
+  },
+  "failure_evidence": {
+    "captures": [
+      {
+        "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-task7-physicsrules-root-cause/screenshots_attempt2/follower_left/screenshots_annotated/follower_left_whole_arm_oblique_annotated.png",
+        "annotated_sha256": "b53fbfdde1502e83c83cc9092bc93585ba4a0c9898a39679b74e192e447c53c4",
+        "failure_shown": "UNCOMPENSATED_HELPER_BODY_REMOVAL_CREATES_NONADJACENT_COLLIDER_CLASH_FINDINGS",
+        "follower": "follower_left",
+        "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-task7-physicsrules-root-cause/screenshots_attempt2/follower_left/screenshots_raw/follower_left_whole_arm_oblique_raw.png",
+        "raw_sha256": "9f6c199a52f7e2ac8a38f5030d29ca2cb6aec379981a46c925277eca59071478",
+        "view": "whole_arm_oblique",
+        "visual_model_review": "PASS"
+      },
+      {
+        "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-task7-physicsrules-root-cause/screenshots_attempt2/follower_left/screenshots_annotated/follower_left_gripper_failure_closeup_annotated.png",
+        "annotated_sha256": "29ed358607182f3d013a21b9bc31148b146e2a6181ace0fecfe77ee7c5446ae8",
+        "failure_shown": "UNCOMPENSATED_HELPER_BODY_REMOVAL_CREATES_NONADJACENT_COLLIDER_CLASH_FINDINGS",
+        "follower": "follower_left",
+        "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-task7-physicsrules-root-cause/screenshots_attempt2/follower_left/screenshots_raw/follower_left_gripper_failure_closeup_raw.png",
+        "raw_sha256": "5983b1fd547b315182e45d12d411af91fcb477d5f7590ff89bbe82e1806e8f10",
+        "view": "gripper_failure_closeup",
+        "visual_model_review": "PASS"
+      },
+      {
+        "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-task7-physicsrules-root-cause/screenshots_attempt2/follower_right/screenshots_annotated/follower_right_whole_arm_oblique_annotated.png",
+        "annotated_sha256": "e197fcb782ab533ea009a7365149f65b3ec4b1542058b48c647bd0043db56220",
+        "failure_shown": "UNCOMPENSATED_HELPER_BODY_REMOVAL_CREATES_NONADJACENT_COLLIDER_CLASH_FINDINGS",
+        "follower": "follower_right",
+        "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-task7-physicsrules-root-cause/screenshots_attempt2/follower_right/screenshots_raw/follower_right_whole_arm_oblique_raw.png",
+        "raw_sha256": "def4192f77482782cda74c80c4c8374dd3d6eee218584e368fc5fdef663aa32d",
+        "view": "whole_arm_oblique",
+        "visual_model_review": "PASS"
+      },
+      {
+        "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-task7-physicsrules-root-cause/screenshots_attempt2/follower_right/screenshots_annotated/follower_right_gripper_failure_closeup_annotated.png",
+        "annotated_sha256": "2ae3a3344167437702fcb23772d80d628cb75132743c4d3ada7e7694ef4c7eeb",
+        "failure_shown": "UNCOMPENSATED_HELPER_BODY_REMOVAL_CREATES_NONADJACENT_COLLIDER_CLASH_FINDINGS",
+        "follower": "follower_right",
+        "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-task7-physicsrules-root-cause/screenshots_attempt2/follower_right/screenshots_raw/follower_right_gripper_failure_closeup_raw.png",
+        "raw_sha256": "8ac6dd949d07918173fe3648fb44a5be711b99ea4b904eb78922ed4357e5c215",
+        "view": "gripper_failure_closeup",
+        "visual_model_review": "PASS"
+      }
+    ],
+    "review_reports": [
+      {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7_virtual_helper_failure_screenshot_review_left.json",
+        "sha256": "ce3bb95b14d8171c232da39af8c61af6b1cf5c4f9fe53255b5a9eac5d756facb",
+        "status": "PASS"
+      },
+      {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7_virtual_helper_failure_screenshot_review_right.json",
+        "sha256": "b83d90012d951d71c8565675614b691fd6b8720c394befd9ab252423ab1957b7",
+        "status": "PASS"
+      }
+    ],
+    "status": "PASS",
+    "trigger": "TWO_IDENTICAL_FRESH_PROCESS_FAILURES_PER_FOLLOWER"
+  },
+  "final_or_default_asset_modified": false,
+  "frozen_stage_sha256": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9",
+  "helper_mass_semantics": {
+    "audit_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7_virtual_helper_mass_audit.json",
+    "audit_sha256": "108a9de4e8eeca7a4bd269dff24e80cfe27179682b5bd40b997cb2297c6e7edd",
+    "physical_calibration_status": "SOURCE_AUTHORED_PLACEHOLDER_NOT_PHYSICALLY_VERIFIED",
+    "removed_mass_per_follower_kg": 0.003000000142492354,
+    "uncompensated_collapse_allowed": false
+  },
+  "literal_validator_boundary": "The combined isolated candidate still reports one MimicAPICheck per follower. The finding is retained unsuppressed even though local PhysX 107.3 equation evidence supports the current opposed-axis mapping.",
+  "original_physicsrules_finding_count": 20,
+  "original_rule_counts": {
+    "JointHasCorrectTransformAndState": 10,
+    "MimicAPICheck": 2,
+    "RigidBodyHasCollider": 8
+  },
+  "real_robot_connected": false,
+  "remaining_real_blockers": [
+    "HELPER_MASS_COM_INERTIA_SEMANTICS_NOT_PRESERVED_IN_TOPOLOGY_CANDIDATE",
+    "COLLIDER_SPLIT_AND_TOPOLOGY_CANDIDATE_NOT_PROMOTED_OR_GRASP_REGRESSED"
+  ],
+  "remote_192_168_1_103_accessed": false,
+  "root_cause_dispositions": {
+    "empty_helpers": "SIMPLE_RIGID_BODY_REMOVAL_REJECTED; FRAME_PRESERVING_TOPOLOGY COLLAPSE_REMOVES_6_FINDINGS_BUT_DOES_NOT_PRESERVE_MASS_SEMANTICS",
+    "gripper_bar": "COLLIDER_EXISTS_IN_SUPPLIER_CAD_FIXED_GROUP; SPLIT_CANDIDATE REMOVES_2 FINDINGS BUT CHANGES_COLLIDER_PATHS",
+    "joint_state": "VALIDATOR_EXPECTS_GEOMETRY_ZERO_STATE_WHILE_PACKAGE_AUTHORS_HOME_STATE; ZERO_STATE_OVERRIDE_REMOVES_10_FINDINGS_AND_IS_RUNTIME_EQUIVALENT",
+    "mimic": "ISAAC_SIM_ASSET_VALIDATION_1_1_0_FORMULA_CONFLICT; PHYSX_107_3_OPPOSED_AXIS_AUTHORING_REMAINS_UNCHANGED"
+  },
+  "runtime": {
+    "asset_validation": "1.1.0",
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physx": "107.3.26"
+  },
+  "runtime_fresh_process_count": 20,
+  "schema_version": 1,
+  "scope": "TASK7_PHYSICSRULES_ROOT_CAUSE_CLOSURE_DIAGNOSTIC_ONLY",
+  "status": "PARTIAL",
+  "task7": "PARTIAL",
+  "task8": "NOT_RUN",
+  "validator_fresh_process_count": 20
+}

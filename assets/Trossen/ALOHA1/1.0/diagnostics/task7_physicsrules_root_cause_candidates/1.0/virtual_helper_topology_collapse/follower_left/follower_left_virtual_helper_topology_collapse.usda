@@ -1,0 +1,20 @@
+#usda 1.0
+(
+    customLayerData = {
+        string "aloha1:frozenStageSha256" = "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9"
+        string "aloha1:inputProfile" = "baseline_gripper_fixed_group_split"
+        string "aloha1:profile" = "virtual_helper_topology_collapse"
+        string "aloha1:scope" = "DIAGNOSTIC_ONLY_NOT_FINAL"
+    }
+    defaultPrim = "vx300s_left"
+    subLayers = [
+        @follower_left_virtual_helper_topology_collapse_override.usda@
+    ]
+)
+
+def Xform "vx300s_left" (
+    prepend references = @../../baseline_gripper_fixed_group_split/follower_left/follower_left_baseline_gripper_fixed_group_split.usda@</vx300s_left>
+)
+{
+}
+

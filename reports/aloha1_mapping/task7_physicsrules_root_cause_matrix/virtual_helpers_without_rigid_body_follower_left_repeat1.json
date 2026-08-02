@@ -1,0 +1,423 @@
+{
+  "blocking_issue_count": 64,
+  "category": "IsaacSim.PhysicsRules",
+  "direct_nvidia_mcp_verified": true,
+  "issues": [
+    {
+      "at": "Prim </vx300s_left/joints/elbow>",
+      "message": "Joint /vx300s_left/joints/elbow state not matching robot pose (0.0). From body 0: [(0, 1, 0) 66.46310424804689], from body 1: [(1, 0, 0) 0]",
+      "rule": "JointHasCorrectTransformAndState",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/joints/left_finger>",
+      "message": "Joint /vx300s_left/joints/left_finger state not matching robot pose(0.022390000522136688). From body 0: (0.49799397587776184, 0.022390000522136688, 0.42705002427101135), from body 1: (0.49799397587776184, 0, 0.42705002427101135)",
+      "rule": "JointHasCorrectTransformAndState",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/joints/right_finger>",
+      "message": "Joint /vx300s_left/joints/right_finger state not matching robot pose(0.022390000522136688). From body 0: (0.49799397587776184, -0.022390000522136688, 0.42705002427101135), from body 1: (0.49799397587776184, 0, 0.42705002427101135)",
+      "rule": "JointHasCorrectTransformAndState",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/joints/shoulder>",
+      "message": "Joint /vx300s_left/joints/shoulder state not matching robot pose (0.0). From body 0: [(0, -1, 0) 55.003948211669915], from body 1: [(1, 0, 0) 0]",
+      "rule": "JointHasCorrectTransformAndState",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/joints/wrist_angle>",
+      "message": "Joint /vx300s_left/joints/wrist_angle state not matching robot pose (0.0). From body 0: [(0, -0.9999999999999999, 0) 17.188734054565412], from body 1: [(1, 0, 0) 0]",
+      "rule": "JointHasCorrectTransformAndState",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/joints/right_finger>",
+      "message": "Joint /vx300s_left/joints/right_finger's lower limit (-0.013799999840557575) should be > reference joint limits * gear ratio(0.020999999716877937)",
+      "rule": "MimicAPICheck",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh and /vx300s_left/follower_left_gripper_prop_link/materialized_baseline_fallback/gripper_prop_link/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh and /vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh and /vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_000/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_000/mesh and /vx300s_left/follower_left_gripper_prop_link/materialized_baseline_fallback/gripper_prop_link/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_000/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_000/mesh and /vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_000/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_000/mesh and /vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_001/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_001/mesh and /vx300s_left/follower_left_gripper_prop_link/materialized_baseline_fallback/gripper_prop_link/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_001/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_001/mesh and /vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_001/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_001/mesh and /vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_002/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_002/mesh and /vx300s_left/follower_left_gripper_prop_link/materialized_baseline_fallback/gripper_prop_link/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_002/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_002/mesh and /vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_002/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_002/mesh and /vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_003/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_003/mesh and /vx300s_left/follower_left_gripper_prop_link/materialized_baseline_fallback/gripper_prop_link/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_003/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_003/mesh and /vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_003/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_003/mesh and /vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_004/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_004/mesh and /vx300s_left/follower_left_gripper_prop_link/materialized_baseline_fallback/gripper_prop_link/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_004/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_004/mesh and /vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_004/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_004/mesh and /vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_005/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_005/mesh and /vx300s_left/follower_left_gripper_prop_link/materialized_baseline_fallback/gripper_prop_link/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_005/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_005/mesh and /vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_005/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_005/mesh and /vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_006/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_006/mesh and /vx300s_left/follower_left_gripper_prop_link/materialized_baseline_fallback/gripper_prop_link/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_006/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_006/mesh and /vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_006/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_006/mesh and /vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_007/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_007/mesh and /vx300s_left/follower_left_gripper_prop_link/materialized_baseline_fallback/gripper_prop_link/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_007/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_007/mesh and /vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_007/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_007/mesh and /vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_008/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_008/mesh and /vx300s_left/follower_left_gripper_prop_link/materialized_baseline_fallback/gripper_prop_link/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_008/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_008/mesh and /vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_008/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_gripper_link/cad_derived_collisions/cad_derived_gripper_link/piece_008/mesh and /vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_gripper_prop_link/materialized_baseline_fallback/gripper_prop_link/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_gripper_prop_link/materialized_baseline_fallback/gripper_prop_link/mesh and /vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_gripper_prop_link/materialized_baseline_fallback/gripper_prop_link/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_gripper_prop_link/materialized_baseline_fallback/gripper_prop_link/mesh and /vx300s_left/follower_left_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_gripper_prop_link/materialized_baseline_fallback/gripper_prop_link/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_gripper_prop_link/materialized_baseline_fallback/gripper_prop_link/mesh and /vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_gripper_prop_link/materialized_baseline_fallback/gripper_prop_link/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_gripper_prop_link/materialized_baseline_fallback/gripper_prop_link/mesh and /vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_gripper_prop_link/materialized_baseline_fallback/gripper_prop_link/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_gripper_prop_link/materialized_baseline_fallback/gripper_prop_link/mesh and /vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_gripper_prop_link/materialized_baseline_fallback/gripper_prop_link/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_gripper_prop_link/materialized_baseline_fallback/gripper_prop_link/mesh and /vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_001/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_gripper_prop_link/materialized_baseline_fallback/gripper_prop_link/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_gripper_prop_link/materialized_baseline_fallback/gripper_prop_link/mesh and /vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_002/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_gripper_prop_link/materialized_baseline_fallback/gripper_prop_link/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_gripper_prop_link/materialized_baseline_fallback/gripper_prop_link/mesh and /vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_003/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_gripper_prop_link/materialized_baseline_fallback/gripper_prop_link/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_gripper_prop_link/materialized_baseline_fallback/gripper_prop_link/mesh and /vx300s_left/follower_left_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_gripper_prop_link/materialized_baseline_fallback/gripper_prop_link/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_gripper_prop_link/materialized_baseline_fallback/gripper_prop_link/mesh and /vx300s_left/follower_left_wrist_link/materialized_baseline_fallback/wrist_link/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh and /vx300s_left/follower_left_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh and /vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh and /vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh and /vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh and /vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_001/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh and /vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_002/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh and /vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_003/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh and /vx300s_left/follower_left_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh and /vx300s_left/follower_left_wrist_link/materialized_baseline_fallback/wrist_link/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_lower_forearm_link/cad_derived_collisions/cad_derived_lower_forearm_link/piece_000/mesh and /vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh and /vx300s_left/follower_left_shoulder_link/cad_derived_collisions/cad_derived_shoulder_link/piece_000/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh and /vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh and /vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_001/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh and /vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_002/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh and /vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_003/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh and /vx300s_left/follower_left_upper_forearm_link/cad_derived_collisions/cad_derived_upper_forearm_link/piece_000/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh>",
+      "message": "Colliding meshes /vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh and /vx300s_left/follower_left_wrist_link/materialized_baseline_fallback/wrist_link/mesh are not adjacent",
+      "rule": "NonAdjacentCollisionMeshesDoNotClash",
+      "severity": "ERROR"
+    },
+    {
+      "at": "Prim </vx300s_left/follower_left_gripper_bar_link>",
+      "message": "Rigid body /vx300s_left/follower_left_gripper_bar_link has rigid body api but no collision api",
+      "rule": "RigidBodyHasCollider",
+      "severity": "ERROR"
+    }
+  ],
+  "official_status": "FAIL",
+  "official_status_suppressed": false,
+  "real_robot_connected": false,
+  "remote_192_168_1_103_accessed": false,
+  "requested_rule_filter": null,
+  "rule_count": 12,
+  "rules": [
+    "DriveJointValueReasonable",
+    "HasArticulationRoot",
+    "InvisibleCollisionMeshHasPurposeGuide",
+    "JointHasCorrectTransformAndState",
+    "JointHasJointStateAPI",
+    "MimicAPICheck",
+    "NonAdjacentCollisionMeshesDoNotClash",
+    "PhysicsDriveAndJointState",
+    "PhysicsJointHasDriveOrMimicAPI",
+    "PhysicsJointMaxVelocity",
+    "RigidBodyHasCollider",
+    "RigidBodyHasMassAPI"
+  ],
+  "runtime": {
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physx": "107.3.26"
+  },
+  "schema_version": 1,
+  "target_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task7_physicsrules_root_cause_candidates/1.0/virtual_helpers_without_rigid_body/follower_left/follower_left_virtual_helpers_without_rigid_body.usda",
+  "target_immutable": true,
+  "target_name": "virtual_helpers_without_rigid_body_follower_left_repeat1",
+  "target_sha256_after": "fc9b9a9ba0b9e8a37ef9df99de17eff9995d71b4bbe74522e7aa51164d651efa",
+  "target_sha256_before": "fc9b9a9ba0b9e8a37ef9df99de17eff9995d71b4bbe74522e7aa51164d651efa",
+  "warning_count": 0
+}

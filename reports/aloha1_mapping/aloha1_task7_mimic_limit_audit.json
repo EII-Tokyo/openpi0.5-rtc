@@ -1,0 +1,224 @@
+{
+  "candidate_authoring_allowed": false,
+  "candidate_stages": {
+    "follower_left": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_task7_rule_candidates/1.0/Trossen/vx300s_left/1.0/vx300s_left.usda",
+      "modified": false,
+      "sha256_after": "040264d6f12b6607c7764a102d0ceb5b89797d17859a37852b2da8eacd913bd9",
+      "sha256_before": "040264d6f12b6607c7764a102d0ceb5b89797d17859a37852b2da8eacd913bd9"
+    },
+    "follower_right": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_task7_rule_candidates/1.0/Trossen/vx300s_right/1.0/vx300s_right.usda",
+      "modified": false,
+      "sha256_after": "6cb5d2352b5eef4d8bdea13ca7fdeb809fc27c4fa19f885f7c6ef3c24165a4b8",
+      "sha256_before": "6cb5d2352b5eef4d8bdea13ca7fdeb809fc27c4fa19f885f7c6ef3c24165a4b8"
+    }
+  },
+  "classification": "VALIDATOR_1_1_0_FORMULA_MISMATCH",
+  "final_or_default_asset_modified": false,
+  "finding_count": 2,
+  "findings": [
+    {
+      "authored_limit_order_valid": true,
+      "authored_mimic_limits": {
+        "lower": -0.06419999897480011,
+        "upper": -0.013799999840557575
+      },
+      "authored_reference_limits": {
+        "lower": 0.020999999716877937,
+        "upper": 0.05700000002980232
+      },
+      "classification": "VALIDATOR_1_1_0_FORMULA_MISMATCH",
+      "damping_ratio": 0.004999999888241291,
+      "effective_reference_multiplier": -1.0,
+      "effective_reference_offset": -0.0,
+      "follower": "follower_left",
+      "gearing": 1.0,
+      "mapped_interval_enclosed_after_sort": true,
+      "mapped_reference_interval": [
+        -0.05700000002980232,
+        -0.020999999716877937
+      ],
+      "mimic_api_instance": "rotY",
+      "mimic_joint": "/vx300s_left/joints/right_finger",
+      "natural_frequency": 25.0,
+      "official_finding": {
+        "at": "Prim </vx300s_left/joints/right_finger>",
+        "message": "Joint /vx300s_left/joints/right_finger's lower limit (-0.013799999840557575) should be > reference joint limits * gear ratio(0.020999999716877937)",
+        "rule": "MimicAPICheck",
+        "severity": "ERROR"
+      },
+      "offset": 0.0,
+      "physx_equation": "jointPosition + gearing * referenceJointPosition + offset = 0",
+      "physx_relation_matches_urdf": true,
+      "prim_stack": [
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_task7_rule_candidates/1.0/Trossen/vx300s_left/1.0/configuration/vx300s_left_robot.usda",
+          "path": "/vx300s_left/joints/right_finger",
+          "specifier": "Sdf.SpecifierOver"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/configuration/aloha1_signal_home_targets.usda",
+          "path": "/World/follower_left/vx300s_left/joints/right_finger",
+          "specifier": "Sdf.SpecifierOver"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_physics.usd",
+          "path": "/follower_left/joints/right_finger",
+          "specifier": "Sdf.SpecifierDef"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_robot.usd",
+          "path": "/follower_left/joints/right_finger",
+          "specifier": "Sdf.SpecifierOver"
+        }
+      ],
+      "reference_joint": "/vx300s_left/joints/left_finger",
+      "sorted_authored_interval": [
+        -0.06419999897480011,
+        -0.013799999840557575
+      ],
+      "urdf_source": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_left.urdf",
+        "gearing": -1.0,
+        "mimic_joint": "right_finger",
+        "mimic_limits": {
+          "lower": -0.057,
+          "upper": -0.021
+        },
+        "offset": 0.0,
+        "reference_joint": "left_finger",
+        "reference_limits": {
+          "lower": 0.021,
+          "upper": 0.057
+        },
+        "sha256": "d9e4b32723ee71dfce26fb4e78546cfcfef147b2d7dbf5e53e3620e3d8aa96bd"
+      },
+      "usd_modified": false,
+      "usd_vs_urdf": {
+        "mimic_limits_match": false,
+        "reference_limits_match": true
+      },
+      "validator_predicates": {
+        "branch": "nonnegative",
+        "mimic_lower_lt_reference_upper_times_gearing": true,
+        "reference_lower_times_gearing_lt_mimic_upper": false
+      },
+      "validator_predicates_pass": false
+    },
+    {
+      "authored_limit_order_valid": true,
+      "authored_mimic_limits": {
+        "lower": -0.06419999897480011,
+        "upper": -0.013799999840557575
+      },
+      "authored_reference_limits": {
+        "lower": 0.020999999716877937,
+        "upper": 0.05700000002980232
+      },
+      "classification": "VALIDATOR_1_1_0_FORMULA_MISMATCH",
+      "damping_ratio": 0.004999999888241291,
+      "effective_reference_multiplier": -1.0,
+      "effective_reference_offset": -0.0,
+      "follower": "follower_right",
+      "gearing": 1.0,
+      "mapped_interval_enclosed_after_sort": true,
+      "mapped_reference_interval": [
+        -0.05700000002980232,
+        -0.020999999716877937
+      ],
+      "mimic_api_instance": "rotY",
+      "mimic_joint": "/vx300s_right/joints/right_finger",
+      "natural_frequency": 25.0,
+      "official_finding": {
+        "at": "Prim </vx300s_right/joints/right_finger>",
+        "message": "Joint /vx300s_right/joints/right_finger's lower limit (-0.013799999840557575) should be > reference joint limits * gear ratio(0.020999999716877937)",
+        "rule": "MimicAPICheck",
+        "severity": "ERROR"
+      },
+      "offset": 0.0,
+      "physx_equation": "jointPosition + gearing * referenceJointPosition + offset = 0",
+      "physx_relation_matches_urdf": true,
+      "prim_stack": [
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_task7_rule_candidates/1.0/Trossen/vx300s_right/1.0/configuration/vx300s_right_robot.usda",
+          "path": "/vx300s_right/joints/right_finger",
+          "specifier": "Sdf.SpecifierOver"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/configuration/aloha1_signal_home_targets.usda",
+          "path": "/World/follower_right/vx300s_right/joints/right_finger",
+          "specifier": "Sdf.SpecifierOver"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/configuration/supplier_cad_follower_right_configuration.usda",
+          "path": "/follower_right/vx300s_right/joints/right_finger",
+          "specifier": "Sdf.SpecifierOver"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_physics.usd",
+          "path": "/follower_right/joints/right_finger",
+          "specifier": "Sdf.SpecifierDef"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_robot.usd",
+          "path": "/follower_right/joints/right_finger",
+          "specifier": "Sdf.SpecifierOver"
+        }
+      ],
+      "reference_joint": "/vx300s_right/joints/left_finger",
+      "sorted_authored_interval": [
+        -0.06419999897480011,
+        -0.013799999840557575
+      ],
+      "urdf_source": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_right.urdf",
+        "gearing": -1.0,
+        "mimic_joint": "right_finger",
+        "mimic_limits": {
+          "lower": -0.057,
+          "upper": -0.021
+        },
+        "offset": 0.0,
+        "reference_joint": "left_finger",
+        "reference_limits": {
+          "lower": 0.021,
+          "upper": 0.057
+        },
+        "sha256": "268a5e5b56ce48af679256380008606f64358d6ead2619b52946b37f47fb624b"
+      },
+      "usd_modified": false,
+      "usd_vs_urdf": {
+        "mimic_limits_match": false,
+        "reference_limits_match": true
+      },
+      "validator_predicates": {
+        "branch": "nonnegative",
+        "mimic_lower_lt_reference_upper_times_gearing": true,
+        "reference_lower_times_gearing_lt_mimic_upper": false
+      },
+      "validator_predicates_pass": false
+    }
+  ],
+  "local_rule_source": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.validation/isaacsim/asset/validation/joint_rules.py",
+    "class": "MimicAPICheck",
+    "sha256": "6dc43a4ed0284f61d85d22c5c24775e40c5f373facdc408236a25385109ab1ef"
+  },
+  "local_schema_source": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/extscache/omni.usd.schema.physx-107.3.26+107.3.3.lx64.r.cp311.u353/plugins/PhysxSchema/resources/generatedSchema.usda",
+    "class": "PhysxMimicJointAPI",
+    "equation": "jointPosition + gearing * referenceJointPosition + offset = 0",
+    "sha256": "d2dd1873e165d280ac302f2b2e6e95cc5c4c1f72580478492990ea0f711e00f8"
+  },
+  "next_step": "DO_NOT_CHANGE_VALID_MIMIC_TO_SATISFY_CONFLICTING_RULE",
+  "schema_version": 1,
+  "stage": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+    "modified": false,
+    "sha256_after": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9",
+    "sha256_before": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9"
+  },
+  "status": "PASS",
+  "task8": "NOT_RUN"
+}

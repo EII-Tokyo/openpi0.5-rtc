@@ -1,0 +1,20 @@
+#usda 1.0
+(
+    customLayerData = {
+        string "aloha1:frozenStageSha256" = "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9"
+        string "aloha1:inputProfile" = "virtual_helper_topology_collapse"
+        string "aloha1:profile" = "combined_topology_joint_state"
+        string "aloha1:scope" = "DIAGNOSTIC_ONLY_NOT_FINAL"
+    }
+    defaultPrim = "vx300s_left"
+    subLayers = [
+        @follower_left_combined_topology_joint_state_override.usda@
+    ]
+)
+
+def Xform "vx300s_left" (
+    prepend references = @../../virtual_helper_topology_collapse/follower_left/follower_left_virtual_helper_topology_collapse.usda@</vx300s_left>
+)
+{
+}
+

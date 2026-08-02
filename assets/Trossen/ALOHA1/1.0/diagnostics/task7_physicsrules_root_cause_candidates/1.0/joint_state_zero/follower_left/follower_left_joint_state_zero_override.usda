@@ -1,0 +1,33 @@
+#usda 1.0
+
+over "vx300s_left"
+{
+    over "joints"
+    {
+        over "elbow"
+        {
+            float state:angular:physics:position = 0
+        }
+
+        over "left_finger"
+        {
+            float state:linear:physics:position = 0
+        }
+
+        over "right_finger"
+        {
+            float state:linear:physics:position = 0
+        }
+
+        over "shoulder"
+        {
+            float state:angular:physics:position = 0
+        }
+
+        over "wrist_angle"
+        {
+            float state:angular:physics:position = 0
+        }
+    }
+}
+

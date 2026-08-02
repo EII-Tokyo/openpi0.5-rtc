@@ -1,0 +1,45 @@
+{
+  "blocking_issue_count": 1,
+  "category": "IsaacSim.PhysicsRules",
+  "direct_nvidia_mcp_verified": true,
+  "issues": [
+    {
+      "at": "Prim </vx300s_right/joints/right_finger>",
+      "message": "Joint /vx300s_right/joints/right_finger's lower limit (-0.013799999840557575) should be > reference joint limits * gear ratio(0.020999999716877937)",
+      "rule": "MimicAPICheck",
+      "severity": "ERROR"
+    }
+  ],
+  "official_status": "FAIL",
+  "official_status_suppressed": false,
+  "real_robot_connected": false,
+  "remote_192_168_1_103_accessed": false,
+  "requested_rule_filter": null,
+  "rule_count": 12,
+  "rules": [
+    "DriveJointValueReasonable",
+    "HasArticulationRoot",
+    "InvisibleCollisionMeshHasPurposeGuide",
+    "JointHasCorrectTransformAndState",
+    "JointHasJointStateAPI",
+    "MimicAPICheck",
+    "NonAdjacentCollisionMeshesDoNotClash",
+    "PhysicsDriveAndJointState",
+    "PhysicsJointHasDriveOrMimicAPI",
+    "PhysicsJointMaxVelocity",
+    "RigidBodyHasCollider",
+    "RigidBodyHasMassAPI"
+  ],
+  "runtime": {
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physx": "107.3.26"
+  },
+  "schema_version": 1,
+  "target_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task7_physicsrules_root_cause_candidates/1.0/combined_topology_joint_state/follower_right/follower_right_combined_topology_joint_state.usda",
+  "target_immutable": true,
+  "target_name": "combined_topology_joint_state_follower_right_repeat2",
+  "target_sha256_after": "a0a75896bf4ea67be27540f90d08415e5e8a1e8d3f6082b6af2fad213a5550a1",
+  "target_sha256_before": "a0a75896bf4ea67be27540f90d08415e5e8a1e8d3f6082b6af2fad213a5550a1",
+  "warning_count": 0
+}
