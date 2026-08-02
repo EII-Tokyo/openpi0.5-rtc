@@ -81,7 +81,7 @@ def test_exactly_three_passing_trials_are_required():
     )
 
 
-def test_runtime_verifier_has_fixed_inspector_stress_contract():
+def test_runtime_verifier_uses_signed_contact_and_direct_vertices():
     source = Path("tools/isaac_sim/verify_left_table_collision.py").read_text()
 
     for required in (
@@ -90,15 +90,21 @@ def test_runtime_verifier_has_fixed_inspector_stress_contract():
         "SHOULDER_START_DEG = -55.00394821166992",
         "SHOULDER_END_DEG = 20.0",
         "SHOULDER_STEP_DEG = 0.5",
-        "HOLD_STEPS = 30",
+        "HOLD_STEPS = 180",
         "PhysxContactReportAPI.Apply",
         "CreateThresholdAttr().Set(0)",
         "get_contact_report()",
+        "datum.separation",
         "capture_viewport_to_file",
         "articulation._articulation_view.get_dof_limits()",
         "articulation._articulation_view.set_joint_position_targets(",
-        "prim.HasAPI(UsdPhysics.CollisionAPI)",
-        '"collider_bounds_m"',
+        "collision.HasAPI(UsdPhysics.CollisionAPI)",
+        "GetLocalToWorldTransform",
+        "GetPointsAttr",
+        "table_from_world",
+        "minimum_target_separation_m",
+        "minimum_table_local_finger_z_m",
+        "maximum_visual_collision_error_m",
         "PhysxSceneQuasistaticAPI.Apply",
         '"quasistatic_enabled": True',
         '"min_position_iteration_count": 64',
@@ -110,5 +116,8 @@ def test_runtime_verifier_has_fixed_inspector_stress_contract():
         "contactOffset",
         "restOffset",
         "set_gains",
+        "ComputeWorldBound",
+        "TABLE_BOTTOM_Z_M",
+        "BOTTOM_CROSSING_TOLERANCE_M",
     ):
         assert forbidden not in source
