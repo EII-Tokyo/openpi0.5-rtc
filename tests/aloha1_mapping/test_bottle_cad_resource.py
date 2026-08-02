@@ -118,4 +118,5 @@ def test_readme_records_primary_bottle_and_reference_limits() -> None:
     assert "3594f60200e54181bc8480a229484293a0d386c146d3f235b32e31a0c16bbf8a" in text
     assert "geometry reference, not the default grasp bottle" in text
     assert "UNKNOWN_HARD_BLOCKER" in text
-    assert "Task 8 optimization | **NOT_RUN**" in text
+    assert "Task 8 optimization | **AUTHORIZED / PAUSED_AT_MODEL_PROOF_GATE**" in text
+    assert "no optimization candidate" in text

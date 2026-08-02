@@ -1,5 +1,34 @@
 # Task State
 
+## 2026-08-02 Task 8 lightweight-optimization authorization
+
+- The user explicitly relaxed the remaining Task 7 asset-promotion gate and
+  authorized Task 8 to begin. This does not rewrite Task 7 as a full `PASS`.
+- Current boundary: runtime grasp and finger safety are `PASS`; asset-promotion
+  readiness remains `PARTIAL`; Task 7 aggregate is
+  `PARTIAL_ACCEPTED_FOR_TASK8`; Task 8 is `AUTHORIZED_IN_PROGRESS`.
+- Task 8 is restricted to isolated candidates. The frozen diagnostic Stage,
+  source layers, final/default assets and final/default colliders remain
+  unchanged unless a later, explicit promotion decision is made.
+- Lightweight verification replaces a full five-video rerun. The accepted
+  five grasp MP4s remain frozen. If Task 8 exposes a physical/collision defect,
+  every reproducible failure must be preserved with full-arm
+  collision-enabled video plus
+  before/first-anomaly/final raw and annotated screenshots and machine
+  telemetry. The issue is then returned to its Task 7 root-cause scope.
+- Approved design and execution plan:
+  `docs/superpowers/specs/2026-08-02-aloha1-task8-lightweight-optimization-design.md`
+  and
+  `docs/superpowers/plans/2026-08-02-aloha1-task8-lightweight-optimization.md`.
+- Method correction after the read-only baseline inventory: no Task 8
+  optimization candidate has been built. The user rejected experiment-led
+  parameter inference. Official exact-model sources and mathematical/physical
+  proofs are now mandatory before runtime verification or optimization.
+  Superseding design/plan:
+  `docs/superpowers/specs/2026-08-02-aloha1-official-model-first-design.md`
+  and
+  `docs/superpowers/plans/2026-08-02-aloha1-official-model-first.md`.
+
 ## 2026-08-02 five-pose initialization and finger-safety closure
 
 - Do **not** rerun the five user-confirmed attempt-7 MP4s. They remain
@@ -2233,3 +2262,40 @@ scene design is reviewed and approved.
   `PASS`. Full-repository pytest stops at collection with seven unrelated
   current-`.venv` `transformers` import errors; log preserved under
   `.codex/artifacts/20260802-aloha1-task7-physicsrules-root-cause/final_verification/`.
+
+## 2026-08-02 Task 8 official-model-first gate
+
+- User authorization to enter Task 8 is retained, but the earlier
+  experiment-led lightweight candidate plan is superseded before candidate
+  authoring. Current status is
+  `TASK8=AUTHORIZED_PAUSED_AT_MODEL_PROOF_GATE`.
+- Exact source audit: `PASS`; 13/13 required records are frozen by URL,
+  branch/commit where applicable, local path, SHA-256 and license boundary.
+  Supplier STEP redistribution remains `UNKNOWN_HARD_BLOCKER` and the original
+  CAD stays outside Git.
+- Parameter matrix: `PASS` coverage / `BLOCKED` formal candidate. It contains
+  45 records over 12 groups and seven narrow hard blockers, with no
+  `ENGINEERING_INFERENCE`, `TEMPORARY_UNCALIBRATED` or
+  `DIAGNOSTIC_ONLY_NOT_FINAL` value admitted to the formal gate.
+- Kinematic contract: `PASS`; official Trossen POE versus independent URDF FK
+  maximum translation error `4.484050470211362e-16 m`, maximum rotation error
+  near machine zero and maximum Jacobian error `1.95809590763929e-10` across
+  five deterministic legal samples. Isaac IK/runtime was not used.
+- Left/right normalized robot-local chains match exactly with determinant
+  `+1`; this does not claim a workcell installation transform.
+- Inertial contract: `PASS` for 14 source-authored links per follower;
+  dynamics aggregate remains `PARTIAL` because continuous actuator envelopes
+  and PhysX drive mapping are not yet derived. Stall torque is not used as a
+  continuous torque or PhysX maxForce.
+- Gripper linkage formula: `PASS` at 1001 samples; the Xacro carriage-center
+  range `42–114 mm` versus exact-product page `42–116 mm` remains an explicit
+  definition conflict pending CAD inner-surface proof.
+- Collider geometry contract: `PARTIAL`; deterministic FreeCAD 1.1.1 / OCCT
+  7.8.1 tessellation and existing swept/static checks pass, but
+  `gripper_bar_link`, `gripper_prop_link` and `wrist_link` still account for
+  six unresolved follower records. Existing grasp success does not promote
+  those colliders.
+- `aloha1_official_model_candidate.json` is `NOT_BUILT_BLOCKED` and
+  `aloha1_official_model_runtime.json` is `NOT_RUN`. No Isaac process was
+  launched; no diagnostic candidate directory, final/default asset or collider
+  was created or modified.

@@ -7,6 +7,7 @@ def test_readme_separates_evidence_classes_and_gates_optimization() -> None:
     text = (
         PROJECT_ROOT / "README_ALOHA1_ISAACSIM_5_1.md"
     ).read_text(encoding="utf-8")
+    normalized = " ".join(text.split())
 
     for heading in (
         "### Confirmed directly from official/local source",
@@ -17,8 +18,9 @@ def test_readme_separates_evidence_classes_and_gates_optimization() -> None:
         "## HARD_BLOCKER and measurement checklist",
     ):
         assert heading in text
-    assert "Task 8 was not executed" in text
-    assert "Task 8 optimization | **NOT_RUN**" in text
+    assert "Task 8 optimization | **AUTHORIZED / PAUSED_AT_MODEL_PROOF_GATE**" in text
+    assert "No Isaac process was started for this source/mathematics phase" in normalized
+    assert "no final or default USD/collider was modified" in normalized
     assert "Supplier-CAD Task 5 dynamic structure | **PASS**" in text
     assert (
         "HARD_BLOCKER_RUNTIME_CAMERA_EMPTY_BUFFER_ON_ROOT_FRAME_DIAGNOSTIC"

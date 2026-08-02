@@ -59,10 +59,85 @@ sim-to-real dynamics model and it is not yet accepted for bottle insertion.
 | Supplier-CAD Task 7 aggregate | **FAIL** | historical physical-target result: follower_left remains PARTIAL and the prior follower_right report still contains 5 PhysicsRules and 4 RobotRules blocking findings; a new schema-only right candidate now passes RobotRules 0/0, but it does not rewrite that historical physical report or clear the remaining PhysicsRules/source-evidence boundaries |
 | Task 7 certified-pose screenshots | **PARTIAL** | follower_left: 6 raw + 6 annotated PASS; follower_right robot-local: 7 raw + 7 annotated visual PASS, while numeric runtime remains PARTIAL because mimic accuracy fails |
 | CAD render/tessellation determinism | PASS | `aloha_viper_gripper_screenshot_review.json`, `aloha_viper_finger_tessellation.json` |
-| Task 8 optimization | **NOT_RUN** | no mesh merge, collider promotion, instanceable, payload, or performance optimization |
+| Official exact-model source chain | **PASS** | 13/13 required Trossen, ROBOTIS, pinned Interbotix, supplier-CAD and local Isaac 5.1 sources are hash-verified; ID 6/7 conflict is retained |
+| Official parameter coverage matrix | **PASS inventory / BLOCKED candidate** | 45 source-bound records cover 12 required groups; seven narrow missing derivations contain no convenient fallback values |
+| Kinematic mathematical contract | **PASS** | independent URDF FK and official Trossen POE agree at five legal samples; max translation residual `4.4841e-16 m`, max Jacobian residual `1.9581e-10`; Isaac IK was not used |
+| Dynamics mathematical contract | **PARTIAL** | all 14 inertials per follower pass finite/positive-definite/triangle/parallel-axis checks; continuous actuator envelope and PhysX drive mapping remain blocked |
+| Gripper/collider geometry contract | **PARTIAL** | linkage formula is monotonic and symmetric; 114/116 mm definition conflict and six CAD/link registration records remain unresolved |
+| Task 8 optimization | **AUTHORIZED / PAUSED_AT_MODEL_PROOF_GATE** | read-only 129-mesh baseline inventory exists; no optimization candidate, Isaac runtime, or final/default asset mutation occurred |
 
 `PASS`, `FAIL`, and `PARTIAL` are literal machine-report values. A clean
 viewport is not an acceptance criterion.
+
+## 2026-08-02 Task 8 authorization boundary
+
+The user explicitly authorized Task 8 to start with the remaining Task 7
+asset-promotion findings open. Task 7 is therefore
+`PARTIAL_ACCEPTED_FOR_TASK8`, not retroactively changed to `PASS`. Runtime
+grasp and finger-safety gates remain `PASS`; diagnostic candidate promotion
+remains `PARTIAL`; Task 8 is `AUTHORIZED_IN_PROGRESS`.
+
+Task 8 uses isolated candidates and a lightweight regression gate. It does not
+modify final/default assets or rerun the five accepted grasp videos by default.
+The user prioritizes understandable evidence when an optimization fails: every
+reproducible failure requires a collision-enabled full-arm video and
+raw/annotated before, first-anomaly and final-failure screenshots, all bound to
+machine telemetry and visually reviewed. A failure discovered during Task 8
+is returned to the corresponding Task 7 root-cause scope instead of being
+hidden or tuned away.
+
+## 2026-08-02 official-model-first correction
+
+Task 8 remains user-authorized, but optimization candidate authoring is paused
+at a new source-and-mathematics gate. A successful grasp, a visually plausible
+collider, or a parameter sweep is no longer allowed to identify a physical
+parameter. The evidence order is now exact product source → exact component
+manual → pinned official description/driver → supplier CAD calculation →
+Isaac Sim 5.1 implementation readback.
+
+The exact follower is `aloha_vx300s` / Interbotix ViperX-300 6DOF. DYNAMIXEL
+IDs 1–7 are XM540-W270 and IDs 8–9 are XM430-W350. The Trossen page contains
+an internal ID 6/7 name conflict; the contradictory row remains recorded,
+while the pinned `vx300s.yaml`, `aloha_vx300s.yaml` and Xacro establish
+`ID6=forearm_roll`, `ID7=wrist_angle`. The local third-party
+`external/ros2-essentials` checkout is not treated as upstream authority, and
+its differing sleep pose is not labeled official.
+
+The source audit and parameter matrix are machine `PASS`, but this means the
+coverage is complete—not that every physical value is known. Formal candidate
+generation is currently `BLOCKED` by seven narrow records: CAD-to-link
+registration, continuous actuator envelope, the 114/116 mm gripper aperture
+definition conflict, controller-to-PhysX drive mapping, complete per-link
+collider error certificates, exact contact material properties and a derived
+solver/timestep error budget. No stall torque was promoted to continuous
+`maxForce`; no DYNAMIXEL integer PID was copied into PhysX stiffness/damping;
+no default friction or solver value was inserted.
+
+The pure-math kinematic contract is `PASS`: independent URDF-chain FK agrees
+with Trossen's published POE model at home and four deterministic legal joint
+samples. Both follower URDFs have the same normalized robot-local chain and
+determinant `+1`; they are not mirrored. This does not claim a measured
+workcell installation transform. The inertial sub-contract also passes for
+all 14 source-authored links per follower, while the overall dynamics contract
+remains `PARTIAL` because the continuous actuator and PhysX-drive derivations
+are still open.
+
+Authoritative new reports:
+
+- `reports/aloha1_mapping/aloha1_official_parameter_source_audit.json/.md`;
+- `reports/aloha1_mapping/aloha1_official_parameter_matrix.json/.md`;
+- `reports/aloha1_mapping/aloha1_kinematic_contract.json/.md`;
+- `reports/aloha1_mapping/aloha1_dynamics_contract.json/.md`;
+- `reports/aloha1_mapping/aloha1_gripper_geometry_contract.json/.md`;
+- `reports/aloha1_mapping/aloha1_collider_geometry_contract.json/.md`;
+- `reports/aloha1_mapping/aloha1_official_model_candidate.json`;
+- `reports/aloha1_mapping/aloha1_official_model_runtime.json`;
+- `reports/aloha1_mapping/aloha1_task8_model_first_gate.json`.
+
+The supplier STEP remains local read-only because its formal redistribution
+license is still `UNKNOWN_HARD_BLOCKER`. No original CAD is committed. No
+Isaac process was started for this source/mathematics phase, and no final or
+default USD/collider was modified.
 
 ## 2026-08-02 five-pose initialization and finger-safety closure
 
