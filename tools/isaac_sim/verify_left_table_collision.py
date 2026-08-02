@@ -217,22 +217,40 @@ def _contact_pairs(state: dict[str, Any]) -> list[tuple[str, str]]:
     return sorted(set(result))
 
 
-def _live_tip_minimum_z(stage: Any, allowed_roots: tuple[str, ...]) -> float:
-    from pxr import Usd, UsdGeom
+def _live_tip_bounds(stage: Any, allowed_roots: tuple[str, ...]) -> dict[str, Any]:
+    from pxr import Usd, UsdGeom, UsdPhysics
 
     cache = UsdGeom.BBoxCache(
         Usd.TimeCode.Default(),
         [UsdGeom.Tokens.default_, UsdGeom.Tokens.render, UsdGeom.Tokens.guide],
         useExtentsHint=False,
     )
-    values = []
+    root_bounds: dict[str, list[float]] = {}
+    collider_bounds: dict[str, list[float]] = {}
     for path in allowed_roots:
-        prim = stage.GetPrimAtPath(path)
-        if not prim.IsValid():
+        root = stage.GetPrimAtPath(path)
+        if not root.IsValid():
             raise RuntimeError(f"allowed tip root missing: {path}")
-        value = cache.ComputeWorldBound(prim).ComputeAlignedRange().GetMin()[2]
-        values.append(float(value))
-    return min(values)
+        root_range = cache.ComputeWorldBound(root).ComputeAlignedRange()
+        root_bounds[path] = [
+            float(root_range.GetMin()[2]),
+            float(root_range.GetMax()[2]),
+        ]
+        for prim in Usd.PrimRange(root):
+            if not prim.HasAPI(UsdPhysics.CollisionAPI):
+                continue
+            collider_range = cache.ComputeWorldBound(prim).ComputeAlignedRange()
+            collider_bounds[str(prim.GetPath())] = [
+                float(collider_range.GetMin()[2]),
+                float(collider_range.GetMax()[2]),
+            ]
+    if not collider_bounds:
+        raise RuntimeError("no CollisionAPI prims beneath allowed tip roots")
+    return {
+        "minimum_collider_z_m": min(row[0] for row in collider_bounds.values()),
+        "collider_bounds_m": collider_bounds,
+        "root_aggregate_bounds_m": root_bounds,
+    }
 
 
 def _normalized_limits(articulation: Any) -> np.ndarray:
@@ -386,7 +404,8 @@ def _run_trial(
             all_pairs.update(pairs)
             disallowed.update(_disallowed_environment_pairs(pairs, ALLOWED_TIP_ROOTS))
             step_contact = any(_target_pair(pair, ALLOWED_TIP_ROOTS) for pair in pairs)
-            tip_z = _live_tip_minimum_z(stage, ALLOWED_TIP_ROOTS)
+            bounds = _live_tip_bounds(stage, ALLOWED_TIP_ROOTS)
+            tip_z = bounds["minimum_collider_z_m"]
             minimum_tip_z = min(minimum_tip_z, tip_z)
             step_finite = bool(
                 np.all(np.isfinite(qpos))
@@ -403,6 +422,8 @@ def _run_trial(
                     "shoulder_deg": math.degrees(float(qpos[shoulder_index])),
                     "shoulder_velocity_rad_s": float(qvel[shoulder_index]),
                     "minimum_tip_z_m": tip_z,
+                    "collider_bounds_m": bounds["collider_bounds_m"],
+                    "root_aggregate_bounds_m": bounds["root_aggregate_bounds_m"],
                     "target_contact": step_contact,
                     "contact_pairs": pairs,
                     "finite": step_finite,
@@ -438,7 +459,8 @@ def _run_trial(
                     _target_pair(pair, ALLOWED_TIP_ROOTS) for pair in pairs
                 )
                 persistent_contact_steps += int(step_contact)
-                tip_z = _live_tip_minimum_z(stage, ALLOWED_TIP_ROOTS)
+                bounds = _live_tip_bounds(stage, ALLOWED_TIP_ROOTS)
+                tip_z = bounds["minimum_collider_z_m"]
                 minimum_tip_z = min(minimum_tip_z, tip_z)
                 step_finite = bool(
                     np.all(np.isfinite(qpos))
@@ -456,6 +478,8 @@ def _run_trial(
                         "shoulder_deg": math.degrees(float(qpos[shoulder_index])),
                         "shoulder_velocity_rad_s": float(qvel[shoulder_index]),
                         "minimum_tip_z_m": tip_z,
+                        "collider_bounds_m": bounds["collider_bounds_m"],
+                        "root_aggregate_bounds_m": bounds["root_aggregate_bounds_m"],
                         "target_contact": step_contact,
                         "contact_pairs": pairs,
                         "finite": step_finite,

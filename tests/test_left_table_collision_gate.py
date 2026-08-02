@@ -74,6 +74,8 @@ def test_runtime_verifier_has_fixed_inspector_stress_contract():
         "capture_viewport_to_file",
         "articulation._articulation_view.get_dof_limits()",
         "articulation._articulation_view.set_joint_position_targets(",
+        "prim.HasAPI(UsdPhysics.CollisionAPI)",
+        '"collider_bounds_m"',
     ):
         assert required in source
     for forbidden in (
