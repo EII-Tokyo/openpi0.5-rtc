@@ -157,3 +157,5 @@ terminal transition 的结果：
 2. 下一轮做 episode-level holdout：按 shard 切分训练集/测试集，例如 80% 训练、20% 测试，再看 held-out Q 曲线和 AUC。
 3. 机器人上线前先只启用 critic gate metrics，观察真实在线数据中的 `reference_q`、`actor_q`、`q_advantage` 是否稳定。
 4. 如果 held-out 的全 transition AUC 仍能高于约 `0.75`，terminal AUC 仍能高于约 `0.80`，再进入小步 actor 介入测试。
+
+› 下一步你需要改造我AGENTS.md，SKILLS和hooks，以及codex-full的启动方式，使得按需访问请求MCPJungle，同时要改造与codex 默认功能重复的自定义的脚本，或是关闭现在codex已经有的功能的插件。需要你广泛调研。
