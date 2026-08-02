@@ -31,6 +31,25 @@ def classify_velocity_semantics(
     return "INCONCLUSIVE"
 
 
+def classify_readback_responsibility(
+    *,
+    exact_tensor_path: bool,
+    tensor_direct_transform_max_delta_m: float,
+    tensor_usd_linear_velocity_max_delta_m_s: float,
+    transform_velocity_alignment: bool,
+) -> str:
+    """Localize the disagreement without guessing an internal PhysX cause."""
+
+    if (
+        exact_tensor_path
+        and tensor_direct_transform_max_delta_m <= 1.0e-9
+        and tensor_usd_linear_velocity_max_delta_m_s <= 1.0e-9
+        and not transform_velocity_alignment
+    ):
+        return "VERIFIED_LOCAL_PHYSX_VELOCITY_TRANSFORM_DISAGREEMENT"
+    return "UNRESOLVED_READBACK_BOUNDARY"
+
+
 def _sha256(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as stream:
@@ -88,6 +107,98 @@ def _run_metrics(run_root: Path) -> dict[str, Any]:
         ),
         "stage": report.get("stage"),
         "grasp_metrics": report.get("metrics"),
+    }
+    lifecycle = result.get("lifecycle") or {}
+    identities = lifecycle.get("rigid_body_view_identities", [])
+    direct_deltas_all = [
+        float(
+            row["bottle"]["direct_physx_transform"][
+                "tensor_position_delta_norm_m"
+            ]
+        )
+        for row in rows
+        if row.get("bottle", {}).get("direct_physx_transform")
+    ]
+    usd_linear_deltas_all = [
+        float(
+            row["bottle"]["usd_velocity_readback"][
+                "tensor_linear_delta_norm_m_s"
+            ]
+        )
+        for row in rows
+        if row.get("bottle", {}).get("usd_velocity_readback")
+    ]
+    usd_angular_deltas_all = [
+        float(
+            row["bottle"]["usd_velocity_readback"][
+                "tensor_angular_delta_norm_rad_s"
+            ]
+        )
+        for row in rows
+        if row.get("bottle", {}).get("usd_velocity_readback")
+    ]
+    direct_deltas_hold = [
+        float(
+            row["bottle"]["direct_physx_transform"][
+                "tensor_position_delta_norm_m"
+            ]
+        )
+        for row in hold
+        if row.get("bottle", {}).get("direct_physx_transform")
+    ]
+    usd_linear_deltas_hold = [
+        float(
+            row["bottle"]["usd_velocity_readback"][
+                "tensor_linear_delta_norm_m_s"
+            ]
+        )
+        for row in hold
+        if row.get("bottle", {}).get("usd_velocity_readback")
+    ]
+    usd_angular_deltas_hold = [
+        float(
+            row["bottle"]["usd_velocity_readback"][
+                "tensor_angular_delta_norm_rad_s"
+            ]
+        )
+        for row in hold
+        if row.get("bottle", {}).get("usd_velocity_readback")
+    ]
+    result["readback_cross_checks"] = {
+        "tensor_view_identity_count": len(identities),
+        "tensor_view_exact_path_match": bool(identities)
+        and all(bool(item["exact_path_match"]) for item in identities),
+        "tensor_view_identities": identities,
+        "direct_physx_transform_sample_count": len(
+            direct_deltas_hold
+        ),
+        "tensor_direct_transform_max_delta_m": (
+            max(direct_deltas_hold) if direct_deltas_hold else None
+        ),
+        "overall_tensor_direct_transform_max_delta_m": (
+            max(direct_deltas_all) if direct_deltas_all else None
+        ),
+        "usd_velocity_sample_count": len(usd_linear_deltas_hold),
+        "tensor_usd_linear_velocity_max_delta_m_s": (
+            max(usd_linear_deltas_hold)
+            if usd_linear_deltas_hold
+            else None
+        ),
+        "tensor_usd_angular_velocity_max_delta_rad_s": (
+            max(usd_angular_deltas_hold)
+            if usd_angular_deltas_hold
+            else None
+        ),
+        "overall_tensor_usd_linear_velocity_max_delta_m_s": (
+            max(usd_linear_deltas_all)
+            if usd_linear_deltas_all
+            else None
+        ),
+        "overall_tensor_usd_angular_velocity_max_delta_rad_s": (
+            max(usd_angular_deltas_all)
+            if usd_angular_deltas_all
+            else None
+        ),
     }
     if not hold:
         result["velocity_alignment"] = {
@@ -232,6 +343,10 @@ def _markdown(report: dict[str, Any]) -> str:
             "- Velocity semantics: "
             f"`{report['velocity_semantics_status']}`"
         ),
+        (
+            "- Readback responsibility boundary: "
+            f"`{report['readback_responsibility_boundary']}`"
+        ),
         "- Isaac Sim / Kit / PhysX: `5.1.0.0 / 107.3.3 / 107.3.26`",
         "- Task 8: `NOT_RUN`",
         "",
@@ -248,8 +363,14 @@ def _markdown(report: dict[str, Any]) -> str:
     lines.extend(
         [
             "",
-            "The baseline and dynamic-view recreation have identical grasp "
-            "signatures and identical velocity mismatch. Calling "
+            "The baseline, immediate recreation, delayed recreation after a "
+            "dynamic physics step, direct-transform probe and USD velocity "
+            "writeback preserve the same grasp signature. The tensor view "
+            "binds the exact Bottle500 prim; tensor transform equals the "
+            "direct PhysX transform, and USD velocity writeback equals tensor "
+            "velocity after converting angular degrees/second to radians/second. "
+            "Nevertheless velocity integration remains inconsistent with "
+            "transform evolution. Calling "
             "`initialize_kinematic_bodies()` at the tested post-reset point "
             "makes the first tensor sample invalid and fails the run. COM and "
             "rigid-prim-origin comparisons were both evaluated; point choice "
@@ -270,6 +391,9 @@ def main() -> int:
     parser.add_argument("--baseline-run", required=True, type=Path)
     parser.add_argument("--initialize-run", required=True, type=Path)
     parser.add_argument("--recreate-run", required=True, type=Path)
+    parser.add_argument("--delayed-run", type=Path)
+    parser.add_argument("--direct-transform-run", type=Path)
+    parser.add_argument("--usd-velocity-run", type=Path)
     parser.add_argument("--output-json", required=True, type=Path)
     parser.add_argument("--output-md", required=True, type=Path)
     args = parser.parse_args()
@@ -281,6 +405,14 @@ def main() -> int:
         ),
         "RECREATE_AFTER_DYNAMIC": _run_metrics(args.recreate_run),
     }
+    optional_variants = {
+        "RECREATE_AFTER_DYNAMIC_STEP": args.delayed_run,
+        "DIRECT_PHYSX_TRANSFORM": args.direct_transform_run,
+        "USD_VELOCITY_WRITEBACK": args.usd_velocity_run,
+    }
+    for name, path in optional_variants.items():
+        if path is not None:
+            variants[name] = _run_metrics(path)
     baseline = variants["BASELINE"]
     initialize = variants["INITIALIZE_KINEMATIC_BODIES"]
     recreate = variants["RECREATE_AFTER_DYNAMIC"]
@@ -304,10 +436,50 @@ def main() -> int:
         "omni.physics.tensors-107.3.26+107.3.3.lx64.r.cp311.u353/"
         "omni/physics/tensors/impl/api.py"
     ).resolve(strict=True)
+    physx_api = Path(
+        ".venv_issac/lib/python3.11/site-packages/isaacsim/extscache/"
+        "omni.physx-107.3.26+107.3.3.lx64.r.cp311.u353/omni/physx/"
+        "bindings/_physx.pyi"
+    ).resolve(strict=True)
+    usd_physics_schema = Path(
+        ".venv_issac/lib/python3.11/site-packages/isaacsim/extscache/"
+        "omni.usd.libs-1.0.1+69cbf6ad.lx64.r.cp311/bin/usd/"
+        "usdPhysics/resources/usdPhysics/schema.usda"
+    ).resolve(strict=True)
+    usd_cross_checks = variants.get("USD_VELOCITY_WRITEBACK", {}).get(
+        "readback_cross_checks", {}
+    )
+    direct_delta = usd_cross_checks.get(
+        "tensor_direct_transform_max_delta_m"
+    )
+    usd_linear_delta = usd_cross_checks.get(
+        "tensor_usd_linear_velocity_max_delta_m_s"
+    )
+    responsibility = classify_readback_responsibility(
+        exact_tensor_path=bool(
+            usd_cross_checks.get("tensor_view_exact_path_match")
+        ),
+        tensor_direct_transform_max_delta_m=(
+            float(direct_delta)
+            if direct_delta is not None
+            else float("inf")
+        ),
+        tensor_usd_linear_velocity_max_delta_m_s=(
+            float(usd_linear_delta)
+            if usd_linear_delta is not None
+            else float("inf")
+        ),
+        transform_velocity_alignment=bool(
+            variants.get("USD_VELOCITY_WRITEBACK", {})
+            .get("velocity_alignment", {})
+            .get("aligned")
+        ),
+    )
     report = {
         "schema_version": 1,
         "status": "PARTIAL" if status == "INCONCLUSIVE" else "PASS",
         "velocity_semantics_status": status,
+        "readback_responsibility_boundary": responsibility,
         "variants": variants,
         "gates": {
             "baseline_grasp_machine_pass": (
@@ -324,6 +496,21 @@ def main() -> int:
                 baseline["velocity_alignment"]["status"] == "MISMATCH"
             ),
             "tensor_velocity_not_used_as_drop_authority": True,
+            "exact_tensor_actor_verified": bool(
+                usd_cross_checks.get("tensor_view_exact_path_match")
+            ),
+            "tensor_and_direct_physx_transform_identical": (
+                usd_cross_checks.get(
+                    "tensor_direct_transform_max_delta_m"
+                )
+                == 0.0
+            ),
+            "tensor_and_usd_linear_velocity_identical": (
+                usd_cross_checks.get(
+                    "tensor_usd_linear_velocity_max_delta_m_s"
+                )
+                == 0.0
+            ),
         },
         "local_official_api_source": {
             "absolute_path": str(source_api),
@@ -342,12 +529,34 @@ def main() -> int:
                     "INITIALIZES_KINEMATIC_BODY_TRANSFORM_VELOCITY_REPORTING"
                 ),
             },
+            "additional_sources": [
+                {
+                    "absolute_path": str(physx_api),
+                    "sha256": _sha256(physx_api),
+                    "confirmed_semantics": (
+                        "update_transformations can write velocities to USD"
+                    ),
+                },
+                {
+                    "absolute_path": str(usd_physics_schema),
+                    "sha256": _sha256(usd_physics_schema),
+                    "confirmed_semantics": (
+                        "physics:velocity uses distance/second; "
+                        "physics:angularVelocity uses degrees/second"
+                    ),
+                },
+            ],
         },
         "official_mcp": {
             "route": "DIRECT_isaac-sim-mcp_NOT_MCPJUNGLE",
             "status": "QUERIED",
+            "query": (
+                "Isaac Sim 5.1 RigidBodyView get_velocities and "
+                "kinematic-body lifecycle"
+            ),
             "version_boundary": (
-                "MCP_RESULTS_NOT_USED_WHERE_NOT_PINNED_TO_LOCAL_5_1"
+                "SEARCH_RETURNED_NEWTON_OR_UNPINNED_RESULTS; LOCAL_5_1_"
+                "SOURCE_IS_SEMANTIC_AUTHORITY"
             ),
         },
         "evidence_classification": {
@@ -364,9 +573,13 @@ def main() -> int:
                 "linear/angular RMSE",
             ],
             "engineering_inference": (
-                "LOCAL_TENSOR_VELOCITY_CHANNEL_UNRESOLVED"
+                "LOCAL_PHYSX_VELOCITY_TRANSFORM_DISAGREEMENT_"
+                "INTERNAL_CAUSE_UNPROVEN"
             ),
-            "hard_blocker": None,
+            "hard_blocker": (
+                "HARD_BLOCKER_LOCAL_PHYSX_107_3_26_INTERNAL_VELOCITY_"
+                "SEMANTICS_UNPROVEN"
+            ),
         },
         "boundaries": {
             "source_or_final_collider_modified": False,

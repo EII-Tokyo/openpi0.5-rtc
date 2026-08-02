@@ -40,6 +40,7 @@ BOTTLE_TENSOR_LIFECYCLE_MODES = {
     "BASELINE",
     "INITIALIZE_KINEMATIC_BODIES",
     "RECREATE_AFTER_DYNAMIC",
+    "RECREATE_AFTER_DYNAMIC_STEP",
 }
 
 
@@ -79,12 +80,105 @@ def bottle_tensor_lifecycle_plan(mode: str) -> tuple[str, ...]:
         if normalized == "INITIALIZE_KINEMATIC_BODIES"
         else ()
     )
-    suffix = (
-        ("recreate_after_dynamic",)
-        if normalized == "RECREATE_AFTER_DYNAMIC"
-        else ()
-    )
+    if normalized == "RECREATE_AFTER_DYNAMIC":
+        suffix = ("recreate_after_dynamic",)
+    elif normalized == "RECREATE_AFTER_DYNAMIC_STEP":
+        suffix = (
+            "wait_one_dynamic_physics_step",
+            "recreate_after_dynamic_step",
+        )
+    else:
+        suffix = ()
     return (*prefix, "create_initial_view", *suffix)
+
+
+def delayed_tensor_recreation_due(
+    *,
+    mode: str,
+    pending: bool,
+    current_frame: int,
+    transition_frame: int | None,
+) -> bool:
+    """Return whether the post-dynamic-step tensor view must be rebuilt."""
+
+    return bool(
+        mode == "RECREATE_AFTER_DYNAMIC_STEP"
+        and pending
+        and transition_frame is not None
+        and int(current_frame) > int(transition_frame)
+    )
+
+
+def tensor_view_identity_record(
+    view: Any,
+    *,
+    expected_prim_path: str,
+) -> dict[str, Any]:
+    """Prove that a single-body tensor view binds the expected rigid prim."""
+
+    count = int(view.count)
+    prim_paths = [str(path) for path in view.prim_paths]
+    exact = count == 1 and prim_paths == [str(expected_prim_path)]
+    if not exact:
+        raise ValueError(
+            "PhysX tensor view does not bind exact bottle path: "
+            f"count={count}, prim_paths={prim_paths}"
+        )
+    return {
+        "count": count,
+        "prim_paths": prim_paths,
+        "expected_prim_path": str(expected_prim_path),
+        "exact_path_match": True,
+    }
+
+
+def normalize_direct_physx_transform(
+    value: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Normalize the local PhysX direct-transform diagnostic readback."""
+
+    if not bool(value.get("ret_val")):
+        raise ValueError("direct PhysX rigid-body transform is unavailable")
+    position = np.asarray(list(value["position"]), dtype=np.float64)
+    rotation = np.asarray(list(value["rotation"]), dtype=np.float64)
+    if (
+        position.shape != (3,)
+        or rotation.shape != (4,)
+        or not np.isfinite(position).all()
+        or not np.isfinite(rotation).all()
+    ):
+        raise ValueError("direct PhysX rigid-body transform is invalid")
+    return {
+        "available": True,
+        "position_world_m": position.tolist(),
+        "orientation_xyzw": rotation.tolist(),
+    }
+
+
+def normalize_usd_velocity_readback(
+    *,
+    linear_velocity: Sequence[float],
+    angular_velocity_deg_s: Sequence[float],
+) -> dict[str, Any]:
+    """Normalize USD Physics velocity attrs to the tensor report units."""
+
+    linear = np.asarray(linear_velocity, dtype=np.float64)
+    angular_deg = np.asarray(angular_velocity_deg_s, dtype=np.float64)
+    if (
+        linear.shape != (3,)
+        or angular_deg.shape != (3,)
+        or not np.isfinite(linear).all()
+        or not np.isfinite(angular_deg).all()
+    ):
+        raise ValueError("USD velocity readback must contain finite 3-vectors")
+    return {
+        "linear_velocity_world_m_s": linear.tolist(),
+        "angular_velocity_world_deg_s": angular_deg.tolist(),
+        "angular_velocity_world_rad_s": np.deg2rad(angular_deg).tolist(),
+        "angular_source_units": "degrees_per_second",
+        "update_velocities_to_usd": True,
+        "output_velocities_local_space": False,
+    }
 
 
 def derive_gripper_closeup_camera_geometry(
@@ -633,6 +727,7 @@ class IsaacGrasp20cmBindings:
         capture_collider_evidence: bool = True,
         closeup_axial_side: int = 1,
         bottle_tensor_lifecycle: str = "BASELINE",
+        bottle_usd_velocity_readback: bool = False,
     ) -> None:
         import carb.settings
         from isaacsim.core.api import World
@@ -825,6 +920,9 @@ class IsaacGrasp20cmBindings:
         self.bottle_tensor_lifecycle_mode = str(
             bottle_tensor_lifecycle
         )
+        self.bottle_usd_velocity_readback = bool(
+            bottle_usd_velocity_readback
+        )
         self.bottle_tensor_lifecycle_plan = (
             bottle_tensor_lifecycle_plan(
                 self.bottle_tensor_lifecycle_mode
@@ -836,7 +934,14 @@ class IsaacGrasp20cmBindings:
             "initialize_kinematic_bodies_called": False,
             "initialize_kinematic_bodies_return": None,
             "rigid_body_view_creation_count": 0,
+            "rigid_body_view_identities": [],
             "kinematic_to_dynamic_transition": None,
+            "delayed_recreation_pending": False,
+            "delayed_recreation_frame": None,
+            "delayed_recreation_time_s": None,
+            "usd_velocity_writeback_enabled": (
+                self.bottle_usd_velocity_readback
+            ),
             "classification": "DIAGNOSTIC_ONE_VARIABLE_LIFECYCLE_ONLY",
         }
         self.task_profile["config"]["bottle"]["session_path"] = str(
@@ -1141,6 +1246,19 @@ class IsaacGrasp20cmBindings:
         ] = 1
         if self.bottle is None or int(self.bottle.count) != 1:
             raise RuntimeError("Bottle500 PhysX rigid-body view unavailable")
+        initial_identity = tensor_view_identity_record(
+            self.bottle,
+            expected_prim_path=bottle_path,
+        )
+        self.bottle_tensor_lifecycle[
+            "rigid_body_view_identities"
+        ].append(
+            {
+                "creation_index": 1,
+                "physics_frame": 0,
+                **initial_identity,
+            }
+        )
         self._finger_link_views = {
             side: simulation_view.create_rigid_body_view(
                 str(paths["link"])
@@ -1393,6 +1511,15 @@ class IsaacGrasp20cmBindings:
         if hasattr(self, "bottle_tensor_lifecycle"):
             self.bottle_tensor_lifecycle[
                 "kinematic_to_dynamic_transition"
+            ] = None
+            self.bottle_tensor_lifecycle[
+                "delayed_recreation_pending"
+            ] = False
+            self.bottle_tensor_lifecycle[
+                "delayed_recreation_frame"
+            ] = None
+            self.bottle_tensor_lifecycle[
+                "delayed_recreation_time_s"
             ] = None
 
     def prepare_run(self) -> None:
@@ -1682,6 +1809,40 @@ class IsaacGrasp20cmBindings:
                 self._last_snapshot["clearance_m"]
             )
 
+    def _recreate_bottle_tensor_view(self) -> None:
+        refreshed = self._simulation_view.create_rigid_body_view(
+            self._bottle_tensor_path
+        )
+        if refreshed is None or int(refreshed.count) != 1:
+            raise RuntimeError(
+                "Bottle500 PhysX rigid-body view recreation failed"
+            )
+        self.bottle = refreshed
+        self.bottle_tensor_lifecycle[
+            "rigid_body_view_creation_count"
+        ] = int(
+            self.bottle_tensor_lifecycle[
+                "rigid_body_view_creation_count"
+            ]
+        ) + 1
+        identity = tensor_view_identity_record(
+            self.bottle,
+            expected_prim_path=self._bottle_tensor_path,
+        )
+        self.bottle_tensor_lifecycle[
+            "rigid_body_view_identities"
+        ].append(
+            {
+                "creation_index": int(
+                    self.bottle_tensor_lifecycle[
+                        "rigid_body_view_creation_count"
+                    ]
+                ),
+                "physics_frame": int(self._contact_frame),
+                **identity,
+            }
+        )
+
     def set_bottle_kinematic(self, *, enabled: bool) -> None:
         from pxr import UsdPhysics
 
@@ -1695,22 +1856,16 @@ class IsaacGrasp20cmBindings:
             and self.bottle_tensor_lifecycle_mode
             == "RECREATE_AFTER_DYNAMIC"
         ):
-            refreshed = self._simulation_view.create_rigid_body_view(
-                self._bottle_tensor_path
-            )
-            if refreshed is None or int(refreshed.count) != 1:
-                raise RuntimeError(
-                    "Bottle500 PhysX rigid-body view recreation failed"
-                )
-            self.bottle = refreshed
-            self.bottle_tensor_lifecycle[
-                "rigid_body_view_creation_count"
-            ] = int(
-                self.bottle_tensor_lifecycle[
-                    "rigid_body_view_creation_count"
-                ]
-            ) + 1
+            self._recreate_bottle_tensor_view()
             recreated = True
+        elif (
+            not enabled
+            and self.bottle_tensor_lifecycle_mode
+            == "RECREATE_AFTER_DYNAMIC_STEP"
+        ):
+            self.bottle_tensor_lifecycle[
+                "delayed_recreation_pending"
+            ] = True
         self.bottle_tensor_lifecycle[
             "kinematic_to_dynamic_transition"
         ] = {
@@ -1740,8 +1895,98 @@ class IsaacGrasp20cmBindings:
         from pxr import UsdPhysics
 
         self._contact_frame = frame
-        self._physx.update_transformations(True, True, False, False)
+        transition = self.bottle_tensor_lifecycle.get(
+            "kinematic_to_dynamic_transition"
+        )
+        transition_frame = (
+            int(transition["physics_frame"])
+            if isinstance(transition, Mapping)
+            else None
+        )
+        if delayed_tensor_recreation_due(
+            mode=self.bottle_tensor_lifecycle_mode,
+            pending=bool(
+                self.bottle_tensor_lifecycle[
+                    "delayed_recreation_pending"
+                ]
+            ),
+            current_frame=frame,
+            transition_frame=transition_frame,
+        ):
+            self._recreate_bottle_tensor_view()
+            self.bottle_tensor_lifecycle[
+                "delayed_recreation_pending"
+            ] = False
+            self.bottle_tensor_lifecycle[
+                "delayed_recreation_frame"
+            ] = int(frame)
+            self.bottle_tensor_lifecycle[
+                "delayed_recreation_time_s"
+            ] = float(time_s)
+        self._physx.update_transformations(
+            True,
+            True,
+            self.bottle_usd_velocity_readback,
+            False,
+        )
         bottle_state = self._read_bottle_state(self.bottle)
+        direct_physx_transform = normalize_direct_physx_transform(
+            self._physx.get_rigidbody_transformation(
+                self._bottle_tensor_path
+            )
+        )
+        direct_position = np.asarray(
+            direct_physx_transform["position_world_m"],
+            dtype=np.float64,
+        )
+        tensor_position = np.asarray(
+            bottle_state["position_world_m"],
+            dtype=np.float64,
+        )
+        direct_physx_transform[
+            "tensor_position_delta_norm_m"
+        ] = float(np.linalg.norm(direct_position - tensor_position))
+        bottle_state["direct_physx_transform"] = direct_physx_transform
+        bottle_state["tensor_view_identity"] = (
+            self.bottle_tensor_lifecycle[
+                "rigid_body_view_identities"
+            ][-1]
+        )
+        if self.bottle_usd_velocity_readback:
+            rigid_body_api = UsdPhysics.RigidBodyAPI(self.bottle_prim)
+            usd_velocity = normalize_usd_velocity_readback(
+                linear_velocity=rigid_body_api.GetVelocityAttr().Get(),
+                angular_velocity_deg_s=(
+                    rigid_body_api.GetAngularVelocityAttr().Get()
+                ),
+            )
+            tensor_linear = np.asarray(
+                bottle_state["linear_velocity_world_m_s"],
+                dtype=np.float64,
+            )
+            tensor_angular = np.asarray(
+                bottle_state["angular_velocity_world_rad_s"],
+                dtype=np.float64,
+            )
+            usd_velocity["tensor_linear_delta_norm_m_s"] = float(
+                np.linalg.norm(
+                    np.asarray(
+                        usd_velocity["linear_velocity_world_m_s"],
+                        dtype=np.float64,
+                    )
+                    - tensor_linear
+                )
+            )
+            usd_velocity["tensor_angular_delta_norm_rad_s"] = float(
+                np.linalg.norm(
+                    np.asarray(
+                        usd_velocity["angular_velocity_world_rad_s"],
+                        dtype=np.float64,
+                    )
+                    - tensor_angular
+                )
+            )
+            bottle_state["usd_velocity_readback"] = usd_velocity
         pose_finite_difference_velocity = (
             self._derive_pose_velocity(
                 previous=self._previous_bottle_pose_state,

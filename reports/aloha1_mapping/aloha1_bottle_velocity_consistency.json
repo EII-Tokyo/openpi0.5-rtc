@@ -7,8 +7,8 @@
     "task8": "NOT_RUN"
   },
   "evidence_classification": {
-    "engineering_inference": "LOCAL_TENSOR_VELOCITY_CHANNEL_UNRESOLVED",
-    "hard_blocker": null,
+    "engineering_inference": "LOCAL_PHYSX_VELOCITY_TRANSFORM_DISAGREEMENT_INTERNAL_CAUSE_UNPROVEN",
+    "hard_blocker": "HARD_BLOCKER_LOCAL_PHYSX_107_3_26_INTERNAL_VELOCITY_SEMANTICS_UNPROVEN",
     "local_runtime_readback": [
       "tensor transform/velocity/COM",
       "pose finite differences",
@@ -25,12 +25,27 @@
   "gates": {
     "baseline_grasp_machine_pass": true,
     "baseline_recreate_signatures_identical": true,
+    "exact_tensor_actor_verified": true,
     "point_choice_explanation_rejected": true,
     "recreate_grasp_machine_pass": true,
+    "tensor_and_direct_physx_transform_identical": true,
+    "tensor_and_usd_linear_velocity_identical": true,
     "tensor_velocity_not_used_as_drop_authority": true
   },
   "local_official_api_source": {
     "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/extscache/omni.physics.tensors-107.3.26+107.3.3.lx64.r.cp311.u353/omni/physics/tensors/impl/api.py",
+    "additional_sources": [
+      {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/extscache/omni.physx-107.3.26+107.3.3.lx64.r.cp311.u353/omni/physx/bindings/_physx.pyi",
+        "confirmed_semantics": "update_transformations can write velocities to USD",
+        "sha256": "ff13abb83480dcc707ac2ad60062306aef7a33f885d32ed4c8ee6dfea2008e79"
+      },
+      {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/extscache/omni.usd.libs-1.0.1+69cbf6ad.lx64.r.cp311/bin/usd/usdPhysics/resources/usdPhysics/schema.usda",
+        "confirmed_semantics": "physics:velocity uses distance/second; physics:angularVelocity uses degrees/second",
+        "sha256": "159780115745948d49d95d07333d52e88867495824158e2bfd54083ba95c17ce"
+      }
+    ],
     "confirmed_semantics": {
       "get_coms": "COM_POSE_RELATIVE_TO_RIGID_BODY_PRIM_FRAME",
       "get_transforms": "GLOBAL_RIGID_BODY_PRIM_FRAME",
@@ -42,10 +57,12 @@
     "version": "107.3.26+107.3.3"
   },
   "official_mcp": {
+    "query": "Isaac Sim 5.1 RigidBodyView get_velocities and kinematic-body lifecycle",
     "route": "DIRECT_isaac-sim-mcp_NOT_MCPJUNGLE",
     "status": "QUERIED",
-    "version_boundary": "MCP_RESULTS_NOT_USED_WHERE_NOT_PINNED_TO_LOCAL_5_1"
+    "version_boundary": "SEARCH_RETURNED_NEWTON_OR_UNPINNED_RESULTS; LOCAL_5_1_SOURCE_IS_SEMANTIC_AUTHORITY"
   },
+  "readback_responsibility_boundary": "VERIFIED_LOCAL_PHYSX_VELOCITY_TRANSFORM_DISAGREEMENT",
   "schema_version": 1,
   "status": "PARTIAL",
   "task8": "NOT_RUN",
@@ -91,6 +108,19 @@
       },
       "machine_reason": "stable_20cm_hold",
       "machine_status": "PASS",
+      "readback_cross_checks": {
+        "direct_physx_transform_sample_count": 0,
+        "overall_tensor_direct_transform_max_delta_m": null,
+        "overall_tensor_usd_angular_velocity_max_delta_rad_s": null,
+        "overall_tensor_usd_linear_velocity_max_delta_m_s": null,
+        "tensor_direct_transform_max_delta_m": null,
+        "tensor_usd_angular_velocity_max_delta_rad_s": null,
+        "tensor_usd_linear_velocity_max_delta_m_s": null,
+        "tensor_view_exact_path_match": false,
+        "tensor_view_identities": [],
+        "tensor_view_identity_count": 0,
+        "usd_velocity_sample_count": 0
+      },
       "run_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/velocity_semantics_matrix/com_point_aligned_baseline",
       "runtime_report": {
         "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/velocity_semantics_matrix/com_point_aligned_baseline/aloha1_grasp_20cm_runtime.json",
@@ -111,6 +141,173 @@
         "frame_count": 707,
         "hold_frame_count": 120,
         "sha256": "109dc40e96918d8150b0e06244e064259b0bbbba1e423f34326560a8cbf3cd0a"
+      },
+      "velocity_alignment": {
+        "aligned": false,
+        "center_of_mass_local_m": {
+          "maximum": [
+            -5.44165233706817e-11,
+            2.2603786897779088e-10,
+            0.08845507353544235
+          ],
+          "minimum": [
+            -5.44165233706817e-11,
+            2.2603786897779088e-10,
+            0.08845507353544235
+          ]
+        },
+        "gates": {
+          "angular_velocity_consistent": false,
+          "com_linear_velocity_consistent": false,
+          "integrated_vertical_displacement_consistent": false
+        },
+        "hold_dt_s": 0.01666666753590107,
+        "integrated_vertical_error_m": 0.28553749384825483,
+        "pose_com_vertical_displacement_m": 0.00020366224443851833,
+        "pose_com_vertical_velocity_range_m_s": [
+          -0.029591469927582326,
+          0.032711101582296176
+        ],
+        "pose_origin_vertical_displacement_m": 0.0011612176895141602,
+        "status": "MISMATCH",
+        "tensor_com_vertical_integral_m": 0.28574115609269335,
+        "tensor_com_vertical_velocity_range_m_s": [
+          0.10430152714252472,
+          0.18560943007469177
+        ],
+        "tensor_translated_origin_vs_pose_origin_linear_vector_rmse_m_s": 0.07382637235152023,
+        "tensor_vs_pose_angular_vector_rmse_rad_s": 0.5480723424931735,
+        "tensor_vs_pose_com_linear_vector_rmse_m_s": 0.08670486652048147,
+        "thresholds": {
+          "angular_vector_rmse_max_rad_s": 0.5,
+          "classification": "DIAGNOSTIC_ENGINEERING_TOLERANCE_NOT_HARDWARE_CALIBRATION",
+          "integrated_vertical_error_max_m": 0.02,
+          "linear_vector_rmse_max_m_s": 0.05
+        }
+      }
+    },
+    "DIRECT_PHYSX_TRANSFORM": {
+      "deterministic_signature": "90da200849182aa4cadbd37c64a6b36983758fe0e23a3741acb09f1e6740a88d",
+      "grasp_metrics": {
+        "aborted": false,
+        "bilateral_contact_before_lift": true,
+        "bilateral_contact_through_hold": true,
+        "dynamic_during_formal_phases": true,
+        "ee_vertical_displacement_m": 0.10621380805969238,
+        "finite_state": true,
+        "forbidden_constraint": false,
+        "height_reached": true,
+        "hold_bilateral_geometric_frame_count": 120,
+        "hold_bilateral_solver_active_frame_count": 120,
+        "hold_drop_m": 0.0011934366655616258,
+        "hold_duration_s": 2.0,
+        "hold_physics_frame_count": 120,
+        "maximum_clearance_m": 0.20033425935922536,
+        "numerical_ejection": false,
+        "persistent_penetration": false,
+        "status": "PASS"
+      },
+      "lifecycle": {
+        "classification": "DIAGNOSTIC_ONE_VARIABLE_LIFECYCLE_ONLY",
+        "delayed_recreation_frame": 62,
+        "delayed_recreation_pending": false,
+        "delayed_recreation_time_s": 1.0333333872258663,
+        "initialize_kinematic_bodies_called": false,
+        "initialize_kinematic_bodies_return": null,
+        "kinematic_to_dynamic_transition": {
+          "after_kinematic_enabled": false,
+          "before_kinematic_enabled": true,
+          "phase": "SETUP_KINEMATIC",
+          "physics_frame": 61,
+          "rigid_body_view_recreated": false,
+          "time_s": 1.0166666666666666
+        },
+        "mode": "RECREATE_AFTER_DYNAMIC_STEP",
+        "operation_plan": [
+          "create_initial_view",
+          "wait_one_dynamic_physics_step",
+          "recreate_after_dynamic_step"
+        ],
+        "rigid_body_view_creation_count": 2,
+        "rigid_body_view_identities": [
+          {
+            "count": 1,
+            "creation_index": 1,
+            "exact_path_match": true,
+            "expected_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500",
+            "physics_frame": 0,
+            "prim_paths": [
+              "/World/ALOHA1Grasp20cmSession/Bottle500"
+            ]
+          },
+          {
+            "count": 1,
+            "creation_index": 2,
+            "exact_path_match": true,
+            "expected_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500",
+            "physics_frame": 62,
+            "prim_paths": [
+              "/World/ALOHA1Grasp20cmSession/Bottle500"
+            ]
+          }
+        ]
+      },
+      "machine_reason": "stable_20cm_hold",
+      "machine_status": "PASS",
+      "readback_cross_checks": {
+        "direct_physx_transform_sample_count": 120,
+        "overall_tensor_direct_transform_max_delta_m": 0.0,
+        "overall_tensor_usd_angular_velocity_max_delta_rad_s": null,
+        "overall_tensor_usd_linear_velocity_max_delta_m_s": null,
+        "tensor_direct_transform_max_delta_m": 0.0,
+        "tensor_usd_angular_velocity_max_delta_rad_s": null,
+        "tensor_usd_linear_velocity_max_delta_m_s": null,
+        "tensor_view_exact_path_match": true,
+        "tensor_view_identities": [
+          {
+            "count": 1,
+            "creation_index": 1,
+            "exact_path_match": true,
+            "expected_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500",
+            "physics_frame": 0,
+            "prim_paths": [
+              "/World/ALOHA1Grasp20cmSession/Bottle500"
+            ]
+          },
+          {
+            "count": 1,
+            "creation_index": 2,
+            "exact_path_match": true,
+            "expected_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500",
+            "physics_frame": 62,
+            "prim_paths": [
+              "/World/ALOHA1Grasp20cmSession/Bottle500"
+            ]
+          }
+        ],
+        "tensor_view_identity_count": 2,
+        "usd_velocity_sample_count": 0
+      },
+      "run_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/velocity_consistency_v2/direct_transform_probe",
+      "runtime_report": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/velocity_consistency_v2/direct_transform_probe/aloha1_grasp_20cm_runtime.json",
+        "sha256": "048f804ef714ced05a2ca7aae7b14409b21ade1c400d4bf720bd1ea7ae9b71ce"
+      },
+      "stage": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+        "root_prim": "/World",
+        "session_only": true,
+        "sha256_after": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9",
+        "sha256_before": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9",
+        "sublayers": [
+          "aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_diagnostic.usda"
+        ]
+      },
+      "telemetry": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/velocity_consistency_v2/direct_transform_probe/aloha1_grasp_20cm_telemetry.jsonl",
+        "frame_count": 707,
+        "hold_frame_count": 120,
+        "sha256": "99e29e9d76f7616ccdcb4f51d6c3a8ba6709b39a6d346474ec541bd2df53e458"
       },
       "velocity_alignment": {
         "aligned": false,
@@ -191,6 +388,19 @@
       },
       "machine_reason": "numerical_penetration_or_ejection",
       "machine_status": "FAIL",
+      "readback_cross_checks": {
+        "direct_physx_transform_sample_count": 0,
+        "overall_tensor_direct_transform_max_delta_m": null,
+        "overall_tensor_usd_angular_velocity_max_delta_rad_s": null,
+        "overall_tensor_usd_linear_velocity_max_delta_m_s": null,
+        "tensor_direct_transform_max_delta_m": null,
+        "tensor_usd_angular_velocity_max_delta_rad_s": null,
+        "tensor_usd_linear_velocity_max_delta_m_s": null,
+        "tensor_view_exact_path_match": false,
+        "tensor_view_identities": [],
+        "tensor_view_identity_count": 0,
+        "usd_velocity_sample_count": 0
+      },
       "run_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/velocity_semantics_matrix/initialize_kinematic_bodies",
       "runtime_report": {
         "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/velocity_semantics_matrix/initialize_kinematic_bodies/aloha1_grasp_20cm_runtime.json",
@@ -259,6 +469,19 @@
       },
       "machine_reason": "stable_20cm_hold",
       "machine_status": "PASS",
+      "readback_cross_checks": {
+        "direct_physx_transform_sample_count": 0,
+        "overall_tensor_direct_transform_max_delta_m": null,
+        "overall_tensor_usd_angular_velocity_max_delta_rad_s": null,
+        "overall_tensor_usd_linear_velocity_max_delta_m_s": null,
+        "tensor_direct_transform_max_delta_m": null,
+        "tensor_usd_angular_velocity_max_delta_rad_s": null,
+        "tensor_usd_linear_velocity_max_delta_m_s": null,
+        "tensor_view_exact_path_match": false,
+        "tensor_view_identities": [],
+        "tensor_view_identity_count": 0,
+        "usd_velocity_sample_count": 0
+      },
       "run_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/velocity_semantics_matrix/recreate_after_dynamic_com_aligned",
       "runtime_report": {
         "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/velocity_semantics_matrix/recreate_after_dynamic_com_aligned/aloha1_grasp_20cm_runtime.json",
@@ -279,6 +502,298 @@
         "frame_count": 707,
         "hold_frame_count": 120,
         "sha256": "109dc40e96918d8150b0e06244e064259b0bbbba1e423f34326560a8cbf3cd0a"
+      },
+      "velocity_alignment": {
+        "aligned": false,
+        "center_of_mass_local_m": {
+          "maximum": [
+            -5.44165233706817e-11,
+            2.2603786897779088e-10,
+            0.08845507353544235
+          ],
+          "minimum": [
+            -5.44165233706817e-11,
+            2.2603786897779088e-10,
+            0.08845507353544235
+          ]
+        },
+        "gates": {
+          "angular_velocity_consistent": false,
+          "com_linear_velocity_consistent": false,
+          "integrated_vertical_displacement_consistent": false
+        },
+        "hold_dt_s": 0.01666666753590107,
+        "integrated_vertical_error_m": 0.28553749384825483,
+        "pose_com_vertical_displacement_m": 0.00020366224443851833,
+        "pose_com_vertical_velocity_range_m_s": [
+          -0.029591469927582326,
+          0.032711101582296176
+        ],
+        "pose_origin_vertical_displacement_m": 0.0011612176895141602,
+        "status": "MISMATCH",
+        "tensor_com_vertical_integral_m": 0.28574115609269335,
+        "tensor_com_vertical_velocity_range_m_s": [
+          0.10430152714252472,
+          0.18560943007469177
+        ],
+        "tensor_translated_origin_vs_pose_origin_linear_vector_rmse_m_s": 0.07382637235152023,
+        "tensor_vs_pose_angular_vector_rmse_rad_s": 0.5480723424931735,
+        "tensor_vs_pose_com_linear_vector_rmse_m_s": 0.08670486652048147,
+        "thresholds": {
+          "angular_vector_rmse_max_rad_s": 0.5,
+          "classification": "DIAGNOSTIC_ENGINEERING_TOLERANCE_NOT_HARDWARE_CALIBRATION",
+          "integrated_vertical_error_max_m": 0.02,
+          "linear_vector_rmse_max_m_s": 0.05
+        }
+      }
+    },
+    "RECREATE_AFTER_DYNAMIC_STEP": {
+      "deterministic_signature": "90da200849182aa4cadbd37c64a6b36983758fe0e23a3741acb09f1e6740a88d",
+      "grasp_metrics": {
+        "aborted": false,
+        "bilateral_contact_before_lift": true,
+        "bilateral_contact_through_hold": true,
+        "dynamic_during_formal_phases": true,
+        "ee_vertical_displacement_m": 0.10621380805969238,
+        "finite_state": true,
+        "forbidden_constraint": false,
+        "height_reached": true,
+        "hold_bilateral_geometric_frame_count": 120,
+        "hold_bilateral_solver_active_frame_count": 120,
+        "hold_drop_m": 0.0011934366655616258,
+        "hold_duration_s": 2.0,
+        "hold_physics_frame_count": 120,
+        "maximum_clearance_m": 0.20033425935922536,
+        "numerical_ejection": false,
+        "persistent_penetration": false,
+        "status": "PASS"
+      },
+      "lifecycle": {
+        "classification": "DIAGNOSTIC_ONE_VARIABLE_LIFECYCLE_ONLY",
+        "delayed_recreation_frame": 62,
+        "delayed_recreation_pending": false,
+        "delayed_recreation_time_s": 1.0333333872258663,
+        "initialize_kinematic_bodies_called": false,
+        "initialize_kinematic_bodies_return": null,
+        "kinematic_to_dynamic_transition": {
+          "after_kinematic_enabled": false,
+          "before_kinematic_enabled": true,
+          "phase": "SETUP_KINEMATIC",
+          "physics_frame": 61,
+          "rigid_body_view_recreated": false,
+          "time_s": 1.0166666666666666
+        },
+        "mode": "RECREATE_AFTER_DYNAMIC_STEP",
+        "operation_plan": [
+          "create_initial_view",
+          "wait_one_dynamic_physics_step",
+          "recreate_after_dynamic_step"
+        ],
+        "rigid_body_view_creation_count": 2
+      },
+      "machine_reason": "stable_20cm_hold",
+      "machine_status": "PASS",
+      "readback_cross_checks": {
+        "direct_physx_transform_sample_count": 0,
+        "overall_tensor_direct_transform_max_delta_m": null,
+        "overall_tensor_usd_angular_velocity_max_delta_rad_s": null,
+        "overall_tensor_usd_linear_velocity_max_delta_m_s": null,
+        "tensor_direct_transform_max_delta_m": null,
+        "tensor_usd_angular_velocity_max_delta_rad_s": null,
+        "tensor_usd_linear_velocity_max_delta_m_s": null,
+        "tensor_view_exact_path_match": false,
+        "tensor_view_identities": [],
+        "tensor_view_identity_count": 0,
+        "usd_velocity_sample_count": 0
+      },
+      "run_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/velocity_consistency_v2/recreate_after_dynamic_step",
+      "runtime_report": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/velocity_consistency_v2/recreate_after_dynamic_step/aloha1_grasp_20cm_runtime.json",
+        "sha256": "cdc88dc71a7494218fbbf38e70aac10f8e001af63ef25bcda9dbedeb0caf5a2d"
+      },
+      "stage": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+        "root_prim": "/World",
+        "session_only": true,
+        "sha256_after": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9",
+        "sha256_before": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9",
+        "sublayers": [
+          "aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_diagnostic.usda"
+        ]
+      },
+      "telemetry": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/velocity_consistency_v2/recreate_after_dynamic_step/aloha1_grasp_20cm_telemetry.jsonl",
+        "frame_count": 707,
+        "hold_frame_count": 120,
+        "sha256": "109dc40e96918d8150b0e06244e064259b0bbbba1e423f34326560a8cbf3cd0a"
+      },
+      "velocity_alignment": {
+        "aligned": false,
+        "center_of_mass_local_m": {
+          "maximum": [
+            -5.44165233706817e-11,
+            2.2603786897779088e-10,
+            0.08845507353544235
+          ],
+          "minimum": [
+            -5.44165233706817e-11,
+            2.2603786897779088e-10,
+            0.08845507353544235
+          ]
+        },
+        "gates": {
+          "angular_velocity_consistent": false,
+          "com_linear_velocity_consistent": false,
+          "integrated_vertical_displacement_consistent": false
+        },
+        "hold_dt_s": 0.01666666753590107,
+        "integrated_vertical_error_m": 0.28553749384825483,
+        "pose_com_vertical_displacement_m": 0.00020366224443851833,
+        "pose_com_vertical_velocity_range_m_s": [
+          -0.029591469927582326,
+          0.032711101582296176
+        ],
+        "pose_origin_vertical_displacement_m": 0.0011612176895141602,
+        "status": "MISMATCH",
+        "tensor_com_vertical_integral_m": 0.28574115609269335,
+        "tensor_com_vertical_velocity_range_m_s": [
+          0.10430152714252472,
+          0.18560943007469177
+        ],
+        "tensor_translated_origin_vs_pose_origin_linear_vector_rmse_m_s": 0.07382637235152023,
+        "tensor_vs_pose_angular_vector_rmse_rad_s": 0.5480723424931735,
+        "tensor_vs_pose_com_linear_vector_rmse_m_s": 0.08670486652048147,
+        "thresholds": {
+          "angular_vector_rmse_max_rad_s": 0.5,
+          "classification": "DIAGNOSTIC_ENGINEERING_TOLERANCE_NOT_HARDWARE_CALIBRATION",
+          "integrated_vertical_error_max_m": 0.02,
+          "linear_vector_rmse_max_m_s": 0.05
+        }
+      }
+    },
+    "USD_VELOCITY_WRITEBACK": {
+      "deterministic_signature": "90da200849182aa4cadbd37c64a6b36983758fe0e23a3741acb09f1e6740a88d",
+      "grasp_metrics": {
+        "aborted": false,
+        "bilateral_contact_before_lift": true,
+        "bilateral_contact_through_hold": true,
+        "dynamic_during_formal_phases": true,
+        "ee_vertical_displacement_m": 0.10621380805969238,
+        "finite_state": true,
+        "forbidden_constraint": false,
+        "height_reached": true,
+        "hold_bilateral_geometric_frame_count": 120,
+        "hold_bilateral_solver_active_frame_count": 120,
+        "hold_drop_m": 0.0011934366655616258,
+        "hold_duration_s": 2.0,
+        "hold_physics_frame_count": 120,
+        "maximum_clearance_m": 0.20033425935922536,
+        "numerical_ejection": false,
+        "persistent_penetration": false,
+        "status": "PASS"
+      },
+      "lifecycle": {
+        "classification": "DIAGNOSTIC_ONE_VARIABLE_LIFECYCLE_ONLY",
+        "delayed_recreation_frame": 62,
+        "delayed_recreation_pending": false,
+        "delayed_recreation_time_s": 1.0333333872258663,
+        "initialize_kinematic_bodies_called": false,
+        "initialize_kinematic_bodies_return": null,
+        "kinematic_to_dynamic_transition": {
+          "after_kinematic_enabled": false,
+          "before_kinematic_enabled": true,
+          "phase": "SETUP_KINEMATIC",
+          "physics_frame": 61,
+          "rigid_body_view_recreated": false,
+          "time_s": 1.0166666666666666
+        },
+        "mode": "RECREATE_AFTER_DYNAMIC_STEP",
+        "operation_plan": [
+          "create_initial_view",
+          "wait_one_dynamic_physics_step",
+          "recreate_after_dynamic_step"
+        ],
+        "rigid_body_view_creation_count": 2,
+        "rigid_body_view_identities": [
+          {
+            "count": 1,
+            "creation_index": 1,
+            "exact_path_match": true,
+            "expected_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500",
+            "physics_frame": 0,
+            "prim_paths": [
+              "/World/ALOHA1Grasp20cmSession/Bottle500"
+            ]
+          },
+          {
+            "count": 1,
+            "creation_index": 2,
+            "exact_path_match": true,
+            "expected_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500",
+            "physics_frame": 62,
+            "prim_paths": [
+              "/World/ALOHA1Grasp20cmSession/Bottle500"
+            ]
+          }
+        ],
+        "usd_velocity_writeback_enabled": true
+      },
+      "machine_reason": "stable_20cm_hold",
+      "machine_status": "PASS",
+      "readback_cross_checks": {
+        "direct_physx_transform_sample_count": 120,
+        "overall_tensor_direct_transform_max_delta_m": 0.0,
+        "overall_tensor_usd_angular_velocity_max_delta_rad_s": 0.3873208847222561,
+        "overall_tensor_usd_linear_velocity_max_delta_m_s": 0.00037552045955983833,
+        "tensor_direct_transform_max_delta_m": 0.0,
+        "tensor_usd_angular_velocity_max_delta_rad_s": 6.499808366662185e-08,
+        "tensor_usd_linear_velocity_max_delta_m_s": 0.0,
+        "tensor_view_exact_path_match": true,
+        "tensor_view_identities": [
+          {
+            "count": 1,
+            "creation_index": 1,
+            "exact_path_match": true,
+            "expected_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500",
+            "physics_frame": 0,
+            "prim_paths": [
+              "/World/ALOHA1Grasp20cmSession/Bottle500"
+            ]
+          },
+          {
+            "count": 1,
+            "creation_index": 2,
+            "exact_path_match": true,
+            "expected_prim_path": "/World/ALOHA1Grasp20cmSession/Bottle500",
+            "physics_frame": 62,
+            "prim_paths": [
+              "/World/ALOHA1Grasp20cmSession/Bottle500"
+            ]
+          }
+        ],
+        "tensor_view_identity_count": 2,
+        "usd_velocity_sample_count": 120
+      },
+      "run_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/velocity_consistency_v2/usd_velocity_writeback_probe",
+      "runtime_report": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/velocity_consistency_v2/usd_velocity_writeback_probe/aloha1_grasp_20cm_runtime.json",
+        "sha256": "7817765ccf3a24c2092c6cf3e5982a039340a3f4a1f0c035893421b52b89128f"
+      },
+      "stage": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+        "root_prim": "/World",
+        "session_only": true,
+        "sha256_after": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9",
+        "sha256_before": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9",
+        "sublayers": [
+          "aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_diagnostic.usda"
+        ]
+      },
+      "telemetry": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/velocity_consistency_v2/usd_velocity_writeback_probe/aloha1_grasp_20cm_telemetry.jsonl",
+        "frame_count": 707,
+        "hold_frame_count": 120,
+        "sha256": "a8a8195b89f54f7439c05cef55adf9e8f2f9e4b291ecde4a60ba25ae0d4aa8da"
       },
       "velocity_alignment": {
         "aligned": false,

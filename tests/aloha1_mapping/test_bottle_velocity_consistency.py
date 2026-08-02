@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from tools import audit_aloha1_bottle_velocity_consistency as velocity_audit
 from tools.audit_aloha1_bottle_velocity_consistency import classify_velocity_semantics
 
 
@@ -38,3 +39,14 @@ def test_velocity_semantics_stays_inconclusive_when_neither_fix_works() -> None:
         recreate_aligned=False,
         recreate_runtime_pass=True,
     ) == "INCONCLUSIVE"
+
+
+def test_readback_boundary_is_localized_without_claiming_internal_root_cause() -> None:
+    status = velocity_audit.classify_readback_responsibility(
+        exact_tensor_path=True,
+        tensor_direct_transform_max_delta_m=0.0,
+        tensor_usd_linear_velocity_max_delta_m_s=0.0,
+        transform_velocity_alignment=False,
+    )
+
+    assert status == "VERIFIED_LOCAL_PHYSX_VELOCITY_TRANSFORM_DISAGREEMENT"

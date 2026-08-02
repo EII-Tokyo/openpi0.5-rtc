@@ -204,10 +204,19 @@ def _parse_args() -> argparse.Namespace:
             "BASELINE",
             "INITIALIZE_KINEMATIC_BODIES",
             "RECREATE_AFTER_DYNAMIC",
+            "RECREATE_AFTER_DYNAMIC_STEP",
         ),
         default="BASELINE",
         help=(
             "One-variable Isaac 5.1 rigid-body tensor lifecycle diagnostic."
+        ),
+    )
+    parser.add_argument(
+        "--bottle-usd-velocity-readback",
+        action="store_true",
+        help=(
+            "Session-only diagnostic: request PhysX velocity writeback to "
+            "USD and record the resulting RigidBodyAPI attributes."
         ),
     )
     return parser.parse_args()
@@ -683,6 +692,9 @@ def main() -> int:
             capture_collider_evidence=not args.skip_collider_evidence,
             closeup_axial_side=int(args.closeup_axial_side),
             bottle_tensor_lifecycle=str(args.bottle_tensor_lifecycle),
+            bottle_usd_velocity_readback=bool(
+                args.bottle_usd_velocity_readback
+            ),
         )
         adapter = Grasp20cmRuntimeAdapter(bindings=bindings)
         timeline = omni.timeline.get_timeline_interface()

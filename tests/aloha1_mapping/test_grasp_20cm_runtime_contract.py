@@ -10,6 +10,7 @@ import numpy as np
 import pytest
 import yaml
 
+from tools.aloha1_mapping import grasp_20cm_isaac_bindings as isaac_bindings
 from tools.aloha1_mapping.grasp_20cm_controller import Phase
 from tools.aloha1_mapping.grasp_20cm_controller import RunObservation
 from tools.aloha1_mapping.grasp_20cm_isaac_bindings import IsaacGrasp20cmBindings
@@ -907,6 +908,7 @@ def test_gui_exposes_run_abort_reset_and_workspace_two() -> None:
     assert "DIAGNOSTIC_ONLY_NOT_FINAL_CONTROL_MAPPING" in source
     assert '"--closeup-axial-side"' in source
     assert '"--bottle-tensor-lifecycle"' in source
+    assert '"--bottle-usd-velocity-readback"' in source
 
 
 @pytest.mark.parametrize(
@@ -921,6 +923,14 @@ def test_gui_exposes_run_abort_reset_and_workspace_two() -> None:
             "RECREATE_AFTER_DYNAMIC",
             ("create_initial_view", "recreate_after_dynamic"),
         ),
+        (
+            "RECREATE_AFTER_DYNAMIC_STEP",
+            (
+                "create_initial_view",
+                "wait_one_dynamic_physics_step",
+                "recreate_after_dynamic_step",
+            ),
+        ),
     ],
 )
 def test_bottle_tensor_lifecycle_plan_changes_one_operation(
@@ -933,6 +943,94 @@ def test_bottle_tensor_lifecycle_plan_changes_one_operation(
 def test_bottle_tensor_lifecycle_rejects_unknown_mode() -> None:
     with pytest.raises(ValueError, match="unsupported bottle tensor lifecycle"):
         bottle_tensor_lifecycle_plan("GUESS")
+
+
+def test_delayed_tensor_recreation_decision_is_available() -> None:
+    assert hasattr(isaac_bindings, "delayed_tensor_recreation_due")
+
+
+def test_delayed_tensor_recreation_waits_for_next_physics_frame() -> None:
+    decision = isaac_bindings.delayed_tensor_recreation_due
+
+    assert not decision(
+        mode="RECREATE_AFTER_DYNAMIC_STEP",
+        pending=True,
+        current_frame=61,
+        transition_frame=61,
+    )
+    assert decision(
+        mode="RECREATE_AFTER_DYNAMIC_STEP",
+        pending=True,
+        current_frame=62,
+        transition_frame=61,
+    )
+    assert not decision(
+        mode="RECREATE_AFTER_DYNAMIC",
+        pending=True,
+        current_frame=62,
+        transition_frame=61,
+    )
+    assert not decision(
+        mode="RECREATE_AFTER_DYNAMIC_STEP",
+        pending=False,
+        current_frame=62,
+        transition_frame=61,
+    )
+
+
+def test_tensor_view_identity_requires_exact_bottle_path() -> None:
+    class FakeView:
+        count = 1
+        prim_paths = ("/World/Session/Bottle500",)
+
+    record = isaac_bindings.tensor_view_identity_record(
+        FakeView(),
+        expected_prim_path="/World/Session/Bottle500",
+    )
+
+    assert record == {
+        "count": 1,
+        "prim_paths": ["/World/Session/Bottle500"],
+        "expected_prim_path": "/World/Session/Bottle500",
+        "exact_path_match": True,
+    }
+    with pytest.raises(ValueError, match="does not bind exact bottle path"):
+        isaac_bindings.tensor_view_identity_record(
+            FakeView(),
+            expected_prim_path="/World/Session/Other",
+        )
+
+
+def test_direct_physx_transform_readback_is_numeric() -> None:
+    record = isaac_bindings.normalize_direct_physx_transform(
+        {
+            "ret_val": True,
+            "position": (1.0, 2.0, 3.0),
+            "rotation": (0.0, 0.0, 0.0, 1.0),
+        }
+    )
+
+    assert record == {
+        "available": True,
+        "position_world_m": [1.0, 2.0, 3.0],
+        "orientation_xyzw": [0.0, 0.0, 0.0, 1.0],
+    }
+    with pytest.raises(ValueError, match="unavailable"):
+        isaac_bindings.normalize_direct_physx_transform({"ret_val": False})
+
+
+def test_usd_velocity_readback_converts_angular_degrees_to_radians() -> None:
+    record = isaac_bindings.normalize_usd_velocity_readback(
+        linear_velocity=(1.0, 2.0, 3.0),
+        angular_velocity_deg_s=(0.0, 180.0, -90.0),
+    )
+
+    assert record["linear_velocity_world_m_s"] == [1.0, 2.0, 3.0]
+    assert np.allclose(
+        record["angular_velocity_world_rad_s"],
+        [0.0, np.pi, -np.pi / 2.0],
+    )
+    assert record["angular_source_units"] == "degrees_per_second"
 
 
 def test_runtime_telemetry_records_pose_finite_difference_velocity() -> None:
