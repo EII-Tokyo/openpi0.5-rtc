@@ -1,5 +1,145 @@
 # Task State
 
+## 2026-08-02 CAD-derived Z-up five-pose Task 7 closure
+
+- The isolated Z-up/meters diagnostic Stage is frozen at
+  `assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda`,
+  SHA-256
+  `327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9`.
+  Native Isaac Sim 5.1 readback is `upAxis=Z`, `metersPerUnit=1`, gravity
+  `[0,0,-1]`; required prims and all composed input hashes are unchanged.
+- Formal attempt 7 is complete: 5/5 primary and 5/5 fresh collider repeats
+  are machine `PASS`, with matching deterministic signatures per sample. The
+  aggregate is
+  `reports/aloha1_mapping/aloha1_cad_derived_five_pose_runtime_zup_attempt7.json`.
+  Maximum support clearance ranges from `0.2002013682 m` to
+  `0.2006221924 m`; maximum hold drop is `0.0011934367 m`, below the unchanged
+  `0.010 m` gate.
+- Five critical video phases and all 24 collision panels per sample passed
+  Codex vision review. Sample 02 uses the opposite-bottle-axis evidence-camera
+  retake because its formal closeup occluded the left finger; the fresh retake
+  preserves signature
+  `90da200849182aa4cadbd37c64a6b36983758fe0e23a3741acb09f1e6740a88d`.
+  The first collision retake is preserved as
+  `REJECTED_ARTIFACT_POSTPROCESS_OVERWRITE`; retake 2 is accepted. Exact-video
+  user confirmation remains `NOT_RUN`, so the visual aggregate is `PARTIAL`:
+  `reports/aloha1_mapping/aloha1_cad_derived_five_pose_visual_review_zup_attempt7.json`.
+- Bottle tensor velocity semantics are `INCONCLUSIVE`. COM-point pose
+  finite differences reject a point-frame explanation; recreating the tensor
+  view after the dynamic transition has no effect and preserves the grasp
+  signature; `initialize_kinematic_bodies()` at the tested post-reset point
+  causes numerical ejection and is rejected. Tensor velocity is not used as
+  drop authority. Report:
+  `reports/aloha1_mapping/aloha1_bottle_velocity_consistency.json`.
+- Fresh-process official-rule pairs on the Z-up diagnostic workcell are
+  byte-identical: PhysicsRules `FAIL` (26 blocking), RobotRules `FAIL`
+  (63 blocking, 178 warnings), SimReadyAssetRules `PASS` (one INFO). These
+  literal results are not suppressed. RobotRules was run on the diagnostic
+  workcell wrapper, not a promoted standalone robot package.
+- Current closure:
+  `reports/aloha1_mapping/aloha1_cad_derived_task7_closure_zup_attempt7.json`.
+  Runtime grasp is `PASS`; Task 7 is `PARTIAL`; asset promotion is `FAIL`;
+  Task 8 remains `NOT_RUN`; final/default colliders are unchanged.
+- Protected user-started Isaac GUI PID is currently `409920` on workspace 3.
+  Do not close, move, restart, switch its Stage, or use it for headless tests.
+- Remaining closeout order: full ALOHA pytest/regression, Ruff and py_compile;
+  review the final diff; commit task-owned files in logical batches without
+  pushing. Preserve unrelated dirty files.
+
+## 2026-08-02 CAD-derived full-body collider five-pose runtime handoff
+
+- Active scope is follower-left, five distinct robot-space starts and five
+  configured horizontal Bottle500 poses. Each trial must perform dynamic
+  tabletop settle, downward approach, bilateral contact, 0.20 m lift and a
+  2.0 s hold. Task 8 remains `NOT_RUN`; final/default colliders are unchanged.
+- The prior review Stage was found to author/fall back to `Y-up` and
+  `metersPerUnit=0.01`; this explains the user-observed horizontal world-Z
+  axis when the file is opened directly in Isaac GUI. It remains frozen as
+  historical evidence and was not edited. The current isolated diagnostic
+  Stage is
+  `assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda`,
+  SHA-256
+  `327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9`.
+  It explicitly authors `upAxis=Z` and `metersPerUnit=1` without changing any
+  composed world matrix. A fresh Isaac 5.1 probe reads the same contract before
+  and after `World` creation, reads gravity direction `[0,0,-1]`, never starts
+  the timeline, and leaves all input hashes unchanged. Report:
+  `reports/aloha1_mapping/aloha1_cad_derived_stage_contract_native_probe.json`.
+- Process discovery on 2026-08-02 at the current handoff found no active
+  `run_aloha1_grasp_20cm_five_pose_ik.py` or
+  `run_aloha1_grasp_20cm_gui.py` formal runner. PID `409920` is a separately
+  user-started Isaac GUI on workspace 3 and is protected: do not close, move,
+  restart, switch its Stage, or use it as the formal headless runner.
+- Resume attempt 6 was stopped with `SIGINT` only after sample 04 primary had
+  naturally produced machine `PASS`, because the review-Stage axis/unit
+  contract had not yet been resolved. Sample 04 primary reached
+  `0.20062219242784413 m` clearance with `0.00039392206832492005 m` hold drop
+  and signature
+  `5b2ae3da23b5ab2ad0856a69046bacba8e7a52e65877824e9a05747e91ebb8f4`;
+  it has no fresh repeat and is historical evidence only. No runner or child
+  process from attempt 6 remains.
+- Interrupted attempt 4 report:
+  `reports/aloha1_mapping/aloha1_cad_derived_five_pose_runtime_attempt4.json`,
+  current SHA-256
+  `82633e2736137caf2478104f96c0edbd61c9cce37765aae1b42129699697ce24`.
+  It contains three complete samples only. Sample 04 contains a frozen
+  transform and interrupted primary log but no eligible primary result,
+  video, or collider repeat. Sample 05 was not started.
+- Sample 01 primary and fresh collider repeat are machine `PASS`, share
+  deterministic signature
+  `e94048fa72f53b7a99eb9e4df402d475b0ecc73dead0f2355f38f88057d61e18`,
+  reach `0.20020136823871668 m` clearance, and have
+  `0.00014823808163866303 m` hold drop.
+- Sample 02 primary and fresh collider repeat are machine `PASS`, share
+  deterministic signature
+  `90da200849182aa4cadbd37c64a6b36983758fe0e23a3741acb09f1e6740a88d`,
+  reach `0.20033425935922536 m` clearance, and have
+  `0.0011934366655616258 m` hold drop. Its 707-frame primary video is complete
+  against its own telemetry; cross-sample fixed-frame-count assumptions are
+  invalid.
+- Sample 03 primary and fresh collider repeat are machine `PASS`, share
+  deterministic signature
+  `c0a1899f0900825efcc978abb56059bbc934c9413f5294e9d1d5bb23aca5a4ca`,
+  and have approximately `0.0006763733 m` hold drop. Its primary video has 663
+  physics frames with complete phase coverage.
+- Interrupted resume attempt 5 report:
+  `reports/aloha1_mapping/aloha1_cad_derived_five_pose_runtime_resume_attempt5.json`,
+  current SHA-256
+  `0a9659e60d254001ba95d5bb811bddda23083fa1a249c857ce764ae83863977d`.
+  It only re-registers the three eligible attempt-4 samples; its sample-04
+  directory is incomplete and must not be promoted or treated as a completed
+  trial.
+- The five-pose runner now supports `--resume-results` and only reuses a
+  sample when primary and collider repeat are both machine `PASS`, signatures
+  match, both required videos exist, and all 24 collision evidence records
+  exist. The resume implementation has focused pytest, Ruff and py_compile
+  evidence, but must be freshly reverified before final completion claims.
+- Current visual boundary: samples 01-03 have representative full-arm and
+  close-up phase review evidence. Finger/bottle collision overlays do not by
+  themselves prove full-arm-link collider coverage. Full-arm collision claims
+  must additionally cite the static and swept machine reports and accepted
+  full-arm collision-display screenshots.
+- High-priority unresolved diagnostic: PhysX tensor
+  `RigidBodyView.get_velocities()` reports substantial Bottle500 HOLD-phase
+  vertical velocity while pose finite differences and video show near-static
+  motion. This is an observed readback disagreement, not yet a proven
+  kinematic-transition or stale-view root cause. Before changing Isaac code,
+  query the directly connected NVIDIA official Isaac MCP and local 5.1 source;
+  add per-frame tensor-versus-pose instrumentation and test one lifecycle
+  hypothesis at a time.
+- The old samples 01-03 were executed with `World(stage_units_in_meters=1.0)`,
+  which corrected the old layer metadata in memory, and their physics evidence
+  remains useful. They cannot be reused by the formal runner after the frozen
+  Stage/config hashes changed. The new formal aggregate must therefore run all
+  five samples against the explicit Z-up/m Stage; this is a Stage-identity
+  rerun, not a collider, friction, drive, mimic, bottle, timestep, solver or
+  trajectory change.
+- Next executable order: (1) run all five samples and repeats from fresh resets
+  against the explicit Z-up/m Stage; (2) finish per-video and collision-image
+  visual audits; (3) resolve and classify velocity readback semantics;
+  (4) rerun applicable Task 7 and official rule validators; (5) update final
+  reports/README and commit task-owned changes only. No push.
+
 ## 2026-07-31 ALOHA 20 cm grasp button and five-position gate
 
 - The exact single-position annotated video was user-confirmed `PASS`:

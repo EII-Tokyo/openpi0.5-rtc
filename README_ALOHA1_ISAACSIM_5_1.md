@@ -19,6 +19,10 @@ sim-to-real dynamics model and it is not yet accepted for bottle insertion.
 | Task 7B.2 screenshot evidence | **PARTIAL** | seven side-oblique raw/annotated pairs pass; seven true-top pairs remain PARTIAL because the actual wrist/gripper pose occludes the finger inner surfaces; runtime A/B, L/R origins and contact-normal projections are auxiliary |
 | Grasp Editor / 20 cm single-position pickup | **PASS (diagnostic)** | the user confirmed the exact single-position annotated video; Variant B, local Lula IK, supplier-CAD fingers, dynamic horizontal Bottle500, 20 cm measured clearance, 2 s hold, and Abort/Reset machine gates pass |
 | Five fixed-seed random-position pickup | **PASS (diagnostic)** | successful samples 1–4 were preserved; only failed sample 5 was replanned with a downward gripper and rerecorded; candidate 119 passes a fresh deterministic pair and full-frame visual-model review, and the user confirmed the grasp is correct |
+| CAD-derived Z-up diagnostic Stage | **PASS** | frozen Stage SHA-256 `327361d2…bb9bb9`, `upAxis=Z`, `metersPerUnit=1`, gravity `[0,0,-1]`; composed world matrices and source layers are unchanged |
+| CAD-derived five-pose Z-up runtime | **PASS (machine) / PARTIAL (evidence)** | 5/5 primary plus 5/5 fresh collider repeats pass with matching per-sample signatures; critical phases and all 24 collision panels per sample pass visual review, but the exact videos have not yet been user-confirmed |
+| Bottle tensor-velocity semantics | **PARTIAL / INCONCLUSIVE** | tensor COM velocity disagrees with COM pose finite differences; view recreation does not change the result and `initialize_kinematic_bodies()` is invalid at the tested lifecycle point; tensor velocity is not used as drop authority |
+| CAD-derived Z-up Task 7 closure | **PARTIAL** | runtime grasp passes; literal workcell-target PhysicsRules/RobotRules fail deterministically, exact-video user confirmation is pending, and velocity semantics remain inconclusive; no result is suppressed |
 | Task 7 post-grasp runtime acceptance | **PASS** | Task 7A runtime/workcell, table alignment, ALOHA 6DOF IK correspondence v3, Bottle500 static hold and five-pose dynamic pickup all pass |
 | Task 7 post-grasp aggregate | **PARTIAL** | literal NVIDIA official-rule status remains FAIL with 37 unsuppressed findings, so asset-promotion readiness remains PARTIAL even though runtime/grasp acceptance passes |
 | follower_right RobotRules schema-only candidate | **PASS** | isolated wrapper passed `IsaacSim.RobotRules` twice in fresh Isaac 5.1 processes with 0 issues and an identical deterministic signature; the physical follower_right Stage and final/default assets were not modified |
@@ -55,6 +59,69 @@ sim-to-real dynamics model and it is not yet accepted for bottle insertion.
 
 `PASS`, `FAIL`, and `PARTIAL` are literal machine-report values. A clean
 viewport is not an acceptance criterion.
+
+## 2026-08-02 CAD-derived Z-up five-pose closure
+
+The former direct-review wrapper authored/fell back to `Y-up` and
+`metersPerUnit=0.01`, which made world Z appear horizontal in Isaac GUI. The
+historical file remains untouched. The current isolated wrapper is:
+
+`/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda`
+
+Its SHA-256 is
+`327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9`.
+A fresh Isaac Sim 5.1 probe reads `upAxis=Z`, `metersPerUnit=1`, gravity
+direction `[0,0,-1]`, and identical composed world transforms before and
+after the wrapper change. The timeline was not started during this contract
+probe.
+
+Five distinct horizontal-Bottle500 grasp samples were then run against that
+exact Stage. All five primary runs and all five fresh collider-evidence
+repeats are machine `PASS`; each primary/repeat pair has an identical
+deterministic signature. Maximum measured support clearance is between
+`0.2002013682 m` and `0.2006221924 m`. Full hold-interval drop is between
+`0.0001482381 m` and `0.0011934367 m`, below the unchanged `0.010 m` gate.
+No collider, friction, drive, mimic, bottle, timestep, solver or acceptance
+parameter was changed.
+
+The vision audit covers a distinct initial pose, open/pregrasp, bilateral
+contact, height reached and hold end for every video, plus all 24 paired
+collision-evidence panels per sample. Sample 2's original camera was rejected
+because the left finger was critically occluded. A mathematically opposite
+bottle-axis evidence camera produced a fresh primary and repeat with the same
+machine signature. Its first collision retake is explicitly rejected because
+a post-processing command overwrote one annotated artifact; fresh retake 2 is
+the accepted collision evidence. This audit does not claim that every encoded
+video frame was individually viewed, and the exact five videos still await
+user confirmation.
+
+The Bottle500 velocity audit remains `PARTIAL / INCONCLUSIVE`. PhysX tensor
+velocity is documented locally as world-space COM velocity, but during HOLD
+it integrates to about `0.2857 m` while the COM pose changes only about
+`0.000204 m`. Recreating the rigid-body view after the kinematic-to-dynamic
+transition preserves both the successful grasp signature and the mismatch.
+Calling `initialize_kinematic_bodies()` at the tested post-reset lifecycle
+point causes a first-frame numerical ejection and is rejected. Therefore pose,
+contact, measured clearance, drop and deterministic signatures remain the
+acceptance evidence; tensor velocity is neither treated as real falling nor
+silently discarded.
+
+Literal official-rule results for the diagnostic workcell wrapper repeat
+identically in fresh processes: `PhysicsRules=FAIL` with 26 blocking findings,
+`RobotRules=FAIL` with 63 blocking findings and 178 warnings, and
+`SimReadyAssetRules=PASS` with one INFO record. RobotRules was deliberately
+run literally on a workcell wrapper rather than a promoted standalone robot
+package, so its package/layer findings are preserved but do not negate the
+separate five-pose runtime result. Task 7 is therefore `PARTIAL`, asset
+promotion is `FAIL`, and Task 8 remains `NOT_RUN`.
+
+Authoritative reports:
+
+- `reports/aloha1_mapping/aloha1_cad_derived_stage_contract_native_probe.json`;
+- `reports/aloha1_mapping/aloha1_cad_derived_five_pose_runtime_zup_attempt7.json`;
+- `reports/aloha1_mapping/aloha1_cad_derived_five_pose_visual_review_zup_attempt7.json`;
+- `reports/aloha1_mapping/aloha1_bottle_velocity_consistency.json`;
+- `reports/aloha1_mapping/aloha1_cad_derived_task7_closure_zup_attempt7.json`.
 
 ## 2026-07-31 20 cm grasp button and five-position acceptance
 
