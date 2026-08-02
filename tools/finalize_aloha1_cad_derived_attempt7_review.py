@@ -57,6 +57,94 @@ def classify_review_status(
     return "PASS" if user_confirmation == "PASS" else "PARTIAL"
 
 
+def validate_user_confirmation(
+    confirmation: dict[str, Any],
+    *,
+    sample_reports: list[dict[str, Any]],
+    stage: dict[str, Any],
+) -> dict[str, Any]:
+    """Validate explicit confirmation against the frozen Stage and videos."""
+
+    if confirmation.get("attempt_id") != "Z_UP_ATTEMPT7":
+        raise ValueError("user confirmation attempt must be Z_UP_ATTEMPT7")
+    if confirmation.get("status") != "PASS":
+        raise ValueError("user confirmation requires explicit PASS")
+    if confirmation.get("confirmation_source") != "USER_EXPLICIT_CONFIRMATION":
+        raise ValueError("user confirmation source is not explicit")
+    if not confirmation.get("confirmation_date"):
+        raise ValueError("user confirmation date is missing")
+
+    expected_stage_path = Path(stage["absolute_path"]).resolve(strict=True)
+    expected_stage_hash = str(stage["sha256_after"])
+    if stage.get("sha256_before") != expected_stage_hash:
+        raise ValueError("frozen Stage changed during the machine run")
+    confirmed_stage = confirmation.get("stage", {})
+    if Path(confirmed_stage.get("absolute_path", "")).resolve() != expected_stage_path:
+        raise ValueError("user confirmation Stage path does not match")
+    if confirmed_stage.get("sha256") != expected_stage_hash:
+        raise ValueError("user confirmation Stage hash does not match")
+    if _sha256(expected_stage_path) != expected_stage_hash:
+        raise ValueError("current Stage hash does not match frozen evidence")
+
+    expected_samples = {sample["sample_id"]: sample for sample in sample_reports}
+    confirmed_samples = confirmation.get("samples", [])
+    confirmed_ids = [record.get("sample_id") for record in confirmed_samples]
+    if (
+        len(expected_samples) != 5
+        or len(confirmed_samples) != 5
+        or len(set(confirmed_ids)) != 5
+        or set(confirmed_ids) != set(expected_samples)
+    ):
+        raise ValueError("confirmation must contain five unique samples")
+
+    normalized: list[dict[str, Any]] = []
+    for record in confirmed_samples:
+        sample_id = record["sample_id"]
+        video = expected_samples[sample_id]["videos"]["annotated"]
+        video_path = Path(video["absolute_path"]).resolve(strict=True)
+        if Path(record.get("annotated_video_absolute_path", "")).resolve() != video_path:
+            raise ValueError(f"annotated video path differs for {sample_id}")
+        expected_video_hash = str(video["sha256"])
+        if record.get("annotated_video_sha256") != expected_video_hash:
+            raise ValueError(f"annotated video hash differs for {sample_id}")
+        if _sha256(video_path) != expected_video_hash:
+            raise ValueError(f"current annotated video hash differs for {sample_id}")
+        expected_resolution = video["probe"]["resolution"]
+        if (
+            record.get("frame_count") != video["frame_count"]
+            or record.get("fps") != video["fps"]
+            or record.get("resolution") != expected_resolution
+        ):
+            raise ValueError(f"annotated video metadata differs for {sample_id}")
+        if record.get("status") != "PASS":
+            raise ValueError(f"sample confirmation requires explicit PASS: {sample_id}")
+        normalized.append(
+            {
+                "sample_id": sample_id,
+                "annotated_video_absolute_path": str(video_path),
+                "annotated_video_sha256": expected_video_hash,
+                "frame_count": video["frame_count"],
+                "fps": video["fps"],
+                "resolution": expected_resolution,
+                "status": "PASS",
+            }
+        )
+
+    return {
+        "status": "PASS",
+        "sample_count": len(normalized),
+        "attempt_id": confirmation["attempt_id"],
+        "confirmation_source": confirmation["confirmation_source"],
+        "confirmation_text": confirmation.get("confirmation_text"),
+        "confirmation_date": confirmation["confirmation_date"],
+        "stage": {
+            "absolute_path": str(expected_stage_path),
+            "sha256": expected_stage_hash,
+        },
+        "samples": sorted(normalized, key=lambda item: item["sample_id"]),
+    }
+
+
 def _manifest(run_root: Path) -> tuple[Path, dict[str, Any]]:
     path = run_root / "video_attempt_001/video/candidate_manifest.json"
     return path.resolve(strict=True), _load(path)
@@ -102,6 +190,7 @@ def _video_records(manifest: dict[str, Any]) -> dict[str, dict[str, Any]]:
 def build_report(
     results: dict[str, Any],
     decisions: dict[str, Any],
+    confirmation: dict[str, Any],
     *,
     project_root: Path,
 ) -> dict[str, Any]:
@@ -210,18 +299,31 @@ def build_report(
         and all(sample["visual_model_review"] == "PASS" for sample in sample_reports)
         else "FAIL"
     )
+    confirmation_evidence = validate_user_confirmation(
+        confirmation,
+        sample_reports=sample_reports,
+        stage=results["stage"],
+    )
+    confirmed_by_id = {
+        sample["sample_id"]: sample for sample in confirmation_evidence["samples"]
+    }
+    for sample in sample_reports:
+        sample["user_confirmation"] = confirmed_by_id[sample["sample_id"]]["status"]
+        sample["user_confirmation_evidence"] = confirmed_by_id[sample["sample_id"]]
+
     status = classify_review_status(
         machine_status=results["machine_status"],
         visual_status=visual_status,
-        user_confirmation="NOT_RUN",
+        user_confirmation=confirmation_evidence["status"],
     )
     return {
         "schema_version": 1,
         "status": status,
         "machine_status": results["machine_status"],
         "visual_model_review": visual_status,
-        "user_confirmation": "NOT_RUN",
-        "promotion_status": "AWAITING_USER_CONFIRMATION_OF_EXACT_VIDEOS",
+        "user_confirmation": confirmation_evidence["status"],
+        "user_confirmation_evidence": confirmation_evidence,
+        "promotion_status": "USER_CONFIRMED_EXACT_VIDEOS_NO_ASSET_PROMOTION",
         "samples": sample_reports,
         "review_method": (
             "CODEX_VISION_REVIEW_OF_FIVE_CRITICAL_VIDEO_PHASES_AND_ALL_"
@@ -247,7 +349,7 @@ def _markdown(report: dict[str, Any]) -> str:
         f"- Status: `{report['status']}`",
         f"- Machine: `{report['machine_status']}`",
         f"- Visual-model review: `{report['visual_model_review']}`",
-        "- User confirmation of these exact videos: `NOT_RUN`",
+        f"- User confirmation of these exact videos: `{report['user_confirmation']}`",
         "- Task 8: `NOT_RUN`",
         "",
         "| Sample | Vision | Frames | Collision images | Annotated video |",
@@ -268,7 +370,9 @@ def _markdown(report: dict[str, Any]) -> str:
             "24 collision-evidence panels per sample. It does not claim that "
             "every encoded video frame was individually inspected. Runtime "
             "contact, pose, clearance, drop and deterministic signatures remain "
-            "authoritative. Exact-video user confirmation is still pending.",
+            "authoritative. The user confirmation is bound to the exact "
+            "annotated-video paths, hashes and metadata recorded above; it "
+            "does not promote an asset or suppress other Task 7 gates.",
             "",
         ]
     )
@@ -279,6 +383,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--results", required=True, type=Path)
     parser.add_argument("--decisions", required=True, type=Path)
+    parser.add_argument("--user-confirmation", required=True, type=Path)
     parser.add_argument("--output-json", required=True, type=Path)
     parser.add_argument("--output-md", required=True, type=Path)
     args = parser.parse_args()
@@ -286,6 +391,7 @@ def main() -> int:
     report = build_report(
         _load(args.results),
         _load(args.decisions),
+        _load(args.user_confirmation),
         project_root=project_root,
     )
     args.output_json.resolve().write_text(

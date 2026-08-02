@@ -1,6 +1,6 @@
 {
   "machine_status": "PASS",
-  "promotion_status": "AWAITING_USER_CONFIRMATION_OF_EXACT_VIDEOS",
+  "promotion_status": "USER_CONFIRMED_EXACT_VIDEOS_NO_ASSET_PROMOTION",
   "review_method": "CODEX_VISION_REVIEW_OF_FIVE_CRITICAL_VIDEO_PHASES_AND_ALL_24_COLLISION_SCREENSHOT_PANELS_PER_SAMPLE",
   "samples": [
     {
@@ -727,7 +727,19 @@
       "sample_id": "sample_01",
       "selected_evidence_reason": "FORMAL_ATTEMPT7_CAMERA_UNOBSTRUCTED",
       "status": "PASS",
-      "user_confirmation": "NOT_RUN",
+      "user_confirmation": "PASS",
+      "user_confirmation_evidence": {
+        "annotated_video_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/primary/video_attempt_001/video/aloha1_grasp_20cm_annotated_candidate.mp4",
+        "annotated_video_sha256": "59438795d028760d7212aa9f7c9230f8157bee8638327cd334997f66aec07159",
+        "fps": 60,
+        "frame_count": 2506,
+        "resolution": [
+          1440,
+          680
+        ],
+        "sample_id": "sample_01",
+        "status": "PASS"
+      },
       "videos": {
         "annotated": {
           "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/primary/video_attempt_001/video/aloha1_grasp_20cm_annotated_candidate.mp4",
@@ -1503,7 +1515,19 @@
       "sample_id": "sample_02",
       "selected_evidence_reason": "OPPOSITE_AB_EVIDENCE_CAMERA_REMOVES_LEFT_FINGER_OCCLUSION_WITH_IDENTICAL_MACHINE_SIGNATURE",
       "status": "PASS",
-      "user_confirmation": "NOT_RUN",
+      "user_confirmation": "PASS",
+      "user_confirmation_evidence": {
+        "annotated_video_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/primary/video_attempt_001/video/aloha1_grasp_20cm_annotated_candidate.mp4",
+        "annotated_video_sha256": "80607f7a94a4971d24b899a1d20eae35782308d3333fac96fbf86fb14a3314a8",
+        "fps": 60,
+        "frame_count": 707,
+        "resolution": [
+          1440,
+          680
+        ],
+        "sample_id": "sample_02",
+        "status": "PASS"
+      },
       "videos": {
         "annotated": {
           "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/primary/video_attempt_001/video/aloha1_grasp_20cm_annotated_candidate.mp4",
@@ -2266,7 +2290,19 @@
       "sample_id": "sample_03",
       "selected_evidence_reason": "FORMAL_ATTEMPT7_CAMERA_UNOBSTRUCTED",
       "status": "PASS",
-      "user_confirmation": "NOT_RUN",
+      "user_confirmation": "PASS",
+      "user_confirmation_evidence": {
+        "annotated_video_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/primary/video_attempt_001/video/aloha1_grasp_20cm_annotated_candidate.mp4",
+        "annotated_video_sha256": "28ea418589b64e4a9b4a2a6fc0604fc70ef3570e0f36c3f28564b4a890e762d6",
+        "fps": 60,
+        "frame_count": 663,
+        "resolution": [
+          1440,
+          680
+        ],
+        "sample_id": "sample_03",
+        "status": "PASS"
+      },
       "videos": {
         "annotated": {
           "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/primary/video_attempt_001/video/aloha1_grasp_20cm_annotated_candidate.mp4",
@@ -3029,7 +3065,19 @@
       "sample_id": "sample_04",
       "selected_evidence_reason": "FORMAL_ATTEMPT7_CAMERA_UNOBSTRUCTED",
       "status": "PASS",
-      "user_confirmation": "NOT_RUN",
+      "user_confirmation": "PASS",
+      "user_confirmation_evidence": {
+        "annotated_video_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/primary/video_attempt_001/video/aloha1_grasp_20cm_annotated_candidate.mp4",
+        "annotated_video_sha256": "526b15f1feb245e3063773313a5c94cc533fc10e190d77c6beb0f68f2918d777",
+        "fps": 60,
+        "frame_count": 1767,
+        "resolution": [
+          1440,
+          680
+        ],
+        "sample_id": "sample_04",
+        "status": "PASS"
+      },
       "videos": {
         "annotated": {
           "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/primary/video_attempt_001/video/aloha1_grasp_20cm_annotated_candidate.mp4",
@@ -3792,7 +3840,19 @@
       "sample_id": "sample_05",
       "selected_evidence_reason": "FORMAL_ATTEMPT7_CAMERA_UNOBSTRUCTED",
       "status": "PASS",
-      "user_confirmation": "NOT_RUN",
+      "user_confirmation": "PASS",
+      "user_confirmation_evidence": {
+        "annotated_video_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/primary/video_attempt_001/video/aloha1_grasp_20cm_annotated_candidate.mp4",
+        "annotated_video_sha256": "2f4753fddc6715829a25cb5ddcb2d32f3748af6f5c9e6de9afee01e3c1ca98d3",
+        "fps": 60,
+        "frame_count": 888,
+        "resolution": [
+          1440,
+          680
+        ],
+        "sample_id": "sample_05",
+        "status": "PASS"
+      },
       "videos": {
         "annotated": {
           "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/primary/video_attempt_001/video/aloha1_grasp_20cm_annotated_candidate.mp4",
@@ -3842,8 +3902,82 @@
     "task8": "NOT_RUN",
     "tensor_velocity_disagreement_not_silently_ignored": true
   },
-  "status": "PARTIAL",
+  "status": "PASS",
   "task8": "NOT_RUN",
-  "user_confirmation": "NOT_RUN",
+  "user_confirmation": "PASS",
+  "user_confirmation_evidence": {
+    "attempt_id": "Z_UP_ATTEMPT7",
+    "confirmation_date": "2026-08-02",
+    "confirmation_source": "USER_EXPLICIT_CONFIRMATION",
+    "confirmation_text": "\u5168\u90e8\u786e\u8ba4",
+    "sample_count": 5,
+    "samples": [
+      {
+        "annotated_video_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_01/primary/video_attempt_001/video/aloha1_grasp_20cm_annotated_candidate.mp4",
+        "annotated_video_sha256": "59438795d028760d7212aa9f7c9230f8157bee8638327cd334997f66aec07159",
+        "fps": 60,
+        "frame_count": 2506,
+        "resolution": [
+          1440,
+          680
+        ],
+        "sample_id": "sample_01",
+        "status": "PASS"
+      },
+      {
+        "annotated_video_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_02_visual_retake_opposite_ab/primary/video_attempt_001/video/aloha1_grasp_20cm_annotated_candidate.mp4",
+        "annotated_video_sha256": "80607f7a94a4971d24b899a1d20eae35782308d3333fac96fbf86fb14a3314a8",
+        "fps": 60,
+        "frame_count": 707,
+        "resolution": [
+          1440,
+          680
+        ],
+        "sample_id": "sample_02",
+        "status": "PASS"
+      },
+      {
+        "annotated_video_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_03/primary/video_attempt_001/video/aloha1_grasp_20cm_annotated_candidate.mp4",
+        "annotated_video_sha256": "28ea418589b64e4a9b4a2a6fc0604fc70ef3570e0f36c3f28564b4a890e762d6",
+        "fps": 60,
+        "frame_count": 663,
+        "resolution": [
+          1440,
+          680
+        ],
+        "sample_id": "sample_03",
+        "status": "PASS"
+      },
+      {
+        "annotated_video_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_04/primary/video_attempt_001/video/aloha1_grasp_20cm_annotated_candidate.mp4",
+        "annotated_video_sha256": "526b15f1feb245e3063773313a5c94cc533fc10e190d77c6beb0f68f2918d777",
+        "fps": 60,
+        "frame_count": 1767,
+        "resolution": [
+          1440,
+          680
+        ],
+        "sample_id": "sample_04",
+        "status": "PASS"
+      },
+      {
+        "annotated_video_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-cad-derived-colliders/phase8_five_pose_runtime_zup_attempt7/sample_05/primary/video_attempt_001/video/aloha1_grasp_20cm_annotated_candidate.mp4",
+        "annotated_video_sha256": "2f4753fddc6715829a25cb5ddcb2d32f3748af6f5c9e6de9afee01e3c1ca98d3",
+        "fps": 60,
+        "frame_count": 888,
+        "resolution": [
+          1440,
+          680
+        ],
+        "sample_id": "sample_05",
+        "status": "PASS"
+      }
+    ],
+    "stage": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "sha256": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9"
+    },
+    "status": "PASS"
+  },
   "visual_model_review": "PASS"
 }

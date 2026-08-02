@@ -124,6 +124,23 @@ def build_report() -> dict[str, Any]:
         robot_rules=reports["robot_rules"]["official_status"],
         simready_rules=reports["simready_rules"]["official_status"],
     )
+    hard_blockers: list[str] = []
+    if reports["physics_rules"]["official_status"] != "PASS":
+        hard_blockers.append(
+            "HARD_BLOCKER_LITERAL_PHYSICSRULES_FINDINGS_ON_DIAGNOSTIC_WORKCELL"
+        )
+    if reports["robot_rules"]["official_status"] != "PASS":
+        hard_blockers.append(
+            "HARD_BLOCKER_LITERAL_ROBOTRULES_FINDINGS_ON_NON_ROBOT_PACKAGE_TARGET"
+        )
+    if reports["velocity"]["velocity_semantics_status"] != "VERIFIED":
+        hard_blockers.append(
+            "HARD_BLOCKER_BOTTLE_TENSOR_VELOCITY_SEMANTICS_INCONCLUSIVE"
+        )
+    if reports["visual"].get("user_confirmation") != "PASS":
+        hard_blockers.append(
+            "HARD_BLOCKER_EXACT_ATTEMPT7_VIDEO_USER_CONFIRMATION_NOT_RUN"
+        )
     return {
         "schema_version": 1,
         "status": classified["task7"],
@@ -181,12 +198,7 @@ def build_report() -> dict[str, Any]:
             }
             for name, path in INPUTS.items()
         },
-        "hard_blockers": [
-            "HARD_BLOCKER_LITERAL_PHYSICSRULES_FINDINGS_ON_DIAGNOSTIC_WORKCELL",
-            "HARD_BLOCKER_LITERAL_ROBOTRULES_FINDINGS_ON_NON_ROBOT_PACKAGE_TARGET",
-            "HARD_BLOCKER_BOTTLE_TENSOR_VELOCITY_SEMANTICS_INCONCLUSIVE",
-            "HARD_BLOCKER_EXACT_ATTEMPT7_VIDEO_USER_CONFIRMATION_NOT_RUN",
-        ],
+        "hard_blockers": hard_blockers,
         "boundaries": {
             "runtime_pass_does_not_suppress_official_fail": True,
             "visual_evidence_is_auxiliary": True,
@@ -226,11 +238,12 @@ def _markdown(report: dict[str, Any]) -> str:
         [
             "",
             "The Z-up/meters Stage and five fresh primary/repeat pairs are "
-            "machine PASS. Task 7 remains PARTIAL because exact-video user "
-            "confirmation is pending, tensor velocity semantics remain "
-            "inconclusive, and literal official-rule failures are not "
-            "suppressed. RobotRules was run literally on a diagnostic workcell "
-            "wrapper, not a promoted standalone robot package.",
+            "machine PASS, and the user confirmation is bound to the exact "
+            "annotated-video hashes. Task 7 remains PARTIAL because tensor "
+            "velocity semantics remain inconclusive and literal official-rule "
+            "failures are not suppressed. RobotRules was run literally on a "
+            "diagnostic workcell wrapper, not a promoted standalone robot "
+            "package.",
             "",
         ]
     )

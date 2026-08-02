@@ -2,7 +2,7 @@
 
 - Task 7: `PARTIAL`
 - Runtime grasp: `PASS`
-- Visual evidence: `PARTIAL`
+- Visual evidence: `PASS`
 - Velocity semantics: `PARTIAL`
 - Asset promotion: `FAIL`
 - Task 8: `NOT_RUN`
@@ -13,4 +13,4 @@
 | RobotRules | FAIL | 63 | 178 |
 | SimReadyAssetRules | PASS | 0 | 0 |
 
-The Z-up/meters Stage and five fresh primary/repeat pairs are machine PASS. Task 7 remains PARTIAL because exact-video user confirmation is pending, tensor velocity semantics remain inconclusive, and literal official-rule failures are not suppressed. RobotRules was run literally on a diagnostic workcell wrapper, not a promoted standalone robot package.
+The Z-up/meters Stage and five fresh primary/repeat pairs are machine PASS, and the user confirmation is bound to the exact annotated-video hashes. Task 7 remains PARTIAL because tensor velocity semantics remain inconclusive and literal official-rule failures are not suppressed. RobotRules was run literally on a diagnostic workcell wrapper, not a promoted standalone robot package.

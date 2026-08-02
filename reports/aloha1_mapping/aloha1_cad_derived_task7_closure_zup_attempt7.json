@@ -78,8 +78,8 @@
     },
     "visual": {
       "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_cad_derived_five_pose_visual_review_zup_attempt7.json",
-      "sha256": "6df4cd3d11522024f70b5c6e713f430b0f1c1fa5b929ffe2bc0e0276f54e6965",
-      "status": "PARTIAL"
+      "sha256": "11e15c801d15b6c496f9f7f8b2bd30f6e54b4ecef5b7badbc8017890a245c66c",
+      "status": "PASS"
     }
   },
   "gates": {
@@ -90,13 +90,12 @@
     "static_collision": "PASS",
     "swept_collision": "PASS",
     "velocity_semantics": "INCONCLUSIVE",
-    "visual_review": "PARTIAL"
+    "visual_review": "PASS"
   },
   "hard_blockers": [
     "HARD_BLOCKER_LITERAL_PHYSICSRULES_FINDINGS_ON_DIAGNOSTIC_WORKCELL",
     "HARD_BLOCKER_LITERAL_ROBOTRULES_FINDINGS_ON_NON_ROBOT_PACKAGE_TARGET",
-    "HARD_BLOCKER_BOTTLE_TENSOR_VELOCITY_SEMANTICS_INCONCLUSIVE",
-    "HARD_BLOCKER_EXACT_ATTEMPT7_VIDEO_USER_CONFIRMATION_NOT_RUN"
+    "HARD_BLOCKER_BOTTLE_TENSOR_VELOCITY_SEMANTICS_INCONCLUSIVE"
   ],
   "official_rules": {
     "PhysicsRules": {
@@ -284,5 +283,5 @@
   "task7": "PARTIAL",
   "task8": "NOT_RUN",
   "velocity_semantics": "PARTIAL",
-  "visual_evidence": "PARTIAL"
+  "visual_evidence": "PASS"
 }
