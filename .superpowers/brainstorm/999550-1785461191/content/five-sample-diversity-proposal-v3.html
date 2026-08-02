@@ -1,0 +1,138 @@
+<style>
+  .note { padding:11px 13px; border-left:4px solid #22c55e; background:#052e164f; border-radius:7px; margin:12px 0 18px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(275px,1fr)); gap:14px; }
+  .sample { border:1px solid #334155; border-radius:12px; padding:12px; background:#0f172a; }
+  .sample h3 { margin:0 0 8px; display:flex; justify-content:space-between; gap:8px; }
+  .sample small { color:#94a3b8; font-weight:400; }
+  .diagram { width:100%; aspect-ratio:1.45; background:#111827; border-radius:8px; }
+  .metrics { display:grid; grid-template-columns:1fr 1fr; gap:5px 12px; margin-top:9px; font-size:12px; color:#cbd5e1; }
+  .metrics b { color:#f8fafc; }
+  .changed { color:#86efac; font-weight:700; }
+</style>
+
+<h2>五组候选 v3：样本 1、4 的瓶心位于垂直中线 x=0</h2>
+<p class="subtitle">
+  绿色垂直实线是桌面垂直中线 <code>x=0</code>；灰色水平虚线是 <code>y=0</code>。
+  世界原点仍为桌面正中心。
+</p>
+
+<div class="note">
+  已纠正中线定义。样本 1 与样本 4 的瓶子中心都严格落在 <code>x=0</code>，
+  但分别位于中线上的不同 <code>y</code> 位置；二者不会重合。
+  左臂是否能从各自随机起点到达这些位置，仍须用本机 Isaac 5.1/Lula 和碰撞预检证明。
+</div>
+
+<div class="grid">
+  <div class="sample">
+    <h3>样本 1 <small class="changed">瓶心 x=0，上段</small></h3>
+    <svg class="diagram" viewBox="0 0 280 190">
+      <rect x="10" y="10" width="260" height="170" rx="8" fill="#1f2937" stroke="#64748b"/>
+      <line x1="140" y1="10" x2="140" y2="180" stroke="#22c55e" stroke-width="2"/>
+      <line x1="10" y1="95" x2="270" y2="95" stroke="#64748b" stroke-dasharray="4 4"/>
+      <text x="145" y="24" fill="#86efac" font-size="10">x=0 垂直中线</text>
+      <text x="248" y="108" fill="#94a3b8" font-size="10">+X</text>
+      <text x="125" y="20" fill="#94a3b8" font-size="10">+Y</text>
+      <rect x="22" y="74" width="40" height="42" rx="6" fill="#64748b"/>
+      <circle cx="112" cy="145" r="8" fill="#22c55e"/>
+      <line x1="112" y1="145" x2="140" y2="72" stroke="#a7f3d0" stroke-dasharray="5 4"/>
+      <g transform="translate(140 72) rotate(-15)">
+        <rect x="-42" y="-6" width="84" height="12" rx="6" fill="#38bdf8"/>
+        <polygon points="46,0 36,-6 36,6" fill="#f8fafc"/>
+      </g>
+      <circle cx="140" cy="72" r="3" fill="#f8fafc"/>
+    </svg>
+    <div class="metrics"><span>瓶子 yaw <b>15°</b></span><span>瓶心 x <b class="changed">0.000 m</b></span><span>中线位置 <b>+Y 段</b></span><span>初始 EE z <b>0.16 m</b></span></div>
+  </div>
+
+  <div class="sample">
+    <h3>样本 2 <small>左侧随机位置</small></h3>
+    <svg class="diagram" viewBox="0 0 280 190">
+      <rect x="10" y="10" width="260" height="170" rx="8" fill="#1f2937" stroke="#64748b"/>
+      <line x1="140" y1="10" x2="140" y2="180" stroke="#22c55e" stroke-width="2"/>
+      <line x1="10" y1="95" x2="270" y2="95" stroke="#64748b" stroke-dasharray="4 4"/>
+      <text x="145" y="24" fill="#86efac" font-size="10">x=0</text>
+      <rect x="22" y="74" width="40" height="42" rx="6" fill="#64748b"/>
+      <circle cx="82" cy="55" r="8" fill="#22c55e"/>
+      <line x1="82" y1="55" x2="107" y2="117" stroke="#a7f3d0" stroke-dasharray="5 4"/>
+      <g transform="translate(107 117) rotate(-47)">
+        <rect x="-42" y="-6" width="84" height="12" rx="6" fill="#38bdf8"/>
+        <polygon points="46,0 36,-6 36,6" fill="#f8fafc"/>
+      </g>
+      <circle cx="107" cy="117" r="3" fill="#f8fafc"/>
+    </svg>
+    <div class="metrics"><span>瓶子 yaw <b>47°</b></span><span>瓶心 x <b>&lt; 0</b></span><span>初始 EE z <b>0.21 m</b></span><span>EE 区域 <b>前侧偏左</b></span></div>
+  </div>
+
+  <div class="sample">
+    <h3>样本 3 <small>左侧随机位置</small></h3>
+    <svg class="diagram" viewBox="0 0 280 190">
+      <rect x="10" y="10" width="260" height="170" rx="8" fill="#1f2937" stroke="#64748b"/>
+      <line x1="140" y1="10" x2="140" y2="180" stroke="#22c55e" stroke-width="2"/>
+      <line x1="10" y1="95" x2="270" y2="95" stroke="#64748b" stroke-dasharray="4 4"/>
+      <text x="145" y="24" fill="#86efac" font-size="10">x=0</text>
+      <rect x="22" y="74" width="40" height="42" rx="6" fill="#64748b"/>
+      <circle cx="65" cy="132" r="8" fill="#22c55e"/>
+      <line x1="65" y1="132" x2="118" y2="74" stroke="#a7f3d0" stroke-dasharray="5 4"/>
+      <g transform="translate(118 74) rotate(-82)">
+        <rect x="-42" y="-6" width="84" height="12" rx="6" fill="#38bdf8"/>
+        <polygon points="46,0 36,-6 36,6" fill="#f8fafc"/>
+      </g>
+      <circle cx="118" cy="74" r="3" fill="#f8fafc"/>
+    </svg>
+    <div class="metrics"><span>瓶子 yaw <b>82°</b></span><span>瓶心 x <b>&lt; 0</b></span><span>初始 EE z <b>0.25 m</b></span><span>EE 区域 <b>后侧靠臂</b></span></div>
+  </div>
+
+  <div class="sample">
+    <h3>样本 4 <small class="changed">瓶心 x=0，下段</small></h3>
+    <svg class="diagram" viewBox="0 0 280 190">
+      <rect x="10" y="10" width="260" height="170" rx="8" fill="#1f2937" stroke="#64748b"/>
+      <line x1="140" y1="10" x2="140" y2="180" stroke="#22c55e" stroke-width="2"/>
+      <line x1="10" y1="95" x2="270" y2="95" stroke="#64748b" stroke-dasharray="4 4"/>
+      <text x="145" y="24" fill="#86efac" font-size="10">x=0 垂直中线</text>
+      <rect x="22" y="74" width="40" height="42" rx="6" fill="#64748b"/>
+      <circle cx="126" cy="42" r="8" fill="#22c55e"/>
+      <line x1="126" y1="42" x2="140" y2="125" stroke="#a7f3d0" stroke-dasharray="5 4"/>
+      <g transform="translate(140 125) rotate(-121)">
+        <rect x="-42" y="-6" width="84" height="12" rx="6" fill="#38bdf8"/>
+        <polygon points="46,0 36,-6 36,6" fill="#f8fafc"/>
+      </g>
+      <circle cx="140" cy="125" r="3" fill="#f8fafc"/>
+    </svg>
+    <div class="metrics"><span>瓶子 yaw <b>121°</b></span><span>瓶心 x <b class="changed">0.000 m</b></span><span>中线位置 <b>-Y 段</b></span><span>初始 EE z <b>0.18 m</b></span></div>
+  </div>
+
+  <div class="sample">
+    <h3>样本 5 <small>左侧随机位置</small></h3>
+    <svg class="diagram" viewBox="0 0 280 190">
+      <rect x="10" y="10" width="260" height="170" rx="8" fill="#1f2937" stroke="#64748b"/>
+      <line x1="140" y1="10" x2="140" y2="180" stroke="#22c55e" stroke-width="2"/>
+      <line x1="10" y1="95" x2="270" y2="95" stroke="#64748b" stroke-dasharray="4 4"/>
+      <text x="145" y="24" fill="#86efac" font-size="10">x=0</text>
+      <rect x="22" y="74" width="40" height="42" rx="6" fill="#64748b"/>
+      <circle cx="48" cy="54" r="8" fill="#22c55e"/>
+      <line x1="48" y1="54" x2="122" y2="137" stroke="#a7f3d0" stroke-dasharray="5 4"/>
+      <g transform="translate(122 137) rotate(-158)">
+        <rect x="-42" y="-6" width="84" height="12" rx="6" fill="#38bdf8"/>
+        <polygon points="46,0 36,-6 36,6" fill="#f8fafc"/>
+      </g>
+      <circle cx="122" cy="137" r="3" fill="#f8fafc"/>
+    </svg>
+    <div class="metrics"><span>瓶子 yaw <b>158°</b></span><span>瓶心 x <b>&lt; 0</b></span><span>初始 EE z <b>0.22 m</b></span><span>EE 区域 <b>前侧靠臂</b></span></div>
+  </div>
+</div>
+
+<h3 style="margin-top:20px">是否接受 v3 的空间关系？</h3>
+<div class="options">
+  <div class="option" data-choice="accept-v3" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content"><h3>接受 v3，进入精确计算</h3><p>冻结该结构，再由 Isaac 5.1/Lula 和碰撞预检求出真实可执行坐标。</p></div>
+  </div>
+  <div class="option" data-choice="revise-v3-y" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content"><h3>调整中线上的上下位置</h3><p>保留 x=0，但改变样本 1、4 沿 y 方向的间距。</p></div>
+  </div>
+  <div class="option" data-choice="revise-v3-other" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content"><h3>继续调整其他部分</h3><p>修改瓶子角度或左臂初始 EE 空间位置。</p></div>
+  </div>
+</div>

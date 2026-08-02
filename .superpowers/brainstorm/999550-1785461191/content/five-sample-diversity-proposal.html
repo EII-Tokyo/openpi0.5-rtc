@@ -1,0 +1,154 @@
+<style>
+  .legend { display:flex; gap:18px; flex-wrap:wrap; margin:14px 0 20px; font-size:14px; }
+  .legend span { display:flex; align-items:center; gap:7px; }
+  .dot { width:13px; height:13px; border-radius:50%; display:inline-block; }
+  .ee { background:#22c55e; }
+  .bottle { width:24px; height:7px; border-radius:5px; background:#38bdf8; display:inline-block; }
+  .base { background:#64748b; }
+  .proposal-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(275px,1fr)); gap:14px; }
+  .sample { border:1px solid #334155; border-radius:12px; padding:12px; background:#0f172a; }
+  .sample h3 { margin:0 0 8px; display:flex; justify-content:space-between; gap:8px; }
+  .sample small { color:#94a3b8; font-weight:400; }
+  .diagram { width:100%; aspect-ratio:1.45; background:#111827; border-radius:8px; }
+  .metrics { display:grid; grid-template-columns:1fr 1fr; gap:5px 12px; margin-top:9px; font-size:12px; color:#cbd5e1; }
+  .metrics b { color:#f8fafc; }
+  .warning { padding:11px 13px; border-left:4px solid #f59e0b; background:#42200655; border-radius:7px; margin:12px 0 18px; }
+  .gate { color:#a7f3d0; font-weight:650; }
+</style>
+
+<h2>ALOHA 左臂：五组“瓶子方向 + 空间起点”多样性设计</h2>
+<p class="subtitle">
+  世界原点采用桌面正中心。下图是<strong>待预检的设计候选</strong>，不是已通过 IK/碰撞的最终数值。
+</p>
+
+<div class="warning">
+  旧实验的问题已经被机器报告确认：只改变瓶子 XY，瓶子旋转保持不变，而且五次共用同一个左臂起点。
+  新实验将一次性冻结五个四元组 <code>(bottle x, bottle y, bottle yaw, initial EE xyz)</code>；
+  预检只淘汰不可达、越界或初始碰撞候选，不得根据抓取成败事后换样本。
+</div>
+
+<div class="legend">
+  <span><i class="dot ee"></i>左臂初始 EE（绿色）</span>
+  <span><i class="bottle"></i>瓶子轴线 A→B（蓝色）</span>
+  <span><i class="dot base"></i>左臂底座区（灰色）</span>
+  <span>虚线：EE 从随机起点前往瓶子上方</span>
+</div>
+
+<div class="proposal-grid">
+  <div class="sample">
+    <h3>样本 1 <small>浅角度 / 低起点</small></h3>
+    <svg class="diagram" viewBox="0 0 280 190">
+      <rect x="10" y="10" width="260" height="170" rx="8" fill="#1f2937" stroke="#64748b"/>
+      <line x1="140" y1="10" x2="140" y2="180" stroke="#475569" stroke-dasharray="4 4"/>
+      <line x1="10" y1="95" x2="270" y2="95" stroke="#475569" stroke-dasharray="4 4"/>
+      <rect x="22" y="74" width="40" height="42" rx="6" fill="#64748b"/>
+      <circle cx="112" cy="145" r="8" fill="#22c55e"/>
+      <line x1="112" y1="145" x2="88" y2="90" stroke="#a7f3d0" stroke-dasharray="5 4"/>
+      <g transform="translate(88 90) rotate(-15)">
+        <rect x="-42" y="-6" width="84" height="12" rx="6" fill="#38bdf8"/>
+        <polygon points="46,0 36,-6 36,6" fill="#f8fafc"/>
+      </g>
+      <text x="18" y="28" fill="#94a3b8" font-size="10">TRUE TOP (+Z looking down)</text>
+    </svg>
+    <div class="metrics"><span>瓶子 yaw <b>15°</b></span><span>初始 EE z <b>0.16 m</b></span><span>EE 区域 <b>后侧偏低</b></span><span>状态 <b>待 IK 预检</b></span></div>
+  </div>
+
+  <div class="sample">
+    <h3>样本 2 <small>斜向 / 中高起点</small></h3>
+    <svg class="diagram" viewBox="0 0 280 190">
+      <rect x="10" y="10" width="260" height="170" rx="8" fill="#1f2937" stroke="#64748b"/>
+      <line x1="140" y1="10" x2="140" y2="180" stroke="#475569" stroke-dasharray="4 4"/>
+      <line x1="10" y1="95" x2="270" y2="95" stroke="#475569" stroke-dasharray="4 4"/>
+      <rect x="22" y="74" width="40" height="42" rx="6" fill="#64748b"/>
+      <circle cx="82" cy="55" r="8" fill="#22c55e"/>
+      <line x1="82" y1="55" x2="107" y2="117" stroke="#a7f3d0" stroke-dasharray="5 4"/>
+      <g transform="translate(107 117) rotate(-47)">
+        <rect x="-42" y="-6" width="84" height="12" rx="6" fill="#38bdf8"/>
+        <polygon points="46,0 36,-6 36,6" fill="#f8fafc"/>
+      </g>
+      <text x="18" y="28" fill="#94a3b8" font-size="10">TRUE TOP (+Z looking down)</text>
+    </svg>
+    <div class="metrics"><span>瓶子 yaw <b>47°</b></span><span>初始 EE z <b>0.21 m</b></span><span>EE 区域 <b>前侧偏左</b></span><span>状态 <b>待 IK 预检</b></span></div>
+  </div>
+
+  <div class="sample">
+    <h3>样本 3 <small>近纵向 / 最高起点</small></h3>
+    <svg class="diagram" viewBox="0 0 280 190">
+      <rect x="10" y="10" width="260" height="170" rx="8" fill="#1f2937" stroke="#64748b"/>
+      <line x1="140" y1="10" x2="140" y2="180" stroke="#475569" stroke-dasharray="4 4"/>
+      <line x1="10" y1="95" x2="270" y2="95" stroke="#475569" stroke-dasharray="4 4"/>
+      <rect x="22" y="74" width="40" height="42" rx="6" fill="#64748b"/>
+      <circle cx="65" cy="132" r="8" fill="#22c55e"/>
+      <line x1="65" y1="132" x2="118" y2="74" stroke="#a7f3d0" stroke-dasharray="5 4"/>
+      <g transform="translate(118 74) rotate(-82)">
+        <rect x="-42" y="-6" width="84" height="12" rx="6" fill="#38bdf8"/>
+        <polygon points="46,0 36,-6 36,6" fill="#f8fafc"/>
+      </g>
+      <text x="18" y="28" fill="#94a3b8" font-size="10">TRUE TOP (+Z looking down)</text>
+    </svg>
+    <div class="metrics"><span>瓶子 yaw <b>82°</b></span><span>初始 EE z <b>0.25 m</b></span><span>EE 区域 <b>后侧靠臂</b></span><span>状态 <b>待 IK 预检</b></span></div>
+  </div>
+
+  <div class="sample">
+    <h3>样本 4 <small>反斜向 / 中低起点</small></h3>
+    <svg class="diagram" viewBox="0 0 280 190">
+      <rect x="10" y="10" width="260" height="170" rx="8" fill="#1f2937" stroke="#64748b"/>
+      <line x1="140" y1="10" x2="140" y2="180" stroke="#475569" stroke-dasharray="4 4"/>
+      <line x1="10" y1="95" x2="270" y2="95" stroke="#475569" stroke-dasharray="4 4"/>
+      <rect x="22" y="74" width="40" height="42" rx="6" fill="#64748b"/>
+      <circle cx="126" cy="42" r="8" fill="#22c55e"/>
+      <line x1="126" y1="42" x2="76" y2="105" stroke="#a7f3d0" stroke-dasharray="5 4"/>
+      <g transform="translate(76 105) rotate(-121)">
+        <rect x="-42" y="-6" width="84" height="12" rx="6" fill="#38bdf8"/>
+        <polygon points="46,0 36,-6 36,6" fill="#f8fafc"/>
+      </g>
+      <text x="18" y="28" fill="#94a3b8" font-size="10">TRUE TOP (+Z looking down)</text>
+    </svg>
+    <div class="metrics"><span>瓶子 yaw <b>121°</b></span><span>初始 EE z <b>0.18 m</b></span><span>EE 区域 <b>前侧偏中</b></span><span>状态 <b>待 IK 预检</b></span></div>
+  </div>
+
+  <div class="sample">
+    <h3>样本 5 <small>大角度 / 高起点</small></h3>
+    <svg class="diagram" viewBox="0 0 280 190">
+      <rect x="10" y="10" width="260" height="170" rx="8" fill="#1f2937" stroke="#64748b"/>
+      <line x1="140" y1="10" x2="140" y2="180" stroke="#475569" stroke-dasharray="4 4"/>
+      <line x1="10" y1="95" x2="270" y2="95" stroke="#475569" stroke-dasharray="4 4"/>
+      <rect x="22" y="74" width="40" height="42" rx="6" fill="#64748b"/>
+      <circle cx="48" cy="54" r="8" fill="#22c55e"/>
+      <line x1="48" y1="54" x2="122" y2="137" stroke="#a7f3d0" stroke-dasharray="5 4"/>
+      <g transform="translate(122 137) rotate(-158)">
+        <rect x="-42" y="-6" width="84" height="12" rx="6" fill="#38bdf8"/>
+        <polygon points="46,0 36,-6 36,6" fill="#f8fafc"/>
+      </g>
+      <text x="18" y="28" fill="#94a3b8" font-size="10">TRUE TOP (+Z looking down)</text>
+    </svg>
+    <div class="metrics"><span>瓶子 yaw <b>158°</b></span><span>初始 EE z <b>0.22 m</b></span><span>EE 区域 <b>前侧靠臂</b></span><span>状态 <b>待 IK 预检</b></span></div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:20px">
+  <h3>建议的硬验收门</h3>
+  <ul>
+    <li><span class="gate">方向门：</span>五个瓶子 yaw 的最小圆周间隔 ≥ 25°，运行时从 CAD 轴和世界变换重新读回。</li>
+    <li><span class="gate">起点门：</span>任意两个初始 EE 世界位置距离 ≥ 50 mm，且视频第一秒肉眼可区分。</li>
+    <li><span class="gate">IK 门：</span>每段 FK 位置误差、旋转误差、关节限位、速度限位、初始/路径碰撞全部通过。</li>
+    <li><span class="gate">抓取门：</span>五次都从 dynamic settle 开始，真实双侧接触，离桌并净提升 0.200 m，保持 2 s。</li>
+    <li><span class="gate">证据门：</span>五个完整全臂 raw/annotated 视频逐个视觉自审；任何一次失败，整体 FAIL，不换样本。</li>
+  </ul>
+</div>
+
+<h3>这个多样性结构是否符合你的意图？</h3>
+<div class="options">
+  <div class="option" data-choice="accept-compute" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content"><h3>接受结构，计算真实候选</h3><p>推荐。下一步用 Isaac 5.1/Lula 与碰撞预检计算可执行的精确坐标。</p></div>
+  </div>
+  <div class="option" data-choice="more-ee-separation" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content"><h3>增加机械臂起点差异</h3><p>把 EE 最小空间间距门从 50 mm 提高，再生成设计。</p></div>
+  </div>
+  <div class="option" data-choice="revise-yaw" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content"><h3>调整瓶子方向分布</h3><p>保留五个不同 EE 起点，但重新分配瓶子主轴方向。</p></div>
+  </div>
+</div>
