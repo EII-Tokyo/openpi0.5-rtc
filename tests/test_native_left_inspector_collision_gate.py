@@ -153,6 +153,7 @@ def test_native_trial_exercises_single_joint_inspector_callback():
         '"supported_contact_steps"',
         '"hold_supported_contact_steps"',
         '"maximum_consecutive_supported_contact_steps"',
+        '"all_geometry_samples_finite"',
         "support_sequence_is_complete",
         "async def _capture_verified_contact_async",
         '"drive_targets_before"',

@@ -94,6 +94,11 @@ def test_settled_support_requires_prior_contact_and_tabletop_tolerance():
         physical_contact=False,
         minimum_table_local_finger_z_m=-0.001,
     )
+    assert not settled_support_step(
+        target_contact_seen=True,
+        physical_contact=True,
+        minimum_table_local_finger_z_m=float("nan"),
+    )
     assert support_sequence_is_complete(180, 180, 180)
     assert not support_sequence_is_complete(181, 180, 180)
     assert not support_sequence_is_complete(180, 180, 179)

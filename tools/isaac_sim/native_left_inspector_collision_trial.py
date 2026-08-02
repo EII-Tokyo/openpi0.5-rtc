@@ -263,6 +263,7 @@ def _new_accumulator() -> dict[str, Any]:
         "consecutive_supported_contact_steps": 0,
         "maximum_consecutive_supported_contact_steps": 0,
         "target_contact_seen": False,
+        "all_geometry_samples_finite": True,
         "native_steps": 0,
         "samples": [],
     }
@@ -280,16 +281,24 @@ def _sample_step(stage: Any, interface: Any, accumulator: dict[str, Any]) -> Non
     ]
     separation = min(target_separations, default=math.inf)
     geometry = _live_finger_geometry(stage)
+    geometry_z = geometry["minimum_table_local_finger_z_m"]
+    visual_error = geometry["maximum_visual_collision_error_m"]
+    sample_geometry_finite = math.isfinite(geometry_z) and math.isfinite(
+        visual_error
+    )
+    accumulator["all_geometry_samples_finite"] = (
+        accumulator["all_geometry_samples_finite"] and sample_geometry_finite
+    )
     accumulator["minimum_target_separation_m"] = min(
         accumulator["minimum_target_separation_m"], separation
     )
     accumulator["minimum_table_local_finger_z_m"] = min(
         accumulator["minimum_table_local_finger_z_m"],
-        geometry["minimum_table_local_finger_z_m"],
+        geometry_z,
     )
     accumulator["maximum_visual_collision_error_m"] = max(
         accumulator["maximum_visual_collision_error_m"],
-        geometry["maximum_visual_collision_error_m"],
+        visual_error,
     )
     accumulator["native_steps"] += 1
     physical = math.isfinite(separation) and separation <= MAX_CONTACT_SEPARATION_M
@@ -298,9 +307,7 @@ def _sample_step(stage: Any, interface: Any, accumulator: dict[str, Any]) -> Non
     supported = settled_support_step(
         target_contact_seen=accumulator["target_contact_seen"],
         physical_contact=physical,
-        minimum_table_local_finger_z_m=geometry[
-            "minimum_table_local_finger_z_m"
-        ],
+        minimum_table_local_finger_z_m=geometry_z,
     )
     accumulator["physical_contact_steps"] += int(physical)
     accumulator["supported_contact_steps"] += int(supported)
@@ -317,12 +324,8 @@ def _sample_step(stage: Any, interface: Any, accumulator: dict[str, Any]) -> Non
             {
                 "native_step": accumulator["native_steps"],
                 "minimum_target_separation_m": separation,
-                "minimum_table_local_finger_z_m": geometry[
-                    "minimum_table_local_finger_z_m"
-                ],
-                "maximum_visual_collision_error_m": geometry[
-                    "maximum_visual_collision_error_m"
-                ],
+                "minimum_table_local_finger_z_m": geometry_z,
+                "maximum_visual_collision_error_m": visual_error,
                 "physical_contact": physical,
                 "supported_contact": supported,
             }
@@ -565,7 +568,9 @@ async def _run_trial() -> None:
                     approach["minimum_table_local_finger_z_m"],
                     hold["minimum_table_local_finger_z_m"],
                 )
-            ),
+            )
+            and approach["all_geometry_samples_finite"]
+            and hold["all_geometry_samples_finite"],
             within_joint_limits=-106.0 <= realized_deg <= 72.0,
             ccd_effective=(
                 preflight["scene"]["enable_ccd"]
@@ -605,6 +610,10 @@ async def _run_trial() -> None:
                     hold["maximum_consecutive_supported_contact_steps"]
                 ),
                 "support_sequence_complete": support_sequence_complete,
+                "all_geometry_samples_finite": bool(
+                    approach["all_geometry_samples_finite"]
+                    and hold["all_geometry_samples_finite"]
+                ),
                 "approach_samples": approach["samples"],
                 "hold_samples": hold["samples"],
                 "joint_row_count": len(joint_rows),

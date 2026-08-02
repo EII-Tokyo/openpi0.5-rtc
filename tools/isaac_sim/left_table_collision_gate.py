@@ -66,11 +66,12 @@ def settled_support_step(
 ) -> bool:
     """Count settled tabletop support after PhysX stops reporting a sleeping pair."""
 
+    if not math.isfinite(minimum_table_local_finger_z_m):
+        return False
     if physical_contact:
         return True
     return (
         target_contact_seen
-        and math.isfinite(minimum_table_local_finger_z_m)
         and -MAX_TABLE_TOP_PENETRATION_M
         <= minimum_table_local_finger_z_m
         <= MAX_CONTACT_SEPARATION_M
