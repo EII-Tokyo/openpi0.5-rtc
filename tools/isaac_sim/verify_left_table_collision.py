@@ -22,10 +22,10 @@ STRESS_DT = 1.0 / 60.0
 SHOULDER_START_DEG = -55.00394821166992
 SHOULDER_END_DEG = 20.0
 SHOULDER_STEP_DEG = 0.5
-HOLD_STEPS = 30
+HOLD_STEPS = 180
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-STAGE_PATH = REPO_ROOT / (
+PROJECT_ROOT = Path("/home/eii/project/openpi0.5-rtc-reward-learning")
+STAGE_PATH = PROJECT_ROOT / (
     "assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/"
     "aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_diagnostic.usda"
 )
@@ -52,6 +52,20 @@ LEFT_BODY_NAMES = (
 )
 LEFT_BODY_PATHS = tuple(
     f"/World/follower_left/vx300s_left/{name}" for name in LEFT_BODY_NAMES
+)
+FINGER_MESH_PAIRS = (
+    (
+        "/World/follower_left/vx300s_left/follower_left_left_finger_link/"
+        "visuals/diagnostic_supplier_cad_left_finger/mesh",
+        "/World/follower_left/vx300s_left/follower_left_left_finger_link/"
+        "collisions/diagnostic_supplier_cad_left_finger/mesh",
+    ),
+    (
+        "/World/follower_left/vx300s_left/follower_left_right_finger_link/"
+        "visuals/diagnostic_supplier_cad_right_finger/mesh",
+        "/World/follower_left/vx300s_left/follower_left_right_finger_link/"
+        "collisions/diagnostic_supplier_cad_right_finger/mesh",
+    ),
 )
 
 
@@ -211,51 +225,116 @@ def _finish_contact_reporting(stage: Any, state: dict[str, Any]) -> None:
         stage.GetSessionLayer().subLayerPaths.remove(identifier)
 
 
-def _contact_pairs(state: dict[str, Any]) -> list[tuple[str, str]]:
+def _contact_report(state: dict[str, Any]) -> list[dict[str, Any]]:
     from pxr import PhysicsSchemaTools
 
-    headers, _data = state["interface"].get_contact_report()
-    result = []
+    headers, data = state["interface"].get_contact_report()
+    result: list[dict[str, Any]] = []
     for header in headers:
         first = str(PhysicsSchemaTools.intToSdfPath(header.collider0))
         second = str(PhysicsSchemaTools.intToSdfPath(header.collider1))
-        result.append((first, second))
-    return sorted(set(result))
+        start = int(header.contact_data_offset)
+        stop = start + int(header.num_contact_data)
+        separations = [float(datum.separation) for datum in list(data)[start:stop]]
+        result.append(
+            {
+                "pair": (first, second),
+                "minimum_separation_m": min(separations, default=math.inf),
+                "contact_data_count": len(separations),
+            }
+        )
+    return result
 
 
-def _live_tip_bounds(stage: Any, allowed_roots: tuple[str, ...]) -> dict[str, Any]:
-    from pxr import Usd, UsdGeom, UsdPhysics
+def _world_points(cache: Any, prim: Any) -> list[tuple[float, float, float]]:
+    from pxr import UsdGeom
 
-    cache = UsdGeom.BBoxCache(
-        Usd.TimeCode.Default(),
-        [UsdGeom.Tokens.default_, UsdGeom.Tokens.render, UsdGeom.Tokens.guide],
-        useExtentsHint=False,
+    points = UsdGeom.Mesh(prim).GetPointsAttr().Get() or []
+    if not points:
+        raise RuntimeError(f"mesh has no points: {prim.GetPath()}")
+    matrix = cache.GetLocalToWorldTransform(prim)
+    return [tuple(float(value) for value in matrix.Transform(point)) for point in points]
+
+
+def _live_finger_geometry(stage: Any) -> dict[str, Any]:
+    from pxr import Gf, UsdGeom, UsdPhysics
+
+    from tools.isaac_sim.left_table_geometry import (
+        maximum_point_error,
+        minimum_local_z,
+        points_in_table_footprint,
     )
-    root_bounds: dict[str, list[float]] = {}
-    collider_bounds: dict[str, list[float]] = {}
-    for path in allowed_roots:
-        root = stage.GetPrimAtPath(path)
-        if not root.IsValid():
-            raise RuntimeError(f"allowed tip root missing: {path}")
-        root_range = cache.ComputeWorldBound(root).ComputeAlignedRange()
-        root_bounds[path] = [
-            float(root_range.GetMin()[2]),
-            float(root_range.GetMax()[2]),
-        ]
-        for prim in Usd.PrimRange(root):
-            if not prim.HasAPI(UsdPhysics.CollisionAPI):
-                continue
-            collider_range = cache.ComputeWorldBound(prim).ComputeAlignedRange()
-            collider_bounds[str(prim.GetPath())] = [
-                float(collider_range.GetMin()[2]),
-                float(collider_range.GetMax()[2]),
-            ]
-    if not collider_bounds:
-        raise RuntimeError("no CollisionAPI prims beneath allowed tip roots")
+
+    cache = UsdGeom.XformCache()
+    table = stage.GetPrimAtPath(TABLE_PATH)
+    if not table.IsA(UsdGeom.Cube):
+        raise RuntimeError("confirmed table is not a Cube")
+    table_size = float(UsdGeom.Cube(table).GetSizeAttr().Get())
+    half_size = table_size / 2.0
+    world_from_table = cache.GetLocalToWorldTransform(table)
+    table_from_world = world_from_table.GetInverse()
+    table_from_world_rows = [
+        [float(table_from_world[column][row]) for column in range(4)]
+        for row in range(4)
+    ]
+    table_scale_z_m = float(
+        world_from_table.TransformDir(Gf.Vec3d(0.0, 0.0, 1.0)).GetLength()
+    )
+    if not math.isfinite(table_scale_z_m) or table_scale_z_m <= 0:
+        raise RuntimeError(f"invalid table Z scale: {table_scale_z_m}")
+
+    pair_rows = []
+    minimum_table_local_finger_z_m = math.inf
+    maximum_visual_collision_error_m = 0.0
+    for visual_path, collision_path in FINGER_MESH_PAIRS:
+        visual = stage.GetPrimAtPath(visual_path)
+        collision = stage.GetPrimAtPath(collision_path)
+        if not visual.IsA(UsdGeom.Mesh) or not collision.IsA(UsdGeom.Mesh):
+            raise RuntimeError(
+                f"supplier-CAD finger mesh missing: {visual_path}, {collision_path}"
+            )
+        if not collision.HasAPI(UsdPhysics.CollisionAPI):
+            raise RuntimeError(f"finger collider missing CollisionAPI: {collision_path}")
+        visual_world = _world_points(cache, visual)
+        collision_world = _world_points(cache, collision)
+        correspondence_error = maximum_point_error(visual_world, collision_world)
+        local_collision = points_in_table_footprint(
+            collision_world,
+            table_from_world_rows,
+            (half_size, half_size),
+        )
+        local_visual = points_in_table_footprint(
+            visual_world,
+            table_from_world_rows,
+            (half_size, half_size),
+        )
+        local_points = local_collision + local_visual
+        minimum_relative_z_m = (
+            minimum_local_z(local_points) - half_size
+        ) * table_scale_z_m
+        minimum_table_local_finger_z_m = min(
+            minimum_table_local_finger_z_m, minimum_relative_z_m
+        )
+        maximum_visual_collision_error_m = max(
+            maximum_visual_collision_error_m, correspondence_error
+        )
+        pair_rows.append(
+            {
+                "visual_path": visual_path,
+                "collision_path": collision_path,
+                "point_count": len(visual_world),
+                "inside_footprint_point_count": len(local_points),
+                "minimum_relative_z_m": minimum_relative_z_m,
+                "maximum_visual_collision_error_m": correspondence_error,
+            }
+        )
     return {
-        "minimum_collider_z_m": min(row[0] for row in collider_bounds.values()),
-        "collider_bounds_m": collider_bounds,
-        "root_aggregate_bounds_m": root_bounds,
+        "table_from_world": table_from_world_rows,
+        "table_half_size_local": half_size,
+        "table_scale_z_m": table_scale_z_m,
+        "minimum_table_local_finger_z_m": minimum_table_local_finger_z_m,
+        "maximum_visual_collision_error_m": maximum_visual_collision_error_m,
+        "finger_pairs": pair_rows,
     }
 
 
@@ -344,8 +423,8 @@ def _run_trial(
 
     from tools.isaac_sim.left_table_collision_gate import (
         ALLOWED_TIP_ROOTS,
-        TABLE_BOTTOM_Z_M,
-        BOTTOM_CROSSING_TOLERANCE_M,
+        MAX_CONTACT_SEPARATION_M,
+        MAX_TABLE_TOP_PENETRATION_M,
         TrialMetrics,
         evaluate_trial,
     )
@@ -358,7 +437,9 @@ def _run_trial(
     all_pairs: set[tuple[str, str]] = set()
     disallowed: set[tuple[str, str]] = set()
     persistent_contact_steps = 0
-    minimum_tip_z = math.inf
+    minimum_target_separation_m = math.inf
+    minimum_table_local_finger_z_m = math.inf
+    maximum_visual_collision_error_m = 0.0
     finite = True
     within_limits = True
     physx_errors: list[str] = []
@@ -406,17 +487,37 @@ def _run_trial(
 
             qpos = np.asarray(articulation.get_joint_positions(), dtype=np.float64)
             qvel = np.asarray(articulation.get_joint_velocities(), dtype=np.float64)
-            pairs = _contact_pairs(contact_state)
+            contacts = _contact_report(contact_state)
+            pairs = [row["pair"] for row in contacts]
             all_pairs.update(pairs)
             disallowed.update(_disallowed_environment_pairs(pairs, ALLOWED_TIP_ROOTS))
-            step_contact = any(_target_pair(pair, ALLOWED_TIP_ROOTS) for pair in pairs)
-            bounds = _live_tip_bounds(stage, ALLOWED_TIP_ROOTS)
-            tip_z = bounds["minimum_collider_z_m"]
-            minimum_tip_z = min(minimum_tip_z, tip_z)
+            target_separations = [
+                row["minimum_separation_m"]
+                for row in contacts
+                if _target_pair(row["pair"], ALLOWED_TIP_ROOTS)
+            ]
+            step_separation = min(target_separations, default=math.inf)
+            minimum_target_separation_m = min(
+                minimum_target_separation_m, step_separation
+            )
+            step_contact = (
+                math.isfinite(step_separation)
+                and step_separation <= MAX_CONTACT_SEPARATION_M
+            )
+            geometry = _live_finger_geometry(stage)
+            step_local_z = geometry["minimum_table_local_finger_z_m"]
+            step_correspondence = geometry["maximum_visual_collision_error_m"]
+            minimum_table_local_finger_z_m = min(
+                minimum_table_local_finger_z_m, step_local_z
+            )
+            maximum_visual_collision_error_m = max(
+                maximum_visual_collision_error_m, step_correspondence
+            )
             step_finite = bool(
                 np.all(np.isfinite(qpos))
                 and np.all(np.isfinite(qvel))
-                and math.isfinite(tip_z)
+                and math.isfinite(step_local_z)
+                and math.isfinite(step_correspondence)
             )
             step_limits = _within_limits(qpos, limits)
             finite = finite and step_finite
@@ -427,10 +528,12 @@ def _run_trial(
                     "target_deg": target_deg,
                     "shoulder_deg": math.degrees(float(qpos[shoulder_index])),
                     "shoulder_velocity_rad_s": float(qvel[shoulder_index]),
-                    "minimum_tip_z_m": tip_z,
-                    "collider_bounds_m": bounds["collider_bounds_m"],
-                    "root_aggregate_bounds_m": bounds["root_aggregate_bounds_m"],
+                    "minimum_target_separation_m": step_separation,
+                    "minimum_table_local_finger_z_m": step_local_z,
+                    "maximum_visual_collision_error_m": step_correspondence,
+                    "finger_geometry": geometry["finger_pairs"],
                     "target_contact": step_contact,
+                    "contact_report": contacts,
                     "contact_pairs": pairs,
                     "finite": step_finite,
                     "within_joint_limits": step_limits,
@@ -441,7 +544,7 @@ def _run_trial(
                 break
             if not step_limits:
                 break
-            if tip_z < TABLE_BOTTOM_Z_M - BOTTOM_CROSSING_TOLERANCE_M:
+            if step_local_z < -MAX_TABLE_TOP_PENETRATION_M:
                 break
             if disallowed:
                 break
@@ -456,22 +559,40 @@ def _run_trial(
                 world.step(render=capture and hold_step == HOLD_STEPS - 1)
                 qpos = np.asarray(articulation.get_joint_positions(), dtype=np.float64)
                 qvel = np.asarray(articulation.get_joint_velocities(), dtype=np.float64)
-                pairs = _contact_pairs(contact_state)
+                contacts = _contact_report(contact_state)
+                pairs = [row["pair"] for row in contacts]
                 all_pairs.update(pairs)
                 disallowed.update(
                     _disallowed_environment_pairs(pairs, ALLOWED_TIP_ROOTS)
                 )
-                step_contact = any(
-                    _target_pair(pair, ALLOWED_TIP_ROOTS) for pair in pairs
+                target_separations = [
+                    row["minimum_separation_m"]
+                    for row in contacts
+                    if _target_pair(row["pair"], ALLOWED_TIP_ROOTS)
+                ]
+                step_separation = min(target_separations, default=math.inf)
+                minimum_target_separation_m = min(
+                    minimum_target_separation_m, step_separation
+                )
+                step_contact = (
+                    math.isfinite(step_separation)
+                    and step_separation <= MAX_CONTACT_SEPARATION_M
                 )
                 persistent_contact_steps += int(step_contact)
-                bounds = _live_tip_bounds(stage, ALLOWED_TIP_ROOTS)
-                tip_z = bounds["minimum_collider_z_m"]
-                minimum_tip_z = min(minimum_tip_z, tip_z)
+                geometry = _live_finger_geometry(stage)
+                step_local_z = geometry["minimum_table_local_finger_z_m"]
+                step_correspondence = geometry["maximum_visual_collision_error_m"]
+                minimum_table_local_finger_z_m = min(
+                    minimum_table_local_finger_z_m, step_local_z
+                )
+                maximum_visual_collision_error_m = max(
+                    maximum_visual_collision_error_m, step_correspondence
+                )
                 step_finite = bool(
                     np.all(np.isfinite(qpos))
                     and np.all(np.isfinite(qvel))
-                    and math.isfinite(tip_z)
+                    and math.isfinite(step_local_z)
+                    and math.isfinite(step_correspondence)
                 )
                 step_limits = _within_limits(qpos, limits)
                 finite = finite and step_finite
@@ -483,10 +604,12 @@ def _run_trial(
                         "target_deg": SHOULDER_END_DEG,
                         "shoulder_deg": math.degrees(float(qpos[shoulder_index])),
                         "shoulder_velocity_rad_s": float(qvel[shoulder_index]),
-                        "minimum_tip_z_m": tip_z,
-                        "collider_bounds_m": bounds["collider_bounds_m"],
-                        "root_aggregate_bounds_m": bounds["root_aggregate_bounds_m"],
+                        "minimum_target_separation_m": step_separation,
+                        "minimum_table_local_finger_z_m": step_local_z,
+                        "maximum_visual_collision_error_m": step_correspondence,
+                        "finger_geometry": geometry["finger_pairs"],
                         "target_contact": step_contact,
+                        "contact_report": contacts,
                         "contact_pairs": pairs,
                         "finite": step_finite,
                         "within_joint_limits": step_limits,
@@ -495,7 +618,7 @@ def _run_trial(
                 if (
                     not step_finite
                     or not step_limits
-                    or tip_z < TABLE_BOTTOM_Z_M - BOTTOM_CROSSING_TOLERANCE_M
+                    or step_local_z < -MAX_TABLE_TOP_PENETRATION_M
                     or disallowed
                 ):
                     break
@@ -506,7 +629,9 @@ def _run_trial(
         )
         metrics = TrialMetrics(
             contact_pairs=sorted(all_pairs),
-            minimum_tip_z_m=minimum_tip_z,
+            minimum_target_separation_m=minimum_target_separation_m,
+            minimum_table_local_finger_z_m=minimum_table_local_finger_z_m,
+            maximum_visual_collision_error_m=maximum_visual_collision_error_m,
             final_target_error_rad=final_error,
             persistent_contact_steps=persistent_contact_steps,
             finite=finite,
@@ -582,7 +707,10 @@ def main() -> int:
             report["trials"].append(trial)
             print(
                 f"CODEX_COLLISION_TRIAL index={trial_index} status={trial['status']} "
-                f"minimum_tip_z_m={trial['metrics']['minimum_tip_z_m']} "
+                "minimum_table_local_finger_z_m="
+                f"{trial['metrics']['minimum_table_local_finger_z_m']} "
+                "minimum_target_separation_m="
+                f"{trial['metrics']['minimum_target_separation_m']} "
                 f"persistent={trial['metrics']['persistent_contact_steps']}",
                 flush=True,
             )

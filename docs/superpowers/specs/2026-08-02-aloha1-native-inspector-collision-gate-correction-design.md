@@ -83,6 +83,13 @@ Inspector to:
 - `/World/follower_left/vx300s_left/root_joint`;
 - `/World/environment/worldBody/user_confirmed_table`.
 
+Both anchors belong to one Inspector panel. In a multi-selection, Inspector no
+longer auto-expands an articulation root, so the binding explicitly adds every
+left-arm joint, rigid body, and collider beneath `vx300s_left` to that same
+panel. A second panel is not equivalent: runtime evidence showed the arm could
+reach the target while penetrating `106.7 mm` through the table when the table
+was isolated in another panel.
+
 It uses the same options as manual operation: Joint Drive target control,
 quasistatic mode enabled, fixed articulation base, and gravity disabled. The
 shoulder target change is issued through the same USD `ChangeProperty` command
@@ -103,8 +110,9 @@ posture are disposable and the process exits after writing evidence.
 
 Only after the native three-trial gate passes does a new Isaac Sim Full process
 open the same frozen Stage for the user. The existing stable startup sequence
-then selects Perspective view, creates the two Inspector panels, binds the
-exact articulation and table paths, verifies 13 joint rows and authoring state,
+then selects Perspective view, creates one Inspector panel, binds the exact
+articulation and table paths plus the required expanded left-arm physics prims,
+verifies 13 joint rows and authoring state,
 stops the timeline, and moves the window to workspace index 2.
 
 Because validation and handoff use different processes, no test posture,
@@ -134,7 +142,7 @@ The workflow fails closed and does not launch a clean handoff when:
 - a directly transformed finger vertex enters more than `0.5 mm` below the
   tabletop within its local XY footprint;
 - visual and collision finger vertices differ by more than `0.1 mm`;
-- the infeasible shoulder target is not blocked, contact is not persistent,
+- exact contact is not persistent for all 180 pressure-hold steps,
   a disallowed support contact appears, or any state is non-finite;
 - a PhysX, USD, rendering, or out-of-memory error invalidates a trial;
 - the Stage hash changes after the disposable test process exits.
@@ -175,11 +183,12 @@ Completion requires fresh evidence for all of the following:
 - exact table/finger contacts have signed separation at or below `0.5 mm`;
 - no table-local finger vertex is more than `0.5 mm` below the top plane;
 - visual/collision world-point disagreement is at most `0.1 mm`;
-- the commanded shoulder target remains infeasible and the realized joint is
-  physically blocked;
+- a second pressure target maintains exact physical contact for all 180 hold
+  steps without crossing the tabletop top plane;
 - the frozen Stage hash is unchanged and no posture is saved;
 - the final process is `isaacsim.exp.full.kit`, the Stage URL is exact, both
-  Inspector paths and joint rows are verified, Perspective is active, the
+  Inspector anchors are associated with the same panel and joint rows are
+  verified, Perspective is active, the
   timeline is stopped, and the window is on workspace index 2;
 - a final screenshot is visually inspected before the user receives control;
 - the final commit excludes runtime artifacts and unrelated dirty files.
