@@ -1,0 +1,474 @@
+{
+  "articulation_integration_status": "NOT_RUN",
+  "asset_decision": "DIAGNOSTIC_ONLY_NOT_PROMOTED",
+  "contact_dynamics_status": "NOT_RUN",
+  "coordinate_frame": "FINGER_LINK_LOCAL_METRES",
+  "determinism": {
+    "geometry_usd_hashes": [
+      "7383234fa596e891b573de95f21239ee4ca8ae0e324e6bf025344131e6c102fa",
+      "7383234fa596e891b573de95f21239ee4ca8ae0e324e6bf025344131e6c102fa"
+    ],
+    "reports": [
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/cad_compound_contact_candidate/usd_determinism/run1/report.json",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/cad_compound_contact_candidate/usd_determinism/run2/report.json"
+    ],
+    "root_usd_hashes": [
+      "8ff146fcd2101447013ef788aed3e683ec693d5aad5108c79de4c38e0f2aba6d",
+      "8ff146fcd2101447013ef788aed3e683ec693d5aad5108c79de4c38e0f2aba6d"
+    ],
+    "status": "PASS_TWO_FRESH_BUILDS_BYTE_IDENTICAL"
+  },
+  "final_or_default_collider_modified": false,
+  "inputs": {
+    "geometry": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/cad_compound_contact_candidate/compound_geometry_finger_link_local.json",
+      "deterministic_signature": "5fe1178d5802f7eee4c2e4e6c7e9525845cf3efe704952e8cc2e40e16a119593",
+      "sha256": "af270fd586ce5173d49c43093ed77d090eeb55ac9459c37d589e6c54373594e2"
+    },
+    "runtime_certificate": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_supplier_cad_compound_runtime_cooking_certificate.json",
+      "sha256": "ccc1d81bf05e60c262172327e0f685c96e4306312fe6098c8516d5586d173f12",
+      "status": "PASS_RUNTIME_COOKED_CONTACT_REGION_GEOMETRY_NOT_PROMOTED"
+    }
+  },
+  "outputs": {
+    "geometry_usd": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_compound_contact_candidate/geometry/supplier_cad_compound_contact_candidate.usda",
+      "sha256": "7383234fa596e891b573de95f21239ee4ca8ae0e324e6bf025344131e6c102fa"
+    },
+    "root_usd": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_compound_contact_candidate/aloha1_supplier_cad_compound_contact_candidate.usda",
+      "sha256": "8ff146fcd2101447013ef788aed3e683ec693d5aad5108c79de4c38e0f2aba6d"
+    }
+  },
+  "readback": {
+    "all_approximations_convex_hull": true,
+    "collision_piece_count": 68,
+    "collision_records": [
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/left_finger/piece_000",
+        "point_count": 14,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/left_finger/piece_001",
+        "point_count": 10,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/left_finger/piece_002",
+        "point_count": 21,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/left_finger/piece_003",
+        "point_count": 18,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/left_finger/piece_004",
+        "point_count": 16,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/left_finger/piece_005",
+        "point_count": 14,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/left_finger/piece_006",
+        "point_count": 22,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/left_finger/piece_007",
+        "point_count": 13,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/left_finger/piece_008",
+        "point_count": 13,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/left_finger/piece_009",
+        "point_count": 15,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/left_finger/piece_010",
+        "point_count": 17,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/left_finger/piece_011",
+        "point_count": 12,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/left_finger/piece_012",
+        "point_count": 19,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/left_finger/piece_013",
+        "point_count": 11,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/left_finger/piece_014",
+        "point_count": 15,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/left_finger/piece_015",
+        "point_count": 12,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/left_finger/piece_016",
+        "point_count": 17,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/left_finger/piece_017",
+        "point_count": 19,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/left_finger/piece_018",
+        "point_count": 13,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/left_finger/piece_019",
+        "point_count": 17,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/left_finger/piece_020",
+        "point_count": 10,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/left_finger/piece_021",
+        "point_count": 9,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/left_finger/piece_022",
+        "point_count": 13,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/left_finger/piece_023",
+        "point_count": 23,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/left_finger/piece_024",
+        "point_count": 21,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/left_finger/piece_025",
+        "point_count": 16,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/left_finger/piece_026",
+        "point_count": 20,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/left_finger/piece_027",
+        "point_count": 14,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/left_finger/piece_028",
+        "point_count": 18,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/left_finger/piece_029",
+        "point_count": 15,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/left_finger/piece_030",
+        "point_count": 11,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/left_finger/piece_031",
+        "point_count": 15,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/left_finger/piece_032",
+        "point_count": 6,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/left_finger/piece_033",
+        "point_count": 6,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/right_finger/piece_000",
+        "point_count": 25,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/right_finger/piece_001",
+        "point_count": 19,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/right_finger/piece_002",
+        "point_count": 15,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/right_finger/piece_003",
+        "point_count": 22,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/right_finger/piece_004",
+        "point_count": 16,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/right_finger/piece_005",
+        "point_count": 13,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/right_finger/piece_006",
+        "point_count": 17,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/right_finger/piece_007",
+        "point_count": 15,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/right_finger/piece_008",
+        "point_count": 12,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/right_finger/piece_009",
+        "point_count": 15,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/right_finger/piece_010",
+        "point_count": 9,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/right_finger/piece_011",
+        "point_count": 21,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/right_finger/piece_012",
+        "point_count": 13,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/right_finger/piece_013",
+        "point_count": 12,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/right_finger/piece_014",
+        "point_count": 21,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/right_finger/piece_015",
+        "point_count": 14,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/right_finger/piece_016",
+        "point_count": 17,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/right_finger/piece_017",
+        "point_count": 15,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/right_finger/piece_018",
+        "point_count": 18,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/right_finger/piece_019",
+        "point_count": 11,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/right_finger/piece_020",
+        "point_count": 12,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/right_finger/piece_021",
+        "point_count": 14,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/right_finger/piece_022",
+        "point_count": 21,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/right_finger/piece_023",
+        "point_count": 12,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/right_finger/piece_024",
+        "point_count": 20,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/right_finger/piece_025",
+        "point_count": 16,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/right_finger/piece_026",
+        "point_count": 11,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/right_finger/piece_027",
+        "point_count": 16,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/right_finger/piece_028",
+        "point_count": 12,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/right_finger/piece_029",
+        "point_count": 16,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/right_finger/piece_030",
+        "point_count": 11,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/right_finger/piece_031",
+        "point_count": 10,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/right_finger/piece_032",
+        "point_count": 6,
+        "type_name": "Mesh"
+      },
+      {
+        "approximation": "convexHull",
+        "path": "/CadFingerCompoundContactCandidate/right_finger/piece_033",
+        "point_count": 6,
+        "type_name": "Mesh"
+      }
+    ],
+    "default_prim": "/CadFingerCompoundContactCandidate",
+    "forbidden_dynamic_schemas": [],
+    "meters_per_unit": 1.0,
+    "references": [
+      {
+        "asset_path": "geometry/supplier_cad_compound_contact_candidate.usda",
+        "prim_path": "/CadFingerCompoundContactCandidate"
+      }
+    ],
+    "root_prim_valid": true,
+    "sublayers": [],
+    "up_axis": "Z"
+  },
+  "schema_version": 1,
+  "scope": "GEOMETRY_ONLY_NOT_ARTICULATION_NOT_CONTACT_DYNAMICS",
+  "status": "PASS_GEOMETRY_ONLY_DIAGNOSTIC_USD",
+  "timeline_status": "NOT_RUN"
+}

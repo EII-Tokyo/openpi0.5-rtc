@@ -1,5 +1,5 @@
 {
-  "deterministic_signature": "0492dc00de0776a653b2ba922931a3a73968b614822cd55de468398ed5061715",
+  "deterministic_signature": "78717ac316855f20becfd89ba935b730d5a962f49f84787a4e5842d3a9ea30f6",
   "existing_static_collision_gate": "PASS",
   "existing_swept_collision_gate": "PASS",
   "final_or_default_asset_modified": false,
@@ -74,9 +74,19 @@
       "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_supplier_cad_finger_brep_cooked_certificate.json",
       "sha256": "c2f3f5450662b4edc1370f18c226d07d612190c51894ad790f9446ea69ebbe4c",
       "status": "PASS_DETERMINISTIC_MEASUREMENT_FAIL_EXACT_SURFACE_GATE"
+    },
+    {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_supplier_cad_compound_runtime_cooking_certificate.json",
+      "sha256": "ccc1d81bf05e60c262172327e0f685c96e4306312fe6098c8516d5586d173f12",
+      "status": "PASS_RUNTIME_COOKED_CONTACT_REGION_GEOMETRY_NOT_PROMOTED"
+    },
+    {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_supplier_cad_compound_contact_usd.json",
+      "sha256": "601c4127150d3b1f46d5991ec02542ea130b526e481843f568cb316454238e26",
+      "status": "PASS_GEOMETRY_ONLY_DIAGNOSTIC_USD"
     }
   ],
-  "interpretation": "The former bar/prop/wrist identity blockers are resolved by explicit source boundaries: the supplier STEP remains fused/invalid where observed, while byte-identical pinned Interbotix link meshes provide robot-description geometry. Every physical link has a deterministic finite-sample convex-hull surface/volume certificate. Exact trimmed B-Rep sampling further proves that both the current single hull and default 32-piece decomposition cross each handed finger's inward CAD face beyond a derived numerical floor; decomposition improves the left crossing but worsens the right and is not promoted. The contract remains PARTIAL because the task-local acceptable approximation error has not been derived or measured; no tolerance was fitted from successful grasp videos.",
+  "interpretation": "The former bar/prop/wrist identity blockers are resolved by explicit source boundaries: the supplier STEP remains fused/invalid where observed, while byte-identical pinned Interbotix link meshes provide robot-description geometry. Every physical link has a deterministic finite-sample convex-hull surface/volume certificate. Exact trimmed B-Rep sampling proves that both the current single hull and default 32-piece decomposition cross the inward CAD face; neither is promoted. A CAD-derived compound candidate now passes two fresh finger-link-local PhysX cooking runs for its central contact rectangle, and its 68-piece geometry-only USD is byte-deterministic. This resolves the local crossing construction without fitting successful grasp data, but the candidate explicitly covers only the central contact region and is not integrated into an articulation. The contract remains PARTIAL because full effective contact-surface/task-local acceptance and remaining physical dynamics mappings are not yet proven.",
   "invalid_brep_blockers": [],
   "link_identity_resolution": "PASS",
   "resolved_source_boundary_records": [
@@ -181,6 +191,16 @@
     "sha256": "337862418769d4ea8b801d26e68930c4412f870050e60769bbf91765194dc571"
   },
   "status": "PARTIAL",
+  "supplier_finger_compound_asset_decision": "DIAGNOSTIC_ONLY_NOT_PROMOTED",
+  "supplier_finger_compound_contact_region_gates": {
+    "left": "PASS",
+    "right": "PASS"
+  },
+  "supplier_finger_compound_coordinate_frame": "FINGER_LINK_LOCAL_METRES",
+  "supplier_finger_compound_full_face_scope": "PARTIAL_CONTACT_REGION_ONLY",
+  "supplier_finger_compound_runtime_status": "PASS_RUNTIME_COOKED_CONTACT_REGION_GEOMETRY_NOT_PROMOTED",
+  "supplier_finger_compound_usd_piece_count": 68,
+  "supplier_finger_compound_usd_status": "PASS_GEOMETRY_ONLY_DIAGNOSTIC_USD",
   "supplier_finger_decomposition_comparison": "DECOMPOSITION_MIXED_OR_WORSE",
   "supplier_finger_exact_asset_decision": "REJECTED_EXACT_CAD_CONTACT_GATE",
   "supplier_finger_exact_brep_gate": "ALL_PROFILES_CROSS_INWARD_CAD_SURFACE",
