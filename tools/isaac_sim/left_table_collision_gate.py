@@ -58,6 +58,25 @@ def _is_target_pair(pair: tuple[str, str]) -> bool:
     )
 
 
+def settled_support_step(
+    *,
+    target_contact_seen: bool,
+    physical_contact: bool,
+    minimum_table_local_finger_z_m: float,
+) -> bool:
+    """Count settled tabletop support after PhysX stops reporting a sleeping pair."""
+
+    if physical_contact:
+        return True
+    return (
+        target_contact_seen
+        and math.isfinite(minimum_table_local_finger_z_m)
+        and -MAX_TABLE_TOP_PENETRATION_M
+        <= minimum_table_local_finger_z_m
+        <= MAX_CONTACT_SEPARATION_M
+    )
+
+
 def evaluate_trial(metrics: TrialMetrics) -> dict[str, Any]:
     """Evaluate one trial without importing Isaac Sim or USD modules."""
 

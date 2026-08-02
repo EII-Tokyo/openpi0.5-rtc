@@ -26,6 +26,7 @@ from tools.isaac_sim.left_table_collision_gate import (
     MAX_CONTACT_SEPARATION_M,
     TrialMetrics,
     evaluate_trial,
+    settled_support_step,
 )
 from tools.isaac_sim.left_inspector_startup import target_change_is_isolated
 from tools.isaac_sim.verify_left_table_collision import (
@@ -255,6 +256,8 @@ def _new_accumulator() -> dict[str, Any]:
         "minimum_table_local_finger_z_m": math.inf,
         "maximum_visual_collision_error_m": 0.0,
         "physical_contact_steps": 0,
+        "supported_contact_steps": 0,
+        "target_contact_seen": False,
         "native_steps": 0,
         "samples": [],
     }
@@ -285,7 +288,17 @@ def _sample_step(stage: Any, interface: Any, accumulator: dict[str, Any]) -> Non
     )
     accumulator["native_steps"] += 1
     physical = math.isfinite(separation) and separation <= MAX_CONTACT_SEPARATION_M
+    if physical:
+        accumulator["target_contact_seen"] = True
+    supported = settled_support_step(
+        target_contact_seen=accumulator["target_contact_seen"],
+        physical_contact=physical,
+        minimum_table_local_finger_z_m=geometry[
+            "minimum_table_local_finger_z_m"
+        ],
+    )
     accumulator["physical_contact_steps"] += int(physical)
+    accumulator["supported_contact_steps"] += int(supported)
     if accumulator["native_steps"] in (1, 30, 60, 90, 120, 150, 180):
         accumulator["samples"].append(
             {
@@ -298,6 +311,7 @@ def _sample_step(stage: Any, interface: Any, accumulator: dict[str, Any]) -> Non
                     "maximum_visual_collision_error_m"
                 ],
                 "physical_contact": physical,
+                "supported_contact": supported,
             }
         )
 
@@ -484,7 +498,7 @@ async def _run_trial() -> None:
                 hold["maximum_visual_collision_error_m"],
             ),
             final_target_error_rad=final_target_error_rad,
-            persistent_contact_steps=int(hold["physical_contact_steps"]),
+            persistent_contact_steps=int(hold["supported_contact_steps"]),
             finite=all(
                 math.isfinite(value)
                 for value in (
@@ -513,6 +527,9 @@ async def _run_trial() -> None:
                 "approach_native_steps": int(approach["native_steps"]),
                 "hold_native_steps": int(hold["native_steps"]),
                 "hold_physical_contact_steps": int(hold["physical_contact_steps"]),
+                "hold_supported_contact_steps": int(
+                    hold["supported_contact_steps"]
+                ),
                 "approach_samples": approach["samples"],
                 "hold_samples": hold["samples"],
                 "joint_row_count": len(joint_rows),

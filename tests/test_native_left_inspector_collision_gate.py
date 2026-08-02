@@ -135,6 +135,8 @@ def test_native_trial_exercises_single_joint_inspector_callback():
         '"stage_selection_after_isolation"',
         '"inspector_selection_after_isolation"',
         '"selected_joint_paths_after_isolation"',
+        '"supported_contact_steps"',
+        '"hold_supported_contact_steps"',
         '"drive_targets_before"',
         '"drive_targets_after_single_joint_edit"',
         '"drive_targets_after_probe_restore"',

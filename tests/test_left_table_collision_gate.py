@@ -6,6 +6,7 @@ from tools.isaac_sim.left_table_collision_gate import (
     TrialMetrics,
     aggregate_trials,
     evaluate_trial,
+    settled_support_step,
 )
 
 
@@ -74,6 +75,24 @@ def test_visual_collision_mismatch_fails_closed():
 
     assert result["status"] == "FAIL"
     assert "visual_collision_mismatch" in result["failure_reasons"]
+
+
+def test_settled_support_requires_prior_contact_and_tabletop_tolerance():
+    assert settled_support_step(
+        target_contact_seen=True,
+        physical_contact=False,
+        minimum_table_local_finger_z_m=-0.0000218,
+    )
+    assert not settled_support_step(
+        target_contact_seen=False,
+        physical_contact=False,
+        minimum_table_local_finger_z_m=-0.0000218,
+    )
+    assert not settled_support_step(
+        target_contact_seen=True,
+        physical_contact=False,
+        minimum_table_local_finger_z_m=-0.001,
+    )
 
 
 def test_exactly_three_passing_trials_are_required():
