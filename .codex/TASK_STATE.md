@@ -1,5 +1,50 @@
 # Task State
 
+## 2026-08-03 follower_left no-motion synchronized interlock
+
+- Legacy ROS1 `puppet_left` is the current `follower_left` role. The user
+  explicitly waived tabletop/workspace clearing as a motion gate; clutter is
+  retained only as a non-blocking observation.
+- Frozen Stage/manifest/finger-limit hashes and `LoadAll` composition passed.
+  Both follower articulation roots are present; `upAxis=Z` and
+  `metersPerUnit=1`.
+- Controlled render A/B changed only `headless`:
+  - GUI on workspace 2 aborted at physics frame 1 because render latency made
+    it `27.696179 ms` late, above the strict 60 Hz one-period deadline. This is
+    `GUI_RENDERING_EXCEEDED_STRICT_FRAME_DEADLINE`, not a Stage or physics
+    failure.
+  - Headless completed 2220/2220 frames with start skew `81 ns`, maximum
+    lateness `79,913 ns`, no burst catch-up and the already-qualified signature
+    `d93ae226dcb2a11a728f4abda1dc821867d1eae0893c3cc01fdb4e8113696562`.
+  - Authoritative Isaac synchronization must remain headless; any live GUI
+    observer must be decoupled from its safety-critical clock.
+- 103 read-only observation saved 9000 JointState rows over `89.989079347 s`.
+  Maximum position span was `0.0030679702758789062`; both command topics had
+  no publishers and diagnostic command count was zero. cam_high captured and
+  published 5400/5400 frames with zero hardware resets.
+- Newly identified motion gate: the real follower is not at manifest Home.
+  Maximum arm error from Home is `1.5837285041809082 rad`; maximum error from
+  the selected Sleep is `0.31372850418090814 rad`. Directly publishing the
+  first Home sample would create an implicit large preposition step while the
+  digital Stage starts at Home.
+- The user corrected the formal initialization: both real and digital
+  follower_left must start from the same Sleep state, then run three
+  `Sleep -> Home -> Sleep` cycles. The frozen runtime-measured Sleep reference
+  is the median of 9000 samples:
+  `[0, -1.845378995, 1.622951746, -0.006135923, -1.883728504,
+  -0.006135923] rad`. It is runtime evidence, not the historical official
+  Sleep vector. Digital initialization and a predeclared real-readback gate
+  must use this exact reference. Real motion still requires fresh explicit
+  authorization.
+- The real capture overlapped only the first approximately `4.69 s` of the
+  controlled headless run; no complete live three-cycle correspondence is
+  claimed.
+- `ros_master` and the torque-enabled `puppet_left` driver remain running on
+  103. No real motion occurred. No source/final/default asset changed. Task 8
+  remains `COMPLETE_WITH_NO_PROMOTION`.
+- Report:
+  `reports/aloha1_mapping/aloha1_home_sleep_no_motion_interlock.json/.md`.
+
 ## 2026-08-03 follower_left live read-only runtime qualification
 
 - User-authorized scope was limited to deploying isolated diagnostics under

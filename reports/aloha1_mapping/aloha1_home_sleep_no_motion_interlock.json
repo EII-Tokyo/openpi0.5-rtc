@@ -1,0 +1,171 @@
+{
+  "schema_version": 1,
+  "status": "PARTIAL_SLEEP_REFERENCE_REPLAN_REQUIRED",
+  "scope": "ALOHA1_FOLLOWER_LEFT_NO_MOTION_INTERLOCK",
+  "terminology": {
+    "legacy_ros1_name": "puppet_left",
+    "current_role": "follower_left",
+    "mapping_status": "VERIFIED_SAME_ROBOT_ROLE"
+  },
+  "authorization": {
+    "real_driver_readback": true,
+    "cam_high_readback": true,
+    "real_motion": false,
+    "real_commands_published": 0,
+    "workspace_clearance_required_by_user": false
+  },
+  "frozen_inputs": {
+    "stage": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "sha256": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9",
+      "default_prim": "/World",
+      "up_axis": "Z",
+      "meters_per_unit": 1.0,
+      "load_all_required_prims_present": true
+    },
+    "manifest": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_home_sleep_command_manifest.json",
+      "sha256": "e9b18a154569945127779dfe74bee62e7c2db0a8d1dd320e802aaade7bf76087",
+      "command_signature": "d481b71bc8d6160fae0bdc1b264715e782712565064bb18099f8a9a4883f499e",
+      "sample_count": 1850
+    },
+    "finger_limit_layer": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/finger_limit_pair_collision_candidate/1.0/configuration/finger_source_limits.usda",
+      "sha256": "2547e6fb374c213b5c6c54f200c7ced37605ab0e1a11735d0a32c0a231fd260f"
+    }
+  },
+  "controlled_render_ab": {
+    "only_changed_variable": "headless_render_mode",
+    "gui": {
+      "status": "ABORTED_DEADLINE_MISS",
+      "workspace_number": 2,
+      "x11_desktop_index": 1,
+      "completed_physics_frames": 1,
+      "expected_physics_frames": 2220,
+      "start_skew_ns": 76,
+      "maximum_lateness_ns": 27696179,
+      "allowed_lateness_ns": 16666666,
+      "classification": "GUI_RENDERING_EXCEEDED_STRICT_FRAME_DEADLINE",
+      "report": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-synchronized-real-sim/no_motion_interlock_attempt1/isaac_report.json",
+        "sha256": "735ca984faf4385b36a5117d6f2af00ed580980d81a3b76000b7b2c26fb6e19f"
+      },
+      "telemetry_sha256": "4923be1dfde840d568bf5602034268b627933174bb5943a311be53c6078daf76",
+      "log_sha256": "801c6f9ca1ccf128aebaa48e8607cc136eae7261d5f0224ab404f1250778f6e7"
+    },
+    "headless": {
+      "status": "PASS",
+      "completed_physics_frames": 2220,
+      "expected_physics_frames": 2220,
+      "start_skew_ns": 81,
+      "maximum_lateness_ns": 79913,
+      "burst_catchup_used": false,
+      "normalized_numeric_signature": "d93ae226dcb2a11a728f4abda1dc821867d1eae0893c3cc01fdb4e8113696562",
+      "runtime": {
+        "isaac_sim": "5.1.0.0",
+        "kit": "107.3.3",
+        "physx": "107.3.26"
+      },
+      "report": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-synchronized-real-sim/no_motion_interlock_attempt2_headless/isaac_report.json",
+        "sha256": "176d2a0e70e51fcba416705d0220aeac5053140ce94f4ff648467a0862e348cd"
+      },
+      "telemetry": {
+        "row_count": 2220,
+        "sha256": "2a7307c93c3eb2e0f8a472f8aa849e4831fc795ea93ef16e651d0350176576dc"
+      },
+      "log_sha256": "162507394a0303cc8623200ad3bc01582c97bacd5cd9eb4629b3eba10f015c8b"
+    },
+    "conclusion": "STRICT_HEADLESS_SYNCHRONIZATION_PASS_GUI_OBSERVER_MUST_BE_DECOUPLED"
+  },
+  "real_read_only_observation": {
+    "host": "192.168.1.103",
+    "namespace": "/puppet_left",
+    "status": "PASS_STATIONARY_READBACK",
+    "joint_order": [
+      "waist",
+      "shoulder",
+      "elbow",
+      "forearm_roll",
+      "wrist_angle",
+      "wrist_rotate",
+      "gripper",
+      "left_finger",
+      "right_finger"
+    ],
+    "joint_state_rows": 9000,
+    "duration_s": 89.989079347,
+    "first_position_rad_or_m": [
+      0.0,
+      -1.8453789949417114,
+      1.6229517459869385,
+      -0.006135923322290182,
+      -1.8837285041809082,
+      -0.006135923322290182,
+      0.6887574195861816,
+      0.04572412371635437,
+      -0.04572412371635437
+    ],
+    "last_position_rad_or_m": [
+      0.0,
+      -1.8453789949417114,
+      1.6229517459869385,
+      -0.006135923322290182,
+      -1.8837285041809082,
+      -0.006135923322290182,
+      0.6887574195861816,
+      0.04572412371635437,
+      -0.04572412371635437
+    ],
+    "maximum_observed_span_rad_or_m": 0.0030679702758789062,
+    "arm_max_abs_error_from_manifest_home_rad": 1.5837285041809082,
+    "arm_max_abs_error_from_selected_sleep_rad": 0.31372850418090814,
+    "arm_command_publishers": [],
+    "gripper_command_publishers": [],
+    "commands_published_by_diagnostics": 0,
+    "joint_state_csv": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-synchronized-real-sim/no_motion_interlock_attempt2_headless/real_observation/puppet_left_joint_states_no_motion.csv",
+      "sha256": "2967e97c59ede8620cad70e806cc4779cb6c87e9660c44af40c9313f2ddef1e3"
+    },
+    "cam_high": {
+      "status": "PASS_CAM_HIGH_SINGLE_CAMERA_RUNTIME",
+      "serial": "130322270656",
+      "resolution": [640, 480],
+      "fps": 60,
+      "frames_captured": 5400,
+      "frames_published": 5400,
+      "hardware_resets": 0,
+      "robot_command_publishers": 0,
+      "report_sha256": "23e9e458dd17cf80473fd8113cd95f4186236b1d868d6438f6a4427610812750",
+      "first_frame_sha256": "76478e3e406aeaac89d1b65c8d840494018baf0bb7e813a0590e957949d6daf7",
+      "visual_review": "PASS_CAM_HIGH_SCENE_VISIBLE_WORKSPACE_CLUTTER_NON_BLOCKING_BY_USER_AUTHORIZATION"
+    }
+  },
+  "observation_overlap": {
+    "status": "PARTIAL_FIRST_4_69_SECONDS_ONLY",
+    "estimated_overlap_s": 4.692269298,
+    "clock_readback_skew_ms": 1.454166,
+    "full_three_cycle_overlap_claimed": false,
+    "reason": "the controlled headless rerun began near the end of the already-running 90-second read-only capture"
+  },
+  "initialization_gate": {
+    "status": "BLOCKED_OLD_HOME_INITIALIZED_MANIFEST",
+    "reason": "real follower_left is not at the manifest Home initial state while the digital Stage is initialized at Home",
+    "forbidden_next_action": "publish the first Home sample as an implicit large-step preposition command",
+    "user_selected_correction": "initialize both real and digital follower_left at the same Sleep state",
+    "runtime_measured_sleep_reference_rad": [
+      0.0,
+      -1.8453789949417114,
+      1.6229517459869385,
+      -0.006135923322290182,
+      -1.8837285041809082,
+      -0.006135923322290182
+    ],
+    "runtime_reference_provenance": "median of 9000 stationary machine-103 JointState samples",
+    "runtime_reference_is_official_historical_sleep": false,
+    "required_next_design": "initialize the digital follower_left from the frozen runtime-measured Sleep reference, verify the real readback remains within a predeclared tolerance, then execute three formal Sleep-Home-Sleep cycles",
+    "requires_fresh_real_motion_authorization": true
+  },
+  "source_or_final_asset_modified": false,
+  "task8": "COMPLETE_WITH_NO_PROMOTION"
+}

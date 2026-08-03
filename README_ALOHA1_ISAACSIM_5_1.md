@@ -72,7 +72,8 @@ sim-to-real dynamics model and it is not yet accepted for bottle insertion.
 | Task 8 collider LOD candidate | **NO_MEASURABLE_IMPROVEMENT** | isolated upper-arm candidate reduced authored convex pieces 8 → 2 and passed cooking/swept/smoke comparison, but fresh-process timing ranges overlap and the candidate is not promoted |
 | Home→Sleep→Home digital twin | **PASS / selected historical official Sleep** | user-selected official historical ALOHA Sleep `[0, -1.80, 1.55, 0, -1.57, 0]` passes all 1850 modeled command samples and two fresh Isaac 5.1 runs with identical numeric signatures; the current Humble vector remains an out-of-limit comparison only |
 | Synchronized real/sim offline bridge | **READY_FOR_SUPERVISED_REAL_EXECUTION** | fake three-worker protocol, deferred ROS1 adapter, two fresh Isaac regressions and one 37 s monotonic-paced Isaac run pass; this is readiness only, not real/digital correspondence |
-| follower_left live read-only bridge | **PASS read-only / motion NOT_RUN** | isolated `puppet_left` driver and exact `cam_high` probe passed; explicit joint order and position modes were read back, 1200 camera frames were captured, diagnostics published zero robot commands; workspace and stop/hold motion gates remain open |
+| follower_left live read-only bridge | **PASS read-only / motion NOT_RUN** | isolated `puppet_left` driver and exact `cam_high` probe passed; explicit joint order and position modes were read back, 1200 camera frames were captured, diagnostics published zero robot commands; tabletop clutter is user-accepted and non-blocking, while stop/hold and motion authorization remain open |
+| follower_left no-motion synchronized interlock | **PARTIAL / Sleep-reference replan required** | strict headless Isaac completed 2220/2220 frames, while GUI rendering correctly tripped the deadline gate; 103 remained stationary with zero command publishers, but its current pose differs from manifest Home by up to `1.5837 rad`, so the sequence must be rebuilt as shared-Sleep initialization followed by `Sleep → Home → Sleep` |
 | Home→Sleep→Home real robot | **NOT_RUN_AUTHORIZATION_REQUIRED** | offline preflight and 1850-sample dry-run performed no network, SSH, ROS, serial, torque or command publication; digital PASS does not authorize hardware motion |
 
 `PASS`, `FAIL`, and `PARTIAL` are literal machine-report values. A clean
@@ -218,6 +219,26 @@ readback. Machine reports:
 
 - `reports/aloha1_mapping/aloha1_home_sleep_sync_live_readback.json`;
 - `reports/aloha1_mapping/aloha1_home_sleep_sync_live_readback.md`.
+
+The subsequent no-motion synchronized interlock supersedes workspace
+clearance as a gate: the user explicitly accepted the current tabletop, so
+clutter is now non-blocking. It also exposed a more important initialization
+boundary. The real follower currently differs from manifest Home by as much as
+`1.5837285042 rad`, while the digital Stage starts at Home. A direct first Home
+sample would therefore be an implicit large real preposition step. The user
+selected a shared Sleep initialization followed by three
+`Sleep -> Home -> Sleep` cycles. The runtime-measured six-joint Sleep reference
+is frozen from the median of 9000 stationary real samples; it is not relabeled
+as the historical official Sleep vector. Real motion remains subject to a
+separate explicit authorization.
+
+The same run demonstrated that strict 60 Hz pacing must not share a process
+with the GUI renderer: GUI mode missed frame 1 by `27.696179 ms`, while the
+controlled headless run passed all 2220 frames with maximum lateness
+`79.913 us` and the existing deterministic signature. The authoritative
+synchronized worker remains headless; a future GUI observer must be decoupled.
+Report:
+`reports/aloha1_mapping/aloha1_home_sleep_no_motion_interlock.json/.md`.
 
 At the earlier 103 read-only static preflight, the result was
 `PARTIAL_RUNTIME_STACK_STOPPED`. That inspection was restricted to
