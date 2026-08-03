@@ -1,0 +1,29 @@
+services:
+  aloha_ros_nodes:
+    volumes:
+      - ./.codex/runtime/aloha1_home_sleep_live_readback/aloha1_home_sleep_puppet_left_only_candidate.launch:/root/interbotix_ws/src/aloha/launch/aloha1_home_sleep_puppet_left_only_candidate.launch:ro
+    command: >-
+      roslaunch --wait aloha
+      aloha1_home_sleep_puppet_left_only_candidate.launch
+
+  aloha_cam_high_probe:
+    image: lyl472324464/robot:aloha-ros1.0
+    depends_on:
+      - ros_master
+    init: true
+    network_mode: host
+    privileged: true
+    volumes:
+      - /dev:/dev
+      - ./.codex/runtime/aloha1_home_sleep_live_readback/probe_aloha1_cam_high_ros1.py:/diagnostic/probe_aloha1_cam_high_ros1.py:ro
+      - ./.codex/runtime/aloha1_home_sleep_live_readback/output:/diagnostic/output
+    command:
+      - python3
+      - /diagnostic/probe_aloha1_cam_high_ros1.py
+      - --execute-camera-hardware
+      - --max-frames
+      - "600"
+      - --output
+      - /diagnostic/output/cam_high_probe.json
+      - --snapshot
+      - /diagnostic/output/cam_high_first_frame.jpg
