@@ -12,6 +12,7 @@ from tools.audit_aloha1_task8_baseline import start_usd_runtime_if_needed
 from tools.benchmark_aloha1_task8_stage import _measurement_dict
 from tools.benchmark_aloha1_task8_stage import align_physics_samples
 from tools.benchmark_aloha1_task8_stage import select_target_waypoint
+from tools.build_aloha1_task8_final_closure import build_closure
 from tools.build_aloha1_task8_progression_authorization import build_report
 from tools.build_aloha1_task8_visual_material_candidate import _bound_visual_material_count
 
@@ -363,3 +364,24 @@ def test_task8_benchmark_comparison_uses_nonoverlapping_fresh_process_ranges() -
     assert improved["classification"] == "IMPROVES_NONOVERLAPPING_RANGE"
     assert worsened["classification"] == "WORSENS_NONOVERLAPPING_RANGE"
     assert overlap["classification"] == "INCONCLUSIVE_OVERLAPPING_RANGE"
+
+
+def test_task8_final_closure_promotes_nothing() -> None:
+    closure = build_closure(
+        visual={
+            "classification": "NO_MEASURABLE_IMPROVEMENT",
+            "candidate": {"candidate_promoted": False},
+        },
+        collider={
+            "status": "NO_MEASURABLE_IMPROVEMENT",
+            "candidate_promoted": False,
+            "final_or_default_asset_modified": False,
+        },
+    )
+
+    assert closure["task8_status"] == "COMPLETE"
+    assert closure["task8_result"] == "COMPLETE_WITH_NO_PROMOTION"
+    assert closure["visual_material_candidate"] == "NO_MEASURABLE_IMPROVEMENT"
+    assert closure["collider_lod_candidate"] == "NO_MEASURABLE_IMPROVEMENT"
+    assert closure["candidate_promoted"] is False
+    assert closure["final_default_asset_modified"] is False

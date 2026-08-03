@@ -68,11 +68,26 @@ sim-to-real dynamics model and it is not yet accepted for bottle insertion.
 | Physics timestep/solver convergence | **PARTIAL** | every 60-960 Hz frozen-model cell still completes the grasp, but successive trajectory differences exceed the independently frozen geometry/encoder bounds; no timestep is selected and solver sweeps are not admitted |
 | Force-drive physical derivation | **HARD_BLOCKER** | Gain Tuner 3.0.6 equations and SI units are verified; effective gripper mass, declared/identified response, loaded linkage efficiency and continuous force envelope are missing, so no candidate or scan is authored |
 | Contact material / continuous duty | **HARD_BLOCKER** | runtime material binding is verified, but friction `0.7` remains `TEMPORARY_UNCALIBRATED`; exact surface-pair properties and a measured loaded thermal envelope are absent |
-| Task 8 optimization | **AUTHORIZED / IN_PROGRESS** | strict model-proof findings are retained as non-blocking reminders; isolated approximate candidates may proceed, while final/default promotion remains separate |
+| Task 8 optimization | **COMPLETE / NO_PROMOTION** | both isolated candidates are closed as `NO_MEASURABLE_IMPROVEMENT`; strict model-proof findings are retained as non-blocking reminders, final/default assets remain unchanged, and Task 8 reopens only by explicit request or a profiler-backed new bottleneck |
 | Task 8 collider LOD candidate | **NO_MEASURABLE_IMPROVEMENT** | isolated upper-arm candidate reduced authored convex pieces 8 → 2 and passed cooking/swept/smoke comparison, but fresh-process timing ranges overlap and the candidate is not promoted |
 
 `PASS`, `FAIL`, and `PARTIAL` are literal machine-report values. A clean
 viewport is not an acceptance criterion.
+
+## 2026-08-03 Task 8 final closure
+
+Task 8 is formally `COMPLETE_WITH_NO_PROMOTION`. The isolated visual-material
+and collider-LOD candidates are both `NO_MEASURABLE_IMPROVEMENT`; neither is
+promoted and no final/default asset is modified. The machine-readable closure
+is `reports/aloha1_mapping/aloha1_task8_final_closure.json/.md` with
+deterministic signature
+`7771a79b3c579f235443a29dad491cda50f4e0db54bcfe6758d160380838cdfa`.
+
+The next active scope is `ALOHA1_REAL_SIM_HOME_SIGNAL_CORRESPONDENCE`: first
+qualify three uninterrupted `Home -> Sleep -> Home` cycles on digital
+`follower_left`, then prepare a separately authorized real-robot comparison.
+This status change does not authorize access to `192.168.1.103` or any real
+motion and does not claim calibrated dynamic sim-to-real behavior.
 
 ## 2026-08-02 Task 8 authorization boundary
 

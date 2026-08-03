@@ -1,0 +1,28 @@
+{
+  "candidate_promoted": false,
+  "classification": "ALOHA1_TASK8_FINAL_CLOSURE",
+  "collider_lod_candidate": "NO_MEASURABLE_IMPROVEMENT",
+  "deterministic_signature": "7771a79b3c579f235443a29dad491cda50f4e0db54bcfe6758d160380838cdfa",
+  "final_default_asset_modified": false,
+  "inputs": {
+    "collider_comparison": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task8_comparison.json",
+      "sha256": "ae3dc4dd41d483165e5dee27a87916fc2540002005894fd0b0fc1a72710ed369"
+    },
+    "visual_benchmark": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task8_benchmark_comparison.json",
+      "sha256": "77e4eaa60bc03558ee4133cc4d18e8f3f22e2643a59d394f56f2e925f584ff42"
+    },
+    "visual_candidate": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task8_visual_material_candidate.json",
+      "sha256": "d20722e94fa9bfa3582d0d79aa32b6c403c34f83af8425ce3f2dee8a338aee65"
+    }
+  },
+  "next_scope": "ALOHA1_REAL_SIM_HOME_SIGNAL_CORRESPONDENCE",
+  "reopen_policy": "EXPLICIT_USER_REQUEST_OR_PROFILER_IDENTIFIED_NEW_BOTTLENECK",
+  "schema_version": 1,
+  "status": "PASS",
+  "task8_result": "COMPLETE_WITH_NO_PROMOTION",
+  "task8_status": "COMPLETE",
+  "visual_material_candidate": "NO_MEASURABLE_IMPROVEMENT"
+}

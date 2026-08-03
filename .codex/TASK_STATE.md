@@ -1,5 +1,21 @@
 # Task State
 
+## 2026-08-03 Task 8 final closure and next active scope
+
+- `TASK8_STATUS=COMPLETE` and
+  `TASK8_RESULT=COMPLETE_WITH_NO_PROMOTION`.
+- Visual-material and collider-LOD candidates are both
+  `NO_MEASURABLE_IMPROVEMENT`; `candidate_promoted=false` and
+  `final_default_asset_modified=false`.
+- Authoritative closure:
+  `reports/aloha1_mapping/aloha1_task8_final_closure.json/.md`, signature
+  `7771a79b3c579f235443a29dad491cda50f4e0db54bcfe6758d160380838cdfa`.
+- New active scope: `ALOHA1_REAL_SIM_HOME_SIGNAL_CORRESPONDENCE`, beginning
+  with digital-only three-cycle `Home -> Sleep -> Home` qualification for
+  `follower_left`. `follower_right` and both grippers remain stationary.
+- Real robot and `192.168.1.103` access remain unauthorized/not run. A later
+  same-turn explicit authorization is required after the digital safety gate.
+
 ## 2026-08-03 Task 8 contact-aware collider LOD closure
 
 - Final Task 8 collider-LOD conclusion is `NO_MEASURABLE_IMPROVEMENT`.
