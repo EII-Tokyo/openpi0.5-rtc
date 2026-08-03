@@ -1,5 +1,29 @@
 # Task State
 
+## 2026-08-03 active runtime-Sleep GUI review
+
+- A new isolated Isaac Sim GUI is running as PID `327371`; it is not the
+  user's prior manual GUI and no real-robot transport was constructed.
+- Window `125829131` is on one-based workspace `2` while the active workspace
+  remained `1`. The timeline is paused.
+- The frozen Stage SHA-256 remains
+  `327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9`.
+- `follower_left` is initialized from the runtime-measured Sleep manifest;
+  maximum six-arm-joint target/readback error is `0.0002634805 rad`.
+- Machine status is `READY_FOR_USER_REVIEW`; real motion commands remain `0`.
+- Session report:
+  `reports/aloha1_mapping/aloha1_runtime_measured_sleep_gui_session.json`.
+- Successful startup log:
+  `.codex/artifacts/20260803-aloha1-runtime-sleep-gui/isaac_gui_attempt2.log`.
+- Raw self-reviewed window capture:
+  `.codex/artifacts/20260803-aloha1-runtime-sleep-gui/runtime_sleep_ready_raw.png`.
+  It shows both complete follower arms and the workcell in the viewport; this
+  is visual review assistance, not a motion or correspondence PASS.
+- Attempt 1 exited before READY because the launcher passed the
+  `SimulationApp` wrapper instead of the Kit application to runtime-version
+  readback. The single caller error was covered by a regression test and
+  corrected before attempt 2. No duplicate Isaac process remains.
+
 ## 2026-08-03 follower_left runtime-Sleep digital alignment
 
 - The user accepted the small real-readback excursions beyond the ideal URDF
