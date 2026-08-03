@@ -1,0 +1,75 @@
+{
+  "commands_published": 0,
+  "live_blockers": [
+    "real_access_authorized",
+    "real_motion_authorized",
+    "operator_workspace_clear",
+    "stop_path_verified",
+    "joint_order_verified",
+    "camera_ready",
+    "manifest_hash_match",
+    "digital_gate_pass"
+  ],
+  "network_access_performed": false,
+  "official_source_evidence": {
+    "files": [
+      {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-synchronized-real-sim/sources/interbotix_ros_core_noetic/interbotix_ros_xseries/interbotix_xs_msgs/msg/JointGroupCommand.msg",
+        "sha256": "b85955c32e0fcaca05feeabe663b495e93ba5e85d26d4becf91d72dd09b04d44"
+      },
+      {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-synchronized-real-sim/sources/interbotix_ros_core_noetic/interbotix_ros_xseries/interbotix_xs_sdk/src/xs_sdk_obj.cpp",
+        "sha256": "d095e4984a59dc6b60ab0fa5a06315fc0ca450b3bdc1260ab66646a857c9c6d1"
+      },
+      {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha-home-sleep-root-cause/history_probe/interbotix_ros_xsarms/examples/interbotix_xsarm_pid/src/xsarm_pid.cpp",
+        "sha256": "c91deafb08d663baab6eaecd13230e3ee8b7675d1d2ab31cb362060cd92491d4"
+      },
+      {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-synchronized-real-sim/sources/interbotix_ros_core_noetic/LICENSE",
+        "sha256": "4eab000b04ce3f3b2746e2c22c1475c83c67a55ba5caf9becc089db26a2688d4"
+      },
+      {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha-home-sleep-root-cause/history_probe/LICENSE",
+        "sha256": "4eab000b04ce3f3b2746e2c22c1475c83c67a55ba5caf9becc089db26a2688d4"
+      }
+    ],
+    "interbotix_ros_core": {
+      "branch": "noetic",
+      "commit": "172841ffa93f7556fff9c7455ad0e77688fa156e",
+      "license": "BSD-3-Clause",
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-synchronized-real-sim/sources/interbotix_ros_core_noetic",
+      "repository": "https://github.com/Interbotix/interbotix_ros_core.git"
+    },
+    "interbotix_ros_manipulators": {
+      "branch": "noetic",
+      "commit": "0bb2b0e6d0e619bff02cf74dbd5af5681dcf80c9",
+      "license": "BSD-3-Clause",
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha-home-sleep-root-cause/history_probe",
+      "repository": "https://github.com/Interbotix/interbotix_ros_manipulators.git"
+    },
+    "unverified_runtime_semantics": {
+      "deployed_joint_order": "READ_ONLY_103_PREFLIGHT_REQUIRED",
+      "deployed_operating_mode": "READ_ONLY_103_PREFLIGHT_REQUIRED",
+      "stop_hold_path": "READ_ONLY_103_PREFLIGHT_REQUIRED"
+    },
+    "verified_semantics": {
+      "arm_group_name": "arm",
+      "command_order_source": "motor_config.yaml groups entry",
+      "message_fields": [
+        "string name",
+        "float32[] cmd"
+      ],
+      "position_mode_units": "radian",
+      "relative_command_topic": "commands/joint_group"
+    }
+  },
+  "publisher_constructed": false,
+  "real_access_authorized": false,
+  "real_motion_authorized": false,
+  "ros_transport_instantiated": false,
+  "schema_version": 1,
+  "scope": "OFFLINE_SOURCE_AUDIT_ONLY",
+  "status": "NOT_RUN_AUTHORIZATION_REQUIRED",
+  "torque_changed": false
+}

@@ -24,6 +24,25 @@ REMOTE
 
 - For reusable 103 tasks, prefer adding local scripts under this repository and syncing them to `/home/eii/openpi0.5-rtc-reward-learning` before execution. This avoids shell quoting bugs such as losing literal paths like `/app/replay`.
 
+## Synchronized Home/Sleep Replay Gate
+- The Stationary ALOHA follower-left synchronized real/simulation replay uses
+  `/puppet_left/joint_states`, `/puppet_left/commands/joint_group`, and
+  `/cam_high`; these names remain candidates until a separately authorized
+  read-only inspection confirms their deployed types and publishers.
+- Official Interbotix ROS1 Noetic defines `JointGroupCommand` as `string name`
+  plus `float32[] cmd`. For the arm, `name` is `arm`; `cmd` order comes from the
+  deployed motor-config group and must be read back rather than inferred.
+- `commands/joint_group` is interpreted according to the group's current
+  operating mode. Never use an all-zero group command as a generic stop: in
+  position mode it is a position target, not an emergency-stop instruction.
+- Do not import the live ROS adapter or create a command publisher until real
+  access, real motion, workspace clearance, deployed joint order, camera,
+  manifest identity, digital gate, and an operator-tested stop/hold path all
+  pass. A read-only preflight must construct zero publishers and issue zero
+  commands.
+- Missing `Present_Current` support is recorded as `NOT_AVAILABLE`; it is not
+  itself a reason to bypass the remaining live gates.
+
 ## Checkpoint Paths
 - Strong checkpoint constraint for `192.168.1.103`: user-trained checkpoints for this project must live under `/home/eii/openpi0.5-rtc-reward-learning/checkpoints` and be mounted into containers as `/app/checkpoints`.
 - Do not load this project's VLA/RLToken checkpoints from `/home/eii/openpi0.5-rtc/checkpoints`; that path belongs outside this project boundary.
