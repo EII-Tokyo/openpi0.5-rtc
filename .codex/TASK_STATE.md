@@ -1,5 +1,51 @@
 # Task State
 
+## 2026-08-03 Task 8 contact-aware collider LOD closure
+
+- Final Task 8 collider-LOD conclusion is `NO_MEASURABLE_IMPROVEMENT`.
+  The isolated candidate is `DIAGNOSTIC_ONLY_NOT_PROMOTED`; final/default
+  assets and colliders remain unchanged.
+- Geometry change is limited to deactivating three contained upper-arm convex
+  pieces per follower. Authored upper-arm piece count is `8 -> 2`; no new or
+  resized collider geometry is introduced. Gripper, finger, Bottle500 and
+  tabletop colliders are unchanged.
+- Two fresh cooking runs are geometry-deterministic after excluding only
+  wall-clock `runtime_s`. Protected articulation/joint/rigid-body/visual
+  inventories match and the retained cooked `piece_000` signatures match.
+- Static fidelity and throughput reports are byte-equivalent in their
+  deterministic physics result and retain the same pre-existing absolute
+  failures for sample_02/sample_05. Candidate classification is
+  `PASS_EQUIVALENT_TO_BASELINE_WITH_PREEXISTING_ABSOLUTE_GATE_FAILURE`, not an
+  absolute static `PASS`.
+- Fidelity and throughput each pass two fresh 809-waypoint swept audits with
+  deterministic signature
+  `7c1f7c47b6d498915c49163331726603f6d196747e3665da3c3c557f69aab73d`.
+- The authoritative attempt10 sample_01 initialization was used for one
+  headless Bottle500 smoke per profile. Both runs are `PASS / stable_20cm_hold`,
+  have zero finger-safety violations, reach over `0.200 m`, and stay below the
+  `0.010 m` hold-drop gate. No five-video rerun was performed.
+- The throughput smoke retains positive bilateral solver impulse for all 120
+  hold frames. Its left minimum separation crosses the exact zero threshold at
+  micrometre scale, reducing the geometric-contact count without losing
+  force-carrying contact; signed separation and impulse remain in the report.
+- Fresh-process physics-step means are `0.726768 -> 0.686884 ms` (1 env),
+  `1.091770 -> 1.201651 ms` (2 envs), and `1.677457 -> 1.606811 ms` (4 envs).
+  All ranges overlap, the 2-env cell regresses, and memory shows no stable
+  reduction. Promotion is therefore not justified.
+- Reports: `aloha1_task8_collider_baseline.json/.md`,
+  `aloha1_task8_collider_roles.json/.md`,
+  `aloha1_task8_collider_lod_candidate.json/.md`,
+  `aloha1_task8_physics_benchmark.json/.md`, and
+  `aloha1_task8_comparison.json/.md` under `reports/aloha1_mapping/`.
+- Two rejected smoke invocations are preserved under
+  `.codex/artifacts/20260803-aloha1-task8-lightweight/collider_lod_smoke/`:
+  the first exposed the Task7 direct-hash guard's incompatibility with an
+  audited wrapper; the second used stale attempt4 initialization and correctly
+  hit the current finger-safety gate. Neither entered a reproducible physical
+  or render anomaly, so no failure video was fabricated.
+- No real robot, `192.168.1.103`, ROS, camera, leader, insertion or default
+  asset work occurred.
+
 ## 2026-08-03 Task 8 approximation authorization
 
 - The user explicitly removed the strict model-proof findings as a Task 8

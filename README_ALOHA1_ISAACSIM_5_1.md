@@ -69,6 +69,7 @@ sim-to-real dynamics model and it is not yet accepted for bottle insertion.
 | Force-drive physical derivation | **HARD_BLOCKER** | Gain Tuner 3.0.6 equations and SI units are verified; effective gripper mass, declared/identified response, loaded linkage efficiency and continuous force envelope are missing, so no candidate or scan is authored |
 | Contact material / continuous duty | **HARD_BLOCKER** | runtime material binding is verified, but friction `0.7` remains `TEMPORARY_UNCALIBRATED`; exact surface-pair properties and a measured loaded thermal envelope are absent |
 | Task 8 optimization | **AUTHORIZED / IN_PROGRESS** | strict model-proof findings are retained as non-blocking reminders; isolated approximate candidates may proceed, while final/default promotion remains separate |
+| Task 8 collider LOD candidate | **NO_MEASURABLE_IMPROVEMENT** | isolated upper-arm candidate reduced authored convex pieces 8 → 2 and passed cooking/swept/smoke comparison, but fresh-process timing ranges overlap and the candidate is not promoted |
 
 `PASS`, `FAIL`, and `PARTIAL` are literal machine-report values. A clean
 viewport is not an acceptance criterion.
@@ -113,6 +114,49 @@ save at most 0.211% of visual points and 1.241% of visual faces, so that path
 is deferred. The next meaningful Task 8 scope is an isolated
 collider-complexity candidate. See
 `reports/aloha1_mapping/aloha1_task8_current_summary.json`.
+
+### 2026-08-03 contact-aware collider LOD result
+
+The collider-complexity candidate is now closed as
+`NO_MEASURABLE_IMPROVEMENT`. It modifies only the two followers'
+`upper_arm_link` diagnostic colliders. A half-space certificate proves that
+the existing `piece_000` contains the other three authored pieces within a
+float32-derived `2.47821822086e-6 m` numerical tolerance, so the candidate
+deactivates six contained pieces without creating or resizing geometry.
+Gripper, finger, Bottle500 and tabletop colliders are unchanged. The frozen
+source Stage SHA-256 remains
+`327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9`.
+
+Two fresh cooking processes agree after excluding wall-clock `runtime_s` only;
+all cooked geometry signatures, retained pieces and protected inventories
+match. Fidelity and throughput have the same pre-existing static overlap gate
+failures in `sample_02` and `sample_05`, and the same static deterministic
+signature. Both profiles pass the 809-waypoint swept audit twice with the same
+signature. This is reported as candidate equivalence, not as rewriting the
+pre-existing absolute static gate to `PASS`.
+
+One representative, already accepted attempt10 horizontal Bottle500 setup was
+run headlessly for each profile. Both runs establish bilateral force-carrying
+contact, lift past `0.200 m`, hold for `2 s`, remain below the `0.010 m` drop
+gate, and have zero finger-safety violations. The exact
+`separation_m <= 0` count changes because the left-side minimum separation
+crosses zero at micrometre scale, while both sides retain positive solver
+impulse for all 120 hold frames. This signed difference is retained in the
+machine report and is not described as contact loss.
+
+The two-fresh-process physics means are `0.726768 → 0.686884 ms` at one
+environment, `1.091770 → 1.201651 ms` at two environments, and
+`1.677457 → 1.606811 ms` at four environments. Every timing range overlaps,
+the two-environment result regresses, and memory has no stable reduction.
+Therefore no throughput benefit is claimed, the candidate remains
+`DIAGNOSTIC_ONLY_NOT_PROMOTED`, and no final/default asset is modified. The
+authoritative reports are:
+
+- `reports/aloha1_mapping/aloha1_task8_collider_baseline.json/.md`;
+- `reports/aloha1_mapping/aloha1_task8_collider_roles.json/.md`;
+- `reports/aloha1_mapping/aloha1_task8_collider_lod_candidate.json/.md`;
+- `reports/aloha1_mapping/aloha1_task8_physics_benchmark.json/.md`;
+- `reports/aloha1_mapping/aloha1_task8_comparison.json/.md`.
 
 ## 2026-08-02 official-model-first correction
 
