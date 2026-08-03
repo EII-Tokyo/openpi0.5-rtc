@@ -52,13 +52,33 @@
     `/puppet_left/joint_states`, `/puppet_left/commands/joint_group`, and
     `/cam_high` declarations;
   - no publisher, command, torque change or real motion occurred;
-  - external mount `/home/eii/openpi0.5-rtc/third_party/aloha` was not inspected
-    because it is outside the approved remote project boundary.
-- Next gate requires explicit authorization before starting the robot driver;
-  runtime joint order, operating mode, cam_high message and operator-tested
-  stop/hold semantics are still unverified.
+  - external mount `/home/eii/openpi0.5-rtc/third_party/aloha` was initially
+    outside the approved remote project boundary.
+- The user then explicitly authorized read-only inspection of that external
+  mount. The snapshot is commit
+  `f2e6a34c0433285f31f4cc575650cc3f978ac874`, branch
+  `codex/minimal-aloha-real`, Git top-level `/home/eii/openpi0.5-rtc`, with 11
+  dirty/untracked entries preserved and MIT license hash
+  `4666c312da313e6c46929f6695d06cf98a2e7359b9c7dcbb0ea232d01b32cd42`.
+- `launch/ros_nodes.launch` is
+  `REJECTED_FOR_LEFT_ONLY_SUPERVISED_REPLAY`: it includes all four
+  master/puppet drivers. Both follower mode files enable arm and gripper
+  torque. The bundled camera publisher requires all four serials and calls
+  `hardware_reset()`. The bundled `sleep.py` commands both puppets.
+- Inert candidate
+  `configs/aloha1_home_sleep_puppet_left_only_candidate.launch`, SHA-256
+  `967f2855468358a10078929aa07b3b32548a974acd9dee08c98df37fa7023db1`,
+  passes static scope with only `puppet_left/vx300s`, `load_configs=false`, and
+  no camera node. It was not executed.
+- Next gate requires explicit authorization before starting that minimal
+  driver. Starting it will access `/dev/ttyDXL_puppet_left` and enable torque
+  for the left arm and gripper. Runtime joint order/position mode,
+  operator-tested stop/hold, cam_high-only runtime, workspace clearance and
+  explicit real motion remain unverified.
 - Report:
   `reports/aloha1_mapping/aloha1_home_sleep_sync_103_read_only_preflight.json/.md`.
+- External-source report:
+  `reports/aloha1_mapping/aloha1_home_sleep_sync_external_aloha_audit.json/.md`.
 
 ## 2026-08-03 selected historical Sleep digital-twin gate
 

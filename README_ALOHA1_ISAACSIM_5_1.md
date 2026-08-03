@@ -197,6 +197,37 @@ message and stop/hold behavior remain runtime gates. The compose-declared
 is outside the approved 103 project boundary. Evidence:
 `reports/aloha1_mapping/aloha1_home_sleep_sync_103_read_only_preflight.json/.md`.
 
+The user subsequently authorized a separate read-only inspection of that
+external ALOHA source. The frozen snapshot is commit
+`f2e6a34c0433285f31f4cc575650cc3f978ac874` on
+`codex/minimal-aloha-real`, under Git top-level
+`/home/eii/openpi0.5-rtc`, with 11 dirty/untracked entries preserved. The
+source is MIT-licensed; the inspected files and SHA-256 values are recorded in
+`reports/aloha1_mapping/aloha1_home_sleep_sync_external_aloha_audit.json/.md`.
+
+That source changes the live-start boundary materially:
+
+- `ros_nodes.launch` includes `master_left`, `master_right`, `puppet_left`
+  and `puppet_right`; it is therefore
+  `REJECTED_FOR_LEFT_ONLY_SUPERVISED_REPLAY`;
+- `puppet_modes_left.yaml` configures the arm in `position` mode and the
+  gripper in `linear_position` mode, with torque enabled for both;
+- the bundled RealSense publisher requires all four configured serials and
+  calls `hardware_reset()`, so it is not accepted as a cam_high-only path;
+- the bundled `sleep.py` constructs and commands both puppet arms and is not
+  used for this left-only experiment.
+
+An inert local candidate,
+`configs/aloha1_home_sleep_puppet_left_only_candidate.launch`, passes the
+static left-only scope gate: it includes only `puppet_left/vx300s`, uses the
+deployed left mode configuration, keeps `load_configs=false`, and launches no
+camera node. This is source validation only. Starting it would open the real
+left Dynamixel bus and enable arm and gripper torque, so it remains
+`NOT_RUN_AUTHORIZATION_REQUIRED`. Runtime joint order/mode, an
+operator-tested stop/hold path, cam_high-only capture, workspace clearance and
+real motion each remain separate live gates. No driver, ROS publisher, motor
+command, camera reset or torque change occurred during the read-only audit.
+
 ## 2026-08-03 current-Humble Sleep comparison (historical failed run)
 
 The exact pinned `aloha_vx300s` command authority was executed without tuning:
