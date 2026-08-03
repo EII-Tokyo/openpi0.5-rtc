@@ -39,6 +39,26 @@
   - `reports/aloha1_mapping/aloha1_home_sleep_sync_real_preflight.json`;
   - `reports/aloha1_mapping/aloha1_home_sleep_sync_isaac_api_audit.json`;
   - `reports/aloha1_mapping/aloha1_home_sleep_sync_isaac_paced.json`.
+- 103 read-only static preflight subsequently completed with
+  `PARTIAL_RUNTIME_STACK_STOPPED` and static evidence `PASS`:
+  - restricted root: `/home/eii/openpi0.5-rtc-reward-learning`;
+  - remote HEAD `ea818494bf9ee7756c955864ba3b0d62be6ce649`, branch
+    `paper_actor_sample`, 45 dirty/untracked entries to preserve;
+  - ALOHA/ROS container count `0`, ROS master listener count `0`, rosbridge
+    listener count `0`;
+  - robot image digest
+    `lyl472324464/robot@sha256:fa02aebda4c30254380e87d0b6ee609a87fcfd99c59e98fb5c9c05df9c0aef7c`;
+  - project-source hashes bind the expected six-joint order,
+    `/puppet_left/joint_states`, `/puppet_left/commands/joint_group`, and
+    `/cam_high` declarations;
+  - no publisher, command, torque change or real motion occurred;
+  - external mount `/home/eii/openpi0.5-rtc/third_party/aloha` was not inspected
+    because it is outside the approved remote project boundary.
+- Next gate requires explicit authorization before starting the robot driver;
+  runtime joint order, operating mode, cam_high message and operator-tested
+  stop/hold semantics are still unverified.
+- Report:
+  `reports/aloha1_mapping/aloha1_home_sleep_sync_103_read_only_preflight.json/.md`.
 
 ## 2026-08-03 selected historical Sleep digital-twin gate
 

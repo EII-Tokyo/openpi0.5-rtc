@@ -1,0 +1,107 @@
+{
+  "commands_published": 0,
+  "execution": {
+    "argv": [
+      "ssh",
+      "-T",
+      "-o",
+      "BatchMode=yes",
+      "-o",
+      "ConnectTimeout=5",
+      "-o",
+      "LogLevel=ERROR",
+      "192.168.1.103",
+      "bash -s"
+    ],
+    "exit_code": 0,
+    "remote_script_sha256": "16ca13bfacc6cff5eaf011164ccf9c707f9658dd78cf77d1b4303132e135e5dd",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "d5a9515f756ec67f85a2a926bac90c52f806911786ddfbea29516cf5b6d65139"
+  },
+  "external_mount": {
+    "declared_in_compose": true,
+    "inspected": false,
+    "path": "/home/eii/openpi0.5-rtc/third_party/aloha",
+    "reason": "OUTSIDE_APPROVED_103_PROJECT_BOUNDARY"
+  },
+  "host": "192.168.1.103",
+  "publisher_constructed": false,
+  "read_only_103_access_performed": true,
+  "real_execution": "NOT_RUN_AUTHORIZATION_REQUIRED",
+  "real_motion_authorized": false,
+  "remaining_gates": [
+    "authorization_to_start_robot_driver",
+    "deployed_runtime_joint_order",
+    "deployed_runtime_position_mode",
+    "cam_high_runtime_message",
+    "operator_tested_stop_hold_path",
+    "operator_workspace_clear",
+    "real_motion_authorized"
+  ],
+  "remote_git": {
+    "branch": "paper_actor_sample",
+    "dirty_entry_count": 45,
+    "head": "ea818494bf9ee7756c955864ba3b0d62be6ce649",
+    "preserve_remote_dirty_worktree": true
+  },
+  "robot_image": {
+    "digest": "lyl472324464/robot@sha256:fa02aebda4c30254380e87d0b6ee609a87fcfd99c59e98fb5c9c05df9c0aef7c",
+    "id": "sha256:fa02aebda4c30254380e87d0b6ee609a87fcfd99c59e98fb5c9c05df9c0aef7c"
+  },
+  "robot_stack": {
+    "container_count": 0,
+    "ros_master_listener_count": 0,
+    "rosbridge_listener_count": 0
+  },
+  "runtime_ros_evidence": "NOT_RUN_ROBOT_STACK_STOPPED",
+  "schema_version": 1,
+  "snapshot": {
+    "ALOHA_LAUNCH_COMMAND_PRESENT": "1",
+    "COMPOSE_SHA256": "04dd806b4a79796c80e39fa4d290ee523933271729695faf50850499fdd30cfd",
+    "CONSTANTS_SHA256": "19a72e01cba604ecbf9775067a3df5926ed489b8369fdbec4bde4597cd0389db",
+    "EXTERNAL_ALOHA_MOUNT_DECLARED": "1",
+    "GIT_BRANCH": "paper_actor_sample",
+    "GIT_DIRTY_COUNT": "45",
+    "GIT_HEAD": "ea818494bf9ee7756c955864ba3b0d62be6ce649",
+    "IMAGE_DIGEST": "lyl472324464/robot@sha256:fa02aebda4c30254380e87d0b6ee609a87fcfd99c59e98fb5c9c05df9c0aef7c",
+    "IMAGE_ID": "sha256:fa02aebda4c30254380e87d0b6ee609a87fcfd99c59e98fb5c9c05df9c0aef7c",
+    "PROJECT_ROOT": "/home/eii/openpi0.5-rtc-reward-learning",
+    "ROBOT_CONTAINER_COUNT": "0",
+    "ROBOT_UTILS_SHA256": "479dd5845d639f32775460b1225d9f4b2d8611a2588649574de37237d83489d7",
+    "ROSBRIDGE_PORT_LISTENERS": "0",
+    "ROS_MASTER_PORT_LISTENERS": "0",
+    "STATIC_CAM_HIGH_PRESENT": "1",
+    "STATIC_JOINT_COMMAND_TOPIC_PRESENT": "1",
+    "STATIC_JOINT_ORDER_PRESENT": "1",
+    "STATIC_JOINT_STATE_TOPIC_PRESENT": "1"
+  },
+  "static_checks": {
+    "cam_high_declared": true,
+    "compose_hash": true,
+    "constants_hash": true,
+    "external_mount_boundary_recorded": true,
+    "joint_command_topic_declared": true,
+    "joint_order_declared": true,
+    "joint_state_topic_declared": true,
+    "launch_command_declared": true,
+    "project_root": true,
+    "robot_utils_hash": true
+  },
+  "static_project_evidence": "PASS",
+  "static_signal_contract": {
+    "camera_topic": "/cam_high",
+    "command_topic": "/puppet_left/commands/joint_group",
+    "evidence_class": "REMOTE_PROJECT_SOURCE_HASH_BOUND",
+    "joint_order": [
+      "waist",
+      "shoulder",
+      "elbow",
+      "forearm_roll",
+      "wrist_angle",
+      "wrist_rotate"
+    ],
+    "joint_states_topic": "/puppet_left/joint_states"
+  },
+  "status": "PARTIAL_RUNTIME_STACK_STOPPED",
+  "torque_changed": false
+}

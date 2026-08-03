@@ -184,6 +184,19 @@ Primary reports:
 - `reports/aloha1_mapping/aloha1_home_sleep_sync_isaac_fresh_02.json`;
 - `reports/aloha1_mapping/aloha1_home_sleep_sync_isaac_paced.json`.
 
+The subsequent 103 read-only static preflight is
+`PARTIAL_RUNTIME_STACK_STOPPED`. It was restricted to
+`/home/eii/openpi0.5-rtc-reward-learning` and confirmed the hash-bound project
+declarations for the six-joint order, follower-left state/command topics,
+`cam_high`, compose launch command and deployed robot-image digest. Remote HEAD
+is `ea818494bf9ee7756c955864ba3b0d62be6ce649` with 45 dirty/untracked entries;
+they must be preserved. No ALOHA/ROS container is running and neither port
+11311 nor 9090 is listening, so deployed joint order, position mode, camera
+message and stop/hold behavior remain runtime gates. The compose-declared
+`/home/eii/openpi0.5-rtc/third_party/aloha` mount was not inspected because it
+is outside the approved 103 project boundary. Evidence:
+`reports/aloha1_mapping/aloha1_home_sleep_sync_103_read_only_preflight.json/.md`.
+
 ## 2026-08-03 current-Humble Sleep comparison (historical failed run)
 
 The exact pinned `aloha_vx300s` command authority was executed without tuning:
