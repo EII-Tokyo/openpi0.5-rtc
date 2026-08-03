@@ -1,0 +1,740 @@
+{
+  "classification": "OFFICIAL_SLEEP_TARGET_OUTSIDE_FROZEN_JOINT_LIMITS",
+  "fresh_process_run_count": 2,
+  "gates": {
+    "all_endpoints_reached": false,
+    "all_targets_legal": false,
+    "both_numeric_runs_pass": false,
+    "command_identity": true,
+    "final_home_reached": true,
+    "follower_right_stationary": true,
+    "grippers_stationary": true,
+    "hashes_remained_frozen": true,
+    "no_impulse_carrying_contact": true,
+    "numeric_signatures_match": true,
+    "three_cycles_completed": true,
+    "visual_evidence_review": true
+  },
+  "limit_conflicts": [
+    {
+      "frozen_usd_lower_rad": -1.8500488996505737,
+      "frozen_usd_upper_rad": 1.2566370964050293,
+      "joint_index": 1,
+      "joint_name": "shoulder",
+      "official_sleep_target_rad": -2.05,
+      "violation_rad": 0.1999511003494261
+    },
+    {
+      "frozen_usd_lower_rad": -1.7627824544906616,
+      "frozen_usd_upper_rad": 1.6057027578353882,
+      "joint_index": 2,
+      "joint_name": "elbow",
+      "official_sleep_target_rad": 1.7,
+      "violation_rad": 0.09429724216461177
+    },
+    {
+      "frozen_usd_lower_rad": -1.8675020933151245,
+      "frozen_usd_upper_rad": 2.2340211868286133,
+      "joint_index": 4,
+      "joint_name": "wrist_angle",
+      "official_sleep_target_rad": -2.0,
+      "violation_rad": 0.1324979066848755
+    }
+  ],
+  "manifest": {
+    "command_signature": "ea11f6aa2253ca81390b2b2d63c0e3fafe1e8eeda9c4e5d1e928fc5db112795e",
+    "sha256": "c5e6c584d7fbe2bd3f098b32d3ded5630cc50c9b25368a704e49c8f26baf9798"
+  },
+  "normalized_numeric_signatures": [
+    "91041520a780bd5d0bb15f803d8ac6dde7a6d67c60a434f07276eae138a60829",
+    "91041520a780bd5d0bb15f803d8ac6dde7a6d67c60a434f07276eae138a60829"
+  ],
+  "numeric_repeatability": "PASS",
+  "real_execution_authorized": false,
+  "real_execution_status": "NOT_RUN_DIGITAL_GATE_FAILED",
+  "real_preflight_status": "NOT_RUN_DIGITAL_GATE_FAILED",
+  "runs": [
+    {
+      "repeat_index": 1,
+      "status": "FAIL",
+      "summary": {
+        "contact": {
+          "event_point_count": 0,
+          "first_impulse_contacts": [],
+          "impulse_carrying_point_count": 0,
+          "maximum_impulse_n_s": 0.0,
+          "minimum_separation_m": null
+        },
+        "direction_results": [
+          {
+            "active_joint_count": 3,
+            "command_delta_rad": [
+              0.0,
+              -1.0899999737739563,
+              0.5400000810623169,
+              0.0,
+              -1.699999988079071,
+              0.0
+            ],
+            "readback_delta_rad": [
+              -1.6117321479214297e-05,
+              -0.8901028037071228,
+              0.4444725513458252,
+              -0.0012598543835338205,
+              -1.5718700885772705,
+              2.534215855121147e-05
+            ],
+            "segment": "cycle_01_home_to_sleep",
+            "status": "PASS"
+          },
+          {
+            "active_joint_count": 3,
+            "command_delta_rad": [
+              0.0,
+              1.0899999737739563,
+              -0.5400000810623169,
+              0.0,
+              1.699999988079071,
+              0.0
+            ],
+            "readback_delta_rad": [
+              1.5991094528544636e-05,
+              0.8910782337188721,
+              -0.44462311267852783,
+              0.001102666457882151,
+              1.5746943950653076,
+              2.740156378422398e-05
+            ],
+            "segment": "cycle_01_sleep_to_home",
+            "status": "PASS"
+          },
+          {
+            "active_joint_count": 3,
+            "command_delta_rad": [
+              0.0,
+              -1.0899999737739563,
+              0.5400000810623169,
+              0.0,
+              -1.699999988079071,
+              0.0
+            ],
+            "readback_delta_rad": [
+              -1.7653986787991016e-05,
+              -0.8901028037071228,
+              0.44447267055511475,
+              -0.00123412131506484,
+              -1.5718704164028168,
+              -2.7868290089827497e-05
+            ],
+            "segment": "cycle_02_home_to_sleep",
+            "status": "PASS"
+          },
+          {
+            "active_joint_count": 3,
+            "command_delta_rad": [
+              0.0,
+              1.0899999737739563,
+              -0.5400000810623169,
+              0.0,
+              1.699999988079071,
+              0.0
+            ],
+            "readback_delta_rad": [
+              1.5991069062692986e-05,
+              0.8910780549049377,
+              -0.44462311267852783,
+              0.001102663460187614,
+              1.574694275856018,
+              2.740106629062211e-05
+            ],
+            "segment": "cycle_02_sleep_to_home",
+            "status": "PASS"
+          },
+          {
+            "active_joint_count": 3,
+            "command_delta_rad": [
+              0.0,
+              -1.0899999737739563,
+              0.5400000810623169,
+              0.0,
+              -1.699999988079071,
+              0.0
+            ],
+            "readback_delta_rad": [
+              -1.7653997815614275e-05,
+              -0.8901028037071228,
+              0.44447267055511475,
+              -0.0012341198307694867,
+              -1.5718702971935272,
+              -2.7868202778336126e-05
+            ],
+            "segment": "cycle_03_home_to_sleep",
+            "status": "PASS"
+          },
+          {
+            "active_joint_count": 3,
+            "command_delta_rad": [
+              0.0,
+              1.0899999737739563,
+              -0.5400000810623169,
+              0.0,
+              1.699999988079071,
+              0.0
+            ],
+            "readback_delta_rad": [
+              1.5991068266885122e-05,
+              0.8910781145095825,
+              -0.4446232318878174,
+              0.0011026717838831246,
+              1.574694812297821,
+              2.7401001716498286e-05
+            ],
+            "segment": "cycle_03_sleep_to_home",
+            "status": "PASS"
+          }
+        ],
+        "endpoint_results": [
+          {
+            "maximum_abs_error_rad": 0.00436931848526001,
+            "segment": "cycle_01_home_hold",
+            "status": "PASS"
+          },
+          {
+            "maximum_abs_error_rad": 0.19995105266571045,
+            "segment": "cycle_01_sleep_hold",
+            "status": "FAIL"
+          },
+          {
+            "maximum_abs_error_rad": 0.004369258880615234,
+            "segment": "cycle_02_home_hold",
+            "status": "PASS"
+          },
+          {
+            "maximum_abs_error_rad": 0.19995105266571045,
+            "segment": "cycle_02_sleep_hold",
+            "status": "FAIL"
+          },
+          {
+            "maximum_abs_error_rad": 0.004369139671325684,
+            "segment": "cycle_03_home_hold",
+            "status": "PASS"
+          },
+          {
+            "maximum_abs_error_rad": 0.19995105266571045,
+            "segment": "cycle_03_sleep_hold",
+            "status": "FAIL"
+          },
+          {
+            "maximum_abs_error_rad": 0.004369020462036133,
+            "segment": "initial_home_hold",
+            "status": "PASS"
+          }
+        ],
+        "final_home_max_error_rad": 0.004369127750396717,
+        "gates": {
+          "directions": true,
+          "endpoints": false,
+          "final_home": true,
+          "finite_readback": true,
+          "follower_right_stationary": true,
+          "grippers_stationary": true,
+          "legal_limits": false,
+          "no_impulse_carrying_contact": true,
+          "three_cycles_complete": true
+        },
+        "left_gripper_max_drift_rad_or_m": 0.01665519606399357,
+        "normalized_numeric_signature": "91041520a780bd5d0bb15f803d8ac6dde7a6d67c60a434f07276eae138a60829",
+        "position_gate_provenance": {
+          "exact_motor_resolution_pulse_per_rev": 4096,
+          "existing_task7a_gate_rad": 0.02,
+          "one_pulse_rad": 0.0015339807878856412,
+          "selection": "MAX_EXISTING_PREDECLARED_TASK7A_GATE_AND_ONE_PULSE"
+        },
+        "position_gate_rad": 0.02,
+        "right_max_drift_rad_or_m": 0.008883059024810791,
+        "status": "FAIL"
+      },
+      "telemetry": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_home_sleep_digital_telemetry_run_01.csv",
+        "row_count": 2220,
+        "sha256": "a012c166333386d082537c1376684a6e681b945ef719b0404dc70b80e21f18fa"
+      }
+    },
+    {
+      "repeat_index": 2,
+      "status": "FAIL",
+      "summary": {
+        "contact": {
+          "event_point_count": 0,
+          "first_impulse_contacts": [],
+          "impulse_carrying_point_count": 0,
+          "maximum_impulse_n_s": 0.0,
+          "minimum_separation_m": null
+        },
+        "direction_results": [
+          {
+            "active_joint_count": 3,
+            "command_delta_rad": [
+              0.0,
+              -1.0899999737739563,
+              0.5400000810623169,
+              0.0,
+              -1.699999988079071,
+              0.0
+            ],
+            "readback_delta_rad": [
+              -1.6117321479214297e-05,
+              -0.8901028037071228,
+              0.4444725513458252,
+              -0.0012598543835338205,
+              -1.5718700885772705,
+              2.534215855121147e-05
+            ],
+            "segment": "cycle_01_home_to_sleep",
+            "status": "PASS"
+          },
+          {
+            "active_joint_count": 3,
+            "command_delta_rad": [
+              0.0,
+              1.0899999737739563,
+              -0.5400000810623169,
+              0.0,
+              1.699999988079071,
+              0.0
+            ],
+            "readback_delta_rad": [
+              1.5991094528544636e-05,
+              0.8910782337188721,
+              -0.44462311267852783,
+              0.001102666457882151,
+              1.5746943950653076,
+              2.740156378422398e-05
+            ],
+            "segment": "cycle_01_sleep_to_home",
+            "status": "PASS"
+          },
+          {
+            "active_joint_count": 3,
+            "command_delta_rad": [
+              0.0,
+              -1.0899999737739563,
+              0.5400000810623169,
+              0.0,
+              -1.699999988079071,
+              0.0
+            ],
+            "readback_delta_rad": [
+              -1.7653986787991016e-05,
+              -0.8901028037071228,
+              0.44447267055511475,
+              -0.00123412131506484,
+              -1.5718704164028168,
+              -2.7868290089827497e-05
+            ],
+            "segment": "cycle_02_home_to_sleep",
+            "status": "PASS"
+          },
+          {
+            "active_joint_count": 3,
+            "command_delta_rad": [
+              0.0,
+              1.0899999737739563,
+              -0.5400000810623169,
+              0.0,
+              1.699999988079071,
+              0.0
+            ],
+            "readback_delta_rad": [
+              1.5991069062692986e-05,
+              0.8910780549049377,
+              -0.44462311267852783,
+              0.001102663460187614,
+              1.574694275856018,
+              2.740106629062211e-05
+            ],
+            "segment": "cycle_02_sleep_to_home",
+            "status": "PASS"
+          },
+          {
+            "active_joint_count": 3,
+            "command_delta_rad": [
+              0.0,
+              -1.0899999737739563,
+              0.5400000810623169,
+              0.0,
+              -1.699999988079071,
+              0.0
+            ],
+            "readback_delta_rad": [
+              -1.7653997815614275e-05,
+              -0.8901028037071228,
+              0.44447267055511475,
+              -0.0012341198307694867,
+              -1.5718702971935272,
+              -2.7868202778336126e-05
+            ],
+            "segment": "cycle_03_home_to_sleep",
+            "status": "PASS"
+          },
+          {
+            "active_joint_count": 3,
+            "command_delta_rad": [
+              0.0,
+              1.0899999737739563,
+              -0.5400000810623169,
+              0.0,
+              1.699999988079071,
+              0.0
+            ],
+            "readback_delta_rad": [
+              1.5991068266885122e-05,
+              0.8910781145095825,
+              -0.4446232318878174,
+              0.0011026717838831246,
+              1.574694812297821,
+              2.7401001716498286e-05
+            ],
+            "segment": "cycle_03_sleep_to_home",
+            "status": "PASS"
+          }
+        ],
+        "endpoint_results": [
+          {
+            "maximum_abs_error_rad": 0.00436931848526001,
+            "segment": "cycle_01_home_hold",
+            "status": "PASS"
+          },
+          {
+            "maximum_abs_error_rad": 0.19995105266571045,
+            "segment": "cycle_01_sleep_hold",
+            "status": "FAIL"
+          },
+          {
+            "maximum_abs_error_rad": 0.004369258880615234,
+            "segment": "cycle_02_home_hold",
+            "status": "PASS"
+          },
+          {
+            "maximum_abs_error_rad": 0.19995105266571045,
+            "segment": "cycle_02_sleep_hold",
+            "status": "FAIL"
+          },
+          {
+            "maximum_abs_error_rad": 0.004369139671325684,
+            "segment": "cycle_03_home_hold",
+            "status": "PASS"
+          },
+          {
+            "maximum_abs_error_rad": 0.19995105266571045,
+            "segment": "cycle_03_sleep_hold",
+            "status": "FAIL"
+          },
+          {
+            "maximum_abs_error_rad": 0.004369020462036133,
+            "segment": "initial_home_hold",
+            "status": "PASS"
+          }
+        ],
+        "final_home_max_error_rad": 0.004369127750396717,
+        "gates": {
+          "directions": true,
+          "endpoints": false,
+          "final_home": true,
+          "finite_readback": true,
+          "follower_right_stationary": true,
+          "grippers_stationary": true,
+          "legal_limits": false,
+          "no_impulse_carrying_contact": true,
+          "three_cycles_complete": true
+        },
+        "left_gripper_max_drift_rad_or_m": 0.01665519606399357,
+        "normalized_numeric_signature": "91041520a780bd5d0bb15f803d8ac6dde7a6d67c60a434f07276eae138a60829",
+        "position_gate_provenance": {
+          "exact_motor_resolution_pulse_per_rev": 4096,
+          "existing_task7a_gate_rad": 0.02,
+          "one_pulse_rad": 0.0015339807878856412,
+          "selection": "MAX_EXISTING_PREDECLARED_TASK7A_GATE_AND_ONE_PULSE"
+        },
+        "position_gate_rad": 0.02,
+        "right_max_drift_rad_or_m": 0.008883059024810791,
+        "status": "FAIL"
+      },
+      "telemetry": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_home_sleep_digital_telemetry_run_02.csv",
+        "row_count": 2220,
+        "sha256": "a012c166333386d082537c1376684a6e681b945ef719b0404dc70b80e21f18fa"
+      }
+    }
+  ],
+  "runtime": {
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physx": "107.3.26"
+  },
+  "schema_version": 1,
+  "source_boundary": {
+    "historical_robot_report": "/home/eii/project/openpi0.5-rtc-reward-learning/docs/aloha1_isaac_adaptation/09_phase4_real_aloha1_joint_signal_probe_2026-07-17.md",
+    "historical_robot_report_used_as_command_authority": false,
+    "local_mirror_sleep_rad": [
+      0,
+      -1.8,
+      1.55,
+      0,
+      -1.57,
+      0
+    ],
+    "local_mirror_source_class": "THIRD_PARTY_AGGREGATE_LOCAL_MIRROR",
+    "local_mirror_used_as_command_authority": false,
+    "official_sleep_rad": [
+      0,
+      -2.05,
+      1.7,
+      0,
+      -2.0,
+      0
+    ],
+    "official_source_class": "OFFICIAL_PINNED_EXACT_MODEL_SOURCE"
+  },
+  "source_or_final_asset_modified": false,
+  "stage": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+    "sha256_after": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9",
+    "sha256_before": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9"
+  },
+  "status": "FAIL",
+  "task8_status": "COMPLETE_WITH_NO_PROMOTION",
+  "visual_evidence": {
+    "classification": "DIGITAL_SLEEP_LIMIT_FAILURE_VISUAL_REVIEW",
+    "command_signature": "ea11f6aa2253ca81390b2b2d63c0e3fafe1e8eeda9c4e5d1e928fc5db112795e",
+    "gates": {
+      "all_required_stages_present_per_mode": true,
+      "annotations_non_occluding": true,
+      "collision_retake_visual_review": true,
+      "normal_visual_review": true,
+      "states_visibly_distinct": true,
+      "whole_arm_visible": true
+    },
+    "machine_telemetry_remains_primary": true,
+    "manifest_sha256": "c5e6c584d7fbe2bd3f098b32d3ded5630cc50c9b25368a704e49c8f26baf9798",
+    "rejected_attempts": [
+      {
+        "mode": "collision_overlay",
+        "reason": "REJECTED_COLLIDER_OVERLAY_NOT_DISTINCT",
+        "retained_as_history": true,
+        "source_report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_home_sleep_digital_video_review.json"
+      }
+    ],
+    "retained_screenshots": [
+      {
+        "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-home-sleep-digital-twin/failure_evidence/screenshots_annotated/before_limit_exceedance_normal_annotated.png",
+        "annotated_sha256": "b4cf1ffbfa4dfdd64f0a07457f5296ead6c1828fa5a5051cf8931e6f19c00450",
+        "label": "before_limit_exceedance",
+        "mode": "normal",
+        "physics_frame": 304,
+        "physics_time_s": 5.083333333333333,
+        "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-home-sleep-digital-twin/failure_evidence/screenshots_raw/before_limit_exceedance_normal_raw.png",
+        "raw_sha256": "0a03aedd1cc4af880c550357a9b266637a00f4d0a741bde31ba3900f62ff86d5",
+        "visual_review": {
+          "annotation_readable_and_non_occluding": true,
+          "collision_overlay_distinct": false,
+          "home_sleep_states_visibly_distinct": true,
+          "note": "Whole arm visible; Home and Sleep poses differ; labels do not obscure geometry.",
+          "reviewed_by": "Codex visual model",
+          "status": "PASS",
+          "whole_follower_left_visible": true
+        }
+      },
+      {
+        "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-home-sleep-digital-twin/failure_evidence/screenshots_annotated/final_home_recovery_normal_annotated.png",
+        "annotated_sha256": "184e8ec1cbac3ac0f2af8d52767ec95b31407c09223a870d84e5328ea9b7d15e",
+        "label": "final_home_recovery",
+        "mode": "normal",
+        "physics_frame": 2219,
+        "physics_time_s": 37.0,
+        "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-home-sleep-digital-twin/failure_evidence/screenshots_raw/final_home_recovery_normal_raw.png",
+        "raw_sha256": "354945f854656ad0857635b63ff2fb70904bcdc6554fee81fdbef8fb44752572",
+        "visual_review": {
+          "annotation_readable_and_non_occluding": true,
+          "collision_overlay_distinct": false,
+          "home_sleep_states_visibly_distinct": true,
+          "note": "Whole arm visible; Home and Sleep poses differ; labels do not obscure geometry.",
+          "reviewed_by": "Codex visual model",
+          "status": "PASS",
+          "whole_follower_left_visible": true
+        }
+      },
+      {
+        "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-home-sleep-digital-twin/failure_evidence/screenshots_annotated/first_limit_exceedance_normal_annotated.png",
+        "annotated_sha256": "d271e10bc3cbaf67d2140ce603837e77a1fc7a12c03f57048a41623097baeffa",
+        "label": "first_limit_exceedance",
+        "mode": "normal",
+        "physics_frame": 305,
+        "physics_time_s": 5.1,
+        "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-home-sleep-digital-twin/failure_evidence/screenshots_raw/first_limit_exceedance_normal_raw.png",
+        "raw_sha256": "529bd0b6cc595a3b295338726a53add83849fa664d0df3b36360d9c6238d22a7",
+        "visual_review": {
+          "annotation_readable_and_non_occluding": true,
+          "collision_overlay_distinct": false,
+          "home_sleep_states_visibly_distinct": true,
+          "note": "Whole arm visible; Home and Sleep poses differ; labels do not obscure geometry.",
+          "reviewed_by": "Codex visual model",
+          "status": "PASS",
+          "whole_follower_left_visible": true
+        }
+      },
+      {
+        "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-home-sleep-digital-twin/failure_evidence/screenshots_annotated/first_sleep_hold_end_normal_annotated.png",
+        "annotated_sha256": "ca79d4e96488de23669c18fd1faef9680e0392b10f266cd71eb48e83db4d0923",
+        "label": "first_sleep_hold_end",
+        "mode": "normal",
+        "physics_frame": 419,
+        "physics_time_s": 7.0,
+        "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-home-sleep-digital-twin/failure_evidence/screenshots_raw/first_sleep_hold_end_normal_raw.png",
+        "raw_sha256": "12195b4586db12d273c08ce701370cbe3b5aebe5b20e80b389827077b07607e0",
+        "visual_review": {
+          "annotation_readable_and_non_occluding": true,
+          "collision_overlay_distinct": false,
+          "home_sleep_states_visibly_distinct": true,
+          "note": "Whole arm visible; Home and Sleep poses differ; labels do not obscure geometry.",
+          "reviewed_by": "Codex visual model",
+          "status": "PASS",
+          "whole_follower_left_visible": true
+        }
+      },
+      {
+        "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-home-sleep-digital-twin/failure_evidence_collision_retake/screenshots_annotated/before_limit_exceedance_collision_overlay_annotated.png",
+        "annotated_sha256": "9bfe189520b64833dcab9381e5a5154bd4f9173c713f4999ba7be475a904e83a",
+        "label": "before_limit_exceedance",
+        "mode": "collision_overlay",
+        "physics_frame": 304,
+        "physics_time_s": 5.083333333333333,
+        "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-home-sleep-digital-twin/failure_evidence_collision_retake/screenshots_raw/before_limit_exceedance_collision_overlay_raw.png",
+        "raw_sha256": "b9b36d64cf4b59658b13706c704bb60337138ec61dc8b5b0c774de0a855970ca",
+        "visual_review": {
+          "annotation_readable_and_non_occluding": true,
+          "collision_overlay_distinct": true,
+          "home_sleep_states_visibly_distinct": true,
+          "note": "Bright-red full-body collider overlay is visually distinct from source materials.",
+          "reviewed_by": "Codex visual model",
+          "status": "PASS",
+          "whole_follower_left_visible": true
+        }
+      },
+      {
+        "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-home-sleep-digital-twin/failure_evidence_collision_retake/screenshots_annotated/final_home_recovery_collision_overlay_annotated.png",
+        "annotated_sha256": "476e9961b80dd79c2a338a6900cb91575f19ecef23fc98b910b55fb19febf552",
+        "label": "final_home_recovery",
+        "mode": "collision_overlay",
+        "physics_frame": 2219,
+        "physics_time_s": 37.0,
+        "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-home-sleep-digital-twin/failure_evidence_collision_retake/screenshots_raw/final_home_recovery_collision_overlay_raw.png",
+        "raw_sha256": "55f148a09886c356d2ed57f5e8de980d1d0f6d1181f10b2e7b5c18d146b1a1da",
+        "visual_review": {
+          "annotation_readable_and_non_occluding": true,
+          "collision_overlay_distinct": true,
+          "home_sleep_states_visibly_distinct": true,
+          "note": "Bright-red full-body collider overlay is visually distinct from source materials.",
+          "reviewed_by": "Codex visual model",
+          "status": "PASS",
+          "whole_follower_left_visible": true
+        }
+      },
+      {
+        "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-home-sleep-digital-twin/failure_evidence_collision_retake/screenshots_annotated/first_limit_exceedance_collision_overlay_annotated.png",
+        "annotated_sha256": "b564398f0058ed4e8d9acc3bfda06afa5004e28e7a07d4f4188130d0dcfa03d2",
+        "label": "first_limit_exceedance",
+        "mode": "collision_overlay",
+        "physics_frame": 305,
+        "physics_time_s": 5.1,
+        "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-home-sleep-digital-twin/failure_evidence_collision_retake/screenshots_raw/first_limit_exceedance_collision_overlay_raw.png",
+        "raw_sha256": "d376060e52be0461069746170275c1cd68d294422d044ec4ec121687902dcaa2",
+        "visual_review": {
+          "annotation_readable_and_non_occluding": true,
+          "collision_overlay_distinct": true,
+          "home_sleep_states_visibly_distinct": true,
+          "note": "Bright-red full-body collider overlay is visually distinct from source materials.",
+          "reviewed_by": "Codex visual model",
+          "status": "PASS",
+          "whole_follower_left_visible": true
+        }
+      },
+      {
+        "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-home-sleep-digital-twin/failure_evidence_collision_retake/screenshots_annotated/first_sleep_hold_end_collision_overlay_annotated.png",
+        "annotated_sha256": "ac4ab02315e455110275171ffdc64fd7e915b6e1290fd556eae544340806d68e",
+        "label": "first_sleep_hold_end",
+        "mode": "collision_overlay",
+        "physics_frame": 419,
+        "physics_time_s": 7.0,
+        "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-home-sleep-digital-twin/failure_evidence_collision_retake/screenshots_raw/first_sleep_hold_end_collision_overlay_raw.png",
+        "raw_sha256": "c496e9fb754985066ad3d1c5ab7403c6c75495fbef6be5be6735eda70420f220",
+        "visual_review": {
+          "annotation_readable_and_non_occluding": true,
+          "collision_overlay_distinct": true,
+          "home_sleep_states_visibly_distinct": true,
+          "note": "Bright-red full-body collider overlay is visually distinct from source materials.",
+          "reviewed_by": "Codex visual model",
+          "status": "PASS",
+          "whole_follower_left_visible": true
+        }
+      }
+    ],
+    "retained_videos": {
+      "collision_overlay": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-home-sleep-digital-twin/failure_evidence_collision_retake/aloha1_home_sleep_collision_overlay.mp4",
+        "duration_s": 37.2,
+        "ffmpeg_command": [
+          "ffmpeg",
+          "-y",
+          "-framerate",
+          "15",
+          "-i",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-home-sleep-digital-twin/failure_evidence_collision_retake/frames/collision_overlay/%06d.png",
+          "-c:v",
+          "libx264",
+          "-pix_fmt",
+          "yuv420p",
+          "-crf",
+          "18",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-home-sleep-digital-twin/failure_evidence_collision_retake/aloha1_home_sleep_collision_overlay.mp4"
+        ],
+        "ffmpeg_exit_code": 0,
+        "fps": 15,
+        "frame_count": 558,
+        "sha256": "48de6feff2d929d3dc0d7e72f4ff5dca107b6167c1340c5c06308e64c89d91c3"
+      },
+      "normal": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-home-sleep-digital-twin/failure_evidence/aloha1_home_sleep_normal.mp4",
+        "duration_s": 37.2,
+        "ffmpeg_command": [
+          "ffmpeg",
+          "-y",
+          "-framerate",
+          "15",
+          "-i",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-home-sleep-digital-twin/failure_evidence/frames/normal/%06d.png",
+          "-c:v",
+          "libx264",
+          "-pix_fmt",
+          "yuv420p",
+          "-crf",
+          "18",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-home-sleep-digital-twin/failure_evidence/aloha1_home_sleep_normal.mp4"
+        ],
+        "ffmpeg_exit_code": 0,
+        "fps": 15,
+        "frame_count": 558,
+        "sha256": "f72e24d571fcc73649e6b7b219713b2f98e3349ea9a18254a67d2ea42b74d80b"
+      }
+    },
+    "review_notes": {
+      "boundary": "PASS applies to evidence quality only; the digital motion gate remains FAIL.",
+      "collision_overlay": "PASS after retake: red colliders are distinguishable from cyan/white visuals.",
+      "normal": "PASS: fixed overview contains the complete follower_left arm."
+    },
+    "schema_version": 1,
+    "stage_sha256": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9",
+    "status": "PASS_FAILURE_EVIDENCE",
+    "visual_review_is_auxiliary": true
+  }
+}

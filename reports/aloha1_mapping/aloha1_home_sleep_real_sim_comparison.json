@@ -1,0 +1,18 @@
+{
+  "classification": "REAL_DIGITAL_COMPARISON_NOT_RUN",
+  "command_signature": "ea11f6aa2253ca81390b2b2d63c0e3fafe1e8eeda9c4e5d1e928fc5db112795e",
+  "digital_telemetry": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_home_sleep_digital_telemetry_run_01.csv",
+    "sha256": "a012c166333386d082537c1376684a6e681b945ef719b0404dc70b80e21f18fa"
+  },
+  "layers": {
+    "COMMAND_IDENTITY": "NOT_RUN_REAL_EVIDENCE_MISSING",
+    "DYNAMIC_TRAJECTORY_CORRESPONDENCE": "NOT_RUN_REAL_EVIDENCE_MISSING",
+    "JOINT_SEMANTICS": "NOT_RUN_REAL_EVIDENCE_MISSING",
+    "KINEMATIC_ENDPOINT_CORRESPONDENCE": "NOT_RUN_REAL_EVIDENCE_MISSING"
+  },
+  "raw_inputs_modified": false,
+  "real_telemetry": null,
+  "schema_version": 1,
+  "status": "NOT_RUN_REAL_EVIDENCE_MISSING"
+}

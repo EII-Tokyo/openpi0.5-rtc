@@ -1,0 +1,32 @@
+{
+  "boundary": "No access to 192.168.1.103 is permitted while the digital gate is not PASS.",
+  "classification": "ALOHA_REAL_HOME_SLEEP_OFFLINE_PREFLIGHT",
+  "commands_published": 0,
+  "digital_report": {
+    "classification": "OFFICIAL_SLEEP_TARGET_OUTSIDE_FROZEN_JOINT_LIMITS",
+    "sha256": "e7a72bf6fb165e54c5fccfb68f0b914eb300da244750f97a9448f42fba33c586",
+    "status": "FAIL"
+  },
+  "manifest": {
+    "command_signature": "ea11f6aa2253ca81390b2b2d63c0e3fafe1e8eeda9c4e5d1e928fc5db112795e",
+    "sample_count": 1850,
+    "sha256": "c5e6c584d7fbe2bd3f098b32d3ded5630cc50c9b25368a704e49c8f26baf9798"
+  },
+  "network_access_performed": false,
+  "read_only_remote_checks_performed": false,
+  "real_execution_authorized": false,
+  "remaining_live_checks": [
+    "exact robot identity and arm namespace",
+    "current joint readback near Home",
+    "motor torque/error/temperature status",
+    "operator workspace clear",
+    "operator stop control ready"
+  ],
+  "robot": "follower_left",
+  "ros_transport_instantiated": false,
+  "schema_version": 1,
+  "serial_device_opened": false,
+  "ssh_connection_opened": false,
+  "status": "NOT_RUN_DIGITAL_GATE_FAILED",
+  "torque_changed": false
+}
