@@ -1,0 +1,201 @@
+{
+  "authorization": {
+    "commands_published": 0,
+    "driver_started": false,
+    "external_source_read_only_authorized": true,
+    "real_execution": "NOT_RUN_AUTHORIZATION_REQUIRED",
+    "real_motion_authorized": false,
+    "ros_publisher_constructed": false,
+    "torque_changed": false
+  },
+  "camera_decision": {
+    "cam_high_single_camera_runtime": "NOT_RUN_AUTHORIZATION_REQUIRED",
+    "existing_four_camera_publisher_accepted": false,
+    "reason": "REQUIRES_ALL_FOUR_SERIALS_AND_CALLS_HARDWARE_RESET; NOT_A_CAM_HIGH_ONLY_PATH"
+  },
+  "execution": {
+    "argv": [
+      "ssh",
+      "-T",
+      "-o",
+      "BatchMode=yes",
+      "-o",
+      "ConnectTimeout=5",
+      "-o",
+      "LogLevel=ERROR",
+      "192.168.1.103",
+      "bash -s"
+    ],
+    "exit_code": 0,
+    "operation": "READ_ONLY_SOURCE_INSPECTION",
+    "remote_script_sha256": "a733115696bf24fa4288ee70cef1517ba6408f9b161df7e7480049b8f221cd2e",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "cd7125183c0b27424c866ba4d4929f1513334cebfc300cbdbf1f383e633e1fbf"
+  },
+  "existing_deployment": {
+    "camera_scope": {
+      "camera_names": [
+        "cam_left_wrist",
+        "cam_high",
+        "cam_low",
+        "cam_right_wrist"
+      ],
+      "hardware_reset_present": true,
+      "launch_nodes": [
+        "realsense_publisher"
+      ],
+      "requires_four_cameras": true,
+      "suitable_for_cam_high_only": false
+    },
+    "driver_scope": {
+      "include_count": 4,
+      "left_only": false,
+      "robot_names": [
+        "master_left",
+        "master_right",
+        "puppet_left",
+        "puppet_right"
+      ]
+    },
+    "puppet_left_mode": {
+      "arm_operating_mode": "position",
+      "arm_torque_enable": true,
+      "evidence_class": "REMOTE_SOURCE_READBACK",
+      "gripper_operating_mode": "linear_position",
+      "gripper_torque_enable": true,
+      "port": "/dev/ttyDXL_puppet_left"
+    },
+    "real_execution": "NOT_RUN_AUTHORIZATION_REQUIRED",
+    "schema_version": 1,
+    "side_effect_boundary": {
+      "existing_camera_process_resets_devices": true,
+      "starting_existing_ros_nodes_launch_would_start_real_drivers": true,
+      "starting_puppet_left_candidate_would_enable_arm_torque": true,
+      "starting_puppet_left_candidate_would_enable_gripper_torque": true
+    },
+    "sleep_scope": {
+      "commands_both_puppets": true,
+      "suitable_for_left_only": false
+    },
+    "status": "REJECTED_FOR_LEFT_ONLY_SUPERVISED_REPLAY"
+  },
+  "external_repository": {
+    "branch": "codex/minimal-aloha-real",
+    "commit": "f2e6a34c0433285f31f4cc575650cc3f978ac874",
+    "dirty_entry_count": 11,
+    "git_toplevel": "/home/eii/openpi0.5-rtc",
+    "license": "MIT",
+    "license_evidence": "/home/eii/openpi0.5-rtc/third_party/aloha/LICENSE",
+    "local_path": "/home/eii/openpi0.5-rtc/third_party/aloha",
+    "origin": "https://github.com/EII-Tokyo/openpi0.5-rtc.git",
+    "preserve_remote_dirty_worktree": true
+  },
+  "file_manifest": [
+    {
+      "evidence_class": "REMOTE_SOURCE_READBACK",
+      "path": "/home/eii/openpi0.5-rtc/third_party/aloha/launch/ros_nodes.launch",
+      "sha256": "3307a47cdf66bc5c9e5e6362b12182250f18736b9fd0d7d0ca42c5982684c90e"
+    },
+    {
+      "evidence_class": "REMOTE_SOURCE_READBACK",
+      "path": "/home/eii/openpi0.5-rtc/third_party/aloha/launch/4arms_teleop.launch",
+      "sha256": "d8543ec40081a807bfa43c7b149c7945f933856f180f277fb937cffc2cdaa632"
+    },
+    {
+      "evidence_class": "REMOTE_SOURCE_READBACK",
+      "path": "/home/eii/openpi0.5-rtc/third_party/aloha/config/master_modes_left.yaml",
+      "sha256": "dd755f147fb707ea84b9533e7bbba4bef5348a13a7a807c97f9bf01cda9605e9"
+    },
+    {
+      "evidence_class": "REMOTE_SOURCE_READBACK",
+      "path": "/home/eii/openpi0.5-rtc/third_party/aloha/config/master_modes_right.yaml",
+      "sha256": "ec95fa410c6a8a2a9427f8566365108550d57c5fc233a6c28a5c8717959cf8bc"
+    },
+    {
+      "evidence_class": "REMOTE_SOURCE_READBACK",
+      "path": "/home/eii/openpi0.5-rtc/third_party/aloha/config/puppet_modes_left.yaml",
+      "sha256": "862940f33e2459255873d5839a401a5f2d0c0576aa9439b6b58d57118a182cb6"
+    },
+    {
+      "evidence_class": "REMOTE_SOURCE_READBACK",
+      "path": "/home/eii/openpi0.5-rtc/third_party/aloha/config/puppet_modes_right.yaml",
+      "sha256": "a744f6a24b9565027c39770d63d1e1381b223db920815ce55c060d28af30503f"
+    },
+    {
+      "evidence_class": "REMOTE_SOURCE_READBACK",
+      "path": "/home/eii/openpi0.5-rtc/third_party/aloha/aloha_scripts/realsense_publisher.py",
+      "sha256": "a80d80cb2c8d85ec5f89487c830b5776ec9001655682bfb812aaf44b90bb9c26"
+    },
+    {
+      "evidence_class": "REMOTE_SOURCE_READBACK",
+      "path": "/home/eii/openpi0.5-rtc/third_party/aloha/aloha_scripts/robot_utils.py",
+      "sha256": "60150e66ca6caf44fe5846f4a67dfae08f2faabc40337f269fb7a9ad2e547733"
+    },
+    {
+      "evidence_class": "REMOTE_SOURCE_READBACK",
+      "path": "/home/eii/openpi0.5-rtc/third_party/aloha/aloha_scripts/sleep.py",
+      "sha256": "c3901b50f2a0c35f7a71fc04299ae9370147c47b750e87b30cb2ea3543cbfa6e"
+    },
+    {
+      "evidence_class": "REMOTE_SOURCE_READBACK",
+      "path": "/home/eii/openpi0.5-rtc/third_party/aloha/msg/RGBGrayscaleImage.msg",
+      "sha256": "d7f80679cbe72f43c639191caa5a23be8c587ffa18a4e9b558af87868af9fc73"
+    },
+    {
+      "evidence_class": "REMOTE_SOURCE_READBACK",
+      "path": "/home/eii/openpi0.5-rtc/third_party/aloha/LICENSE",
+      "sha256": "4666c312da313e6c46929f6695d06cf98a2e7359b9c7dcbb0ea232d01b32cd42"
+    }
+  ],
+  "host": "192.168.1.103",
+  "left_only_candidate": {
+    "camera_nodes": [],
+    "checks": {
+      "load_configs": true,
+      "mode_config": true,
+      "no_camera_node": true,
+      "no_master_or_right": true,
+      "one_driver_include": true,
+      "robot_model": true,
+      "robot_name": true,
+      "use_sim": true
+    },
+    "load_configs": "false",
+    "mode_config": "$(find aloha)/config/puppet_modes_left.yaml",
+    "path": "/home/eii/project/openpi0.5-rtc-reward-learning/configs/aloha1_home_sleep_puppet_left_only_candidate.launch",
+    "real_execution": "NOT_RUN_AUTHORIZATION_REQUIRED",
+    "robot_model": "vx300s",
+    "robot_names": [
+      "puppet_left"
+    ],
+    "schema_version": 1,
+    "sha256": "967f2855468358a10078929aa07b3b32548a974acd9dee08c98df37fa7023db1",
+    "status": "PASS_STATIC_LEFT_ONLY_SCOPE",
+    "use_sim": "false"
+  },
+  "official_xsarm_control_source": {
+    "branch": "noetic",
+    "commit": "0bb2b0e6d0e619bff02cf74dbd5af5681dcf80c9",
+    "evidence_class": "OFFICIAL_PINNED_SOURCE",
+    "license": "BSD-3-Clause",
+    "path": "interbotix_ros_xsarms/interbotix_xsarm_control/launch/xsarm_control.launch",
+    "repository": "https://github.com/Interbotix/interbotix_ros_manipulators.git",
+    "sha256": "58d4f5511bf71b8b7408891e3bfe9b43c4ceec2eec08291b33596882dcd01c5c"
+  },
+  "remaining_gates": [
+    "explicit_authorization_to_start_puppet_left_driver",
+    "runtime_joint_order_and_position_mode_readback",
+    "operator_tested_stop_hold_path",
+    "cam_high_single_camera_runtime_path",
+    "operator_workspace_clear",
+    "explicit_real_motion_authorization"
+  ],
+  "schema_version": 1,
+  "scope": "READ_ONLY_EXTERNAL_ALOHA_SOURCE_AND_INERT_LAUNCH_CANDIDATE",
+  "status": "READY_FOR_MINIMAL_START_AUTHORIZATION",
+  "stop_hold_decision": {
+    "operator_tested_stop_hold_path": "NOT_VERIFIED",
+    "torque_off_accepted_as_generic_stop": false,
+    "zero_joint_command_accepted_as_generic_stop": false
+  }
+}
