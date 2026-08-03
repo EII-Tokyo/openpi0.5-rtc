@@ -1,0 +1,20 @@
+{
+  "commands_published": 0,
+  "manifest": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_home_sleep_command_manifest.json",
+    "command_signature": "d481b71bc8d6160fae0bdc1b264715e782712565064bb18099f8a9a4883f499e"
+  },
+  "manifest_sha256": "e9b18a154569945127779dfe74bee62e7c2db0a8d1dd320e802aaade7bf76087",
+  "mode": "DRY_RUN",
+  "network_access_performed": false,
+  "planned_samples": 1850,
+  "present_current_required": false,
+  "real_access_authorized": false,
+  "real_motion_authorized": false,
+  "ros_transport_instantiated": false,
+  "schema_version": 1,
+  "serial_device_opened": false,
+  "ssh_connection_opened": false,
+  "status": "NOT_RUN_AUTHORIZATION_REQUIRED",
+  "torque_changed": false
+}
