@@ -1,6 +1,42 @@
 # Task State
 
-## 2026-08-03 Home/Sleep digital-twin gate result
+## 2026-08-03 selected historical Sleep digital-twin gate
+
+- Active scope: `ALOHA1_REAL_SIM_HOME_SIGNAL_CORRESPONDENCE`.
+- The user selected the official historical Interbotix ALOHA Sleep command
+  `[0, -1.80, 1.55, 0, -1.57, 0] rad` from commit
+  `dbc6aefb53e956181fe97f60474f1ad292491f0c`. Source blob SHA-256:
+  `a5c809a5dd1cd6fb795a8f4f4cbf69de6e0133e1916cb8816061d29f4a8aa75e`.
+  This is an explicit cross-version selection; current-Humble limits are
+  unchanged and its newer out-of-limit Sleep remains comparison evidence.
+- `DIGITAL_HOME_SLEEP=PASS`, classification `DIGITAL_HOME_SLEEP_VERIFIED`.
+  All 1850 command samples pass the modeled official whole-group limit gate.
+- Two fresh Isaac Sim 5.1.0.0 processes produced identical signature
+  `d93ae226dcb2a11a728f4abda1dc821867d1eae0893c3cc01fdb4e8113696562`.
+  Maximum Sleep endpoint error is about `0.001038 rad`; maximum final Home
+  error is about `0.004368 rad`; all numeric gates pass.
+- Frozen Stage SHA-256 remains
+  `327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9`.
+  No source, final/default USD, collider, drive or physics parameter changed.
+- Visual review is `PASS`: 2 full-arm videos, 10 raw and 10 annotated key
+  frames. The initial annotation batch was rejected for stale failure wording;
+  reannotation passed without recapturing the raw simulation/video.
+- `REAL_PREFLIGHT=NOT_RUN_AUTHORIZATION_REQUIRED` and
+  `REAL_EXECUTION=NOT_RUN_AUTHORIZATION_REQUIRED`. Offline planning performed
+  no network, SSH, ROS, serial, torque or command-publication operation; no
+  access to `192.168.1.103` occurred.
+- Authoritative reports:
+  - `reports/aloha1_mapping/aloha1_home_sleep_historical_sleep_digital_validation.json/.md`;
+  - `reports/aloha1_mapping/aloha1_home_sleep_historical_sleep_run_01.json` and `run_02.json`;
+  - `reports/aloha1_mapping/aloha1_home_sleep_historical_sleep_visual_review.json/.md`;
+  - `reports/aloha1_mapping/aloha1_home_sleep_historical_sleep_real_preflight.json/.md`;
+  - `reports/aloha1_mapping/aloha1_home_sleep_historical_sleep_real_dry_run.json`.
+- Video paths:
+  - `/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-official-historical-sleep/visual_evidence_attempt1/aloha1_home_sleep_normal.mp4`;
+  - `/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-official-historical-sleep/visual_evidence_attempt1/aloha1_home_sleep_collision_overlay.mp4`.
+- Task 8 remains `COMPLETE_WITH_NO_PROMOTION`.
+
+## 2026-08-03 current-Humble Home/Sleep historical gate result
 
 - Active scope: `ALOHA1_REAL_SIM_HOME_SIGNAL_CORRESPONDENCE`.
 - `DIGITAL_HOME_SLEEP=PARTIAL` with classification

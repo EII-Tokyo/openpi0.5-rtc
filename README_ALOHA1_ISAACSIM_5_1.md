@@ -70,8 +70,8 @@ sim-to-real dynamics model and it is not yet accepted for bottle insertion.
 | Contact material / continuous duty | **HARD_BLOCKER** | runtime material binding is verified, but friction `0.7` remains `TEMPORARY_UNCALIBRATED`; exact surface-pair properties and a measured loaded thermal envelope are absent |
 | Task 8 optimization | **COMPLETE / NO_PROMOTION** | both isolated candidates are closed as `NO_MEASURABLE_IMPROVEMENT`; strict model-proof findings are retained as non-blocking reminders, final/default assets remain unchanged, and Task 8 reopens only by explicit request or a profiler-backed new bottleneck |
 | Task 8 collider LOD candidate | **NO_MEASURABLE_IMPROVEMENT** | isolated upper-arm candidate reduced authored convex pieces 8 → 2 and passed cooking/swept/smoke comparison, but fresh-process timing ranges overlap and the candidate is not promoted |
-| Home→Sleep→Home digital twin | **FAIL / deterministic source-limit conflict** | two fresh Isaac 5.1 runs completed three cycles with identical numeric signatures; final Home, directions, stationary right follower/grippers and zero impulse contacts pass, but three official Sleep targets exceed frozen USD limits |
-| Home→Sleep→Home real robot | **NOT_RUN_DIGITAL_GATE_FAILED** | offline preflight and runner remain literal DRY_RUN; no network, SSH, ROS, serial, torque or command publication occurred |
+| Home→Sleep→Home digital twin | **PASS / selected historical official Sleep** | user-selected official historical ALOHA Sleep `[0, -1.80, 1.55, 0, -1.57, 0]` passes all 1850 modeled command samples and two fresh Isaac 5.1 runs with identical numeric signatures; the current Humble vector remains an out-of-limit comparison only |
+| Home→Sleep→Home real robot | **NOT_RUN_AUTHORIZATION_REQUIRED** | offline preflight and 1850-sample dry-run performed no network, SSH, ROS, serial, torque or command publication; digital PASS does not authorize hardware motion |
 
 `PASS`, `FAIL`, and `PARTIAL` are literal machine-report values. A clean
 viewport is not an acceptance criterion.
@@ -91,7 +91,53 @@ qualify three uninterrupted `Home -> Sleep -> Home` cycles on digital
 This status change does not authorize access to `192.168.1.103` or any real
 motion and does not claim calibrated dynamic sim-to-real behavior.
 
-## 2026-08-03 Home/Sleep digital-twin qualification
+## 2026-08-03 user-selected historical Sleep qualification
+
+The user explicitly selected the older official ALOHA command from Interbotix
+ROS 2 historical commit `dbc6aefb53e956181fe97f60474f1ad292491f0c`:
+Home `[0, -0.96, 1.16, 0, -0.3, 0] rad` and Sleep
+`[0, -1.80, 1.55, 0, -1.57, 0] rad`. The exact source blob SHA-256 is
+`a5c809a5dd1cd6fb795a8f4f4cbf69de6e0133e1916cb8816061d29f4a8aa75e`.
+This is an explicit cross-version command selection; the frozen current-Humble
+URDF/driver limits remain unchanged, and the newer Humble Sleep command is
+retained only as the out-of-limit comparison described below.
+
+The generated 50 Hz command stream contains 1850 samples over three complete
+`Home -> Sleep -> Home` cycles. All 1850 samples pass the modeled official
+Interbotix whole-group limit gate. Two independent Isaac Sim 5.1.0.0 / Kit
+107.3.3 / PhysX 107.3.26 processes both report `PASS` and the identical
+normalized numeric signature
+`d93ae226dcb2a11a728f4abda1dc821867d1eae0893c3cc01fdb4e8113696562`.
+Maximum Sleep-hold error is about `0.001038 rad`; maximum final Home error is
+about `0.004368 rad`. All direction, endpoint, finite-readback, stationary
+right-follower/gripper and zero impulse-carrying-contact gates pass. The frozen
+Stage SHA-256 remains
+`327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9`,
+and no source/final asset was modified.
+
+Full-arm normal and collision-overlay videos contain 560 frames each at
+960x540 and 15 fps. Ten annotated key frames were reviewed individually. The
+first annotation batch was rejected because it retained stale failure wording;
+the same raw evidence was reannotated and all ten final images passed visual
+review. Visual evidence remains auxiliary to telemetry.
+
+- Normal video: `/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-official-historical-sleep/visual_evidence_attempt1/aloha1_home_sleep_normal.mp4`, SHA-256 `b051241ad02c991f00404e11c995ac08ea8308cac2be3dedf3731f1d8c02d25e`.
+- Collision video: `/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-official-historical-sleep/visual_evidence_attempt1/aloha1_home_sleep_collision_overlay.mp4`, SHA-256 `8164dad93e53235f471528a4cd5693c262a4057c85b3908c849c66e26ed6fe70`.
+
+Real-hardware execution is still `NOT_RUN_AUTHORIZATION_REQUIRED`. The offline
+preflight/dry-run planned 1850 samples but opened no network, SSH, ROS or serial
+transport, changed no torque and published zero commands. Neither the real
+robot nor `192.168.1.103` was accessed.
+
+Machine reports:
+
+- `reports/aloha1_mapping/aloha1_home_sleep_historical_sleep_digital_validation.json/.md`;
+- `reports/aloha1_mapping/aloha1_home_sleep_historical_sleep_run_01.json` and `run_02.json`;
+- `reports/aloha1_mapping/aloha1_home_sleep_historical_sleep_visual_review.json/.md`;
+- `reports/aloha1_mapping/aloha1_home_sleep_historical_sleep_real_preflight.json/.md`;
+- `reports/aloha1_mapping/aloha1_home_sleep_historical_sleep_real_dry_run.json`.
+
+## 2026-08-03 current-Humble Sleep comparison (historical failed run)
 
 The exact pinned `aloha_vx300s` command authority was executed without tuning:
 Home `[0, -0.96, 1.16, 0, -0.3, 0] rad`, Sleep
