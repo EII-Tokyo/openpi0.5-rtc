@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "status": "PASS_VISUAL_EVIDENCE_CLIP",
+  "classification": "DERIVED_SLEEP_HOME_SLEEP_REVIEW_CLIPS",
+  "source_trajectory": "Home -> Sleep -> Home, repeated three times",
+  "selected_sequence": "cycle_01_sleep_hold -> cycle_01_sleep_to_home -> cycle_01_home_hold -> cycle_02_home_to_sleep -> cycle_02_sleep_hold",
+  "selection": {
+    "source_capture_frame_first": 91,
+    "source_capture_frame_last": 286,
+    "source_physics_time_first_s": 6.016666666666667,
+    "source_physics_time_last_s": 18.95,
+    "source_command_index_first": 300,
+    "source_command_index_last": 946,
+    "output_frame_count": 196,
+    "output_fps": 15,
+    "output_duration_s": 13.066667,
+    "resolution": [960, 540]
+  },
+  "clips": {
+    "normal": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-home-sleep-digital-twin/sleep_home_sleep_review_clips/aloha1_sleep_home_sleep_normal.mp4",
+      "sha256": "a267dfe9c04fe2de45afccebb29b8d122f6e601b70bacdc439ec768c7f87cb06",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-home-sleep-digital-twin/failure_evidence/aloha1_home_sleep_normal.mp4",
+      "source_sha256": "f72e24d571fcc73649e6b7b219713b2f98e3349ea9a18254a67d2ea42b74d80b"
+    },
+    "collision_overlay": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-home-sleep-digital-twin/sleep_home_sleep_review_clips/aloha1_sleep_home_sleep_collision_overlay.mp4",
+      "sha256": "90b5fb454219cfad72a0611c773a62e2114166fcbd6c34bd791457498c3baa02",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-home-sleep-digital-twin/failure_evidence_collision_retake/aloha1_home_sleep_collision_overlay.mp4",
+      "source_sha256": "48de6feff2d929d3dc0d7e72f4ff5dca107b6167c1340c5c06308e64c89d91c3"
+    }
+  },
+  "visual_review": {
+    "reviewed_by": "Codex visual model",
+    "status": "PASS",
+    "normal_contact_sheet": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-home-sleep-digital-twin/sleep_home_sleep_review_clips/normal_sleep_home_sleep_contact_sheet.png",
+      "sha256": "09a7915a9e82ba897f6a89bd0e10ce75bf0600e3e5ba1353364ec8e7541fb6ab"
+    },
+    "collision_contact_sheet": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-home-sleep-digital-twin/sleep_home_sleep_review_clips/collision_sleep_home_sleep_contact_sheet.png",
+      "sha256": "b22c7f4ee489b1c092347fd7a64b3157130876ea5bc5b5a6df8a51bb63aa532f"
+    },
+    "checks": {
+      "whole_arm_visible": true,
+      "initial_sleep_visible": true,
+      "home_visible_and_distinct": true,
+      "final_sleep_visible_and_distinct": true,
+      "collision_overlay_distinct": true,
+      "critical_geometry_not_cropped": true
+    }
+  },
+  "physics_boundary": {
+    "digital_motion_gate": "FAIL",
+    "reason": "OFFICIAL_SLEEP_TARGET_OUTSIDE_FROZEN_JOINT_LIMITS",
+    "visual_pass_does_not_imply_sleep_endpoint_pass": true,
+    "source_videos_modified": false,
+    "isaac_rerun_performed": false,
+    "real_robot_accessed": false
+  }
+}
