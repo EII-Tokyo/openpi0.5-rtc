@@ -1,0 +1,70 @@
+{
+  "authorization_basis": "USER_EXPLICITLY_RELAXED_MODEL_PROOF_AS_A_TASK8_ENTRY_GATE_2026_08_03",
+  "deterministic_signature": "ff71d5e4f17e11b5486bedfe35292411cfe4ad6ee9c112b4463afe354ed0d127",
+  "history_preserved": {
+    "final_or_default_asset_modified": false,
+    "rejected_compound_candidate_promoted": false,
+    "strict_model_first_report_rewritten": false
+  },
+  "policy": {
+    "additional_contact_patch_screenshots": "NOT_REQUESTED",
+    "approximate_simulation": "ALLOWED_WITH_EXPLICIT_PROVENANCE_AND_LIMITATIONS",
+    "final_default_asset_promotion": "REQUIRES_SEPARATE_REVIEW",
+    "known_issues": "RECALL_ON_MATCHING_FAILURE_OR_PROMOTION_REVIEW",
+    "parameter_sensitivity": "ONE_VARIABLE_AT_A_TIME_WHEN_NEEDED",
+    "repeat_five_grasp_videos": "NOT_REQUIRED_BY_DEFAULT"
+  },
+  "progression_gate": {
+    "approximate_simulation_allowed": true,
+    "final_default_promotion_allowed": false,
+    "functional_gates": {
+      "finger_safety": "PASS",
+      "runtime_grasp": "PASS"
+    },
+    "isolated_candidate_authoring_allowed": true,
+    "known_issue_reminders": [
+      {
+        "blocking_task8": false,
+        "id": "continuous_actuator_envelope",
+        "recall_when": "matching Task 8 failure or final/default promotion review",
+        "status": "APPROXIMATION_ALLOWED_NOT_CALIBRATED",
+        "summary": "The measured continuous torque-speed-current thermal envelope is unavailable."
+      },
+      {
+        "blocking_task8": false,
+        "id": "physx_joint_drive_mapping",
+        "recall_when": "matching Task 8 failure or final/default promotion review",
+        "status": "APPROXIMATION_ALLOWED_NOT_CALIBRATED",
+        "summary": "The exact controller/transmission to PhysX drive mapping is incomplete."
+      },
+      {
+        "blocking_task8": false,
+        "id": "finite_contact_patch_miss",
+        "recall_when": "matching Task 8 failure or final/default promotion review",
+        "status": "REJECTED_DIAGNOSTIC_CANDIDATE",
+        "summary": "The rejected compound patch misses the Bottle500 central tangent by about 1.614 mm; the final/default collider was not changed."
+      },
+      {
+        "blocking_task8": false,
+        "id": "finger_bottle_table_contact_materials",
+        "recall_when": "matching Task 8 failure or final/default promotion review",
+        "status": "TEMPORARY_UNCALIBRATED",
+        "summary": "Exact finger/bottle/table material-pair coefficients are not measured."
+      },
+      {
+        "blocking_task8": false,
+        "id": "physics_timestep_solver_selection",
+        "recall_when": "matching Task 8 failure or final/default promotion review",
+        "status": "FUNCTIONALLY_PASSING_NOT_NUMERICALLY_CONVERGED",
+        "summary": "All tested rates held the bottle, but the strict cross-rate trajectory convergence bounds did not pass."
+      }
+    ],
+    "model_first_status": "PARTIAL_MODEL_PROOF",
+    "sim_to_real_calibrated_claim_allowed": false,
+    "status": "AUTHORIZED_IN_PROGRESS"
+  },
+  "schema_version": 1,
+  "status": "AUTHORIZED_IN_PROGRESS",
+  "task7": "PARTIAL_ACCEPTED_FOR_TASK8",
+  "task8": "AUTHORIZED_IN_PROGRESS"
+}

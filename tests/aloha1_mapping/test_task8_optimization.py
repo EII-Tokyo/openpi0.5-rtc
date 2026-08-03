@@ -1,8 +1,10 @@
 from tools.aloha1_mapping.task8_optimization import build_inventory_summary
 from tools.aloha1_mapping.task8_optimization import build_model_first_gate
 from tools.aloha1_mapping.task8_optimization import build_protected_signature
+from tools.aloha1_mapping.task8_optimization import build_task8_progression_gate
 from tools.aloha1_mapping.task8_optimization import failure_evidence_contract
 from tools.aloha1_mapping.task8_optimization import rank_optimization_opportunities
+from tools.build_aloha1_task8_progression_authorization import build_report
 
 
 def _mesh(
@@ -150,3 +152,55 @@ def test_model_first_gate_requires_every_mathematical_and_runtime_contract() -> 
     assert gate["status"] == "BLOCKED"
     assert gate["candidate_authoring_allowed"] is False
     assert gate["blocking_gates"][0]["id"] == "dynamics_contract"
+
+
+def test_task8_progression_keeps_calibration_gaps_as_nonblocking_reminders() -> None:
+    gate = build_task8_progression_gate(
+        runtime_grasp_status="PASS",
+        finger_safety_status="PASS",
+        model_first_status="PARTIAL_MODEL_PROOF",
+        known_issues=[
+            {
+                "id": "finite_contact_patch_miss",
+                "status": "KNOWN_LIMITATION",
+                "summary": "Bottle500 central tangent is outside one rejected diagnostic patch.",
+            },
+            {
+                "id": "uncalibrated_material_pair",
+                "status": "TEMPORARY_UNCALIBRATED",
+                "summary": "Physical finger/bottle material coefficients are not measured.",
+            },
+        ],
+    )
+
+    assert gate["status"] == "AUTHORIZED_IN_PROGRESS"
+    assert gate["isolated_candidate_authoring_allowed"] is True
+    assert gate["final_default_promotion_allowed"] is False
+    assert gate["sim_to_real_calibrated_claim_allowed"] is False
+    assert len(gate["known_issue_reminders"]) == 2
+    assert all(not item["blocking_task8"] for item in gate["known_issue_reminders"])
+
+
+def test_task8_progression_still_blocks_when_runtime_functional_gate_failed() -> None:
+    gate = build_task8_progression_gate(
+        runtime_grasp_status="FAIL",
+        finger_safety_status="PASS",
+        model_first_status="PARTIAL_MODEL_PROOF",
+        known_issues=[],
+    )
+
+    assert gate["status"] == "BLOCKED_BY_FUNCTIONAL_BASELINE"
+    assert gate["isolated_candidate_authoring_allowed"] is False
+
+
+def test_task8_progression_report_preserves_history_and_skips_extra_evidence() -> None:
+    report = build_report()
+
+    assert report["status"] == "AUTHORIZED_IN_PROGRESS"
+    assert report["policy"]["additional_contact_patch_screenshots"] == "NOT_REQUESTED"
+    assert report["policy"]["repeat_five_grasp_videos"] == "NOT_REQUIRED_BY_DEFAULT"
+    assert report["history_preserved"] == {
+        "strict_model_first_report_rewritten": False,
+        "rejected_compound_candidate_promoted": False,
+        "final_or_default_asset_modified": False,
+    }

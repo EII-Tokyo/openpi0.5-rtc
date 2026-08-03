@@ -68,7 +68,7 @@ sim-to-real dynamics model and it is not yet accepted for bottle insertion.
 | Physics timestep/solver convergence | **PARTIAL** | every 60-960 Hz frozen-model cell still completes the grasp, but successive trajectory differences exceed the independently frozen geometry/encoder bounds; no timestep is selected and solver sweeps are not admitted |
 | Force-drive physical derivation | **HARD_BLOCKER** | Gain Tuner 3.0.6 equations and SI units are verified; effective gripper mass, declared/identified response, loaded linkage efficiency and continuous force envelope are missing, so no candidate or scan is authored |
 | Contact material / continuous duty | **HARD_BLOCKER** | runtime material binding is verified, but friction `0.7` remains `TEMPORARY_UNCALIBRATED`; exact surface-pair properties and a measured loaded thermal envelope are absent |
-| Task 8 optimization | **AUTHORIZED / PAUSED_AT_MODEL_PROOF_GATE** | read-only 129-mesh baseline inventory exists; no optimization candidate, Isaac runtime, or final/default asset mutation occurred |
+| Task 8 optimization | **AUTHORIZED / IN_PROGRESS** | strict model-proof findings are retained as non-blocking reminders; isolated approximate candidates may proceed, while final/default promotion remains separate |
 
 `PASS`, `FAIL`, and `PARTIAL` are literal machine-report values. A clean
 viewport is not an acceptance criterion.
@@ -92,8 +92,8 @@ hidden or tuned away.
 
 ## 2026-08-02 official-model-first correction
 
-Task 8 remains user-authorized, but optimization candidate authoring is paused
-at a new source-and-mathematics gate. A successful grasp, a visually plausible
+Historical note: Task 8 was temporarily paused at a new model-first
+source-and-mathematics gate. A successful grasp, a visually plausible
 collider, or a parameter sweep is no longer allowed to identify a physical
 parameter. The evidence order is now exact product source → exact component
 manual → pinned official description/driver → supplier CAD calculation →

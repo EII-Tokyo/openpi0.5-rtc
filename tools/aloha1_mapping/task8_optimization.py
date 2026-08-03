@@ -243,3 +243,49 @@ def build_model_first_gate(gates: Mapping[str, Mapping[str, Any]]) -> dict[str, 
         "required_gates": records,
         "blocking_gates": blockers,
     }
+
+
+def build_task8_progression_gate(
+    *,
+    runtime_grasp_status: str,
+    finger_safety_status: str,
+    model_first_status: str,
+    known_issues: Sequence[Mapping[str, Any]],
+) -> dict[str, object]:
+    """Separate functional Task 8 progression from calibrated asset promotion.
+
+    Model-first findings remain visible and continue to block claims of a
+    calibrated sim-to-real model or promotion into final/default assets.  They
+    do not block isolated Task 8 candidates once the accepted runtime grasp and
+    finger-safety baselines pass.
+    """
+
+    functional_gates = {
+        "runtime_grasp": str(runtime_grasp_status),
+        "finger_safety": str(finger_safety_status),
+    }
+    functional_pass = all(status == "PASS" for status in functional_gates.values())
+    reminders = [
+        {
+            "id": str(issue["id"]),
+            "status": str(issue["status"]),
+            "summary": str(issue["summary"]),
+            "blocking_task8": False,
+            "recall_when": "matching Task 8 failure or final/default promotion review",
+        }
+        for issue in known_issues
+    ]
+    return {
+        "status": (
+            "AUTHORIZED_IN_PROGRESS"
+            if functional_pass
+            else "BLOCKED_BY_FUNCTIONAL_BASELINE"
+        ),
+        "functional_gates": functional_gates,
+        "model_first_status": str(model_first_status),
+        "isolated_candidate_authoring_allowed": functional_pass,
+        "approximate_simulation_allowed": functional_pass,
+        "final_default_promotion_allowed": False,
+        "sim_to_real_calibrated_claim_allowed": False,
+        "known_issue_reminders": reminders,
+    }

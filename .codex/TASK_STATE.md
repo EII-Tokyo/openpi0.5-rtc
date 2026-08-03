@@ -1,5 +1,25 @@
 # Task State
 
+## 2026-08-03 Task 8 approximation authorization
+
+- The user explicitly removed the strict model-proof findings as a Task 8
+  entry gate. Current status is `TASK8=AUTHORIZED_IN_PROGRESS`; Task 7 remains
+  `PARTIAL_ACCEPTED_FOR_TASK8` and is not rewritten as a full pass.
+- Approximate digital simulation is allowed when provenance, units and known
+  limitations are explicit. Missing real thermal/force/material calibration
+  does not stop isolated Task 8 candidates and does not support a calibrated
+  sim-to-real claim.
+- Five retained issues are non-blocking reminders: continuous actuator
+  envelope, exact controller-to-PhysX drive mapping, the rejected finite
+  Bottle500 contact-patch candidate, uncalibrated material pairs, and strict
+  cross-rate numerical convergence. Recall them only on a matching failure or
+  during later final/default promotion review.
+- No additional screenshots are requested for the rejected finite patch and
+  the five accepted grasp videos are not repeated by default. Historical
+  reports remain unchanged; no rejected candidate is promoted.
+- Machine-readable authorization:
+  `reports/aloha1_mapping/aloha1_task8_progression_authorization.json/.md`.
+
 ## 2026-08-03 model-first execution closure
 
 - Recommended order steps 1-2 are complete and already committed: runtime

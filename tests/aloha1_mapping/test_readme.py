@@ -18,7 +18,8 @@ def test_readme_separates_evidence_classes_and_gates_optimization() -> None:
         "## HARD_BLOCKER and measurement checklist",
     ):
         assert heading in text
-    assert "Task 8 optimization | **AUTHORIZED / PAUSED_AT_MODEL_PROOF_GATE**" in text
+    assert "Task 8 optimization | **AUTHORIZED / IN_PROGRESS**" in text
+    assert "strict model-proof findings are retained as non-blocking reminders" in text
     assert "No Isaac process was started for this source/mathematics phase" in normalized
     assert "no final or default USD/collider was modified" in normalized
     assert "Supplier-CAD Task 5 dynamic structure | **PASS**" in text
