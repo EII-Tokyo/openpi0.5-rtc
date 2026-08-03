@@ -64,7 +64,10 @@
   `REJECTED_FOR_LEFT_ONLY_SUPERVISED_REPLAY`: it includes all four
   master/puppet drivers. Both follower mode files enable arm and gripper
   torque. The bundled camera publisher requires all four serials and calls
-  `hardware_reset()`. The bundled `sleep.py` commands both puppets.
+  `hardware_reset()`; it also reverses BGR bytes and then labels the resulting
+  RGB-valued image `bgr8`, classified
+  `MISMATCH_RGB_BYTES_LABELED_BGR8`. The bundled `sleep.py` commands both
+  puppets.
 - Inert candidate
   `configs/aloha1_home_sleep_puppet_left_only_candidate.launch`, SHA-256
   `967f2855468358a10078929aa07b3b32548a974acd9dee08c98df37fa7023db1`,

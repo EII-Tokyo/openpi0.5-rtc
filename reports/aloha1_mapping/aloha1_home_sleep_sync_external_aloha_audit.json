@@ -11,7 +11,7 @@
   "camera_decision": {
     "cam_high_single_camera_runtime": "NOT_RUN_AUTHORIZATION_REQUIRED",
     "existing_four_camera_publisher_accepted": false,
-    "reason": "REQUIRES_ALL_FOUR_SERIALS_AND_CALLS_HARDWARE_RESET; NOT_A_CAM_HIGH_ONLY_PATH"
+    "reason": "REQUIRES_ALL_FOUR_SERIALS_AND_CALLS_HARDWARE_RESET; RGB_BYTES_ARE_LABELED_BGR8; NOT_A_CAM_HIGH_ONLY_PATH"
   },
   "execution": {
     "argv": [
@@ -40,11 +40,15 @@
         "cam_low",
         "cam_right_wrist"
       ],
+      "channel_reversal_present": true,
+      "color_semantics": "MISMATCH_RGB_BYTES_LABELED_BGR8",
       "hardware_reset_present": true,
       "launch_nodes": [
         "realsense_publisher"
       ],
       "requires_four_cameras": true,
+      "ros_image_encoding_label": "bgr8",
+      "source_stream_format": "bgr8",
       "suitable_for_cam_high_only": false
     },
     "driver_scope": {

@@ -132,6 +132,14 @@ def audit_external_aloha_source(
         and "missing_cams" in realsense_source
         and "raise Exception" in realsense_source
     )
+    bgr_stream = "rs.format.bgr8" in realsense_source
+    channel_reversal = "[..., ::-1]" in realsense_source
+    bgr_message_label = 'encoding="bgr8"' in realsense_source
+    color_semantics = (
+        "MISMATCH_RGB_BYTES_LABELED_BGR8"
+        if bgr_stream and channel_reversal and bgr_message_label
+        else "INCONCLUSIVE"
+    )
     commands_both_puppets = all(
         token in sleep_source
         for token in ("puppet_left", "puppet_right", "move_arms")
@@ -162,6 +170,12 @@ def audit_external_aloha_source(
             "camera_names": names,
             "requires_four_cameras": requires_four_cameras,
             "hardware_reset_present": "hardware_reset()" in realsense_source,
+            "source_stream_format": "bgr8" if bgr_stream else "INCONCLUSIVE",
+            "channel_reversal_present": channel_reversal,
+            "ros_image_encoding_label": (
+                "bgr8" if bgr_message_label else "INCONCLUSIVE"
+            ),
+            "color_semantics": color_semantics,
             "suitable_for_cam_high_only": False,
         },
         "sleep_scope": {
@@ -324,7 +338,7 @@ def build_external_audit_report(
             "existing_four_camera_publisher_accepted": False,
             "reason": (
                 "REQUIRES_ALL_FOUR_SERIALS_AND_CALLS_HARDWARE_RESET; "
-                "NOT_A_CAM_HIGH_ONLY_PATH"
+                "RGB_BYTES_ARE_LABELED_BGR8; NOT_A_CAM_HIGH_ONLY_PATH"
             ),
             "cam_high_single_camera_runtime": "NOT_RUN_AUTHORIZATION_REQUIRED",
         },

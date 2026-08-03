@@ -101,7 +101,9 @@ It includes `{existing['driver_scope']['include_count']}` robot drivers:
 `{', '.join(existing['driver_scope']['robot_names'])}`. The left follower arm
 and gripper mode configuration both have torque enabled. The bundled camera
 publisher requires four camera serials and calls `hardware_reset()`. The
-bundled `sleep.py` constructs and commands both puppet arms. None of these
+source also reverses a `bgr8` frame to RGB values and then labels the ROS Image
+as `bgr8`; this is `MISMATCH_RGB_BYTES_LABELED_BGR8`. The bundled `sleep.py`
+constructs and commands both puppet arms. None of these
 entry points is accepted for the left-only supervised replay.
 
 ## Isolated launch candidate

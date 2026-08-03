@@ -55,6 +55,9 @@ if missing_cams:
     raise Exception(f'Cameras missing:{missing_cams}')
 for dev in devices:
     dev.hardware_reset()
+cfg.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, FPS)
+color_frame = color_frame[..., ::-1]
+cv_bridge.cv2_to_imgmsg(color_frame, encoding="bgr8")
 """
 
 SLEEP_SOURCE = """puppet_bot_left = InterbotixManipulatorXS(robot_name='puppet_left')
@@ -84,6 +87,9 @@ def test_external_launch_is_rejected_for_left_only_replay() -> None:
     assert report["puppet_left_mode"]["gripper_torque_enable"] is True
     assert report["camera_scope"]["requires_four_cameras"] is True
     assert report["camera_scope"]["hardware_reset_present"] is True
+    assert report["camera_scope"]["color_semantics"] == (
+        "MISMATCH_RGB_BYTES_LABELED_BGR8"
+    )
     assert report["sleep_scope"]["commands_both_puppets"] is True
 
 

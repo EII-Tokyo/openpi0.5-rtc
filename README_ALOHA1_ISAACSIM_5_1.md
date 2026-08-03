@@ -213,7 +213,10 @@ That source changes the live-start boundary materially:
 - `puppet_modes_left.yaml` configures the arm in `position` mode and the
   gripper in `linear_position` mode, with torque enabled for both;
 - the bundled RealSense publisher requires all four configured serials and
-  calls `hardware_reset()`, so it is not accepted as a cam_high-only path;
+  calls `hardware_reset()`. It also reverses a `bgr8` frame into RGB byte
+  values and labels the ROS Image `bgr8`, so its color contract is
+  `MISMATCH_RGB_BYTES_LABELED_BGR8`; it is not accepted as a cam_high-only
+  path;
 - the bundled `sleep.py` constructs and commands both puppet arms and is not
   used for this left-only experiment.
 
