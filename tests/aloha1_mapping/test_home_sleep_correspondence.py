@@ -10,7 +10,14 @@ from tools.aloha1_mapping.home_sleep_correspondence import SLEEP_ARM
 from tools.aloha1_mapping.home_sleep_correspondence import build_home_sleep_samples
 from tools.aloha1_mapping.home_sleep_correspondence import command_index_for_physics_frame
 from tools.aloha1_mapping.home_sleep_correspondence import command_signature
+from tools.aloha1_mapping.home_sleep_correspondence import compare_aligned_joint_rows
+from tools.aloha1_mapping.home_sleep_correspondence import count_follower_articulation_roots
+from tools.aloha1_mapping.home_sleep_correspondence import digital_runtime_signature
+from tools.aloha1_mapping.home_sleep_correspondence import validate_digital_preflight
+from tools.aloha1_mapping.home_sleep_correspondence import values_within_float32_limits
 from tools.build_aloha1_home_sleep_command_manifest import build_manifest
+from tools.build_aloha1_home_sleep_digital_report import build_digital_report
+from tools.review_aloha1_home_sleep_digital_evidence import build_visual_review
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -152,3 +159,269 @@ def test_home_sleep_manifest_is_deterministic() -> None:
     second, _ = build_manifest(config, project_root=ROOT)
 
     assert first == second
+
+
+def test_digital_preflight_fails_closed_on_any_frozen_contract_drift() -> None:
+    contract = {
+        "runtime_versions_match": True,
+        "stage_hash_match": True,
+        "manifest_hash_match": True,
+        "default_prim": "/World",
+        "root_prim_valid": True,
+        "required_prims_valid": True,
+        "articulation_count": 2,
+        "dof_order_match": True,
+        "finger_limit_hash_match": True,
+        "home_finite_and_legal": True,
+        "first_frame_arm_stable": True,
+        "stationary_scope_declared": True,
+        "source_hashes_immutable": True,
+        "final_default_asset_modified": False,
+    }
+    passed = validate_digital_preflight(contract)
+    assert passed["status"] == "PASS"
+    assert passed["failed_gates"] == []
+
+    for key in (
+        "runtime_versions_match",
+        "stage_hash_match",
+        "manifest_hash_match",
+        "root_prim_valid",
+        "required_prims_valid",
+        "dof_order_match",
+        "finger_limit_hash_match",
+        "home_finite_and_legal",
+        "first_frame_arm_stable",
+        "stationary_scope_declared",
+        "source_hashes_immutable",
+    ):
+        drifted = dict(contract)
+        drifted[key] = False
+        result = validate_digital_preflight(drifted)
+        assert result["status"] == "FAIL"
+        assert key in result["failed_gates"]
+
+
+def test_digital_runtime_signature_excludes_process_local_fields() -> None:
+    run_a = {
+        "runtime_pid": 100,
+        "wall_time_s": 12.0,
+        "rows": [
+            {
+                "physics_frame": 0,
+                "command_index": 0,
+                "target": [0.0, -0.96],
+                "readback": [0.0, -0.959999],
+            }
+        ],
+    }
+    run_b = {
+        **run_a,
+        "runtime_pid": 200,
+        "wall_time_s": 99.0,
+    }
+    assert digital_runtime_signature(run_a) == digital_runtime_signature(run_b)
+    changed = {**run_b, "rows": [{**run_b["rows"][0], "command_index": 1}]}
+    assert digital_runtime_signature(run_a) != digital_runtime_signature(changed)
+
+
+def test_follower_articulation_count_excludes_environment_schema_root() -> None:
+    roots = [
+        "/World/follower_left/vx300s_left/root_joint",
+        "/World/follower_right/vx300s_right/root_joint",
+        "/World/environment/worldBody",
+    ]
+    assert count_follower_articulation_roots(roots) == roots[:2]
+
+
+def test_limit_check_allows_only_float32_roundoff_not_physical_violation() -> None:
+    assert values_within_float32_limits(
+        [1.6057032346725464],
+        [-1.7627824544906616],
+        [1.6057027578353882],
+    )
+    assert not values_within_float32_limits(
+        [1.6059],
+        [-1.7627824544906616],
+        [1.6057027578353882],
+    )
+
+
+def _visual_capture(mode: str, *, status: str = "PENDING_VISUAL_MODEL_REVIEW") -> dict:
+    return {
+        "status": status,
+        "stage": {"sha256_before": "stage", "sha256_after": "stage"},
+        "manifest": {"sha256": "manifest", "command_signature": "command"},
+        "videos": {
+            mode: {
+                "absolute_path": f"/{mode}.mp4",
+                "sha256": mode * 8,
+                "frame_count": 558,
+                "fps": 15,
+                "duration_s": 37.2,
+            }
+        },
+        "screenshots": [
+            {
+                "label": label,
+                "mode": mode,
+                "raw_absolute_path": f"/{label}_{mode}_raw.png",
+                "raw_sha256": label * 8,
+                "annotated_absolute_path": f"/{label}_{mode}_annotated.png",
+                "annotated_sha256": (label + mode) * 4,
+            }
+            for label in (
+                "before_limit_exceedance",
+                "first_limit_exceedance",
+                "first_sleep_hold_end",
+                "final_home_recovery",
+            )
+        ],
+    }
+
+
+def test_visual_review_rejects_old_overlay_and_accepts_red_retake() -> None:
+    original = _visual_capture("normal")
+    original["videos"]["collision_overlay"] = {
+        **original["videos"]["normal"],
+        "absolute_path": "/old_collision.mp4",
+        "sha256": "old" * 16,
+    }
+    original["screenshots"] += _visual_capture("collision_overlay")["screenshots"]
+    retake = _visual_capture("collision_overlay")
+
+    report = build_visual_review(
+        original,
+        retake,
+        normal_review_status="PASS",
+        collision_retake_review_status="PASS",
+        rejected_collision_reason="REJECTED_COLLIDER_OVERLAY_NOT_DISTINCT",
+    )
+
+    assert report["status"] == "PASS_FAILURE_EVIDENCE"
+    assert report["visual_review_is_auxiliary"] is True
+    assert report["retained_videos"]["normal"]["absolute_path"] == "/normal.mp4"
+    assert (
+        report["retained_videos"]["collision_overlay"]["absolute_path"]
+        == "/collision_overlay.mp4"
+    )
+    assert len(report["retained_screenshots"]) == 8
+    assert report["rejected_attempts"][0]["reason"] == (
+        "REJECTED_COLLIDER_OVERLAY_NOT_DISTINCT"
+    )
+
+
+def _digital_run(status: str, signature: str) -> dict:
+    return {
+        "status": status,
+        "runtime": {
+            "isaac_sim": "5.1.0.0",
+            "kit": "107.3.3",
+            "physx": "107.3.26",
+        },
+        "stage": {"sha256_before": "stage", "sha256_after": "stage"},
+        "manifest": {
+            "sha256_before": "manifest",
+            "sha256_after": "manifest",
+            "command_signature": "command",
+        },
+        "source_or_final_asset_modified": False,
+        "real_execution_authorized": False,
+        "summary": {
+            "status": status,
+            "normalized_numeric_signature": signature,
+            "gates": {
+                "three_cycles_complete": True,
+                "directions": True,
+                "endpoints": status == "PASS",
+                "legal_limits": status == "PASS",
+                "final_home": True,
+                "follower_right_stationary": True,
+                "grippers_stationary": True,
+                "finite_readback": True,
+                "no_impulse_carrying_contact": True,
+            },
+            "endpoint_results": [],
+            "contact": {"impulse_carrying_point_count": 0},
+        },
+        "preflight": {
+            "status": "PASS",
+            "limits": {
+                "follower_left": [
+                    [-3.14, -1.85, -1.76, -3.14, -1.868, -3.14],
+                    [3.14, 1.257, 1.606, 3.14, 2.234, 3.14],
+                ]
+            },
+        },
+    }
+
+
+def test_digital_report_fails_closed_on_repeatable_official_sleep_limit_conflict() -> None:
+    run_1 = _digital_run("FAIL", "same")
+    run_2 = _digital_run("FAIL", "same")
+    visual = {
+        "status": "PASS_FAILURE_EVIDENCE",
+        "retained_videos": {},
+        "retained_screenshots": [],
+    }
+    manifest = {
+        "sleep_rad": [0.0, -2.05, 1.7, 0.0, -2.0, 0.0],
+        "joint_order": list(ARM_JOINT_ORDER),
+        "command_signature": "command",
+        "real_execution_authorized": False,
+    }
+
+    report = build_digital_report(run_1, run_2, visual, manifest)
+
+    assert report["status"] == "FAIL"
+    assert report["classification"] == (
+        "OFFICIAL_SLEEP_TARGET_OUTSIDE_FROZEN_JOINT_LIMITS"
+    )
+    assert report["numeric_repeatability"] == "PASS"
+    assert report["real_execution_authorized"] is False
+    assert [item["joint_name"] for item in report["limit_conflicts"]] == [
+        "shoulder",
+        "elbow",
+        "wrist_angle",
+    ]
+
+
+def test_digital_report_requires_two_passing_fresh_runs_for_pass() -> None:
+    run_1 = _digital_run("PASS", "same")
+    run_2 = _digital_run("PASS", "same")
+    manifest = {
+        "sleep_rad": [0.0, -1.5, 1.5, 0.0, -1.5, 0.0],
+        "joint_order": list(ARM_JOINT_ORDER),
+        "command_signature": "command",
+        "real_execution_authorized": False,
+    }
+    visual = {
+        "status": "PASS_FAILURE_EVIDENCE",
+        "retained_videos": {},
+        "retained_screenshots": [],
+    }
+
+    report = build_digital_report(run_1, run_2, visual, manifest)
+
+    assert report["status"] == "PASS"
+    assert report["classification"] == "DIGITAL_HOME_SLEEP_VERIFIED"
+
+
+def test_real_digital_comparison_preserves_signed_joint_error() -> None:
+    digital = [
+        {"command_index": 0, "q": [0.0, -1.0]},
+        {"command_index": 1, "q": [0.2, -1.2]},
+        {"command_index": 2, "q": [0.4, -1.4]},
+    ]
+    real = [
+        {"command_index": 0, "q": [0.1, -1.0]},
+        {"command_index": 1, "q": [0.3, -1.1]},
+        {"command_index": 2, "q": [0.5, -1.2]},
+    ]
+
+    result = compare_aligned_joint_rows(digital, real, joint_names=("a", "b"))
+
+    assert result["matched_command_count"] == 3
+    assert result["per_joint"][0]["signed_mean_error_rad"] == pytest.approx(0.1)
+    assert result["per_joint"][1]["signed_mean_error_rad"] == pytest.approx(0.1)
+    assert result["per_joint"][1]["maximum_abs_error_rad"] == pytest.approx(0.2)

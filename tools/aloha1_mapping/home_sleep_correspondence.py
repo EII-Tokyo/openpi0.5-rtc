@@ -19,6 +19,7 @@ ARM_JOINT_ORDER = (
 )
 HOME_ARM = (0.0, -0.96, 1.16, 0.0, -0.3, 0.0)
 SLEEP_ARM = (0.0, -2.05, 1.7, 0.0, -2.0, 0.0)
+FOLLOWER_ROOT_PREFIXES = ("/World/follower_left/", "/World/follower_right/")
 
 
 @dataclass(frozen=True)
@@ -161,3 +162,127 @@ def command_signature(samples: Sequence[CommandSample]) -> str:
         allow_nan=False,
     ).encode("utf-8")
     return hashlib.sha256(encoded).hexdigest()
+
+
+def validate_digital_preflight(contract: dict[str, object]) -> dict[str, object]:
+    """Validate the immutable digital-run contract without importing Isaac Sim."""
+
+    boolean_gates = (
+        "runtime_versions_match",
+        "stage_hash_match",
+        "manifest_hash_match",
+        "root_prim_valid",
+        "required_prims_valid",
+        "dof_order_match",
+        "finger_limit_hash_match",
+        "home_finite_and_legal",
+        "first_frame_arm_stable",
+        "stationary_scope_declared",
+        "source_hashes_immutable",
+    )
+    failed = [name for name in boolean_gates if contract.get(name) is not True]
+    if contract.get("default_prim") != "/World":
+        failed.append("default_prim")
+    if contract.get("articulation_count") != 2:
+        failed.append("articulation_count")
+    if contract.get("final_default_asset_modified") is not False:
+        failed.append("final_default_asset_modified")
+    return {
+        "status": "PASS" if not failed else "FAIL",
+        "failed_gates": failed,
+        "contract": dict(contract),
+    }
+
+
+def digital_runtime_signature(payload: dict[str, object]) -> str:
+    """Hash normalized digital evidence while excluding process-local timing."""
+
+    normalized = {
+        key: value
+        for key, value in payload.items()
+        if key not in {"runtime_pid", "wall_time_s", "absolute_output_paths"}
+    }
+    encoded = json.dumps(
+        normalized,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=True,
+        allow_nan=False,
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def count_follower_articulation_roots(paths: Sequence[str]) -> list[str]:
+    """Return robot-scoped roots, excluding environment schema roots."""
+
+    return [
+        str(path)
+        for path in paths
+        if any(str(path).startswith(prefix) for prefix in FOLLOWER_ROOT_PREFIXES)
+    ]
+
+
+def values_within_float32_limits(
+    values: Sequence[float], lower: Sequence[float], upper: Sequence[float]
+) -> bool:
+    """Check limits with eight float32 ULP-equivalents of numeric slack."""
+
+    if not (len(values) == len(lower) == len(upper)):
+        raise ValueError("limit vectors must have equal lengths")
+    relative_slack = 8.0 * 2.0**-23
+    return all(
+        float(low) - relative_slack * max(1.0, abs(float(low)))
+        <= float(value)
+        <= float(high) + relative_slack * max(1.0, abs(float(high)))
+        for value, low, high in zip(values, lower, upper, strict=True)
+    )
+
+
+def compare_aligned_joint_rows(
+    digital_rows: Sequence[dict[str, object]],
+    real_rows: Sequence[dict[str, object]],
+    *,
+    joint_names: Sequence[str] = ARM_JOINT_ORDER,
+) -> dict[str, object]:
+    """Compare immutable traces by exact command index without rewriting either trace."""
+
+    def by_index(rows: Sequence[dict[str, object]]) -> dict[int, list[float]]:
+        result: dict[int, list[float]] = {}
+        for row in rows:
+            index = int(row["command_index"])
+            q = [float(value) for value in row["q"]]  # type: ignore[index]
+            if index in result:
+                raise ValueError(f"duplicate command index: {index}")
+            result[index] = q
+        return result
+
+    digital = by_index(digital_rows)
+    real = by_index(real_rows)
+    matched = sorted(set(digital) & set(real))
+    if not matched:
+        raise ValueError("no common command indices")
+    joint_count = len(joint_names)
+    if any(
+        len(digital[index]) != joint_count or len(real[index]) != joint_count
+        for index in matched
+    ):
+        raise ValueError("joint vector length does not match joint_names")
+    per_joint = []
+    for joint_index, joint_name in enumerate(joint_names):
+        errors = [real[index][joint_index] - digital[index][joint_index] for index in matched]
+        per_joint.append(
+            {
+                "joint_name": str(joint_name),
+                "joint_index": joint_index,
+                "signed_mean_error_rad": sum(errors) / len(errors),
+                "rmse_rad": math.sqrt(sum(error * error for error in errors) / len(errors)),
+                "maximum_abs_error_rad": max(abs(error) for error in errors),
+            }
+        )
+    return {
+        "matched_command_count": len(matched),
+        "first_command_index": matched[0],
+        "last_command_index": matched[-1],
+        "per_joint": per_joint,
+        "raw_inputs_modified": False,
+    }
