@@ -1,0 +1,64 @@
+schema_version: 1
+experiment_id: ALOHA1_SYNCHRONIZED_REAL_SIM_HOME_SLEEP
+active_robot: follower_left
+stationary_scope:
+  follower_right: true
+  follower_left_gripper: true
+  follower_right_gripper: true
+
+manifest:
+  path: reports/aloha1_mapping/aloha1_home_sleep_command_manifest.json
+  sha256: e9b18a154569945127779dfe74bee62e7c2db0a8d1dd320e802aaade7bf76087
+  command_signature: d481b71bc8d6160fae0bdc1b264715e782712565064bb18099f8a9a4883f499e
+  sample_count: 1850
+
+digital:
+  validation_report: reports/aloha1_mapping/aloha1_home_sleep_historical_sleep_digital_validation.json
+  validation_report_sha256: 5fd84f4b92b89e33af42237535256e9667369d28e9ea5e6579916df810156a1a
+  stage: assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda
+  stage_sha256: 327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9
+  finger_limit_layer: assets/Trossen/ALOHA1/1.0/diagnostics/finger_limit_pair_collision_candidate/1.0/configuration/finger_source_limits.usda
+  finger_limit_layer_sha256: 2547e6fb374c213b5c6c54f200c7ced37605ab0e1a11735d0a32c0a231fd260f
+  isaac_sim: 5.1.0.0
+  kit: 107.3.3
+  physx: 107.3.26
+  gui_workspace: 2
+
+real:
+  host: 192.168.1.103
+  project_root: /home/eii/openpi0.5-rtc-reward-learning
+  ros_distribution: noetic
+  robot_namespace: /puppet_left
+  joint_states_topic: /puppet_left/joint_states
+  command_topic_candidate: /puppet_left/commands/joint_group
+  command_message_type: DISCOVER_READ_ONLY_BEFORE_USE
+  stop_path: VERIFY_DEPLOYED_OFFICIAL_PATH_BEFORE_USE
+
+camera:
+  name: cam_high
+  topic: /cam_high
+  expected_message_type: aloha.msg/RGBGrayscaleImage
+  covers_complete_follower_left: true
+  record_before_start_s: 2.0
+  record_after_final_home_s: 2.0
+
+timing:
+  command_rate_hz: 50
+  sample_period_ns: 20000000
+  synchronized_start_gate_ns: 20000000
+  scheduling: ABSOLUTE_MONOTONIC_DEADLINES_NO_BURST_CATCHUP
+  alignment_key: [run_id, command_signature, cycle, segment, sample_index]
+
+authorization:
+  real_access_authorized: false
+  real_motion_authorized: false
+
+forbidden:
+  - control_follower_right
+  - control_gripper
+  - change_motor_registers
+  - change_ros_driver_configuration
+  - change_final_or_default_usd
+  - change_physics_parameters
+  - burst_late_motor_commands
+  - unattended_real_robot_execution
