@@ -1,0 +1,101 @@
+{
+  "failed_gates": [],
+  "frozen_command": {
+    "command_rate_hz": 50,
+    "command_signature": "d481b71bc8d6160fae0bdc1b264715e782712565064bb18099f8a9a4883f499e",
+    "manifest_sha256": "e9b18a154569945127779dfe74bee62e7c2db0a8d1dd320e802aaade7bf76087",
+    "sample_count": 1850
+  },
+  "inputs": {
+    "fake_coordinator": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_home_sleep_sync_fake_run.json",
+      "sha256": "3d2b36a9b5141dfcc14dc2cb08628324e70545faa49eb9abc1ef0befc2b5ad4d",
+      "status": "PASS_FAKE_TRANSPORT"
+    },
+    "isaac_api_audit": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_home_sleep_sync_isaac_api_audit.json",
+      "sha256": "fafbc151d9be38909f7a7e6d2cb68f65c22bf66230b57abc6d7a565a100e90d3",
+      "status": "PASS"
+    },
+    "isaac_fresh_01": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_home_sleep_sync_isaac_fresh_01.json",
+      "sha256": "b082730a9a12a25c673f8abee3b43812b41351c2aed401710a443ea0250e842f",
+      "status": "PASS"
+    },
+    "isaac_fresh_02": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_home_sleep_sync_isaac_fresh_02.json",
+      "sha256": "96c5d0651ba66c718ffd02ac5cd68519cd52c5fcaa219fea271b21b00eba58e3",
+      "status": "PASS"
+    },
+    "isaac_paced": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_home_sleep_sync_isaac_paced.json",
+      "sha256": "633e495cef8b032bd7b0f1db31136f85e267f78108ba5cb6093d605e02f0bd78",
+      "status": "PASS"
+    },
+    "real_worker_dry_run": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_home_sleep_sync_real_worker_dry_run.json",
+      "sha256": "7718e808ee34b825b3286d1ea012fd3142dc1e5913c9b03e14ff655e50a87fdd",
+      "status": "NOT_RUN_AUTHORIZATION_REQUIRED"
+    },
+    "ros1_source_preflight": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_home_sleep_sync_real_preflight.json",
+      "sha256": "538d995aa395eff0f475b5a4f1dc5b8a7b7f48d34295c51ebb21b2905bdd3b11",
+      "status": "NOT_RUN_AUTHORIZATION_REQUIRED"
+    }
+  },
+  "isaac": {
+    "fresh_process_count": 3,
+    "numeric_signature": "d93ae226dcb2a11a728f4abda1dc821867d1eae0893c3cc01fdb4e8113696562",
+    "paced_scheduler": {
+      "burst_catchup_used": false,
+      "completed_physics_frames": 2220,
+      "expected_physics_frames": 2220,
+      "first_applied_monotonic_ns": 266434477535389,
+      "maximum_lateness_ns": 11435,
+      "mode": "ABSOLUTE_MONOTONIC_NO_BURST",
+      "physics_rate_hz": 60,
+      "requested_start_monotonic_ns": 266434477535354,
+      "start_skew_ns": 35,
+      "status": "PASS"
+    },
+    "runtime": {
+      "isaac_sim": "5.1.0.0",
+      "kit": "107.3.3",
+      "physx": "107.3.26"
+    },
+    "signatures_identical": true,
+    "source_or_final_asset_modified": false
+  },
+  "offline_gates": {
+    "fake_coordinator": true,
+    "isaac_deterministic_signature": true,
+    "isaac_process_statuses": true,
+    "prohibited_side_effects_absent": true,
+    "ros1_official_source_audit": true
+  },
+  "ready_is_not_real_validation": true,
+  "real_digital_correspondence": "NOT_RUN_REAL_EVIDENCE_MISSING",
+  "real_execution": "NOT_RUN_AUTHORIZATION_REQUIRED",
+  "real_transport": {
+    "commands_published": 0,
+    "network_access_performed": false,
+    "publisher_constructed": false,
+    "ros_adapter_status": "NOT_RUN_AUTHORIZATION_REQUIRED",
+    "torque_changed": false,
+    "worker_status": "NOT_RUN_AUTHORIZATION_REQUIRED"
+  },
+  "remaining_live_gates": [
+    "real_access_authorized",
+    "read_only_103_preflight_pass",
+    "deployed_joint_order_verified",
+    "deployed_position_mode_verified",
+    "stop_path_verified",
+    "cam_high_stream_verified",
+    "operator_workspace_clear",
+    "real_motion_authorized"
+  ],
+  "schema_version": 1,
+  "scope": "ALOHA1_FOLLOWER_LEFT_SYNCHRONIZED_HOME_SLEEP_OFFLINE_GATE",
+  "status": "READY_FOR_SUPERVISED_REAL_EXECUTION",
+  "task8": "COMPLETE_WITH_NO_PROMOTION"
+}

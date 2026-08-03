@@ -250,6 +250,9 @@ def main() -> int:
         "sha256": manifest_hash,
         "sample_count": len(manifest["samples"]),
     }
+    report["authorization"] = dict(config["authorization"])
+    report["live_transport_available"] = False
+    report["real_execution"] = "NOT_RUN_AUTHORIZATION_REQUIRED"
     args.output.resolve().parent.mkdir(parents=True, exist_ok=True)
     args.output.resolve().write_text(
         json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8"

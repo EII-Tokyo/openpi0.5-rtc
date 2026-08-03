@@ -71,6 +71,7 @@ sim-to-real dynamics model and it is not yet accepted for bottle insertion.
 | Task 8 optimization | **COMPLETE / NO_PROMOTION** | both isolated candidates are closed as `NO_MEASURABLE_IMPROVEMENT`; strict model-proof findings are retained as non-blocking reminders, final/default assets remain unchanged, and Task 8 reopens only by explicit request or a profiler-backed new bottleneck |
 | Task 8 collider LOD candidate | **NO_MEASURABLE_IMPROVEMENT** | isolated upper-arm candidate reduced authored convex pieces 8 → 2 and passed cooking/swept/smoke comparison, but fresh-process timing ranges overlap and the candidate is not promoted |
 | Home→Sleep→Home digital twin | **PASS / selected historical official Sleep** | user-selected official historical ALOHA Sleep `[0, -1.80, 1.55, 0, -1.57, 0]` passes all 1850 modeled command samples and two fresh Isaac 5.1 runs with identical numeric signatures; the current Humble vector remains an out-of-limit comparison only |
+| Synchronized real/sim offline bridge | **READY_FOR_SUPERVISED_REAL_EXECUTION** | fake three-worker protocol, deferred ROS1 adapter, two fresh Isaac regressions and one 37 s monotonic-paced Isaac run pass; this is readiness only, not real/digital correspondence |
 | Home→Sleep→Home real robot | **NOT_RUN_AUTHORIZATION_REQUIRED** | offline preflight and 1850-sample dry-run performed no network, SSH, ROS, serial, torque or command publication; digital PASS does not authorize hardware motion |
 
 `PASS`, `FAIL`, and `PARTIAL` are literal machine-report values. A clean
@@ -136,6 +137,52 @@ Machine reports:
 - `reports/aloha1_mapping/aloha1_home_sleep_historical_sleep_visual_review.json/.md`;
 - `reports/aloha1_mapping/aloha1_home_sleep_historical_sleep_real_preflight.json/.md`;
 - `reports/aloha1_mapping/aloha1_home_sleep_historical_sleep_real_dry_run.json`.
+
+## 2026-08-03 synchronized real/simulation bridge readiness
+
+The approved scheme A is implemented as local playback of one frozen 1850
+sample manifest by independent Isaac and ROS1 workers. The network is not used
+to stream 50 Hz commands. Workers bind the same `run_id`, manifest SHA-256,
+command signature, cycle, segment and sample index, then start from a shared
+future monotonic deadline. A missed period aborts; missed samples are never
+sent in a burst.
+
+Official Interbotix ROS1 noetic source confirms that
+`JointGroupCommand` contains `string name` and ordered `float32[] cmd`, that
+the arm group is `arm`, and that `commands/joint_group` is interpreted using
+the deployed operating mode. An all-zero message is therefore **not** treated
+as a generic stop: in position mode it is a position target. ROS imports and
+publisher construction remain deferred until an operator-tested stop/hold
+path and all live gates pass. Missing `Present_Current` remains
+`NOT_AVAILABLE`, not a reason to bypass safety gates.
+
+The Isaac worker was checked through the directly connected NVIDIA official
+Isaac MCP and the installed Isaac Sim 5.1 source. Two fresh unpaced runs and
+one fresh 37-second monotonic-paced run each completed 2220 physics frames and
+produced the identical numeric signature
+`d93ae226dcb2a11a728f4abda1dc821867d1eae0893c3cc01fdb4e8113696562`.
+The paced run reports `35 ns` start skew, `11,435 ns` maximum lateness and no
+burst catch-up. Frozen Stage, manifest and finger-limit hashes remain
+unchanged. These timing values validate the local digital scheduler only; they
+do not predict LAN or real-controller timing.
+
+The offline aggregate is `READY_FOR_SUPERVISED_REAL_EXECUTION`, while
+`REAL_EXECUTION=NOT_RUN_AUTHORIZATION_REQUIRED` and
+`REAL_DIGITAL_CORRESPONDENCE=NOT_RUN_REAL_EVIDENCE_MISSING`. Before live motion,
+the project still requires separately authorized read-only 103 discovery,
+deployed joint-order and position-mode readback, cam_high readiness, workspace
+clearance, an operator-tested stop/hold path, and explicit real-motion
+authorization. No connection to `192.168.1.103`, ROS publisher, motor command
+or torque change occurred during this implementation.
+
+Primary reports:
+
+- `reports/aloha1_mapping/aloha1_home_sleep_sync_offline_preflight.json/.md`;
+- `reports/aloha1_mapping/aloha1_home_sleep_sync_real_preflight.json`;
+- `reports/aloha1_mapping/aloha1_home_sleep_sync_isaac_api_audit.json`;
+- `reports/aloha1_mapping/aloha1_home_sleep_sync_isaac_fresh_01.json`;
+- `reports/aloha1_mapping/aloha1_home_sleep_sync_isaac_fresh_02.json`;
+- `reports/aloha1_mapping/aloha1_home_sleep_sync_isaac_paced.json`.
 
 ## 2026-08-03 current-Humble Sleep comparison (historical failed run)
 

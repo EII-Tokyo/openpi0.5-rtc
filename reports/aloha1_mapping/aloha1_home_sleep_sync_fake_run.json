@@ -1,4 +1,8 @@
 {
+  "authorization": {
+    "real_access_authorized": false,
+    "real_motion_authorized": false
+  },
   "commands_published_to_real_hardware": 0,
   "config": {
     "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/configs/aloha1_home_sleep_synchronized_real_sim.yaml",
@@ -18,6 +22,7 @@
     ]
   },
   "identity_failures": {},
+  "live_transport_available": false,
   "manifest": {
     "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_home_sleep_command_manifest.json",
     "sample_count": 1850,
@@ -47,6 +52,7 @@
       "worker": "real"
     }
   },
+  "real_execution": "NOT_RUN_AUTHORIZATION_REQUIRED",
   "ros_transport_instantiated": false,
   "schema_version": 1,
   "serial_device_opened": false,

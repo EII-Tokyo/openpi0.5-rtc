@@ -7,6 +7,7 @@ from tools.aloha1_mapping.home_sleep_sync import build_run_identity
 from tools.aloha1_mapping.home_sleep_sync import classify_start_skew
 from tools.aloha1_mapping.home_sleep_sync import deadline_ns
 from tools.aloha1_mapping.home_sleep_sync import validate_ready_record
+from tools.build_aloha1_home_sleep_sync_preflight_report import classify_offline_readiness
 from tools.run_aloha1_home_sleep_isaac_worker import build_isaac_worker_plan
 from tools.run_aloha1_home_sleep_isaac_worker import build_validator_argv
 from tools.run_aloha1_home_sleep_isaac_worker import frame_deadline_ns
@@ -213,6 +214,37 @@ def test_isaac_worker_aborts_instead_of_bursting_late_frames() -> None:
         frame_lateness_status(16_666_667, physics_rate_hz=60)
         == "ABORTED_DEADLINE_MISS"
     )
+
+
+def test_offline_readiness_never_claims_real_execution() -> None:
+    report = classify_offline_readiness(
+        fake_status="PASS_FAKE_TRANSPORT",
+        isaac_statuses=["PASS", "PASS", "PASS"],
+        isaac_signatures=["a" * 64, "a" * 64, "a" * 64],
+        ros_source_audit_status="NOT_RUN_AUTHORIZATION_REQUIRED",
+        prohibited_side_effects_detected=False,
+    )
+
+    assert report["status"] == "READY_FOR_SUPERVISED_REAL_EXECUTION"
+    assert report["real_execution"] == "NOT_RUN_AUTHORIZATION_REQUIRED"
+    assert "real_motion_authorized" in report["remaining_live_gates"]
+
+
+def test_offline_readiness_blocks_on_isaac_mismatch_or_side_effect() -> None:
+    report = classify_offline_readiness(
+        fake_status="PASS_FAKE_TRANSPORT",
+        isaac_statuses=["PASS", "FAIL"],
+        isaac_signatures=["a" * 64, "b" * 64],
+        ros_source_audit_status="NOT_RUN_AUTHORIZATION_REQUIRED",
+        prohibited_side_effects_detected=True,
+    )
+
+    assert report["status"] == "BLOCKED_OFFLINE_PREFLIGHT"
+    assert set(report["failed_gates"]) == {
+        "isaac_process_statuses",
+        "isaac_deterministic_signature",
+        "prohibited_side_effects_absent",
+    }
 
 
 def _identity() -> dict[str, object]:

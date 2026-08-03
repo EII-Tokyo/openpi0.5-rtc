@@ -1,5 +1,45 @@
 # Task State
 
+## 2026-08-03 synchronized real/sim bridge code landing
+
+- Active scope: `ALOHA1_SYNCHRONIZED_REAL_SIM_HOME_SLEEP` for
+  `follower_left`; no real execution has occurred.
+- Offline aggregate status is `READY_FOR_SUPERVISED_REAL_EXECUTION`, but
+  `REAL_EXECUTION=NOT_RUN_AUTHORIZATION_REQUIRED` and
+  `REAL_DIGITAL_CORRESPONDENCE=NOT_RUN_REAL_EVIDENCE_MISSING`.
+- Scheme A is implemented as local manifest playback in each worker, aligned
+  by `run_id + command_signature + cycle + segment + sample_index`; the LAN is
+  not used for 50 Hz command streaming.
+- ROS1 adapter is fail-closed. It imports ROS only after all live gates pass;
+  read-only preflight creates zero publishers. Official noetic source fixes
+  `JointGroupCommand` to `name + cmd`, group `arm`, with order coming from the
+  deployed motor config. A zero position command is not used as a stop.
+- Real-worker direction monitoring was corrected to compare readback motion
+  with the command interval that actually completed, not the not-yet-applied
+  next target.
+- Direct NVIDIA Isaac MCP plus installed 5.1 source were used for the worker
+  API. Two unpaced fresh processes and one 37 s monotonic-paced process each
+  passed 2220 frames with identical signature
+  `d93ae226dcb2a11a728f4abda1dc821867d1eae0893c3cc01fdb4e8113696562`.
+  The paced run recorded start skew `35 ns`, maximum lateness `11,435 ns`, and
+  `burst_catchup_used=false`.
+- Frozen inputs remain unchanged: Stage
+  `327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9`,
+  manifest
+  `e9b18a154569945127779dfe74bee62e7c2db0a8d1dd320e802aaade7bf76087`,
+  and finger-limit layer
+  `2547e6fb374c213b5c6c54f200c7ced37605ab0e1a11735d0a32c0a231fd260f`.
+- Remaining live gates: explicit real access, read-only 103 discovery,
+  deployed joint order, deployed position mode, operator-tested stop/hold,
+  cam_high stream, clear workspace and explicit real-motion authorization.
+- No 103/network/SSH/ROS/serial connection, publisher, real command or torque
+  change occurred. Task 8 remains `COMPLETE_WITH_NO_PROMOTION`.
+- Primary reports:
+  - `reports/aloha1_mapping/aloha1_home_sleep_sync_offline_preflight.json/.md`;
+  - `reports/aloha1_mapping/aloha1_home_sleep_sync_real_preflight.json`;
+  - `reports/aloha1_mapping/aloha1_home_sleep_sync_isaac_api_audit.json`;
+  - `reports/aloha1_mapping/aloha1_home_sleep_sync_isaac_paced.json`.
+
 ## 2026-08-03 selected historical Sleep digital-twin gate
 
 - Active scope: `ALOHA1_REAL_SIM_HOME_SIGNAL_CORRESPONDENCE`.
