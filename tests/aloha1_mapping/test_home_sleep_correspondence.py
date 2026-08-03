@@ -8,12 +8,15 @@ from tools.aloha1_mapping.home_sleep_correspondence import ARM_JOINT_ORDER
 from tools.aloha1_mapping.home_sleep_correspondence import HOME_ARM
 from tools.aloha1_mapping.home_sleep_correspondence import SLEEP_ARM
 from tools.aloha1_mapping.home_sleep_correspondence import build_home_sleep_samples
+from tools.aloha1_mapping.home_sleep_correspondence import build_sleep_home_samples
 from tools.aloha1_mapping.home_sleep_correspondence import command_index_for_physics_frame
 from tools.aloha1_mapping.home_sleep_correspondence import command_signature
 from tools.aloha1_mapping.home_sleep_correspondence import compare_aligned_joint_rows
 from tools.aloha1_mapping.home_sleep_correspondence import count_follower_articulation_roots
 from tools.aloha1_mapping.home_sleep_correspondence import digital_runtime_signature
 from tools.aloha1_mapping.home_sleep_correspondence import evaluate_interbotix_group_limit_gate
+from tools.aloha1_mapping.home_sleep_correspondence import expand_joint_limits_to_reference
+from tools.aloha1_mapping.home_sleep_correspondence import manifest_initial_terminal_arm
 from tools.aloha1_mapping.home_sleep_correspondence import validate_digital_preflight
 from tools.aloha1_mapping.home_sleep_correspondence import values_within_float32_limits
 from tools.audit_aloha1_sleep_limit_correspondence import _inspect_python_semantics
@@ -23,16 +26,27 @@ from tools.audit_aloha1_sleep_limit_correspondence import build_root_cause_repor
 from tools.build_aloha1_home_sleep_command_manifest import build_manifest
 from tools.build_aloha1_home_sleep_digital_report import build_digital_report
 from tools.build_aloha1_home_sleep_digital_report import source_boundary_from_audit
+from tools.build_aloha1_runtime_sleep_command_manifest import build_runtime_sleep_manifest
+from tools.build_aloha1_runtime_sleep_digital_report import build_runtime_sleep_digital_report
 from tools.capture_aloha1_home_sleep_digital_video import _annotation_footer
 from tools.capture_aloha1_home_sleep_digital_video import _selected_trajectory_key_indices
 from tools.review_aloha1_home_sleep_digital_evidence import build_qualification_review
 from tools.review_aloha1_home_sleep_digital_evidence import build_visual_review
+from tools.validate_aloha1_home_sleep_digital import _summarize_rows
 
 ROOT = Path(__file__).resolve().parents[2]
 
 SELECTED_HISTORICAL_SLEEP = (0.0, -1.8, 1.55, 0.0, -1.57, 0.0)
 SELECTED_HISTORICAL_COMMIT = "dbc6aefb53e956181fe97f60474f1ad292491f0c"
 CURRENT_HUMBLE_OUT_OF_RANGE_SLEEP = (0.0, -2.05, 1.7, 0.0, -2.0, 0.0)
+RUNTIME_MEASURED_SLEEP = (
+    0.0,
+    -1.8453789949417114,
+    1.6229517459869385,
+    -0.006135923322290182,
+    -1.8837285041809082,
+    -0.006135923322290182,
+)
 
 
 def test_home_sleep_samples_freeze_three_cycles_and_end_at_home() -> None:
@@ -61,6 +75,111 @@ def test_home_sleep_samples_freeze_three_cycles_and_end_at_home() -> None:
     assert {len(sample.q_rad) for sample in samples} == {6}
     assert [sample.index for sample in samples] == list(range(1850))
     assert [sample.time_ns for sample in samples] == [index * 20_000_000 for index in range(1850)]
+
+
+def test_sleep_home_samples_start_and_end_at_runtime_sleep() -> None:
+    samples = build_sleep_home_samples(
+        sleep=RUNTIME_MEASURED_SLEEP,
+        home=HOME_ARM,
+        command_hz=50,
+        move_seconds=5,
+        hold_seconds=1,
+        cycles=3,
+    )
+
+    assert len(samples) == 1850
+    assert samples[0].segment == "initial_sleep_hold"
+    assert samples[-1].segment == "cycle_03_sleep_hold"
+    assert samples[0].q_rad == pytest.approx(RUNTIME_MEASURED_SLEEP)
+    assert samples[-1].q_rad == pytest.approx(RUNTIME_MEASURED_SLEEP)
+    assert [sample.index for sample in samples] == list(range(1850))
+    assert [sample.time_ns for sample in samples] == [index * 20_000_000 for index in range(1850)]
+
+    by_segment: dict[str, list[object]] = {}
+    for sample in samples:
+        by_segment.setdefault(sample.segment, []).append(sample)
+    for cycle in range(1, 4):
+        prefix = f"cycle_{cycle:02d}"
+        outbound = by_segment[f"{prefix}_sleep_to_home"]
+        home_hold = by_segment[f"{prefix}_home_hold"]
+        inbound = by_segment[f"{prefix}_home_to_sleep"]
+        sleep_hold = by_segment[f"{prefix}_sleep_hold"]
+        assert len(outbound) == 250
+        assert len(home_hold) == 50
+        assert len(inbound) == 250
+        assert len(sleep_hold) == 50
+        assert outbound[0].q_rad == pytest.approx(RUNTIME_MEASURED_SLEEP)
+        assert outbound[-1].q_rad == pytest.approx(HOME_ARM)
+        assert inbound[0].q_rad == pytest.approx(HOME_ARM)
+        assert inbound[-1].q_rad == pytest.approx(RUNTIME_MEASURED_SLEEP)
+
+
+def test_runtime_sleep_limit_expansion_changes_only_outside_joints() -> None:
+    lower = (-3.14158, -1.8500488996505737, -1.7627824544906616, -3.14158, -1.8675020933151245, -3.14158)
+    upper = (3.14158, 1.2566370964050293, 1.6057027578353882, 3.14158, 2.2340211868286133, 3.14158)
+
+    expanded_lower, expanded_upper, changes = expand_joint_limits_to_reference(
+        RUNTIME_MEASURED_SLEEP,
+        lower,
+        upper,
+        joint_names=ARM_JOINT_ORDER,
+    )
+
+    assert expanded_lower == pytest.approx((*lower[:4], RUNTIME_MEASURED_SLEEP[4], lower[5]))
+    assert expanded_upper == pytest.approx((*upper[:2], RUNTIME_MEASURED_SLEEP[2], *upper[3:]))
+    assert [item["joint_name"] for item in changes] == ["elbow", "wrist_angle"]
+    assert [item["bound"] for item in changes] == ["upper", "lower"]
+    assert all(item["classification"] == "DIAGNOSTIC_ONLY_RUNTIME_ALIGNMENT" for item in changes)
+
+
+def test_manifest_initial_terminal_supports_sleep_first_without_breaking_legacy() -> None:
+    legacy_initial, legacy_terminal = manifest_initial_terminal_arm({"home_rad": list(HOME_ARM)})
+    runtime_initial, runtime_terminal = manifest_initial_terminal_arm(
+        {
+            "home_rad": list(HOME_ARM),
+            "initial_arm_rad": list(RUNTIME_MEASURED_SLEEP),
+            "terminal_arm_rad": list(RUNTIME_MEASURED_SLEEP),
+        }
+    )
+
+    assert legacy_initial == pytest.approx(HOME_ARM)
+    assert legacy_terminal == pytest.approx(HOME_ARM)
+    assert runtime_initial == pytest.approx(RUNTIME_MEASURED_SLEEP)
+    assert runtime_terminal == pytest.approx(RUNTIME_MEASURED_SLEEP)
+
+
+def test_runtime_sleep_summary_uses_terminal_sleep_instead_of_legacy_home() -> None:
+    left = [*RUNTIME_MEASURED_SLEEP, 0.04, 0.04, -0.04]
+    row = {
+        "physics_frame": 0,
+        "command_index": 1849,
+        "cycle": 3,
+        "segment": "cycle_03_sleep_hold",
+        "target_arm_q": list(RUNTIME_MEASURED_SLEEP),
+        "left_q": left,
+        "left_qd": [0.0] * 9,
+        "right_q": [0.0] * 9,
+        "contacts": [],
+    }
+    summary = _summarize_rows(
+        [row],
+        manifest={
+            "home_rad": list(HOME_ARM),
+            "terminal_arm_rad": list(RUNTIME_MEASURED_SLEEP),
+            "terminal_pose_label": "runtime_measured_sleep",
+            "command_signature": "test",
+        },
+        limits={"follower_left": [[-4.0] * 9, [4.0] * 9]},
+        initial_stationary={
+            "follower_right": [0.0] * 9,
+            "follower_left_gripper": [0.04, 0.04, -0.04],
+        },
+    )
+
+    assert summary["gates"]["final_terminal"] is True
+    assert "final_home" not in summary["gates"]
+    assert summary["terminal_pose_label"] == "runtime_measured_sleep"
+    assert summary["final_terminal_max_error_rad"] == pytest.approx(0.0)
 
 
 def test_selected_sleep_is_the_user_approved_official_historical_variant() -> None:
@@ -153,9 +272,7 @@ def test_home_sleep_manifest_freezes_official_sources_and_exclusions() -> None:
     assert manifest["candidate_promoted"] is False
     assert len(manifest["command_signature"]) == 64
     assert len(manifest["manifest_signature"]) == 64
-    assert source_audit["classification"] == (
-        "OFFICIAL_HISTORICAL_LEGAL_ALOHA_SLEEP_EXPLICITLY_SELECTED_BY_USER"
-    )
+    assert source_audit["classification"] == ("OFFICIAL_HISTORICAL_LEGAL_ALOHA_SLEEP_EXPLICITLY_SELECTED_BY_USER")
     selected = next(item for item in source_audit["sources"] if item["id"] == "selected_sleep")
     assert selected["source_type"] == "git_blob"
     assert selected["commit"] == SELECTED_HISTORICAL_COMMIT
@@ -247,6 +364,93 @@ def test_home_sleep_manifest_is_deterministic() -> None:
     second, _ = build_manifest(config, project_root=ROOT)
 
     assert first == second
+
+
+def test_runtime_sleep_manifest_is_sleep_initialized_and_diagnostic_only() -> None:
+    config = yaml.safe_load((ROOT / "configs/aloha1_runtime_measured_sleep_correspondence.yaml").read_text())
+
+    first, first_audit = build_runtime_sleep_manifest(config, project_root=ROOT)
+    second, second_audit = build_runtime_sleep_manifest(config, project_root=ROOT)
+
+    assert first == second
+    assert first_audit == second_audit
+    assert first["sequence_kind"] == "SLEEP_HOME_SLEEP"
+    assert first["initial_pose_label"] == "runtime_measured_sleep"
+    assert first["terminal_pose_label"] == "runtime_measured_sleep"
+    assert first["initial_arm_rad"] == pytest.approx(RUNTIME_MEASURED_SLEEP)
+    assert first["terminal_arm_rad"] == pytest.approx(RUNTIME_MEASURED_SLEEP)
+    assert first["sample_count"] == 1850
+    assert first["samples"][0]["segment"] == "initial_sleep_hold"
+    assert first["samples"][-1]["segment"] == "cycle_03_sleep_hold"
+    assert first["real_execution_authorized"] is False
+    assert first["candidate_promoted"] is False
+    assert first["final_default_asset_modified"] is False
+    assert first_audit["runtime_reference"]["sample_count"] == 9000
+    assert first_audit["runtime_reference"]["median_arm_rad"] == pytest.approx(RUNTIME_MEASURED_SLEEP)
+    assert first_audit["runtime_reference"]["classification"] == ("RUNTIME_MEASURED_SLEEP_REFERENCE_NOT_OFFICIAL_SLEEP")
+    assert [item["joint_name"] for item in first_audit["diagnostic_limit_changes"]] == [
+        "elbow",
+        "wrist_angle",
+    ]
+    assert first_audit["diagnostic_limit_policy"] == ("DIAGNOSTIC_ONLY_RUNTIME_ALIGNMENT_NOT_FINAL_ASSET")
+
+
+def test_runtime_sleep_digital_report_requires_two_matching_fresh_runs() -> None:
+    run_1 = {
+        "status": "PASS",
+        "repeat_index": 1,
+        "runtime_pid": 101,
+        "runtime": {"isaac_sim": "5.1.0.0", "kit": "107.3.3", "physx": "107.3.26"},
+        "summary": {
+            "status": "PASS",
+            "normalized_numeric_signature": "same",
+            "final_terminal_max_error_rad": 0.0,
+            "endpoint_results": [],
+            "direction_results": [],
+            "gates": {
+                "final_terminal": True,
+                "endpoints": True,
+                "directions": True,
+                "legal_limits": True,
+                "three_cycles_complete": True,
+            },
+        },
+        "immutability": {"stage": True, "manifest": True, "finger_limit_layer": True},
+        "source_or_final_asset_modified": False,
+        "manifest": {"sha256_before": "manifest", "command_signature": "command"},
+        "stage": {"sha256_before": "stage", "sha256_after": "stage"},
+        "telemetry": {"row_count": 2220, "sha256": "rows-1"},
+        "preflight": {
+            "first_frame_arm_jump_rad": 0.0,
+            "session_only_layers": {"diagnostic_limit_readback": [{"joint_name": "elbow"}]},
+        },
+    }
+    run_2 = {
+        **run_1,
+        "repeat_index": 2,
+        "runtime_pid": 202,
+        "telemetry": {"row_count": 2220, "sha256": "rows-2"},
+    }
+    manifest = {
+        "manifest_signature": "manifest-signature",
+        "command_signature": "command",
+        "sample_count": 1850,
+        "initial_pose_label": "runtime_measured_sleep",
+        "terminal_pose_label": "runtime_measured_sleep",
+        "real_execution_authorized": False,
+        "final_default_asset_modified": False,
+    }
+
+    report = build_runtime_sleep_digital_report(run_1, run_2, manifest)
+
+    assert report["status"] == "PASS_DIAGNOSTIC_DIGITAL_ONLY"
+    assert report["classification"] == "RUNTIME_MEASURED_SLEEP_ALIGNED_IN_ISAAC"
+    assert report["fresh_process_count"] == 2
+    assert report["fresh_process_pids_distinct"] is True
+    assert report["numeric_signatures_match"] is True
+    assert report["real_execution_authorized"] is False
+    assert report["real_motion_commands"] == 0
+    assert report["candidate_promoted"] is False
 
 
 def test_digital_preflight_fails_closed_on_any_frozen_contract_drift() -> None:

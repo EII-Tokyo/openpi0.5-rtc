@@ -1,0 +1,422 @@
+{
+  "candidate_promoted": false,
+  "classification": "RUNTIME_MEASURED_SLEEP_ALIGNED_IN_ISAAC",
+  "command_signature": "6e454405843d0a231bef75f35b471e2f07c60f277f76e5c9690a4f89d745ed47",
+  "cycles": 3,
+  "diagnostic_limit_readback": [
+    {
+      "authored_value_degrees": 92.98828539843961,
+      "authored_value_rad": 1.6229517459869385,
+      "bound": "upper",
+      "classification": "DIAGNOSTIC_ONLY_RUNTIME_ALIGNMENT",
+      "joint_name": "elbow",
+      "joint_path": "/World/follower_left/vx300s_left/joints/elbow",
+      "usd_readback_degrees": 92.98828887939453
+    },
+    {
+      "authored_value_degrees": -107.92969303805769,
+      "authored_value_rad": -1.8837285041809082,
+      "bound": "lower",
+      "classification": "DIAGNOSTIC_ONLY_RUNTIME_ALIGNMENT",
+      "joint_name": "wrist_angle",
+      "joint_path": "/World/follower_left/vx300s_left/joints/wrist_angle",
+      "usd_readback_degrees": -107.92969512939453
+    }
+  ],
+  "diagnostic_only": true,
+  "fresh_process_count": 2,
+  "fresh_process_pids": [
+    298512,
+    299668
+  ],
+  "fresh_process_pids_distinct": true,
+  "gates": {
+    "diagnostic_limits_respected": true,
+    "directions_match": true,
+    "endpoints_reached": true,
+    "final_runtime_sleep_reached": true,
+    "fresh_process_pids_distinct": true,
+    "manifest_command_identity": true,
+    "numeric_signatures_match": true,
+    "source_hashes_immutable": true,
+    "telemetry_complete": true,
+    "three_cycles_complete": true,
+    "two_runs_pass": true
+  },
+  "initial_pose_label": "runtime_measured_sleep",
+  "manifest_signature": "c6ce84c560a2db9d035870114949a69325ad412a77d605ffd16f8b904b7101bd",
+  "normalized_numeric_signatures": [
+    "6a4273b930f1fe2ad6d1cada8d9b88c0b1dc59a0ea7ce08acf934152f52ab31d",
+    "6a4273b930f1fe2ad6d1cada8d9b88c0b1dc59a0ea7ce08acf934152f52ab31d"
+  ],
+  "numeric_signatures_match": true,
+  "real_execution_authorized": false,
+  "real_motion_commands": 0,
+  "runs": [
+    {
+      "direction_results": [
+        {
+          "active_joint_count": 5,
+          "command_delta_rad": [
+            0.0,
+            -0.8853790163993835,
+            0.46295177936553955,
+            -0.006135923322290182,
+            -1.5837284922599792,
+            -0.006135923322290182
+          ],
+          "readback_delta_rad": [
+            -1.667717600639662e-05,
+            -0.8884896039962769,
+            0.46172022819519043,
+            -0.007519484148360789,
+            -1.5880979895591736,
+            -0.0059702210448904225
+          ],
+          "segment": "cycle_01_home_to_sleep",
+          "status": "PASS"
+        },
+        {
+          "active_joint_count": 5,
+          "command_delta_rad": [
+            0.0,
+            0.8853790163993835,
+            -0.46295177936553955,
+            0.006135923322290182,
+            1.5837284922599792,
+            0.006135923322290182
+          ],
+          "readback_delta_rad": [
+            1.576686815951689e-05,
+            0.8863070011138916,
+            -0.46183574199676514,
+            0.007240253675263375,
+            1.590745747089386,
+            0.006004993570968509
+          ],
+          "segment": "cycle_01_sleep_to_home",
+          "status": "PASS"
+        },
+        {
+          "active_joint_count": 5,
+          "command_delta_rad": [
+            0.0,
+            -0.8853790163993835,
+            0.46295177936553955,
+            -0.006135923322290182,
+            -1.5837284922599792,
+            -0.006135923322290182
+          ],
+          "readback_delta_rad": [
+            -1.667728042775707e-05,
+            -0.8884896039962769,
+            0.46172034740448,
+            -0.007519628503359854,
+            -1.588096708059311,
+            -0.005970024694079257
+          ],
+          "segment": "cycle_02_home_to_sleep",
+          "status": "PASS"
+        },
+        {
+          "active_joint_count": 5,
+          "command_delta_rad": [
+            0.0,
+            0.8853790163993835,
+            -0.46295177936553955,
+            0.006135923322290182,
+            1.5837284922599792,
+            0.006135923322290182
+          ],
+          "readback_delta_rad": [
+            1.576540961423234e-05,
+            0.8863065838813782,
+            -0.46183574199676514,
+            0.007240274688228965,
+            1.5907465815544128,
+            0.006004864088026807
+          ],
+          "segment": "cycle_02_sleep_to_home",
+          "status": "PASS"
+        },
+        {
+          "active_joint_count": 5,
+          "command_delta_rad": [
+            0.0,
+            -0.8853790163993835,
+            0.46295177936553955,
+            -0.006135923322290182,
+            -1.5837284922599792,
+            -0.006135923322290182
+          ],
+          "readback_delta_rad": [
+            -1.667722588649667e-05,
+            -0.8884896039962769,
+            0.46172046661376953,
+            -0.007519516977481544,
+            -1.5880961120128632,
+            -0.0059701410450543335
+          ],
+          "segment": "cycle_03_home_to_sleep",
+          "status": "PASS"
+        },
+        {
+          "active_joint_count": 5,
+          "command_delta_rad": [
+            0.0,
+            0.8853790163993835,
+            -0.46295177936553955,
+            0.006135923322290182,
+            1.5837284922599792,
+            0.006135923322290182
+          ],
+          "readback_delta_rad": [
+            1.5765224759434204e-05,
+            0.8863070011138916,
+            -0.4618358612060547,
+            0.007240334816742688,
+            1.5907458066940308,
+            0.006004864830174483
+          ],
+          "segment": "cycle_03_sleep_to_home",
+          "status": "PASS"
+        }
+      ],
+      "endpoint_results": [
+        {
+          "maximum_abs_error_rad": 0.004368782043457031,
+          "segment": "cycle_01_home_hold",
+          "status": "PASS"
+        },
+        {
+          "maximum_abs_error_rad": 0.0002619256265461445,
+          "segment": "cycle_01_sleep_hold",
+          "status": "PASS"
+        },
+        {
+          "maximum_abs_error_rad": 0.004369139671325684,
+          "segment": "cycle_02_home_hold",
+          "status": "PASS"
+        },
+        {
+          "maximum_abs_error_rad": 0.00026188092306256294,
+          "segment": "cycle_02_sleep_hold",
+          "status": "PASS"
+        },
+        {
+          "maximum_abs_error_rad": 0.004369258880615234,
+          "segment": "cycle_03_home_hold",
+          "status": "PASS"
+        },
+        {
+          "maximum_abs_error_rad": 0.00026187533512711525,
+          "segment": "cycle_03_sleep_hold",
+          "status": "PASS"
+        },
+        {
+          "maximum_abs_error_rad": 0.0002616490237414837,
+          "segment": "initial_sleep_hold",
+          "status": "PASS"
+        }
+      ],
+      "final_terminal_max_error_rad": 0.00026187533512711525,
+      "first_frame_arm_jump_rad": 0.004436678718775511,
+      "repeat_index": 1,
+      "runtime_pid": 298512,
+      "status": "PASS",
+      "telemetry": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-runtime-sleep-alignment/run_01_telemetry.csv",
+        "row_count": 2220,
+        "sha256": "8b84d6c66f77b95d62a94fd22181052336b8317b79eca276de7dbd2df004ef61"
+      }
+    },
+    {
+      "direction_results": [
+        {
+          "active_joint_count": 5,
+          "command_delta_rad": [
+            0.0,
+            -0.8853790163993835,
+            0.46295177936553955,
+            -0.006135923322290182,
+            -1.5837284922599792,
+            -0.006135923322290182
+          ],
+          "readback_delta_rad": [
+            -1.667717600639662e-05,
+            -0.8884896039962769,
+            0.46172022819519043,
+            -0.007519484148360789,
+            -1.5880979895591736,
+            -0.0059702210448904225
+          ],
+          "segment": "cycle_01_home_to_sleep",
+          "status": "PASS"
+        },
+        {
+          "active_joint_count": 5,
+          "command_delta_rad": [
+            0.0,
+            0.8853790163993835,
+            -0.46295177936553955,
+            0.006135923322290182,
+            1.5837284922599792,
+            0.006135923322290182
+          ],
+          "readback_delta_rad": [
+            1.576686815951689e-05,
+            0.8863070011138916,
+            -0.46183574199676514,
+            0.007240253675263375,
+            1.590745747089386,
+            0.006004993570968509
+          ],
+          "segment": "cycle_01_sleep_to_home",
+          "status": "PASS"
+        },
+        {
+          "active_joint_count": 5,
+          "command_delta_rad": [
+            0.0,
+            -0.8853790163993835,
+            0.46295177936553955,
+            -0.006135923322290182,
+            -1.5837284922599792,
+            -0.006135923322290182
+          ],
+          "readback_delta_rad": [
+            -1.667728042775707e-05,
+            -0.8884896039962769,
+            0.46172034740448,
+            -0.007519628503359854,
+            -1.588096708059311,
+            -0.005970024694079257
+          ],
+          "segment": "cycle_02_home_to_sleep",
+          "status": "PASS"
+        },
+        {
+          "active_joint_count": 5,
+          "command_delta_rad": [
+            0.0,
+            0.8853790163993835,
+            -0.46295177936553955,
+            0.006135923322290182,
+            1.5837284922599792,
+            0.006135923322290182
+          ],
+          "readback_delta_rad": [
+            1.576540961423234e-05,
+            0.8863065838813782,
+            -0.46183574199676514,
+            0.007240274688228965,
+            1.5907465815544128,
+            0.006004864088026807
+          ],
+          "segment": "cycle_02_sleep_to_home",
+          "status": "PASS"
+        },
+        {
+          "active_joint_count": 5,
+          "command_delta_rad": [
+            0.0,
+            -0.8853790163993835,
+            0.46295177936553955,
+            -0.006135923322290182,
+            -1.5837284922599792,
+            -0.006135923322290182
+          ],
+          "readback_delta_rad": [
+            -1.667722588649667e-05,
+            -0.8884896039962769,
+            0.46172046661376953,
+            -0.007519516977481544,
+            -1.5880961120128632,
+            -0.0059701410450543335
+          ],
+          "segment": "cycle_03_home_to_sleep",
+          "status": "PASS"
+        },
+        {
+          "active_joint_count": 5,
+          "command_delta_rad": [
+            0.0,
+            0.8853790163993835,
+            -0.46295177936553955,
+            0.006135923322290182,
+            1.5837284922599792,
+            0.006135923322290182
+          ],
+          "readback_delta_rad": [
+            1.5765224759434204e-05,
+            0.8863070011138916,
+            -0.4618358612060547,
+            0.007240334816742688,
+            1.5907458066940308,
+            0.006004864830174483
+          ],
+          "segment": "cycle_03_sleep_to_home",
+          "status": "PASS"
+        }
+      ],
+      "endpoint_results": [
+        {
+          "maximum_abs_error_rad": 0.004368782043457031,
+          "segment": "cycle_01_home_hold",
+          "status": "PASS"
+        },
+        {
+          "maximum_abs_error_rad": 0.0002619256265461445,
+          "segment": "cycle_01_sleep_hold",
+          "status": "PASS"
+        },
+        {
+          "maximum_abs_error_rad": 0.004369139671325684,
+          "segment": "cycle_02_home_hold",
+          "status": "PASS"
+        },
+        {
+          "maximum_abs_error_rad": 0.00026188092306256294,
+          "segment": "cycle_02_sleep_hold",
+          "status": "PASS"
+        },
+        {
+          "maximum_abs_error_rad": 0.004369258880615234,
+          "segment": "cycle_03_home_hold",
+          "status": "PASS"
+        },
+        {
+          "maximum_abs_error_rad": 0.00026187533512711525,
+          "segment": "cycle_03_sleep_hold",
+          "status": "PASS"
+        },
+        {
+          "maximum_abs_error_rad": 0.0002616490237414837,
+          "segment": "initial_sleep_hold",
+          "status": "PASS"
+        }
+      ],
+      "final_terminal_max_error_rad": 0.00026187533512711525,
+      "first_frame_arm_jump_rad": 0.004436678718775511,
+      "repeat_index": 2,
+      "runtime_pid": 299668,
+      "status": "PASS",
+      "telemetry": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-runtime-sleep-alignment/run_02_telemetry.csv",
+        "row_count": 2220,
+        "sha256": "8b84d6c66f77b95d62a94fd22181052336b8317b79eca276de7dbd2df004ef61"
+      }
+    }
+  ],
+  "runtime": {
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physx": "107.3.26"
+  },
+  "schema_version": 1,
+  "sequence_kind": "SLEEP_HOME_SLEEP",
+  "source_or_final_asset_modified": false,
+  "status": "PASS_DIAGNOSTIC_DIGITAL_ONLY",
+  "task8": "COMPLETE_WITH_NO_PROMOTION",
+  "terminal_pose_label": "runtime_measured_sleep"
+}

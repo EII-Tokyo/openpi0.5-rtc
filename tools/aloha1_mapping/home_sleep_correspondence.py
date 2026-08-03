@@ -123,6 +123,133 @@ def build_home_sleep_samples(
     return tuple(records)
 
 
+def build_sleep_home_samples(
+    *,
+    sleep: Sequence[float],
+    home: Sequence[float] = HOME_ARM,
+    command_hz: int = 50,
+    move_seconds: int = 5,
+    hold_seconds: int = 1,
+    cycles: int = 3,
+) -> tuple[CommandSample, ...]:
+    """Build three Sleep-Home-Sleep cycles from an explicit runtime reference."""
+
+    sleep_q = _arm_vector(sleep)
+    home_q = _arm_vector(home)
+    if cycles <= 0:
+        raise ValueError("cycles must be positive")
+    if 1_000_000_000 % command_hz != 0:
+        raise ValueError("command_hz must divide one second into integer nanoseconds")
+    move_count = _sample_count(frequency_hz=command_hz, duration_seconds=move_seconds)
+    hold_count = _sample_count(frequency_hz=command_hz, duration_seconds=hold_seconds)
+    dt_ns = 1_000_000_000 // command_hz
+    records: list[CommandSample] = []
+
+    def append_segment(*, cycle: int, segment: str, positions: Sequence[tuple[float, ...]]) -> None:
+        for segment_sample, q_rad in enumerate(positions):
+            index = len(records)
+            records.append(
+                CommandSample(
+                    index=index,
+                    time_ns=index * dt_ns,
+                    cycle=cycle,
+                    segment=segment,
+                    segment_sample=segment_sample,
+                    q_rad=q_rad,
+                )
+            )
+
+    append_segment(cycle=0, segment="initial_sleep_hold", positions=[sleep_q] * hold_count)
+    for cycle in range(1, cycles + 1):
+        prefix = f"cycle_{cycle:02d}"
+        append_segment(
+            cycle=cycle,
+            segment=f"{prefix}_sleep_to_home",
+            positions=_linear_segment(sleep_q, home_q, move_count),
+        )
+        append_segment(
+            cycle=cycle,
+            segment=f"{prefix}_home_hold",
+            positions=[home_q] * hold_count,
+        )
+        append_segment(
+            cycle=cycle,
+            segment=f"{prefix}_home_to_sleep",
+            positions=_linear_segment(home_q, sleep_q, move_count),
+        )
+        append_segment(
+            cycle=cycle,
+            segment=f"{prefix}_sleep_hold",
+            positions=[sleep_q] * hold_count,
+        )
+    return tuple(records)
+
+
+def expand_joint_limits_to_reference(
+    reference: Sequence[float],
+    lower: Sequence[float],
+    upper: Sequence[float],
+    *,
+    joint_names: Sequence[str] = ARM_JOINT_ORDER,
+) -> tuple[tuple[float, ...], tuple[float, ...], tuple[dict[str, object], ...]]:
+    """Return the smallest diagnostic-only limit expansion containing a reference."""
+
+    reference_q = _arm_vector(reference)
+    lower_q = _arm_vector(lower)
+    upper_q = _arm_vector(upper)
+    if len(joint_names) != len(reference_q):
+        raise ValueError("joint_names must match reference length")
+    if any(low > high for low, high in zip(lower_q, upper_q, strict=True)):
+        raise ValueError("lower limits must not exceed upper limits")
+
+    expanded_lower = list(lower_q)
+    expanded_upper = list(upper_q)
+    changes: list[dict[str, object]] = []
+    for index, (joint_name, value, low, high) in enumerate(
+        zip(joint_names, reference_q, lower_q, upper_q, strict=True)
+    ):
+        if value < low:
+            expanded_lower[index] = value
+            changes.append(
+                {
+                    "joint_name": str(joint_name),
+                    "joint_index": index,
+                    "bound": "lower",
+                    "source_value_rad": low,
+                    "diagnostic_value_rad": value,
+                    "delta_rad": value - low,
+                    "classification": "DIAGNOSTIC_ONLY_RUNTIME_ALIGNMENT",
+                }
+            )
+        elif value > high:
+            expanded_upper[index] = value
+            changes.append(
+                {
+                    "joint_name": str(joint_name),
+                    "joint_index": index,
+                    "bound": "upper",
+                    "source_value_rad": high,
+                    "diagnostic_value_rad": value,
+                    "delta_rad": value - high,
+                    "classification": "DIAGNOSTIC_ONLY_RUNTIME_ALIGNMENT",
+                }
+            )
+    return tuple(expanded_lower), tuple(expanded_upper), tuple(changes)
+
+
+def manifest_initial_terminal_arm(
+    manifest: dict[str, object],
+) -> tuple[tuple[float, ...], tuple[float, ...]]:
+    """Read generalized endpoint fields while preserving legacy Home manifests."""
+
+    if "home_rad" not in manifest:
+        raise ValueError("manifest is missing home_rad")
+    home = _arm_vector(manifest["home_rad"])  # type: ignore[arg-type]
+    initial = _arm_vector(manifest.get("initial_arm_rad", home))  # type: ignore[arg-type]
+    terminal = _arm_vector(manifest.get("terminal_arm_rad", home))  # type: ignore[arg-type]
+    return initial, terminal
+
+
 def command_index_for_physics_frame(
     physics_frame: int,
     *,

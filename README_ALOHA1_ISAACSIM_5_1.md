@@ -73,8 +73,8 @@ sim-to-real dynamics model and it is not yet accepted for bottle insertion.
 | Home→Sleep→Home digital twin | **PASS / selected historical official Sleep** | user-selected official historical ALOHA Sleep `[0, -1.80, 1.55, 0, -1.57, 0]` passes all 1850 modeled command samples and two fresh Isaac 5.1 runs with identical numeric signatures; the current Humble vector remains an out-of-limit comparison only |
 | Synchronized real/sim offline bridge | **READY_FOR_SUPERVISED_REAL_EXECUTION** | fake three-worker protocol, deferred ROS1 adapter, two fresh Isaac regressions and one 37 s monotonic-paced Isaac run pass; this is readiness only, not real/digital correspondence |
 | follower_left live read-only bridge | **PASS read-only / motion NOT_RUN** | isolated `puppet_left` driver and exact `cam_high` probe passed; explicit joint order and position modes were read back, 1200 camera frames were captured, diagnostics published zero robot commands; tabletop clutter is user-accepted and non-blocking, while stop/hold and motion authorization remain open |
-| follower_left no-motion synchronized interlock | **PARTIAL / Sleep-reference replan required** | strict headless Isaac completed 2220/2220 frames, while GUI rendering correctly tripped the deadline gate; 103 remained stationary with zero command publishers, but its current pose differs from manifest Home by up to `1.5837 rad`, so the sequence must be rebuilt as shared-Sleep initialization followed by `Sleep → Home → Sleep` |
-| Home→Sleep→Home real robot | **NOT_RUN_AUTHORIZATION_REQUIRED** | offline preflight and 1850-sample dry-run performed no network, SSH, ROS, serial, torque or command publication; digital PASS does not authorize hardware motion |
+| follower_left runtime-Sleep digital alignment | **PASS_DIAGNOSTIC_DIGITAL_ONLY** | isolated session-layer initialization uses the median of 9000 stationary real samples; two fresh Isaac 5.1 runs completed `Sleep → Home → Sleep` ×3 with identical numeric signature and `0.000262 rad` final Sleep error; no source/default/final asset changed |
+| Sleep→Home→Sleep real robot | **NOT_RUN_AUTHORIZATION_REQUIRED** | active synchronized config is now Sleep-first; fake playback and real-worker dry-run sent zero hardware commands; digital diagnostic PASS does not authorize hardware motion |
 
 `PASS`, `FAIL`, and `PARTIAL` are literal machine-report values. A clean
 viewport is not an acceptance criterion.
@@ -239,6 +239,49 @@ controlled headless run passed all 2220 frames with maximum lateness
 synchronized worker remains headless; a future GUI observer must be decoupled.
 Report:
 `reports/aloha1_mapping/aloha1_home_sleep_no_motion_interlock.json/.md`.
+
+## 2026-08-03 runtime-measured Sleep alignment
+
+The no-motion interlock's Sleep-reference replan is complete on the digital
+side. The active diagnostic manifest starts and ends at the median of 9000
+stationary real follower-left samples:
+
+`[0, -1.8453789949, 1.6229517460, -0.0061359233, -1.8837285042, -0.0061359233] rad`.
+
+The user accepted the approximately one-degree elbow/wrist discrepancy from
+the ideal URDF limits for this diagnostic. To preserve the exact runtime
+reference without altering the asset, Isaac authors only an anonymous session
+layer. It minimally expands elbow upper by `0.0172489882 rad` and wrist_angle
+lower by `0.0162264109 rad`. This is
+`DIAGNOSTIC_ONLY_RUNTIME_ALIGNMENT_NOT_FINAL_ASSET`: it is not an official
+hardware limit, calibration result, candidate promotion or final/default USD
+change.
+
+Preflight and two full runs used Isaac Sim `5.1.0.0`, Kit `107.3.3` and PhysX
+`107.3.26`. Each full run completed 2220 physics frames for three
+`Sleep -> Home -> Sleep` cycles. Both produced normalized signature
+`6a4273b930f1fe2ad6d1cada8d9b88c0b1dc59a0ea7ce08acf934152f52ab31d`.
+Maximum endpoint errors passed the unchanged `0.02 rad` gate; final Sleep
+error was `0.0002618753 rad`. Stage, manifest and finger-limit hashes remained
+unchanged during each process.
+
+The active synchronized config now binds this Sleep-first manifest. Fake
+three-worker playback completed all 1850 command samples, and the real-worker
+dry-run constructed no ROS or hardware transport and published zero commands.
+Thus digital initialization is `PASS_DIAGNOSTIC_DIGITAL_ONLY`, while
+real execution and real/digital correspondence remain
+`NOT_RUN_AUTHORIZATION_REQUIRED` and
+`NOT_RUN_REAL_MOTION_EVIDENCE_MISSING` respectively.
+
+Machine reports:
+
+- `reports/aloha1_mapping/aloha1_runtime_measured_sleep_alignment.json/.md`;
+- `reports/aloha1_mapping/aloha1_runtime_measured_sleep_command_manifest.json`;
+- `reports/aloha1_mapping/aloha1_runtime_measured_sleep_digital_run_01.json`;
+- `reports/aloha1_mapping/aloha1_runtime_measured_sleep_digital_run_02.json`;
+- `reports/aloha1_mapping/aloha1_runtime_measured_sleep_digital_validation.json/.md`;
+- `reports/aloha1_mapping/aloha1_runtime_measured_sleep_sync_fake_run.json`;
+- `reports/aloha1_mapping/aloha1_runtime_measured_sleep_real_worker_dry_run.json`.
 
 At the earlier 103 read-only static preflight, the result was
 `PARTIAL_RUNTIME_STACK_STOPPED`. That inspection was restricted to

@@ -53,18 +53,9 @@ def test_deadline_uses_absolute_index_without_accumulated_sleep() -> None:
 
 
 def test_start_classification_uses_one_command_period() -> None:
-    assert (
-        classify_start_skew(20_000_000, sample_period_ns=20_000_000)
-        == "SYNCHRONIZED_START_PASS"
-    )
-    assert (
-        classify_start_skew(-20_000_000, sample_period_ns=20_000_000)
-        == "SYNCHRONIZED_START_PASS"
-    )
-    assert (
-        classify_start_skew(20_000_001, sample_period_ns=20_000_000)
-        == "POST_ALIGNED_ONLY"
-    )
+    assert classify_start_skew(20_000_000, sample_period_ns=20_000_000) == "SYNCHRONIZED_START_PASS"
+    assert classify_start_skew(-20_000_000, sample_period_ns=20_000_000) == "SYNCHRONIZED_START_PASS"
+    assert classify_start_skew(20_000_001, sample_period_ns=20_000_000) == "POST_ALIGNED_ONLY"
 
 
 def test_ready_record_must_match_frozen_identity() -> None:
@@ -85,21 +76,22 @@ def test_ready_record_must_match_frozen_identity() -> None:
     assert validate_ready_record(ready, identity) == ["manifest_sha256"]
 
 
-def test_synchronized_config_is_fail_closed_and_bound_to_selected_sleep() -> None:
+def test_synchronized_config_is_fail_closed_and_bound_to_runtime_sleep() -> None:
     config = yaml.safe_load(CONFIG.read_text(encoding="utf-8"))
 
     assert config["schema_version"] == 1
     assert config["active_robot"] == "follower_left"
     assert config["manifest"]["command_signature"] == (
-        "d481b71bc8d6160fae0bdc1b264715e782712565064bb18099f8a9a4883f499e"
+        "6e454405843d0a231bef75f35b471e2f07c60f277f76e5c9690a4f89d745ed47"
     )
     assert config["manifest"]["sample_count"] == 1850
+    assert config["manifest"]["sequence_kind"] == "SLEEP_HOME_SLEEP"
+    assert config["manifest"]["initial_pose_label"] == "runtime_measured_sleep"
+    assert config["manifest"]["terminal_pose_label"] == "runtime_measured_sleep"
     assert config["timing"]["command_rate_hz"] == 50
     assert config["timing"]["synchronized_start_gate_ns"] == 20_000_000
     assert config["real"]["joint_states_topic"] == "/puppet_left/joint_states"
-    assert config["real"]["command_topic_candidate"] == (
-        "/puppet_left/commands/joint_group"
-    )
+    assert config["real"]["command_topic_candidate"] == ("/puppet_left/commands/joint_group")
     assert config["camera"]["topic"] == "/cam_high"
     assert config["camera"]["covers_complete_follower_left"] is True
     assert config["authorization"] == {
@@ -161,13 +153,9 @@ def test_isaac_worker_plan_rejects_changed_stage(tmp_path: Path) -> None:
             stage=stage,
             stage_sha256="0" * 64,
             manifest=manifest,
-            manifest_sha256=(
-                __import__("hashlib").sha256(manifest.read_bytes()).hexdigest()
-            ),
+            manifest_sha256=(__import__("hashlib").sha256(manifest.read_bytes()).hexdigest()),
             finger_limit_layer=finger,
-            finger_limit_sha256=(
-                __import__("hashlib").sha256(finger.read_bytes()).hexdigest()
-            ),
+            finger_limit_sha256=(__import__("hashlib").sha256(finger.read_bytes()).hexdigest()),
             command_signature="b" * 64,
             start_monotonic_ns=10_000_000_000,
             headless=True,
@@ -203,17 +191,12 @@ def test_isaac_frame_deadlines_do_not_accumulate_rounding_error() -> None:
     start = 10_000_000_000
 
     assert frame_deadline_ns(start, frame_index=0, physics_rate_hz=60) == start
-    assert frame_deadline_ns(start, frame_index=60, physics_rate_hz=60) == (
-        start + 1_000_000_000
-    )
+    assert frame_deadline_ns(start, frame_index=60, physics_rate_hz=60) == (start + 1_000_000_000)
 
 
 def test_isaac_worker_aborts_instead_of_bursting_late_frames() -> None:
     assert frame_lateness_status(16_666_666, physics_rate_hz=60) == "ON_TIME"
-    assert (
-        frame_lateness_status(16_666_667, physics_rate_hz=60)
-        == "ABORTED_DEADLINE_MISS"
-    )
+    assert frame_lateness_status(16_666_667, physics_rate_hz=60) == "ABORTED_DEADLINE_MISS"
 
 
 def test_offline_readiness_never_claims_real_execution() -> None:
@@ -292,9 +275,7 @@ def test_coordinator_never_arms_before_all_workers_ready() -> None:
 def test_manifest_mismatch_aborts_without_transport_publish() -> None:
     real = FakeWorker("real", manifest_sha256="c" * 64)
 
-    report = run_coordinator(
-        identity=_identity(), workers=_ready_workers(real=real), samples=_samples(3)
-    )
+    report = run_coordinator(identity=_identity(), workers=_ready_workers(real=real), samples=_samples(3))
 
     assert report["status"] == "BLOCKED_IDENTITY_MISMATCH"
     assert real.publish_count == 0
@@ -303,9 +284,7 @@ def test_manifest_mismatch_aborts_without_transport_publish() -> None:
 def test_fake_workers_execute_all_indices_once() -> None:
     workers = _ready_workers()
 
-    report = run_coordinator(
-        identity=_identity(), workers=workers, samples=_samples(1850)
-    )
+    report = run_coordinator(identity=_identity(), workers=workers, samples=_samples(1850))
 
     assert report["status"] == "PASS_FAKE_TRANSPORT"
     assert report["workers"]["real"]["sample_indices"] == list(range(1850))
@@ -317,9 +296,7 @@ def test_fake_workers_execute_all_indices_once() -> None:
 def test_late_real_worker_never_bursts_missed_commands() -> None:
     real = FakeWorker("real", late_at_index=2)
 
-    report = run_coordinator(
-        identity=_identity(), workers=_ready_workers(real=real), samples=_samples(5)
-    )
+    report = run_coordinator(identity=_identity(), workers=_ready_workers(real=real), samples=_samples(5))
 
     assert report["status"] == "ABORTED_DEADLINE_MISS"
     assert real.sample_indices == [0, 1]

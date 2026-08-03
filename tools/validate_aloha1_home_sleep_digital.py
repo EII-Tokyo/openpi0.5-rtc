@@ -23,6 +23,7 @@ from tools.aloha1_mapping.home_sleep_correspondence import ARM_JOINT_ORDER
 from tools.aloha1_mapping.home_sleep_correspondence import command_index_for_physics_frame
 from tools.aloha1_mapping.home_sleep_correspondence import count_follower_articulation_roots
 from tools.aloha1_mapping.home_sleep_correspondence import digital_runtime_signature
+from tools.aloha1_mapping.home_sleep_correspondence import manifest_initial_terminal_arm
 from tools.aloha1_mapping.home_sleep_correspondence import validate_digital_preflight
 from tools.aloha1_mapping.home_sleep_correspondence import values_within_float32_limits
 
@@ -89,12 +90,8 @@ def _runtime_versions(app: Any) -> dict[str, str]:
     physx_record = manager.get_extension_dict(physx_id) if physx_id else {}
     return {
         "isaac_sim": version("isaacsim"),
-        "kit": str(carb.tokens.get_tokens_interface().resolve("${kit_version}")).split(
-            "+", maxsplit=1
-        )[0],
-        "physx": str(physx_record.get("package", {}).get("version", "")).split(
-            "+", maxsplit=1
-        )[0],
+        "kit": str(carb.tokens.get_tokens_interface().resolve("${kit_version}")).split("+", maxsplit=1)[0],
+        "physx": str(physx_record.get("package", {}).get("version", "")).split("+", maxsplit=1)[0],
     }
 
 
@@ -110,11 +107,7 @@ def _stage_composition(stage: Any) -> dict[str, Any]:
         if prim.HasAuthoredReferences()
     ]
     root = stage.GetRootLayer()
-    file_layers = sorted(
-        str(Path(layer.realPath).resolve())
-        for layer in stage.GetUsedLayers()
-        if layer.realPath
-    )
+    file_layers = sorted(str(Path(layer.realPath).resolve()) for layer in stage.GetUsedLayers() if layer.realPath)
     return {
         "default_prim": str(stage.GetDefaultPrim().GetPath()),
         "root_layer": str(Path(root.realPath).resolve()),
@@ -126,7 +119,7 @@ def _stage_composition(stage: Any) -> dict[str, Any]:
     }
 
 
-def _install_session_layers(stage: Any, finger_layer: Path) -> dict[str, Any]:
+def _install_session_layers(stage: Any, finger_layer: Path, manifest: Mapping[str, Any]) -> dict[str, Any]:
     from pxr import PhysxSchema
     from pxr import Sdf
     from pxr import Usd
@@ -135,6 +128,45 @@ def _install_session_layers(stage: Any, finger_layer: Path) -> dict[str, Any]:
     session = stage.GetSessionLayer()
     finger_identifier = str(finger_layer.resolve(strict=True))
     session.subLayerPaths.append(finger_identifier)
+    limit_layer = None
+    limit_readback = []
+    override = manifest.get("diagnostic_limit_override")
+    if override:
+        if override.get("classification") != ("DIAGNOSTIC_ONLY_RUNTIME_ALIGNMENT_NOT_FINAL_ASSET"):
+            raise ValueError("unapproved diagnostic limit override classification")
+        limit_layer = Sdf.Layer.CreateAnonymous("aloha1_runtime_sleep_diagnostic_limits.usda")
+        session.subLayerPaths.insert(0, limit_layer.identifier)
+        old_target = stage.GetEditTarget()
+        stage.SetEditTarget(Usd.EditTarget(limit_layer))
+        for change in override["changes"]:
+            joint_name = str(change["joint_name"])
+            joint_path = f"/World/follower_left/vx300s_left/joints/{joint_name}"
+            prim = stage.GetPrimAtPath(joint_path)
+            if not prim or not prim.IsA(UsdPhysics.RevoluteJoint):
+                raise ValueError(f"missing follower_left revolute joint: {joint_path}")
+            joint = UsdPhysics.RevoluteJoint(prim)
+            value_rad = float(change["diagnostic_value_rad"])
+            value_degrees = math.degrees(value_rad)
+            if change["bound"] == "lower":
+                joint.GetLowerLimitAttr().Set(value_degrees)
+                readback_degrees = float(joint.GetLowerLimitAttr().Get())
+            elif change["bound"] == "upper":
+                joint.GetUpperLimitAttr().Set(value_degrees)
+                readback_degrees = float(joint.GetUpperLimitAttr().Get())
+            else:
+                raise ValueError(f"unsupported limit bound: {change['bound']}")
+            limit_readback.append(
+                {
+                    "joint_path": joint_path,
+                    "joint_name": joint_name,
+                    "bound": str(change["bound"]),
+                    "authored_value_rad": value_rad,
+                    "authored_value_degrees": value_degrees,
+                    "usd_readback_degrees": readback_degrees,
+                    "classification": "DIAGNOSTIC_ONLY_RUNTIME_ALIGNMENT",
+                }
+            )
+        stage.SetEditTarget(old_target)
     report_layer = Sdf.Layer.CreateAnonymous("aloha1_home_sleep_contact_reports.usda")
     session.subLayerPaths.insert(0, report_layer.identifier)
     old_target = stage.GetEditTarget()
@@ -148,6 +180,8 @@ def _install_session_layers(stage: Any, finger_layer: Path) -> dict[str, Any]:
     stage.SetEditTarget(old_target)
     return {
         "finger_layer": finger_identifier,
+        "diagnostic_limit_layer": limit_layer.identifier if limit_layer else None,
+        "diagnostic_limit_readback": limit_readback,
         "contact_report_layer": report_layer.identifier,
         "contact_report_bodies": report_bodies,
     }
@@ -213,9 +247,7 @@ def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
         for row in rows:
             writer.writerow(
                 {
-                    key: json.dumps(value, separators=(",", ":"))
-                    if isinstance(value, list | dict)
-                    else value
+                    key: json.dumps(value, separators=(",", ":")) if isinstance(value, list | dict) else value
                     for key, value in row.items()
                 }
             )
@@ -234,17 +266,11 @@ def _summarize_rows(
     finite = bool(np.isfinite(left).all() and np.isfinite(right).all())
     lower = np.asarray(limits["follower_left"][0], dtype=np.float64)
     upper = np.asarray(limits["follower_left"][1], dtype=np.float64)
-    legal = all(
-        values_within_float32_limits(row, lower, upper) for row in left.tolist()
-    )
+    legal = all(values_within_float32_limits(row, lower, upper) for row in left.tolist())
     right_start = np.asarray(initial_stationary["follower_right"], dtype=np.float64)
-    left_gripper_start = np.asarray(
-        initial_stationary["follower_left_gripper"], dtype=np.float64
-    )
+    left_gripper_start = np.asarray(initial_stationary["follower_left_gripper"], dtype=np.float64)
     right_drift = float(np.max(np.abs(right - right_start[None, :])))
-    left_gripper_drift = float(
-        np.max(np.abs(left[:, 6:] - left_gripper_start[None, :]))
-    )
+    left_gripper_drift = float(np.max(np.abs(left[:, 6:] - left_gripper_start[None, :])))
 
     segment_names = sorted({str(row["segment"]) for row in rows})
     endpoints = []
@@ -301,20 +327,20 @@ def _summarize_rows(
                             "separation_m": separation,
                         }
                     )
-    final_home_error = float(
-        np.max(np.abs(left[-1, :6] - np.asarray(manifest["home_rad"], dtype=np.float64)))
-    )
+    _, terminal_arm = manifest_initial_terminal_arm(dict(manifest))
+    terminal_label = str(manifest.get("terminal_pose_label", "home"))
+    final_terminal_error = float(np.max(np.abs(left[-1, :6] - np.asarray(terminal_arm, dtype=np.float64))))
     gates = {
         "finite_readback": finite,
         "legal_limits": legal,
         "directions": bool(directions) and all(item["status"] == "PASS" for item in directions),
         "endpoints": bool(endpoints) and all(item["status"] == "PASS" for item in endpoints),
-        "final_home": final_home_error <= POSITION_GATE_RAD,
         "follower_right_stationary": right_drift <= STATIONARY_GATE_RAD_OR_M,
         "grippers_stationary": left_gripper_drift <= STATIONARY_GATE_RAD_OR_M,
         "no_impulse_carrying_contact": not physical_contacts,
         "three_cycles_complete": int(rows[-1]["cycle"]) == 3,
     }
+    gates["final_home" if terminal_label == "home" else "final_terminal"] = final_terminal_error <= POSITION_GATE_RAD
     signature_payload = {
         "command_signature": manifest["command_signature"],
         "rows": [
@@ -324,9 +350,7 @@ def _summarize_rows(
                 "left_q": [round(value, 9) for value in row["left_q"]],
                 "left_qd": [round(value, 9) for value in row["left_qd"]],
                 "right_q": [round(value, 9) for value in row["right_q"]],
-                "contact_pairs": [
-                    [pair["collider0"], pair["collider1"]] for pair in row["contacts"]
-                ],
+                "contact_pairs": [[pair["collider0"], pair["collider1"]] for pair in row["contacts"]],
             }
             for row in rows
         ],
@@ -343,18 +367,16 @@ def _summarize_rows(
         },
         "right_max_drift_rad_or_m": right_drift,
         "left_gripper_max_drift_rad_or_m": left_gripper_drift,
-        "final_home_max_error_rad": final_home_error,
+        "terminal_pose_label": terminal_label,
+        "final_terminal_max_error_rad": final_terminal_error,
+        **({"final_home_max_error_rad": final_terminal_error} if terminal_label == "home" else {}),
         "endpoint_results": endpoints,
         "direction_results": directions,
         "contact": {
-            "event_point_count": sum(
-                len(pair["contacts"]) for row in rows for pair in row["contacts"]
-            ),
+            "event_point_count": sum(len(pair["contacts"]) for row in rows for pair in row["contacts"]),
             "impulse_carrying_point_count": len(physical_contacts),
             "maximum_impulse_n_s": maximum_impulse,
-            "minimum_separation_m": (
-                minimum_separation if math.isfinite(minimum_separation) else None
-            ),
+            "minimum_separation_m": (minimum_separation if math.isfinite(minimum_separation) else None),
             "first_impulse_contacts": physical_contacts[:20],
         },
         "normalized_numeric_signature": digital_runtime_signature(signature_payload),
@@ -390,7 +412,7 @@ def main(args: argparse.Namespace) -> int:
         app.update()
     stage = omni.usd.get_context().get_stage()
     composition = _stage_composition(stage)
-    session = _install_session_layers(stage, finger_path)
+    session = _install_session_layers(stage, finger_path, manifest)
 
     world = World(
         stage_units_in_meters=1.0,
@@ -415,39 +437,28 @@ def main(args: argparse.Namespace) -> int:
     properties = {robot: item.dof_properties.copy() for robot, item in articulations.items()}
     runtime = _runtime_versions(app)
     required_paths = ["/World", "/World/PhysicsScene", *ARTICULATION_PATHS.values()]
-    home = np.asarray(manifest["home_rad"], dtype=np.float32)
-    left_initial = np.asarray(
-        articulations["follower_left"].get_joint_positions(), dtype=np.float32
-    )
-    right_initial = np.asarray(
-        articulations["follower_right"].get_joint_positions(), dtype=np.float32
-    )
-    left_full_home = left_initial.copy()
-    left_full_home[:6] = home
-    articulations["follower_left"].set_joint_positions(left_full_home)
-    articulations["follower_left"].set_joint_velocities(np.zeros_like(left_full_home))
-    _apply_targets(articulations["follower_left"], left_full_home[:8], range(8))
+    initial_arm_tuple, terminal_arm_tuple = manifest_initial_terminal_arm(manifest)
+    initial_arm = np.asarray(initial_arm_tuple, dtype=np.float32)
+    left_initial = np.asarray(articulations["follower_left"].get_joint_positions(), dtype=np.float32)
+    right_initial = np.asarray(articulations["follower_right"].get_joint_positions(), dtype=np.float32)
+    left_full_initial = left_initial.copy()
+    left_full_initial[:6] = initial_arm
+    articulations["follower_left"].set_joint_positions(left_full_initial)
+    articulations["follower_left"].set_joint_velocities(np.zeros_like(left_full_initial))
+    _apply_targets(articulations["follower_left"], left_full_initial[:8], range(8))
     _apply_targets(articulations["follower_right"], right_initial[:8], range(8))
     world.step(render=False)
-    left_first = np.asarray(
-        articulations["follower_left"].get_joint_positions(), dtype=np.float64
-    )
-    first_frame_arm_jump = float(np.max(np.abs(left_first[:6] - left_full_home[:6])))
-    first_frame_gripper_jump = float(
-        np.max(np.abs(left_first[6:] - left_full_home[6:]))
-    )
-    # Match the already validated Task 7A initialization: establish a stable
-    # robot-local Home before the formal 37-second command stream begins.
+    left_first = np.asarray(articulations["follower_left"].get_joint_positions(), dtype=np.float64)
+    first_frame_arm_jump = float(np.max(np.abs(left_first[:6] - left_full_initial[:6])))
+    first_frame_gripper_jump = float(np.max(np.abs(left_first[6:] - left_full_initial[6:])))
+    # Establish the manifest-declared robot-local initial pose before the
+    # formal 37-second command stream begins.
     for _ in range(29):
-        _apply_targets(articulations["follower_left"], left_full_home[:8], range(8))
+        _apply_targets(articulations["follower_left"], left_full_initial[:8], range(8))
         _apply_targets(articulations["follower_right"], right_initial[:8], range(8))
         world.step(render=False)
-    left_settled = np.asarray(
-        articulations["follower_left"].get_joint_positions(), dtype=np.float32
-    )
-    right_settled = np.asarray(
-        articulations["follower_right"].get_joint_positions(), dtype=np.float32
-    )
+    left_settled = np.asarray(articulations["follower_left"].get_joint_positions(), dtype=np.float32)
+    right_settled = np.asarray(articulations["follower_right"].get_joint_positions(), dtype=np.float32)
 
     limits: dict[str, list[list[float]]] = {}
     for robot, prop in properties.items():
@@ -455,15 +466,13 @@ def main(args: argparse.Namespace) -> int:
             [float(row["lower"]) for row in prop],
             [float(row["upper"]) for row in prop],
         ]
-    home_legal = bool(
-        np.isfinite(home).all()
-        and np.all(home >= np.asarray(limits["follower_left"][0][:6]))
-        and np.all(home <= np.asarray(limits["follower_left"][1][:6]))
+    initial_legal = bool(
+        np.isfinite(initial_arm).all()
+        and np.all(initial_arm >= np.asarray(limits["follower_left"][0][:6]))
+        and np.all(initial_arm <= np.asarray(limits["follower_left"][1][:6]))
     )
     all_articulation_roots = [
-        str(prim.GetPath())
-        for prim in stage.Traverse()
-        if prim.HasAPI(UsdPhysics.ArticulationRootAPI)
+        str(prim.GetPath()) for prim in stage.Traverse() if prim.HasAPI(UsdPhysics.ArticulationRootAPI)
     ]
     articulation_roots = count_follower_articulation_roots(all_articulation_roots)
     preflight_contract = {
@@ -476,7 +485,7 @@ def main(args: argparse.Namespace) -> int:
         "articulation_count": len(articulation_roots),
         "dof_order_match": all(order == EXPECTED_DOF_ORDER for order in dof_orders.values()),
         "finger_limit_hash_match": finger_hash_before == args.finger_limit_sha256,
-        "home_finite_and_legal": home_legal,
+        "home_finite_and_legal": initial_legal,
         "first_frame_arm_stable": first_frame_arm_jump <= POSITION_GATE_RAD,
         "stationary_scope_declared": manifest["stationary_scope"]
         == {
@@ -497,19 +506,18 @@ def main(args: argparse.Namespace) -> int:
             "all_schema_articulation_roots": all_articulation_roots,
             "dof_orders": dof_orders,
             "limits": limits,
-            "first_frame_jump_rad_or_m": float(
-                np.max(np.abs(left_first - left_full_home))
-            ),
+            "first_frame_jump_rad_or_m": float(np.max(np.abs(left_first - left_full_initial))),
             "first_frame_arm_jump_rad": first_frame_arm_jump,
             "first_frame_gripper_jump_rad_or_m": first_frame_gripper_jump,
-            "left_target_before_first_frame": left_full_home.astype(
-                np.float64
-            ).tolist(),
+            "left_target_before_first_frame": left_full_initial.astype(np.float64).tolist(),
+            "initial_pose_label": str(manifest.get("initial_pose_label", "home")),
+            "initial_arm_rad": list(initial_arm_tuple),
+            "terminal_pose_label": str(manifest.get("terminal_pose_label", "home")),
+            "terminal_arm_rad": list(terminal_arm_tuple),
+            "initial_finite_and_legal": initial_legal,
             "left_readback_after_first_frame": left_first.tolist(),
             "initialization_settle_frames_not_in_formal_trajectory": 30,
-            "solve_articulation_contact_last": bool(
-                world.get_physics_context().get_solve_articulation_contact_last()
-            ),
+            "solve_articulation_contact_last": bool(world.get_physics_context().get_solve_articulation_contact_last()),
         }
     )
 
@@ -517,11 +525,7 @@ def main(args: argparse.Namespace) -> int:
     summary: dict[str, Any] | None = None
     contact_events: list[dict[str, Any]] = []
     scheduler: dict[str, Any] = {
-        "mode": (
-            "ABSOLUTE_MONOTONIC_NO_BURST"
-            if args.realtime_pacing
-            else "UNPACED_DETERMINISTIC_PHYSICS"
-        ),
+        "mode": ("ABSOLUTE_MONOTONIC_NO_BURST" if args.realtime_pacing else "UNPACED_DETERMINISTIC_PHYSICS"),
         "status": "NOT_REQUESTED" if not args.realtime_pacing else "PENDING",
         "requested_start_monotonic_ns": args.start_monotonic_ns,
         "first_applied_monotonic_ns": None,
@@ -534,9 +538,7 @@ def main(args: argparse.Namespace) -> int:
     def on_contact(headers: Sequence[Any], data: Sequence[Any]) -> None:
         contact_events.extend(_serialize_contacts(headers, data))
 
-    subscription = get_physx_simulation_interface().subscribe_contact_report_events(
-        on_contact
-    )
+    subscription = get_physx_simulation_interface().subscribe_contact_report_events(on_contact)
     if not args.preflight_only and preflight["status"] == "PASS":
         if args.realtime_pacing and args.start_monotonic_ns is None:
             raise ValueError("--realtime-pacing requires --start-monotonic-ns")
@@ -564,13 +566,9 @@ def main(args: argparse.Namespace) -> int:
                     scheduler["start_skew_ns"] = frame_lateness_ns
                 previous_maximum = scheduler["maximum_lateness_ns"]
                 scheduler["maximum_lateness_ns"] = (
-                    frame_lateness_ns
-                    if previous_maximum is None
-                    else max(int(previous_maximum), frame_lateness_ns)
+                    frame_lateness_ns if previous_maximum is None else max(int(previous_maximum), frame_lateness_ns)
                 )
-                pacing_status = frame_lateness_status(
-                    frame_lateness_ns, physics_rate_hz=physics_hz
-                )
+                pacing_status = frame_lateness_status(frame_lateness_ns, physics_rate_hz=physics_hz)
                 if pacing_status != "ON_TIME":
                     scheduler["status"] = pacing_status
                     scheduler["aborted_physics_frame"] = physics_frame
@@ -584,29 +582,15 @@ def main(args: argparse.Namespace) -> int:
             sample = samples[command_index]
             target = np.asarray(sample["q_rad"], dtype=np.float32)
             _apply_targets(articulations["follower_left"], target, range(6))
-            _apply_targets(
-                articulations["follower_left"], frozen_left_gripper[:2], (6, 7)
-            )
-            _apply_targets(
-                articulations["follower_right"], frozen_right[:8], range(8)
-            )
+            _apply_targets(articulations["follower_left"], frozen_left_gripper[:2], (6, 7))
+            _apply_targets(articulations["follower_right"], frozen_right[:8], range(8))
             contact_events.clear()
             world.step(render=not args.headless)
-            left_q = _finite_json_vector(
-                articulations["follower_left"].get_joint_positions()
-            )
-            left_qd = _finite_json_vector(
-                articulations["follower_left"].get_joint_velocities()
-            )
-            right_q = _finite_json_vector(
-                articulations["follower_right"].get_joint_positions()
-            )
-            right_qd = _finite_json_vector(
-                articulations["follower_right"].get_joint_velocities()
-            )
-            ee_position, ee_orientation = get_world_pose(
-                "/World/follower_left/vx300s_left/follower_left_gripper_link"
-            )
+            left_q = _finite_json_vector(articulations["follower_left"].get_joint_positions())
+            left_qd = _finite_json_vector(articulations["follower_left"].get_joint_velocities())
+            right_q = _finite_json_vector(articulations["follower_right"].get_joint_positions())
+            right_qd = _finite_json_vector(articulations["follower_right"].get_joint_velocities())
+            ee_position, ee_orientation = get_world_pose("/World/follower_left/vx300s_left/follower_left_gripper_link")
             rows.append(
                 {
                     "physics_frame": physics_frame,
@@ -614,8 +598,7 @@ def main(args: argparse.Namespace) -> int:
                     "physics_dt_s": 1.0 / physics_hz,
                     "command_index": command_index,
                     "nominal_command_time_s": int(sample["time_ns"]) / 1.0e9,
-                    "scheduler_phase_error_s": physics_frame / physics_hz
-                    - int(sample["time_ns"]) / 1.0e9,
+                    "scheduler_phase_error_s": physics_frame / physics_hz - int(sample["time_ns"]) / 1.0e9,
                     "scheduler_applied_monotonic_ns": applied_monotonic_ns,
                     "scheduler_frame_lateness_ns": frame_lateness_ns,
                     "cycle": int(sample["cycle"]),
@@ -626,9 +609,7 @@ def main(args: argparse.Namespace) -> int:
                     "right_q": right_q,
                     "right_qd": right_qd,
                     "left_ee_position_world_m": _finite_json_vector(ee_position),
-                    "left_ee_orientation_world_wxyz": _finite_json_vector(
-                        ee_orientation
-                    ),
+                    "left_ee_orientation_world_wxyz": _finite_json_vector(ee_orientation),
                     "contacts": list(contact_events),
                 }
             )
@@ -642,9 +623,7 @@ def main(args: argparse.Namespace) -> int:
                 limits=limits,
                 initial_stationary={
                     "follower_right": frozen_right.astype(np.float64).tolist(),
-                    "follower_left_gripper": frozen_left_gripper.astype(
-                        np.float64
-                    ).tolist(),
+                    "follower_left_gripper": frozen_left_gripper.astype(np.float64).tolist(),
                 },
             )
         if rows:
@@ -673,7 +652,13 @@ def main(args: argparse.Namespace) -> int:
         "schema_version": 1,
         "status": status,
         "classification": (
-            "DIGITAL_PREFLIGHT_ONLY" if args.preflight_only else "DIGITAL_HOME_SLEEP_THREE_CYCLE"
+            "DIGITAL_PREFLIGHT_ONLY"
+            if args.preflight_only
+            else (
+                "DIGITAL_SLEEP_HOME_SLEEP_THREE_CYCLE"
+                if manifest.get("sequence_kind") == "SLEEP_HOME_SLEEP"
+                else "DIGITAL_HOME_SLEEP_THREE_CYCLE"
+            )
         ),
         "repeat_index": args.repeat_index,
         "run_id": args.run_id,
@@ -721,9 +706,7 @@ def main(args: argparse.Namespace) -> int:
                 "status": status,
                 "repeat_index": args.repeat_index,
                 "telemetry_rows": len(rows),
-                "numeric_signature": (
-                    summary["normalized_numeric_signature"] if summary else None
-                ),
+                "numeric_signature": (summary["normalized_numeric_signature"] if summary else None),
                 "output": str(args.output.resolve()),
             },
             sort_keys=True,

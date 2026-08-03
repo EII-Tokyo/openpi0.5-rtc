@@ -1,5 +1,5 @@
 schema_version: 1
-experiment_id: ALOHA1_SYNCHRONIZED_REAL_SIM_HOME_SLEEP
+experiment_id: ALOHA1_SYNCHRONIZED_REAL_SIM_SLEEP_HOME_SLEEP
 active_robot: follower_left
 stationary_scope:
   follower_right: true
@@ -7,14 +7,17 @@ stationary_scope:
   follower_right_gripper: true
 
 manifest:
-  path: reports/aloha1_mapping/aloha1_home_sleep_command_manifest.json
-  sha256: e9b18a154569945127779dfe74bee62e7c2db0a8d1dd320e802aaade7bf76087
-  command_signature: d481b71bc8d6160fae0bdc1b264715e782712565064bb18099f8a9a4883f499e
+  path: reports/aloha1_mapping/aloha1_runtime_measured_sleep_command_manifest.json
+  sha256: d48047eadc6a02664efb01cba3e0345b523bf64052791491bb237639f24dad3c
+  command_signature: 6e454405843d0a231bef75f35b471e2f07c60f277f76e5c9690a4f89d745ed47
   sample_count: 1850
+  sequence_kind: SLEEP_HOME_SLEEP
+  initial_pose_label: runtime_measured_sleep
+  terminal_pose_label: runtime_measured_sleep
 
 digital:
-  validation_report: reports/aloha1_mapping/aloha1_home_sleep_historical_sleep_digital_validation.json
-  validation_report_sha256: 5fd84f4b92b89e33af42237535256e9667369d28e9ea5e6579916df810156a1a
+  validation_report: reports/aloha1_mapping/aloha1_runtime_measured_sleep_digital_validation.json
+  validation_report_sha256: c7bba33fb91fd175215d14d27a1dd5e16e7e341c3ba094b250ad08d3fa0bc68b
   stage: assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda
   stage_sha256: 327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9
   finger_limit_layer: assets/Trossen/ALOHA1/1.0/diagnostics/finger_limit_pair_collision_candidate/1.0/configuration/finger_source_limits.usda
@@ -40,7 +43,7 @@ camera:
   expected_message_type: aloha.msg/RGBGrayscaleImage
   covers_complete_follower_left: true
   record_before_start_s: 2.0
-  record_after_final_home_s: 2.0
+  record_after_final_sleep_s: 2.0
 
 timing:
   command_rate_hz: 50

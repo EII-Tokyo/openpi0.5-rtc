@@ -1,5 +1,48 @@
 # Task State
 
+## 2026-08-03 follower_left runtime-Sleep digital alignment
+
+- The user accepted the small real-readback excursions beyond the ideal URDF
+  limits as non-blocking for this diagnostic. They are not promoted to official
+  hardware limits.
+- The active synchronized command authority is now an isolated 1850-sample,
+  50 Hz, three-cycle `Sleep -> Home -> Sleep` manifest. It starts and ends at
+  the median of 9000 stationary `/puppet_left/joint_states` samples:
+  `[0, -1.845378995, 1.622951746, -0.006135923, -1.883728504,
+  -0.006135923] rad`.
+- The frozen source Stage remains SHA-256
+  `327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9`.
+  No source/default/final asset or historical Home-first manifest was changed.
+- Exact runtime initialization uses an anonymous Isaac session layer with the
+  smallest limit expansion needed to contain the measured reference:
+  elbow upper `+0.0172489882 rad` and wrist_angle lower
+  `-0.0162264109 rad`. Classification is
+  `DIAGNOSTIC_ONLY_RUNTIME_ALIGNMENT_NOT_FINAL_ASSET`.
+- Preflight passed with Isaac Sim `5.1.0.0`, Kit `107.3.3`, PhysX `107.3.26`.
+  First-frame maximum arm error was `0.0044366787 rad` and session-layer USD
+  degree attributes were read back successfully.
+- Two fresh headless processes (PIDs `298512`, `299668`) each completed
+  `2220/2220` physics frames. Both returned the identical normalized signature
+  `6a4273b930f1fe2ad6d1cada8d9b88c0b1dc59a0ea7ce08acf934152f52ab31d`;
+  final Sleep error was `0.0002618753 rad`.
+- The synchronized config now binds the Sleep-first manifest and its digital
+  validation. Fake three-worker playback passed all 1850 samples. The real
+  worker remained dry-run only with zero network, ROS, serial, torque or
+  motion commands.
+- Current status:
+  `DIGITAL_SLEEP_INITIALIZATION=PASS_DIAGNOSTIC_DIGITAL_ONLY`,
+  `REAL_EXECUTION=NOT_RUN_AUTHORIZATION_REQUIRED`,
+  `REAL_DIGITAL_CORRESPONDENCE=NOT_RUN_REAL_MOTION_EVIDENCE_MISSING`,
+  `TASK8=COMPLETE_WITH_NO_PROMOTION`.
+- Primary reports:
+  - `reports/aloha1_mapping/aloha1_runtime_measured_sleep_alignment.json/.md`;
+  - `reports/aloha1_mapping/aloha1_runtime_measured_sleep_command_manifest.json`;
+  - `reports/aloha1_mapping/aloha1_runtime_measured_sleep_digital_run_01.json`;
+  - `reports/aloha1_mapping/aloha1_runtime_measured_sleep_digital_run_02.json`;
+  - `reports/aloha1_mapping/aloha1_runtime_measured_sleep_digital_validation.json/.md`;
+  - `reports/aloha1_mapping/aloha1_runtime_measured_sleep_sync_fake_run.json`;
+  - `reports/aloha1_mapping/aloha1_runtime_measured_sleep_real_worker_dry_run.json`.
+
 ## 2026-08-03 follower_left no-motion synchronized interlock
 
 - Legacy ROS1 `puppet_left` is the current `follower_left` role. The user

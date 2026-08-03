@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "status": "READY_FOR_ISOLATED_DIGITAL_VALIDATION",
+  "classification": "RUNTIME_MEASURED_SLEEP_DIAGNOSTIC_ALIGNMENT",
+  "runtime_reference": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-synchronized-real-sim/no_motion_interlock_attempt2_headless/real_observation/puppet_left_joint_states_no_motion.csv",
+    "sha256": "2967e97c59ede8620cad70e806cc4779cb6c87e9660c44af40c9313f2ddef1e3",
+    "sample_count": 9000,
+    "median_arm_rad": [
+      0.0,
+      -1.8453789949417114,
+      1.6229517459869385,
+      -0.006135923322290182,
+      -1.8837285041809082,
+      -0.006135923322290182
+    ],
+    "span_rad_by_joint": {
+      "waist": 0.0015339808305725455,
+      "shoulder": 0.0015338659286499023,
+      "elbow": 0.0030679702758789062,
+      "forearm_roll": 0.0030679618939757347,
+      "wrist_angle": 0.0015339851379394531,
+      "wrist_rotate": 0.0030679618939757347
+    },
+    "maximum_span_rad": 0.0030679702758789062,
+    "host": "192.168.1.103",
+    "namespace": "/puppet_left",
+    "access_mode": "PREVIOUSLY_CAPTURED_READ_ONLY",
+    "classification": "RUNTIME_MEASURED_SLEEP_REFERENCE_NOT_OFFICIAL_SLEEP"
+  },
+  "diagnostic_limit_policy": "DIAGNOSTIC_ONLY_RUNTIME_ALIGNMENT_NOT_FINAL_ASSET",
+  "diagnostic_limit_changes": [
+    {
+      "joint_name": "elbow",
+      "joint_index": 2,
+      "bound": "upper",
+      "source_value_rad": 1.6057027578353882,
+      "diagnostic_value_rad": 1.6229517459869385,
+      "delta_rad": 0.017248988151550293,
+      "classification": "DIAGNOSTIC_ONLY_RUNTIME_ALIGNMENT"
+    },
+    {
+      "joint_name": "wrist_angle",
+      "joint_index": 4,
+      "bound": "lower",
+      "source_value_rad": -1.8675020933151245,
+      "diagnostic_value_rad": -1.8837285041809082,
+      "delta_rad": -0.01622641086578369,
+      "classification": "DIAGNOSTIC_ONLY_RUNTIME_ALIGNMENT"
+    }
+  ],
+  "source_limits_rad": {
+    "lower": [
+      -3.141582489013672,
+      -1.8500488996505737,
+      -1.7627824544906616,
+      -3.141582489013672,
+      -1.8675020933151245,
+      -3.141582489013672
+    ],
+    "upper": [
+      3.141582489013672,
+      1.2566370964050293,
+      1.6057027578353882,
+      3.141582489013672,
+      2.2340211868286133,
+      3.141582489013672
+    ]
+  },
+  "diagnostic_limits_rad": {
+    "lower": [
+      -3.141582489013672,
+      -1.8500488996505737,
+      -1.7627824544906616,
+      -3.141582489013672,
+      -1.8837285041809082,
+      -3.141582489013672
+    ],
+    "upper": [
+      3.141582489013672,
+      1.2566370964050293,
+      1.6229517459869385,
+      3.141582489013672,
+      2.2340211868286133,
+      3.141582489013672
+    ]
+  },
+  "sequence": {
+    "kind": "SLEEP_HOME_SLEEP",
+    "cycles": 3,
+    "sample_count": 1850,
+    "command_signature": "6e454405843d0a231bef75f35b471e2f07c60f277f76e5c9690a4f89d745ed47",
+    "manifest_signature": "c6ce84c560a2db9d035870114949a69325ad412a77d605ffd16f8b904b7101bd"
+  },
+  "historical_manifest_unchanged": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_home_sleep_command_manifest.json",
+    "sha256": "e9b18a154569945127779dfe74bee62e7c2db0a8d1dd320e802aaade7bf76087"
+  },
+  "source_or_final_asset_modified": false,
+  "candidate_promoted": false,
+  "real_execution_authorized": false,
+  "real_motion_commands": 0
+}

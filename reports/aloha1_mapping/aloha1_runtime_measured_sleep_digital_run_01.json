@@ -1,0 +1,966 @@
+{
+  "classification": "DIGITAL_SLEEP_HOME_SLEEP_THREE_CYCLE",
+  "finger_limit_layer": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/finger_limit_pair_collision_candidate/1.0/configuration/finger_source_limits.usda",
+    "sha256_after": "2547e6fb374c213b5c6c54f200c7ced37605ab0e1a11735d0a32c0a231fd260f",
+    "sha256_before": "2547e6fb374c213b5c6c54f200c7ced37605ab0e1a11735d0a32c0a231fd260f"
+  },
+  "immutability": {
+    "finger_limit_layer": true,
+    "manifest": true,
+    "stage": true
+  },
+  "manifest": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_runtime_measured_sleep_command_manifest.json",
+    "command_signature": "6e454405843d0a231bef75f35b471e2f07c60f277f76e5c9690a4f89d745ed47",
+    "manifest_signature": "c6ce84c560a2db9d035870114949a69325ad412a77d605ffd16f8b904b7101bd",
+    "sha256_after": "d48047eadc6a02664efb01cba3e0345b523bf64052791491bb237639f24dad3c",
+    "sha256_before": "d48047eadc6a02664efb01cba3e0345b523bf64052791491bb237639f24dad3c"
+  },
+  "preflight": {
+    "all_schema_articulation_roots": [
+      "/World/follower_left/vx300s_left/root_joint",
+      "/World/follower_right/vx300s_right/root_joint",
+      "/World/environment/worldBody"
+    ],
+    "articulation_roots": [
+      "/World/follower_left/vx300s_left/root_joint",
+      "/World/follower_right/vx300s_right/root_joint"
+    ],
+    "contract": {
+      "articulation_count": 2,
+      "default_prim": "/World",
+      "dof_order_match": true,
+      "final_default_asset_modified": false,
+      "finger_limit_hash_match": true,
+      "first_frame_arm_stable": true,
+      "home_finite_and_legal": true,
+      "manifest_hash_match": true,
+      "required_prims_valid": true,
+      "root_prim_valid": true,
+      "runtime_versions_match": true,
+      "source_hashes_immutable": true,
+      "stage_hash_match": true,
+      "stationary_scope_declared": true
+    },
+    "dof_orders": {
+      "follower_left": [
+        "waist",
+        "shoulder",
+        "elbow",
+        "forearm_roll",
+        "wrist_angle",
+        "wrist_rotate",
+        "gripper",
+        "left_finger",
+        "right_finger"
+      ],
+      "follower_right": [
+        "waist",
+        "shoulder",
+        "elbow",
+        "forearm_roll",
+        "wrist_angle",
+        "wrist_rotate",
+        "gripper",
+        "left_finger",
+        "right_finger"
+      ]
+    },
+    "failed_gates": [],
+    "first_frame_arm_jump_rad": 0.004436678718775511,
+    "first_frame_gripper_jump_rad_or_m": 0.02292756736278534,
+    "first_frame_jump_rad_or_m": 0.02292756736278534,
+    "initial_arm_rad": [
+      0.0,
+      -1.8453789949417114,
+      1.6229517459869385,
+      -0.006135923322290182,
+      -1.8837285041809082,
+      -0.006135923322290182
+    ],
+    "initial_finite_and_legal": true,
+    "initial_pose_label": "runtime_measured_sleep",
+    "initialization_settle_frames_not_in_formal_trajectory": 30,
+    "left_readback_after_first_frame": [
+      0.000522738613653928,
+      -1.846027135848999,
+      1.6229510307312012,
+      -0.0016992446035146713,
+      -1.8837288618087769,
+      -0.009702217765152454,
+      -0.0020247132051736116,
+      0.022910332307219505,
+      -0.02292756736278534
+    ],
+    "left_target_before_first_frame": [
+      0.0,
+      -1.8453789949417114,
+      1.6229517459869385,
+      -0.006135923322290182,
+      -1.8837285041809082,
+      -0.006135923322290182,
+      0.0,
+      0.022390000522136688,
+      0.0
+    ],
+    "limits": {
+      "follower_left": [
+        [
+          -3.141582489013672,
+          -1.8500488996505737,
+          -1.7627824544906616,
+          -3.141582489013672,
+          -1.8837285041809082,
+          -3.141582489013672,
+          -3.4028234663852886e+38,
+          0.020999999716877937,
+          -0.05700000002980232
+        ],
+        [
+          3.141582489013672,
+          1.2566370964050293,
+          1.6229517459869385,
+          3.141582489013672,
+          2.2340211868286133,
+          3.141582489013672,
+          3.4028234663852886e+38,
+          0.05700000002980232,
+          -0.020999999716877937
+        ]
+      ],
+      "follower_right": [
+        [
+          -3.141582489013672,
+          -1.8500488996505737,
+          -1.7627824544906616,
+          -3.141582489013672,
+          -1.8675020933151245,
+          -3.141582489013672,
+          -3.4028234663852886e+38,
+          0.020999999716877937,
+          -0.06419999897480011
+        ],
+        [
+          3.141582489013672,
+          1.2566370964050293,
+          1.6057027578353882,
+          3.141582489013672,
+          2.2340211868286133,
+          3.141582489013672,
+          3.4028234663852886e+38,
+          0.05700000002980232,
+          -0.013799999840557575
+        ]
+      ]
+    },
+    "runtime": {
+      "isaac_sim": "5.1.0.0",
+      "kit": "107.3.3",
+      "physx": "107.3.26"
+    },
+    "session_only_layers": {
+      "contact_report_bodies": [
+        "/World/follower_left/vx300s_left/follower_left_base_link",
+        "/World/follower_left/vx300s_left/follower_left_shoulder_link",
+        "/World/follower_left/vx300s_left/follower_left_upper_arm_link",
+        "/World/follower_left/vx300s_left/follower_left_upper_forearm_link",
+        "/World/follower_left/vx300s_left/follower_left_lower_forearm_link",
+        "/World/follower_left/vx300s_left/follower_left_wrist_link",
+        "/World/follower_left/vx300s_left/follower_left_gripper_link",
+        "/World/follower_left/vx300s_left/follower_left_ee_arm_link",
+        "/World/follower_left/vx300s_left/follower_left_gripper_prop_link",
+        "/World/follower_left/vx300s_left/follower_left_gripper_bar_link",
+        "/World/follower_left/vx300s_left/follower_left_fingers_link",
+        "/World/follower_left/vx300s_left/follower_left_ee_gripper_link",
+        "/World/follower_left/vx300s_left/follower_left_left_finger_link",
+        "/World/follower_left/vx300s_left/follower_left_right_finger_link",
+        "/World/follower_right/vx300s_right/follower_right_base_link",
+        "/World/follower_right/vx300s_right/follower_right_shoulder_link",
+        "/World/follower_right/vx300s_right/follower_right_upper_arm_link",
+        "/World/follower_right/vx300s_right/follower_right_upper_forearm_link",
+        "/World/follower_right/vx300s_right/follower_right_lower_forearm_link",
+        "/World/follower_right/vx300s_right/follower_right_wrist_link",
+        "/World/follower_right/vx300s_right/follower_right_gripper_link",
+        "/World/follower_right/vx300s_right/follower_right_ee_arm_link",
+        "/World/follower_right/vx300s_right/follower_right_gripper_prop_link",
+        "/World/follower_right/vx300s_right/follower_right_gripper_bar_link",
+        "/World/follower_right/vx300s_right/follower_right_fingers_link",
+        "/World/follower_right/vx300s_right/follower_right_ee_gripper_link",
+        "/World/follower_right/vx300s_right/follower_right_left_finger_link",
+        "/World/follower_right/vx300s_right/follower_right_right_finger_link",
+        "/World/environment/worldBody/floor",
+        "/World/environment/worldBody/_",
+        "/World/environment/worldBody/__1",
+        "/World/environment/worldBody/__2",
+        "/World/environment/worldBody/__3",
+        "/World/environment/worldBody/__4",
+        "/World/environment/worldBody/__5",
+        "/World/environment/worldBody/__6",
+        "/World/environment/worldBody/__7",
+        "/World/environment/worldBody/__8",
+        "/World/environment/worldBody/__9",
+        "/World/environment/worldBody/__10",
+        "/World/environment/worldBody/__11",
+        "/World/environment/worldBody/__12",
+        "/World/environment/worldBody/__13",
+        "/World/environment/worldBody/__14",
+        "/World/environment/worldBody/__15",
+        "/World/environment/worldBody/__16",
+        "/World/environment/worldBody/__17",
+        "/World/environment/worldBody/__18",
+        "/World/environment/worldBody/__19",
+        "/World/environment/worldBody/__20",
+        "/World/environment/worldBody/__21",
+        "/World/environment/worldBody/__22",
+        "/World/environment/worldBody/__23",
+        "/World/environment/worldBody/__24",
+        "/World/environment/worldBody/__25",
+        "/World/environment/worldBody/__26",
+        "/World/environment/worldBody/__27",
+        "/World/environment/worldBody/__28",
+        "/World/environment/worldBody/__29",
+        "/World/environment/worldBody/__30",
+        "/World/environment/worldBody/__31",
+        "/World/environment/worldBody/__32"
+      ],
+      "contact_report_layer": "anon:0x6073f65e99c0:aloha1_home_sleep_contact_reports.usda",
+      "diagnostic_limit_layer": "anon:0x6073f5b2c770:aloha1_runtime_sleep_diagnostic_limits.usda",
+      "diagnostic_limit_readback": [
+        {
+          "authored_value_degrees": 92.98828539843961,
+          "authored_value_rad": 1.6229517459869385,
+          "bound": "upper",
+          "classification": "DIAGNOSTIC_ONLY_RUNTIME_ALIGNMENT",
+          "joint_name": "elbow",
+          "joint_path": "/World/follower_left/vx300s_left/joints/elbow",
+          "usd_readback_degrees": 92.98828887939453
+        },
+        {
+          "authored_value_degrees": -107.92969303805769,
+          "authored_value_rad": -1.8837285041809082,
+          "bound": "lower",
+          "classification": "DIAGNOSTIC_ONLY_RUNTIME_ALIGNMENT",
+          "joint_name": "wrist_angle",
+          "joint_path": "/World/follower_left/vx300s_left/joints/wrist_angle",
+          "usd_readback_degrees": -107.92969512939453
+        }
+      ],
+      "finger_layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/finger_limit_pair_collision_candidate/1.0/configuration/finger_source_limits.usda"
+    },
+    "solve_articulation_contact_last": true,
+    "stage_composition": {
+      "authored_references": [
+        {
+          "prim_path": "/World/follower_left",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(follower_left_asset/aloha1_signal_follower_left.usda, /follower_left, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/follower_left/vx300s_left",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(../../../../follower_vx300s/follower_left/follower_left.usd, /follower_left, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/follower_left/vx300s_left/follower_left_base_link/visuals",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /visuals/follower_left_base_link, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/follower_left/vx300s_left/follower_left_shoulder_link/visuals",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /visuals/follower_left_shoulder_link, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/follower_left/vx300s_left/follower_left_upper_arm_link/visuals",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /visuals/follower_left_upper_arm_link, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/follower_left/vx300s_left/follower_left_upper_forearm_link/visuals",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /visuals/follower_left_upper_forearm_link, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/follower_left/vx300s_left/follower_left_lower_forearm_link/visuals",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /visuals/follower_left_lower_forearm_link, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/follower_left/vx300s_left/follower_left_wrist_link/visuals",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /visuals/follower_left_wrist_link, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/follower_left/vx300s_left/follower_left_gripper_link/visuals",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /visuals/follower_left_gripper_link, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/follower_left/vx300s_left/follower_left_gripper_prop_link/visuals",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /visuals/follower_left_gripper_prop_link, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/follower_left/vx300s_left/follower_left_gripper_bar_link/visuals",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /visuals/follower_left_gripper_bar_link, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/follower_left/vx300s_left/follower_left_left_finger_link/visuals",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /visuals/follower_left_left_finger_link, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/follower_left/vx300s_left/follower_left_left_finger_link/visuals/diagnostic_supplier_cad_left_finger",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(../../../../cad_finger_task5_convex_hull/geometry/supplier_cad_finger_mesh.usda, /CadFingerGeometry/left_finger, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/follower_left/vx300s_left/follower_left_left_finger_link/collisions",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /colliders/follower_left_left_finger_link, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(../../../../cad_finger_task5_convex_hull/geometry/supplier_cad_finger_mesh.usda, /CadFingerGeometry/left_finger, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/follower_left/vx300s_left/follower_left_right_finger_link/visuals",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /visuals/follower_left_right_finger_link, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/follower_left/vx300s_left/follower_left_right_finger_link/visuals/diagnostic_supplier_cad_right_finger",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(../../../../cad_finger_task5_convex_hull/geometry/supplier_cad_finger_mesh.usda, /CadFingerGeometry/right_finger, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /colliders/follower_left_right_finger_link, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(../../../../cad_finger_task5_convex_hull/geometry/supplier_cad_finger_mesh.usda, /CadFingerGeometry/right_finger, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/follower_right",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(../../supplier_cad_follower_right/1.0/supplier_cad_follower_right.usda, /follower_right, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/follower_right/vx300s_right",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(../../../follower_vx300s/follower_right/follower_right.usd, /follower_right, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/follower_right/vx300s_right/follower_right_base_link/visuals",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /visuals/follower_right_base_link, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/follower_right/vx300s_right/follower_right_shoulder_link/visuals",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /visuals/follower_right_shoulder_link, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/follower_right/vx300s_right/follower_right_upper_arm_link/visuals",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /visuals/follower_right_upper_arm_link, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/follower_right/vx300s_right/follower_right_upper_forearm_link/visuals",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /visuals/follower_right_upper_forearm_link, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/follower_right/vx300s_right/follower_right_lower_forearm_link/visuals",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /visuals/follower_right_lower_forearm_link, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/follower_right/vx300s_right/follower_right_wrist_link/visuals",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /visuals/follower_right_wrist_link, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/follower_right/vx300s_right/follower_right_gripper_link/visuals",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /visuals/follower_right_gripper_link, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/follower_right/vx300s_right/follower_right_gripper_prop_link/visuals",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /visuals/follower_right_gripper_prop_link, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/follower_right/vx300s_right/follower_right_gripper_bar_link/visuals",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /visuals/follower_right_gripper_bar_link, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/follower_right/vx300s_right/follower_right_left_finger_link/visuals",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /visuals/follower_right_left_finger_link, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/follower_right/vx300s_right/follower_right_left_finger_link/visuals/diagnostic_supplier_cad_left_finger",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(../../../cad_finger_task5_convex_hull/geometry/supplier_cad_finger_mesh.usda, /CadFingerGeometry/left_finger, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/follower_right/vx300s_right/follower_right_left_finger_link/collisions",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /colliders/follower_right_left_finger_link, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/follower_right/vx300s_right/follower_right_left_finger_link/collisions/diagnostic_supplier_cad_left_finger",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(../../../cad_finger_task5_convex_hull/geometry/supplier_cad_finger_mesh.usda, /CadFingerGeometry/left_finger, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/follower_right/vx300s_right/follower_right_right_finger_link/visuals",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /visuals/follower_right_right_finger_link, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/follower_right/vx300s_right/follower_right_right_finger_link/visuals/diagnostic_supplier_cad_right_finger",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(../../../cad_finger_task5_convex_hull/geometry/supplier_cad_finger_mesh.usda, /CadFingerGeometry/right_finger, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/follower_right/vx300s_right/follower_right_right_finger_link/collisions",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /colliders/follower_right_right_finger_link, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/follower_right/vx300s_right/follower_right_right_finger_link/collisions/diagnostic_supplier_cad_right_finger",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(../../../cad_finger_task5_convex_hull/geometry/supplier_cad_finger_mesh.usda, /CadFingerGeometry/right_finger, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(workcell/aloha1_signal_correspondence_environment.usda, /environment, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/floor/visuals/floor/floor",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /meshes/floor, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/_/visuals/_/_",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /meshes/tabletop, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__1/visuals/__1/__1",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /meshes/tablelegs, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__2/visuals/__2/__2",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /meshes/extrusion_2040_880, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__2/collisions/__2",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /collisions/__2, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__3/visuals/__3/__3",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /meshes/extrusion_150, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__3/collisions/__3",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /collisions/__3, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__4/visuals/__4/__4",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /meshes/d405_solid, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__4/collisions/__4",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /collisions/__4, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__5/visuals/__5/__5",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /meshes/corner_bracket, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__5/collisions/__5",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /collisions/__5, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__6/visuals/__6/__6",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /meshes/extrusion_1220, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__6/collisions/__6",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /collisions/__6, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__7/visuals/__7/__7",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /meshes/extrusion_150, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__7/collisions/__7",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /collisions/__7, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__8/visuals/__8/__8",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /meshes/corner_bracket, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__8/collisions/__8",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /collisions/__8, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__9/visuals/__9/__9",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /meshes/d405_solid, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__9/collisions/__9",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /collisions/__9, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__10/visuals/__10/__10",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /meshes/corner_bracket, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__10/collisions/__10",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /collisions/__10, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__11/visuals/__11/__11",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /meshes/extrusion_2040_1000, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__11/collisions/__11",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /collisions/__11, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__12/visuals/__12/__12",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /meshes/corner_bracket, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__12/collisions/__12",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /collisions/__12, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__13/visuals/__13/__13",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /meshes/angled_extrusion, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__13/collisions/__13",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /collisions/__13, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__14/visuals/__14/__14",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /meshes/extrusion_150, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__14/collisions/__14",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /collisions/__14, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__15/visuals/__15/__15",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /meshes/extrusion_600, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__15/collisions/__15",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /collisions/__15, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__16/visuals/__16/__16",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /meshes/extrusion_150, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__16/collisions/__16",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /collisions/__16, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__17/visuals/__17/__17",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /meshes/overhead_mount, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__17/collisions/__17",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /collisions/__17, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__18/visuals/__18/__18",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /meshes/extrusion_1000, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__18/collisions/__18",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /collisions/__18, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__19/visuals/__19/__19",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /meshes/angled_extrusion, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__19/collisions/__19",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /collisions/__19, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__20/visuals/__20/__20",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /meshes/extrusion_150, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__20/collisions/__20",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /collisions/__20, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__21/visuals/__21/__21",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /meshes/corner_bracket, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__21/collisions/__21",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /collisions/__21, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__22/visuals/__22/__22",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /meshes/extrusion_1220, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__22/collisions/__22",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /collisions/__22, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__23/visuals/__23/__23",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /meshes/extrusion_1000, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__23/collisions/__23",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /collisions/__23, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__24/visuals/__24/__24",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /meshes/extrusion_1000, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__24/collisions/__24",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /collisions/__24, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__25/visuals/__25/__25",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /meshes/extrusion_150, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__25/collisions/__25",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /collisions/__25, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__26/visuals/__26/__26",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /meshes/corner_bracket, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__26/collisions/__26",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /collisions/__26, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__27/visuals/__27/__27",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /meshes/extrusion_1000, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__27/collisions/__27",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /collisions/__27, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__28/visuals/__28/__28",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /meshes/extrusion_600, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__28/collisions/__28",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /collisions/__28, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__29/visuals/__29/__29",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /meshes/angled_extrusion, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__29/collisions/__29",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /collisions/__29, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__30/visuals/__30/__30",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /meshes/angled_extrusion, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__30/collisions/__30",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /collisions/__30, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__31/visuals/__31/__31",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /meshes/extrusion_2040_1000, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__31/collisions/__31",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /collisions/__31, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__32/visuals/__32/__32",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /meshes/wormseye_mount, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/__32/collisions/__32",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /collisions/__32, SdfLayerOffset(0, 1), {})])"
+        },
+        {
+          "prim_path": "/World/environment/worldBody/sites/worldref",
+          "references": "SdfReferenceListOp(Prepended Items: [SdfReference(, /meshes/worldref, SdfLayerOffset(0, 1), {})])"
+        }
+      ],
+      "default_prim": "/World",
+      "meters_per_unit": 1.0,
+      "root_layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "root_sublayers": [
+        "aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_diagnostic.usda"
+      ],
+      "up_axis": "Z",
+      "used_file_layers": [
+        "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_diagnostic.usda",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_diagnostic.usda",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/geometry/cad_derived_colliders.usda",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/physics/cad_derived_colliders_gripper_decomposition_physics.usda",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/physics/physics_inspector_collision_gate_physics.usda",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_convex_hull/geometry/supplier_cad_finger_mesh.usda",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/aloha1_signal_correspondence_workcell.usda",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/configuration/aloha1_signal_home_targets.usda",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/follower_left_asset/aloha1_signal_follower_left.usda",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/follower_left_asset/configuration/aloha1_signal_follower_left_configuration.usda",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/follower_left_asset/geometry/aloha1_signal_follower_left_geometry.usda",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/follower_left_asset/physics/aloha1_signal_follower_left_physics.usda",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/workcell/aloha1_signal_correspondence_environment.usda",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/configuration/supplier_cad_follower_right_configuration.usda",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/geometry/supplier_cad_follower_right_geometry.usda",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/physics/supplier_cad_follower_right_physics.usda",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/supplier_cad_follower_right.usda",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/table_support_alignment/1.0/configuration/aloha1_tabletop_world_zero.usda",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/follower_left.usd",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_base.usd",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_physics.usd",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_robot.usd",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_sensor.usd",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/follower_left_imported.usd",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/follower_right.usd",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_base.usd",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_physics.usd",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_robot.usd",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_sensor.usd",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/follower_right_imported.usd",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/configuration/aloha2_menagerie_scene_base.usd",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/configuration/aloha2_menagerie_scene_physics.usd",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/configuration/aloha2_menagerie_scene_robot.usd",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/configuration/aloha2_menagerie_scene_sensor.usd"
+      ]
+    },
+    "status": "PASS",
+    "terminal_arm_rad": [
+      0.0,
+      -1.8453789949417114,
+      1.6229517459869385,
+      -0.006135923322290182,
+      -1.8837285041809082,
+      -0.006135923322290182
+    ],
+    "terminal_pose_label": "runtime_measured_sleep"
+  },
+  "real_execution_authorized": false,
+  "repeat_index": 1,
+  "run_id": "runtime_sleep_run_01",
+  "runtime": {
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physx": "107.3.26"
+  },
+  "runtime_pid": 298512,
+  "scheduler": {
+    "burst_catchup_used": false,
+    "completed_physics_frames": 2220,
+    "expected_physics_frames": 2220,
+    "first_applied_monotonic_ns": null,
+    "maximum_lateness_ns": null,
+    "mode": "UNPACED_DETERMINISTIC_PHYSICS",
+    "physics_rate_hz": 60,
+    "requested_start_monotonic_ns": null,
+    "start_skew_ns": null,
+    "status": "NOT_REQUESTED"
+  },
+  "schema_version": 1,
+  "source_or_final_asset_modified": false,
+  "stage": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+    "sha256_after": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9",
+    "sha256_before": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9"
+  },
+  "status": "PASS",
+  "summary": {
+    "contact": {
+      "event_point_count": 0,
+      "first_impulse_contacts": [],
+      "impulse_carrying_point_count": 0,
+      "maximum_impulse_n_s": 0.0,
+      "minimum_separation_m": null
+    },
+    "direction_results": [
+      {
+        "active_joint_count": 5,
+        "command_delta_rad": [
+          0.0,
+          -0.8853790163993835,
+          0.46295177936553955,
+          -0.006135923322290182,
+          -1.5837284922599792,
+          -0.006135923322290182
+        ],
+        "readback_delta_rad": [
+          -1.667717600639662e-05,
+          -0.8884896039962769,
+          0.46172022819519043,
+          -0.007519484148360789,
+          -1.5880979895591736,
+          -0.0059702210448904225
+        ],
+        "segment": "cycle_01_home_to_sleep",
+        "status": "PASS"
+      },
+      {
+        "active_joint_count": 5,
+        "command_delta_rad": [
+          0.0,
+          0.8853790163993835,
+          -0.46295177936553955,
+          0.006135923322290182,
+          1.5837284922599792,
+          0.006135923322290182
+        ],
+        "readback_delta_rad": [
+          1.576686815951689e-05,
+          0.8863070011138916,
+          -0.46183574199676514,
+          0.007240253675263375,
+          1.590745747089386,
+          0.006004993570968509
+        ],
+        "segment": "cycle_01_sleep_to_home",
+        "status": "PASS"
+      },
+      {
+        "active_joint_count": 5,
+        "command_delta_rad": [
+          0.0,
+          -0.8853790163993835,
+          0.46295177936553955,
+          -0.006135923322290182,
+          -1.5837284922599792,
+          -0.006135923322290182
+        ],
+        "readback_delta_rad": [
+          -1.667728042775707e-05,
+          -0.8884896039962769,
+          0.46172034740448,
+          -0.007519628503359854,
+          -1.588096708059311,
+          -0.005970024694079257
+        ],
+        "segment": "cycle_02_home_to_sleep",
+        "status": "PASS"
+      },
+      {
+        "active_joint_count": 5,
+        "command_delta_rad": [
+          0.0,
+          0.8853790163993835,
+          -0.46295177936553955,
+          0.006135923322290182,
+          1.5837284922599792,
+          0.006135923322290182
+        ],
+        "readback_delta_rad": [
+          1.576540961423234e-05,
+          0.8863065838813782,
+          -0.46183574199676514,
+          0.007240274688228965,
+          1.5907465815544128,
+          0.006004864088026807
+        ],
+        "segment": "cycle_02_sleep_to_home",
+        "status": "PASS"
+      },
+      {
+        "active_joint_count": 5,
+        "command_delta_rad": [
+          0.0,
+          -0.8853790163993835,
+          0.46295177936553955,
+          -0.006135923322290182,
+          -1.5837284922599792,
+          -0.006135923322290182
+        ],
+        "readback_delta_rad": [
+          -1.667722588649667e-05,
+          -0.8884896039962769,
+          0.46172046661376953,
+          -0.007519516977481544,
+          -1.5880961120128632,
+          -0.0059701410450543335
+        ],
+        "segment": "cycle_03_home_to_sleep",
+        "status": "PASS"
+      },
+      {
+        "active_joint_count": 5,
+        "command_delta_rad": [
+          0.0,
+          0.8853790163993835,
+          -0.46295177936553955,
+          0.006135923322290182,
+          1.5837284922599792,
+          0.006135923322290182
+        ],
+        "readback_delta_rad": [
+          1.5765224759434204e-05,
+          0.8863070011138916,
+          -0.4618358612060547,
+          0.007240334816742688,
+          1.5907458066940308,
+          0.006004864830174483
+        ],
+        "segment": "cycle_03_sleep_to_home",
+        "status": "PASS"
+      }
+    ],
+    "endpoint_results": [
+      {
+        "maximum_abs_error_rad": 0.004368782043457031,
+        "segment": "cycle_01_home_hold",
+        "status": "PASS"
+      },
+      {
+        "maximum_abs_error_rad": 0.0002619256265461445,
+        "segment": "cycle_01_sleep_hold",
+        "status": "PASS"
+      },
+      {
+        "maximum_abs_error_rad": 0.004369139671325684,
+        "segment": "cycle_02_home_hold",
+        "status": "PASS"
+      },
+      {
+        "maximum_abs_error_rad": 0.00026188092306256294,
+        "segment": "cycle_02_sleep_hold",
+        "status": "PASS"
+      },
+      {
+        "maximum_abs_error_rad": 0.004369258880615234,
+        "segment": "cycle_03_home_hold",
+        "status": "PASS"
+      },
+      {
+        "maximum_abs_error_rad": 0.00026187533512711525,
+        "segment": "cycle_03_sleep_hold",
+        "status": "PASS"
+      },
+      {
+        "maximum_abs_error_rad": 0.0002616490237414837,
+        "segment": "initial_sleep_hold",
+        "status": "PASS"
+      }
+    ],
+    "final_terminal_max_error_rad": 0.00026187533512711525,
+    "gates": {
+      "directions": true,
+      "endpoints": true,
+      "final_terminal": true,
+      "finite_readback": true,
+      "follower_right_stationary": true,
+      "grippers_stationary": true,
+      "legal_limits": true,
+      "no_impulse_carrying_contact": true,
+      "three_cycles_complete": true
+    },
+    "left_gripper_max_drift_rad_or_m": 0.0048675893631298095,
+    "normalized_numeric_signature": "6a4273b930f1fe2ad6d1cada8d9b88c0b1dc59a0ea7ce08acf934152f52ab31d",
+    "position_gate_provenance": {
+      "exact_motor_resolution_pulse_per_rev": 4096,
+      "existing_task7a_gate_rad": 0.02,
+      "one_pulse_rad": 0.0015339807878856412,
+      "selection": "MAX_EXISTING_PREDECLARED_TASK7A_GATE_AND_ONE_PULSE"
+    },
+    "position_gate_rad": 0.02,
+    "right_max_drift_rad_or_m": 0.008883059024810791,
+    "status": "PASS",
+    "terminal_pose_label": "runtime_measured_sleep"
+  },
+  "task8": "COMPLETE_WITH_NO_PROMOTION",
+  "telemetry": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-runtime-sleep-alignment/run_01_telemetry.csv",
+    "row_count": 2220,
+    "sha256": "8b84d6c66f77b95d62a94fd22181052336b8317b79eca276de7dbd2df004ef61"
+  },
+  "wall_time_s": 9.253557356016245
+}
