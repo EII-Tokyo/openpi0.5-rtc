@@ -27,6 +27,14 @@ class FakeStateSource:
         return self.state
 
 
+class ScriptedStateSource:
+    def __init__(self, states: list[JointStateRecord]) -> None:
+        self.states = iter(states)
+
+    def latest(self) -> JointStateRecord:
+        return next(self.states)
+
+
 class FakeStopController:
     def __init__(self) -> None:
         self.hold_reasons: list[str] = []
@@ -76,6 +84,12 @@ def _sample(index: int) -> dict[str, object]:
         "segment": "cycle_01_home_to_sleep",
         "q_rad": [0.0, -0.96, 1.16, 0.0, -0.3, 0.0],
     }
+
+
+def _sample_with_waist(index: int, waist: float) -> dict[str, object]:
+    sample = _sample(index)
+    sample["q_rad"] = [waist, -0.96, 1.16, 0.0, -0.3, 0.0]
+    return sample
 
 
 def test_real_worker_rejects_reordered_joint_state() -> None:
@@ -133,6 +147,38 @@ def test_real_worker_stops_without_burst_after_deadline_miss() -> None:
 
     assert report["status"] == "ABORTED_DEADLINE_MISS"
     assert [index for index, _ in sink.published] == [0, 1]
+
+
+def test_direction_check_compares_completed_command_interval() -> None:
+    sink = FakeCommandSink()
+    stop = FakeStopController()
+    clock = ScriptedClock(now_ns=1_000_000_000, late_by_index={})
+    worker = RealWorkerCore(maximum_readback_age_ns=1_000_000_000)
+    states = ScriptedStateSource(
+        [
+            _state(positions=(0.0, -0.96, 1.16, 0.0, -0.3, 0.0)),
+            _state(positions=(0.1, -0.96, 1.16, 0.0, -0.3, 0.0)),
+            _state(positions=(0.2, -0.96, 1.16, 0.0, -0.3, 0.0)),
+        ]
+    )
+
+    report = worker.run_samples(
+        [
+            _sample_with_waist(0, 0.0),
+            _sample_with_waist(1, 1.0),
+            _sample_with_waist(2, -1.0),
+        ],
+        start_monotonic_ns=1_000_000_000,
+        sample_period_ns=20_000_000,
+        clock=clock,
+        state_source=states,
+        command_sink=sink,
+        stop_controller=stop,
+    )
+
+    assert report["status"] == "PASS"
+    assert [index for index, _ in sink.published] == [0, 1, 2]
+    assert stop.hold_reasons == []
 
 
 def test_opposite_readback_direction_is_rejected() -> None:

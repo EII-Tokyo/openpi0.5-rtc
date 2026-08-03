@@ -138,7 +138,8 @@ class RealWorkerCore:
         stop_controller: StopController,
     ) -> dict[str, Any]:
         records: list[dict[str, object]] = []
-        previous_target: tuple[float, ...] | None = None
+        target_before_last: tuple[float, ...] | None = None
+        last_published_target: tuple[float, ...] | None = None
         previous_readback: tuple[float, ...] | None = None
         status = "PASS"
         for sample in samples:
@@ -171,11 +172,12 @@ class RealWorkerCore:
                 stop_controller.hold(status)
                 break
             if (
-                previous_target is not None
+                target_before_last is not None
+                and last_published_target is not None
                 and previous_readback is not None
                 and not direction_matches(
-                    previous_target=previous_target,
-                    target=target,
+                    previous_target=target_before_last,
+                    target=last_published_target,
                     previous_readback=previous_readback,
                     readback=state.positions,
                     minimum_motion_rad=0.001,
@@ -200,7 +202,8 @@ class RealWorkerCore:
                     "lateness_ns": lateness,
                 }
             )
-            previous_target = target
+            target_before_last = last_published_target
+            last_published_target = target
             previous_readback = state.positions
         return {
             "schema_version": 1,
