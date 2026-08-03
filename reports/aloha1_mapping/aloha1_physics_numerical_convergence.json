@@ -1,0 +1,1233 @@
+{
+  "boundaries": {
+    "extra_solver_cells_from_superseded_driver": {
+      "absolute_paths": [
+        "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/runtime_cells/final_repeat_f0960_p004_v008",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/runtime_cells/position_f0960_p004_v008",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/runtime_cells/position_f0960_p008_v008",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/runtime_cells/position_f0960_p016_v008",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/runtime_cells/position_f0960_p032_v008",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/runtime_cells/velocity_f0960_p004_v001",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/runtime_cells/velocity_f0960_p004_v002",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/runtime_cells/velocity_f0960_p004_v004"
+      ],
+      "status": "EXCLUDED_FROM_DECISION_IF_PRESENT"
+    },
+    "failure_video_capture_status": "NOT_REQUIRED",
+    "failure_video_required": false,
+    "final_or_default_asset_modified": false,
+    "frozen_stage_modified": false,
+    "grasp_pass_used_to_set_tolerance": false,
+    "physical_parameters_modified": false,
+    "real_robot": false,
+    "remote_103": false,
+    "task8_candidate_promoted": false
+  },
+  "classification": "DIAGNOSTIC_NUMERICAL_CONVERGENCE_ONLY",
+  "config": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/configs/aloha1_physics_numerical_convergence.yaml",
+    "sha256": "3fc99c50c47d19ae2619b362754933c6a5140aa1b54069dcbd95659b05236523"
+  },
+  "deterministic_signature": "4116adffecd06ba7b62707c1419218b60d76f6c68a45034e1ae2a478c4ff6293",
+  "free_motion": [
+    {
+      "analytic_position_error_norm_m": 2.4832302313874325e-07,
+      "com_velocity_max_error_m_s": 5.003807504524834e-07,
+      "dt_s": {
+        "maximum": 0.01666666753590107,
+        "mean": 0.01666666753590107,
+        "minimum": 0.01666666753590107
+      },
+      "frequency_hz": 60,
+      "process": {
+        "command": [
+          "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/bin/python",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/tools/diagnose_aloha1_bottle_com_velocity.py",
+          "--variant",
+          "V1",
+          "--output",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/free_motion/v1_f0060/report.json",
+          "--samples-output",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/free_motion/v1_f0060/samples.jsonl",
+          "--steps",
+          "121",
+          "--physics-frequency-hz",
+          "60"
+        ],
+        "log_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/free_motion/v1_f0060/process.log",
+        "log_sha256": "206dfc8061245127995d4ab4c85e7fac4e7bc94a417bb58d6611585777c28595",
+        "resume_status": "REUSED_COMPLETE_CELL"
+      },
+      "report_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/free_motion/v1_f0060/report.json",
+      "report_sha256": "4753b826dd1286bd1209ebe0d1db7131ba41cd5fcff46068f10c7c171588b652",
+      "sample_count": 121,
+      "samples_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/free_motion/v1_f0060/samples.jsonl",
+      "samples_sha256": "6ca220b09dcbb7469484f71cc7dacd7ad9617c1711c1163f5ea20d0ee685f477",
+      "signed_velocity_integral_vector_m": [
+        0.24000000715255787,
+        -0.1600000047683714,
+        0.10000000670552231
+      ],
+      "status": "PASS"
+    },
+    {
+      "analytic_position_error_norm_m": 6.188212995252066e-07,
+      "com_velocity_max_error_m_s": 8.764891722298472e-07,
+      "dt_s": {
+        "maximum": 0.008333333767950535,
+        "mean": 0.008333333767950535,
+        "minimum": 0.008333333767950535
+      },
+      "frequency_hz": 120,
+      "process": {
+        "command": [
+          "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/bin/python",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/tools/diagnose_aloha1_bottle_com_velocity.py",
+          "--variant",
+          "V1",
+          "--output",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/free_motion/v1_f0120/report.json",
+          "--samples-output",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/free_motion/v1_f0120/samples.jsonl",
+          "--steps",
+          "241",
+          "--physics-frequency-hz",
+          "120"
+        ],
+        "log_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/free_motion/v1_f0120/process.log",
+        "log_sha256": "c627515cf77adce7422986df87d72c7e4881194763411b16cfc848e49e4f13a8",
+        "resume_status": "REUSED_COMPLETE_CELL"
+      },
+      "report_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/free_motion/v1_f0120/report.json",
+      "report_sha256": "8ccc2e71a39c124f4ae30436f1e0fa64f01a072d0a5a284be02305e584283240",
+      "sample_count": 241,
+      "samples_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/free_motion/v1_f0120/samples.jsonl",
+      "samples_sha256": "a6aa16fe49d483f72897175f99afaf41697527820196b4c5055c41a74d69bb32",
+      "signed_velocity_integral_vector_m": [
+        0.24000000715255831,
+        -0.16000000476837067,
+        0.10000000670552205
+      ],
+      "status": "PASS"
+    },
+    {
+      "analytic_position_error_norm_m": 1.324208686036374e-06,
+      "com_velocity_max_error_m_s": 2.05620979575063e-06,
+      "dt_s": {
+        "maximum": 0.004166666883975267,
+        "mean": 0.004166666883975267,
+        "minimum": 0.004166666883975267
+      },
+      "frequency_hz": 240,
+      "process": {
+        "command": [
+          "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/bin/python",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/tools/diagnose_aloha1_bottle_com_velocity.py",
+          "--variant",
+          "V1",
+          "--output",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/free_motion/v1_f0240/report.json",
+          "--samples-output",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/free_motion/v1_f0240/samples.jsonl",
+          "--steps",
+          "481",
+          "--physics-frequency-hz",
+          "240"
+        ],
+        "log_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/free_motion/v1_f0240/process.log",
+        "log_sha256": "6d6e76dcfe40120cd1618605f01aa1b3da17e8d78b898945bfde59664841bfb1",
+        "resume_status": "REUSED_COMPLETE_CELL"
+      },
+      "report_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/free_motion/v1_f0240/report.json",
+      "report_sha256": "e63ce54cb8de8b2f63ff604e4b8cf7ae3d35d8e90c0f6fbeef76446aae4eb2dd",
+      "sample_count": 481,
+      "samples_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/free_motion/v1_f0240/samples.jsonl",
+      "samples_sha256": "a88845a6fb4e05d189c7594190a0cf8d306007fc4597ce977b6ad5bda35234cc",
+      "signed_velocity_integral_vector_m": [
+        0.24000000715255854,
+        -0.16000000476836937,
+        0.10000000670552317
+      ],
+      "status": "PASS"
+    },
+    {
+      "analytic_position_error_norm_m": 5.154309036908403e-06,
+      "com_velocity_max_error_m_s": 4.285621802375705e-06,
+      "dt_s": {
+        "maximum": 0.0020833334419876337,
+        "mean": 0.0020833334419876337,
+        "minimum": 0.0020833334419876337
+      },
+      "frequency_hz": 480,
+      "process": {
+        "command": [
+          "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/bin/python",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/tools/diagnose_aloha1_bottle_com_velocity.py",
+          "--variant",
+          "V1",
+          "--output",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/free_motion/v1_f0480/report.json",
+          "--samples-output",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/free_motion/v1_f0480/samples.jsonl",
+          "--steps",
+          "961",
+          "--physics-frequency-hz",
+          "480"
+        ],
+        "log_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/free_motion/v1_f0480/process.log",
+        "log_sha256": "b25d73b6d206c9bc84c696931ea44de00b1201a9ff1b2a51c4e1d3c071852246",
+        "resume_status": "REUSED_COMPLETE_CELL"
+      },
+      "report_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/free_motion/v1_f0480/report.json",
+      "report_sha256": "bf59e8fb8e7b6604eedd2df3b458eaa5b2f52539dcb5b7fc7339bd3370e8adbb",
+      "sample_count": 961,
+      "samples_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/free_motion/v1_f0480/samples.jsonl",
+      "samples_sha256": "0514043b7cb65e2480a926d5034a70705acb77ff8dfa1935d82e57dd912181ad",
+      "signed_velocity_integral_vector_m": [
+        0.24000000715255226,
+        -0.16000000476837165,
+        0.10000000670552164
+      ],
+      "status": "PASS"
+    },
+    {
+      "analytic_position_error_norm_m": 4.8097655345460235e-06,
+      "com_velocity_max_error_m_s": 8.843695160745804e-06,
+      "dt_s": {
+        "maximum": 0.0010416667209938169,
+        "mean": 0.0010416667209938169,
+        "minimum": 0.0010416667209938169
+      },
+      "frequency_hz": 960,
+      "process": {
+        "command": [
+          "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/bin/python",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/tools/diagnose_aloha1_bottle_com_velocity.py",
+          "--variant",
+          "V1",
+          "--output",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/free_motion/v1_f0960/report.json",
+          "--samples-output",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/free_motion/v1_f0960/samples.jsonl",
+          "--steps",
+          "1921",
+          "--physics-frequency-hz",
+          "960"
+        ],
+        "log_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/free_motion/v1_f0960/process.log",
+        "log_sha256": "03d7e9a03bcfab28a032d041462f6ae34addee9604f21a0836dd58d3f02eb8c9",
+        "resume_status": "REUSED_COMPLETE_CELL"
+      },
+      "report_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/free_motion/v1_f0960/report.json",
+      "report_sha256": "8a1f013c0e033f90faa821a5b2a49202b6af4b197d7f937424422012f0761e93",
+      "sample_count": 1921,
+      "samples_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/free_motion/v1_f0960/samples.jsonl",
+      "samples_sha256": "c50e582e0b2016e1b139acecd7d9b0eb410d459aa2fa76c2e06abbcbb1ee025c",
+      "signed_velocity_integral_vector_m": [
+        0.24000000715254885,
+        -0.1600000047683765,
+        0.10000000670552504
+      ],
+      "status": "PASS"
+    }
+  ],
+  "free_motion_floor": {
+    "maximum_analytic_position_error_m": 5.154309036908403e-06,
+    "maximum_com_velocity_error_m_s": 8.843695160745804e-06
+  },
+  "frequency_sweep": {
+    "cells": [
+      {
+        "deterministic_signature": "40d7ec9cd8bd31fe8660a63876cce0a9b736ed1f7b0e0aab364012eed0862a3a",
+        "effective": {
+          "frequency_hz": 60,
+          "position_iterations": 64,
+          "velocity_iterations": 8
+        },
+        "failure_evidence": null,
+        "family": "frequency",
+        "machine_reason": "stable_20cm_hold",
+        "machine_status": "PASS",
+        "metrics": {
+          "bottle_final": {
+            "orientation_wxyz": [
+              -0.43733846526816195,
+              0.6283624847824149,
+              -0.31892207623768193,
+              -0.5587346094553337
+            ],
+            "pose_finite_difference_velocity": {
+              "angular_speed_rad_s": 3.7975414645479744e-05,
+              "angular_velocity_world_rad_s": [
+                -3.5456346805241054e-05,
+                -1.3513390862973878e-05,
+                -1.5387839702452314e-06
+              ],
+              "linear_velocity_world_m_s": [
+                1.6987323760986328e-05,
+                9.387731552124023e-06,
+                1.7881393432617188e-06
+              ],
+              "state_source": "POSE_FINITE_DIFFERENCE",
+              "vertical_velocity_m_s": 1.7881393432617188e-06
+            },
+            "position_world_m": [
+              0.04174884781241417,
+              -0.018977515399456024,
+              0.23188641667366028
+            ]
+          },
+          "contact": {
+            "left_scalar_impulse_ns": 2.6285528933094353,
+            "left_signed_normal_impulse_ns": 2.6285529516398314,
+            "maximum_penetration_m": 3.830803689197637e-05,
+            "minimum_separation_m": -3.830803689197637e-05,
+            "right_scalar_impulse_ns": 2.615123843111778,
+            "right_signed_normal_impulse_ns": 2.6151238989505985
+          },
+          "drive": {
+            "absolute_work_j": 12.699175017062139,
+            "maximum_joint_target_error": 0.004600235497289051,
+            "signed_work_j": 7.131027845670676
+          },
+          "first_bilateral_solver_contact_time_s": 5.45000028423965,
+          "hold_drop_m": 0.000172912424231092,
+          "numerical_readback": {
+            "effective_physics_dt_s": 0.016666666666666666,
+            "effective_position_iterations": 64,
+            "effective_velocity_iterations": 8,
+            "readback_status": "PASS",
+            "requested_frequency_hz": 60.0,
+            "requested_physics_dt_s": 0.016666666666666666,
+            "requested_position_iterations": 64,
+            "requested_velocity_iterations": 8
+          },
+          "phase_first_time_s": {
+            "BILATERAL_CONTACT": 5.250000273808837,
+            "CLOSE_PRELOAD": 5.466666951775551,
+            "HEIGHT_REACHED": 7.933333747088909,
+            "HOLD": 7.95000041462481,
+            "OPEN_PREGRASP": 1.2666667327284813,
+            "RELEASE_DYNAMIC": 1.0333333872258663,
+            "SETTLE": 1.0500000547617674,
+            "SETUP_KINEMATIC": 0.03333333507180214,
+            "VALIDATE": 0.01666666753590107,
+            "VERTICAL_DESCENT": 4.716666912660003,
+            "VERTICAL_LIFT": 5.550000289455056
+          },
+          "physical_model_signature": "9b32b9f5057c2638e80ab6425d66cecc5cdba1613cc75fdcdf1f2eff003b1fa3",
+          "reason": "stable_20cm_hold",
+          "sample_count": 596,
+          "solver_residuals": {
+            "position_max": 0.0,
+            "position_rms": 0.0,
+            "velocity_max": 0.0,
+            "velocity_rms": 0.0
+          },
+          "status": "PASS"
+        },
+        "name": "frequency_f0060_p064_v008",
+        "process": {
+          "command": [
+            "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/bin/python",
+            "/home/eii/project/openpi0.5-rtc-reward-learning/tools/run_aloha1_grasp_20cm_gui.py",
+            "--config",
+            "/home/eii/project/openpi0.5-rtc-reward-learning/configs/aloha1_grasp_20cm_gui_finger_source_limit_candidate.yaml",
+            "--artifact-root",
+            "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/runtime_cells/frequency_f0060_p064_v008",
+            "--autorun",
+            "--close-after-terminal",
+            "--bottle-world-from-object-json",
+            "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/frozen_world_from_object.json",
+            "--initial-arm-q-rad",
+            "-0.7152093294228168",
+            "-0.304541715978692",
+            "0.028855309532025343",
+            "-0.016145176621151457",
+            "1.7227135126825848",
+            "0.4219415062336835",
+            "--initial-pose-hold-frames",
+            "60",
+            "--arm-phase-readback-tolerance-rad",
+            "0.02",
+            "--arm-trajectory-mode",
+            "LULA_CSPACE_ACCELERATION_LIMITED",
+            "--arm-acceleration-limits-rad-s2",
+            "5.0",
+            "5.0",
+            "5.0",
+            "5.0",
+            "5.0",
+            "5.0",
+            "--physics-frequency-hz",
+            "60",
+            "--solver-position-iterations",
+            "64",
+            "--solver-velocity-iterations",
+            "8",
+            "--enable-solver-residual-reporting",
+            "--skip-collider-evidence",
+            "--skip-video-capture"
+          ],
+          "log_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/logs/frequency_f0060_p064_v008.log",
+          "log_sha256": "a9c0334337cc0dd387c1a10cd83b58846ba2fa834f8827165533f9adab8f85c5",
+          "resume_status": "REUSED_COMPLETE_CELL"
+        },
+        "report_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/runtime_cells/frequency_f0060_p064_v008/aloha1_grasp_20cm_runtime.json",
+        "report_sha256": "f8f92bb8b2634e7026ea6769078308663695e416b546c34dc5ce0579f1ab550c",
+        "requested": {
+          "frequency_hz": 60,
+          "position_iterations": 64,
+          "velocity_iterations": 8
+        },
+        "telemetry_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/runtime_cells/frequency_f0060_p064_v008/aloha1_grasp_20cm_telemetry.jsonl",
+        "telemetry_sha256": "b5349af75d60c0c677fd23f1d8bbb650548417b8187a8a9ef5f27780b6c9dc40"
+      },
+      {
+        "deterministic_signature": "114f1a3bd837afab15877b5c5d5878063c370ab82a83985907c993b1f80e2203",
+        "effective": {
+          "frequency_hz": 120,
+          "position_iterations": 64,
+          "velocity_iterations": 8
+        },
+        "failure_evidence": null,
+        "family": "frequency",
+        "machine_reason": "stable_20cm_hold",
+        "machine_status": "PASS",
+        "metrics": {
+          "bottle_final": {
+            "orientation_wxyz": [
+              -0.4385891979116108,
+              0.6291481603404793,
+              -0.31733329827692397,
+              -0.5577738660246906
+            ],
+            "pose_finite_difference_velocity": {
+              "angular_speed_rad_s": 0.0003972703437259603,
+              "angular_velocity_world_rad_s": [
+                4.247175441342839e-05,
+                -0.0003927892931312032,
+                4.167070053020208e-05
+              ],
+              "linear_velocity_world_m_s": [
+                4.738569259643555e-05,
+                2.5033950805664062e-05,
+                0.00013589859008789062
+              ],
+              "state_source": "POSE_FINITE_DIFFERENCE",
+              "vertical_velocity_m_s": 0.00013589859008789062
+            },
+            "position_world_m": [
+              0.041665349155664444,
+              -0.018978167325258255,
+              0.23166042566299438
+            ]
+          },
+          "contact": {
+            "left_scalar_impulse_ns": 2.5850399137812885,
+            "left_signed_normal_impulse_ns": 2.585039952797126,
+            "maximum_penetration_m": 1.2683005479630083e-05,
+            "minimum_separation_m": -1.2683005479630083e-05,
+            "right_scalar_impulse_ns": 2.5796671373170565,
+            "right_signed_normal_impulse_ns": 2.579667183519561
+          },
+          "drive": {
+            "absolute_work_j": 10.220535070437696,
+            "maximum_joint_target_error": 0.004620705744477593,
+            "signed_work_j": 3.336185269334338
+          },
+          "first_bilateral_solver_contact_time_s": 6.050000315532088,
+          "hold_drop_m": 0.0001687166634301296,
+          "numerical_readback": {
+            "effective_physics_dt_s": 0.008333333333333333,
+            "effective_position_iterations": 64,
+            "effective_velocity_iterations": 8,
+            "readback_status": "PASS",
+            "requested_frequency_hz": 120.0,
+            "requested_physics_dt_s": 0.008333333333333333,
+            "requested_position_iterations": 64,
+            "requested_velocity_iterations": 8
+          },
+          "phase_first_time_s": {
+            "BILATERAL_CONTACT": 5.850000305101275,
+            "CLOSE_PRELOAD": 6.058333649300039,
+            "HEIGHT_REACHED": 8.608333782292902,
+            "HOLD": 8.616667116060853,
+            "OPEN_PREGRASP": 1.4000000730156898,
+            "RELEASE_DYNAMIC": 1.0166667196899652,
+            "SETTLE": 1.0250000534579158,
+            "SETUP_KINEMATIC": 0.01666666753590107,
+            "VALIDATE": 0.008333333767950535,
+            "VERTICAL_DESCENT": 5.29166694264859,
+            "VERTICAL_LIFT": 6.158333654515445
+          },
+          "physical_model_signature": "9b32b9f5057c2638e80ab6425d66cecc5cdba1613cc75fdcdf1f2eff003b1fa3",
+          "reason": "stable_20cm_hold",
+          "sample_count": 1273,
+          "solver_residuals": {
+            "position_max": 0.0,
+            "position_rms": 0.0,
+            "velocity_max": 0.0,
+            "velocity_rms": 0.0
+          },
+          "status": "PASS"
+        },
+        "name": "frequency_f0120_p064_v008",
+        "process": {
+          "command": [
+            "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/bin/python",
+            "/home/eii/project/openpi0.5-rtc-reward-learning/tools/run_aloha1_grasp_20cm_gui.py",
+            "--config",
+            "/home/eii/project/openpi0.5-rtc-reward-learning/configs/aloha1_grasp_20cm_gui_finger_source_limit_candidate.yaml",
+            "--artifact-root",
+            "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/runtime_cells/frequency_f0120_p064_v008",
+            "--autorun",
+            "--close-after-terminal",
+            "--bottle-world-from-object-json",
+            "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/frozen_world_from_object.json",
+            "--initial-arm-q-rad",
+            "-0.7152093294228168",
+            "-0.304541715978692",
+            "0.028855309532025343",
+            "-0.016145176621151457",
+            "1.7227135126825848",
+            "0.4219415062336835",
+            "--initial-pose-hold-frames",
+            "120",
+            "--arm-phase-readback-tolerance-rad",
+            "0.02",
+            "--arm-trajectory-mode",
+            "LULA_CSPACE_ACCELERATION_LIMITED",
+            "--arm-acceleration-limits-rad-s2",
+            "5.0",
+            "5.0",
+            "5.0",
+            "5.0",
+            "5.0",
+            "5.0",
+            "--physics-frequency-hz",
+            "120",
+            "--solver-position-iterations",
+            "64",
+            "--solver-velocity-iterations",
+            "8",
+            "--enable-solver-residual-reporting",
+            "--skip-collider-evidence",
+            "--skip-video-capture"
+          ],
+          "log_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/logs/frequency_f0120_p064_v008.log",
+          "log_sha256": "a5b0eb62dc7a99a5eccd7c6830b7756759f6c16095d72e81504cf7921d55e362",
+          "resume_status": "REUSED_COMPLETE_CELL"
+        },
+        "report_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/runtime_cells/frequency_f0120_p064_v008/aloha1_grasp_20cm_runtime.json",
+        "report_sha256": "3f6eda931d7d6ef2013144cbd8a59572b3511995c6a3f5f45b8b49bc19cb5043",
+        "requested": {
+          "frequency_hz": 120,
+          "position_iterations": 64,
+          "velocity_iterations": 8
+        },
+        "telemetry_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/runtime_cells/frequency_f0120_p064_v008/aloha1_grasp_20cm_telemetry.jsonl",
+        "telemetry_sha256": "4f70e0eebd32629e393a45f328cdac1f4bec910de1dcc187e546bd81b6a42c96"
+      },
+      {
+        "deterministic_signature": "732e21e88453e4e2e225d2f7420d518920e2e7d7180d4b9ca4ff908459ffd4ab",
+        "effective": {
+          "frequency_hz": 240,
+          "position_iterations": 64,
+          "velocity_iterations": 8
+        },
+        "failure_evidence": null,
+        "family": "frequency",
+        "machine_reason": "stable_20cm_hold",
+        "machine_status": "PASS",
+        "metrics": {
+          "bottle_final": {
+            "orientation_wxyz": [
+              -0.4376885201242518,
+              0.6289495095116701,
+              -0.3178944221650252,
+              -0.5583855390255346
+            ],
+            "pose_finite_difference_velocity": {
+              "angular_speed_rad_s": 0.0002361005771264609,
+              "angular_velocity_world_rad_s": [
+                -6.908315359766272e-05,
+                4.2886909583652114e-05,
+                -0.00022165674678388046
+              ],
+              "linear_velocity_world_m_s": [
+                8.940696716308594e-07,
+                -7.152557373046875e-06,
+                -7.152557373046875e-06
+              ],
+              "state_source": "POSE_FINITE_DIFFERENCE",
+              "vertical_velocity_m_s": -7.152557373046875e-06
+            },
+            "position_world_m": [
+              0.0417618602514267,
+              -0.018941152840852737,
+              0.23152774572372437
+            ]
+          },
+          "contact": {
+            "left_scalar_impulse_ns": 2.4436508942942035,
+            "left_signed_normal_impulse_ns": 2.443650881268843,
+            "maximum_penetration_m": 0.00038357824087142944,
+            "minimum_separation_m": -0.00038357824087142944,
+            "right_scalar_impulse_ns": 2.4331236910511973,
+            "right_signed_normal_impulse_ns": 2.433123721160916
+          },
+          "drive": {
+            "absolute_work_j": 8.84359293922728,
+            "maximum_joint_target_error": 0.004310173923140481,
+            "signed_work_j": 0.9899604572029093
+          },
+          "first_bilateral_solver_contact_time_s": 5.945833643432707,
+          "hold_drop_m": 0.0001593997282489379,
+          "numerical_readback": {
+            "effective_physics_dt_s": 0.004166666666666667,
+            "effective_position_iterations": 64,
+            "effective_velocity_iterations": 8,
+            "readback_status": "PASS",
+            "requested_frequency_hz": 240.0,
+            "requested_physics_dt_s": 0.004166666666666667,
+            "requested_position_iterations": 64,
+            "requested_velocity_iterations": 8
+          },
+          "phase_first_time_s": {
+            "BILATERAL_CONTACT": 5.7416669661179185,
+            "CLOSE_PRELOAD": 5.950000310316682,
+            "HEIGHT_REACHED": 8.245833763387054,
+            "HOLD": 8.25000043027103,
+            "OPEN_PREGRASP": 1.5291667464189231,
+            "RELEASE_DYNAMIC": 1.0083333859220147,
+            "SETTLE": 1.01250005280599,
+            "SETUP_KINEMATIC": 0.008333333767950535,
+            "VALIDATE": 0.004166666883975267,
+            "VERTICAL_DESCENT": 4.966666925698519,
+            "VERTICAL_LIFT": 6.050000315532088
+          },
+          "physical_model_signature": "9b32b9f5057c2638e80ab6425d66cecc5cdba1613cc75fdcdf1f2eff003b1fa3",
+          "reason": "stable_20cm_hold",
+          "sample_count": 2459,
+          "solver_residuals": {
+            "position_max": 0.0,
+            "position_rms": 0.0,
+            "velocity_max": 0.0,
+            "velocity_rms": 0.0
+          },
+          "status": "PASS"
+        },
+        "name": "frequency_f0240_p064_v008",
+        "process": {
+          "command": [
+            "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/bin/python",
+            "/home/eii/project/openpi0.5-rtc-reward-learning/tools/run_aloha1_grasp_20cm_gui.py",
+            "--config",
+            "/home/eii/project/openpi0.5-rtc-reward-learning/configs/aloha1_grasp_20cm_gui_finger_source_limit_candidate.yaml",
+            "--artifact-root",
+            "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/runtime_cells/frequency_f0240_p064_v008",
+            "--autorun",
+            "--close-after-terminal",
+            "--bottle-world-from-object-json",
+            "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/frozen_world_from_object.json",
+            "--initial-arm-q-rad",
+            "-0.7152093294228168",
+            "-0.304541715978692",
+            "0.028855309532025343",
+            "-0.016145176621151457",
+            "1.7227135126825848",
+            "0.4219415062336835",
+            "--initial-pose-hold-frames",
+            "240",
+            "--arm-phase-readback-tolerance-rad",
+            "0.02",
+            "--arm-trajectory-mode",
+            "LULA_CSPACE_ACCELERATION_LIMITED",
+            "--arm-acceleration-limits-rad-s2",
+            "5.0",
+            "5.0",
+            "5.0",
+            "5.0",
+            "5.0",
+            "5.0",
+            "--physics-frequency-hz",
+            "240",
+            "--solver-position-iterations",
+            "64",
+            "--solver-velocity-iterations",
+            "8",
+            "--enable-solver-residual-reporting",
+            "--skip-collider-evidence",
+            "--skip-video-capture"
+          ],
+          "log_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/logs/frequency_f0240_p064_v008.log",
+          "log_sha256": "0638fdddf11430673227f9d17149cf5390f0aed815003faaf1b105c8b8968c3d",
+          "resume_status": "REUSED_COMPLETE_CELL"
+        },
+        "report_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/runtime_cells/frequency_f0240_p064_v008/aloha1_grasp_20cm_runtime.json",
+        "report_sha256": "7ccf59fb232767ee91b372cb58ea20ce95fd1ed2a0d8e1f00d3706128383eda9",
+        "requested": {
+          "frequency_hz": 240,
+          "position_iterations": 64,
+          "velocity_iterations": 8
+        },
+        "telemetry_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/runtime_cells/frequency_f0240_p064_v008/aloha1_grasp_20cm_telemetry.jsonl",
+        "telemetry_sha256": "291b0a007be82ba595fdd96854c32c7431765da0d9d1d2765134720f1fe1eee2"
+      },
+      {
+        "deterministic_signature": "06fb0f54ce303c83a83a8a44613c93785160a62bf88201037321a7a1530a5e57",
+        "effective": {
+          "frequency_hz": 480,
+          "position_iterations": 64,
+          "velocity_iterations": 8
+        },
+        "failure_evidence": null,
+        "family": "frequency",
+        "machine_reason": "stable_20cm_hold",
+        "machine_status": "PASS",
+        "metrics": {
+          "bottle_final": {
+            "orientation_wxyz": [
+              -0.44009645851542073,
+              0.6300144829059616,
+              -0.315510066191724,
+              -0.556641946553269
+            ],
+            "pose_finite_difference_velocity": {
+              "angular_speed_rad_s": 0.0003227211876576146,
+              "angular_velocity_world_rad_s": [
+                -0.00018007349912530285,
+                -0.0002674056919893581,
+                1.4720589920358685e-05
+              ],
+              "linear_velocity_world_m_s": [
+                4.8279762268066406e-05,
+                1.2516975402832031e-05,
+                1.430511474609375e-05
+              ],
+              "state_source": "POSE_FINITE_DIFFERENCE",
+              "vertical_velocity_m_s": 1.430511474609375e-05
+            },
+            "position_world_m": [
+              0.04164191335439682,
+              -0.01898254081606865,
+              0.2316252589225769
+            ]
+          },
+          "contact": {
+            "left_scalar_impulse_ns": 4.707158814718242,
+            "left_signed_normal_impulse_ns": 4.707158802557667,
+            "maximum_penetration_m": 0.0001760711893439293,
+            "minimum_separation_m": -0.0001760711893439293,
+            "right_scalar_impulse_ns": 4.708657697464678,
+            "right_signed_normal_impulse_ns": 4.708657798939891
+          },
+          "drive": {
+            "absolute_work_j": 8.743179721692467,
+            "maximum_joint_target_error": 0.004209350303105874,
+            "signed_work_j": 0.3261626723536394
+          },
+          "first_bilateral_solver_contact_time_s": 5.856250305427238,
+          "hold_drop_m": 2.639725651784608e-05,
+          "numerical_readback": {
+            "effective_physics_dt_s": 0.0020833333333333333,
+            "effective_position_iterations": 64,
+            "effective_velocity_iterations": 8,
+            "readback_status": "PASS",
+            "requested_frequency_hz": 480.0,
+            "requested_physics_dt_s": 0.0020833333333333333,
+            "requested_position_iterations": 64,
+            "requested_velocity_iterations": 8
+          },
+          "phase_first_time_s": {
+            "BILATERAL_CONTACT": 5.650000294670463,
+            "CLOSE_PRELOAD": 5.858333638869226,
+            "HEIGHT_REACHED": 12.254167305771261,
+            "HOLD": 12.256250639213249,
+            "OPEN_PREGRASP": 1.7895834266673774,
+            "RELEASE_DYNAMIC": 1.0041667190380394,
+            "SETTLE": 1.006250052480027,
+            "SETUP_KINEMATIC": 0.004166666883975267,
+            "VALIDATE": 0.0020833334419876337,
+            "VERTICAL_DESCENT": 5.068750264355913,
+            "VERTICAL_LIFT": 5.958333644084632
+          },
+          "physical_model_signature": "9b32b9f5057c2638e80ab6425d66cecc5cdba1613cc75fdcdf1f2eff003b1fa3",
+          "reason": "stable_20cm_hold",
+          "sample_count": 6842,
+          "solver_residuals": {
+            "position_max": 0.0,
+            "position_rms": 0.0,
+            "velocity_max": 0.0,
+            "velocity_rms": 0.0
+          },
+          "status": "PASS"
+        },
+        "name": "frequency_f0480_p064_v008",
+        "process": {
+          "command": [
+            "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/bin/python",
+            "/home/eii/project/openpi0.5-rtc-reward-learning/tools/run_aloha1_grasp_20cm_gui.py",
+            "--config",
+            "/home/eii/project/openpi0.5-rtc-reward-learning/configs/aloha1_grasp_20cm_gui_finger_source_limit_candidate.yaml",
+            "--artifact-root",
+            "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/runtime_cells/frequency_f0480_p064_v008",
+            "--autorun",
+            "--close-after-terminal",
+            "--bottle-world-from-object-json",
+            "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/frozen_world_from_object.json",
+            "--initial-arm-q-rad",
+            "-0.7152093294228168",
+            "-0.304541715978692",
+            "0.028855309532025343",
+            "-0.016145176621151457",
+            "1.7227135126825848",
+            "0.4219415062336835",
+            "--initial-pose-hold-frames",
+            "480",
+            "--arm-phase-readback-tolerance-rad",
+            "0.02",
+            "--arm-trajectory-mode",
+            "LULA_CSPACE_ACCELERATION_LIMITED",
+            "--arm-acceleration-limits-rad-s2",
+            "5.0",
+            "5.0",
+            "5.0",
+            "5.0",
+            "5.0",
+            "5.0",
+            "--physics-frequency-hz",
+            "480",
+            "--solver-position-iterations",
+            "64",
+            "--solver-velocity-iterations",
+            "8",
+            "--enable-solver-residual-reporting",
+            "--skip-collider-evidence",
+            "--skip-video-capture"
+          ],
+          "log_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/logs/frequency_f0480_p064_v008.log",
+          "log_sha256": "5210fa478bc07dfe0b8166cf3edfb7bd0571f00d35970df4f5ff4b3c2daade33",
+          "resume_status": "REUSED_COMPLETE_CELL"
+        },
+        "report_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/runtime_cells/frequency_f0480_p064_v008/aloha1_grasp_20cm_runtime.json",
+        "report_sha256": "11db03260f998fbfb46decee0b53f1ae3ad39c288adee80a967999a40a3a4c07",
+        "requested": {
+          "frequency_hz": 480,
+          "position_iterations": 64,
+          "velocity_iterations": 8
+        },
+        "telemetry_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/runtime_cells/frequency_f0480_p064_v008/aloha1_grasp_20cm_telemetry.jsonl",
+        "telemetry_sha256": "0ecf2cdcd90a24b6e8fbd0a05be2bfe972e24d125c722373101084435df0803a"
+      },
+      {
+        "deterministic_signature": "749343e157448aba0a2e7e307dd40fbbe6130d5061e1a7f7d14f81dfe3041616",
+        "effective": {
+          "frequency_hz": 960,
+          "position_iterations": 64,
+          "velocity_iterations": 8
+        },
+        "failure_evidence": null,
+        "family": "frequency",
+        "machine_reason": "stable_20cm_hold",
+        "machine_status": "PASS",
+        "metrics": {
+          "bottle_final": {
+            "orientation_wxyz": [
+              -0.43818482676062737,
+              0.6293340481803071,
+              -0.3169492559768637,
+              -0.5581002441617978
+            ],
+            "pose_finite_difference_velocity": {
+              "angular_speed_rad_s": 0.00037163988908486026,
+              "angular_velocity_world_rad_s": [
+                0.000311868948745799,
+                -0.00018403529862709547,
+                -8.357616183118974e-05
+              ],
+              "linear_velocity_world_m_s": [
+                3.5762786865234375e-06,
+                -1.0728836059570312e-05,
+                -1.430511474609375e-05
+              ],
+              "state_source": "POSE_FINITE_DIFFERENCE",
+              "vertical_velocity_m_s": -1.430511474609375e-05
+            },
+            "position_world_m": [
+              0.04175709933042526,
+              -0.01896493509411812,
+              0.23149487376213074
+            ]
+          },
+          "contact": {
+            "left_scalar_impulse_ns": 2.8179088374915793,
+            "left_signed_normal_impulse_ns": 2.817908836718084,
+            "maximum_penetration_m": 3.988295793533325e-05,
+            "minimum_separation_m": -3.988295793533325e-05,
+            "right_scalar_impulse_ns": 2.8092676965990275,
+            "right_signed_normal_impulse_ns": 2.809267751989815
+          },
+          "drive": {
+            "absolute_work_j": 8.193020566024764,
+            "maximum_joint_target_error": 0.004329182259913189,
+            "signed_work_j": -0.6600204482580971
+          },
+          "first_bilateral_solver_contact_time_s": 6.11041698534973,
+          "hold_drop_m": 0.00011153018030254924,
+          "numerical_readback": {
+            "effective_physics_dt_s": 0.0010416666666666667,
+            "effective_position_iterations": 64,
+            "effective_velocity_iterations": 8,
+            "readback_status": "PASS",
+            "requested_frequency_hz": 960.0,
+            "requested_physics_dt_s": 0.0010416666666666667,
+            "requested_position_iterations": 64,
+            "requested_velocity_iterations": 8
+          },
+          "phase_first_time_s": {
+            "BILATERAL_CONTACT": 5.9062503080349416,
+            "CLOSE_PRELOAD": 6.1114586520707235,
+            "HEIGHT_REACHED": 9.094792140997015,
+            "HOLD": 9.095833807718009,
+            "OPEN_PREGRASP": 2.1739584467140958,
+            "RELEASE_DYNAMIC": 1.0020833855960518,
+            "SETTLE": 1.0031250523170456,
+            "SETUP_KINEMATIC": 0.0020833334419876337,
+            "VALIDATE": 0.0010416667209938169,
+            "VERTICAL_DESCENT": 5.385416947538033,
+            "VERTICAL_LIFT": 6.217708657612093
+          },
+          "physical_model_signature": "9b32b9f5057c2638e80ab6425d66cecc5cdba1613cc75fdcdf1f2eff003b1fa3",
+          "reason": "stable_20cm_hold",
+          "sample_count": 10651,
+          "solver_residuals": {
+            "position_max": 0.0,
+            "position_rms": 0.0,
+            "velocity_max": 0.0,
+            "velocity_rms": 0.0
+          },
+          "status": "PASS"
+        },
+        "name": "frequency_f0960_p064_v008",
+        "process": {
+          "command": [
+            "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/bin/python",
+            "/home/eii/project/openpi0.5-rtc-reward-learning/tools/run_aloha1_grasp_20cm_gui.py",
+            "--config",
+            "/home/eii/project/openpi0.5-rtc-reward-learning/configs/aloha1_grasp_20cm_gui_finger_source_limit_candidate.yaml",
+            "--artifact-root",
+            "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/runtime_cells/frequency_f0960_p064_v008",
+            "--autorun",
+            "--close-after-terminal",
+            "--bottle-world-from-object-json",
+            "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/frozen_world_from_object.json",
+            "--initial-arm-q-rad",
+            "-0.7152093294228168",
+            "-0.304541715978692",
+            "0.028855309532025343",
+            "-0.016145176621151457",
+            "1.7227135126825848",
+            "0.4219415062336835",
+            "--initial-pose-hold-frames",
+            "960",
+            "--arm-phase-readback-tolerance-rad",
+            "0.02",
+            "--arm-trajectory-mode",
+            "LULA_CSPACE_ACCELERATION_LIMITED",
+            "--arm-acceleration-limits-rad-s2",
+            "5.0",
+            "5.0",
+            "5.0",
+            "5.0",
+            "5.0",
+            "5.0",
+            "--physics-frequency-hz",
+            "960",
+            "--solver-position-iterations",
+            "64",
+            "--solver-velocity-iterations",
+            "8",
+            "--enable-solver-residual-reporting",
+            "--skip-collider-evidence",
+            "--skip-video-capture"
+          ],
+          "log_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/logs/frequency_f0960_p064_v008.log",
+          "log_sha256": "aac444eb34b6f791a24ac01415c639a6e7f42430541e2d19f5fde5d8d807fa59",
+          "resume_status": "REUSED_COMPLETE_CELL"
+        },
+        "report_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/runtime_cells/frequency_f0960_p064_v008/aloha1_grasp_20cm_runtime.json",
+        "report_sha256": "d3bee2f7bfe0535e3cabfc44304970f1e84eed893c87fe260956a94496db9d67",
+        "requested": {
+          "frequency_hz": 960,
+          "position_iterations": 64,
+          "velocity_iterations": 8
+        },
+        "telemetry_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/runtime_cells/frequency_f0960_p064_v008/aloha1_grasp_20cm_telemetry.jsonl",
+        "telemetry_sha256": "05859ec6e6238a15410b96d94515a85eeb3a3cd3abdb6b9388b04ff042aec76f"
+      }
+    ],
+    "comparisons": [
+      {
+        "coarse": {
+          "frequency_hz": 60,
+          "position_iterations": 64,
+          "velocity_iterations": 8
+        },
+        "contact_onset_bound_s": 0.016666666666666666,
+        "contact_onset_difference_s": 0.6000000312924385,
+        "fine": {
+          "frequency_hz": 120,
+          "position_iterations": 64,
+          "velocity_iterations": 8
+        },
+        "gates": {
+          "bottle_position_within_geometry_numeric_budget": false,
+          "contact_onset_within_one_coarse_step": false,
+          "joint_position_within_official_tick": false,
+          "physical_model_signature_equal": true,
+          "terminal_classification_equal": true
+        },
+        "maximum_penetration_difference_m": 2.562503141234629e-05,
+        "signed_drive_work_difference_j": 3.7948425763363383,
+        "signed_normal_impulse_absolute_sum_coarse_ns": 5.24367685059043,
+        "signed_normal_impulse_absolute_sum_fine_ns": 5.164707136316688,
+        "signed_normal_impulse_relative_difference": 0.015059988730016868,
+        "trace": {
+          "bottle_position_max_norm_difference_m": 0.010763872520896164,
+          "common_phases": [
+            "VALIDATE",
+            "SETUP_KINEMATIC",
+            "RELEASE_DYNAMIC",
+            "SETTLE",
+            "OPEN_PREGRASP",
+            "VERTICAL_DESCENT",
+            "BILATERAL_CONTACT",
+            "CLOSE_PRELOAD",
+            "VERTICAL_LIFT",
+            "HEIGHT_REACHED",
+            "HOLD"
+          ],
+          "compared_signal_phase_count": 33,
+          "joint_position_max_abs_difference": 0.04470113739371303,
+          "joint_velocity_max_abs_difference": 0.46634620428085327
+        }
+      },
+      {
+        "coarse": {
+          "frequency_hz": 120,
+          "position_iterations": 64,
+          "velocity_iterations": 8
+        },
+        "contact_onset_bound_s": 0.008333333333333333,
+        "contact_onset_difference_s": 0.10416667209938169,
+        "fine": {
+          "frequency_hz": 240,
+          "position_iterations": 64,
+          "velocity_iterations": 8
+        },
+        "gates": {
+          "bottle_position_within_geometry_numeric_budget": false,
+          "contact_onset_within_one_coarse_step": false,
+          "joint_position_within_official_tick": false,
+          "physical_model_signature_equal": true,
+          "terminal_classification_equal": true
+        },
+        "maximum_penetration_difference_m": 0.00037089523539179936,
+        "signed_drive_work_difference_j": 2.3462248121314286,
+        "signed_normal_impulse_absolute_sum_coarse_ns": 5.164707136316688,
+        "signed_normal_impulse_absolute_sum_fine_ns": 4.876774602429759,
+        "signed_normal_impulse_relative_difference": 0.055750021499239105,
+        "trace": {
+          "bottle_position_max_norm_difference_m": 0.009663573726726896,
+          "common_phases": [
+            "VALIDATE",
+            "SETUP_KINEMATIC",
+            "RELEASE_DYNAMIC",
+            "SETTLE",
+            "OPEN_PREGRASP",
+            "VERTICAL_DESCENT",
+            "BILATERAL_CONTACT",
+            "CLOSE_PRELOAD",
+            "VERTICAL_LIFT",
+            "HEIGHT_REACHED",
+            "HOLD"
+          ],
+          "compared_signal_phase_count": 33,
+          "joint_position_max_abs_difference": 0.09689905047416691,
+          "joint_velocity_max_abs_difference": 0.47569633126258826
+        }
+      },
+      {
+        "coarse": {
+          "frequency_hz": 240,
+          "position_iterations": 64,
+          "velocity_iterations": 8
+        },
+        "contact_onset_bound_s": 0.004166666666666667,
+        "contact_onset_difference_s": 0.08958333800546825,
+        "fine": {
+          "frequency_hz": 480,
+          "position_iterations": 64,
+          "velocity_iterations": 8
+        },
+        "gates": {
+          "bottle_position_within_geometry_numeric_budget": false,
+          "contact_onset_within_one_coarse_step": false,
+          "joint_position_within_official_tick": false,
+          "physical_model_signature_equal": true,
+          "terminal_classification_equal": true
+        },
+        "maximum_penetration_difference_m": 0.00020750705152750015,
+        "signed_drive_work_difference_j": 0.6637977848492699,
+        "signed_normal_impulse_absolute_sum_coarse_ns": 4.876774602429759,
+        "signed_normal_impulse_absolute_sum_fine_ns": 9.415816601497557,
+        "signed_normal_impulse_relative_difference": 0.4820656764221467,
+        "trace": {
+          "bottle_position_max_norm_difference_m": 0.020981290006095374,
+          "common_phases": [
+            "VALIDATE",
+            "SETUP_KINEMATIC",
+            "RELEASE_DYNAMIC",
+            "SETTLE",
+            "OPEN_PREGRASP",
+            "VERTICAL_DESCENT",
+            "BILATERAL_CONTACT",
+            "CLOSE_PRELOAD",
+            "VERTICAL_LIFT",
+            "HEIGHT_REACHED",
+            "HOLD"
+          ],
+          "compared_signal_phase_count": 33,
+          "joint_position_max_abs_difference": 0.09701794654130941,
+          "joint_velocity_max_abs_difference": 0.4534487453103066
+        }
+      },
+      {
+        "coarse": {
+          "frequency_hz": 480,
+          "position_iterations": 64,
+          "velocity_iterations": 8
+        },
+        "contact_onset_bound_s": 0.0020833333333333333,
+        "contact_onset_difference_s": 0.2541666799224913,
+        "fine": {
+          "frequency_hz": 960,
+          "position_iterations": 64,
+          "velocity_iterations": 8
+        },
+        "gates": {
+          "bottle_position_within_geometry_numeric_budget": false,
+          "contact_onset_within_one_coarse_step": false,
+          "joint_position_within_official_tick": false,
+          "physical_model_signature_equal": true,
+          "terminal_classification_equal": true
+        },
+        "maximum_penetration_difference_m": 0.00013618823140859604,
+        "signed_drive_work_difference_j": 0.9861831206117365,
+        "signed_normal_impulse_absolute_sum_coarse_ns": 9.415816601497557,
+        "signed_normal_impulse_absolute_sum_fine_ns": 5.627176588707899,
+        "signed_normal_impulse_relative_difference": 0.40236977557390896,
+        "trace": {
+          "bottle_position_max_norm_difference_m": 0.010508916850184123,
+          "common_phases": [
+            "VALIDATE",
+            "SETUP_KINEMATIC",
+            "RELEASE_DYNAMIC",
+            "SETTLE",
+            "OPEN_PREGRASP",
+            "VERTICAL_DESCENT",
+            "BILATERAL_CONTACT",
+            "CLOSE_PRELOAD",
+            "VERTICAL_LIFT",
+            "HEIGHT_REACHED",
+            "HOLD"
+          ],
+          "compared_signal_phase_count": 33,
+          "joint_position_max_abs_difference": 0.07563466519117357,
+          "joint_velocity_max_abs_difference": 0.4487636238336561
+        }
+      }
+    ],
+    "optional_960_used": true,
+    "selected_frequency_hz": null
+  },
+  "frozen_stage": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+    "sha256_after": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9",
+    "sha256_before": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9"
+  },
+  "independent_bounds": {
+    "bottle_position_difference_m": {
+      "semantic_limit": "GEOMETRY_NUMERICAL_BUDGET_NOT_PHYSICAL_CONTACT_TOLERANCE",
+      "source_key": "known_numerical_error_budget.known_sum_m",
+      "source_path": "reports/aloha1_mapping/aloha1_bottle_swept_contact_band_collider_certificate.json",
+      "source_sha256": "bf19e8836ebf2dc37cd0ec5d0e6cbbb4afda1c1646a7dbdd7f5d34f0cac38a8b",
+      "value": 0.00020047983236613217
+    },
+    "contact_onset_difference_s": {
+      "derivation": "maximum of the adjacent pair physics timesteps"
+    },
+    "joint_position_difference_rad": {
+      "derivation": "0.088 degree official DYNAMIXEL position tick converted to radians",
+      "source_keys": [
+        "exact_model_hardware.XM540-W270.position_degree_per_tick",
+        "exact_model_hardware.XM430-W350.position_degree_per_tick"
+      ],
+      "source_path": "reports/aloha1_mapping/aloha1_official_parameter_matrix.json",
+      "source_sha256": "09df03d3f1c84536fc58a65f13cf8fa4d8b8768b216b01f0de43dfb98c46d6ae",
+      "value": 0.00153588974175501
+    },
+    "velocity_difference_m_s": {
+      "derivation": "measured from the analytic V1 free-translation grid, not selected from grasp success"
+    }
+  },
+  "position_iteration_sweep": {
+    "cells": [],
+    "comparisons": [],
+    "selected_position_iterations": null,
+    "status": "NOT_RUN_TIMESTEP_NOT_CONVERGED"
+  },
+  "reason": "TIMESTEP_NOT_CONVERGED_SOLVER_SWEEPS_NOT_RUN",
+  "runtime": {
+    "baseline_frequency_hz": 60,
+    "baseline_initial_pose_hold_frames": 60,
+    "fresh_process_per_cell": true,
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physx": "107.3.26",
+    "sample_id": "sample_01",
+    "solve_articulation_contact_last": true
+  },
+  "sample": {
+    "bottle_transform_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/frozen_world_from_object.json",
+    "bottle_transform_sha256": "b8241ef910ecf71a62dba879b4c32d9ff3cd37e8e1ac4a77021d57233e7c4d99",
+    "initial_arm_q_rad": [
+      -0.7152093294228168,
+      -0.304541715978692,
+      0.028855309532025343,
+      -0.016145176621151457,
+      1.7227135126825848,
+      0.4219415062336835
+    ],
+    "preflight_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_finger_source_limit_candidate_five_pose_preflight.json",
+    "preflight_sha256": "d50c978382aea94714de2e782a488d9a1ab1d5aa037981f4624e48869554b2c2",
+    "sample_id": "sample_01"
+  },
+  "schema_version": 1,
+  "selection": {
+    "frequency_hz": null,
+    "fresh_repeat_signature_equal": null,
+    "position_iterations": null,
+    "velocity_iterations": null
+  },
+  "status": "PARTIAL",
+  "task8": "AUTHORIZED_PAUSED_AT_MODEL_PROOF",
+  "velocity_iteration_sweep": {
+    "cells": [],
+    "comparisons": [],
+    "selected_velocity_iterations": null,
+    "status": "NOT_RUN_TIMESTEP_NOT_CONVERGED"
+  }
+}

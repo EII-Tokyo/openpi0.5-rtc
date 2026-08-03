@@ -826,6 +826,8 @@ class IsaacGrasp20cmBindings:
         closeup_axial_side: int = 1,
         bottle_tensor_lifecycle: str = "BASELINE",
         bottle_usd_velocity_readback: bool = False,
+        numerical_override: Mapping[str, float | int] | None = None,
+        enable_solver_residual_reporting: bool = False,
     ) -> None:
         import carb.settings
         from isaacsim.core.api import World
@@ -844,6 +846,9 @@ class IsaacGrasp20cmBindings:
         from tools.aloha1_mapping.grasp_20cm_five_pose_ik import apply_frozen_bottle_transform
         from tools.aloha1_mapping.grasp_20cm_five_pose_ik import compose_initial_command
         from tools.aloha1_mapping.grasp_20cm_sampling import translate_horizontal_bottle_profile
+        from tools.aloha1_mapping.physics_numerical_convergence import apply_articulation_solver_override
+        from tools.aloha1_mapping.physics_numerical_convergence import physical_model_signature
+        from tools.aloha1_mapping.physics_numerical_convergence import scaled_frame_count
         from tools.audit_aloha1_bottle_collision_runtime import _create_bottle_render_evidence
         from tools.audit_aloha1_bottle_collision_runtime import _quaternion_matrix_wxyz
         from tools.audit_aloha1_bottle_collision_runtime import _update_bottle_render_evidence
@@ -881,7 +886,33 @@ class IsaacGrasp20cmBindings:
             self.profile["frozen_inputs"]["stage"]["absolute_path"]
         )
         self.stage_hash_before = sha256_file(self.stage_path)
-        self.dt = 1.0 / float(self.config["physics"]["frequency_hz"])
+        self.numerical_override = (
+            None if numerical_override is None else dict(numerical_override)
+        )
+        frequency_hz = float(
+            self.config["physics"]["frequency_hz"]
+            if self.numerical_override is None
+            else self.numerical_override["frequency_hz"]
+        )
+        self.dt = 1.0 / frequency_hz
+        self.preload_stable_frames_required = scaled_frame_count(
+            base_frames=5,
+            frequency_hz=frequency_hz,
+        )
+        self.phase_timeout_frames = {
+            phase: scaled_frame_count(
+                base_frames=frames,
+                frequency_hz=frequency_hz,
+            )
+            for phase, frames in PHASE_TIMEOUT_FRAMES.items()
+        }
+        self._apply_articulation_solver_override = (
+            apply_articulation_solver_override
+        )
+        self._physical_model_signature = physical_model_signature(self.config)
+        self._solver_residual_reporting_enabled = bool(
+            enable_solver_residual_reporting
+        )
         self._get_world_pose = get_world_pose
         self._command_positions = _command_positions
         self._physical_contacts = _physical_contacts
@@ -1221,6 +1252,50 @@ class IsaacGrasp20cmBindings:
         )
         self.world.scene.add(self.articulation)
         self.world.reset()
+        if self.numerical_override is None:
+            self.numerical_readback = {
+                "requested_frequency_hz": float(
+                    self.config["physics"]["frequency_hz"]
+                ),
+                "effective_physics_dt_s": float(
+                    self.physics_context.get_physics_dt()
+                ),
+                "effective_position_iterations": int(
+                    self.articulation
+                    .get_solver_position_iteration_count()
+                ),
+                "effective_velocity_iterations": int(
+                    self.articulation
+                    .get_solver_velocity_iteration_count()
+                ),
+                "readback_status": "BASELINE_READBACK",
+            }
+        else:
+            solver_readback = self._apply_articulation_solver_override(
+                self.articulation,
+                position_iterations=int(
+                    self.numerical_override["position_iterations"]
+                ),
+                velocity_iterations=int(
+                    self.numerical_override["velocity_iterations"]
+                ),
+            )
+            effective_dt = float(self.physics_context.get_physics_dt())
+            if not math.isclose(effective_dt, self.dt, rel_tol=0.0, abs_tol=1e-12):
+                raise RuntimeError(
+                    "physics dt readback mismatch: "
+                    f"requested={self.dt} effective={effective_dt}"
+                )
+            self.numerical_readback = {
+                "requested_frequency_hz": float(
+                    self.numerical_override["frequency_hz"]
+                ),
+                "requested_physics_dt_s": self.dt,
+                "effective_physics_dt_s": effective_dt,
+                **solver_readback,
+            }
+        if self._solver_residual_reporting_enabled:
+            self.physics_context.enable_residual_reporting(True)
         if list(self.articulation.dof_names) != EXPECTED_DOF_ORDER:
             raise RuntimeError(
                 f"unexpected DOF order: {self.articulation.dof_names}"
@@ -2401,6 +2476,55 @@ class IsaacGrasp20cmBindings:
             self.articulation.get_joint_velocities(),
             dtype=np.float64,
         )
+        measured_efforts = self.articulation.get_measured_joint_efforts()
+        if measured_efforts is None:
+            joint_effort = None
+            joint_power_w = None
+            drive_work_increment_j = None
+        else:
+            effort_array = np.asarray(
+                measured_efforts,
+                dtype=np.float64,
+            )
+            if effort_array.shape != qvel.shape:
+                raise RuntimeError(
+                    "measured joint effort shape does not match DOF velocity"
+                )
+            power_array = effort_array * qvel
+            joint_effort = effort_array.tolist()
+            joint_power_w = power_array.tolist()
+            drive_work_increment_j = float(
+                np.sum(power_array) * self.dt
+            )
+        solver_residuals: dict[str, float | str | None] = {
+            "status": "NOT_ENABLED",
+            "position_max": None,
+            "position_rms": None,
+            "velocity_max": None,
+            "velocity_rms": None,
+        }
+        if self._solver_residual_reporting_enabled:
+            residual_values = {
+                "position_max": (
+                    self.physics_context.get_solver_position_residual(True)
+                ),
+                "position_rms": (
+                    self.physics_context.get_solver_position_residual(False)
+                ),
+                "velocity_max": (
+                    self.physics_context.get_solver_velocity_residual(True)
+                ),
+                "velocity_rms": (
+                    self.physics_context.get_solver_velocity_residual(False)
+                ),
+            }
+            solver_residuals = {
+                "status": "OBSERVED",
+                **{
+                    name: None if value is None else float(value)
+                    for name, value in residual_values.items()
+                },
+            }
         finger_pair_geometry = self._finger_pair_geometry()
         finger_safety = evaluate_finger_runtime_frame(
             frame=frame,
@@ -2510,7 +2634,10 @@ class IsaacGrasp20cmBindings:
             self._preload_stable_frames += 1
         elif self._phase is Phase.CLOSE_PRELOAD:
             self._preload_stable_frames = 0
-        preload_complete = self._preload_stable_frames >= 5
+        preload_complete = (
+            self._preload_stable_frames
+            >= self.preload_stable_frames_required
+        )
         hold_drop_m = (
             max(
                 0.0,
@@ -2557,7 +2684,10 @@ class IsaacGrasp20cmBindings:
         maximum_angular = float(
             bottle_state["angular_speed_rad_s"]
         )
-        phase_timeout = PHASE_TIMEOUT_FRAMES.get(self._phase, 600)
+        phase_timeout = self.phase_timeout_frames.get(
+            self._phase,
+            round(600 / (60.0 * self.dt)),
+        )
         if self._phase is Phase.SETUP_KINEMATIC:
             phase_timeout = max(
                 phase_timeout,
@@ -2629,6 +2759,10 @@ class IsaacGrasp20cmBindings:
             "joint_velocity_target": self.command_velocity.tolist(),
             "joint_readback": qpos.tolist(),
             "joint_velocity": qvel.tolist(),
+            "joint_effort": joint_effort,
+            "joint_power_w": joint_power_w,
+            "drive_work_increment_j": drive_work_increment_j,
+            "solver_residuals": solver_residuals,
             "finger_safety": finger_safety,
             "arm_target_max_readback_error_rad": arm_target_error_rad,
             "bottle": {
@@ -3699,6 +3833,31 @@ class IsaacGrasp20cmBindings:
                         self.physics_context.get_physics_dt()
                     ),
                     "subscription_pre_step_argument": False,
+                },
+                "numerical_convergence": {
+                    "classification": "DIAGNOSTIC_NUMERICAL_ONLY",
+                    "physical_model_signature": (
+                        self._physical_model_signature
+                    ),
+                    "override": self.numerical_override,
+                    "readback": self.numerical_readback,
+                    "solver_residual_reporting_enabled": (
+                        self._solver_residual_reporting_enabled
+                    ),
+                    "frame_count_duration_invariants": {
+                        "baseline_frequency_hz": 60.0,
+                        "initial_pose_hold_frames": (
+                            self.initial_pose_hold_frames
+                        ),
+                        "preload_stable_frames": (
+                            self.preload_stable_frames_required
+                        ),
+                        "phase_timeout_frames": {
+                            phase.value: count
+                            for phase, count in self.phase_timeout_frames.items()
+                        },
+                    },
+                    "source_stage_or_config_modified": False,
                 },
             },
             "stage": {

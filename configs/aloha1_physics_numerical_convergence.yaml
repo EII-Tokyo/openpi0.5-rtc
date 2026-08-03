@@ -1,0 +1,61 @@
+schema_version: 1
+classification: DIAGNOSTIC_NUMERICAL_ONLY_NOT_PHYSICAL_CALIBRATION
+runtime:
+  isaac_sim: 5.1.0.0
+  kit: 107.3.3
+  physx: 107.3.26
+  fresh_process_per_cell: true
+  solve_articulation_contact_last: true
+  sample_id: sample_01
+  baseline_frequency_hz: 60
+  baseline_initial_pose_hold_frames: 60
+frozen_inputs:
+  runtime_config:
+    path: configs/aloha1_grasp_20cm_gui_finger_source_limit_candidate.yaml
+    sha256: 044abc9fe3183d1e845690e3cef193d06f0b8111838a17046ae5c7cb7e913a6c
+  approved_stage:
+    path: assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda
+    sha256: 327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9
+  five_pose_preflight:
+    path: reports/aloha1_mapping/aloha1_finger_source_limit_candidate_five_pose_preflight.json
+    sha256: d50c978382aea94714de2e782a488d9a1ab1d5aa037981f4624e48869554b2c2
+  bottle_source:
+    path: assets/bottle_500ml/isaac/bottle_500ml_sim.usd
+    sha256: 16427135f152ec951de2321fd689366d745a2dd389cbe260976631783952533e
+matrix:
+  frequency_hz: [60, 120, 240, 480]
+  optional_frequency_hz: 960
+  frequency_sweep_position_iterations: 64
+  frequency_sweep_velocity_iterations: 8
+  position_iterations: [4, 8, 16, 32, 64]
+  velocity_iterations: [1, 2, 4, 8]
+independent_bounds:
+  bottle_position_difference_m:
+    value: 0.00020047983236613217
+    source_path: reports/aloha1_mapping/aloha1_bottle_swept_contact_band_collider_certificate.json
+    source_sha256: bf19e8836ebf2dc37cd0ec5d0e6cbbb4afda1c1646a7dbdd7f5d34f0cac38a8b
+    source_key: known_numerical_error_budget.known_sum_m
+    semantic_limit: GEOMETRY_NUMERICAL_BUDGET_NOT_PHYSICAL_CONTACT_TOLERANCE
+  joint_position_difference_rad:
+    value: 0.00153588974175501
+    derivation: 0.088 degree official DYNAMIXEL position tick converted to radians
+    source_path: reports/aloha1_mapping/aloha1_official_parameter_matrix.json
+    source_sha256: 09df03d3f1c84536fc58a65f13cf8fa4d8b8768b216b01f0de43dfb98c46d6ae
+    source_keys:
+      - exact_model_hardware.XM540-W270.position_degree_per_tick
+      - exact_model_hardware.XM430-W350.position_degree_per_tick
+  contact_onset_difference_s:
+    derivation: maximum of the adjacent pair physics timesteps
+  velocity_difference_m_s:
+    derivation: measured from the analytic V1 free-translation grid, not selected from grasp success
+selection:
+  require_all_successive_finer_pairs: true
+  grasp_pass_not_used_to_set_tolerance: true
+  optional_960_only_if_240_to_480_fails: true
+boundaries:
+  physical_parameters_modified: false
+  frozen_stage_modified: false
+  final_or_default_asset_modified: false
+  real_robot: false
+  remote_103: false
+  task8_candidate_promoted: false

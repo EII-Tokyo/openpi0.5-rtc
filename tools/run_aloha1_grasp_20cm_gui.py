@@ -220,6 +220,35 @@ def _parse_args() -> argparse.Namespace:
             "USD and record the resulting RigidBodyAPI attributes."
         ),
     )
+    parser.add_argument(
+        "--physics-frequency-hz",
+        type=float,
+        default=None,
+        help=(
+            "Session-only numerical-convergence override. The frozen YAML "
+            "and Stage are not modified."
+        ),
+    )
+    parser.add_argument(
+        "--solver-position-iterations",
+        type=int,
+        default=None,
+        help="Session-only articulation position-solver iteration count.",
+    )
+    parser.add_argument(
+        "--solver-velocity-iterations",
+        type=int,
+        default=None,
+        help="Session-only articulation velocity-solver iteration count.",
+    )
+    parser.add_argument(
+        "--enable-solver-residual-reporting",
+        action="store_true",
+        help=(
+            "Enable the local PhysX 107.3 residual-reporting API for the "
+            "numerical-convergence run."
+        ),
+    )
     return parser.parse_args()
 
 
@@ -587,15 +616,38 @@ def main() -> int:
         raise ValueError(
             "--collision-evidence-only cannot be combined with either skip flag"
         )
+    numerical_values = (
+        args.physics_frequency_hz,
+        args.solver_position_iterations,
+        args.solver_velocity_iterations,
+    )
+    if any(value is not None for value in numerical_values) and not all(
+        value is not None for value in numerical_values
+    ):
+        raise ValueError(
+            "numerical convergence requires frequency and both solver counts"
+        )
 
     sys.path.insert(0, str(ROOT))
+    from tools.aloha1_mapping.grasp_20cm_controller import Grasp20cmThresholds
     from tools.aloha1_mapping.grasp_20cm_runtime import Grasp20cmRuntimeAdapter
     from tools.aloha1_mapping.grasp_20cm_runtime import load_and_verify_config
     from tools.aloha1_mapping.grasp_20cm_runtime import sha256_file
+    from tools.aloha1_mapping.physics_numerical_convergence import scaled_frame_count
+    from tools.aloha1_mapping.physics_numerical_convergence import validate_numerical_override
 
     profile = load_and_verify_config(
         args.config.resolve(strict=True),
         project_root=ROOT,
+    )
+    numerical_override = (
+        None
+        if all(value is None for value in numerical_values)
+        else validate_numerical_override(
+            frequency_hz=float(args.physics_frequency_hz),
+            position_iterations=int(args.solver_position_iterations),
+            velocity_iterations=int(args.solver_velocity_iterations),
+        )
     )
     bottle_world_from_object = (
         None
@@ -703,8 +755,25 @@ def main() -> int:
             bottle_usd_velocity_readback=bool(
                 args.bottle_usd_velocity_readback
             ),
+            numerical_override=numerical_override,
+            enable_solver_residual_reporting=bool(
+                args.enable_solver_residual_reporting
+            ),
         )
-        adapter = Grasp20cmRuntimeAdapter(bindings=bindings)
+        controller_thresholds = None
+        if numerical_override is not None:
+            controller_thresholds = Grasp20cmThresholds(
+                settle_consecutive_frames=scaled_frame_count(
+                    base_frames=10,
+                    frequency_hz=float(
+                        numerical_override["frequency_hz"]
+                    ),
+                )
+            )
+        adapter = Grasp20cmRuntimeAdapter(
+            bindings=bindings,
+            thresholds=controller_thresholds,
+        )
         timeline = omni.timeline.get_timeline_interface()
         timeline.pause()
         controller = DiagnosticWindowController(
