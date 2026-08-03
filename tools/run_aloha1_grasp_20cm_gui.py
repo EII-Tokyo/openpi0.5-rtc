@@ -21,6 +21,10 @@ DEFAULT_ARTIFACT_ROOT = (
     ROOT
     / ".codex/artifacts/20260731-aloha1-grasp-20cm-button/runtime"
 )
+TASK8_COLLIDER_REPORT = (
+    ROOT
+    / "reports/aloha1_mapping/aloha1_task8_collider_lod_candidate.json"
+)
 CLASSIFICATION = "DIAGNOSTIC_ONLY_NOT_FINAL_CONTROL_MAPPING"
 ABORTABLE_PHASES = (
     "RELEASE_DYNAMIC",
@@ -45,6 +49,20 @@ def _parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--width", type=int, default=1600)
     parser.add_argument("--height", type=int, default=1000)
+    parser.add_argument(
+        "--headless",
+        action="store_true",
+        help="Run without a window; requires --skip-video-capture.",
+    )
+    parser.add_argument(
+        "--task8-collider-profile",
+        choices=("fidelity_profile", "throughput_profile"),
+        default=None,
+        help=(
+            "Use one exact non-promoted Task 8 collider profile recorded in "
+            "the frozen candidate manifest."
+        ),
+    )
     parser.add_argument("--startup-workspace", type=int, default=2)
     parser.add_argument(
         "--no-move-to-startup-workspace",
@@ -616,6 +634,8 @@ def main() -> int:
         raise ValueError(
             "--collision-evidence-only cannot be combined with either skip flag"
         )
+    if args.headless and not args.skip_video_capture:
+        raise ValueError("--headless requires --skip-video-capture")
     numerical_values = (
         args.physics_frequency_hz,
         args.solver_position_iterations,
@@ -631,6 +651,7 @@ def main() -> int:
     sys.path.insert(0, str(ROOT))
     from tools.aloha1_mapping.grasp_20cm_controller import Grasp20cmThresholds
     from tools.aloha1_mapping.grasp_20cm_runtime import Grasp20cmRuntimeAdapter
+    from tools.aloha1_mapping.grasp_20cm_runtime import apply_task8_collider_profile
     from tools.aloha1_mapping.grasp_20cm_runtime import load_and_verify_config
     from tools.aloha1_mapping.grasp_20cm_runtime import sha256_file
     from tools.aloha1_mapping.physics_numerical_convergence import scaled_frame_count
@@ -640,6 +661,12 @@ def main() -> int:
         args.config.resolve(strict=True),
         project_root=ROOT,
     )
+    if args.task8_collider_profile is not None:
+        profile = apply_task8_collider_profile(
+            profile,
+            candidate_report_path=TASK8_COLLIDER_REPORT,
+            profile_name=str(args.task8_collider_profile),
+        )
     numerical_override = (
         None
         if all(value is None for value in numerical_values)
@@ -668,7 +695,7 @@ def main() -> int:
 
     app = SimulationApp(
         {
-            "headless": False,
+            "headless": bool(args.headless),
             "width": int(args.width),
             "height": int(args.height),
             "create_new_stage": False,
@@ -823,7 +850,7 @@ def main() -> int:
                 name="aloha1_grasp_20cm_timeline_guard",
             )
         )
-        if not args.no_move_to_startup_workspace:
+        if not args.headless and not args.no_move_to_startup_workspace:
             if args.startup_workspace == 2:
                 _move_current_process_window_to_workspace(2)
             else:
@@ -972,7 +999,7 @@ def main() -> int:
                                 "VIDEO_INTENTIONALLY_NOT_CAPTURED_BEFORE_"
                                 "FORMAL_RECORDED_RUN"
                             ),
-                            "task8": "NOT_RUN",
+                            "task8": config["boundaries"]["task8"],
                         },
                     )
                     video_state["finalized"] = True
@@ -1045,7 +1072,9 @@ def main() -> int:
                     "parent_attachment": False,
                     "source_stage_modified": False,
                     "final_collider_modified": False,
-                    "task8": "NOT_RUN",
+                    "task8": config.get("boundaries", {}).get(
+                        "task8", "NOT_RUN"
+                    ),
                 },
             },
         )

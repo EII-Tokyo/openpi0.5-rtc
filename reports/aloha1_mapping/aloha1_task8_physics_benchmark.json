@@ -1,0 +1,872 @@
+{
+  "candidate_promoted": false,
+  "method": {
+    "aligned_app_and_physics_samples_per_run": 179,
+    "excluded_leading_history_samples_per_run": 30,
+    "measured_frames_requested": 180,
+    "raw_physics_samples_per_run": 209,
+    "runtime_control": "SingleArticulation + ArticulationAction",
+    "service": "isaacsim.benchmark.services",
+    "source_stage_authored_per_frame": false,
+    "warmup_frames": 30
+  },
+  "performance": {
+    "all_scales_non_overlapping_improvement": false,
+    "classification": "NO_MEASURABLE_IMPROVEMENT",
+    "criterion": "THROUGHPUT_MAX_PHYSICS_STEP_MS_LT_FIDELITY_MIN_AT_EVERY_TESTED_ENVIRONMENT_SCALE",
+    "scale_records": [
+      {
+        "environment_count": 1,
+        "fidelity_mean_ms": 0.7267676528605669,
+        "fidelity_range_ms": [
+          0.7037559204927369,
+          0.7497793852283968
+        ],
+        "mean_improvement_percent": 5.487787431355577,
+        "non_overlapping_improvement": false,
+        "throughput_mean_ms": 0.6868841889517268,
+        "throughput_range_ms": [
+          0.6646319003411512,
+          0.7091364775623024
+        ]
+      },
+      {
+        "environment_count": 2,
+        "fidelity_mean_ms": 1.091770421692779,
+        "fidelity_range_ms": [
+          0.9052219021253746,
+          1.2783189412601834
+        ],
+        "mean_improvement_percent": -10.06442528892399,
+        "non_overlapping_improvement": false,
+        "throughput_mean_ms": 1.2016508401106192,
+        "throughput_range_ms": [
+          1.1908777129716714,
+          1.2124239672495667
+        ]
+      },
+      {
+        "environment_count": 4,
+        "fidelity_mean_ms": 1.6774565381044781,
+        "fidelity_range_ms": [
+          1.6205629609816568,
+          1.7343501152272998
+        ],
+        "mean_improvement_percent": 4.211455561470683,
+        "non_overlapping_improvement": false,
+        "throughput_mean_ms": 1.6068112014392235,
+        "throughput_range_ms": [
+          1.5884852529238056,
+          1.6251371499546414
+        ]
+      }
+    ]
+  },
+  "raw_runs": [
+    {
+      "app_frame_sample_count": 179,
+      "app_update_ms": 8.317748703910615,
+      "artifact": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-task8-lightweight/collider_lod_benchmark/final_fidelity_e1_r1.json",
+        "sha256": "aa67bd8d377ae4a1790d5cc571cfe18e96c9da6c1ddd740a82e93483df92afe6"
+      },
+      "environment_count": 1,
+      "gpu_dedicated_gb": 1.201,
+      "inventory": {
+        "articulation_count": 3,
+        "collider_prim_count": 75,
+        "collision_mesh_face_count": 254788,
+        "collision_mesh_point_count": 655096,
+        "joint_count": 28,
+        "rigid_body_count": 62,
+        "upper_arm_collider_prim_count": 8
+      },
+      "physics_frame_sample_count": 179,
+      "physics_frame_sample_count_raw": 209,
+      "physics_history_sample_count_excluded": 30,
+      "physics_step_ms": 0.7497793852283968,
+      "profile": "fidelity_profile",
+      "readback_motion_max_abs_rad": 1.338320717215538,
+      "real_time_factor": 2.004,
+      "repeat": 1,
+      "rss_gb": 4.659,
+      "source_stage_unchanged": true,
+      "stage": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task8_collider_lod/1.0/contained_piece_pruning/aloha1_task8_fidelity_profile.usda",
+        "default_prim": "/World",
+        "expected_sha256": "222a327e24893fbcecbdd18d1bc1e3160fbdfb2ebad7d19103b1964f32c929b0",
+        "sha256": "222a327e24893fbcecbdd18d1bc1e3160fbdfb2ebad7d19103b1964f32c929b0"
+      },
+      "stage_load_ms": 221.232198,
+      "uss_gb": 4.566
+    },
+    {
+      "app_frame_sample_count": 179,
+      "app_update_ms": 7.973501290502793,
+      "artifact": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-task8-lightweight/collider_lod_benchmark/final_fidelity_e1_r2.json",
+        "sha256": "7e43b05f32a4e9c65e194fc3b1a78fa61a692c3617897339eadc35398abdc01d"
+      },
+      "environment_count": 1,
+      "gpu_dedicated_gb": 1.201,
+      "inventory": {
+        "articulation_count": 3,
+        "collider_prim_count": 75,
+        "collision_mesh_face_count": 254788,
+        "collision_mesh_point_count": 655096,
+        "joint_count": 28,
+        "rigid_body_count": 62,
+        "upper_arm_collider_prim_count": 8
+      },
+      "physics_frame_sample_count": 179,
+      "physics_frame_sample_count_raw": 209,
+      "physics_history_sample_count_excluded": 30,
+      "physics_step_ms": 0.7037559204927369,
+      "profile": "fidelity_profile",
+      "readback_motion_max_abs_rad": 1.338320717215538,
+      "real_time_factor": 2.089,
+      "repeat": 2,
+      "rss_gb": 4.658,
+      "source_stage_unchanged": true,
+      "stage": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task8_collider_lod/1.0/contained_piece_pruning/aloha1_task8_fidelity_profile.usda",
+        "default_prim": "/World",
+        "expected_sha256": "222a327e24893fbcecbdd18d1bc1e3160fbdfb2ebad7d19103b1964f32c929b0",
+        "sha256": "222a327e24893fbcecbdd18d1bc1e3160fbdfb2ebad7d19103b1964f32c929b0"
+      },
+      "stage_load_ms": 207.414962,
+      "uss_gb": 4.565
+    },
+    {
+      "app_frame_sample_count": 179,
+      "app_update_ms": 9.733945189944134,
+      "artifact": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-task8-lightweight/collider_lod_benchmark/final_fidelity_e2_r1.json",
+        "sha256": "b49cec5bbb80e6b1811cb8c3e45f08030502d90145eb350a46f20abcd28aad8a"
+      },
+      "environment_count": 2,
+      "gpu_dedicated_gb": 1.201,
+      "inventory": {
+        "articulation_count": 6,
+        "collider_prim_count": 150,
+        "collision_mesh_face_count": 509576,
+        "collision_mesh_point_count": 1310192,
+        "joint_count": 56,
+        "rigid_body_count": 124,
+        "upper_arm_collider_prim_count": 16
+      },
+      "physics_frame_sample_count": 179,
+      "physics_frame_sample_count_raw": 209,
+      "physics_history_sample_count_excluded": 30,
+      "physics_step_ms": 0.9052219021253746,
+      "profile": "fidelity_profile",
+      "readback_motion_max_abs_rad": 1.3477163314819336,
+      "real_time_factor": 1.713,
+      "repeat": 1,
+      "rss_gb": 4.649,
+      "source_stage_unchanged": true,
+      "stage": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task8_collider_lod/1.0/benchmark_stages/fidelity_profile/environments_2.usda",
+        "default_prim": "/World",
+        "expected_sha256": "c0e061dab7a1d28e237519a6d38ce1bcf5680e856b0bceae7a11319dae3fb04a",
+        "sha256": "c0e061dab7a1d28e237519a6d38ce1bcf5680e856b0bceae7a11319dae3fb04a"
+      },
+      "stage_load_ms": 244.165433,
+      "uss_gb": 4.556
+    },
+    {
+      "app_frame_sample_count": 179,
+      "app_update_ms": 14.054802111731844,
+      "artifact": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-task8-lightweight/collider_lod_benchmark/final_fidelity_e2_r2.json",
+        "sha256": "f1cf71d21d698d3072904381efc4b5962cd9a96db30533f8edea417cbbb86659"
+      },
+      "environment_count": 2,
+      "gpu_dedicated_gb": 1.205,
+      "inventory": {
+        "articulation_count": 6,
+        "collider_prim_count": 150,
+        "collision_mesh_face_count": 509576,
+        "collision_mesh_point_count": 1310192,
+        "joint_count": 56,
+        "rigid_body_count": 124,
+        "upper_arm_collider_prim_count": 16
+      },
+      "physics_frame_sample_count": 179,
+      "physics_frame_sample_count_raw": 209,
+      "physics_history_sample_count_excluded": 30,
+      "physics_step_ms": 1.2783189412601834,
+      "profile": "fidelity_profile",
+      "readback_motion_max_abs_rad": 1.3477163314819336,
+      "real_time_factor": 1.185,
+      "repeat": 2,
+      "rss_gb": 4.659,
+      "source_stage_unchanged": true,
+      "stage": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task8_collider_lod/1.0/benchmark_stages/fidelity_profile/environments_2.usda",
+        "default_prim": "/World",
+        "expected_sha256": "c0e061dab7a1d28e237519a6d38ce1bcf5680e856b0bceae7a11319dae3fb04a",
+        "sha256": "c0e061dab7a1d28e237519a6d38ce1bcf5680e856b0bceae7a11319dae3fb04a"
+      },
+      "stage_load_ms": 333.110401,
+      "uss_gb": 3.605
+    },
+    {
+      "app_frame_sample_count": 179,
+      "app_update_ms": 18.725934882681564,
+      "artifact": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-task8-lightweight/collider_lod_benchmark/final_fidelity_e4_r1.json",
+        "sha256": "f50b9a509c0c0088451b53e35491c39c73e643e6d89488fd3ffc04d3a531a565"
+      },
+      "environment_count": 4,
+      "gpu_dedicated_gb": 1.205,
+      "inventory": {
+        "articulation_count": 12,
+        "collider_prim_count": 300,
+        "collision_mesh_face_count": 1019152,
+        "collision_mesh_point_count": 2620384,
+        "joint_count": 112,
+        "rigid_body_count": 248,
+        "upper_arm_collider_prim_count": 32
+      },
+      "physics_frame_sample_count": 179,
+      "physics_frame_sample_count_raw": 209,
+      "physics_history_sample_count_excluded": 30,
+      "physics_step_ms": 1.7343501152272998,
+      "profile": "fidelity_profile",
+      "readback_motion_max_abs_rad": 1.3477163314819336,
+      "real_time_factor": 0.89,
+      "repeat": 1,
+      "rss_gb": 4.712,
+      "source_stage_unchanged": true,
+      "stage": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task8_collider_lod/1.0/benchmark_stages/fidelity_profile/environments_4.usda",
+        "default_prim": "/World",
+        "expected_sha256": "7fdab27fc08411621c77696a5260d356244be1264aae4617433b9a6f32d051ce",
+        "sha256": "7fdab27fc08411621c77696a5260d356244be1264aae4617433b9a6f32d051ce"
+      },
+      "stage_load_ms": 301.839796,
+      "uss_gb": 3.656
+    },
+    {
+      "app_frame_sample_count": 179,
+      "app_update_ms": 17.149137720670392,
+      "artifact": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-task8-lightweight/collider_lod_benchmark/final_fidelity_e4_r2.json",
+        "sha256": "4a1f3ac28c658bc879d6b280b860e55f8569db4ecfd7d68b9d13b6ac8ca9a324"
+      },
+      "environment_count": 4,
+      "gpu_dedicated_gb": 1.205,
+      "inventory": {
+        "articulation_count": 12,
+        "collider_prim_count": 300,
+        "collision_mesh_face_count": 1019152,
+        "collision_mesh_point_count": 2620384,
+        "joint_count": 112,
+        "rigid_body_count": 248,
+        "upper_arm_collider_prim_count": 32
+      },
+      "physics_frame_sample_count": 179,
+      "physics_frame_sample_count_raw": 209,
+      "physics_history_sample_count_excluded": 30,
+      "physics_step_ms": 1.6205629609816568,
+      "profile": "fidelity_profile",
+      "readback_motion_max_abs_rad": 1.3477163314819336,
+      "real_time_factor": 0.971,
+      "repeat": 2,
+      "rss_gb": 4.687,
+      "source_stage_unchanged": true,
+      "stage": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task8_collider_lod/1.0/benchmark_stages/fidelity_profile/environments_4.usda",
+        "default_prim": "/World",
+        "expected_sha256": "7fdab27fc08411621c77696a5260d356244be1264aae4617433b9a6f32d051ce",
+        "sha256": "7fdab27fc08411621c77696a5260d356244be1264aae4617433b9a6f32d051ce"
+      },
+      "stage_load_ms": 291.322599,
+      "uss_gb": 3.632
+    },
+    {
+      "app_frame_sample_count": 179,
+      "app_update_ms": 7.959925737430168,
+      "artifact": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-task8-lightweight/collider_lod_benchmark/final_throughput_e1_r1.json",
+        "sha256": "59d31e15a2bd08ea1736f87b2a5cd90844d1e5a320f215e5c0dc5675a69588c8"
+      },
+      "environment_count": 1,
+      "gpu_dedicated_gb": 1.201,
+      "inventory": {
+        "articulation_count": 3,
+        "collider_prim_count": 69,
+        "collision_mesh_face_count": 253672,
+        "collision_mesh_point_count": 654526,
+        "joint_count": 28,
+        "rigid_body_count": 62,
+        "upper_arm_collider_prim_count": 2
+      },
+      "physics_frame_sample_count": 179,
+      "physics_frame_sample_count_raw": 209,
+      "physics_history_sample_count_excluded": 30,
+      "physics_step_ms": 0.7091364775623024,
+      "profile": "throughput_profile",
+      "readback_motion_max_abs_rad": 1.338320717215538,
+      "real_time_factor": 2.094,
+      "repeat": 1,
+      "rss_gb": 4.632,
+      "source_stage_unchanged": true,
+      "stage": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task8_collider_lod/1.0/contained_piece_pruning/aloha1_task8_throughput_profile.usda",
+        "default_prim": "/World",
+        "expected_sha256": "f907375e5b1125a3565eee95f55445ced153eba79927a06a9e5af52f7409f389",
+        "sha256": "f907375e5b1125a3565eee95f55445ced153eba79927a06a9e5af52f7409f389"
+      },
+      "stage_load_ms": 206.40125,
+      "uss_gb": 4.539
+    },
+    {
+      "app_frame_sample_count": 179,
+      "app_update_ms": 7.496967033519553,
+      "artifact": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-task8-lightweight/collider_lod_benchmark/final_throughput_e1_r2.json",
+        "sha256": "fb6b41f589739d8961159740471ecd8414c738a67f0152b7226ff33bf6f6a67d"
+      },
+      "environment_count": 1,
+      "gpu_dedicated_gb": 1.201,
+      "inventory": {
+        "articulation_count": 3,
+        "collider_prim_count": 69,
+        "collision_mesh_face_count": 253672,
+        "collision_mesh_point_count": 654526,
+        "joint_count": 28,
+        "rigid_body_count": 62,
+        "upper_arm_collider_prim_count": 2
+      },
+      "physics_frame_sample_count": 179,
+      "physics_frame_sample_count_raw": 209,
+      "physics_history_sample_count_excluded": 30,
+      "physics_step_ms": 0.6646319003411512,
+      "profile": "throughput_profile",
+      "readback_motion_max_abs_rad": 1.338320717215538,
+      "real_time_factor": 2.224,
+      "repeat": 2,
+      "rss_gb": 4.645,
+      "source_stage_unchanged": true,
+      "stage": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task8_collider_lod/1.0/contained_piece_pruning/aloha1_task8_throughput_profile.usda",
+        "default_prim": "/World",
+        "expected_sha256": "f907375e5b1125a3565eee95f55445ced153eba79927a06a9e5af52f7409f389",
+        "sha256": "f907375e5b1125a3565eee95f55445ced153eba79927a06a9e5af52f7409f389"
+      },
+      "stage_load_ms": 188.027954,
+      "uss_gb": 4.552
+    },
+    {
+      "app_frame_sample_count": 179,
+      "app_update_ms": 13.45927984916201,
+      "artifact": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-task8-lightweight/collider_lod_benchmark/final_throughput_e2_r1.json",
+        "sha256": "d1bd119d5504734f481a9bcb9bace76f0ff776142e3c46b4ffe614620c7c2135"
+      },
+      "environment_count": 2,
+      "gpu_dedicated_gb": 1.201,
+      "inventory": {
+        "articulation_count": 6,
+        "collider_prim_count": 138,
+        "collision_mesh_face_count": 507344,
+        "collision_mesh_point_count": 1309052,
+        "joint_count": 56,
+        "rigid_body_count": 124,
+        "upper_arm_collider_prim_count": 4
+      },
+      "physics_frame_sample_count": 179,
+      "physics_frame_sample_count_raw": 209,
+      "physics_history_sample_count_excluded": 30,
+      "physics_step_ms": 1.2124239672495667,
+      "profile": "throughput_profile",
+      "readback_motion_max_abs_rad": 1.3477163314819336,
+      "real_time_factor": 1.241,
+      "repeat": 1,
+      "rss_gb": 4.664,
+      "source_stage_unchanged": true,
+      "stage": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task8_collider_lod/1.0/benchmark_stages/throughput_profile/environments_2.usda",
+        "default_prim": "/World",
+        "expected_sha256": "a1d3ff005e6c9888417f8fa7e1085ea02eda4aecbbc1e4c37494a1b1649b5fcc",
+        "sha256": "a1d3ff005e6c9888417f8fa7e1085ea02eda4aecbbc1e4c37494a1b1649b5fcc"
+      },
+      "stage_load_ms": 259.129206,
+      "uss_gb": 4.571
+    },
+    {
+      "app_frame_sample_count": 179,
+      "app_update_ms": 12.645629391061453,
+      "artifact": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-task8-lightweight/collider_lod_benchmark/final_throughput_e2_r2.json",
+        "sha256": "2771f353183a256a27c2039bf2158064d6a81f207133948f1d4138ab66b53b0d"
+      },
+      "environment_count": 2,
+      "gpu_dedicated_gb": 1.205,
+      "inventory": {
+        "articulation_count": 6,
+        "collider_prim_count": 138,
+        "collision_mesh_face_count": 507344,
+        "collision_mesh_point_count": 1309052,
+        "joint_count": 56,
+        "rigid_body_count": 124,
+        "upper_arm_collider_prim_count": 4
+      },
+      "physics_frame_sample_count": 179,
+      "physics_frame_sample_count_raw": 209,
+      "physics_history_sample_count_excluded": 30,
+      "physics_step_ms": 1.1908777129716714,
+      "profile": "throughput_profile",
+      "readback_motion_max_abs_rad": 1.3477163314819336,
+      "real_time_factor": 1.315,
+      "repeat": 2,
+      "rss_gb": 4.718,
+      "source_stage_unchanged": true,
+      "stage": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task8_collider_lod/1.0/benchmark_stages/throughput_profile/environments_2.usda",
+        "default_prim": "/World",
+        "expected_sha256": "a1d3ff005e6c9888417f8fa7e1085ea02eda4aecbbc1e4c37494a1b1649b5fcc",
+        "sha256": "a1d3ff005e6c9888417f8fa7e1085ea02eda4aecbbc1e4c37494a1b1649b5fcc"
+      },
+      "stage_load_ms": 913.00928,
+      "uss_gb": 3.663
+    },
+    {
+      "app_frame_sample_count": 179,
+      "app_update_ms": 16.96757434078212,
+      "artifact": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-task8-lightweight/collider_lod_benchmark/final_throughput_e4_r1.json",
+        "sha256": "7f957523bfed279d4e5c0f72bace983b990cfc7efef4e5adeef1b32914ac8799"
+      },
+      "environment_count": 4,
+      "gpu_dedicated_gb": 1.205,
+      "inventory": {
+        "articulation_count": 12,
+        "collider_prim_count": 276,
+        "collision_mesh_face_count": 1014688,
+        "collision_mesh_point_count": 2618104,
+        "joint_count": 112,
+        "rigid_body_count": 248,
+        "upper_arm_collider_prim_count": 8
+      },
+      "physics_frame_sample_count": 179,
+      "physics_frame_sample_count_raw": 209,
+      "physics_history_sample_count_excluded": 30,
+      "physics_step_ms": 1.5884852529238056,
+      "profile": "throughput_profile",
+      "readback_motion_max_abs_rad": 1.3477163314819336,
+      "real_time_factor": 0.983,
+      "repeat": 1,
+      "rss_gb": 4.676,
+      "source_stage_unchanged": true,
+      "stage": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task8_collider_lod/1.0/benchmark_stages/throughput_profile/environments_4.usda",
+        "default_prim": "/World",
+        "expected_sha256": "1f06015d097b2233b287e04c26dc783033a02267f8f92ddcaf613c38f5592903",
+        "sha256": "1f06015d097b2233b287e04c26dc783033a02267f8f92ddcaf613c38f5592903"
+      },
+      "stage_load_ms": 309.462018,
+      "uss_gb": 3.622
+    },
+    {
+      "app_frame_sample_count": 179,
+      "app_update_ms": 17.09298556424581,
+      "artifact": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-task8-lightweight/collider_lod_benchmark/final_throughput_e4_r2.json",
+        "sha256": "fe2933e76fe6147ac61f37a079ab109871323fd3537a9ef02ec6f60f1ad2397e"
+      },
+      "environment_count": 4,
+      "gpu_dedicated_gb": 1.205,
+      "inventory": {
+        "articulation_count": 12,
+        "collider_prim_count": 276,
+        "collision_mesh_face_count": 1014688,
+        "collision_mesh_point_count": 2618104,
+        "joint_count": 112,
+        "rigid_body_count": 248,
+        "upper_arm_collider_prim_count": 8
+      },
+      "physics_frame_sample_count": 179,
+      "physics_frame_sample_count_raw": 209,
+      "physics_history_sample_count_excluded": 30,
+      "physics_step_ms": 1.6251371499546414,
+      "profile": "throughput_profile",
+      "readback_motion_max_abs_rad": 1.3477163314819336,
+      "real_time_factor": 0.975,
+      "repeat": 2,
+      "rss_gb": 4.67,
+      "source_stage_unchanged": true,
+      "stage": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task8_collider_lod/1.0/benchmark_stages/throughput_profile/environments_4.usda",
+        "default_prim": "/World",
+        "expected_sha256": "1f06015d097b2233b287e04c26dc783033a02267f8f92ddcaf613c38f5592903",
+        "sha256": "1f06015d097b2233b287e04c26dc783033a02267f8f92ddcaf613c38f5592903"
+      },
+      "stage_load_ms": 288.802215,
+      "uss_gb": 3.616
+    }
+  ],
+  "runtime": {
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physx": "107.3.26"
+  },
+  "schema_version": 1,
+  "status": "PASS",
+  "summary": {
+    "fidelity_profile": {
+      "1": {
+        "app_update_ms": {
+          "count": 2,
+          "max": 8.317748703910615,
+          "mean": 8.145624997206705,
+          "min": 7.973501290502793,
+          "stdev": 0.24341968042659973
+        },
+        "gpu_dedicated_gb": {
+          "count": 2,
+          "max": 1.201,
+          "mean": 1.201,
+          "min": 1.201,
+          "stdev": 0.0
+        },
+        "physics_step_ms": {
+          "count": 2,
+          "max": 0.7497793852283968,
+          "mean": 0.7267676528605669,
+          "min": 0.7037559204927369,
+          "stdev": 0.03254350400828504
+        },
+        "readback_motion_max_abs_rad": {
+          "count": 2,
+          "max": 1.338320717215538,
+          "mean": 1.338320717215538,
+          "min": 1.338320717215538,
+          "stdev": 0.0
+        },
+        "real_time_factor": {
+          "count": 2,
+          "max": 2.089,
+          "mean": 2.0465,
+          "min": 2.004,
+          "stdev": 0.060104076400856514
+        },
+        "rss_gb": {
+          "count": 2,
+          "max": 4.659,
+          "mean": 4.6585,
+          "min": 4.658,
+          "stdev": 0.0007071067811861557
+        },
+        "stage_load_ms": {
+          "count": 2,
+          "max": 221.232198,
+          "mean": 214.32358,
+          "min": 207.414962,
+          "stdev": 9.770261272854894
+        },
+        "uss_gb": {
+          "count": 2,
+          "max": 4.566,
+          "mean": 4.5655,
+          "min": 4.565,
+          "stdev": 0.0007071067811861557
+        }
+      },
+      "2": {
+        "app_update_ms": {
+          "count": 2,
+          "max": 14.054802111731844,
+          "mean": 11.894373650837988,
+          "min": 9.733945189944134,
+          "stdev": 3.0553072299329216
+        },
+        "gpu_dedicated_gb": {
+          "count": 2,
+          "max": 1.205,
+          "mean": 1.203,
+          "min": 1.201,
+          "stdev": 0.0028284271247461927
+        },
+        "physics_step_ms": {
+          "count": 2,
+          "max": 1.2783189412601834,
+          "mean": 1.091770421692779,
+          "min": 0.9052219021253746,
+          "stdev": 0.26381944641284605
+        },
+        "readback_motion_max_abs_rad": {
+          "count": 2,
+          "max": 1.3477163314819336,
+          "mean": 1.3477163314819336,
+          "min": 1.3477163314819336,
+          "stdev": 0.0
+        },
+        "real_time_factor": {
+          "count": 2,
+          "max": 1.713,
+          "mean": 1.449,
+          "min": 1.185,
+          "stdev": 0.3733523804664971
+        },
+        "rss_gb": {
+          "count": 2,
+          "max": 4.659,
+          "mean": 4.654,
+          "min": 4.649,
+          "stdev": 0.007071067811865324
+        },
+        "stage_load_ms": {
+          "count": 2,
+          "max": 333.110401,
+          "mean": 288.637917,
+          "min": 244.165433,
+          "stdev": 62.89359002522048
+        },
+        "uss_gb": {
+          "count": 2,
+          "max": 4.556,
+          "mean": 4.0805,
+          "min": 3.605,
+          "stdev": 0.6724585489084067
+        }
+      },
+      "4": {
+        "app_update_ms": {
+          "count": 2,
+          "max": 18.725934882681564,
+          "mean": 17.937536301675976,
+          "min": 17.149137720670392,
+          "stdev": 1.1149639658138026
+        },
+        "gpu_dedicated_gb": {
+          "count": 2,
+          "max": 1.205,
+          "mean": 1.205,
+          "min": 1.205,
+          "stdev": 0.0
+        },
+        "physics_step_ms": {
+          "count": 2,
+          "max": 1.7343501152272998,
+          "mean": 1.6774565381044781,
+          "min": 1.6205629609816568,
+          "stdev": 0.08045966837901382
+        },
+        "readback_motion_max_abs_rad": {
+          "count": 2,
+          "max": 1.3477163314819336,
+          "mean": 1.3477163314819336,
+          "min": 1.3477163314819336,
+          "stdev": 0.0
+        },
+        "real_time_factor": {
+          "count": 2,
+          "max": 0.971,
+          "mean": 0.9305,
+          "min": 0.89,
+          "stdev": 0.05727564927611032
+        },
+        "rss_gb": {
+          "count": 2,
+          "max": 4.712,
+          "mean": 4.6995000000000005,
+          "min": 4.687,
+          "stdev": 0.01767766952966331
+        },
+        "stage_load_ms": {
+          "count": 2,
+          "max": 301.839796,
+          "mean": 296.58119750000003,
+          "min": 291.322599,
+          "stdev": 7.4367813177747815
+        },
+        "uss_gb": {
+          "count": 2,
+          "max": 3.656,
+          "mean": 3.644,
+          "min": 3.632,
+          "stdev": 0.016970562748477157
+        }
+      }
+    },
+    "throughput_profile": {
+      "1": {
+        "app_update_ms": {
+          "count": 2,
+          "max": 7.959925737430168,
+          "mean": 7.728446385474861,
+          "min": 7.496967033519553,
+          "stdev": 0.3273612389445307
+        },
+        "gpu_dedicated_gb": {
+          "count": 2,
+          "max": 1.201,
+          "mean": 1.201,
+          "min": 1.201,
+          "stdev": 0.0
+        },
+        "physics_step_ms": {
+          "count": 2,
+          "max": 0.7091364775623024,
+          "mean": 0.6868841889517268,
+          "min": 0.6646319003411512,
+          "stdev": 0.03146948834691637
+        },
+        "readback_motion_max_abs_rad": {
+          "count": 2,
+          "max": 1.338320717215538,
+          "mean": 1.338320717215538,
+          "min": 1.338320717215538,
+          "stdev": 0.0
+        },
+        "real_time_factor": {
+          "count": 2,
+          "max": 2.224,
+          "mean": 2.159,
+          "min": 2.094,
+          "stdev": 0.09192388155425142
+        },
+        "rss_gb": {
+          "count": 2,
+          "max": 4.645,
+          "mean": 4.6385,
+          "min": 4.632,
+          "stdev": 0.009192388155425047
+        },
+        "stage_load_ms": {
+          "count": 2,
+          "max": 206.40125,
+          "mean": 197.214602,
+          "min": 188.027954,
+          "stdev": 12.991882194347676
+        },
+        "uss_gb": {
+          "count": 2,
+          "max": 4.552,
+          "mean": 4.5455,
+          "min": 4.539,
+          "stdev": 0.009192388155425047
+        }
+      },
+      "2": {
+        "app_update_ms": {
+          "count": 2,
+          "max": 13.45927984916201,
+          "mean": 13.052454620111732,
+          "min": 12.645629391061453,
+          "stdev": 0.5753377564384451
+        },
+        "gpu_dedicated_gb": {
+          "count": 2,
+          "max": 1.205,
+          "mean": 1.203,
+          "min": 1.201,
+          "stdev": 0.0028284271247461927
+        },
+        "physics_step_ms": {
+          "count": 2,
+          "max": 1.2124239672495667,
+          "mean": 1.2016508401106192,
+          "min": 1.1908777129716714,
+          "stdev": 0.015235502509069389
+        },
+        "readback_motion_max_abs_rad": {
+          "count": 2,
+          "max": 1.3477163314819336,
+          "mean": 1.3477163314819336,
+          "min": 1.3477163314819336,
+          "stdev": 0.0
+        },
+        "real_time_factor": {
+          "count": 2,
+          "max": 1.315,
+          "mean": 1.278,
+          "min": 1.241,
+          "stdev": 0.05232590180780441
+        },
+        "rss_gb": {
+          "count": 2,
+          "max": 4.718,
+          "mean": 4.691,
+          "min": 4.664,
+          "stdev": 0.03818376618407376
+        },
+        "stage_load_ms": {
+          "count": 2,
+          "max": 913.00928,
+          "mean": 586.069243,
+          "min": 259.129206,
+          "stdev": 462.36303440816147
+        },
+        "uss_gb": {
+          "count": 2,
+          "max": 4.571,
+          "mean": 4.117,
+          "min": 3.663,
+          "stdev": 0.6420529573173851
+        }
+      },
+      "4": {
+        "app_update_ms": {
+          "count": 2,
+          "max": 17.09298556424581,
+          "mean": 17.030279952513965,
+          "min": 16.96757434078212,
+          "stdev": 0.08867912654807661
+        },
+        "gpu_dedicated_gb": {
+          "count": 2,
+          "max": 1.205,
+          "mean": 1.205,
+          "min": 1.205,
+          "stdev": 0.0
+        },
+        "physics_step_ms": {
+          "count": 2,
+          "max": 1.6251371499546414,
+          "mean": 1.6068112014392235,
+          "min": 1.5884852529238056,
+          "stdev": 0.025916804933855096
+        },
+        "readback_motion_max_abs_rad": {
+          "count": 2,
+          "max": 1.3477163314819336,
+          "mean": 1.3477163314819336,
+          "min": 1.3477163314819336,
+          "stdev": 0.0
+        },
+        "real_time_factor": {
+          "count": 2,
+          "max": 0.983,
+          "mean": 0.979,
+          "min": 0.975,
+          "stdev": 0.005656854249492385
+        },
+        "rss_gb": {
+          "count": 2,
+          "max": 4.676,
+          "mean": 4.673,
+          "min": 4.67,
+          "stdev": 0.004242640687119446
+        },
+        "stage_load_ms": {
+          "count": 2,
+          "max": 309.462018,
+          "mean": 299.1321165,
+          "min": 288.802215,
+          "stdev": 14.608686799278185
+        },
+        "uss_gb": {
+          "count": 2,
+          "max": 3.622,
+          "mean": 3.6189999999999998,
+          "min": 3.616,
+          "stdev": 0.004242640687119132
+        }
+      }
+    }
+  }
+}

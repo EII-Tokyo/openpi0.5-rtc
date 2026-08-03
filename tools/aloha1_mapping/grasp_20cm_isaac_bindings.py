@@ -48,6 +48,29 @@ BOTTLE_TENSOR_LIFECYCLE_MODES = {
 }
 
 
+def task_profile_binds_runtime_stage(
+    *,
+    task_profile_stage_sha256: str,
+    runtime_stage_sha256: str,
+    task8_diagnostic: Mapping[str, Any] | None,
+) -> bool:
+    """Verify direct Task 7 binding or an exact non-promoted Task 8 wrapper."""
+
+    if task_profile_stage_sha256 == runtime_stage_sha256:
+        return True
+    if not isinstance(task8_diagnostic, Mapping):
+        return False
+    source = task8_diagnostic.get("source_stage")
+    runtime = task8_diagnostic.get("runtime_stage")
+    return bool(
+        task8_diagnostic.get("candidate_promoted") is False
+        and isinstance(source, Mapping)
+        and isinstance(runtime, Mapping)
+        and source.get("sha256") == task_profile_stage_sha256
+        and runtime.get("sha256") == runtime_stage_sha256
+    )
+
+
 def single_body_tensor_indices(*, count: int) -> np.ndarray:
     """Return the explicit index required by local PhysX tensor setters."""
 
@@ -1108,9 +1131,12 @@ class IsaacGrasp20cmBindings:
         self.task_profile["diagnostic_finger_drive_type"] = str(
             self.config["physics"]["finger_drive_type"]
         )
-        if (
-            self.task_profile["hashes"]["task7a_stage"]
-            != self.stage_hash_before
+        if not task_profile_binds_runtime_stage(
+            task_profile_stage_sha256=self.task_profile["hashes"][
+                "task7a_stage"
+            ],
+            runtime_stage_sha256=self.stage_hash_before,
+            task8_diagnostic=self.profile.get("task8_diagnostic"),
         ):
             raise RuntimeError("Task7B.2 profile does not bind approved Stage")
         verified_lula = Path(
@@ -3859,6 +3885,10 @@ class IsaacGrasp20cmBindings:
                     },
                     "source_stage_or_config_modified": False,
                 },
+                "task8_diagnostic": self.profile.get(
+                    "task8_diagnostic",
+                    {"status": "NOT_APPLICABLE"},
+                ),
             },
             "stage": {
                 "absolute_path": str(self.stage_path),
@@ -3907,7 +3937,9 @@ class IsaacGrasp20cmBindings:
                 "parent_attachment": False,
                 "source_stage_modified": False,
                 "final_collider_modified": False,
-                "task8": "NOT_RUN",
+                "task8": self.config.get("boundaries", {}).get(
+                    "task8", "NOT_RUN"
+                ),
             },
         }
         if report["stage"]["sha256_after"] != self.stage_hash_before:
@@ -3975,7 +4007,9 @@ class IsaacGrasp20cmBindings:
                     "parent_attachment": False,
                     "source_stage_modified": False,
                     "final_collider_modified": False,
-                    "task8": "NOT_RUN",
+                    "task8": self.config.get("boundaries", {}).get(
+                        "task8", "NOT_RUN"
+                    ),
                 },
             },
         )

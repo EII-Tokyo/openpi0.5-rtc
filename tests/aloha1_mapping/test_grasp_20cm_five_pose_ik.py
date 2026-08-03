@@ -517,6 +517,28 @@ def test_gui_supports_machine_only_screening_without_video(
     assert args.skip_video_capture is True
 
 
+def test_gui_supports_headless_task8_collider_profile(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from tools import run_aloha1_grasp_20cm_gui
+
+    monkeypatch.setattr(
+        "sys.argv",
+        [
+            "run_aloha1_grasp_20cm_gui.py",
+            "--headless",
+            "--skip-video-capture",
+            "--task8-collider-profile",
+            "throughput_profile",
+        ],
+    )
+
+    args = run_aloha1_grasp_20cm_gui._parse_args()  # noqa: SLF001
+
+    assert args.headless is True
+    assert args.task8_collider_profile == "throughput_profile"
+
+
 def test_gui_supports_sparse_collision_evidence_only(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

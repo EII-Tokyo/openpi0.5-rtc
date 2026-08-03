@@ -31,9 +31,11 @@ from tools.aloha1_mapping.grasp_20cm_isaac_bindings import required_collider_pha
 from tools.aloha1_mapping.grasp_20cm_isaac_bindings import reset_body_transition_plan
 from tools.aloha1_mapping.grasp_20cm_isaac_bindings import single_body_tensor_indices
 from tools.aloha1_mapping.grasp_20cm_isaac_bindings import solver_active_contacts
+from tools.aloha1_mapping.grasp_20cm_isaac_bindings import task_profile_binds_runtime_stage
 from tools.aloha1_mapping.grasp_20cm_runtime import EXPECTED_DOF_ORDER
 from tools.aloha1_mapping.grasp_20cm_runtime import FrozenInputError
 from tools.aloha1_mapping.grasp_20cm_runtime import Grasp20cmRuntimeAdapter
+from tools.aloha1_mapping.grasp_20cm_runtime import apply_task8_collider_profile
 from tools.aloha1_mapping.grasp_20cm_runtime import apply_verified_session_sublayers
 from tools.aloha1_mapping.grasp_20cm_runtime import load_and_verify_config
 from tools.aloha1_mapping.grasp_20cm_runtime import validate_composed_stage
@@ -87,6 +89,119 @@ def test_verified_session_sublayer_is_inserted_once() -> None:
     assert second["already_present_paths"] == [
         "/tmp/finger_source_limits.usda"
     ]
+
+
+def test_task8_collider_profile_replaces_only_verified_stage(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "source.usda"
+    candidate = tmp_path / "candidate.usda"
+    source.write_text("#usda 1.0\n", encoding="utf-8")
+    candidate.write_text('#usda 1.0\n(defaultPrim="World")\n', encoding="utf-8")
+    source_sha = hashlib.sha256(source.read_bytes()).hexdigest()
+    candidate_sha = hashlib.sha256(candidate.read_bytes()).hexdigest()
+    manifest = tmp_path / "candidate.json"
+    manifest.write_text(
+        json.dumps(
+            {
+                "classification": "DIAGNOSTIC_ONLY_NOT_PROMOTED",
+                "candidate_promoted": False,
+                "source_stage": {
+                    "absolute_path": str(source),
+                    "sha256": source_sha,
+                },
+                "layers": {
+                    "throughput_profile": {
+                        "absolute_path": str(candidate),
+                        "sha256": candidate_sha,
+                    }
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    profile = {
+        "config": {
+            "stage": {
+                "path": str(source),
+                "sha256": source_sha,
+                "root_prim": "/World",
+            },
+            "boundaries": {"task8": "NOT_RUN"},
+        },
+        "frozen_inputs": {
+            "stage": {"absolute_path": str(source), "sha256": source_sha}
+        },
+    }
+
+    result = apply_task8_collider_profile(
+        profile,
+        candidate_report_path=manifest,
+        profile_name="throughput_profile",
+    )
+
+    assert result["config"]["stage"]["path"] == str(candidate.resolve())
+    assert result["config"]["stage"]["sha256"] == candidate_sha
+    assert result["frozen_inputs"]["stage"] == {
+        "absolute_path": str(candidate.resolve()),
+        "sha256": candidate_sha,
+    }
+    assert result["config"]["stage"]["root_prim"] == "/World"
+    assert result["config"]["boundaries"]["task8"] == "AUTHORIZED_IN_PROGRESS"
+    assert result["task8_diagnostic"]["candidate_promoted"] is False
+
+
+def test_task8_collider_profile_rejects_promoted_candidate(
+    tmp_path: Path,
+) -> None:
+    manifest = tmp_path / "candidate.json"
+    manifest.write_text(
+        json.dumps(
+            {
+                "classification": "DIAGNOSTIC_ONLY_NOT_PROMOTED",
+                "candidate_promoted": True,
+                "source_stage": {},
+                "layers": {},
+            }
+        ),
+        encoding="utf-8",
+    )
+    with pytest.raises(FrozenInputError, match="must not be promoted"):
+        apply_task8_collider_profile(
+            {"config": {}, "frozen_inputs": {}},
+            candidate_report_path=manifest,
+            profile_name="throughput_profile",
+        )
+
+
+def test_task8_wrapper_binds_original_task_profile_only_via_manifest() -> None:
+    diagnostic = {
+        "candidate_promoted": False,
+        "source_stage": {"sha256": "source"},
+        "runtime_stage": {"sha256": "wrapper"},
+    }
+
+    assert task_profile_binds_runtime_stage(
+        task_profile_stage_sha256="source",
+        runtime_stage_sha256="wrapper",
+        task8_diagnostic=diagnostic,
+    )
+    assert not task_profile_binds_runtime_stage(
+        task_profile_stage_sha256="other",
+        runtime_stage_sha256="wrapper",
+        task8_diagnostic=diagnostic,
+    )
+    assert not task_profile_binds_runtime_stage(
+        task_profile_stage_sha256="source",
+        runtime_stage_sha256="unknown",
+        task8_diagnostic=diagnostic,
+    )
+    diagnostic["candidate_promoted"] = True
+    assert not task_profile_binds_runtime_stage(
+        task_profile_stage_sha256="source",
+        runtime_stage_sha256="wrapper",
+        task8_diagnostic=diagnostic,
+    )
 
 
 class _FakeContinuousTrajectory:

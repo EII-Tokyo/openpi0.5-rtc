@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
+import copy
 import hashlib
+import json
 import math
 from pathlib import Path
 from typing import Any, Protocol
@@ -279,6 +281,79 @@ def load_and_verify_config(
         "frozen_inputs": records,
         "session_sublayers": session_sublayers,
     }
+
+
+def apply_task8_collider_profile(
+    profile: Mapping[str, Any],
+    *,
+    candidate_report_path: Path,
+    profile_name: str,
+) -> dict[str, Any]:
+    """Select one frozen, non-promoted Task 8 collider profile.
+
+    The returned mapping is a deep copy.  Only the Stage frozen-input record
+    and the explicit Task 8 boundary are changed; the grasp configuration,
+    session layers, physical parameters, and source files remain untouched.
+    """
+
+    if profile_name not in {"fidelity_profile", "throughput_profile"}:
+        raise FrozenInputError(f"unsupported Task 8 collider profile: {profile_name}")
+    report_record = verify_frozen_file(
+        candidate_report_path,
+        sha256_file(candidate_report_path.resolve()),
+    )
+    report = json.loads(candidate_report_path.read_text(encoding="utf-8"))
+    if report.get("classification") != "DIAGNOSTIC_ONLY_NOT_PROMOTED":
+        raise FrozenInputError("unexpected Task 8 candidate classification")
+    if report.get("candidate_promoted") is not False:
+        raise FrozenInputError("Task 8 collider candidate must not be promoted")
+
+    result = copy.deepcopy(dict(profile))
+    source_record = result.get("frozen_inputs", {}).get("stage")
+    manifest_source = report.get("source_stage")
+    if not isinstance(source_record, Mapping) or not isinstance(
+        manifest_source, Mapping
+    ):
+        raise FrozenInputError("Task 8 source Stage records are missing")
+    if (
+        str(Path(str(source_record.get("absolute_path"))).resolve())
+        != str(Path(str(manifest_source.get("absolute_path"))).resolve())
+        or source_record.get("sha256") != manifest_source.get("sha256")
+    ):
+        raise FrozenInputError("Task 8 candidate source Stage does not match runtime")
+
+    layer_record = report.get("layers", {}).get(profile_name)
+    if not isinstance(layer_record, Mapping):
+        raise FrozenInputError(f"missing Task 8 layer record: {profile_name}")
+    candidate = verify_frozen_file(
+        Path(str(layer_record.get("absolute_path"))),
+        str(layer_record.get("sha256")),
+    )
+    config = result.get("config")
+    frozen_inputs = result.get("frozen_inputs")
+    if not isinstance(config, dict) or not isinstance(frozen_inputs, dict):
+        raise FrozenInputError("runtime profile is not mutable after deep copy")
+    stage_config = config.get("stage")
+    if not isinstance(stage_config, dict):
+        raise FrozenInputError("runtime Stage config is missing")
+    stage_config["path"] = candidate["absolute_path"]
+    stage_config["sha256"] = candidate["sha256"]
+    frozen_inputs["stage"] = candidate
+    boundaries = config.get("boundaries")
+    if not isinstance(boundaries, dict):
+        raise FrozenInputError("runtime boundary record is missing")
+    boundaries["task8"] = "AUTHORIZED_IN_PROGRESS"
+    result["task8_diagnostic"] = {
+        "profile_name": profile_name,
+        "classification": "DIAGNOSTIC_ONLY_NOT_PROMOTED",
+        "candidate_promoted": False,
+        "candidate_report": report_record,
+        "source_stage": dict(manifest_source),
+        "runtime_stage": candidate,
+        "physical_parameters_changed": False,
+        "final_or_default_asset_modified": False,
+    }
+    return result
 
 
 def _verify_record(

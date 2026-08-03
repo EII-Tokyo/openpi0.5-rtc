@@ -1,0 +1,380 @@
+{
+  "candidate_classification": "DIAGNOSTIC_ONLY_NOT_PROMOTED",
+  "candidate_promoted": false,
+  "conclusion": "NO_MEASURABLE_IMPROVEMENT",
+  "failure_evidence": {
+    "preserved_diagnostic_invocation_failures": [
+      {
+        "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-task8-lightweight/collider_lod_smoke/fidelity_profile",
+        "classification": "REJECTED_TASK8_WRAPPER_HASH_GUARD_INCOMPATIBILITY"
+      },
+      {
+        "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-task8-lightweight/collider_lod_smoke/fidelity_profile_attempt2",
+        "classification": "REJECTED_STALE_ATTEMPT4_INITIALIZATION_CONTRACT"
+      }
+    ],
+    "reason": "NO_REPRODUCIBLE_PHYSICAL_OR_RENDER_REGRESSION",
+    "runtime_or_collision_regression": false,
+    "video_required": false
+  },
+  "final_or_default_asset_modified": false,
+  "memory_conclusion": "NO_STABLE_MEASURABLE_REDUCTION",
+  "performance": {
+    "all_scales_non_overlapping_improvement": false,
+    "classification": "NO_MEASURABLE_IMPROVEMENT",
+    "criterion": "THROUGHPUT_MAX_PHYSICS_STEP_MS_LT_FIDELITY_MIN_AT_EVERY_TESTED_ENVIRONMENT_SCALE",
+    "scale_records": [
+      {
+        "environment_count": 1,
+        "fidelity_mean_ms": 0.7267676528605669,
+        "fidelity_range_ms": [
+          0.7037559204927369,
+          0.7497793852283968
+        ],
+        "mean_improvement_percent": 5.487787431355577,
+        "non_overlapping_improvement": false,
+        "throughput_mean_ms": 0.6868841889517268,
+        "throughput_range_ms": [
+          0.6646319003411512,
+          0.7091364775623024
+        ]
+      },
+      {
+        "environment_count": 2,
+        "fidelity_mean_ms": 1.091770421692779,
+        "fidelity_range_ms": [
+          0.9052219021253746,
+          1.2783189412601834
+        ],
+        "mean_improvement_percent": -10.06442528892399,
+        "non_overlapping_improvement": false,
+        "throughput_mean_ms": 1.2016508401106192,
+        "throughput_range_ms": [
+          1.1908777129716714,
+          1.2124239672495667
+        ]
+      },
+      {
+        "environment_count": 4,
+        "fidelity_mean_ms": 1.6774565381044781,
+        "fidelity_range_ms": [
+          1.6205629609816568,
+          1.7343501152272998
+        ],
+        "mean_improvement_percent": 4.211455561470683,
+        "non_overlapping_improvement": false,
+        "throughput_mean_ms": 1.6068112014392235,
+        "throughput_range_ms": [
+          1.5884852529238056,
+          1.6251371499546414
+        ]
+      }
+    ]
+  },
+  "piece_reduction": {
+    "after": 2,
+    "before": 8,
+    "reduction": 6
+  },
+  "recommendation": "DO_NOT_PROMOTE_NO_MEASURABLE_IMPROVEMENT",
+  "regression": {
+    "fresh_cooking": "PASS_TWO_FRESH_PROCESSES",
+    "static": "PASS_EQUIVALENT_TO_BASELINE_WITH_PREEXISTING_ABSOLUTE_GATE_FAILURE",
+    "static_absolute_failure_scope": "sample_02_and_sample_05_preexisting_self_overlap_gate",
+    "static_absolute_status": "FAIL",
+    "swept": "PASS_809_WAYPOINTS_TWO_FRESH_PROCESSES"
+  },
+  "runtime": {
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physx": "107.3.26"
+  },
+  "runtime_smoke": {
+    "fidelity_profile": {
+      "deterministic_signature": "11838209dc4ca742dcdc5480f00466f35907316545cdbcbed7171bb83ef02cf6",
+      "finger_safety": {
+        "abort_on_first_runtime_violation": true,
+        "classified_environment_contact_count": 304,
+        "first_violation": null,
+        "frame_count": 629,
+        "status": "PASS",
+        "violation_count": 0
+      },
+      "hold_contact_summary": {
+        "hold_bottle_origin_z_delta_m": -3.316998481750488e-05,
+        "hold_drop_m": 0.000193937320122628,
+        "hold_frame_count": 120,
+        "left_finger": {
+          "collider_pair_paths": [
+            [
+              "/World/follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh",
+              "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Body_10/COL_Body_10Mesh"
+            ],
+            [
+              "/World/follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh",
+              "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Body_11/COL_Body_11Mesh"
+            ],
+            [
+              "/World/follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh",
+              "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Body_12/COL_Body_12Mesh"
+            ],
+            [
+              "/World/follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh",
+              "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Body_13/COL_Body_13Mesh"
+            ],
+            [
+              "/World/follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh",
+              "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Body_14/COL_Body_14Mesh"
+            ]
+          ],
+          "geometric_contact_frame_count": 120,
+          "minimum_separation_m": {
+            "count": 120,
+            "max": -1.6118947314680554e-06,
+            "mean": -1.7619969715572856e-06,
+            "min": -1.9253434402344283e-06,
+            "stdev": 5.203625036403286e-08
+          },
+          "positive_impulse_sum_ns": {
+            "count": 120,
+            "max": 0.009791245549560798,
+            "mean": 0.009692493112826705,
+            "min": 0.009608624270352792,
+            "stdev": 2.068295774774373e-05
+          },
+          "solver_active_frame_count": 120
+        },
+        "right_finger": {
+          "collider_pair_paths": [
+            [
+              "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh",
+              "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Body_02/COL_Body_02Mesh"
+            ],
+            [
+              "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh",
+              "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Body_03/COL_Body_03Mesh"
+            ],
+            [
+              "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh",
+              "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Body_04/COL_Body_04Mesh"
+            ],
+            [
+              "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh",
+              "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Body_05/COL_Body_05Mesh"
+            ],
+            [
+              "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh",
+              "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Body_06/COL_Body_06Mesh"
+            ]
+          ],
+          "geometric_contact_frame_count": 120,
+          "minimum_separation_m": {
+            "count": 120,
+            "max": -4.070368504471844e-07,
+            "mean": -5.93426833953951e-07,
+            "min": -7.200974323495757e-07,
+            "stdev": 5.047889379839312e-08
+          },
+          "positive_impulse_sum_ns": {
+            "count": 120,
+            "max": 0.00980512224423486,
+            "mean": 0.009694300927572948,
+            "min": 0.009521324248744792,
+            "stdev": 2.6557376993706028e-05
+          },
+          "solver_active_frame_count": 120
+        }
+      },
+      "initialization_signature": "ae00b3367a35927414f66f9bac3c58b1a9e578459291e8c1532d7253b12b08e1",
+      "machine_status": "PASS",
+      "metrics": {
+        "aborted": false,
+        "bilateral_contact_before_lift": true,
+        "bilateral_contact_through_hold": true,
+        "dynamic_during_formal_phases": true,
+        "ee_vertical_displacement_m": -0.1008390486240387,
+        "finite_state": true,
+        "forbidden_constraint": false,
+        "height_reached": true,
+        "hold_bilateral_geometric_frame_count": 120,
+        "hold_bilateral_solver_active_frame_count": 120,
+        "hold_drop_m": 0.000193937320122628,
+        "hold_duration_s": 2.0,
+        "hold_physics_frame_count": 120,
+        "maximum_clearance_m": 0.20018182360669862,
+        "numerical_ejection": false,
+        "persistent_penetration": false,
+        "status": "PASS"
+      },
+      "profile": "fidelity_profile",
+      "reason": "stable_20cm_hold",
+      "runtime_report": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-task8-lightweight/collider_lod_smoke/fidelity_profile_attempt3/aloha1_grasp_20cm_runtime.json",
+        "sha256": "6e036e82b5599024b71c63f26654764810a272fad5a6632475fed5fddf949db5"
+      },
+      "stage": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task8_collider_lod/1.0/contained_piece_pruning/aloha1_task8_fidelity_profile.usda",
+        "root_prim": "/World",
+        "session_only": true,
+        "sha256_after": "222a327e24893fbcecbdd18d1bc1e3160fbdfb2ebad7d19103b1964f32c929b0",
+        "sha256_before": "222a327e24893fbcecbdd18d1bc1e3160fbdfb2ebad7d19103b1964f32c929b0",
+        "sublayers": [
+          "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda"
+        ]
+      },
+      "telemetry": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-task8-lightweight/collider_lod_smoke/fidelity_profile_attempt3/aloha1_grasp_20cm_telemetry.jsonl",
+        "sha256": "08058523cd81cefd961beb46700db0a8f0329ca03c14230252543fe9914db206"
+      },
+      "telemetry_line_count": 629,
+      "video": "NOT_RECORDED_BY_AUTHORIZED_LIGHTWEIGHT_SMOKE_POLICY"
+    },
+    "throughput_profile": {
+      "deterministic_signature": "d2b1e4aa224f07bc3cd7741c9b065c873c2cc7ab0a2f3d29fdb9d30588e66c71",
+      "finger_safety": {
+        "abort_on_first_runtime_violation": true,
+        "classified_environment_contact_count": 304,
+        "first_violation": null,
+        "frame_count": 629,
+        "status": "PASS",
+        "violation_count": 0
+      },
+      "hold_contact_summary": {
+        "hold_bottle_origin_z_delta_m": -3.311038017272949e-05,
+        "hold_drop_m": 0.00019418846757898733,
+        "hold_frame_count": 120,
+        "left_finger": {
+          "collider_pair_paths": [
+            [
+              "/World/follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh",
+              "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Body_10/COL_Body_10Mesh"
+            ],
+            [
+              "/World/follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh",
+              "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Body_11/COL_Body_11Mesh"
+            ],
+            [
+              "/World/follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh",
+              "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Body_12/COL_Body_12Mesh"
+            ],
+            [
+              "/World/follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh",
+              "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Body_13/COL_Body_13Mesh"
+            ],
+            [
+              "/World/follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh",
+              "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Body_14/COL_Body_14Mesh"
+            ]
+          ],
+          "geometric_contact_frame_count": 2,
+          "minimum_separation_m": {
+            "count": 120,
+            "max": 6.325994377220923e-07,
+            "mean": 1.4799136056620198e-07,
+            "min": -1.8074731045203407e-08,
+            "stdev": 8.238303099776277e-08
+          },
+          "positive_impulse_sum_ns": {
+            "count": 120,
+            "max": 0.009845309610301776,
+            "mean": 0.009738879056132963,
+            "min": 0.009649190345964918,
+            "stdev": 2.2181027798202718e-05
+          },
+          "solver_active_frame_count": 120
+        },
+        "right_finger": {
+          "collider_pair_paths": [
+            [
+              "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh",
+              "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Body_02/COL_Body_02Mesh"
+            ],
+            [
+              "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh",
+              "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Body_03/COL_Body_03Mesh"
+            ],
+            [
+              "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh",
+              "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Body_04/COL_Body_04Mesh"
+            ],
+            [
+              "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh",
+              "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Body_05/COL_Body_05Mesh"
+            ],
+            [
+              "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh",
+              "/World/ALOHA1Grasp20cmSession/Bottle500/Collisions/COL_Body_06/COL_Body_06Mesh"
+            ]
+          ],
+          "geometric_contact_frame_count": 120,
+          "minimum_separation_m": {
+            "count": 120,
+            "max": -2.9058451218588743e-06,
+            "mean": -3.123594260993438e-06,
+            "min": -3.302723825981957e-06,
+            "stdev": 5.951661745476454e-08
+          },
+          "positive_impulse_sum_ns": {
+            "count": 120,
+            "max": 0.009831914985326805,
+            "mean": 0.009725830532433987,
+            "min": 0.009558902609833966,
+            "stdev": 2.613051681075295e-05
+          },
+          "solver_active_frame_count": 120
+        }
+      },
+      "initialization_signature": "ae00b3367a35927414f66f9bac3c58b1a9e578459291e8c1532d7253b12b08e1",
+      "machine_status": "PASS",
+      "metrics": {
+        "aborted": false,
+        "bilateral_contact_before_lift": true,
+        "bilateral_contact_through_hold": true,
+        "dynamic_during_formal_phases": true,
+        "ee_vertical_displacement_m": -0.10083910822868347,
+        "finite_state": true,
+        "forbidden_constraint": false,
+        "height_reached": true,
+        "hold_bilateral_geometric_frame_count": 2,
+        "hold_bilateral_solver_active_frame_count": 120,
+        "hold_drop_m": 0.00019418846757898733,
+        "hold_duration_s": 2.0,
+        "hold_physics_frame_count": 120,
+        "maximum_clearance_m": 0.20014004183589792,
+        "numerical_ejection": false,
+        "persistent_penetration": false,
+        "status": "PASS"
+      },
+      "profile": "throughput_profile",
+      "reason": "stable_20cm_hold",
+      "runtime_report": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-task8-lightweight/collider_lod_smoke/throughput_profile/aloha1_grasp_20cm_runtime.json",
+        "sha256": "4ac5512fae4178745ea14b53c7c0cdf463cafecf391fb33a90b79db7b17e2701"
+      },
+      "stage": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task8_collider_lod/1.0/contained_piece_pruning/aloha1_task8_throughput_profile.usda",
+        "root_prim": "/World",
+        "session_only": true,
+        "sha256_after": "f907375e5b1125a3565eee95f55445ced153eba79927a06a9e5af52f7409f389",
+        "sha256_before": "f907375e5b1125a3565eee95f55445ced153eba79927a06a9e5af52f7409f389",
+        "sublayers": [
+          "configuration/deactivate_contained_pieces.usda",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda"
+        ]
+      },
+      "telemetry": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-task8-lightweight/collider_lod_smoke/throughput_profile/aloha1_grasp_20cm_telemetry.jsonl",
+        "sha256": "a6385cefa317cf01b661e435bee9cc76894646e983a8fd71c804b6f3a4aa71b8"
+      },
+      "telemetry_line_count": 629,
+      "video": "NOT_RECORDED_BY_AUTHORIZED_LIGHTWEIGHT_SMOKE_POLICY"
+    }
+  },
+  "schema_version": 1,
+  "smoke_contact_interpretation": {
+    "exact_geometric_zero_threshold_changed": true,
+    "interpretation": "LEFT_MINIMUM_SEPARATION_CROSSED_EXACT_ZERO_AT_MICROMETRE_SCALE; BOTH_SIDES_RETAINED_POSITIVE_SOLVER_IMPULSE_FOR_ALL_120_HOLD_FRAMES",
+    "status": "PASS_SOLVER_CONTACT_PERSISTED"
+  },
+  "status": "NO_MEASURABLE_IMPROVEMENT"
+}
