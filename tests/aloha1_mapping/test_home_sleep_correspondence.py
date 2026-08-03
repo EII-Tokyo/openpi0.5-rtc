@@ -26,6 +26,10 @@ from tools.review_aloha1_home_sleep_digital_evidence import build_visual_review
 
 ROOT = Path(__file__).resolve().parents[2]
 
+SELECTED_HISTORICAL_SLEEP = (0.0, -1.8, 1.55, 0.0, -1.57, 0.0)
+SELECTED_HISTORICAL_COMMIT = "dbc6aefb53e956181fe97f60474f1ad292491f0c"
+CURRENT_HUMBLE_OUT_OF_RANGE_SLEEP = (0.0, -2.05, 1.7, 0.0, -2.0, 0.0)
+
 
 def test_home_sleep_samples_freeze_three_cycles_and_end_at_home() -> None:
     samples = build_home_sleep_samples(
@@ -53,6 +57,10 @@ def test_home_sleep_samples_freeze_three_cycles_and_end_at_home() -> None:
     assert {len(sample.q_rad) for sample in samples} == {6}
     assert [sample.index for sample in samples] == list(range(1850))
     assert [sample.time_ns for sample in samples] == [index * 20_000_000 for index in range(1850)]
+
+
+def test_selected_sleep_is_the_user_approved_official_historical_variant() -> None:
+    assert SLEEP_ARM == SELECTED_HISTORICAL_SLEEP
 
 
 def test_home_sleep_segment_lengths_and_endpoints_are_exact() -> None:
@@ -141,6 +149,49 @@ def test_home_sleep_manifest_freezes_official_sources_and_exclusions() -> None:
     assert manifest["candidate_promoted"] is False
     assert len(manifest["command_signature"]) == 64
     assert len(manifest["manifest_signature"]) == 64
+    assert source_audit["classification"] == (
+        "OFFICIAL_HISTORICAL_LEGAL_ALOHA_SLEEP_EXPLICITLY_SELECTED_BY_USER"
+    )
+    selected = next(item for item in source_audit["sources"] if item["id"] == "selected_sleep")
+    assert selected["source_type"] == "git_blob"
+    assert selected["commit"] == SELECTED_HISTORICAL_COMMIT
+    assert selected["sha256"] == "a5c809a5dd1cd6fb795a8f4f4cbf69de6e0133e1916cb8816061d29f4a8aa75e"
+    assert source_audit["sleep"]["value_rad"] == pytest.approx(SELECTED_HISTORICAL_SLEEP)
+    assert source_audit["current_humble_comparison"]["used_as_command_authority"] is False
+    assert source_audit["group_limit_gate"] == {
+        "status": "PASS",
+        "command_semantics": "REJECT_WHOLE_GROUP_SAMPLE",
+        "sample_count": 1850,
+        "accepted_sample_count": 1850,
+        "rejected_sample_count": 0,
+        "first_rejected_sample_index": None,
+        "first_rejected_joint_names": [],
+        "all_samples_publishable": True,
+    }
+
+
+def test_selected_historical_sleep_passes_every_group_limit_sample() -> None:
+    samples = build_home_sleep_samples(
+        home=HOME_ARM,
+        sleep=SELECTED_HISTORICAL_SLEEP,
+        command_hz=50,
+        move_seconds=5,
+        hold_seconds=1,
+        cycles=3,
+    )
+    result = evaluate_interbotix_group_limit_gate(
+        samples,
+        lower_rad=[-math.pi, math.radians(-106), math.radians(-101), -math.pi, math.radians(-107), -math.pi],
+        upper_rad=[math.pi, math.radians(72), math.radians(92), math.pi, math.radians(128), math.pi],
+        moving_time_s=2.0,
+        velocity_limits_rad_s=[math.pi] * 6,
+    )
+
+    assert result["sample_count"] == 1850
+    assert result["accepted_sample_count"] == 1850
+    assert result["rejected_sample_count"] == 0
+    assert result["first_rejected_sample_index"] is None
+    assert result["last_published_q_rad"] == pytest.approx(HOME_ARM)
 
 
 def test_home_sleep_manifest_is_deterministic() -> None:
@@ -342,10 +393,10 @@ def _digital_run(status: str, signature: str) -> dict:
     }
 
 
-def test_interbotix_group_gate_rejects_the_whole_first_illegal_sample() -> None:
+def test_current_humble_group_gate_rejects_the_whole_first_illegal_sample() -> None:
     samples = build_home_sleep_samples(
         home=HOME_ARM,
-        sleep=SLEEP_ARM,
+        sleep=CURRENT_HUMBLE_OUT_OF_RANGE_SLEEP,
         command_hz=50,
         move_seconds=5,
         hold_seconds=1,

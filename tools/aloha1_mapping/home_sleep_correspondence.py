@@ -18,7 +18,7 @@ ARM_JOINT_ORDER = (
     "wrist_rotate",
 )
 HOME_ARM = (0.0, -0.96, 1.16, 0.0, -0.3, 0.0)
-SLEEP_ARM = (0.0, -2.05, 1.7, 0.0, -2.0, 0.0)
+SLEEP_ARM = (0.0, -1.8, 1.55, 0.0, -1.57, 0.0)
 FOLLOWER_ROOT_PREFIXES = ("/World/follower_left/", "/World/follower_right/")
 
 

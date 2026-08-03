@@ -1,8 +1,31 @@
 {
-  "classification": "OFFICIAL_EXACT_MODEL_HOME_SLEEP_SOURCE_AUDIT",
+  "classification": "OFFICIAL_HISTORICAL_LEGAL_ALOHA_SLEEP_EXPLICITLY_SELECTED_BY_USER",
   "command_dt_s": 0.02,
-  "deterministic_signature": "099d6b6b227fcbe7b65c0f27999b338aa601b40fde629291e947f646bd906332",
+  "current_humble_comparison": {
+    "classification": "CURRENT_HUMBLE_OUT_OF_LIMIT_COMPARISON_ONLY",
+    "sleep_rad": [
+      0.0,
+      -2.05,
+      1.7,
+      0.0,
+      -2.0,
+      0.0
+    ],
+    "source_id": "aloha_vx300s",
+    "used_as_command_authority": false
+  },
+  "deterministic_signature": "44758902293d0f3df768c1c08f871d0ee0e811c4c31a15a202a5146ab84c076a",
   "generic_vx300s_substituted": false,
+  "group_limit_gate": {
+    "accepted_sample_count": 1850,
+    "all_samples_publishable": true,
+    "command_semantics": "REJECT_WHOLE_GROUP_SAMPLE",
+    "first_rejected_joint_names": [],
+    "first_rejected_sample_index": null,
+    "rejected_sample_count": 0,
+    "sample_count": 1850,
+    "status": "PASS"
+  },
   "home": {
     "source_id": "robot_utils",
     "value_rad": [
@@ -12,6 +35,33 @@
       0.0,
       -0.3,
       0.0
+    ]
+  },
+  "joint_limit_authority": {
+    "lower_rad": [
+      -3.141582653589793,
+      -1.8500490071139892,
+      -1.7627825445142729,
+      -3.141582653589793,
+      -1.8675022996339325,
+      -3.141582653589793
+    ],
+    "source_id": "aloha_vx300s_xacro",
+    "upper_rad": [
+      3.141582653589793,
+      1.2566370614359172,
+      1.6057029118347832,
+      3.141582653589793,
+      2.234021442552742,
+      3.141582653589793
+    ],
+    "velocity_rad_s": [
+      3.141592653589793,
+      3.141592653589793,
+      3.141592653589793,
+      3.141592653589793,
+      3.141592653589793,
+      3.141592653589793
     ]
   },
   "joint_order": [
@@ -26,17 +76,29 @@
   "product": "aloha_vx300s",
   "schema_version": 1,
   "sleep": {
-    "source_id": "aloha_vx300s",
+    "source_id": "selected_sleep",
     "value_rad": [
       0.0,
-      -2.05,
-      1.7,
+      -1.8,
+      1.55,
       0.0,
-      -2.0,
+      -1.57,
       0.0
     ]
   },
   "sources": [
+    {
+      "absolute_repository_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha-home-sleep-root-cause/history_probe",
+      "branch": "humble (historical pre-PR-225)",
+      "commit": "dbc6aefb53e956181fe97f60474f1ad292491f0c",
+      "git_object_path": "interbotix_ros_xsarms/interbotix_xsarm_control/config/aloha_vx300s.yaml",
+      "id": "selected_sleep",
+      "license": "BSD-3-Clause",
+      "repository": "https://github.com/Interbotix/interbotix_ros_manipulators.git",
+      "selection_status": "OFFICIAL_HISTORICAL_LEGAL_SLEEP_EXPLICITLY_SELECTED_BY_USER",
+      "sha256": "a5c809a5dd1cd6fb795a8f4f4cbf69de6e0133e1916cb8816061d29f4a8aa75e",
+      "source_type": "git_blob"
+    },
     {
       "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/sources/official_repo_probe/interbotix_aloha_main/aloha/robot_utils.py",
       "branch": "main",
@@ -44,7 +106,8 @@
       "id": "robot_utils",
       "license": "MIT",
       "repository": "https://github.com/Interbotix/aloha.git",
-      "sha256": "0d7ab1014210f311eebc2cdb0f5d2a58c5f870f8b875b7a05b3373413efe1179"
+      "sha256": "0d7ab1014210f311eebc2cdb0f5d2a58c5f870f8b875b7a05b3373413efe1179",
+      "source_type": "file"
     },
     {
       "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/sources/official_repo_probe/interbotix_aloha_main/aloha/constants.py",
@@ -53,7 +116,8 @@
       "id": "constants",
       "license": "MIT",
       "repository": "https://github.com/Interbotix/aloha.git",
-      "sha256": "2b553446f77b74c959e31b01d9901c21b8fc33096f87a43e3cc5462f96674ac5"
+      "sha256": "2b553446f77b74c959e31b01d9901c21b8fc33096f87a43e3cc5462f96674ac5",
+      "source_type": "file"
     },
     {
       "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/sources/interbotix_manipulators_b66d5b905725351dd71d3251a06cd3f4c777940f/aloha_vx300s.yaml",
@@ -62,8 +126,24 @@
       "id": "aloha_vx300s",
       "license": "BSD-3-Clause",
       "repository": "https://github.com/Interbotix/interbotix_ros_manipulators.git",
-      "sha256": "999cc0863b7b1e0334c5cd75d5ed1430736d25aa13881e4c24f4bf6cb3a1924f"
+      "sha256": "999cc0863b7b1e0334c5cd75d5ed1430736d25aa13881e4c24f4bf6cb3a1924f",
+      "source_type": "file"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/sources/interbotix_manipulators_b66d5b905725351dd71d3251a06cd3f4c777940f/aloha_vx300s.urdf.xacro",
+      "branch": "humble",
+      "commit": "b66d5b905725351dd71d3251a06cd3f4c777940f",
+      "id": "aloha_vx300s_xacro",
+      "license": "BSD-3-Clause",
+      "repository": "https://github.com/Interbotix/interbotix_ros_manipulators.git",
+      "sha256": "45dff1e0de2456386dbb64b851c94db2d874b6dbefb6503cb747bc55435177bd",
+      "source_type": "file"
     }
   ],
-  "status": "PASS"
+  "status": "PASS",
+  "version_selection": {
+    "current_urdf_and_driver_limits_preserved": true,
+    "selected_command_source": "official historical ROS2 PR #189",
+    "status": "EXPLICIT_CROSS_VERSION_COMMAND_SELECTION"
+  }
 }

@@ -10,6 +10,7 @@ from dataclasses import asdict
 import hashlib
 import json
 from pathlib import Path
+import subprocess
 from typing import Any
 
 import yaml
@@ -17,6 +18,8 @@ import yaml
 from tools.aloha1_mapping.home_sleep_correspondence import ARM_JOINT_ORDER
 from tools.aloha1_mapping.home_sleep_correspondence import build_home_sleep_samples
 from tools.aloha1_mapping.home_sleep_correspondence import command_signature
+from tools.aloha1_mapping.home_sleep_correspondence import evaluate_interbotix_group_limit_gate
+from tools.audit_aloha1_sleep_limit_correspondence import _xacro_limits
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CONFIG = ROOT / "configs/aloha1_home_sleep_correspondence.yaml"
@@ -102,6 +105,42 @@ def _extract_dt(path: Path) -> float:
 def _verified_source(
     name: str, record: Mapping[str, Any], *, project_root: Path
 ) -> dict[str, Any]:
+    source_type = str(record.get("source_type", "file"))
+    if source_type == "git_blob":
+        repository_path = (
+            project_root / str(record["local_repository_path"])
+        ).resolve(strict=True)
+        commit = str(record["commit"])
+        object_path = str(record["git_object_path"])
+        subprocess.run(
+            ["git", "-C", str(repository_path), "cat-file", "-e", f"{commit}^{{commit}}"],
+            check=True,
+            capture_output=True,
+        )
+        content = subprocess.run(
+            ["git", "-C", str(repository_path), "show", f"{commit}:{object_path}"],
+            check=True,
+            capture_output=True,
+        ).stdout
+        actual = hashlib.sha256(content).hexdigest()
+        expected = str(record["sha256"])
+        if actual != expected:
+            raise ValueError(f"{name} SHA-256 mismatch: {actual} != {expected}")
+        return {
+            "id": name,
+            "source_type": source_type,
+            "repository": str(record["repository"]),
+            "branch": str(record["branch"]),
+            "commit": commit,
+            "license": str(record["license"]),
+            "absolute_repository_path": str(repository_path),
+            "git_object_path": object_path,
+            "sha256": actual,
+            "selection_status": str(record["selection_status"]),
+            "_content_text": content.decode("utf-8"),
+        }
+    if source_type != "file":
+        raise ValueError(f"unsupported source_type for {name}: {source_type}")
     path = (project_root / str(record["local_path"])).resolve(strict=True)
     actual = _sha256(path)
     expected = str(record["sha256"])
@@ -109,6 +148,7 @@ def _verified_source(
         raise ValueError(f"{name} SHA-256 mismatch: {actual} != {expected}")
     return {
         "id": name,
+        "source_type": source_type,
         "repository": str(record["repository"]),
         "branch": str(record["branch"]),
         "commit": str(record["commit"]),
@@ -140,9 +180,10 @@ def build_manifest(
         Path(sources["robot_utils"]["absolute_path"])
     )
     dt = _extract_dt(Path(sources["constants"]["absolute_path"]))
-    motor_config = yaml.safe_load(
+    current_humble_motor_config = yaml.safe_load(
         Path(sources["aloha_vx300s"]["absolute_path"]).read_text(encoding="utf-8")
     )
+    motor_config = yaml.safe_load(sources["selected_sleep"]["_content_text"])
     if motor_config["joint_order"][:6] != list(ARM_JOINT_ORDER):
         raise ValueError("official aloha_vx300s joint order mismatch")
     sleep_source = [float(value) for value in motor_config["sleep_positions"][:6]]
@@ -166,20 +207,70 @@ def build_manifest(
         hold_seconds=int(command["hold_seconds"]),
         cycles=int(command["cycles"]),
     )
+    lower_rad, upper_rad = _xacro_limits(
+        Path(sources["aloha_vx300s_xacro"]["absolute_path"])
+    )
+    group_gate_detail = evaluate_interbotix_group_limit_gate(
+        samples,
+        lower_rad=lower_rad,
+        upper_rad=upper_rad,
+        moving_time_s=2.0,
+        velocity_limits_rad_s=[3.141592653589793] * len(ARM_JOINT_ORDER),
+    )
+    group_limit_gate = {
+        "status": (
+            "PASS" if group_gate_detail["rejected_sample_count"] == 0 else "FAIL"
+        ),
+        "command_semantics": group_gate_detail["command_semantics"],
+        "sample_count": group_gate_detail["sample_count"],
+        "accepted_sample_count": group_gate_detail["accepted_sample_count"],
+        "rejected_sample_count": group_gate_detail["rejected_sample_count"],
+        "first_rejected_sample_index": group_gate_detail[
+            "first_rejected_sample_index"
+        ],
+        "first_rejected_joint_names": group_gate_detail[
+            "first_rejected_joint_names"
+        ],
+        "all_samples_publishable": group_gate_detail["rejected_sample_count"] == 0,
+    }
     source_audit: dict[str, Any] = {
         "schema_version": 1,
         "status": "PASS",
-        "classification": "OFFICIAL_EXACT_MODEL_HOME_SLEEP_SOURCE_AUDIT",
+        "classification": "OFFICIAL_HISTORICAL_LEGAL_ALOHA_SLEEP_EXPLICITLY_SELECTED_BY_USER",
         "product": str(config["product"]["model"]),
         "home": {"value_rad": home_source, "source_id": "robot_utils"},
         "sleep": {
             "value_rad": sleep_source,
-            "source_id": "aloha_vx300s",
+            "source_id": "selected_sleep",
         },
         "command_dt_s": dt,
         "moving_time_s": moving_time,
         "joint_order": list(ARM_JOINT_ORDER),
-        "sources": list(sources.values()),
+        "sources": [
+            {key: value for key, value in source.items() if not key.startswith("_")}
+            for source in sources.values()
+        ],
+        "current_humble_comparison": {
+            "source_id": "aloha_vx300s",
+            "sleep_rad": [
+                float(value)
+                for value in current_humble_motor_config["sleep_positions"][:6]
+            ],
+            "used_as_command_authority": False,
+            "classification": "CURRENT_HUMBLE_OUT_OF_LIMIT_COMPARISON_ONLY",
+        },
+        "version_selection": {
+            "status": "EXPLICIT_CROSS_VERSION_COMMAND_SELECTION",
+            "selected_command_source": "official historical ROS2 PR #189",
+            "current_urdf_and_driver_limits_preserved": True,
+        },
+        "joint_limit_authority": {
+            "source_id": "aloha_vx300s_xacro",
+            "lower_rad": lower_rad,
+            "upper_rad": upper_rad,
+            "velocity_rad_s": [3.141592653589793] * len(ARM_JOINT_ORDER),
+        },
+        "group_limit_gate": group_limit_gate,
         "generic_vx300s_substituted": False,
     }
     source_audit["deterministic_signature"] = _canonical_signature(source_audit)

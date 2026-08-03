@@ -13,13 +13,23 @@ scope:
 joint_order: [waist, shoulder, elbow, forearm_roll, wrist_angle, wrist_rotate]
 command:
   home_rad: [0.0, -0.96, 1.16, 0.0, -0.3, 0.0]
-  sleep_rad: [0.0, -2.05, 1.7, 0.0, -2.0, 0.0]
+  sleep_rad: [0.0, -1.80, 1.55, 0.0, -1.57, 0.0]
   command_rate_hz: 50
   physics_rate_hz: 60
   move_seconds: 5
   hold_seconds: 1
   cycles: 3
 sources:
+  selected_sleep:
+    source_type: git_blob
+    repository: https://github.com/Interbotix/interbotix_ros_manipulators.git
+    branch: humble (historical pre-PR-225)
+    commit: dbc6aefb53e956181fe97f60474f1ad292491f0c
+    license: BSD-3-Clause
+    local_repository_path: .codex/artifacts/20260803-aloha-home-sleep-root-cause/history_probe
+    git_object_path: interbotix_ros_xsarms/interbotix_xsarm_control/config/aloha_vx300s.yaml
+    sha256: a5c809a5dd1cd6fb795a8f4f4cbf69de6e0133e1916cb8816061d29f4a8aa75e
+    selection_status: OFFICIAL_HISTORICAL_LEGAL_SLEEP_EXPLICITLY_SELECTED_BY_USER
   robot_utils:
     repository: https://github.com/Interbotix/aloha.git
     branch: main
@@ -41,6 +51,15 @@ sources:
     license: BSD-3-Clause
     local_path: .codex/artifacts/20260802-aloha1-official-model-first/sources/interbotix_manipulators_b66d5b905725351dd71d3251a06cd3f4c777940f/aloha_vx300s.yaml
     sha256: 999cc0863b7b1e0334c5cd75d5ed1430736d25aa13881e4c24f4bf6cb3a1924f
+    role: CURRENT_HUMBLE_COMPARISON_NOT_COMMAND_AUTHORITY
+  aloha_vx300s_xacro:
+    repository: https://github.com/Interbotix/interbotix_ros_manipulators.git
+    branch: humble
+    commit: b66d5b905725351dd71d3251a06cd3f4c777940f
+    license: BSD-3-Clause
+    local_path: .codex/artifacts/20260802-aloha1-official-model-first/sources/interbotix_manipulators_b66d5b905725351dd71d3251a06cd3f4c777940f/aloha_vx300s.urdf.xacro
+    sha256: 45dff1e0de2456386dbb64b851c94db2d874b6dbefb6503cb747bc55435177bd
+    role: CURRENT_HUMBLE_EXACT_MODEL_JOINT_LIMIT_AUTHORITY
 digital:
   isaac_sim: 5.1.0.0
   kit: 107.3.3
