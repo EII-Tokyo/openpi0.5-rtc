@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "status": "PASS",
+  "scope": "ISAAC_SIM_5_1_SYNCHRONIZED_WORKER_API_AUDIT",
+  "runtime": {
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physx": "107.3.26"
+  },
+  "official_mcp": {
+    "server": "isaac-sim-mcp",
+    "connection": "DIRECT_CODEX_CONNECTION",
+    "routed_through_mcpjungle": false,
+    "queries": [
+      "Isaac Sim 5.1 standalone SimulationApp/open_stage/World/step/close",
+      "Isaac Sim 5.1 SingleArticulation/ArticulationAction/get_joint_positions"
+    ]
+  },
+  "local_installed_source": [
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.simulation_app/isaacsim/simulation_app/utils.py",
+      "sha256": "7aa0029357db2bca258647a611c490ca01ba6bbefba82556edd211be582299eb"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.simulation_app/isaacsim/simulation_app/simulation_app.py",
+      "sha256": "7cbaa6f00e935a6f14bf1c28ec0db089fd924e931f3b0deee07a822f9b7d0090"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.core.prims/isaacsim/core/prims/impl/single_articulation.py",
+      "sha256": "086c94ac60aa4f8f1ffac0c921fe8eb4a5b118604d4e108b891d827635382234"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.core.api/isaacsim/core/api/simulation_context/simulation_context.py",
+      "sha256": "ebafc6bcb30a454925fe21b96dcdbd4637c922a3fa9d5a6947308c9796ba5028"
+    }
+  ],
+  "verified_api_contract": {
+    "bootstrap_order": "SimulationApp before Omniverse/Isaac/PXR imports",
+    "stage_open": "isaacsim.core.utils.stage.open_stage returns bool",
+    "articulation": "isaacsim.core.prims.SingleArticulation",
+    "position_command": "ArticulationAction(joint_positions, joint_indices)",
+    "readback": "SingleArticulation.get_joint_positions/get_joint_velocities",
+    "physics_advance": "World.step(render=...) while timeline is playing",
+    "shutdown": "World.stop then SimulationApp.close"
+  },
+  "fresh_process_validation": {
+    "unpaced": [
+      {
+        "report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_home_sleep_sync_isaac_fresh_01.json",
+        "status": "PASS",
+        "physics_frames": 2220,
+        "numeric_signature": "d93ae226dcb2a11a728f4abda1dc821867d1eae0893c3cc01fdb4e8113696562"
+      },
+      {
+        "report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_home_sleep_sync_isaac_fresh_02.json",
+        "status": "PASS",
+        "physics_frames": 2220,
+        "numeric_signature": "d93ae226dcb2a11a728f4abda1dc821867d1eae0893c3cc01fdb4e8113696562"
+      }
+    ],
+    "absolute_monotonic_pacing": {
+      "report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_home_sleep_sync_isaac_paced.json",
+      "status": "PASS",
+      "physics_frames": 2220,
+      "start_skew_ns": 35,
+      "maximum_lateness_ns": 11435,
+      "burst_catchup_used": false,
+      "numeric_signature": "d93ae226dcb2a11a728f4abda1dc821867d1eae0893c3cc01fdb4e8113696562"
+    },
+    "frozen_input_hashes_unchanged": true
+  }
+}

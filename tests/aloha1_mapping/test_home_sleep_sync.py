@@ -7,6 +7,10 @@ from tools.aloha1_mapping.home_sleep_sync import build_run_identity
 from tools.aloha1_mapping.home_sleep_sync import classify_start_skew
 from tools.aloha1_mapping.home_sleep_sync import deadline_ns
 from tools.aloha1_mapping.home_sleep_sync import validate_ready_record
+from tools.run_aloha1_home_sleep_isaac_worker import build_isaac_worker_plan
+from tools.run_aloha1_home_sleep_isaac_worker import build_validator_argv
+from tools.run_aloha1_home_sleep_isaac_worker import frame_deadline_ns
+from tools.run_aloha1_home_sleep_isaac_worker import frame_lateness_status
 from tools.run_aloha1_home_sleep_sync import FakeWorker
 from tools.run_aloha1_home_sleep_sync import run_coordinator
 
@@ -101,6 +105,114 @@ def test_synchronized_config_is_fail_closed_and_bound_to_selected_sleep() -> Non
         "real_access_authorized": False,
         "real_motion_authorized": False,
     }
+
+
+def test_isaac_worker_plan_hash_pins_all_frozen_inputs(tmp_path: Path) -> None:
+    stage = tmp_path / "stage.usda"
+    manifest = tmp_path / "manifest.json"
+    finger = tmp_path / "finger.usda"
+    stage.write_text("stage", encoding="utf-8")
+    manifest.write_text(
+        '{"command_signature":"' + "b" * 64 + '","sample_count":1850}',
+        encoding="utf-8",
+    )
+    finger.write_text("finger", encoding="utf-8")
+    import hashlib
+
+    def sha(path: Path) -> str:
+        return hashlib.sha256(path.read_bytes()).hexdigest()
+
+    plan = build_isaac_worker_plan(
+        run_id="run-isaac-001",
+        stage=stage,
+        stage_sha256=sha(stage),
+        manifest=manifest,
+        manifest_sha256=sha(manifest),
+        finger_limit_layer=finger,
+        finger_limit_sha256=sha(finger),
+        command_signature="b" * 64,
+        start_monotonic_ns=10_000_000_000,
+        headless=True,
+        gui_workspace=2,
+    )
+
+    assert plan["status"] == "READY"
+    assert plan["worker"] == "isaac"
+    assert plan["sample_count"] == 1850
+    assert plan["gui_workspace"] == 2
+    assert plan["stage"]["sha256"] == sha(stage)
+
+
+def test_isaac_worker_plan_rejects_changed_stage(tmp_path: Path) -> None:
+    stage = tmp_path / "stage.usda"
+    manifest = tmp_path / "manifest.json"
+    finger = tmp_path / "finger.usda"
+    stage.write_text("changed", encoding="utf-8")
+    manifest.write_text(
+        '{"command_signature":"' + "b" * 64 + '","sample_count":1850}',
+        encoding="utf-8",
+    )
+    finger.write_text("finger", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="stage SHA-256 mismatch"):
+        build_isaac_worker_plan(
+            run_id="run-isaac-001",
+            stage=stage,
+            stage_sha256="0" * 64,
+            manifest=manifest,
+            manifest_sha256=(
+                __import__("hashlib").sha256(manifest.read_bytes()).hexdigest()
+            ),
+            finger_limit_layer=finger,
+            finger_limit_sha256=(
+                __import__("hashlib").sha256(finger.read_bytes()).hexdigest()
+            ),
+            command_signature="b" * 64,
+            start_monotonic_ns=10_000_000_000,
+            headless=True,
+            gui_workspace=2,
+        )
+
+
+def test_isaac_worker_builds_validator_command_with_future_start(tmp_path: Path) -> None:
+    args = build_validator_argv(
+        python_executable=Path("/project/.venv_issac/bin/python"),
+        validator=Path("/project/tools/validate_aloha1_home_sleep_digital.py"),
+        stage=Path("/project/stage.usda"),
+        stage_sha256="a" * 64,
+        manifest=Path("/project/manifest.json"),
+        manifest_sha256="b" * 64,
+        finger_limit_layer=Path("/project/finger.usda"),
+        finger_limit_sha256="c" * 64,
+        output=tmp_path / "report.json",
+        telemetry=tmp_path / "telemetry.csv",
+        repeat_index=1,
+        run_id="run-isaac-001",
+        start_monotonic_ns=10_000_000_000,
+        headless=True,
+    )
+
+    assert "--realtime-pacing" in args
+    assert args[args.index("--start-monotonic-ns") + 1] == "10000000000"
+    assert args[args.index("--run-id") + 1] == "run-isaac-001"
+    assert "--headless" in args
+
+
+def test_isaac_frame_deadlines_do_not_accumulate_rounding_error() -> None:
+    start = 10_000_000_000
+
+    assert frame_deadline_ns(start, frame_index=0, physics_rate_hz=60) == start
+    assert frame_deadline_ns(start, frame_index=60, physics_rate_hz=60) == (
+        start + 1_000_000_000
+    )
+
+
+def test_isaac_worker_aborts_instead_of_bursting_late_frames() -> None:
+    assert frame_lateness_status(16_666_666, physics_rate_hz=60) == "ON_TIME"
+    assert (
+        frame_lateness_status(16_666_667, physics_rate_hz=60)
+        == "ABORTED_DEADLINE_MISS"
+    )
 
 
 def _identity() -> dict[str, object]:

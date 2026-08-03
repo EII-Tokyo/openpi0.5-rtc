@@ -1,0 +1,27 @@
+{
+  "command_signature": "d481b71bc8d6160fae0bdc1b264715e782712565064bb18099f8a9a4883f499e",
+  "finger_limit_layer": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/finger_limit_pair_collision_candidate/1.0/configuration/finger_source_limits.usda",
+    "sha256": "2547e6fb374c213b5c6c54f200c7ced37605ab0e1a11735d0a32c0a231fd260f"
+  },
+  "gui_workspace": 2,
+  "headless": true,
+  "isaac_modules_imported_during_preflight": false,
+  "manifest": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_home_sleep_command_manifest.json",
+    "sha256": "e9b18a154569945127779dfe74bee62e7c2db0a8d1dd320e802aaade7bf76087"
+  },
+  "manifest_sha256": "e9b18a154569945127779dfe74bee62e7c2db0a8d1dd320e802aaade7bf76087",
+  "run_id": "paced-digital-20260803",
+  "sample_count": 1850,
+  "schema_version": 1,
+  "source_or_final_asset_modified": false,
+  "stage": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+    "sha256": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9"
+  },
+  "stage_opened_during_preflight": false,
+  "start_monotonic_ns": 266434477535354,
+  "status": "READY",
+  "worker": "isaac"
+}

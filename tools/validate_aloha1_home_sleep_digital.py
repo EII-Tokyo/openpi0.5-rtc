@@ -73,6 +73,9 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--telemetry", type=Path, required=True)
     parser.add_argument("--repeat-index", type=int, required=True)
+    parser.add_argument("--run-id")
+    parser.add_argument("--start-monotonic-ns", type=int)
+    parser.add_argument("--realtime-pacing", action="store_true")
     parser.add_argument("--preflight-only", action="store_true")
     parser.add_argument("--headless", action=argparse.BooleanOptionalAction, default=True)
     return parser.parse_args()
@@ -368,6 +371,10 @@ def main(args: argparse.Namespace) -> int:
     import omni.usd
     from pxr import UsdPhysics
 
+    from tools.run_aloha1_home_sleep_isaac_worker import frame_deadline_ns
+    from tools.run_aloha1_home_sleep_isaac_worker import frame_lateness_status
+    from tools.run_aloha1_home_sleep_isaac_worker import wait_until_monotonic_ns
+
     started = time.monotonic()
     stage_path = args.stage.resolve(strict=True)
     manifest_path = args.manifest.resolve(strict=True)
@@ -509,6 +516,20 @@ def main(args: argparse.Namespace) -> int:
     rows: list[dict[str, Any]] = []
     summary: dict[str, Any] | None = None
     contact_events: list[dict[str, Any]] = []
+    scheduler: dict[str, Any] = {
+        "mode": (
+            "ABSOLUTE_MONOTONIC_NO_BURST"
+            if args.realtime_pacing
+            else "UNPACED_DETERMINISTIC_PHYSICS"
+        ),
+        "status": "NOT_REQUESTED" if not args.realtime_pacing else "PENDING",
+        "requested_start_monotonic_ns": args.start_monotonic_ns,
+        "first_applied_monotonic_ns": None,
+        "start_skew_ns": None,
+        "maximum_lateness_ns": None,
+        "completed_physics_frames": 0,
+        "burst_catchup_used": False,
+    }
 
     def on_contact(headers: Sequence[Any], data: Sequence[Any]) -> None:
         contact_events.extend(_serialize_contacts(headers, data))
@@ -517,13 +538,43 @@ def main(args: argparse.Namespace) -> int:
         on_contact
     )
     if not args.preflight_only and preflight["status"] == "PASS":
+        if args.realtime_pacing and args.start_monotonic_ns is None:
+            raise ValueError("--realtime-pacing requires --start-monotonic-ns")
         samples = manifest["samples"]
         physics_hz = int(manifest["physics_rate_hz"])
         command_hz = int(manifest["command_rate_hz"])
         total_frames = math.ceil(len(samples) * physics_hz / command_hz)
+        scheduler["expected_physics_frames"] = total_frames
+        scheduler["physics_rate_hz"] = physics_hz
         frozen_left_gripper = left_settled[6:]
         frozen_right = right_settled.copy()
         for physics_frame in range(total_frames):
+            applied_monotonic_ns = None
+            frame_lateness_ns = None
+            if args.realtime_pacing:
+                frame_deadline = frame_deadline_ns(
+                    int(args.start_monotonic_ns),
+                    frame_index=physics_frame,
+                    physics_rate_hz=physics_hz,
+                )
+                applied_monotonic_ns = wait_until_monotonic_ns(frame_deadline)
+                frame_lateness_ns = applied_monotonic_ns - frame_deadline
+                if scheduler["first_applied_monotonic_ns"] is None:
+                    scheduler["first_applied_monotonic_ns"] = applied_monotonic_ns
+                    scheduler["start_skew_ns"] = frame_lateness_ns
+                previous_maximum = scheduler["maximum_lateness_ns"]
+                scheduler["maximum_lateness_ns"] = (
+                    frame_lateness_ns
+                    if previous_maximum is None
+                    else max(int(previous_maximum), frame_lateness_ns)
+                )
+                pacing_status = frame_lateness_status(
+                    frame_lateness_ns, physics_rate_hz=physics_hz
+                )
+                if pacing_status != "ON_TIME":
+                    scheduler["status"] = pacing_status
+                    scheduler["aborted_physics_frame"] = physics_frame
+                    break
             command_index = command_index_for_physics_frame(
                 physics_frame,
                 physics_hz=physics_hz,
@@ -540,7 +591,7 @@ def main(args: argparse.Namespace) -> int:
                 articulations["follower_right"], frozen_right[:8], range(8)
             )
             contact_events.clear()
-            world.step(render=False)
+            world.step(render=not args.headless)
             left_q = _finite_json_vector(
                 articulations["follower_left"].get_joint_positions()
             )
@@ -565,6 +616,8 @@ def main(args: argparse.Namespace) -> int:
                     "nominal_command_time_s": int(sample["time_ns"]) / 1.0e9,
                     "scheduler_phase_error_s": physics_frame / physics_hz
                     - int(sample["time_ns"]) / 1.0e9,
+                    "scheduler_applied_monotonic_ns": applied_monotonic_ns,
+                    "scheduler_frame_lateness_ns": frame_lateness_ns,
                     "cycle": int(sample["cycle"]),
                     "segment": str(sample["segment"]),
                     "target_arm_q": target.astype(np.float64).tolist(),
@@ -579,18 +632,23 @@ def main(args: argparse.Namespace) -> int:
                     "contacts": list(contact_events),
                 }
             )
-        summary = _summarize_rows(
-            rows,
-            manifest=manifest,
-            limits=limits,
-            initial_stationary={
-                "follower_right": frozen_right.astype(np.float64).tolist(),
-                "follower_left_gripper": frozen_left_gripper.astype(
-                    np.float64
-                ).tolist(),
-            },
-        )
-        _write_csv(args.telemetry.resolve(), rows)
+        scheduler["completed_physics_frames"] = len(rows)
+        if len(rows) == total_frames:
+            if args.realtime_pacing:
+                scheduler["status"] = "PASS"
+            summary = _summarize_rows(
+                rows,
+                manifest=manifest,
+                limits=limits,
+                initial_stationary={
+                    "follower_right": frozen_right.astype(np.float64).tolist(),
+                    "follower_left_gripper": frozen_left_gripper.astype(
+                        np.float64
+                    ).tolist(),
+                },
+            )
+        if rows:
+            _write_csv(args.telemetry.resolve(), rows)
 
     del subscription
     stage_hash_after = _sha256(stage_path)
@@ -607,7 +665,10 @@ def main(args: argparse.Namespace) -> int:
         if summary is not None:
             summary["status"] = "FAIL"
             summary["gates"]["source_hashes_immutable"] = False
-    status = preflight["status"] if summary is None else summary["status"]
+    if scheduler["status"] == "ABORTED_DEADLINE_MISS":
+        status = "ABORTED_DEADLINE_MISS"
+    else:
+        status = preflight["status"] if summary is None else summary["status"]
     report = {
         "schema_version": 1,
         "status": status,
@@ -615,6 +676,7 @@ def main(args: argparse.Namespace) -> int:
             "DIGITAL_PREFLIGHT_ONLY" if args.preflight_only else "DIGITAL_HOME_SLEEP_THREE_CYCLE"
         ),
         "repeat_index": args.repeat_index,
+        "run_id": args.run_id,
         "runtime_pid": os.getpid(),
         "wall_time_s": time.monotonic() - started,
         "runtime": runtime,
@@ -642,6 +704,7 @@ def main(args: argparse.Namespace) -> int:
             "row_count": len(rows),
             "sha256": _sha256(args.telemetry) if rows else None,
         },
+        "scheduler": scheduler,
         "immutability": immutable,
         "source_or_final_asset_modified": False,
         "real_execution_authorized": False,
@@ -679,7 +742,7 @@ def run() -> int:
         {
             "headless": bool(args.headless),
             "create_new_stage": False,
-            "disable_viewport_updates": True,
+            "disable_viewport_updates": bool(args.headless),
         }
     )
     exit_code = 1
