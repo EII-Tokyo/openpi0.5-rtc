@@ -72,6 +72,7 @@ sim-to-real dynamics model and it is not yet accepted for bottle insertion.
 | Task 8 collider LOD candidate | **NO_MEASURABLE_IMPROVEMENT** | isolated upper-arm candidate reduced authored convex pieces 8 → 2 and passed cooking/swept/smoke comparison, but fresh-process timing ranges overlap and the candidate is not promoted |
 | Home→Sleep→Home digital twin | **PASS / selected historical official Sleep** | user-selected official historical ALOHA Sleep `[0, -1.80, 1.55, 0, -1.57, 0]` passes all 1850 modeled command samples and two fresh Isaac 5.1 runs with identical numeric signatures; the current Humble vector remains an out-of-limit comparison only |
 | Synchronized real/sim offline bridge | **READY_FOR_SUPERVISED_REAL_EXECUTION** | fake three-worker protocol, deferred ROS1 adapter, two fresh Isaac regressions and one 37 s monotonic-paced Isaac run pass; this is readiness only, not real/digital correspondence |
+| follower_left live read-only bridge | **PASS read-only / motion NOT_RUN** | isolated `puppet_left` driver and exact `cam_high` probe passed; explicit joint order and position modes were read back, 1200 camera frames were captured, diagnostics published zero robot commands; workspace and stop/hold motion gates remain open |
 | Home→Sleep→Home real robot | **NOT_RUN_AUTHORIZATION_REQUIRED** | offline preflight and 1850-sample dry-run performed no network, SSH, ROS, serial, torque or command publication; digital PASS does not authorize hardware motion |
 
 `PASS`, `FAIL`, and `PARTIAL` are literal machine-report values. A clean
@@ -184,15 +185,50 @@ Primary reports:
 - `reports/aloha1_mapping/aloha1_home_sleep_sync_isaac_fresh_02.json`;
 - `reports/aloha1_mapping/aloha1_home_sleep_sync_isaac_paced.json`.
 
-The subsequent 103 read-only static preflight is
-`PARTIAL_RUNTIME_STACK_STOPPED`. It was restricted to
+## 2026-08-03 follower_left live read-only qualification
+
+The user authorized an isolated machine-103 runtime check limited to ROS
+master, the `puppet_left` driver and an exact-serial `cam_high` probe. The
+driver enabled the follower-left arm and gripper according to the deployed
+mode configuration. The diagnostic code constructed no robot-command
+publisher, called no robot service, and sent zero Home, Sleep or other motion
+commands.
+
+Runtime readback is `PASS_READ_ONLY_RUNTIME_MOTION_NOT_RUN`. The driver exposed
+the explicit arm order `waist, shoulder, elbow, forearm_roll, wrist_angle,
+wrist_rotate`; arm mode was `position`, gripper mode was `linear_position`, and
+no follower-right or leader/master driver node was active. Twenty
+`/puppet_left/joint_states` samples had a maximum observed position span of
+`0.001533985 rad` and reported zero velocity. This is a stationary readback,
+not a Home/Sleep correspondence test.
+
+The exact `cam_high` serial `130322270656` produced 600 frames before and 600
+frames after driver startup at 640x480/60 fps. The probe issued zero hardware
+resets and did not open the other three discovered cameras. Visual review
+confirmed that the left arm did not visibly move, but also showed a cluttered
+tabletop. Therefore `REAL_MOTION=NOT_RUN_AUTHORIZATION_REQUIRED`,
+`REAL_DIGITAL_CORRESPONDENCE=NOT_RUN_REAL_MOTION_EVIDENCE_MISSING`, workspace
+clearance is `FAIL_CLUTTERED_TABLE`, and the stop/hold path remains
+`NOT_VERIFIED`.
+
+The driver remains running because an unverified shutdown could release
+torque and allow the arm to drop. Its torque state is inferred from the
+deployed mode configuration and startup log, not from direct register
+readback. Machine reports:
+
+- `reports/aloha1_mapping/aloha1_home_sleep_sync_live_readback.json`;
+- `reports/aloha1_mapping/aloha1_home_sleep_sync_live_readback.md`.
+
+At the earlier 103 read-only static preflight, the result was
+`PARTIAL_RUNTIME_STACK_STOPPED`. That inspection was restricted to
 `/home/eii/openpi0.5-rtc-reward-learning` and confirmed the hash-bound project
 declarations for the six-joint order, follower-left state/command topics,
 `cam_high`, compose launch command and deployed robot-image digest. Remote HEAD
 is `ea818494bf9ee7756c955864ba3b0d62be6ce649` with 45 dirty/untracked entries;
-they must be preserved. No ALOHA/ROS container is running and neither port
-11311 nor 9090 is listening, so deployed joint order, position mode, camera
-message and stop/hold behavior remain runtime gates. The compose-declared
+they must be preserved. At that time no ALOHA/ROS container was running and
+neither port 11311 nor 9090 was listening, so deployed joint order, position
+mode, camera message and stop/hold behavior were runtime gates. The
+compose-declared
 `/home/eii/openpi0.5-rtc/third_party/aloha` mount was not inspected because it
 is outside the approved 103 project boundary. Evidence:
 `reports/aloha1_mapping/aloha1_home_sleep_sync_103_read_only_preflight.json/.md`.
@@ -220,16 +256,15 @@ That source changes the live-start boundary materially:
 - the bundled `sleep.py` constructs and commands both puppet arms and is not
   used for this left-only experiment.
 
-An inert local candidate,
+The initially inert local candidate,
 `configs/aloha1_home_sleep_puppet_left_only_candidate.launch`, passes the
 static left-only scope gate: it includes only `puppet_left/vx300s`, uses the
 deployed left mode configuration, keeps `load_configs=false`, and launches no
-camera node. This is source validation only. Starting it would open the real
-left Dynamixel bus and enable arm and gripper torque, so it remains
-`NOT_RUN_AUTHORIZATION_REQUIRED`. Runtime joint order/mode, an
-operator-tested stop/hold path, cam_high-only capture, workspace clearance and
-real motion each remain separate live gates. No driver, ROS publisher, motor
-command, camera reset or torque change occurred during the read-only audit.
+camera node. At that audit point it had not been executed. It was subsequently
+used only after the user authorized the live read-only phase documented above.
+That phase cleared the runtime joint-order/mode and cam_high-only gates, while
+operator-tested stop/hold behavior, workspace clearance and real motion remain
+separate unresolved gates.
 
 ## 2026-08-03 current-Humble Sleep comparison (historical failed run)
 

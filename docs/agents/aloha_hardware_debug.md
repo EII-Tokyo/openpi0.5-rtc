@@ -13,11 +13,16 @@ the exact-model official manufacturer source.
   - `/home/eii/ROBOTIS/DynamixelWizard2/DynamixelWizard2.sh`
 - Desktop entry:
   - `/home/eii/.local/share/applications/DynamixelWizard2.desktop`
-- Known 103 Dynamixel serial aliases:
-  - `/dev/ttyDXL_puppet_left -> ttyUSB4`
-  - `/dev/ttyDXL_puppet_right -> ttyUSB0`
-  - `/dev/ttyDXL_master_left -> ttyUSB2`
-  - `/dev/ttyDXL_master_right -> ttyUSB3`
-  - Legacy/follower aliases may mirror these devices, such as `/dev/ttyDXL_follower_left` and `/dev/ttyDXL_follower_right`.
+- Do not hard-code historical `ttyUSB*` numbers. On 2026-08-03, read-only
+  udev/runtime inspection on machine 103 verified the current left-side role
+  aliases as follows:
+  - `/dev/ttyDXL_puppet_left -> ttyUSB0`, FTDI serial `FTAAMM8J`;
+  - `/dev/ttyDXL_follower_left -> ttyUSB0`, FTDI serial `FTAAMM8J`;
+  - `/dev/ttyDXL_master_left -> ttyUSB4`, FTDI serial `FTAAML38`;
+  - `/dev/ttyDXL_leader_left -> ttyUSB4`, FTDI serial `FTAAML38`.
+- The older fixed mapping that assigned `puppet_left` to `ttyUSB4` is stale on
+  the current machine. Always resolve and record the semantic `/dev/ttyDXL_*`
+  alias immediately before access; use that alias in launch files. Do not
+  infer the right-side mapping from the left side.
 - DYNAMIXEL Wizard directly opens the servo serial bus. Before using it to scan or diagnose motors, stop robot control containers that may hold `/dev/ttyUSB*` / `/dev/ttyDXL*`, otherwise ROS `xs_sdk` and Wizard can conflict, causing scan failures or unsafe control contention.
 - Use it for hardware-level Dynamixel checks such as bus visibility, servo IDs, operating mode, profile type, errors, and basic motor diagnostics. Do not treat it as an RLT/VLA software debugger.

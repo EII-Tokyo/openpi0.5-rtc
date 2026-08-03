@@ -1,5 +1,45 @@
 # Task State
 
+## 2026-08-03 follower_left live read-only runtime qualification
+
+- User-authorized scope was limited to deploying isolated diagnostics under
+  `/home/eii/openpi0.5-rtc-reward-learning`, starting ROS master, the
+  `puppet_left` driver and an exact-serial cam_high probe, and reading runtime
+  state. No Home, Sleep or other motion command was authorized or sent.
+- Result: `PASS_READ_ONLY_RUNTIME_MOTION_NOT_RUN`.
+  `REAL_MOTION=NOT_RUN_AUTHORIZATION_REQUIRED` and
+  `REAL_DIGITAL_CORRESPONDENCE=NOT_RUN_REAL_MOTION_EVIDENCE_MISSING`.
+- Only `/puppet_left/xs_sdk` and its robot-state publisher were started. No
+  follower-right or leader/master driver ran. The inspector constructed zero
+  publishers, called zero services and observed no publisher on either
+  follower-left command topic.
+- Runtime arm order is `waist, shoulder, elbow, forearm_roll, wrist_angle,
+  wrist_rotate`; the full JointState order appends `gripper, left_finger,
+  right_finger`. Arm mode is `position`; gripper mode is `linear_position`.
+- The current semantic device alias resolves as
+  `/dev/ttyDXL_puppet_left -> ttyUSB0`, FTDI `FTAAMM8J`. The former documented
+  `ttyUSB4` mapping is stale; `ttyUSB4` is currently the left leader/master
+  bus (`FTAAML38`). Launches continue to use the semantic alias.
+- Twenty stationary joint-state rows were saved. Maximum observed position
+  span is `0.0015339851379394531 rad`; maximum reported velocity is `0`.
+- cam_high serial `130322270656` passed two isolated 600-frame captures at
+  640x480/60 fps. Hardware resets and robot command publishers were both zero.
+- Visual review found no visible arm pose change, but the tabletop is
+  cluttered. `WORKSPACE_CLEAR_FOR_MOTION=FAIL_CLUTTERED_TABLE` and
+  `STOP_HOLD_PATH=NOT_VERIFIED`.
+- `puppet_left` and `ros_master` remain running. Do not stop them casually:
+  the driver enabled torque under its existing configuration, and the safe
+  stop/hold behavior has not been operator-tested. Torque enable is supported
+  by config/startup-log evidence, not direct register readback.
+- Reports:
+  `reports/aloha1_mapping/aloha1_home_sleep_sync_live_readback.json/.md`.
+- Raw evidence:
+  `.codex/artifacts/20260803-aloha1-synchronized-real-sim/live_readback/`.
+- Next gates are: clear and confirm the physical workspace; establish an
+  operator-tested stop/hold path; then obtain fresh explicit authorization for
+  the three-cycle real Home/Sleep motion and synchronized comparison.
+- Task 8 remains `COMPLETE_WITH_NO_PROMOTION`.
+
 ## 2026-08-03 synchronized real/sim bridge code landing
 
 - Active scope: `ALOHA1_SYNCHRONIZED_REAL_SIM_HOME_SLEEP` for
