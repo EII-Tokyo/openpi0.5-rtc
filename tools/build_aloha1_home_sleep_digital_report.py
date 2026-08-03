@@ -15,9 +15,7 @@ REPORT_ROOT = ROOT / "reports/aloha1_mapping"
 def _limit_conflicts(run: dict[str, Any], manifest: dict[str, Any]) -> list[dict[str, Any]]:
     lower, upper = run["preflight"]["limits"]["follower_left"]
     conflicts = []
-    for index, (name, target) in enumerate(
-        zip(manifest["joint_order"], manifest["sleep_rad"], strict=True)
-    ):
+    for index, (name, target) in enumerate(zip(manifest["joint_order"], manifest["sleep_rad"], strict=True)):
         if target < lower[index] or target > upper[index]:
             conflicts.append(
                 {
@@ -56,8 +54,7 @@ def build_digital_report(
         for run in (run_1, run_2)
     )
     command_identity = all(
-        run["manifest"]["command_signature"] == manifest["command_signature"]
-        for run in (run_1, run_2)
+        run["manifest"]["command_signature"] == manifest["command_signature"] for run in (run_1, run_2)
     )
     visual_pass = str(visual_review["status"]).startswith("PASS")
     runs_pass = run_1["status"] == run_2["status"] == "PASS"
@@ -66,12 +63,11 @@ def build_digital_report(
         status = "PASS"
         classification = "DIGITAL_HOME_SLEEP_VERIFIED"
     elif conflicts and all(
-        run["summary"]["gates"].get("endpoints") is False
-        and run["summary"]["gates"].get("legal_limits") is False
+        run["summary"]["gates"].get("endpoints") is False and run["summary"]["gates"].get("legal_limits") is False
         for run in (run_1, run_2)
     ):
-        status = "FAIL"
-        classification = "OFFICIAL_SLEEP_TARGET_OUTSIDE_FROZEN_JOINT_LIMITS"
+        status = "PARTIAL"
+        classification = "VISUAL_TRAJECTORY_PASS_SIGNAL_SEMANTICS_MISMATCH"
     else:
         status = "FAIL"
         classification = "DIGITAL_HOME_SLEEP_GATE_FAILED"
@@ -89,39 +85,41 @@ def build_digital_report(
         "numeric_repeatability": "PASS" if repeatable else "FAIL",
         "normalized_numeric_signatures": signatures,
         "limit_conflicts": conflicts,
+        "layer_status": {
+            "visual_trajectory": (
+                "PASS"
+                if visual_pass
+                and all(
+                    run["summary"]["gates"].get("directions") is True
+                    and run["summary"]["gates"].get("three_cycles_complete") is True
+                    and run["summary"]["gates"].get("final_home") is True
+                    for run in (run_1, run_2)
+                )
+                else "FAIL"
+            ),
+            "exact_sleep_endpoint": "PASS" if not conflicts and runs_pass else "FAIL",
+            "real_api_signal_correspondence": ("PARTIAL" if conflicts and repeatable else "FAIL"),
+        },
         "gates": {
             "both_numeric_runs_pass": runs_pass,
             "numeric_signatures_match": repeatable,
             "hashes_remained_frozen": hashes_frozen,
             "command_identity": command_identity,
             "visual_evidence_review": visual_pass,
-            "all_endpoints_reached": all(
-                run["summary"]["gates"].get("endpoints") is True
-                for run in (run_1, run_2)
-            ),
-            "all_targets_legal": all(
-                run["summary"]["gates"].get("legal_limits") is True
-                for run in (run_1, run_2)
-            ),
+            "all_endpoints_reached": all(run["summary"]["gates"].get("endpoints") is True for run in (run_1, run_2)),
+            "all_targets_legal": all(run["summary"]["gates"].get("legal_limits") is True for run in (run_1, run_2)),
             "three_cycles_completed": all(
-                run["summary"]["gates"].get("three_cycles_complete") is True
-                for run in (run_1, run_2)
+                run["summary"]["gates"].get("three_cycles_complete") is True for run in (run_1, run_2)
             ),
-            "final_home_reached": all(
-                run["summary"]["gates"].get("final_home") is True
-                for run in (run_1, run_2)
-            ),
+            "final_home_reached": all(run["summary"]["gates"].get("final_home") is True for run in (run_1, run_2)),
             "follower_right_stationary": all(
-                run["summary"]["gates"].get("follower_right_stationary") is True
-                for run in (run_1, run_2)
+                run["summary"]["gates"].get("follower_right_stationary") is True for run in (run_1, run_2)
             ),
             "grippers_stationary": all(
-                run["summary"]["gates"].get("grippers_stationary") is True
-                for run in (run_1, run_2)
+                run["summary"]["gates"].get("grippers_stationary") is True for run in (run_1, run_2)
             ),
             "no_impulse_carrying_contact": all(
-                run["summary"]["gates"].get("no_impulse_carrying_contact") is True
-                for run in (run_1, run_2)
+                run["summary"]["gates"].get("no_impulse_carrying_contact") is True for run in (run_1, run_2)
             ),
         },
         "runs": [
@@ -177,10 +175,12 @@ def _markdown(report: dict[str, Any]) -> str:
     lines.extend(
         [
             "",
-            "The official ALOHA Sleep command is preserved exactly. The frozen USD/URDF "
-            "limits are also preserved exactly. PhysX clamps the three out-of-range targets, "
-            "so direction, repeatability, stationary bodies, contact absence, and final Home "
-            "pass, but the Sleep endpoint and legal-target gates fail.",
+            "The visible three-cycle trajectory, directions, repeatability, stationary bodies, "
+            "contact absence, and final Home pass. The exact Sleep endpoint remains outside "
+            "the frozen USD/URDF limits. PhysX independently clamps the three conflicting "
+            "joints, while the official ALOHA Python group API rejects an entire sample when "
+            "any joint is illegal. Therefore the video is valid visual trajectory evidence, "
+            "but not yet an exact real-API signal-correspondence proof.",
             "",
             "No real-robot command was sent and this report does not authorize one.",
         ]
@@ -204,12 +204,8 @@ def _markdown(report: dict[str, Any]) -> str:
 
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        "--run-1", type=Path, default=REPORT_ROOT / "aloha1_home_sleep_digital_run_01.json"
-    )
-    parser.add_argument(
-        "--run-2", type=Path, default=REPORT_ROOT / "aloha1_home_sleep_digital_run_02.json"
-    )
+    parser.add_argument("--run-1", type=Path, default=REPORT_ROOT / "aloha1_home_sleep_digital_run_01.json")
+    parser.add_argument("--run-2", type=Path, default=REPORT_ROOT / "aloha1_home_sleep_digital_run_02.json")
     parser.add_argument(
         "--visual",
         type=Path,
@@ -241,8 +237,7 @@ def _parse_args() -> argparse.Namespace:
 def main() -> int:
     args = _parse_args()
     inputs = [
-        json.loads(path.read_text(encoding="utf-8"))
-        for path in (args.run_1, args.run_2, args.visual, args.manifest)
+        json.loads(path.read_text(encoding="utf-8")) for path in (args.run_1, args.run_2, args.visual, args.manifest)
     ]
     parameter_audit = json.loads(args.parameter_source_audit.read_text(encoding="utf-8"))
     mirror = next(
@@ -259,8 +254,7 @@ def main() -> int:
             "local_mirror_source_class": "THIRD_PARTY_AGGREGATE_LOCAL_MIRROR",
             "local_mirror_used_as_command_authority": False,
             "historical_robot_report": str(
-                ROOT
-                / "docs/aloha1_isaac_adaptation/09_phase4_real_aloha1_joint_signal_probe_2026-07-17.md"
+                ROOT / "docs/aloha1_isaac_adaptation/09_phase4_real_aloha1_joint_signal_probe_2026-07-17.md"
             ),
             "historical_robot_report_used_as_command_authority": False,
         },

@@ -1,5 +1,5 @@
 {
-  "classification": "OFFICIAL_SLEEP_TARGET_OUTSIDE_FROZEN_JOINT_LIMITS",
+  "classification": "VISUAL_TRAJECTORY_PASS_SIGNAL_SEMANTICS_MISMATCH",
   "fresh_process_run_count": 2,
   "gates": {
     "all_endpoints_reached": false,
@@ -14,6 +14,11 @@
     "numeric_signatures_match": true,
     "three_cycles_completed": true,
     "visual_evidence_review": true
+  },
+  "layer_status": {
+    "exact_sleep_endpoint": "FAIL",
+    "real_api_signal_correspondence": "PARTIAL",
+    "visual_trajectory": "PASS"
   },
   "limit_conflicts": [
     {
@@ -502,7 +507,7 @@
     "sha256_after": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9",
     "sha256_before": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9"
   },
-  "status": "FAIL",
+  "status": "PARTIAL",
   "task8_status": "COMPLETE_WITH_NO_PROMOTION",
   "visual_evidence": {
     "classification": "DIGITAL_SLEEP_LIMIT_FAILURE_VISUAL_REVIEW",

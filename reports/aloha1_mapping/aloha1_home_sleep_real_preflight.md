@@ -1,7 +1,7 @@
 # ALOHA1 Home/Sleep real preflight
 
 - Status: `NOT_RUN_DIGITAL_GATE_FAILED`
-- Digital gate: `FAIL`
+- Digital gate: `PARTIAL`
 - Remote access performed: `false`
 - ROS/SSH/serial transport instantiated: `false`
 - Torque changed: `false`

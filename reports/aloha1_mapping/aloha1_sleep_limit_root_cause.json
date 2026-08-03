@@ -1,0 +1,372 @@
+{
+  "branch_history": [
+    {
+      "branch": "humble",
+      "head_author_date": "2025-01-02T11:27:43-06:00",
+      "head_commit": "b66d5b905725351dd71d3251a06cd3f4c777940f",
+      "sleep_file_last_commit": "46e979438ee4a78c11d0a779d8aab31146b9e0cd",
+      "sleep_rad": [
+        0.0,
+        -2.05,
+        1.7,
+        0.0,
+        -2.0,
+        0.0
+      ]
+    },
+    {
+      "branch": "iron",
+      "head_author_date": "2025-01-02T11:27:43-06:00",
+      "head_commit": "01c557d65f781697c3a05bffebafbd3404e03eab",
+      "sleep_file_last_commit": "04a3506c6a20474579e27ea75125d1680b256ca0",
+      "sleep_rad": [
+        0.0,
+        -2.05,
+        1.7,
+        0.0,
+        -2.0,
+        0.0
+      ]
+    },
+    {
+      "branch": "jazzy",
+      "head_author_date": "2025-01-02T11:27:43-06:00",
+      "head_commit": "01c557d65f781697c3a05bffebafbd3404e03eab",
+      "sleep_file_last_commit": "04a3506c6a20474579e27ea75125d1680b256ca0",
+      "sleep_rad": [
+        0.0,
+        -2.05,
+        1.7,
+        0.0,
+        -2.0,
+        0.0
+      ]
+    },
+    {
+      "branch": "rolling",
+      "head_author_date": "2025-01-02T11:27:43-06:00",
+      "head_commit": "01c557d65f781697c3a05bffebafbd3404e03eab",
+      "sleep_file_last_commit": "04a3506c6a20474579e27ea75125d1680b256ca0",
+      "sleep_rad": [
+        0.0,
+        -2.05,
+        1.7,
+        0.0,
+        -2.0,
+        0.0
+      ]
+    },
+    {
+      "branch": "main",
+      "head_author_date": "2024-07-10T09:52:42-05:00",
+      "head_commit": "0bb2b0e6d0e619bff02cf74dbd5af5681dcf80c9",
+      "sleep_file_last_commit": "c2482c2cefaef5e830ec027f49f22a331c670373",
+      "sleep_rad": [
+        0.0,
+        -1.8,
+        1.55,
+        0.0,
+        -1.57,
+        0.0
+      ]
+    },
+    {
+      "branch": "noetic",
+      "head_author_date": "2024-07-10T09:52:42-05:00",
+      "head_commit": "0bb2b0e6d0e619bff02cf74dbd5af5681dcf80c9",
+      "sleep_file_last_commit": "c2482c2cefaef5e830ec027f49f22a331c670373",
+      "sleep_rad": [
+        0.0,
+        -1.8,
+        1.55,
+        0.0,
+        -1.57,
+        0.0
+      ]
+    }
+  ],
+  "classification": "OFFICIAL_ROS2_ALOHA_SLEEP_CONFIGURATION_OUTSIDE_ITS_OWN_URDF_LIMITS",
+  "exact_sleep_endpoint_status": "FAIL",
+  "final_or_default_asset_modified": false,
+  "hardware_boundary": "ROBOTIS documents Goal Position as constrained by Min/Max Position Limit in single-turn Position Control Mode. The exact result of a broadcast Sync Write outside that range was not tested on hardware; the ALOHA set_joint_positions path rejects the group earlier.",
+  "hardware_goal_register_outcome": "NOT_RUNTIME_VERIFIED",
+  "history_change": {
+    "author_stated_reason": "change Sleep positions so the arm does not drop as much",
+    "change_commit": "5b90ea49cdfadf13b9e238e1b088147d98fd671d",
+    "humble_merge_commit": "46e979438ee4a78c11d0a779d8aab31146b9e0cd",
+    "pull_request": "https://github.com/Interbotix/interbotix_ros_manipulators/pull/225",
+    "xacro_limits_changed_in_same_commit": false
+  },
+  "interbotix_group_gate_emulation": {
+    "accepted_sample_count": 204,
+    "command_semantics": "REJECT_WHOLE_GROUP_SAMPLE",
+    "first_rejected_joint_names": [
+      "shoulder"
+    ],
+    "first_rejected_q_rad": [
+      0.0,
+      -1.8530120481927708,
+      1.6024096385542168,
+      0.0,
+      -1.6927710843373496,
+      0.0
+    ],
+    "first_rejected_sample_index": 254,
+    "first_rejected_segment_sample": 204,
+    "first_rejected_truncated_q_rad": [
+      0.0,
+      -1.853,
+      1.602,
+      0.0,
+      -1.692,
+      0.0
+    ],
+    "individual_joint_clamping_performed": false,
+    "last_published_q_rad": [
+      0.0,
+      -1.8486345381526104,
+      1.6002409638554216,
+      0.0,
+      -1.6859437751004016,
+      0.0
+    ],
+    "rejected_sample_count": 46,
+    "sample_count": 250
+  },
+  "isaac_interpretation": "The existing runner submitted every sample and PhysX independently stopped each conflicting DOF at its joint limit. That stable visual motion is not the same command-layer behavior as Interbotix whole-group rejection.",
+  "joint_order": [
+    "waist",
+    "shoulder",
+    "elbow",
+    "forearm_roll",
+    "wrist_angle",
+    "wrist_rotate"
+  ],
+  "limit_conflicts": [
+    {
+      "joint_index": 1,
+      "joint_name": "shoulder",
+      "lower_rad": -1.8500490071139892,
+      "target_rad": -2.05,
+      "upper_rad": 1.2566370614359172,
+      "violation_rad": 0.1999509928860106
+    },
+    {
+      "joint_index": 2,
+      "joint_name": "elbow",
+      "lower_rad": -1.7627825445142729,
+      "target_rad": 1.7,
+      "upper_rad": 1.6057029118347832,
+      "violation_rad": 0.09429708816521676
+    },
+    {
+      "joint_index": 4,
+      "joint_name": "wrist_angle",
+      "lower_rad": -1.8675022996339325,
+      "target_rad": -2.0,
+      "upper_rad": 2.234021442552742,
+      "violation_rad": 0.13249770036606745
+    }
+  ],
+  "official_legal_candidate": {
+    "automatically_selected": false,
+    "status": "OFFICIAL_LEGAL_CANDIDATE_REQUIRES_VERSION_SELECTION",
+    "value_rad": [
+      0.0,
+      -1.8,
+      1.55,
+      0.0,
+      -1.57,
+      0.0
+    ]
+  },
+  "official_ros2_sleep_rad": [
+    0.0,
+    -2.05,
+    1.7,
+    0.0,
+    -2.0,
+    0.0
+  ],
+  "official_ros2_sleep_within_limits": false,
+  "previous_official_sleep_rad": [
+    0.0,
+    -1.8,
+    1.55,
+    0.0,
+    -1.57,
+    0.0
+  ],
+  "previous_sleep_within_limits": true,
+  "product": "Stationary ALOHA follower / aloha_vx300s",
+  "real_execution_status": "NOT_RUN_UNAUTHORIZED",
+  "real_robot_access_performed": false,
+  "recommended_digital_contract": "Preserve the visual run as trajectory evidence, but model the selected real API path explicitly before any hardware comparison. Do not widen USD limits and do not silently replace the pinned humble Sleep vector.",
+  "runtime_facts": {
+    "isaac_sleep_saturation": {
+      "left_arm_readback_rad": [
+        -9.631121429265477e-07,
+        -1.8500488996505737,
+        1.6057032346725464,
+        -0.0001470643765060231,
+        -1.867502212524414,
+        -1.568362131365575e-05
+      ],
+      "saturated_joints": [
+        {
+          "absolute_bound_error_rad": 1.0746341549960903e-07,
+          "float32_tolerance_rad": 1.7643442221774952e-06,
+          "joint_index": 1,
+          "joint_name": "shoulder",
+          "readback_rad": -1.8500488996505737,
+          "saturated_bound_rad": -1.8500490071139892,
+          "target_rad": -2.049999952316284
+        },
+        {
+          "absolute_bound_error_rad": 3.2283776318919877e-07,
+          "float32_tolerance_rad": 1.531317626795562e-06,
+          "joint_index": 2,
+          "joint_name": "elbow",
+          "readback_rad": 1.6057032346725464,
+          "saturated_bound_rad": 1.6057029118347832,
+          "target_rad": 1.7000000476837158
+        },
+        {
+          "absolute_bound_error_rad": 8.710951848733828e-08,
+          "float32_tolerance_rad": 1.7809889789904905e-06,
+          "joint_index": 4,
+          "joint_name": "wrist_angle",
+          "readback_rad": -1.867502212524414,
+          "saturated_bound_rad": -1.8675022996339325,
+          "target_rad": -2.0
+        }
+      ],
+      "selected_segment": "cycle_03_sleep_hold",
+      "status": "VERIFIED_INDIVIDUAL_DOF_LIMIT_SATURATION",
+      "target_arm_q_rad": [
+        0.0,
+        -2.049999952316284,
+        1.7000000476837158,
+        0.0,
+        -2.0,
+        0.0
+      ],
+      "telemetry_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_home_sleep_digital_telemetry_run_01.csv",
+      "telemetry_sha256": "a012c166333386d082537c1376684a6e681b945ef719b0404dc70b80e21f18fa"
+    }
+  },
+  "schema_version": 1,
+  "signal_correspondence_status": "PARTIAL",
+  "source_facts": {
+    "aloha_sleep_reads_group_sleep_positions": true,
+    "aloha_sleep_uses_set_joint_positions": true,
+    "driver_converts_and_sync_writes_group_commands": true,
+    "generic_go_to_sleep_pose_bypasses_python_limit_check": true,
+    "set_joint_positions_checks_whole_group": true,
+    "set_joint_positions_return_value_ignored": true,
+    "xs_sdk_group_callback_adds_no_urdf_limit_check": true,
+    "xs_sdk_group_info_limits_come_from_urdf": true
+  },
+  "source_records": [
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/sources/official_repo_probe/interbotix_aloha_main/aloha/robot_utils.py",
+      "branch": "main",
+      "commit": "4fa6b2c4428f5334441a7bee5ab2b2e8071cff93",
+      "id": "aloha_robot_utils",
+      "license": "MIT",
+      "repository": "https://github.com/Interbotix/aloha.git",
+      "role": "official ALOHA interpolation and sleep_arms call path",
+      "sha256": "0d7ab1014210f311eebc2cdb0f5d2a58c5f870f8b875b7a05b3373413efe1179"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/sources/interbotix_manipulators_b66d5b905725351dd71d3251a06cd3f4c777940f/aloha_vx300s.yaml",
+      "branch": "humble",
+      "commit": "b66d5b905725351dd71d3251a06cd3f4c777940f",
+      "id": "aloha_vx300s_motor_config",
+      "license": "BSD-3-Clause",
+      "repository": "https://github.com/Interbotix/interbotix_ros_manipulators.git",
+      "role": "official exact-model Sleep vector and motor limits",
+      "sha256": "999cc0863b7b1e0334c5cd75d5ed1430736d25aa13881e4c24f4bf6cb3a1924f"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/sources/interbotix_manipulators_b66d5b905725351dd71d3251a06cd3f4c777940f/aloha_vx300s.urdf.xacro",
+      "branch": "humble",
+      "commit": "b66d5b905725351dd71d3251a06cd3f4c777940f",
+      "id": "aloha_vx300s_xacro",
+      "license": "BSD-3-Clause",
+      "repository": "https://github.com/Interbotix/interbotix_ros_manipulators.git",
+      "role": "official exact-model URDF joint limits",
+      "sha256": "45dff1e0de2456386dbb64b851c94db2d874b6dbefb6503cb747bc55435177bd"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha-home-sleep-root-cause/toolboxes_probe/interbotix_xs_toolbox/interbotix_xs_modules/interbotix_xs_modules/xs_robot/arm.py",
+      "branch": "humble",
+      "commit": "f52234371b9ec1cb1f5ee8241da32e6b8476fa5c",
+      "id": "interbotix_arm_python_api",
+      "license": "BSD-3-Clause",
+      "repository": "https://github.com/Interbotix/interbotix_ros_toolboxes.git",
+      "role": "official group limit-check and publish semantics; file unchanged from compatible dbe4d7d",
+      "sha256": "5ae38d9623317f4fd54bcb2dcf1161a144c662f99585b67b7dd29d94031d0a94"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha-home-sleep-root-cause/core_probe/interbotix_ros_xseries/interbotix_xs_sdk/src/xs_sdk_obj.cpp",
+      "branch": "humble",
+      "commit": "af18d4fe24ba08e09a0f1e92afaca1863e3205de",
+      "id": "interbotix_xs_sdk",
+      "license": "BSD-3-Clause",
+      "repository": "https://github.com/Interbotix/interbotix_ros_core.git",
+      "role": "official ROS group callback and URDF group-info limits",
+      "sha256": "e65fb1c873274412e5634dbaa0d647858435cc5689157ca44d8cd7cca6fcc02d"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/sources/interbotix_xs_driver_da27b8b2b6c7677844f74581b82c01829a834e1c/xs_driver.cpp",
+      "branch": "v0.3.3",
+      "commit": "da27b8b2b6c7677844f74581b82c01829a834e1c",
+      "id": "interbotix_xs_driver",
+      "license": "BSD-3-Clause",
+      "repository": "https://github.com/Interbotix/interbotix_xs_driver.git",
+      "role": "official radian conversion and group Sync Write path",
+      "sha256": "6d9b8bd613ef17094490ad1a3f82c685316b3bd21c067930b2a5199a91ba9bcb"
+    },
+    {
+      "accessed": "2026-08-03",
+      "authority": "Trossen Robotics / Interbotix",
+      "confirms": "exact actuator models and firmware-defined default joint limits",
+      "id": "trossen_vx300s_specification",
+      "url": "https://docs.trossenrobotics.com/interbotix_xsarms_docs/specifications/vx300s.html"
+    },
+    {
+      "accessed": "2026-08-03",
+      "authority": "ROBOTIS",
+      "confirms": "Position Control Goal Position is constrained by Min/Max Position Limit",
+      "id": "robotis_xm540_w270_manual",
+      "url": "https://emanual.robotis.com/docs/en/dxl/x/xm540-w270/"
+    },
+    {
+      "accessed": "2026-08-03",
+      "authority": "ROBOTIS",
+      "confirms": "out-of-range writes are Data Range Error; Sync Write uses broadcast ID",
+      "id": "robotis_protocol_2",
+      "url": "https://emanual.robotis.com/docs/en/dxl/protocol2/"
+    }
+  ],
+  "status": "VERIFIED_ROOT_CAUSE",
+  "task8_status": "COMPLETE_WITH_NO_PROMOTION",
+  "urdf_lower_rad": [
+    -3.141582653589793,
+    -1.8500490071139892,
+    -1.7627825445142729,
+    -3.141582653589793,
+    -1.8675022996339325,
+    -3.141582653589793
+  ],
+  "urdf_upper_rad": [
+    3.141582653589793,
+    1.2566370614359172,
+    1.6057029118347832,
+    3.141582653589793,
+    2.234021442552742,
+    3.141582653589793
+  ],
+  "video_interpretation": "PASS_TRAJECTORY_VISUAL"
+}

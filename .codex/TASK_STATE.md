@@ -3,8 +3,8 @@
 ## 2026-08-03 Home/Sleep digital-twin gate result
 
 - Active scope: `ALOHA1_REAL_SIM_HOME_SIGNAL_CORRESPONDENCE`.
-- `DIGITAL_HOME_SLEEP=FAIL` with classification
-  `OFFICIAL_SLEEP_TARGET_OUTSIDE_FROZEN_JOINT_LIMITS`.
+- `DIGITAL_HOME_SLEEP=PARTIAL` with classification
+  `VISUAL_TRAJECTORY_PASS_SIGNAL_SEMANTICS_MISMATCH`.
 - Two fresh Isaac Sim 5.1.0.0 processes each completed all three
   `Home -> Sleep -> Home` cycles and produced the identical normalized numeric
   signature
@@ -16,9 +16,25 @@
   - `shoulder`: `-2.05 rad` vs lower `-1.8500488997 rad`;
   - `elbow`: `+1.70 rad` vs upper `+1.6057027578 rad`;
   - `wrist_angle`: `-2.00 rad` vs lower `-1.8675020933 rad`.
+- The full-arm video is `PASS_TRAJECTORY_VISUAL`; it shows the intended motion
+  and is not a visual-motion failure. The exact Sleep endpoint remains `FAIL`
+  and real-API signal correspondence is `PARTIAL`.
+- Root cause is `VERIFIED_ROOT_CAUSE /`
+  `OFFICIAL_ROS2_ALOHA_SLEEP_CONFIGURATION_OUTSIDE_ITS_OWN_URDF_LIMITS`:
+  official ROS 2 PR #225 changed the exact-model Sleep vector to reduce
+  torque-off drop without widening the same model's URDF limits.
+- Official ALOHA `sleep_arms()` uses `set_joint_positions()`. The Interbotix
+  Python API rejects the whole group at the first illegal interpolated sample;
+  ALOHA ignores the returned `False`. First rejection is outbound sample 204
+  of 250 on `shoulder`; the last publishable command is approximately
+  `[0, -1.848635, 1.600241, 0, -1.685944, 0]` rad.
+- Isaac instead submitted every sample and PhysX saturated the three DOFs at
+  their individual limits. This explains why the recorded motion looks safe
+  while exact real-API signal equivalence is not established.
 - The exact official command and frozen USD limits remain unchanged; no
-  clamped command was substituted. The third-party local mirror's different
-  Sleep vector is retained as non-authoritative evidence and was not used.
+  replacement command was substituted. The older official legal vector is
+  only `OFFICIAL_LEGAL_CANDIDATE_REQUIRES_VERSION_SELECTION`. The third-party
+  local mirror remains non-authoritative and was not used.
 - Visual failure evidence is `PASS_FAILURE_EVIDENCE`: the normal full-arm
   capture passed; the first cyan collision-overlay batch was rejected as
   insufficiently distinct; a bright-red collision-only retake passed visual
@@ -29,6 +45,7 @@
   `192.168.1.103` occurred.
 - Authoritative reports:
   - `reports/aloha1_mapping/aloha1_home_sleep_digital_validation.json/.md`;
+  - `reports/aloha1_mapping/aloha1_sleep_limit_root_cause.json/.md`;
   - `reports/aloha1_mapping/aloha1_home_sleep_digital_evidence_review.json/.md`;
   - `reports/aloha1_mapping/aloha1_home_sleep_real_preflight.json/.md`;
   - `reports/aloha1_mapping/aloha1_home_sleep_real_run.json`;

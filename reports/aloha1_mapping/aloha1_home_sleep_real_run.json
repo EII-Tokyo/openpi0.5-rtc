@@ -1,6 +1,6 @@
 {
   "commands_published": 0,
-  "digital_report_status": "FAIL",
+  "digital_report_status": "PARTIAL",
   "manifest_sha256": "c5e6c584d7fbe2bd3f098b32d3ded5630cc50c9b25368a704e49c8f26baf9798",
   "mode": "DRY_RUN",
   "network_access_performed": false,

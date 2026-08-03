@@ -113,22 +113,47 @@ target gates:
 | elbow | +1.700000 | upper +1.605703 | 0.094297 |
 | wrist_angle | -2.000000 | lower -1.867502 | 0.132498 |
 
-PhysX deterministically clamps those joints. The official exact-model command
-was not replaced, the frozen USD/URDF limits were not widened, and the endpoint
-gate was not relaxed. A third-party local mirror contains a different, legal
-Sleep vector, and a historical project robot-readback report also contains a
-different vector; neither is treated as the pinned official command authority
-or used to authorize motion here.
+PhysX deterministically saturates those joints at their individual limits. The
+official exact-model command was not replaced, the frozen USD/URDF limits were
+not widened, and the endpoint gate was not relaxed. A third-party local mirror
+contains a different, legal Sleep vector, and a historical project
+robot-readback report also contains a different vector; neither is treated as
+the pinned official command authority or used to authorize motion here.
 
-The normal full-arm video passed visual review. The original collision overlay
-was rejected because its cyan color was not distinct from the robot material;
+The subsequent source audit identified the precise command-layer mismatch.
+Official ALOHA `sleep_arms()` interpolates through `set_joint_positions()`.
+The official Interbotix Python API truncates requested positions to one
+milliradian for checking and rejects the entire group sample if any joint is
+outside the URDF limits; ALOHA ignores that Boolean return. Deterministic
+emulation first rejects outbound segment sample 204 of 250 on `shoulder`, after
+204 publishable samples. The last publishable command is approximately
+`[0, -1.848635, 1.600241, 0, -1.685944, 0]` rad. This differs from the Isaac
+runner, which continued submitting the full target and allowed each PhysX DOF
+to saturate independently.
+
+Git history also confirms the source conflict. The first official ALOHA
+variant configuration used the legal Sleep vector
+`[0, -1.80, 1.55, 0, -1.57, 0]`. ROS 2 PR #225 changed it to the current
+out-of-range vector to reduce arm drop after torque-off, without widening the
+`aloha_vx300s` URDF limits in the same change. The older ROS 1 `main/noetic`
+branches do not automatically override the pinned `humble` source.
+
+The normal full-arm video passed both motion and visual-evidence review: it
+shows a smooth three-cycle trajectory and final Home recovery. The original
+collision overlay was rejected because its cyan color was not distinct from
+the robot material;
 only that mode was recaptured with bright-red collider geometry. The retake has
 558 frames at 15 fps over 37.2 s and its four raw/annotated key stages pass
-visual review. This is a `PASS_FAILURE_EVIDENCE` result, not a motion PASS.
+visual review. The historical `PASS_FAILURE_EVIDENCE` label describes evidence
+quality for the exact-endpoint failure; it must not be read as a visual-motion
+failure.
 
 Consequently:
 
-- `DIGITAL_HOME_SLEEP=FAIL`;
+- `DIGITAL_HOME_SLEEP=PARTIAL`;
+- `VISUAL_TRAJECTORY=PASS`;
+- `EXACT_SLEEP_ENDPOINT=FAIL`;
+- `REAL_API_SIGNAL_CORRESPONDENCE=PARTIAL`;
 - `REAL_PREFLIGHT=NOT_RUN_DIGITAL_GATE_FAILED`;
 - `REAL_EXECUTION=NOT_RUN_DIGITAL_GATE_FAILED`;
 - `REAL_DIGITAL_COMPARISON=NOT_RUN_REAL_EVIDENCE_MISSING`.
@@ -141,6 +166,7 @@ and `192.168.1.103` were not accessed. Task 8 remains closed as
 Machine reports:
 
 - `reports/aloha1_mapping/aloha1_home_sleep_digital_validation.json/.md`;
+- `reports/aloha1_mapping/aloha1_sleep_limit_root_cause.json/.md`;
 - `reports/aloha1_mapping/aloha1_home_sleep_digital_evidence_review.json/.md`;
 - `reports/aloha1_mapping/aloha1_home_sleep_real_preflight.json/.md`;
 - `reports/aloha1_mapping/aloha1_home_sleep_real_run.json`;

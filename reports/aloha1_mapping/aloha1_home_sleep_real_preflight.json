@@ -3,9 +3,9 @@
   "classification": "ALOHA_REAL_HOME_SLEEP_OFFLINE_PREFLIGHT",
   "commands_published": 0,
   "digital_report": {
-    "classification": "OFFICIAL_SLEEP_TARGET_OUTSIDE_FROZEN_JOINT_LIMITS",
-    "sha256": "e7a72bf6fb165e54c5fccfb68f0b914eb300da244750f97a9448f42fba33c586",
-    "status": "FAIL"
+    "classification": "VISUAL_TRAJECTORY_PASS_SIGNAL_SEMANTICS_MISMATCH",
+    "sha256": "996a6c8da14bce4b0d1894dec7f301c54b50975e677631447a2e9a6124a9d142",
+    "status": "PARTIAL"
   },
   "manifest": {
     "command_signature": "ea11f6aa2253ca81390b2b2d63c0e3fafe1e8eeda9c4e5d1e928fc5db112795e",

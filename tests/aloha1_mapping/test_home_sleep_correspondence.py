@@ -13,8 +13,13 @@ from tools.aloha1_mapping.home_sleep_correspondence import command_signature
 from tools.aloha1_mapping.home_sleep_correspondence import compare_aligned_joint_rows
 from tools.aloha1_mapping.home_sleep_correspondence import count_follower_articulation_roots
 from tools.aloha1_mapping.home_sleep_correspondence import digital_runtime_signature
+from tools.aloha1_mapping.home_sleep_correspondence import evaluate_interbotix_group_limit_gate
 from tools.aloha1_mapping.home_sleep_correspondence import validate_digital_preflight
 from tools.aloha1_mapping.home_sleep_correspondence import values_within_float32_limits
+from tools.audit_aloha1_sleep_limit_correspondence import _inspect_python_semantics
+from tools.audit_aloha1_sleep_limit_correspondence import _isaac_sleep_saturation
+from tools.audit_aloha1_sleep_limit_correspondence import _xacro_limits
+from tools.audit_aloha1_sleep_limit_correspondence import build_root_cause_report
 from tools.build_aloha1_home_sleep_command_manifest import build_manifest
 from tools.build_aloha1_home_sleep_digital_report import build_digital_report
 from tools.review_aloha1_home_sleep_digital_evidence import build_visual_review
@@ -47,9 +52,7 @@ def test_home_sleep_samples_freeze_three_cycles_and_end_at_home() -> None:
     assert samples[-1].q_rad == pytest.approx(HOME_ARM)
     assert {len(sample.q_rad) for sample in samples} == {6}
     assert [sample.index for sample in samples] == list(range(1850))
-    assert [sample.time_ns for sample in samples] == [
-        index * 20_000_000 for index in range(1850)
-    ]
+    assert [sample.time_ns for sample in samples] == [index * 20_000_000 for index in range(1850)]
 
 
 def test_home_sleep_segment_lengths_and_endpoints_are_exact() -> None:
@@ -94,18 +97,10 @@ def test_home_sleep_rejects_nonfinite_or_non_arm_vectors() -> None:
 
 
 def test_rational_scheduler_maps_sixty_hz_physics_to_fifty_hz_commands() -> None:
-    assert command_index_for_physics_frame(
-        0, physics_hz=60, command_hz=50, sample_count=1850
-    ) == 0
-    assert command_index_for_physics_frame(
-        6, physics_hz=60, command_hz=50, sample_count=1850
-    ) == 5
-    assert command_index_for_physics_frame(
-        60, physics_hz=60, command_hz=50, sample_count=1850
-    ) == 50
-    assert command_index_for_physics_frame(
-        999999, physics_hz=60, command_hz=50, sample_count=1850
-    ) == 1849
+    assert command_index_for_physics_frame(0, physics_hz=60, command_hz=50, sample_count=1850) == 0
+    assert command_index_for_physics_frame(6, physics_hz=60, command_hz=50, sample_count=1850) == 5
+    assert command_index_for_physics_frame(60, physics_hz=60, command_hz=50, sample_count=1850) == 50
+    assert command_index_for_physics_frame(999999, physics_hz=60, command_hz=50, sample_count=1850) == 1849
 
 
 def test_command_signature_is_deterministic_and_changes_with_samples() -> None:
@@ -121,9 +116,7 @@ def test_command_signature_is_deterministic_and_changes_with_samples() -> None:
 
 
 def test_home_sleep_manifest_freezes_official_sources_and_exclusions() -> None:
-    config = yaml.safe_load(
-        (ROOT / "configs/aloha1_home_sleep_correspondence.yaml").read_text()
-    )
+    config = yaml.safe_load((ROOT / "configs/aloha1_home_sleep_correspondence.yaml").read_text())
 
     manifest, source_audit = build_manifest(config, project_root=ROOT)
 
@@ -151,9 +144,7 @@ def test_home_sleep_manifest_freezes_official_sources_and_exclusions() -> None:
 
 
 def test_home_sleep_manifest_is_deterministic() -> None:
-    config = yaml.safe_load(
-        (ROOT / "configs/aloha1_home_sleep_correspondence.yaml").read_text()
-    )
+    config = yaml.safe_load((ROOT / "configs/aloha1_home_sleep_correspondence.yaml").read_text())
 
     first, _ = build_manifest(config, project_root=ROOT)
     second, _ = build_manifest(config, project_root=ROOT)
@@ -301,14 +292,9 @@ def test_visual_review_rejects_old_overlay_and_accepts_red_retake() -> None:
     assert report["status"] == "PASS_FAILURE_EVIDENCE"
     assert report["visual_review_is_auxiliary"] is True
     assert report["retained_videos"]["normal"]["absolute_path"] == "/normal.mp4"
-    assert (
-        report["retained_videos"]["collision_overlay"]["absolute_path"]
-        == "/collision_overlay.mp4"
-    )
+    assert report["retained_videos"]["collision_overlay"]["absolute_path"] == "/collision_overlay.mp4"
     assert len(report["retained_screenshots"]) == 8
-    assert report["rejected_attempts"][0]["reason"] == (
-        "REJECTED_COLLIDER_OVERLAY_NOT_DISTINCT"
-    )
+    assert report["rejected_attempts"][0]["reason"] == ("REJECTED_COLLIDER_OVERLAY_NOT_DISTINCT")
 
 
 def _digital_run(status: str, signature: str) -> dict:
@@ -356,7 +342,38 @@ def _digital_run(status: str, signature: str) -> dict:
     }
 
 
-def test_digital_report_fails_closed_on_repeatable_official_sleep_limit_conflict() -> None:
+def test_interbotix_group_gate_rejects_the_whole_first_illegal_sample() -> None:
+    samples = build_home_sleep_samples(
+        home=HOME_ARM,
+        sleep=SLEEP_ARM,
+        command_hz=50,
+        move_seconds=5,
+        hold_seconds=1,
+        cycles=1,
+    )
+    outbound = [sample for sample in samples if sample.segment == "cycle_01_home_to_sleep"]
+
+    result = evaluate_interbotix_group_limit_gate(
+        outbound,
+        lower_rad=[-math.pi, math.radians(-106), math.radians(-101), -math.pi, math.radians(-107), -math.pi],
+        upper_rad=[math.pi, math.radians(72), math.radians(92), math.pi, math.radians(128), math.pi],
+        moving_time_s=2.0,
+        velocity_limits_rad_s=[math.pi] * 6,
+    )
+
+    assert result["first_rejected_segment_sample"] == 204
+    assert result["accepted_sample_count"] == 204
+    assert result["first_rejected_joint_names"] == ["shoulder"]
+    assert result["last_published_q_rad"] == pytest.approx(
+        [0.0, -1.8486345381526104, 1.6002409638554216, 0.0, -1.6859437751004016, 0.0]
+    )
+    assert result["first_rejected_q_rad"] == pytest.approx(
+        [0.0, -1.853012048192771, 1.602409638554217, 0.0, -1.6927710843373494, 0.0]
+    )
+    assert result["command_semantics"] == "REJECT_WHOLE_GROUP_SAMPLE"
+
+
+def test_digital_report_marks_visual_motion_pass_but_signal_gate_partial() -> None:
     run_1 = _digital_run("FAIL", "same")
     run_2 = _digital_run("FAIL", "same")
     visual = {
@@ -373,10 +390,11 @@ def test_digital_report_fails_closed_on_repeatable_official_sleep_limit_conflict
 
     report = build_digital_report(run_1, run_2, visual, manifest)
 
-    assert report["status"] == "FAIL"
-    assert report["classification"] == (
-        "OFFICIAL_SLEEP_TARGET_OUTSIDE_FROZEN_JOINT_LIMITS"
-    )
+    assert report["status"] == "PARTIAL"
+    assert report["classification"] == ("VISUAL_TRAJECTORY_PASS_SIGNAL_SEMANTICS_MISMATCH")
+    assert report["layer_status"]["visual_trajectory"] == "PASS"
+    assert report["layer_status"]["exact_sleep_endpoint"] == "FAIL"
+    assert report["layer_status"]["real_api_signal_correspondence"] == "PARTIAL"
     assert report["numeric_repeatability"] == "PASS"
     assert report["real_execution_authorized"] is False
     assert [item["joint_name"] for item in report["limit_conflicts"]] == [
@@ -405,6 +423,109 @@ def test_digital_report_requires_two_passing_fresh_runs_for_pass() -> None:
 
     assert report["status"] == "PASS"
     assert report["classification"] == "DIGITAL_HOME_SLEEP_VERIFIED"
+
+
+def test_sleep_limit_root_cause_separates_video_from_signal_semantics() -> None:
+    report = build_root_cause_report(
+        official_sleep_rad=[0.0, -2.05, 1.7, 0.0, -2.0, 0.0],
+        previous_sleep_rad=[0.0, -1.8, 1.55, 0.0, -1.57, 0.0],
+        lower_rad=[-math.pi, math.radians(-106), math.radians(-101), -math.pi, math.radians(-107), -math.pi],
+        upper_rad=[math.pi, math.radians(72), math.radians(92), math.pi, math.radians(128), math.pi],
+        gate_result={
+            "command_semantics": "REJECT_WHOLE_GROUP_SAMPLE",
+            "first_rejected_segment_sample": 204,
+            "accepted_sample_count": 204,
+            "rejected_sample_count": 46,
+            "first_rejected_joint_names": ["shoulder"],
+            "last_published_q_rad": [0.0, -1.8486345381526104, 1.6002409638554216, 0.0, -1.6859437751004016, 0.0],
+            "first_rejected_q_rad": [0.0, -1.853012048192771, 1.602409638554217, 0.0, -1.6927710843373494, 0.0],
+        },
+        source_facts={
+            "aloha_sleep_uses_set_joint_positions": True,
+            "set_joint_positions_checks_whole_group": True,
+            "set_joint_positions_return_value_ignored": True,
+            "generic_go_to_sleep_pose_bypasses_python_limit_check": True,
+            "xs_sdk_group_callback_adds_no_urdf_limit_check": True,
+        },
+        runtime_facts={"isaac_sleep_saturation": {"status": "VERIFIED_INDIVIDUAL_DOF_LIMIT_SATURATION"}},
+        source_records=[],
+        branch_history=[],
+    )
+
+    assert report["status"] == "VERIFIED_ROOT_CAUSE"
+    assert report["classification"] == ("OFFICIAL_ROS2_ALOHA_SLEEP_CONFIGURATION_OUTSIDE_ITS_OWN_URDF_LIMITS")
+    assert report["video_interpretation"] == "PASS_TRAJECTORY_VISUAL"
+    assert report["signal_correspondence_status"] == "PARTIAL"
+    assert report["real_execution_status"] == "NOT_RUN_UNAUTHORIZED"
+    assert [item["joint_name"] for item in report["limit_conflicts"]] == ["shoulder", "elbow", "wrist_angle"]
+    assert report["previous_sleep_within_limits"] is True
+
+
+def test_sleep_limit_audit_reads_radians_and_pi_offset_xacro_limits() -> None:
+    path = (
+        ROOT / ".codex/artifacts/20260802-aloha1-official-model-first/sources/"
+        "interbotix_manipulators_b66d5b905725351dd71d3251a06cd3f4c777940f/"
+        "aloha_vx300s.urdf.xacro"
+    )
+
+    lower, upper = _xacro_limits(path)
+
+    assert lower == pytest.approx(
+        [
+            -math.pi + 0.00001,
+            math.radians(-106),
+            math.radians(-101),
+            -math.pi + 0.00001,
+            math.radians(-107),
+            -math.pi + 0.00001,
+        ]
+    )
+    assert upper == pytest.approx(
+        [math.pi - 0.00001, math.radians(72), math.radians(92), math.pi - 0.00001, math.radians(128), math.pi - 0.00001]
+    )
+
+
+def test_sleep_limit_audit_finds_top_level_aloha_and_class_toolbox_methods() -> None:
+    robot_utils = (
+        ROOT / ".codex/artifacts/20260802-aloha1-official-model-first/sources/"
+        "official_repo_probe/interbotix_aloha_main/aloha/robot_utils.py"
+    )
+    arm_module = (
+        ROOT / ".codex/artifacts/20260803-aloha-home-sleep-root-cause/toolboxes_probe/"
+        "interbotix_xs_toolbox/interbotix_xs_modules/interbotix_xs_modules/"
+        "xs_robot/arm.py"
+    )
+
+    facts = _inspect_python_semantics(robot_utils, arm_module)
+
+    assert facts == {
+        "aloha_sleep_reads_group_sleep_positions": True,
+        "aloha_sleep_uses_set_joint_positions": True,
+        "set_joint_positions_return_value_ignored": True,
+        "set_joint_positions_checks_whole_group": True,
+        "generic_go_to_sleep_pose_bypasses_python_limit_check": True,
+    }
+
+
+def test_sleep_limit_audit_derives_individual_physx_saturation_from_telemetry(
+    tmp_path: Path,
+) -> None:
+    telemetry = tmp_path / "telemetry.csv"
+    telemetry.write_text(
+        "segment,target_arm_q,left_q\n"
+        'cycle_01_sleep_hold,"[0,-2.05,1.7,0,-2.0,0]",'
+        '"[0,-1.850049,1.605703,0,-1.867502,0]\n"',
+        encoding="utf-8",
+    )
+
+    result = _isaac_sleep_saturation(
+        telemetry,
+        lower_rad=[-3.14, -1.850049, -1.76278, -3.14, -1.867502, -3.14],
+        upper_rad=[3.14, 1.256637, 1.605703, 3.14, 2.234021, 3.14],
+    )
+
+    assert result["status"] == "VERIFIED_INDIVIDUAL_DOF_LIMIT_SATURATION"
+    assert [item["joint_name"] for item in result["saturated_joints"]] == ["shoulder", "elbow", "wrist_angle"]
 
 
 def test_real_digital_comparison_preserves_signed_joint_error() -> None:

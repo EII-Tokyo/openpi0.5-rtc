@@ -47,17 +47,12 @@ def _sample_count(*, frequency_hz: int, duration_seconds: int) -> int:
     return frequency_hz * duration_seconds
 
 
-def _linear_segment(
-    start: tuple[float, ...], end: tuple[float, ...], count: int
-) -> list[tuple[float, ...]]:
+def _linear_segment(start: tuple[float, ...], end: tuple[float, ...], count: int) -> list[tuple[float, ...]]:
     if count < 2:
         raise ValueError("movement segment requires at least two samples")
     denominator = count - 1
     return [
-        tuple(
-            start[joint] + (end[joint] - start[joint]) * index / denominator
-            for joint in range(len(start))
-        )
+        tuple(start[joint] + (end[joint] - start[joint]) * index / denominator for joint in range(len(start)))
         for index in range(count)
     ]
 
@@ -79,18 +74,12 @@ def build_home_sleep_samples(
         raise ValueError("cycles must be positive")
     if 1_000_000_000 % command_hz != 0:
         raise ValueError("command_hz must divide one second into integer nanoseconds")
-    move_count = _sample_count(
-        frequency_hz=command_hz, duration_seconds=move_seconds
-    )
-    hold_count = _sample_count(
-        frequency_hz=command_hz, duration_seconds=hold_seconds
-    )
+    move_count = _sample_count(frequency_hz=command_hz, duration_seconds=move_seconds)
+    hold_count = _sample_count(frequency_hz=command_hz, duration_seconds=hold_seconds)
     dt_ns = 1_000_000_000 // command_hz
     records: list[CommandSample] = []
 
-    def append_segment(
-        *, cycle: int, segment: str, positions: Sequence[tuple[float, ...]]
-    ) -> None:
+    def append_segment(*, cycle: int, segment: str, positions: Sequence[tuple[float, ...]]) -> None:
         for segment_sample, q_rad in enumerate(positions):
             index = len(records)
             records.append(
@@ -215,16 +204,10 @@ def digital_runtime_signature(payload: dict[str, object]) -> str:
 def count_follower_articulation_roots(paths: Sequence[str]) -> list[str]:
     """Return robot-scoped roots, excluding environment schema roots."""
 
-    return [
-        str(path)
-        for path in paths
-        if any(str(path).startswith(prefix) for prefix in FOLLOWER_ROOT_PREFIXES)
-    ]
+    return [str(path) for path in paths if any(str(path).startswith(prefix) for prefix in FOLLOWER_ROOT_PREFIXES)]
 
 
-def values_within_float32_limits(
-    values: Sequence[float], lower: Sequence[float], upper: Sequence[float]
-) -> bool:
+def values_within_float32_limits(values: Sequence[float], lower: Sequence[float], upper: Sequence[float]) -> bool:
     """Check limits with eight float32 ULP-equivalents of numeric slack."""
 
     if not (len(values) == len(lower) == len(upper)):
@@ -236,6 +219,85 @@ def values_within_float32_limits(
         <= float(high) + relative_slack * max(1.0, abs(float(high)))
         for value, low, high in zip(values, lower, upper, strict=True)
     )
+
+
+def evaluate_interbotix_group_limit_gate(
+    samples: Sequence[CommandSample],
+    *,
+    lower_rad: Sequence[float],
+    upper_rad: Sequence[float],
+    moving_time_s: float,
+    velocity_limits_rad_s: Sequence[float],
+    joint_names: Sequence[str] = ARM_JOINT_ORDER,
+) -> dict[str, object]:
+    """Reproduce the official Interbotix whole-group Python limit gate.
+
+    ``InterbotixArmXSInterface._check_joint_limits`` truncates each requested
+    position toward zero to one milliradian, evaluates every position and
+    velocity limit, and publishes the group only when every joint passes.
+    This helper intentionally models that command-layer behavior; it does not
+    clamp individual joints as a physics engine would.
+    """
+
+    joint_count = len(joint_names)
+    vectors = (lower_rad, upper_rad, velocity_limits_rad_s)
+    if any(len(vector) != joint_count for vector in vectors):
+        raise ValueError("limit vectors must match joint_names")
+    if moving_time_s <= 0.0 or not math.isfinite(moving_time_s):
+        raise ValueError("moving_time_s must be finite and positive")
+    if not samples:
+        raise ValueError("at least one command sample is required")
+    if any(len(sample.q_rad) != joint_count for sample in samples):
+        raise ValueError("command sample length must match joint_names")
+
+    joint_commands = list(samples[0].q_rad)
+    accepted: list[CommandSample] = []
+    rejected: list[dict[str, object]] = []
+    for sample in samples:
+        truncated = [int(value * 1000) / 1000.0 for value in sample.q_rad]
+        speed = [abs(goal - current) / moving_time_s for goal, current in zip(truncated, joint_commands, strict=True)]
+        position_failures = [
+            str(joint_names[index])
+            for index, value in enumerate(truncated)
+            if not (float(lower_rad[index]) <= value <= float(upper_rad[index]))
+        ]
+        velocity_failures = [
+            str(joint_names[index]) for index, value in enumerate(speed) if value > float(velocity_limits_rad_s[index])
+        ]
+        failed_names = list(dict.fromkeys(position_failures + velocity_failures))
+        if failed_names:
+            rejected.append(
+                {
+                    "sample_index": sample.index,
+                    "segment_sample": sample.segment_sample,
+                    "q_rad": list(sample.q_rad),
+                    "truncated_q_rad": truncated,
+                    "position_failure_joint_names": position_failures,
+                    "velocity_failure_joint_names": velocity_failures,
+                    "failed_joint_names": failed_names,
+                }
+            )
+            continue
+        accepted.append(sample)
+        # The official publisher stores the original requested vector, not
+        # the milliradian-truncated vector used solely by the limit check.
+        joint_commands = list(sample.q_rad)
+
+    first_rejected = rejected[0] if rejected else None
+    last_published = list(accepted[-1].q_rad) if accepted else None
+    return {
+        "command_semantics": "REJECT_WHOLE_GROUP_SAMPLE",
+        "sample_count": len(samples),
+        "accepted_sample_count": len(accepted),
+        "rejected_sample_count": len(rejected),
+        "first_rejected_sample_index": (first_rejected["sample_index"] if first_rejected else None),
+        "first_rejected_segment_sample": (first_rejected["segment_sample"] if first_rejected else None),
+        "first_rejected_joint_names": (first_rejected["failed_joint_names"] if first_rejected else []),
+        "first_rejected_q_rad": (first_rejected["q_rad"] if first_rejected else None),
+        "first_rejected_truncated_q_rad": (first_rejected["truncated_q_rad"] if first_rejected else None),
+        "last_published_q_rad": last_published,
+        "individual_joint_clamping_performed": False,
+    }
 
 
 def compare_aligned_joint_rows(
@@ -262,10 +324,7 @@ def compare_aligned_joint_rows(
     if not matched:
         raise ValueError("no common command indices")
     joint_count = len(joint_names)
-    if any(
-        len(digital[index]) != joint_count or len(real[index]) != joint_count
-        for index in matched
-    ):
+    if any(len(digital[index]) != joint_count or len(real[index]) != joint_count for index in matched):
         raise ValueError("joint vector length does not match joint_names")
     per_joint = []
     for joint_index, joint_name in enumerate(joint_names):
