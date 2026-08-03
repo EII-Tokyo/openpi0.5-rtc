@@ -1,0 +1,82 @@
+{
+  "continuous_duty": {
+    "estimate_is_measured_thermal_curve": false,
+    "manufacturer_tables_status": "PASS",
+    "measured_curve": null,
+    "official_estimated_continuous_torque_Nm": {
+      "XM430-W350": 0.82,
+      "XM540-W270": 2.12
+    },
+    "stall_torque_used_as_continuous": false
+  },
+  "deterministic_signature": "bba5e645a153bd441feb5fc1c5a0bac2d98609b56d454a4bbea82e4050aa1fb6",
+  "diagnostic_parameter_scan_status": "NOT_RUN_NO_CALIBRATED_PAIR_PROPERTY",
+  "final_or_default_asset_modified": false,
+  "gate": {
+    "continuous_force_envelope_verified": false,
+    "missing_inputs": [
+      "EXACT_FINGER_PAD_MATERIAL_AND_SURFACE_FINISH",
+      "EXACT_BOTTLE_MATERIAL_AND_SURFACE_FINISH",
+      "EXACT_PAIR_STATIC_DYNAMIC_FRICTION_AND_RESTITUTION",
+      "MEASURED_CONTINUOUS_TORQUE_SPEED_CURRENT_THERMAL_CURVE"
+    ],
+    "parameter_scan_allowed": false,
+    "physical_friction_calibrated": false,
+    "promotion_allowed": false,
+    "runtime_binding_verified": true,
+    "status": "HARD_BLOCKER"
+  },
+  "inputs": {
+    "bottle_asset_config": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/configs/aloha1_bottle_asset.yaml",
+      "sha256": "58d9741830cb9439efdceea016575c649fa06a11e3797c077d2a9152ea3b9e7b"
+    },
+    "dynamics_contract": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_dynamics_contract.json",
+      "sha256": "e6a3b0232f9ed8cba65e48c985317bf68b5b477c5c7f712eada576e7a020bb8b"
+    },
+    "model_blocker_research": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_model_blocker_deep_research.json",
+      "sha256": "fd32ff230e5bc64ff3fa66055719b0ef6bbc9081bf31f762a2d00cf47c0553bf"
+    },
+    "runtime_material_audit": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_material_audit.json",
+      "sha256": "7d7f4b5657f6cce9dda77871b81158d8b408d5ce76ba0bedcd1965b5e2b1a97e"
+    }
+  },
+  "interpretation": "The existing Isaac runtime audit verifies that the temporary physics materials are bound and combine as authored. It does not identify the real finger-pad/bottle materials or calibrate their friction. The exact manufacturer motor tables likewise do not provide the measured loaded continuous gripper force/thermal envelope needed for a final maxForce.",
+  "physical_material_identity": {
+    "bottle_body": null,
+    "finger_pad": null,
+    "invalid_substitutes": [
+      "Trossen statement that fingers may be 3D printed",
+      "visual color",
+      "generic plastic-plastic friction tables",
+      "a friction value that makes a hold test pass",
+      "NVIDIA Robotiq tutorial material values"
+    ],
+    "missing_exact_identity": [
+      "supplier ALOHA finger-pad material and surface finish",
+      "project Bottle500 body material and surface finish",
+      "dry/clean/environmental condition",
+      "static friction, dynamic friction, and restitution for that exact pair"
+    ],
+    "pair_measurement": null
+  },
+  "real_robot_or_material_test_run": false,
+  "required_measurements": {
+    "continuous_duty": "Exact actuator and loaded gripper linkage: torque/force, speed, current, voltage, winding/case temperature, ambient temperature, duty cycle, duration, and thermal shutdown/derating boundary.",
+    "friction": "controlled incline, pull, or tribometer test on the exact pad/bottle surfaces with normal load, direction, speed, temperature, and surface condition recorded"
+  },
+  "runtime_binding": {
+    "classification": "RUNTIME_READBACK_TEMPORARY_VALUE",
+    "effective_authored_dynamic_friction": 0.7,
+    "effective_authored_static_friction": 0.7,
+    "friction_status": "INCONCLUSIVE",
+    "status": "PASS",
+    "temporary_material_status": "TEMPORARY_UNCALIBRATED"
+  },
+  "schema_version": 1,
+  "status": "HARD_BLOCKER",
+  "task8_status": "AUTHORIZED_PAUSED_AT_MODEL_PROOF_GATE"
+}

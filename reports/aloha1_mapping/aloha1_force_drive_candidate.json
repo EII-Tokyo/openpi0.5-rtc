@@ -1,0 +1,136 @@
+{
+  "candidate_authored": false,
+  "deterministic_signature": "22a7b7a44a770688c2e067a0e06cbd4ab1e77dd44a2478e2d371afc98ea5533d",
+  "dynamics_evidence": {
+    "continuous_estimate_is_measured_thermal_curve": false,
+    "contract_status": "PARTIAL",
+    "hard_blockers": [
+      {
+        "blocks": [
+          "formal_joint_max_force_envelope"
+        ],
+        "does_not_block": [
+          "kinematic_contract",
+          "register_unit_conversion"
+        ],
+        "id": "HARD_BLOCKER_CONTINUOUS_TORQUE_SPEED_CURRENT_THERMAL_CURVE",
+        "missing_definition": "measured continuous torque-speed-current thermal envelope beyond the official 12 V 20%-of-stall estimates"
+      },
+      {
+        "blocks": [
+          "formal_physics_drive_layer"
+        ],
+        "does_not_block": [
+          "source_audit",
+          "kinematic_contract"
+        ],
+        "id": "HARD_BLOCKER_PHYSX_DRIVE_PHYSICAL_DERIVATION",
+        "missing_definition": "physical mapping from exact actuator/controller/transmission to PhysX stiffness, damping and maxForce"
+      }
+    ],
+    "runtime_control": {
+      "configuration_default_current_limit_ticks": 200,
+      "pipeline_overrides": {
+        "official_aloha_dual_side_teleop": {
+          "applies_to": [
+            "follower_left",
+            "follower_right"
+          ],
+          "current_limit_ticks": 300
+        }
+      },
+      "runtime_mode": "current_based_position",
+      "selection_status": "PIPELINE_SCOPED_NO_SINGLE_GLOBAL_VALUE",
+      "static_startup_mode": "pwm"
+    },
+    "stall_torque_used_as_continuous": false
+  },
+  "final_or_default_asset_modified": false,
+  "gate": {
+    "candidate": null,
+    "candidate_authored": false,
+    "missing_inputs": [
+      "CONVERGED_TIMESTEP_AND_SOLVER_COUNTS",
+      "GRIPPER_EFFECTIVE_MASS_AT_DECLARED_CONFIGURATION",
+      "DECLARED_OR_IDENTIFIED_CLOSED_LOOP_NATURAL_FREQUENCY",
+      "DECLARED_OR_IDENTIFIED_DAMPING_RATIO",
+      "CONTINUOUS_FORCE_LIMIT_NOT_STALL_OR_MOMENTARY_LIMIT",
+      "LOADED_GRIPPER_LINKAGE_EFFICIENCY"
+    ],
+    "promotion_allowed": false,
+    "runtime_scan_allowed": false,
+    "status": "HARD_BLOCKER"
+  },
+  "geometry_evidence": {
+    "contract_status": "PASS",
+    "effective_dynamic_mass_provided": false,
+    "formal_candidate_gate": "PASS"
+  },
+  "inputs": {
+    "dynamics_contract": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_dynamics_contract.json",
+      "sha256": "e6a3b0232f9ed8cba65e48c985317bf68b5b477c5c7f712eada576e7a020bb8b"
+    },
+    "gripper_geometry_contract": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_gripper_geometry_contract.json",
+      "sha256": "15f68006404e73c478ef0ab8c28e00b2291031a7c65256928c618532064c287a"
+    },
+    "local_gain_tuner_manifest": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.robot_setup.gain_tuner/config/extension.toml",
+      "sha256": "6d02ac74958f6e0fe46e6af4b0abe601913f23a5861276ad8441ea6388952cf6"
+    },
+    "local_gain_tuner_source": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.robot_setup.gain_tuner/isaacsim/robot_setup/gain_tuner/gains_tuner.py",
+      "sha256": "36d6e9a69a9176b7a29300bbc39b6347cc06fa9b6793791582dae19327527929"
+    },
+    "model_blocker_research": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_model_blocker_deep_research.json",
+      "sha256": "fd32ff230e5bc64ff3fa66055719b0ef6bbc9081bf31f762a2d00cf47c0553bf"
+    },
+    "numerical_convergence": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_physics_numerical_convergence.json",
+      "sha256": "4cce3830458bbc8be058a8ace6ae374c230bd9610d3a417328e405212dfbb9d6"
+    }
+  },
+  "interpretation": "The local Isaac 5.1 Gain Tuner relations define how sourced SI mass/inertia and response targets map to PD gains, but they do not supply those physical inputs. Numerical convergence is not established, and the exact gripper effective mass, closed-loop response targets, continuous output-force envelope, and loaded linkage efficiency are not present in the audited sources. Therefore no force-drive USD or runtime parameter scan is permitted.",
+  "numerical_gate": {
+    "input_status": "PARTIAL",
+    "selected_frequency_hz": null,
+    "selected_solver_position_iterations": null,
+    "selected_solver_velocity_iterations": null
+  },
+  "official_equation_boundary": {
+    "gain_tuner_relations": {
+      "damping": "2*damping_ratio*sqrt(effective_inertia*stiffness)",
+      "natural_frequency_hz": "sqrt(stiffness/effective_inertia)/(2*pi)",
+      "stiffness": "effective_inertia*(2*pi*natural_frequency_hz)^2"
+    },
+    "hardware_integer_gain_direct_mapping": "PROHIBITED",
+    "source_classification": "VERIFIED_LOCAL_ISAAC_5_1_SCHEMA_AND_SOURCE",
+    "units": {
+      "prismatic_damping": "N*s/m",
+      "prismatic_max_force": "N",
+      "prismatic_stiffness": "N/m",
+      "revolute_damping": "N*m*s/rad",
+      "revolute_max_force": "N*m",
+      "revolute_stiffness": "N*m/rad"
+    }
+  },
+  "physical_inputs": {
+    "closed_loop_damping_ratio": null,
+    "closed_loop_natural_frequency_hz": null,
+    "continuous_force_limit_n": null,
+    "effective_gripper_mass_at_declared_configuration": null,
+    "loaded_linkage_efficiency": null
+  },
+  "promotion_allowed": false,
+  "runtime_scan_status": "NOT_RUN_PREREQUISITES_UNSATISFIED",
+  "schema_version": 1,
+  "software_scope": {
+    "gain_tuner_extension": "isaacsim.robot_setup.gain_tuner 3.0.6",
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physx": "107.3.26"
+  },
+  "status": "HARD_BLOCKER"
+}
