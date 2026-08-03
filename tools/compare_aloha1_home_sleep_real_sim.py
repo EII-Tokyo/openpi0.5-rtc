@@ -10,8 +10,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+from tools.aloha1_mapping.home_sleep_alignment import align_rows
 from tools.aloha1_mapping.home_sleep_correspondence import ARM_JOINT_ORDER
-from tools.aloha1_mapping.home_sleep_correspondence import compare_aligned_joint_rows
 
 ROOT = Path(__file__).resolve().parents[1]
 REPORT_ROOT = ROOT / "reports/aloha1_mapping"
@@ -25,18 +25,27 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def _normalize_csv_row(row: dict[str, str], *, q_field: str) -> dict[str, object]:
+    """Normalize legacy digital and synchronized real rows without reordering."""
+
+    index_field = "sample_index" if row.get("sample_index") not in (None, "") else "command_index"
+    return {
+        "sample_index": int(row[index_field]),
+        "cycle": int(row["cycle"]),
+        "segment": str(row["segment"]),
+        "q": json.loads(row[q_field])[:6],
+    }
+
+
 def _load_rows(path: Path, q_field: str) -> list[dict[str, object]]:
     with path.open(newline="", encoding="utf-8") as stream:
-        rows = [
-            {
-                "command_index": int(row["command_index"]),
-                "q": json.loads(row[q_field])[:6],
-            }
-            for row in csv.DictReader(stream)
-        ]
+        rows = [_normalize_csv_row(row, q_field=q_field) for row in csv.DictReader(stream)]
     # Physics telemetry repeats held command indices; retain the final readback per command.
-    deduplicated = {int(row["command_index"]): row for row in rows}
-    return [deduplicated[index] for index in sorted(deduplicated)]
+    deduplicated = {
+        (int(row["cycle"]), str(row["segment"]), int(row["sample_index"])): row
+        for row in rows
+    }
+    return [deduplicated[key] for key in sorted(deduplicated)]
 
 
 def build_missing_real_report(
@@ -93,7 +102,7 @@ def main() -> int:
             command_signature=manifest["command_signature"],
         )
     else:
-        comparison = compare_aligned_joint_rows(
+        comparison = align_rows(
             _load_rows(args.digital, "left_q"),
             _load_rows(args.real, "q"),
             joint_names=ARM_JOINT_ORDER,
