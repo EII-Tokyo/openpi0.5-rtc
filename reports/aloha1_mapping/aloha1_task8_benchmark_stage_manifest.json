@@ -1,0 +1,65 @@
+{
+  "candidate_promoted": false,
+  "classification": "TASK8_ISOLATED_BENCHMARK_STAGES_NOT_PROMOTED",
+  "environment_members": [
+    "follower_left",
+    "follower_right",
+    "environment"
+  ],
+  "final_or_default_asset_modified": false,
+  "physics_scene_count_authored_per_stage": 1,
+  "schema_version": 1,
+  "source_candidate_report": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task8_collider_lod_candidate.json",
+    "sha256": "5e929f1c59976766374c3caadc7f93ae3717a74754c700ba26ed70306ceb864c"
+  },
+  "spacing": {
+    "derivation": "2 * frozen full-robot collider x extent",
+    "source_coverage_report": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-task8-lightweight/collider_lod_validation/static_fidelity_01_coverage.json",
+    "source_coverage_sha256": "ceb14eeafea6bded10d4cd92125cfaa223f0b4676f830aadaff0a6040831ebc1",
+    "spacing_m": 2.9514065389687385,
+    "x_bounds_world_m": {
+      "xmax": 0.7378516134112784,
+      "xmin": -0.7378516560730908
+    },
+    "x_extent_m": 1.4757032694843693
+  },
+  "stages": {
+    "fidelity_profile": {
+      "1": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task8_collider_lod/1.0/contained_piece_pruning/aloha1_task8_fidelity_profile.usda",
+        "environment_count": 1,
+        "sha256": "222a327e24893fbcecbdd18d1bc1e3160fbdfb2ebad7d19103b1964f32c929b0"
+      },
+      "2": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task8_collider_lod/1.0/benchmark_stages/fidelity_profile/environments_2.usda",
+        "environment_count": 2,
+        "sha256": "c0e061dab7a1d28e237519a6d38ce1bcf5680e856b0bceae7a11319dae3fb04a"
+      },
+      "4": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task8_collider_lod/1.0/benchmark_stages/fidelity_profile/environments_4.usda",
+        "environment_count": 4,
+        "sha256": "7fdab27fc08411621c77696a5260d356244be1264aae4617433b9a6f32d051ce"
+      }
+    },
+    "throughput_profile": {
+      "1": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task8_collider_lod/1.0/contained_piece_pruning/aloha1_task8_throughput_profile.usda",
+        "environment_count": 1,
+        "sha256": "f907375e5b1125a3565eee95f55445ced153eba79927a06a9e5af52f7409f389"
+      },
+      "2": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task8_collider_lod/1.0/benchmark_stages/throughput_profile/environments_2.usda",
+        "environment_count": 2,
+        "sha256": "a1d3ff005e6c9888417f8fa7e1085ea02eda4aecbbc1e4c37494a1b1649b5fcc"
+      },
+      "4": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task8_collider_lod/1.0/benchmark_stages/throughput_profile/environments_4.usda",
+        "environment_count": 4,
+        "sha256": "1f06015d097b2233b287e04c26dc783033a02267f8f92ddcaf613c38f5592903"
+      }
+    }
+  },
+  "status": "PASS_STATIC_AUTHORING",
+  "two_fresh_directory_determinism": "PASS"
+}

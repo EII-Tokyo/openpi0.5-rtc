@@ -1,0 +1,46 @@
+schema_version: 1
+runtime:
+  isaac_sim: 5.1.0.0
+  kit: 107.3.3
+  physx: 107.3.26
+frozen_inputs:
+  stage: assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda
+  stage_sha256: 327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9
+  finger_limit_layer: assets/Trossen/ALOHA1/1.0/diagnostics/finger_limit_pair_collision_candidate/1.0/configuration/finger_source_limits.usda
+  finger_limit_sha256: 2547e6fb374c213b5c6c54f200c7ced37605ab0e1a11735d0a32c0a231fd260f
+profiles:
+  fidelity_profile:
+    description: Frozen CAD-derived Task 8 baseline.
+    collider_changes: []
+  throughput_profile:
+    description: Isolated upper-arm contained-piece pruning candidate.
+    collider_changes:
+      - link_suffix: upper_arm_link
+        source_approximation: convexHull
+        source_authored_piece_count_per_follower: 4
+        candidate_approximation: convexHull
+        candidate_authored_piece_count_per_follower: 1
+        geometry_derivation: retain authored piece_000 and deactivate pieces_001 through 003 only after a half-space containment proof
+        admission_gates:
+          - valid supplier B-Rep
+          - deterministic project-local tessellation
+          - authored component ordering matches the original CAD-collider builder
+          - piece_000 half-space contains every source vertex within a float32-derived numerical tolerance
+          - full-source convex hull signature equals retained piece_000 convex hull signature
+          - baseline static collision audit PASS
+          - baseline 809-waypoint swept collision audit PASS
+          - candidate static collision audit PASS
+          - candidate swept collision audit PASS
+    protected_link_suffixes:
+      - gripper_link
+      - gripper_bar_link
+      - gripper_prop_link
+      - left_finger_link
+      - right_finger_link
+    final_or_default_promotion: false
+benchmark:
+  environment_counts: [1, 2, 4]
+  fresh_process_runs_per_cell: 2
+  warmup_frames: 30
+  measured_frames: 180
+  stop_before_next_scale_on_oom_or_resource_failure: true

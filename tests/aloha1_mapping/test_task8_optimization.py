@@ -10,6 +10,8 @@ from tools.aloha1_mapping.task8_optimization import summarize_numeric_samples
 from tools.audit_aloha1_task8_baseline import canonical_layer_identifier
 from tools.audit_aloha1_task8_baseline import start_usd_runtime_if_needed
 from tools.benchmark_aloha1_task8_stage import _measurement_dict
+from tools.benchmark_aloha1_task8_stage import align_physics_samples
+from tools.benchmark_aloha1_task8_stage import select_target_waypoint
 from tools.build_aloha1_task8_progression_authorization import build_report
 from tools.build_aloha1_task8_visual_material_candidate import _bound_visual_material_count
 
@@ -334,6 +336,23 @@ def test_task8_benchmark_serializes_unitless_list_measurements() -> None:
     data = type("MeasurementData", (), {"measurements": [measurement]})()
 
     assert _measurement_dict(data) == {"samples": {"value": [1.0], "unit": ""}}
+
+
+def test_task8_benchmark_aligns_physx_history_to_app_window() -> None:
+    aligned, history_count = align_physics_samples(
+        [10.0, 11.0, 12.0],
+        [1000.0, 1001.0, 1.0, 2.0, 3.0],
+    )
+
+    assert aligned == [1.0, 2.0, 3.0]
+    assert history_count == 2
+
+
+def test_task8_benchmark_uses_frozen_sequence_without_cycling_jump() -> None:
+    sequence = [[0.0], [1.0], [2.0]]
+
+    assert select_target_waypoint(sequence, 1) == [1.0]
+    assert select_target_waypoint(sequence, 99) == [2.0]
 
 
 def test_task8_benchmark_comparison_uses_nonoverlapping_fresh_process_ranges() -> None:

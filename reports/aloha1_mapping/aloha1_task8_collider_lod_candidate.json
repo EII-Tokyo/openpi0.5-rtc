@@ -1,0 +1,369 @@
+{
+  "candidate_promoted": false,
+  "candidate_runtime_cooking_readback": "PASS_TWO_FRESH_PROCESSES",
+  "candidate_runtime_smoke": "PASS_LIGHTWEIGHT_BOTTLE500",
+  "candidate_static_collision_regression": "PASS_EQUIVALENT_TO_BASELINE_WITH_PREEXISTING_ABSOLUTE_GATE_FAILURE",
+  "candidate_swept_collision_regression": "PASS_809_WAYPOINTS_TWO_FRESH_PROCESSES",
+  "changed_link_suffixes": [
+    "upper_arm_link"
+  ],
+  "changed_robots": [
+    "follower_left",
+    "follower_right"
+  ],
+  "classification": "DIAGNOSTIC_ONLY_NOT_PROMOTED",
+  "collider_records": [
+    {
+      "aabb_m": {
+        "extent": [
+          0.0895,
+          0.10379999923706054,
+          0.32482501220703125
+        ],
+        "maximum": [
+          0.07375,
+          0.051900001525878904,
+          0.32065001220703127
+        ],
+        "minimum": [
+          -0.01575,
+          -0.051899997711181645,
+          -0.004174999999999998
+        ]
+      },
+      "candidate_active": true,
+      "face_count": 3124,
+      "geometry_signature": "cba7153d6863ed50548d37b4e029c6c0f0f7198119569b7bfa84c8fd38dce127",
+      "piece_index": 0,
+      "prim_path": "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh",
+      "robot": "follower_left",
+      "vertex_count": 1564
+    },
+    {
+      "aabb_m": {
+        "extent": [
+          0.0005000000000000004,
+          0.04019999885559082,
+          0.0015000000000000013
+        ],
+        "maximum": [
+          0.012800000190734864,
+          0.020100000381469727,
+          0.26649562377929686
+        ],
+        "minimum": [
+          0.012300000190734864,
+          -0.020099998474121094,
+          0.26499562377929686
+        ]
+      },
+      "candidate_active": false,
+      "face_count": 134,
+      "geometry_signature": "520088b40ca6ec5e8585d435c69529a9a6b00c78e4955346922b808fcd929001",
+      "piece_index": 1,
+      "prim_path": "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_001/mesh",
+      "robot": "follower_left",
+      "vertex_count": 69
+    },
+    {
+      "aabb_m": {
+        "extent": [
+          0.0024499998092651354,
+          0.003199999809265136,
+          0.003199981689453124
+        ],
+        "maximum": [
+          0.01525,
+          -0.012499999046325684,
+          0.29130000610351564
+        ],
+        "minimum": [
+          0.012800000190734864,
+          -0.01569999885559082,
+          0.2881000244140625
+        ]
+      },
+      "candidate_active": false,
+      "face_count": 212,
+      "geometry_signature": "bc20dbfc2ed8a04aa2a0cfa1f2448302aa9c61626bd696bd96a4f4bbae878a29",
+      "piece_index": 2,
+      "prim_path": "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_002/mesh",
+      "robot": "follower_left",
+      "vertex_count": 108
+    },
+    {
+      "aabb_m": {
+        "extent": [
+          0.0024499998092651354,
+          0.003199999809265136,
+          0.003199981689453124
+        ],
+        "maximum": [
+          0.01525,
+          0.015700000762939453,
+          0.29130000610351564
+        ],
+        "minimum": [
+          0.012800000190734864,
+          0.012500000953674317,
+          0.2881000244140625
+        ]
+      },
+      "candidate_active": false,
+      "face_count": 212,
+      "geometry_signature": "3115f6a278a0c6448592599d709bfdd040c1b308c8b5ed6f2b3a34694ece7850",
+      "piece_index": 3,
+      "prim_path": "/World/follower_left/vx300s_left/follower_left_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_003/mesh",
+      "robot": "follower_left",
+      "vertex_count": 108
+    },
+    {
+      "aabb_m": {
+        "extent": [
+          0.0895,
+          0.10379999923706054,
+          0.32482501220703125
+        ],
+        "maximum": [
+          0.07375,
+          0.051900001525878904,
+          0.32065001220703127
+        ],
+        "minimum": [
+          -0.01575,
+          -0.051899997711181645,
+          -0.004174999999999998
+        ]
+      },
+      "candidate_active": true,
+      "face_count": 3124,
+      "geometry_signature": "cba7153d6863ed50548d37b4e029c6c0f0f7198119569b7bfa84c8fd38dce127",
+      "piece_index": 0,
+      "prim_path": "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_000/mesh",
+      "robot": "follower_right",
+      "vertex_count": 1564
+    },
+    {
+      "aabb_m": {
+        "extent": [
+          0.0005000000000000004,
+          0.04019999885559082,
+          0.0015000000000000013
+        ],
+        "maximum": [
+          0.012800000190734864,
+          0.020100000381469727,
+          0.26649562377929686
+        ],
+        "minimum": [
+          0.012300000190734864,
+          -0.020099998474121094,
+          0.26499562377929686
+        ]
+      },
+      "candidate_active": false,
+      "face_count": 134,
+      "geometry_signature": "520088b40ca6ec5e8585d435c69529a9a6b00c78e4955346922b808fcd929001",
+      "piece_index": 1,
+      "prim_path": "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_001/mesh",
+      "robot": "follower_right",
+      "vertex_count": 69
+    },
+    {
+      "aabb_m": {
+        "extent": [
+          0.0024499998092651354,
+          0.003199999809265136,
+          0.003199981689453124
+        ],
+        "maximum": [
+          0.01525,
+          -0.012499999046325684,
+          0.29130000610351564
+        ],
+        "minimum": [
+          0.012800000190734864,
+          -0.01569999885559082,
+          0.2881000244140625
+        ]
+      },
+      "candidate_active": false,
+      "face_count": 212,
+      "geometry_signature": "bc20dbfc2ed8a04aa2a0cfa1f2448302aa9c61626bd696bd96a4f4bbae878a29",
+      "piece_index": 2,
+      "prim_path": "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_002/mesh",
+      "robot": "follower_right",
+      "vertex_count": 108
+    },
+    {
+      "aabb_m": {
+        "extent": [
+          0.0024499998092651354,
+          0.003199999809265136,
+          0.003199981689453124
+        ],
+        "maximum": [
+          0.01525,
+          0.015700000762939453,
+          0.29130000610351564
+        ],
+        "minimum": [
+          0.012800000190734864,
+          0.012500000953674317,
+          0.2881000244140625
+        ]
+      },
+      "candidate_active": false,
+      "face_count": 212,
+      "geometry_signature": "3115f6a278a0c6448592599d709bfdd040c1b308c8b5ed6f2b3a34694ece7850",
+      "piece_index": 3,
+      "prim_path": "/World/follower_right/vx300s_right/follower_right_upper_arm_link/cad_derived_collisions/cad_derived_upper_arm_link/piece_003/mesh",
+      "robot": "follower_right",
+      "vertex_count": 108
+    }
+  ],
+  "containment_certificate": {
+    "candidate_piece_count": 1,
+    "component_ordering": "MATCHES tools/build_aloha1_cad_derived_collider_diagnostic_stage.py _connected_mesh_components: minimum point, vertex count, index count",
+    "component_records": [
+      {
+        "contains_all_source_vertices": true,
+        "face_count": 3124,
+        "geometry_signature": "cba7153d6863ed50548d37b4e029c6c0f0f7198119569b7bfa84c8fd38dce127",
+        "hull_area_m2": 0.10831700424761906,
+        "hull_volume_m3": 0.0018963264935926178,
+        "maximum_outside_distance_m": 7.632783294297951e-17,
+        "minimum_point": [
+          -0.01575,
+          -0.020555648803710937,
+          0.03025747985839844
+        ],
+        "piece_index": 0,
+        "vertex_count": 1564
+      },
+      {
+        "contains_all_source_vertices": false,
+        "face_count": 134,
+        "geometry_signature": "520088b40ca6ec5e8585d435c69529a9a6b00c78e4955346922b808fcd929001",
+        "hull_area_m2": 0.00015968789082844206,
+        "hull_volume_m3": 2.965930438053816e-08,
+        "maximum_outside_distance_m": 0.2709128520577072,
+        "minimum_point": [
+          0.012300000190734864,
+          -0.020099998474121094,
+          0.26649562377929686
+        ],
+        "piece_index": 1,
+        "vertex_count": 69
+      },
+      {
+        "contains_all_source_vertices": false,
+        "face_count": 212,
+        "geometry_signature": "bc20dbfc2ed8a04aa2a0cfa1f2448302aa9c61626bd696bd96a4f4bbae878a29",
+        "hull_area_m2": 3.649213321382192e-05,
+        "hull_volume_m3": 1.6700575590342602e-08,
+        "maximum_outside_distance_m": 0.2971324875001275,
+        "minimum_point": [
+          0.012800000190734864,
+          -0.01569999885559082,
+          0.2897
+        ],
+        "piece_index": 2,
+        "vertex_count": 108
+      },
+      {
+        "contains_all_source_vertices": false,
+        "face_count": 212,
+        "geometry_signature": "3115f6a278a0c6448592599d709bfdd040c1b308c8b5ed6f2b3a34694ece7850",
+        "hull_area_m2": 3.649213288782206e-05,
+        "hull_volume_m3": 1.670057530405552e-08,
+        "maximum_outside_distance_m": 0.29713249743985665,
+        "minimum_point": [
+          0.012800000190734864,
+          0.012500000953674317,
+          0.2897
+        ],
+        "piece_index": 3,
+        "vertex_count": 108
+      }
+    ],
+    "full_hull_matches_retained_hull": true,
+    "full_hull_signature": "b743fed8083ac1eaca2b53df7b21ff98ab9a98e28a1f93b8c869c57ccafc1d6f",
+    "full_hull_volume_m3": 0.0018963264935926165,
+    "maximum_outside_distance_m": 7.632783294297951e-17,
+    "removed_piece_indices": [
+      1,
+      2,
+      3
+    ],
+    "retained_hull_signature": "b743fed8083ac1eaca2b53df7b21ff98ab9a98e28a1f93b8c869c57ccafc1d6f",
+    "retained_hull_volume_m3": 0.0018963264935926165,
+    "retained_piece_index": 0,
+    "source_piece_count": 4,
+    "status": "VERIFIED_EXISTING_PIECE_CONTAINS_ALL_OTHERS",
+    "tolerance_derivation": "64 * float32_epsilon * max(abs_coordinate, AABB_extent, 1e-3 m)",
+    "tolerance_m": 2.4782182208582526e-06
+  },
+  "final_or_default_asset_modified": false,
+  "geometry_derivation": "RETAIN_EXISTING_AUTHORED_PIECE_000_AND_DEACTIVATE_SOURCE_PIECES_PROVEN_CONTAINED_BY_ITS_CONVEX_HULL",
+  "layers": {
+    "configuration": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task8_collider_lod/1.0/contained_piece_pruning/configuration/deactivate_contained_pieces.usda",
+      "sha256": "ffaa3b10697db0b4c5073d5501e90cc32651d26cc3e83e9b678f75f7d4717e52"
+    },
+    "fidelity_profile": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task8_collider_lod/1.0/contained_piece_pruning/aloha1_task8_fidelity_profile.usda",
+      "sha256": "222a327e24893fbcecbdd18d1bc1e3160fbdfb2ebad7d19103b1964f32c929b0"
+    },
+    "throughput_profile": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task8_collider_lod/1.0/contained_piece_pruning/aloha1_task8_throughput_profile.usda",
+      "sha256": "f907375e5b1125a3565eee95f55445ced153eba79927a06a9e5af52f7409f389"
+    }
+  },
+  "piece_counts": {
+    "fidelity_per_follower": 4,
+    "fidelity_total": 8,
+    "reduction": 6,
+    "throughput_per_follower": 1,
+    "throughput_total": 2
+  },
+  "protected_unchanged": [
+    "gripper_link",
+    "gripper_bar_link",
+    "gripper_prop_link",
+    "left_finger_link",
+    "right_finger_link",
+    "Bottle500",
+    "tabletop support region"
+  ],
+  "rejected_hypotheses": [
+    {
+      "name": "FULL_SOURCE_VERTEX_SET_SINGLE_HULL",
+      "outward_sample_deviation_max_m": 0.05381758429862701,
+      "outward_sample_deviation_rms_m": 0.018745490742476084,
+      "reason": "Fills visible raw-CAD concavities by up to the sampled deviation; not required because an existing authored piece already defines the complete compound outer convex envelope.",
+      "status": "REJECTED_GEOMETRIC_OVERAPPROXIMATION"
+    }
+  ],
+  "runtime_target": {
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physx": "107.3.26"
+  },
+  "schema_version": 2,
+  "source_geometry": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/geometry/upper_arm_link.obj",
+    "authored_geometry_layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/geometry/cad_derived_colliders.usda",
+    "authored_geometry_layer_sha256": "06295762f1f513dae63a1188e360c209ac2bbbabef730db8a103eb3ea4b1df81",
+    "coordinate_frame": "upper_arm_link local",
+    "sha256": "9d27f621ac900a5ecaa1cba36f2e6522db84566fbf1004db2d7212f2f7995176",
+    "transform_determinant": 1.0,
+    "unit": "metre"
+  },
+  "source_stage": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+    "sha256": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9"
+  },
+  "status": "PASS_STATIC_GEOMETRY_CERTIFICATE",
+  "two_fresh_directory_determinism": "PASS"
+}

@@ -1,0 +1,35 @@
+{
+  "candidate_promoted": false,
+  "final_or_default_asset_modified": false,
+  "fresh_cooking_artifacts": [
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-task8-lightweight/collider_lod_validation/fresh_01.json",
+      "sha256": "1aee86e9094a4b559e3e9c8d809c911b1fa9265c4fe784a7a49e9f9948727243"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-task8-lightweight/collider_lod_validation/fresh_02.json",
+      "sha256": "b90cf2e8edc415bb7341f3c6cb4d9b8c9573f84255c2500994cfad42e68aa20d"
+    }
+  ],
+  "inventory": {
+    "articulation_count": 3,
+    "collider_prim_count": 75,
+    "collision_mesh_face_count": 254788,
+    "collision_mesh_point_count": 655096,
+    "joint_count": 28,
+    "rigid_body_count": 62,
+    "upper_arm_collider_prim_count": 8
+  },
+  "runtime": {
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physx": "107.3.26"
+  },
+  "schema_version": 1,
+  "stage": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/task8_collider_lod/1.0/contained_piece_pruning/aloha1_task8_fidelity_profile.usda",
+    "default_prim": "/World",
+    "sha256": "222a327e24893fbcecbdd18d1bc1e3160fbdfb2ebad7d19103b1964f32c929b0"
+  },
+  "status": "PASS"
+}
