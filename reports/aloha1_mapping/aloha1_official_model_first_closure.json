@@ -9,16 +9,20 @@
   "compound_task_contact_band_status": "FAIL_CENTRAL_TANGENCY_OUTSIDE_COMPOUND_PATCH",
   "compound_usd_status": "PASS_GEOMETRY_ONLY_DIAGNOSTIC_USD",
   "compound_video_status": "NOT_APPLICABLE_STATIC_COOKING_ONLY",
-  "deterministic_signature": "459687601eebf65138ed1b9ad0647f574629ab80c4eb53d666e145ad08b8c2fe",
+  "continuous_force_envelope_verified": false,
+  "deterministic_signature": "2748c6942244499575f74809ece2acef34563a24c239e8ef580a26f4e352913f",
   "dynamics_contract_status": "PARTIAL",
   "evidence_boundaries": {
+    "aggregate_scope": "STATIC_GEOMETRY_AND_DYNAMIC_NUMERICAL_DIAGNOSTICS",
     "diagnostic_asset_redistribution": "UNKNOWN_HARD_BLOCKER_SUPPLIER_CAD_LICENSE",
-    "static_cooking_only": true,
-    "timeline_started": false,
-    "video_reason": "NOT_APPLICABLE_STATIC_COOKING_ONLY",
+    "numerical_convergence_timeline_started": true,
+    "static_cooking_timeline_started": false,
+    "video_reason": "NOT_REQUIRED_ALL_FREQUENCY_CELLS_PHYSICAL_GRASP_PASS_NUMERICAL_TRAJECTORY_DISAGREEMENT_ONLY",
     "video_required": false
   },
   "final_or_default_asset_modified": false,
+  "force_drive_candidate_status": "HARD_BLOCKER",
+  "force_drive_runtime_scan_status": "NOT_RUN_PREREQUISITES_UNSATISFIED",
   "formal_parameter_blockers": [
     {
       "blocker": {
@@ -179,11 +183,36 @@
       "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_official_model_runtime.json",
       "sha256": "e0d8298f5610502c20f0aa24108a9e4687268e9c40eabe45979ac7261819be09",
       "status": "NOT_RUN"
+    },
+    {
+      "deterministic_signature": "4116adffecd06ba7b62707c1419218b60d76f6c68a45034e1ae2a478c4ff6293",
+      "id": "numerical_convergence",
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_physics_numerical_convergence.json",
+      "sha256": "4cce3830458bbc8be058a8ace6ae374c230bd9610d3a417328e405212dfbb9d6",
+      "status": "PARTIAL"
+    },
+    {
+      "deterministic_signature": "22a7b7a44a770688c2e067a0e06cbd4ab1e77dd44a2478e2d371afc98ea5533d",
+      "id": "force_drive_candidate",
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_force_drive_candidate.json",
+      "sha256": "dc5b5ef6ad4269b170018682b392bea4f7656943679dfb4a72ff17068923cc4f",
+      "status": "HARD_BLOCKER"
+    },
+    {
+      "deterministic_signature": "bba5e645a153bd441feb5fc1c5a0bac2d98609b56d454a4bbea82e4050aa1fb6",
+      "id": "material_thermal_closure",
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_material_thermal_blocker_closure.json",
+      "sha256": "69507fab52c31829e57a07a2a188e3ae5a2cb57ba72188ee63e28f1e8ef10aff",
+      "status": "HARD_BLOCKER"
     }
   ],
-  "interpretation": "The supplier-CAD finite central rectangle cooks deterministically in finger-link-local metres through two fresh Isaac 5.1 processes, and the geometry-only USD is byte-identical across two fresh builds. The analytic Bottle500 tangent is nevertheless about 1.61 mm outside that finite patch on both handed fingers. The diagnostic candidate is rejected for the task contact band and is not promoted. This does not prove a corrected effective finger contact surface, articulation integration, contact dynamics, calibrated drives, or material/solver mappings; the final/default asset remains unchanged.",
+  "interpretation": "The supplier-CAD finite central rectangle cooks deterministically in finger-link-local metres through two fresh Isaac 5.1 processes, and the geometry-only USD is byte-identical across two fresh builds. The analytic Bottle500 tangent is nevertheless about 1.61 mm outside that finite patch on both handed fingers. The diagnostic candidate is rejected for the task contact band and is not promoted. This does not prove a corrected effective finger contact surface, articulation integration, contact dynamics, calibrated drives, or material/solver mappings. The predeclared 60-960 Hz convergence study does not converge under the independent geometry/encoder bounds, so the solver sweep is not admitted. The force-drive candidate and material/thermal gates remain HARD_BLOCKER without parameter scans; the final/default asset remains unchanged.",
+  "material_thermal_status": "HARD_BLOCKER",
+  "numerical_convergence_reason": "TIMESTEP_NOT_CONVERGED_SOLVER_SWEEPS_NOT_RUN",
+  "numerical_convergence_status": "PARTIAL",
   "official_model_candidate_status": "NOT_BUILT_BLOCKED",
   "official_model_runtime_status": "NOT_RUN",
+  "physical_friction_calibrated": false,
   "remaining_blocker_count": 5,
   "schema_version": 1,
   "status": "PARTIAL_MODEL_PROOF",

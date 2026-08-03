@@ -1,5 +1,54 @@
 # Task State
 
+## 2026-08-03 model-first execution closure
+
+- Recommended order steps 1-2 are complete and already committed: runtime
+  gripper control is `current_based_position` with pipeline-scoped 200/300
+  tick current limits; the finite Bottle500 contact-band certificate rejects
+  the compound candidate because the central tangent is about `1.61374 mm`
+  outside each bounded patch versus a `0.20048 mm` numerical budget.
+- Numerical convergence runs one frozen physical model and Stage at 60, 120,
+  240, 480 and 960 Hz with exact Isaac 5.1 runtime readback and fixed 64/8
+  solver counts. All cells physically pass the 20 cm grasp, but successive
+  joint differences (`0.04470-0.09702 rad`) and bottle differences
+  (`9.664-20.981 mm`) exceed the independently frozen `0.00153589 rad` and
+  `0.20048 mm` bounds. Status is `PARTIAL`; no timestep is selected and the
+  authoritative solver sweeps are `NOT_RUN`.
+- The first matrix driver had a sequencing defect and continued solver cells
+  after the timestep gate failed. Those cells are retained under
+  `.codex/artifacts/20260803-aloha1-model-first/convergence/matrix/` but are
+  explicitly excluded. The corrected driver reuses the valid frequency cells
+  and stops at `TIMESTEP_NOT_CONVERGED_SOLVER_SWEEPS_NOT_RUN`.
+- No numerical failure video applies: every frequency cell is still a
+  physical `stable_20cm_hold`. Signed telemetry and trajectory comparisons,
+  not a visually identical video, are the evidence for the numerical
+  disagreement.
+- Force-drive derivation is `HARD_BLOCKER`. Local Gain Tuner 3.0.6 equations
+  and units are verified, but effective gripper mass, closed-loop natural
+  frequency/damping, loaded linkage efficiency and continuous output force
+  are not sourced. No candidate layer or parameter scan is authored.
+- Material/thermal closure is `HARD_BLOCKER`. Runtime material binding is
+  `PASS`, while the physical surface pair and pair coefficients are unknown;
+  friction `0.7` remains `TEMPORARY_UNCALIBRATED`. ROBOTIS exact-model tables
+  do not provide a measured loaded continuous thermal envelope.
+- Reports:
+  `aloha1_physics_numerical_convergence.json/.md`,
+  `aloha1_force_drive_candidate.json/.md`,
+  `aloha1_material_thermal_blocker_closure.json/.md`, and
+  `aloha1_official_model_first_closure.json/.md` under
+  `reports/aloha1_mapping/`.
+- Frozen Stage, runtime config and Bottle500 hashes remain unchanged. No real
+  robot or `192.168.1.103` access occurred. No final/default collider, drive,
+  material or asset was changed. Task 8 remains
+  `AUTHORIZED_PAUSED_AT_MODEL_PROOF_GATE`.
+- Current verification boundary: focused model-first tests pass; complete
+  `tests/aloha1_mapping` is `1164 passed`; task-owned Ruff and pycompile pass;
+  tracked-Python pycompile passes. Repository-wide pytest still stops during
+  collection on the same seven unrelated TensorFlow/`transformers` import
+  errors, and repository-wide Ruff reports 2236 pre-existing errors. Full logs
+  are under `.codex/artifacts/20260803-aloha1-model-first/` and remain outside
+  Git.
+
 ## 2026-08-03 CAD-derived compound finger contact candidate
 
 - The prior Hull/default-Decomposition exact B-Rep failure is not hidden or

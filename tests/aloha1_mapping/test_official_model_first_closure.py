@@ -23,5 +23,17 @@ def test_closure_keeps_model_gate_partial_and_candidate_unpromoted() -> None:
     assert closure["compound_usd_status"] == "PASS_GEOMETRY_ONLY_DIAGNOSTIC_USD"
     assert closure["collider_contract_status"] == "PARTIAL"
     assert closure["official_model_candidate_status"] == "NOT_BUILT_BLOCKED"
+    assert closure["numerical_convergence_status"] == "PARTIAL"
+    assert closure["numerical_convergence_reason"] == (
+        "TIMESTEP_NOT_CONVERGED_SOLVER_SWEEPS_NOT_RUN"
+    )
+    assert closure["force_drive_candidate_status"] == "HARD_BLOCKER"
+    assert closure["material_thermal_status"] == "HARD_BLOCKER"
+    assert closure["evidence_boundaries"]["aggregate_scope"] == (
+        "STATIC_GEOMETRY_AND_DYNAMIC_NUMERICAL_DIAGNOSTICS"
+    )
+    assert closure["evidence_boundaries"][
+        "numerical_convergence_timeline_started"
+    ] is True
     assert closure["task8_status"] == "AUTHORIZED_PAUSED_AT_MODEL_PROOF_GATE"
     assert closure["final_or_default_asset_modified"] is False

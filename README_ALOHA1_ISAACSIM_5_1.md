@@ -64,6 +64,10 @@ sim-to-real dynamics model and it is not yet accepted for bottle insertion.
 | Kinematic mathematical contract | **PASS** | independent URDF FK and official Trossen POE agree at five legal samples; max translation residual `4.4841e-16 m`, max Jacobian residual `1.9581e-10`; Isaac IK was not used |
 | Dynamics mathematical contract | **PARTIAL** | all 14 inertials per follower pass; official 12 V estimated continuous torque is XM540 `2.12 N·m` and XM430 `0.82 N·m`, explicitly 20%-of-stall estimates rather than measured thermal curves; full envelope and PhysX drive mapping remain blocked |
 | Gripper/collider geometry contract | **PARTIAL / central contact candidate PASS** | Hull/default decomposition fail the exact inward-face gate. A CAD-derived 34-piece-per-finger compound passes two fresh finger-link-local PhysX cooking runs over its central contact rectangle and a deterministic 68-piece geometry-only USD exists; full effective contact-surface scope and promotion remain blocked |
+| Bottle500 finite contact-band certificate | **FAIL / candidate rejected** | the analytic Bottle500 tangent lies about `1.61374 mm` outside the finite compound patch on each handed finger; independent numeric budget is about `0.20048 mm`; candidate is not promoted |
+| Physics timestep/solver convergence | **PARTIAL** | every 60-960 Hz frozen-model cell still completes the grasp, but successive trajectory differences exceed the independently frozen geometry/encoder bounds; no timestep is selected and solver sweeps are not admitted |
+| Force-drive physical derivation | **HARD_BLOCKER** | Gain Tuner 3.0.6 equations and SI units are verified; effective gripper mass, declared/identified response, loaded linkage efficiency and continuous force envelope are missing, so no candidate or scan is authored |
+| Contact material / continuous duty | **HARD_BLOCKER** | runtime material binding is verified, but friction `0.7` remains `TEMPORARY_UNCALIBRATED`; exact surface-pair properties and a measured loaded thermal envelope are absent |
 | Task 8 optimization | **AUTHORIZED / PAUSED_AT_MODEL_PROOF_GATE** | read-only 129-mesh baseline inventory exists; no optimization candidate, Isaac runtime, or final/default asset mutation occurred |
 
 `PASS`, `FAIL`, and `PARTIAL` are literal machine-report values. A clean
@@ -206,6 +210,63 @@ The supplier STEP remains local read-only because its formal redistribution
 license is still `UNKNOWN_HARD_BLOCKER`. No original CAD is committed. No
 Isaac process was started for this source/mathematics phase, and no final or
 default USD/collider was modified.
+
+## 2026-08-03 model-first execution closure
+
+The six-step model-first order has now been executed through every
+non-blocking step. The runtime control contract is
+`current_based_position`; the configuration value 200 ticks (`0.538 A`) and
+the official ALOHA dual-teleop override 300 ticks (`0.807 A`) remain
+pipeline-scoped. Neither value is copied directly into PhysX `maxForce`.
+
+The finite Bottle500 contact-band certificate rejects the 68-piece compound
+candidate. The analytic central tangent misses the bounded contact patch by
+about `1.61374 mm` on each handed finger, versus an independent numerical
+budget of about `0.20048 mm`. The candidate, default collider and final assets
+remain unchanged.
+
+The numerical study used one frozen Stage and physical model, fresh Isaac Sim
+5.1 processes, exact runtime readback, a high fixed 64/8 solver baseline and
+60, 120, 240, 480 and 960 Hz. All five cells still report
+`stable_20cm_hold`; that outcome is not used as a convergence tolerance.
+Successive maximum joint-position differences are `0.04470`, `0.09690`,
+`0.09702` and `0.07563 rad`; Bottle500 position differences are `10.764`,
+`9.664`, `20.981` and `10.509 mm`. These exceed the independently frozen
+`0.00153589 rad` encoder-tick and `0.20048 mm` geometry bounds. No timestep is
+selected, so position/velocity solver sweeps are `NOT_RUN` in the authoritative
+report. Extra solver cells produced by the superseded driver are preserved in
+`.codex/artifacts` but excluded from the decision.
+
+Because every frequency cell remains a physical grasp PASS, there is no
+visible failure state to capture. A video would falsely imply that the bottle
+was dropped; signed telemetry and pairwise trajectory metrics are the
+authoritative evidence for this numerical `PARTIAL` result.
+
+The local Gain Tuner 3.0.6 SI equations are verified, but a force-drive
+candidate is not authored. Required inputs still absent are the effective
+gripper mass at a declared configuration, declared or identified closed-loop
+natural frequency and damping ratio, loaded linkage efficiency, and a
+continuous output-force envelope. No parameter scan is allowed while the
+numerical gate is also open.
+
+Isaac runtime material binding is independently `PASS`, including actual
+collider paths and combine-mode readback. That only proves that the temporary
+materials are applied as authored. It does not calibrate the real surface
+pair: finger-pad identity/finish, Bottle500 identity/finish, pair friction and
+restitution are unknown, and `0.7` remains `TEMPORARY_UNCALIBRATED`. ROBOTIS'
+exact-model tables and 20%-of-stall estimates are retained, but no loaded
+continuous torque-speed-current thermal curve is claimed.
+
+Authoritative reports:
+
+- `reports/aloha1_mapping/aloha1_physics_numerical_convergence.json/.md`;
+- `reports/aloha1_mapping/aloha1_force_drive_candidate.json/.md`;
+- `reports/aloha1_mapping/aloha1_material_thermal_blocker_closure.json/.md`;
+- `reports/aloha1_mapping/aloha1_official_model_first_closure.json/.md`.
+
+Task 8 remains `AUTHORIZED_PAUSED_AT_MODEL_PROOF_GATE`. No force-drive,
+friction, thermal, collider, optimization or final/default asset candidate is
+promoted by this closure.
 
 ## 2026-08-02 five-pose initialization and finger-safety closure
 

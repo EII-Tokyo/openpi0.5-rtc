@@ -9,14 +9,17 @@
 - Articulation integration: **NOT_RUN**
 - Contact dynamics: **NOT_RUN**
 - Official model candidate: **NOT_BUILT_BLOCKED**
+- Numerical convergence: **PARTIAL** (`TIMESTEP_NOT_CONVERGED_SOLVER_SWEEPS_NOT_RUN`)
+- Force-drive candidate: **HARD_BLOCKER**
+- Material/thermal closure: **HARD_BLOCKER**
 - Task 8: **AUTHORIZED_PAUSED_AT_MODEL_PROOF_GATE**
 - Final/default asset modified: `False`
 
 ## Verified boundary
 
-The supplier-CAD finite central rectangle cooks deterministically in finger-link-local metres through two fresh Isaac 5.1 processes, and the geometry-only USD is byte-identical across two fresh builds. The analytic Bottle500 tangent is nevertheless about 1.61 mm outside that finite patch on both handed fingers. The diagnostic candidate is rejected for the task contact band and is not promoted. This does not prove a corrected effective finger contact surface, articulation integration, contact dynamics, calibrated drives, or material/solver mappings; the final/default asset remains unchanged.
+The supplier-CAD finite central rectangle cooks deterministically in finger-link-local metres through two fresh Isaac 5.1 processes, and the geometry-only USD is byte-identical across two fresh builds. The analytic Bottle500 tangent is nevertheless about 1.61 mm outside that finite patch on both handed fingers. The diagnostic candidate is rejected for the task contact band and is not promoted. This does not prove a corrected effective finger contact surface, articulation integration, contact dynamics, calibrated drives, or material/solver mappings. The predeclared 60-960 Hz convergence study does not converge under the independent geometry/encoder bounds, so the solver sweep is not admitted. The force-drive candidate and material/thermal gates remain HARD_BLOCKER without parameter scans; the final/default asset remains unchanged.
 
-This was a static collision-cooking and geometry-authoring check. No timeline was started, so a video would not provide additional physical evidence. The rejected exact-ray attempt and its annotated numerical-quantization screenshot remain part of the evidence trail.
+The collision-cooking certificate remains a static geometry check. The numerical convergence matrix did start isolated timelines, but every frequency cell retained the same physical grasp PASS; its failure is cross-step trajectory disagreement, so a failure video is not applicable. Signed telemetry and pairwise metrics are authoritative. The rejected exact-ray attempt and its annotated numerical-quantization screenshot remain part of the evidence trail.
 
 ## Remaining formal blockers
 

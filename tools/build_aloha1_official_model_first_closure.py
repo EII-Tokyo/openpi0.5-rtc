@@ -24,6 +24,9 @@ INPUT_REPORTS = {
     "compound_task_contact_band": "aloha1_bottle_swept_contact_band_collider_certificate.json",
     "official_model_candidate": "aloha1_official_model_candidate.json",
     "official_model_runtime": "aloha1_official_model_runtime.json",
+    "numerical_convergence": "aloha1_physics_numerical_convergence.json",
+    "force_drive_candidate": "aloha1_force_drive_candidate.json",
+    "material_thermal_closure": "aloha1_material_thermal_blocker_closure.json",
 }
 
 
@@ -60,6 +63,9 @@ def build_closure(root: Path) -> dict[str, object]:
     task_band = reports["compound_task_contact_band"]
     candidate = reports["official_model_candidate"]
     runtime = reports["official_model_runtime"]
+    convergence = reports["numerical_convergence"]
+    force_drive = reports["force_drive_candidate"]
+    material_thermal = reports["material_thermal_closure"]
 
     if cooking["coordinate_frame"] != "FINGER_LINK_LOCAL_METRES":
         raise ValueError("compound cooking certificate is not finger-link-local")
@@ -97,6 +103,19 @@ def build_closure(root: Path) -> dict[str, object]:
         "dynamics_contract_status": dynamics["status"],
         "official_model_candidate_status": candidate["status"],
         "official_model_runtime_status": runtime["status"],
+        "numerical_convergence_status": convergence["status"],
+        "numerical_convergence_reason": convergence["reason"],
+        "force_drive_candidate_status": force_drive["status"],
+        "force_drive_runtime_scan_status": force_drive[
+            "runtime_scan_status"
+        ],
+        "material_thermal_status": material_thermal["status"],
+        "physical_friction_calibrated": material_thermal["gate"][
+            "physical_friction_calibrated"
+        ],
+        "continuous_force_envelope_verified": material_thermal["gate"][
+            "continuous_force_envelope_verified"
+        ],
         "formal_parameter_blockers": blockers,
         "remaining_blocker_count": len(blockers),
         "task8_status": "AUTHORIZED_PAUSED_AT_MODEL_PROOF_GATE",
@@ -107,6 +126,8 @@ def build_closure(root: Path) -> dict[str, object]:
                 compound_usd["final_or_default_collider_modified"],
                 candidate["final_or_default_asset_modified"],
                 runtime["final_or_default_asset_modified"],
+                force_drive["final_or_default_asset_modified"],
+                material_thermal["final_or_default_asset_modified"],
             )
         ),
         "interpretation": (
@@ -116,13 +137,23 @@ def build_closure(root: Path) -> dict[str, object]:
             "outside that finite patch on both handed fingers. The diagnostic candidate is rejected "
             "for the task contact band and is not promoted. This does not prove a corrected effective "
             "finger contact surface, articulation integration, contact dynamics, calibrated drives, "
-            "or material/solver mappings; the final/default asset remains unchanged."
+            "or material/solver mappings. The predeclared 60-960 Hz convergence "
+            "study does not converge under the independent geometry/encoder bounds, "
+            "so the solver sweep is not admitted. The force-drive candidate and "
+            "material/thermal gates remain HARD_BLOCKER without parameter scans; "
+            "the final/default asset remains unchanged."
         ),
         "evidence_boundaries": {
-            "static_cooking_only": True,
-            "timeline_started": cooking["timeline_started"],
+            "aggregate_scope": (
+                "STATIC_GEOMETRY_AND_DYNAMIC_NUMERICAL_DIAGNOSTICS"
+            ),
+            "static_cooking_timeline_started": cooking["timeline_started"],
+            "numerical_convergence_timeline_started": True,
             "video_required": False,
-            "video_reason": "NOT_APPLICABLE_STATIC_COOKING_ONLY",
+            "video_reason": (
+                "NOT_REQUIRED_ALL_FREQUENCY_CELLS_PHYSICAL_GRASP_PASS_"
+                "NUMERICAL_TRAJECTORY_DISAGREEMENT_ONLY"
+            ),
             "diagnostic_asset_redistribution": "UNKNOWN_HARD_BLOCKER_SUPPLIER_CAD_LICENSE",
         },
     }
@@ -150,6 +181,10 @@ def _markdown(report: dict[str, Any]) -> str:
             f"- Articulation integration: **{report['compound_articulation_integration_status']}**",
             f"- Contact dynamics: **{report['compound_contact_dynamics_status']}**",
             f"- Official model candidate: **{report['official_model_candidate_status']}**",
+            f"- Numerical convergence: **{report['numerical_convergence_status']}** "
+            f"(`{report['numerical_convergence_reason']}`)",
+            f"- Force-drive candidate: **{report['force_drive_candidate_status']}**",
+            f"- Material/thermal closure: **{report['material_thermal_status']}**",
             f"- Task 8: **{report['task8_status']}**",
             f"- Final/default asset modified: `{report['final_or_default_asset_modified']}`",
             "",
@@ -157,10 +192,12 @@ def _markdown(report: dict[str, Any]) -> str:
             "",
             report["interpretation"],
             "",
-            "This was a static collision-cooking and geometry-authoring check. No timeline was "
-            "started, so a video would not provide additional physical evidence. The rejected "
-            "exact-ray attempt and its annotated numerical-quantization screenshot remain part "
-            "of the evidence trail.",
+            "The collision-cooking certificate remains a static geometry check. The numerical "
+            "convergence matrix did start isolated timelines, but every frequency cell retained "
+            "the same physical grasp PASS; its failure is cross-step trajectory disagreement, "
+            "so a failure video is not applicable. Signed telemetry and pairwise metrics are "
+            "authoritative. The rejected exact-ray attempt and its annotated numerical-"
+            "quantization screenshot remain part of the evidence trail.",
             "",
             "## Remaining formal blockers",
             "",
