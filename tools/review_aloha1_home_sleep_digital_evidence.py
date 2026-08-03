@@ -148,6 +148,96 @@ def build_visual_review(
     }
 
 
+def build_qualification_review(
+    capture: dict[str, Any], *, visual_model_approved: bool
+) -> dict[str, Any]:
+    """Record the visual-model review of a legal historical Sleep trajectory."""
+
+    required_labels = {
+        "initial_home",
+        "cycle_01_exact_sleep",
+        "cycle_01_return_home",
+        "cycle_03_exact_sleep",
+        "final_home",
+    }
+    required_modes = {"normal", "collision_overlay"}
+    labels_by_mode = {
+        mode: {
+            str(item["label"])
+            for item in capture["screenshots"]
+            if item["mode"] == mode
+        }
+        for mode in required_modes
+    }
+    complete = all(labels == required_labels for labels in labels_by_mode.values())
+    full_arm_view = capture["camera"]["view"] == "FULL_ARM_FIXED_OBLIQUE_ENGINEERING_EVIDENCE"
+    collider_visible = int(capture["collider_overlay"]["clone_count"]) > 0
+    numeric_pass = (
+        capture["evidence"]["numeric_status"] == "PASS"
+        and capture["evidence"]["exact_endpoint_gate"] is True
+    )
+    gates = {
+        "visual_model_approved": visual_model_approved,
+        "five_distinct_stages_per_mode": complete,
+        "whole_follower_left_visible": visual_model_approved and full_arm_view,
+        "home_and_sleep_visibly_distinct": visual_model_approved,
+        "cycle_01_and_cycle_03_sleep_visually_repeat": visual_model_approved,
+        "annotations_readable_and_non_occluding": visual_model_approved,
+        "full_arm_collider_overlay_visible": visual_model_approved and collider_visible,
+        "numeric_endpoint_gate_pass": numeric_pass,
+        "stage_hash_immutable": capture["stage"]["sha256_before"]
+        == capture["stage"]["sha256_after"],
+    }
+    retained = []
+    for source in capture["screenshots"]:
+        item = dict(source)
+        item["visual_review"] = {
+            "status": "PASS" if visual_model_approved else "NOT_REVIEWED",
+            "reviewed_by": "Codex visual model",
+            "whole_follower_left_visible": visual_model_approved,
+            "home_sleep_states_visibly_distinct": visual_model_approved,
+            "annotation_readable_and_non_occluding": visual_model_approved,
+            "full_arm_collider_overlay_visible": (
+                visual_model_approved if item["mode"] == "collision_overlay" else None
+            ),
+            "note": (
+                "Complete follower_left is visible; legal target/readback text is readable."
+                if item["mode"] == "normal"
+                else "Full-chain translucent red-edged collider overlay is visible."
+            ),
+        }
+        retained.append(item)
+    status = "PASS" if all(gates.values()) else "FAIL"
+    return {
+        "schema_version": 1,
+        "status": status,
+        "classification": "DIGITAL_OFFICIAL_HISTORICAL_SLEEP_VISUAL_REVIEW",
+        "visual_review_is_auxiliary": True,
+        "machine_telemetry_remains_primary": True,
+        "stage_sha256": capture["stage"]["sha256_before"],
+        "manifest_sha256": capture["manifest"]["sha256"],
+        "command_signature": capture["manifest"]["command_signature"],
+        "numeric_signature": capture["numeric_report"]["numeric_signature"],
+        "retained_videos": dict(capture["videos"]),
+        "retained_screenshots": retained,
+        "camera": dict(capture["camera"]),
+        "gates": gates,
+        "review_history": [
+            {
+                "attempt": "attempt1_first_annotations",
+                "status": "REJECTED_STALE_FAILURE_WORDING",
+                "raw_video_recaptured": False,
+            },
+            {
+                "attempt": "attempt1_reannotated",
+                "status": status,
+                "visual_model_reviewed_each_retained_image": visual_model_approved,
+            },
+        ],
+        "real_execution_authorized": False,
+    }
+
+
 def _markdown(report: dict[str, Any]) -> str:
     lines = [
         "# ALOHA1 Home/Sleep digital evidence review",
@@ -182,17 +272,72 @@ def _markdown(report: dict[str, Any]) -> str:
     return "\n".join(lines) + "\n"
 
 
+def _qualification_markdown(report: dict[str, Any]) -> str:
+    lines = [
+        "# ALOHA1 official historical Sleep visual review",
+        "",
+        f"- Status: `{report['status']}`",
+        f"- Stage SHA-256: `{report['stage_sha256']}`",
+        f"- Command signature: `{report['command_signature']}`",
+        f"- Numeric signature: `{report['numeric_signature']}`",
+        "- Evidence role: auxiliary visual evidence; numeric telemetry remains authoritative.",
+        "- Real execution authorized: `false`.",
+        "",
+        "## Review result",
+        "",
+        "- Five stages are present in both normal and collision-overlay modes.",
+        "- The complete follower_left arm is visible from a fixed camera.",
+        "- Home and Sleep are visibly distinct; cycle 1 and cycle 3 Sleep repeat.",
+        "- Full-chain collider overlays are visible in collision mode.",
+        "- First annotations were rejected for stale failure wording; only annotations were regenerated.",
+        "",
+        "## Retained videos",
+        "",
+    ]
+    for mode, item in report["retained_videos"].items():
+        lines.append(
+            f"- `{mode}`: `{item['absolute_path']}` ({item['frame_count']} frames, "
+            f"SHA-256 `{item['sha256']}`)"
+        )
+    lines.extend(["", "## Retained screenshots", ""])
+    lines.extend(
+        f"- `{item['mode']}/{item['label']}`: `{item['annotated_absolute_path']}`"
+        for item in report["retained_screenshots"]
+    )
+    return "\n".join(lines) + "\n"
+
+
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--original", type=Path, default=DEFAULT_ORIGINAL)
     parser.add_argument("--collision-retake", type=Path, default=DEFAULT_RETAKE)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--markdown", type=Path, default=DEFAULT_MARKDOWN)
+    parser.add_argument("--qualification-capture", type=Path)
+    parser.add_argument("--approve-visual-model-review", action="store_true")
     return parser.parse_args()
 
 
 def main() -> int:
     args = _parse_args()
+    if args.qualification_capture is not None:
+        capture = json.loads(args.qualification_capture.read_text(encoding="utf-8"))
+        for video in capture["videos"].values():
+            _verify_file(video["absolute_path"], video["sha256"])
+        for screenshot in capture["screenshots"]:
+            _verify_file(screenshot["raw_absolute_path"], screenshot["raw_sha256"])
+            _verify_file(
+                screenshot["annotated_absolute_path"], screenshot["annotated_sha256"]
+            )
+        report = build_qualification_review(
+            capture,
+            visual_model_approved=bool(args.approve_visual_model_review),
+        )
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
+        args.markdown.write_text(_qualification_markdown(report), encoding="utf-8")
+        print(json.dumps({"status": report["status"], "output": str(args.output.resolve())}))
+        return 0 if report["status"] == "PASS" else 1
     original = json.loads(args.original.read_text(encoding="utf-8"))
     retake = json.loads(args.collision_retake.read_text(encoding="utf-8"))
     for report, modes in ((original, ("normal",)), (retake, ("collision_overlay",))):

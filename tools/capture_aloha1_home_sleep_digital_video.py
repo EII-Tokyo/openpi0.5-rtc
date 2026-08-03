@@ -47,12 +47,69 @@ CAPTURE_FPS = 15
 CAPTURE_STRIDE = 4
 
 
+def _selected_trajectory_key_indices(
+    samples: list[dict[str, Any]],
+) -> dict[int, str]:
+    """Return review points for a legal selected Sleep trajectory."""
+
+    labels = {
+        "initial_home_hold": "initial_home",
+        "cycle_01_sleep_hold": "cycle_01_exact_sleep",
+        "cycle_01_home_hold": "cycle_01_return_home",
+        "cycle_03_sleep_hold": "cycle_03_exact_sleep",
+        "cycle_03_home_hold": "final_home",
+    }
+    result = {
+        max(int(sample["index"]) for sample in samples if sample["segment"] == segment): label
+        for segment, label in labels.items()
+    }
+    if len(result) != len(labels):
+        raise ValueError("selected trajectory review stages are not distinct")
+    return result
+
+
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--stage", type=Path, default=STAGE)
+    parser.add_argument("--manifest", type=Path, default=MANIFEST)
+    parser.add_argument("--numeric-report", type=Path, default=NUMERIC_REPORT)
+    parser.add_argument("--finger-limit-layer", type=Path, default=FINGER_LAYER)
     parser.add_argument("--output-root", type=Path, default=DEFAULT_OUTPUT_ROOT)
     parser.add_argument("--report", type=Path, default=DEFAULT_REPORT)
     parser.add_argument("--collision-only", action="store_true")
+    parser.add_argument("--reannotate-only", action="store_true")
+    parser.add_argument(
+        "--evidence-kind",
+        choices=("failure", "selected_historical_sleep"),
+        default="failure",
+    )
     return parser.parse_args()
+
+
+def _annotation_footer(*, evidence_kind: str, target_outside: bool) -> list[str]:
+    if evidence_kind == "selected_historical_sleep":
+        if target_outside:
+            raise ValueError("selected historical Sleep annotation has an illegal target")
+        return [
+            "",
+            "all targets inside frozen USD/URDF limits",
+            "exact endpoint numeric gate: PASS",
+            "contacts: none / impulse=0",
+            "DIGITAL GATE: PASS",
+            "This image does not authorize real motion.",
+        ]
+    return [
+        "",
+        "! = official target outside USD limit",
+        (
+            "Observed: PhysX clamp active in this frame"
+            if target_outside
+            else "This frame is legal; sequence failure retained"
+        ),
+        "contacts: none / impulse=0",
+        "DIGITAL GATE: FAIL",
+        "This image does not authorize real motion.",
+    ]
 
 
 def _font(size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
@@ -95,6 +152,7 @@ def _annotate(
     target: list[float],
     readback: list[float],
     limits: tuple[list[float], list[float]],
+    evidence_kind: str,
 ) -> None:
     with Image.open(source) as opened:
         image = opened.convert("RGB")
@@ -102,9 +160,15 @@ def _annotate(
     canvas = Image.new("RGB", (image.width + panel_width, image.height), (18, 20, 26))
     canvas.paste(image, (0, 0))
     draw = ImageDraw.Draw(canvas)
-    draw.rectangle((8, 8, image.width - 8, image.height - 8), outline=(255, 75, 75), width=4)
+    border = (70, 220, 120) if evidence_kind == "selected_historical_sleep" else (255, 75, 75)
+    draw.rectangle((8, 8, image.width - 8, image.height - 8), outline=border, width=4)
     draw.text((18, 18), "FULL follower_left arm", font=_font(22), fill=(255, 255, 255))
-    draw.text((18, 48), "Failure evidence: Sleep limit clamp", font=_font(18), fill=(255, 90, 90))
+    subtitle = (
+        "Qualification: official historical legal Sleep"
+        if evidence_kind == "selected_historical_sleep"
+        else "Failure evidence: Sleep limit clamp"
+    )
+    draw.text((18, 48), subtitle, font=_font(18), fill=border)
     x = image.width + 18
     lines = [
         "Isaac Sim 5.1.0.0",
@@ -129,18 +193,10 @@ def _annotate(
         for index in range(6)
     )
     lines.extend(
-        [
-            "",
-            "! = official target outside USD limit",
-            (
-                "Observed: PhysX clamp active in this frame"
-                if target_outside
-                else "This frame is legal; sequence failure retained"
-            ),
-            "contacts: none / impulse=0",
-            "DIGITAL GATE: FAIL",
-            "This image does not authorize real motion.",
-        ]
+        _annotation_footer(
+            evidence_kind=evidence_kind,
+            target_outside=target_outside,
+        )
     )
     y = 18
     for line in lines:
@@ -149,6 +205,43 @@ def _annotate(
         y += 24
     destination.parent.mkdir(parents=True, exist_ok=True)
     canvas.save(destination)
+
+
+def _reannotate_existing(args: argparse.Namespace) -> int:
+    report_path = args.report.resolve(strict=True)
+    numeric_path = args.numeric_report.resolve(strict=True)
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    numeric = json.loads(numeric_path.read_text(encoding="utf-8"))
+    limits = tuple(numeric["preflight"]["limits"]["follower_left"])
+    records = {
+        int(record["physics_frame"]): record
+        for record in report["capture"]["frame_records"]
+    }
+    for screenshot in report["screenshots"]:
+        record = records[int(screenshot["physics_frame"])]
+        annotated = Path(screenshot["annotated_absolute_path"])
+        _annotate(
+            Path(screenshot["raw_absolute_path"]),
+            annotated,
+            mode=str(screenshot["mode"]),
+            stage_hash=str(report["stage"]["sha256_before"]),
+            frame=int(record["physics_frame"]),
+            time_s=float(record["physics_time_s"]),
+            label=str(screenshot["label"]),
+            target=list(record["target_arm_q"]),
+            readback=list(record["readback_q"]),
+            limits=(list(limits[0]), list(limits[1])),
+            evidence_kind=args.evidence_kind,
+        )
+        screenshot["annotated_sha256"] = _sha256(annotated)
+        screenshot["visual_review"] = "PENDING_VISUAL_MODEL_REVIEW"
+    report["status"] = "PENDING_VISUAL_MODEL_REVIEW"
+    report_path.write_text(
+        json.dumps(report, indent=2, sort_keys=True, allow_nan=False) + "\n",
+        encoding="utf-8",
+    )
+    print(json.dumps({"status": report["status"], "reannotated": len(report["screenshots"])}))
+    return 0
 
 
 def _encode_video(frame_root: Path, destination: Path) -> dict[str, Any]:
@@ -205,15 +298,19 @@ def main(args: argparse.Namespace) -> int:
     if output_root.exists():
         raise FileExistsError(f"capture output already exists: {output_root}")
     output_root.mkdir(parents=True)
-    stage_path = STAGE.resolve(strict=True)
-    manifest_path = MANIFEST.resolve(strict=True)
-    numeric_path = NUMERIC_REPORT.resolve(strict=True)
+    stage_path = args.stage.resolve(strict=True)
+    manifest_path = args.manifest.resolve(strict=True)
+    numeric_path = args.numeric_report.resolve(strict=True)
+    finger_layer = args.finger_limit_layer.resolve(strict=True)
     stage_hash = _sha256(stage_path)
     manifest_hash = _sha256(manifest_path)
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     numeric = json.loads(numeric_path.read_text(encoding="utf-8"))
-    if numeric["status"] != "FAIL" or numeric["summary"]["gates"]["endpoints"] is not False:
-        raise RuntimeError("capture requires the verified Sleep endpoint failure")
+    if args.evidence_kind == "failure":
+        if numeric["status"] != "FAIL" or numeric["summary"]["gates"]["endpoints"] is not False:
+            raise RuntimeError("failure capture requires the verified Sleep endpoint failure")
+    elif numeric["status"] != "PASS" or numeric["summary"]["gates"]["endpoints"] is not True:
+        raise RuntimeError("selected Sleep capture requires a passing exact endpoint run")
     if numeric["stage"]["sha256_before"] != stage_hash:
         raise RuntimeError("numeric/capture Stage mismatch")
     if numeric["manifest"]["sha256_before"] != manifest_hash:
@@ -222,7 +319,7 @@ def main(args: argparse.Namespace) -> int:
         raise RuntimeError(f"failed to open {stage_path}")
     stage = omni.usd.get_context().get_stage()
     stage.SetEditTarget(stage.GetSessionLayer())
-    _install_session_layers(stage, FINGER_LAYER)
+    _install_session_layers(stage, finger_layer)
     with Usd.EditContext(stage, stage.GetSessionLayer()):
         dome = UsdLux.DomeLight.Define(stage, "/World/HomeSleepEvidence/Dome")
         dome.CreateIntensityAttr(900.0)
@@ -323,17 +420,20 @@ def main(args: argparse.Namespace) -> int:
     )
     frame_records = []
     key_raw: dict[tuple[str, str], Path] = {}
-    exceed_index = _first_limit_exceedance(samples, lower, upper)
-    key_command_indices = {
-        max(0, exceed_index - 1): "before_limit_exceedance",
-        exceed_index: "first_limit_exceedance",
-        max(
-            int(sample["index"])
-            for sample in samples
-            if sample["segment"] == "cycle_01_sleep_hold"
-        ): "first_sleep_hold_end",
-        len(samples) - 1: "final_home_recovery",
-    }
+    if args.evidence_kind == "selected_historical_sleep":
+        key_command_indices = _selected_trajectory_key_indices(samples)
+    else:
+        exceed_index = _first_limit_exceedance(samples, lower, upper)
+        key_command_indices = {
+            max(0, exceed_index - 1): "before_limit_exceedance",
+            exceed_index: "first_limit_exceedance",
+            max(
+                int(sample["index"])
+                for sample in samples
+                if sample["segment"] == "cycle_01_sleep_hold"
+            ): "first_sleep_hold_end",
+            len(samples) - 1: "final_home_recovery",
+        }
     physics_hz = int(manifest["physics_rate_hz"])
     command_hz = int(manifest["command_rate_hz"])
     total_frames = math.ceil(len(samples) * physics_hz / command_hz)
@@ -416,6 +516,7 @@ def main(args: argparse.Namespace) -> int:
             target=record["target_arm_q"],
             readback=record["readback_q"],
             limits=(lower.tolist(), upper.tolist()),
+            evidence_kind=args.evidence_kind,
         )
         screenshots.append(
             {
@@ -435,7 +536,11 @@ def main(args: argparse.Namespace) -> int:
     report = {
         "schema_version": 1,
         "status": "PENDING_VISUAL_MODEL_REVIEW",
-        "classification": "DIGITAL_SLEEP_LIMIT_FAILURE_EVIDENCE",
+        "classification": (
+            "DIGITAL_OFFICIAL_HISTORICAL_SLEEP_QUALIFICATION_EVIDENCE"
+            if args.evidence_kind == "selected_historical_sleep"
+            else "DIGITAL_SLEEP_LIMIT_FAILURE_EVIDENCE"
+        ),
         "stage": {
             "absolute_path": str(stage_path),
             "sha256_before": stage_hash,
@@ -474,9 +579,10 @@ def main(args: argparse.Namespace) -> int:
             "clone_count": len(overlay_records),
             "source_colliders": overlay_records,
         },
-        "failure": {
-            "cause": "OFFICIAL_ALOHA_SLEEP_COMMAND_EXCEEDS_THREE_FROZEN_USD_JOINT_LIMITS",
-            "affected_joints": ["shoulder", "elbow", "wrist_angle"],
+        "evidence": {
+            "kind": args.evidence_kind,
+            "numeric_status": numeric["status"],
+            "exact_endpoint_gate": numeric["summary"]["gates"]["endpoints"],
             "contact_impulse_points": 0,
             "source_or_final_asset_modified": False,
             "real_execution_authorized": False,
@@ -506,6 +612,9 @@ def main(args: argparse.Namespace) -> int:
 
 
 def run() -> int:
+    args = _parse_args()
+    if args.reannotate_only:
+        return _reannotate_existing(args)
     from isaacsim import SimulationApp
 
     app = SimulationApp(
@@ -518,7 +627,7 @@ def run() -> int:
     )
     exit_code = 1
     try:
-        exit_code = main(_parse_args())
+        exit_code = main(args)
     except BaseException:
         traceback.print_exc()
     finally:

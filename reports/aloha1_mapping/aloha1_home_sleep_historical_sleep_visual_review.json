@@ -1,0 +1,299 @@
+{
+  "camera": {
+    "orientation_wxyz": [
+      0.26133033633232117,
+      0.1610567271709442,
+      0.4993281364440918,
+      0.8102089762687683
+    ],
+    "position_world_m": [
+      0.4917930352793709,
+      1.285896100532481,
+      1.0128480071996755
+    ],
+    "prim_path": "/World/HomeSleepEvidence/OverviewCamera",
+    "resolution": [
+      960,
+      540
+    ],
+    "target_world_m": [
+      -0.4477321580052376,
+      -0.01900000125169754,
+      0.20381242409348488
+    ],
+    "view": "FULL_ARM_FIXED_OBLIQUE_ENGINEERING_EVIDENCE"
+  },
+  "classification": "DIGITAL_OFFICIAL_HISTORICAL_SLEEP_VISUAL_REVIEW",
+  "command_signature": "d481b71bc8d6160fae0bdc1b264715e782712565064bb18099f8a9a4883f499e",
+  "gates": {
+    "annotations_readable_and_non_occluding": true,
+    "cycle_01_and_cycle_03_sleep_visually_repeat": true,
+    "five_distinct_stages_per_mode": true,
+    "full_arm_collider_overlay_visible": true,
+    "home_and_sleep_visibly_distinct": true,
+    "numeric_endpoint_gate_pass": true,
+    "stage_hash_immutable": true,
+    "visual_model_approved": true,
+    "whole_follower_left_visible": true
+  },
+  "machine_telemetry_remains_primary": true,
+  "manifest_sha256": "e9b18a154569945127779dfe74bee62e7c2db0a8d1dd320e802aaade7bf76087",
+  "numeric_signature": "d93ae226dcb2a11a728f4abda1dc821867d1eae0893c3cc01fdb4e8113696562",
+  "real_execution_authorized": false,
+  "retained_screenshots": [
+    {
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-official-historical-sleep/visual_evidence_attempt1/screenshots_annotated/cycle_01_exact_sleep_collision_overlay_annotated.png",
+      "annotated_sha256": "8e3a65b5f7c72a8e56a2bb0b0470d8c13c19c971066d8ef1b29e8efcfe031447",
+      "label": "cycle_01_exact_sleep",
+      "mode": "collision_overlay",
+      "physics_frame": 419,
+      "physics_time_s": 7.0,
+      "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-official-historical-sleep/visual_evidence_attempt1/screenshots_raw/cycle_01_exact_sleep_collision_overlay_raw.png",
+      "raw_sha256": "c93ab909ebdb5a24cb503ac4b69e406cdbc43b941172f274ddcaaa4e88cbb332",
+      "visual_review": {
+        "annotation_readable_and_non_occluding": true,
+        "full_arm_collider_overlay_visible": true,
+        "home_sleep_states_visibly_distinct": true,
+        "note": "Full-chain translucent red-edged collider overlay is visible.",
+        "reviewed_by": "Codex visual model",
+        "status": "PASS",
+        "whole_follower_left_visible": true
+      }
+    },
+    {
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-official-historical-sleep/visual_evidence_attempt1/screenshots_annotated/cycle_01_exact_sleep_normal_annotated.png",
+      "annotated_sha256": "e5946f12ceedd45839e539ca160243d64ffe02868e707d88646e22438bd1a044",
+      "label": "cycle_01_exact_sleep",
+      "mode": "normal",
+      "physics_frame": 419,
+      "physics_time_s": 7.0,
+      "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-official-historical-sleep/visual_evidence_attempt1/screenshots_raw/cycle_01_exact_sleep_normal_raw.png",
+      "raw_sha256": "ff372ac91c91cd5bf4013a899100f415071831691f94753e334c3ce2e5806df0",
+      "visual_review": {
+        "annotation_readable_and_non_occluding": true,
+        "full_arm_collider_overlay_visible": null,
+        "home_sleep_states_visibly_distinct": true,
+        "note": "Complete follower_left is visible; legal target/readback text is readable.",
+        "reviewed_by": "Codex visual model",
+        "status": "PASS",
+        "whole_follower_left_visible": true
+      }
+    },
+    {
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-official-historical-sleep/visual_evidence_attempt1/screenshots_annotated/cycle_01_return_home_collision_overlay_annotated.png",
+      "annotated_sha256": "b6d674009adaf14b2384e57a9166d7d494901ab47770ef3e757e90a03aafc452",
+      "label": "cycle_01_return_home",
+      "mode": "collision_overlay",
+      "physics_frame": 779,
+      "physics_time_s": 13.0,
+      "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-official-historical-sleep/visual_evidence_attempt1/screenshots_raw/cycle_01_return_home_collision_overlay_raw.png",
+      "raw_sha256": "94037f9ab02053112ae680d9aae4632d993129bc9abfcb767343154715798096",
+      "visual_review": {
+        "annotation_readable_and_non_occluding": true,
+        "full_arm_collider_overlay_visible": true,
+        "home_sleep_states_visibly_distinct": true,
+        "note": "Full-chain translucent red-edged collider overlay is visible.",
+        "reviewed_by": "Codex visual model",
+        "status": "PASS",
+        "whole_follower_left_visible": true
+      }
+    },
+    {
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-official-historical-sleep/visual_evidence_attempt1/screenshots_annotated/cycle_01_return_home_normal_annotated.png",
+      "annotated_sha256": "70b53edd3fdb112cfb0a9960cfcd0d48ef89f17dbd9e38cb4ddbf58b3e960733",
+      "label": "cycle_01_return_home",
+      "mode": "normal",
+      "physics_frame": 779,
+      "physics_time_s": 13.0,
+      "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-official-historical-sleep/visual_evidence_attempt1/screenshots_raw/cycle_01_return_home_normal_raw.png",
+      "raw_sha256": "be8df45f0f1e3ba380d8ac1b1faa2d037979d4a8d98bac49ca812c5812ef95bb",
+      "visual_review": {
+        "annotation_readable_and_non_occluding": true,
+        "full_arm_collider_overlay_visible": null,
+        "home_sleep_states_visibly_distinct": true,
+        "note": "Complete follower_left is visible; legal target/readback text is readable.",
+        "reviewed_by": "Codex visual model",
+        "status": "PASS",
+        "whole_follower_left_visible": true
+      }
+    },
+    {
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-official-historical-sleep/visual_evidence_attempt1/screenshots_annotated/cycle_03_exact_sleep_collision_overlay_annotated.png",
+      "annotated_sha256": "9b7af9643c2599a9b953ffecf7defd982fc89d850d03e0f1fcbe9a9b0280466a",
+      "label": "cycle_03_exact_sleep",
+      "mode": "collision_overlay",
+      "physics_frame": 1859,
+      "physics_time_s": 31.0,
+      "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-official-historical-sleep/visual_evidence_attempt1/screenshots_raw/cycle_03_exact_sleep_collision_overlay_raw.png",
+      "raw_sha256": "48273ccda286b43152b4e6754fe1d3160651dc9f985eb80eb6494383227b18e7",
+      "visual_review": {
+        "annotation_readable_and_non_occluding": true,
+        "full_arm_collider_overlay_visible": true,
+        "home_sleep_states_visibly_distinct": true,
+        "note": "Full-chain translucent red-edged collider overlay is visible.",
+        "reviewed_by": "Codex visual model",
+        "status": "PASS",
+        "whole_follower_left_visible": true
+      }
+    },
+    {
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-official-historical-sleep/visual_evidence_attempt1/screenshots_annotated/cycle_03_exact_sleep_normal_annotated.png",
+      "annotated_sha256": "9d32786a9660efd230eb926fb30e62e4e14e193618b842a8b7f8ce24d0ed13a3",
+      "label": "cycle_03_exact_sleep",
+      "mode": "normal",
+      "physics_frame": 1859,
+      "physics_time_s": 31.0,
+      "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-official-historical-sleep/visual_evidence_attempt1/screenshots_raw/cycle_03_exact_sleep_normal_raw.png",
+      "raw_sha256": "d4e7ff2019a07a3990188011a23abb355e48d39aa2d3930b7ba41d2a6f88b66f",
+      "visual_review": {
+        "annotation_readable_and_non_occluding": true,
+        "full_arm_collider_overlay_visible": null,
+        "home_sleep_states_visibly_distinct": true,
+        "note": "Complete follower_left is visible; legal target/readback text is readable.",
+        "reviewed_by": "Codex visual model",
+        "status": "PASS",
+        "whole_follower_left_visible": true
+      }
+    },
+    {
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-official-historical-sleep/visual_evidence_attempt1/screenshots_annotated/final_home_collision_overlay_annotated.png",
+      "annotated_sha256": "f2fd88a2c8047ea8440a33b7c8b1408bb083c0bc58346a3529c52bd00c457f85",
+      "label": "final_home",
+      "mode": "collision_overlay",
+      "physics_frame": 2219,
+      "physics_time_s": 37.0,
+      "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-official-historical-sleep/visual_evidence_attempt1/screenshots_raw/final_home_collision_overlay_raw.png",
+      "raw_sha256": "155e1b360e96041955f0a0f216e35693ac5915a7969eeac27a5ba25dafeb9e9e",
+      "visual_review": {
+        "annotation_readable_and_non_occluding": true,
+        "full_arm_collider_overlay_visible": true,
+        "home_sleep_states_visibly_distinct": true,
+        "note": "Full-chain translucent red-edged collider overlay is visible.",
+        "reviewed_by": "Codex visual model",
+        "status": "PASS",
+        "whole_follower_left_visible": true
+      }
+    },
+    {
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-official-historical-sleep/visual_evidence_attempt1/screenshots_annotated/final_home_normal_annotated.png",
+      "annotated_sha256": "f0a6dced76bfb7500598495fbc7ddd3b380e8dd8e43eedc32c10a973a25450b8",
+      "label": "final_home",
+      "mode": "normal",
+      "physics_frame": 2219,
+      "physics_time_s": 37.0,
+      "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-official-historical-sleep/visual_evidence_attempt1/screenshots_raw/final_home_normal_raw.png",
+      "raw_sha256": "c542ed1b2407d7b1712614343707d0169ae0879cf959c74f83ee54f7051568b9",
+      "visual_review": {
+        "annotation_readable_and_non_occluding": true,
+        "full_arm_collider_overlay_visible": null,
+        "home_sleep_states_visibly_distinct": true,
+        "note": "Complete follower_left is visible; legal target/readback text is readable.",
+        "reviewed_by": "Codex visual model",
+        "status": "PASS",
+        "whole_follower_left_visible": true
+      }
+    },
+    {
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-official-historical-sleep/visual_evidence_attempt1/screenshots_annotated/initial_home_collision_overlay_annotated.png",
+      "annotated_sha256": "f7fc8d669d3114cfee42f834ca75af5e164498a370270037a23d738bbcd549e1",
+      "label": "initial_home",
+      "mode": "collision_overlay",
+      "physics_frame": 59,
+      "physics_time_s": 1.0,
+      "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-official-historical-sleep/visual_evidence_attempt1/screenshots_raw/initial_home_collision_overlay_raw.png",
+      "raw_sha256": "1717ad4d260cc762aab45a7339310bafb71e395fd42596c321d9fe578a8ebf63",
+      "visual_review": {
+        "annotation_readable_and_non_occluding": true,
+        "full_arm_collider_overlay_visible": true,
+        "home_sleep_states_visibly_distinct": true,
+        "note": "Full-chain translucent red-edged collider overlay is visible.",
+        "reviewed_by": "Codex visual model",
+        "status": "PASS",
+        "whole_follower_left_visible": true
+      }
+    },
+    {
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-official-historical-sleep/visual_evidence_attempt1/screenshots_annotated/initial_home_normal_annotated.png",
+      "annotated_sha256": "ed40c21be60bb53f8d29e3cf949b6d00e86374ae83a120b5b452ff49fc509ae7",
+      "label": "initial_home",
+      "mode": "normal",
+      "physics_frame": 59,
+      "physics_time_s": 1.0,
+      "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-official-historical-sleep/visual_evidence_attempt1/screenshots_raw/initial_home_normal_raw.png",
+      "raw_sha256": "fc444ac22138ec7fa94263c075edba5ccaf7eb485584247cfa5fc9c9407d8938",
+      "visual_review": {
+        "annotation_readable_and_non_occluding": true,
+        "full_arm_collider_overlay_visible": null,
+        "home_sleep_states_visibly_distinct": true,
+        "note": "Complete follower_left is visible; legal target/readback text is readable.",
+        "reviewed_by": "Codex visual model",
+        "status": "PASS",
+        "whole_follower_left_visible": true
+      }
+    }
+  ],
+  "retained_videos": {
+    "collision_overlay": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-official-historical-sleep/visual_evidence_attempt1/aloha1_home_sleep_collision_overlay.mp4",
+      "duration_s": 37.333333333333336,
+      "ffmpeg_command": [
+        "ffmpeg",
+        "-y",
+        "-framerate",
+        "15",
+        "-i",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-official-historical-sleep/visual_evidence_attempt1/frames/collision_overlay/%06d.png",
+        "-c:v",
+        "libx264",
+        "-pix_fmt",
+        "yuv420p",
+        "-crf",
+        "18",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-official-historical-sleep/visual_evidence_attempt1/aloha1_home_sleep_collision_overlay.mp4"
+      ],
+      "ffmpeg_exit_code": 0,
+      "fps": 15,
+      "frame_count": 560,
+      "sha256": "8164dad93e53235f471528a4cd5693c262a4057c85b3908c849c66e26ed6fe70"
+    },
+    "normal": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-official-historical-sleep/visual_evidence_attempt1/aloha1_home_sleep_normal.mp4",
+      "duration_s": 37.333333333333336,
+      "ffmpeg_command": [
+        "ffmpeg",
+        "-y",
+        "-framerate",
+        "15",
+        "-i",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-official-historical-sleep/visual_evidence_attempt1/frames/normal/%06d.png",
+        "-c:v",
+        "libx264",
+        "-pix_fmt",
+        "yuv420p",
+        "-crf",
+        "18",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-official-historical-sleep/visual_evidence_attempt1/aloha1_home_sleep_normal.mp4"
+      ],
+      "ffmpeg_exit_code": 0,
+      "fps": 15,
+      "frame_count": 560,
+      "sha256": "b051241ad02c991f00404e11c995ac08ea8308cac2be3dedf3731f1d8c02d25e"
+    }
+  },
+  "review_history": [
+    {
+      "attempt": "attempt1_first_annotations",
+      "raw_video_recaptured": false,
+      "status": "REJECTED_STALE_FAILURE_WORDING"
+    },
+    {
+      "attempt": "attempt1_reannotated",
+      "status": "PASS",
+      "visual_model_reviewed_each_retained_image": true
+    }
+  ],
+  "schema_version": 1,
+  "stage_sha256": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9",
+  "status": "PASS",
+  "visual_review_is_auxiliary": true
+}

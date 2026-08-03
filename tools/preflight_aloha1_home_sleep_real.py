@@ -68,7 +68,10 @@ def build_preflight_report(
             "operator stop control ready",
         ],
         "boundary": (
-            "No access to 192.168.1.103 is permitted while the digital gate is not PASS."
+            "Digital qualification passed; real access and motion remain blocked until a separate "
+            "explicit authorization and all live operator safety checks pass."
+            if digital_report["status"] == "PASS"
+            else "No access to 192.168.1.103 is permitted while the digital gate is not PASS."
         ),
     }
 

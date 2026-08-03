@@ -1,0 +1,32 @@
+{
+  "boundary": "Digital qualification passed; real access and motion remain blocked until a separate explicit authorization and all live operator safety checks pass.",
+  "classification": "ALOHA_REAL_HOME_SLEEP_OFFLINE_PREFLIGHT",
+  "commands_published": 0,
+  "digital_report": {
+    "classification": "DIGITAL_HOME_SLEEP_VERIFIED",
+    "sha256": "5fd84f4b92b89e33af42237535256e9667369d28e9ea5e6579916df810156a1a",
+    "status": "PASS"
+  },
+  "manifest": {
+    "command_signature": "d481b71bc8d6160fae0bdc1b264715e782712565064bb18099f8a9a4883f499e",
+    "sample_count": 1850,
+    "sha256": "e9b18a154569945127779dfe74bee62e7c2db0a8d1dd320e802aaade7bf76087"
+  },
+  "network_access_performed": false,
+  "read_only_remote_checks_performed": false,
+  "real_execution_authorized": false,
+  "remaining_live_checks": [
+    "exact robot identity and arm namespace",
+    "current joint readback near Home",
+    "motor torque/error/temperature status",
+    "operator workspace clear",
+    "operator stop control ready"
+  ],
+  "robot": "follower_left",
+  "ros_transport_instantiated": false,
+  "schema_version": 1,
+  "serial_device_opened": false,
+  "ssh_connection_opened": false,
+  "status": "NOT_RUN_AUTHORIZATION_REQUIRED",
+  "torque_changed": false
+}

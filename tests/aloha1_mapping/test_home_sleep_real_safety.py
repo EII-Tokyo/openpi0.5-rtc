@@ -60,6 +60,23 @@ def test_preflight_is_not_run_when_digital_gate_failed() -> None:
     assert report["real_execution_authorized"] is False
 
 
+def test_offline_preflight_after_digital_pass_still_requires_live_authorization() -> None:
+    report = build_preflight_report(
+        digital_report={"status": "PASS", "classification": "DIGITAL_HOME_SLEEP_VERIFIED"},
+        manifest={"sample_count": 1850, "command_signature": "command"},
+        digital_report_sha256="digital",
+        manifest_sha256="manifest",
+    )
+
+    assert report["status"] == "NOT_RUN_AUTHORIZATION_REQUIRED"
+    assert report["boundary"] == (
+        "Digital qualification passed; real access and motion remain blocked until a separate "
+        "explicit authorization and all live operator safety checks pass."
+    )
+    assert report["network_access_performed"] is False
+    assert report["commands_published"] == 0
+
+
 def test_real_runner_default_is_literal_dry_run_even_with_pass_reports() -> None:
     report = build_runner_report(
         execute_real=False,

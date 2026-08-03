@@ -12,6 +12,26 @@ ROOT = Path(__file__).resolve().parents[1]
 REPORT_ROOT = ROOT / "reports/aloha1_mapping"
 
 
+def source_boundary_from_audit(audit: dict[str, Any]) -> dict[str, Any]:
+    selected = next(item for item in audit["sources"] if item["id"] == "selected_sleep")
+    comparison = audit["current_humble_comparison"]
+    return {
+        "selected_sleep_rad": list(audit["sleep"]["value_rad"]),
+        "selected_source_class": audit["classification"],
+        "selected_source_repository": selected["repository"],
+        "selected_source_branch": selected["branch"],
+        "selected_source_commit": selected["commit"],
+        "selected_source_license": selected["license"],
+        "selected_source_sha256": selected["sha256"],
+        "current_humble_sleep_rad": list(comparison["sleep_rad"]),
+        "current_humble_source_class": comparison["classification"],
+        "current_humble_used_as_command_authority": comparison[
+            "used_as_command_authority"
+        ],
+        "selection_status": audit["version_selection"]["status"],
+    }
+
+
 def _limit_conflicts(run: dict[str, Any], manifest: dict[str, Any]) -> list[dict[str, Any]]:
     lower, upper = run["preflight"]["limits"]["follower_left"]
     conflicts = []
@@ -98,7 +118,21 @@ def build_digital_report(
                 else "FAIL"
             ),
             "exact_sleep_endpoint": "PASS" if not conflicts and runs_pass else "FAIL",
-            "real_api_signal_correspondence": ("PARTIAL" if conflicts and repeatable else "FAIL"),
+            "modeled_official_api_command_gate": (
+                "PASS"
+                if not conflicts and runs_pass
+                else "PARTIAL"
+                if conflicts and repeatable
+                else "FAIL"
+            ),
+            "real_api_signal_correspondence": (
+                "PASS_MODELED_NOT_REAL_EXECUTION"
+                if not conflicts and runs_pass
+                else "PARTIAL"
+                if conflicts and repeatable
+                else "FAIL"
+            ),
+            "real_hardware_execution": "NOT_RUN_AUTHORIZATION_REQUIRED",
         },
         "gates": {
             "both_numeric_runs_pass": runs_pass,
@@ -172,19 +206,32 @@ def _markdown(report: dict[str, Any]) -> str:
         )
         for item in report["limit_conflicts"]
     )
-    lines.extend(
-        [
-            "",
-            "The visible three-cycle trajectory, directions, repeatability, stationary bodies, "
-            "contact absence, and final Home pass. The exact Sleep endpoint remains outside "
-            "the frozen USD/URDF limits. PhysX independently clamps the three conflicting "
-            "joints, while the official ALOHA Python group API rejects an entire sample when "
-            "any joint is illegal. Therefore the video is valid visual trajectory evidence, "
-            "but not yet an exact real-API signal-correspondence proof.",
-            "",
-            "No real-robot command was sent and this report does not authorize one.",
-        ]
-    )
+    if report["status"] == "PASS":
+        lines.extend(
+            [
+                "",
+                "The user-selected official historical Sleep is inside every frozen USD/URDF "
+                "joint limit. Two fresh Isaac processes reached all three Sleep endpoints and "
+                "returned Home with identical normalized numeric signatures. This verifies the "
+                "digital trajectory and modeled official command gate only.",
+                "",
+                "No real-robot command was sent and this report does not authorize one.",
+            ]
+        )
+    else:
+        lines.extend(
+            [
+                "",
+                "The visible three-cycle trajectory, directions, repeatability, stationary bodies, "
+                "contact absence, and final Home pass. The exact Sleep endpoint remains outside "
+                "the frozen USD/URDF limits. PhysX independently clamps the three conflicting "
+                "joints, while the official ALOHA Python group API rejects an entire sample when "
+                "any joint is illegal. Therefore the video is valid visual trajectory evidence, "
+                "but not yet an exact real-API signal-correspondence proof.",
+                "",
+                "No real-robot command was sent and this report does not authorize one.",
+            ]
+        )
     if "source_boundary" in report:
         boundary = report["source_boundary"]
         lines.extend(
@@ -192,11 +239,12 @@ def _markdown(report: dict[str, Any]) -> str:
                 "",
                 "## Source boundary",
                 "",
-                f"- Pinned exact-model official Sleep: `{boundary['official_sleep_rad']}` rad.",
-                f"- Local third-party mirror Sleep: `{boundary['local_mirror_sleep_rad']}` rad.",
-                "- The local mirror differs and is explicitly not treated as official authority.",
-                "- A historical read-only robot report also differs; it is retained as project "
-                "evidence, not used to authorize or generate motion in this run.",
+                f"- User-selected official historical Sleep: `{boundary['selected_sleep_rad']}` rad.",
+                f"- Official source commit: `{boundary['selected_source_commit']}`.",
+                f"- Current Humble comparison Sleep: `{boundary['current_humble_sleep_rad']}` rad.",
+                "- This is an explicit cross-version command selection; current Humble "
+                "URDF/driver limits remain frozen and the current Humble Sleep is not the "
+                "command authority for this run.",
             ]
         )
     return "\n".join(lines) + "\n"
@@ -227,9 +275,9 @@ def _parse_args() -> argparse.Namespace:
         default=REPORT_ROOT / "aloha1_home_sleep_digital_validation.md",
     )
     parser.add_argument(
-        "--parameter-source-audit",
+        "--source-audit",
         type=Path,
-        default=REPORT_ROOT / "aloha1_official_parameter_source_audit.json",
+        default=REPORT_ROOT / "aloha1_home_sleep_official_source_audit.json",
     )
     return parser.parse_args()
 
@@ -239,25 +287,10 @@ def main() -> int:
     inputs = [
         json.loads(path.read_text(encoding="utf-8")) for path in (args.run_1, args.run_2, args.visual, args.manifest)
     ]
-    parameter_audit = json.loads(args.parameter_source_audit.read_text(encoding="utf-8"))
-    mirror = next(
-        item
-        for item in parameter_audit["local_mirror_observations"]
-        if item["id"] == "local_aloha_sleep_positions_differ_from_pinned_upstream"
-    )
+    source_audit = json.loads(args.source_audit.read_text(encoding="utf-8"))
     report = build_digital_report(
         *inputs,
-        source_boundary={
-            "official_sleep_rad": mirror["pinned_official_sleep_positions"][:6],
-            "official_source_class": "OFFICIAL_PINNED_EXACT_MODEL_SOURCE",
-            "local_mirror_sleep_rad": mirror["local_mirror_sleep_positions"][:6],
-            "local_mirror_source_class": "THIRD_PARTY_AGGREGATE_LOCAL_MIRROR",
-            "local_mirror_used_as_command_authority": False,
-            "historical_robot_report": str(
-                ROOT / "docs/aloha1_isaac_adaptation/09_phase4_real_aloha1_joint_signal_probe_2026-07-17.md"
-            ),
-            "historical_robot_report_used_as_command_authority": False,
-        },
+        source_boundary=source_boundary_from_audit(source_audit),
     )
     args.output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
     args.markdown.write_text(_markdown(report), encoding="utf-8")

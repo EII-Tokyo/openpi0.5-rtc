@@ -22,6 +22,10 @@ from tools.audit_aloha1_sleep_limit_correspondence import _xacro_limits
 from tools.audit_aloha1_sleep_limit_correspondence import build_root_cause_report
 from tools.build_aloha1_home_sleep_command_manifest import build_manifest
 from tools.build_aloha1_home_sleep_digital_report import build_digital_report
+from tools.build_aloha1_home_sleep_digital_report import source_boundary_from_audit
+from tools.capture_aloha1_home_sleep_digital_video import _annotation_footer
+from tools.capture_aloha1_home_sleep_digital_video import _selected_trajectory_key_indices
+from tools.review_aloha1_home_sleep_digital_evidence import build_qualification_review
 from tools.review_aloha1_home_sleep_digital_evidence import build_visual_review
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -194,6 +198,48 @@ def test_selected_historical_sleep_passes_every_group_limit_sample() -> None:
     assert result["last_published_q_rad"] == pytest.approx(HOME_ARM)
 
 
+def test_selected_trajectory_capture_has_five_distinct_review_stages() -> None:
+    samples = [
+        {
+            "index": sample.index,
+            "segment": sample.segment,
+        }
+        for sample in build_home_sleep_samples(
+            home=HOME_ARM,
+            sleep=SELECTED_HISTORICAL_SLEEP,
+            command_hz=50,
+            move_seconds=5,
+            hold_seconds=1,
+            cycles=3,
+        )
+    ]
+
+    assert _selected_trajectory_key_indices(samples) == {
+        49: "initial_home",
+        349: "cycle_01_exact_sleep",
+        649: "cycle_01_return_home",
+        1549: "cycle_03_exact_sleep",
+        1849: "final_home",
+    }
+
+
+def test_selected_sleep_annotation_cannot_retain_failure_wording() -> None:
+    footer = _annotation_footer(
+        evidence_kind="selected_historical_sleep",
+        target_outside=False,
+    )
+
+    assert footer == [
+        "",
+        "all targets inside frozen USD/URDF limits",
+        "exact endpoint numeric gate: PASS",
+        "contacts: none / impulse=0",
+        "DIGITAL GATE: PASS",
+        "This image does not authorize real motion.",
+    ]
+    assert not any("FAIL" in line or "outside USD limit" in line for line in footer)
+
+
 def test_home_sleep_manifest_is_deterministic() -> None:
     config = yaml.safe_load((ROOT / "configs/aloha1_home_sleep_correspondence.yaml").read_text())
 
@@ -348,6 +394,54 @@ def test_visual_review_rejects_old_overlay_and_accepts_red_retake() -> None:
     assert report["rejected_attempts"][0]["reason"] == ("REJECTED_COLLIDER_OVERLAY_NOT_DISTINCT")
 
 
+def test_selected_sleep_qualification_review_requires_both_modes_and_five_stages() -> None:
+    capture = {
+        "stage": {"sha256_before": "stage", "sha256_after": "stage"},
+        "manifest": {"sha256": "manifest", "command_signature": "command"},
+        "numeric_report": {"numeric_signature": "numeric"},
+        "camera": {"view": "FULL_ARM_FIXED_OBLIQUE_ENGINEERING_EVIDENCE"},
+        "videos": {
+            mode: {
+                "absolute_path": f"/{mode}.mp4",
+                "sha256": mode * 8,
+                "frame_count": 560,
+                "fps": 15,
+                "duration_s": 37.333333,
+            }
+            for mode in ("normal", "collision_overlay")
+        },
+        "screenshots": [
+            {
+                "label": label,
+                "mode": mode,
+                "raw_absolute_path": f"/{label}_{mode}_raw.png",
+                "raw_sha256": label * 8,
+                "annotated_absolute_path": f"/{label}_{mode}_annotated.png",
+                "annotated_sha256": (label + mode) * 4,
+            }
+            for mode in ("normal", "collision_overlay")
+            for label in (
+                "initial_home",
+                "cycle_01_exact_sleep",
+                "cycle_01_return_home",
+                "cycle_03_exact_sleep",
+                "final_home",
+            )
+        ],
+        "collider_overlay": {"clone_count": 42},
+        "evidence": {"numeric_status": "PASS", "exact_endpoint_gate": True},
+    }
+
+    review = build_qualification_review(capture, visual_model_approved=True)
+
+    assert review["status"] == "PASS"
+    assert review["classification"] == "DIGITAL_OFFICIAL_HISTORICAL_SLEEP_VISUAL_REVIEW"
+    assert len(review["retained_screenshots"]) == 10
+    assert review["gates"]["five_distinct_stages_per_mode"] is True
+    assert review["gates"]["full_arm_collider_overlay_visible"] is True
+    assert review["real_execution_authorized"] is False
+
+
 def _digital_run(status: str, signature: str) -> dict:
     return {
         "status": status,
@@ -474,6 +568,39 @@ def test_digital_report_requires_two_passing_fresh_runs_for_pass() -> None:
 
     assert report["status"] == "PASS"
     assert report["classification"] == "DIGITAL_HOME_SLEEP_VERIFIED"
+    assert report["layer_status"]["modeled_official_api_command_gate"] == "PASS"
+    assert report["layer_status"]["real_hardware_execution"] == "NOT_RUN_AUTHORIZATION_REQUIRED"
+
+
+def test_selected_source_boundary_never_calls_current_humble_the_command_authority() -> None:
+    boundary = source_boundary_from_audit(
+        {
+            "classification": "OFFICIAL_HISTORICAL_LEGAL_ALOHA_SLEEP_EXPLICITLY_SELECTED_BY_USER",
+            "sleep": {"value_rad": list(SELECTED_HISTORICAL_SLEEP), "source_id": "selected_sleep"},
+            "sources": [
+                {
+                    "id": "selected_sleep",
+                    "repository": "https://github.com/Interbotix/interbotix_ros_manipulators.git",
+                    "branch": "humble (historical pre-PR-225)",
+                    "commit": SELECTED_HISTORICAL_COMMIT,
+                    "license": "BSD-3-Clause",
+                    "sha256": "source",
+                }
+            ],
+            "current_humble_comparison": {
+                "sleep_rad": list(CURRENT_HUMBLE_OUT_OF_RANGE_SLEEP),
+                "used_as_command_authority": False,
+                "classification": "CURRENT_HUMBLE_OUT_OF_LIMIT_COMPARISON_ONLY",
+            },
+            "version_selection": {"status": "EXPLICIT_CROSS_VERSION_COMMAND_SELECTION"},
+        }
+    )
+
+    assert boundary["selected_sleep_rad"] == pytest.approx(SELECTED_HISTORICAL_SLEEP)
+    assert boundary["selected_source_commit"] == SELECTED_HISTORICAL_COMMIT
+    assert boundary["current_humble_sleep_rad"] == pytest.approx(CURRENT_HUMBLE_OUT_OF_RANGE_SLEEP)
+    assert boundary["current_humble_used_as_command_authority"] is False
+    assert boundary["selection_status"] == "EXPLICIT_CROSS_VERSION_COMMAND_SELECTION"
 
 
 def test_sleep_limit_root_cause_separates_video_from_signal_semantics() -> None:
