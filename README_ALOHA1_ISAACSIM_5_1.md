@@ -90,6 +90,30 @@ machine telemetry and visually reviewed. A failure discovered during Task 8
 is returned to the corresponding Task 7 root-cause scope instead of being
 hidden or tuned away.
 
+### 2026-08-03 first Task 8 candidate
+
+The first isolated candidate changes only visual material bindings. It shares
+18 duplicate robot visual bindings through three existing environment
+materials, reducing effective bound visual material paths from 20 to 4 while
+preserving the frozen source hash, 84 instanceable prims and exact protected
+physics signature. Two fresh builds produce identical root and configuration
+layer hashes. The candidate remains diagnostic and is not promoted.
+
+Three fresh Isaac Sim 5.1 processes per profile used the local official
+`isaacsim.benchmark.services` recorders. Stage-load, App-frame, RSS and GPU
+ranges overlap; Physics frame time is worse with a nonoverlapping range
+(`0.91-0.92 ms` baseline versus `1.00-1.02 ms` candidate). The candidate is
+therefore `NO_MEASURABLE_IMPROVEMENT`; it is rejected before grasp smoke. No
+render, collision or grasp failure occurred, so a screenshot/video would not
+show this sub-millisecond performance result and is not generated.
+
+The baseline already has 52 of 56 visual meshes behind instance proxies and
+three payloads. Sharing the four remaining supplier-finger visual meshes can
+save at most 0.211% of visual points and 1.241% of visual faces, so that path
+is deferred. The next meaningful Task 8 scope is an isolated
+collider-complexity candidate. See
+`reports/aloha1_mapping/aloha1_task8_current_summary.json`.
+
 ## 2026-08-02 official-model-first correction
 
 Historical note: Task 8 was temporarily paused at a new model-first

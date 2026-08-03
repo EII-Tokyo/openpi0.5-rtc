@@ -5,6 +5,7 @@ from collections.abc import Mapping, Sequence
 import hashlib
 import json
 import math
+import statistics
 from typing import Any
 
 PROTECTED_PHYSICS_KEYS = ("articulations", "joints", "rigid_bodies", "colliders")
@@ -17,6 +18,44 @@ MODEL_FIRST_REQUIRED_GATES = (
     "collider_geometry_contract",
     "runtime_contract",
 )
+
+
+def summarize_numeric_samples(samples: Sequence[float]) -> dict[str, float | int]:
+    values = [float(value) for value in samples]
+    if not values:
+        raise ValueError("at least one benchmark sample is required")
+    return {
+        "count": len(values),
+        "mean": statistics.mean(values),
+        "stdev": statistics.stdev(values) if len(values) > 1 else 0.0,
+        "min": min(values),
+        "max": max(values),
+    }
+
+
+def compare_lower_is_better(
+    baseline_samples: Sequence[float], candidate_samples: Sequence[float]
+) -> dict[str, object]:
+    baseline = summarize_numeric_samples(baseline_samples)
+    candidate = summarize_numeric_samples(candidate_samples)
+    if float(candidate["max"]) < float(baseline["min"]):
+        classification = "IMPROVES_NONOVERLAPPING_RANGE"
+    elif float(candidate["min"]) > float(baseline["max"]):
+        classification = "WORSENS_NONOVERLAPPING_RANGE"
+    else:
+        classification = "INCONCLUSIVE_OVERLAPPING_RANGE"
+    baseline_mean = float(baseline["mean"])
+    delta_percent = (
+        100.0 * (float(candidate["mean"]) - baseline_mean) / baseline_mean
+        if baseline_mean
+        else None
+    )
+    return {
+        "classification": classification,
+        "baseline": baseline,
+        "candidate": candidate,
+        "candidate_minus_baseline_percent": delta_percent,
+    }
 
 
 def _finite_json_value(value: Any) -> Any:
@@ -89,6 +128,13 @@ def build_inventory_summary(
     repeated_visual = _duplicate_groups(mesh_records, collision=False)
     repeated_collision = _duplicate_groups(mesh_records, collision=True)
     duplicate_materials = _duplicate_material_groups(material_records)
+    bound_visual_material_paths = sorted(
+        {
+            str(record["material_path"])
+            for record in visual
+            if record.get("material_path")
+        }
+    )
     return {
         "prim_count": sum(int(value) for value in prim_type_counts.values()),
         "prim_type_counts": dict(sorted(prim_type_counts.items())),
@@ -98,6 +144,8 @@ def build_inventory_summary(
         "point_count": sum(int(record["point_count"]) for record in mesh_records),
         "face_count": sum(int(record["face_count"]) for record in mesh_records),
         "material_count": len(material_records),
+        "distinct_bound_visual_material_count": len(bound_visual_material_paths),
+        "bound_visual_material_paths": bound_visual_material_paths,
         "instance_proxy_mesh_count": sum(
             bool(record.get("is_instance_proxy")) for record in mesh_records
         ),
@@ -127,6 +175,53 @@ def build_inventory_summary(
         "repeated_collision_geometry": repeated_collision,
         "duplicate_materials": duplicate_materials,
     }
+
+
+def build_material_dedup_plan(
+    *,
+    mesh_records: Sequence[Mapping[str, Any]],
+    duplicate_material_groups: Sequence[Mapping[str, Any]],
+) -> list[dict[str, str]]:
+    """Plan shared visual bindings without editing instance-proxy descendants."""
+
+    material_to_group: dict[str, tuple[str, str]] = {}
+    for group in duplicate_material_groups:
+        paths = [str(path) for path in group.get("paths", [])]
+        canonical = next(
+            (path for path in paths if path.startswith("/World/environment/Looks/")),
+            None,
+        )
+        if canonical is None:
+            continue
+        signature = str(group["material_signature"])
+        for path in paths:
+            material_to_group[path] = (canonical, signature)
+
+    planned: dict[str, dict[str, str]] = {}
+    for mesh in mesh_records:
+        if bool(mesh.get("is_collision")):
+            continue
+        mesh_path = str(mesh["path"])
+        source_material = str(mesh.get("material_path") or "")
+        if not mesh_path.startswith("/World/follower_") or "/visuals/" not in mesh_path:
+            continue
+        group = material_to_group.get(source_material)
+        if group is None:
+            continue
+        canonical, signature = group
+        visual_root = mesh_path.split("/visuals/", maxsplit=1)[0] + "/visuals"
+        record = {
+            "visual_root": visual_root,
+            "canonical_material": canonical,
+            "source_material": source_material,
+            "material_signature": signature,
+            "representative_mesh": mesh_path,
+        }
+        previous = planned.get(visual_root)
+        if previous is not None and previous != record:
+            raise ValueError(f"conflicting material plan for {visual_root}")
+        planned[visual_root] = record
+    return [planned[path] for path in sorted(planned)]
 
 
 def rank_optimization_opportunities(

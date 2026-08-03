@@ -1,0 +1,61 @@
+{
+  "deterministic_signature": "1e9e73deb54f485604b6d7a8c6b3a32f33b5d75e52791b559e0a663f35a9369d",
+  "first_candidate": {
+    "effective_visual_materials_after": 4,
+    "effective_visual_materials_before": 20,
+    "grasp_smoke": "NOT_RUN_CANDIDATE_REJECTED_BEFORE_RUNTIME_ACCEPTANCE",
+    "nonoverlapping_regressions": [
+      "physics_frame_ms"
+    ],
+    "performance_result": "NO_MEASURABLE_IMPROVEMENT",
+    "protected_physics_signature_unchanged": true,
+    "type": "VISUAL_MATERIAL_BINDING_DEDUP",
+    "visual_failure_evidence": {
+      "reason": "The rejected result is a sub-millisecond benchmark difference, not a visible render, collision, or grasp failure.",
+      "status": "NOT_APPLICABLE_PERFORMANCE_ONLY_NO_VISUAL_OR_PHYSICAL_FAILURE"
+    }
+  },
+  "gates": {
+    "approximate_simulation_allowed": true,
+    "baseline_inventory": "PASS",
+    "candidate_performance": "NO_MEASURABLE_IMPROVEMENT",
+    "candidate_promoted": false,
+    "candidate_static": "PASS_STATIC_CANDIDATE_NOT_PROMOTED",
+    "final_or_default_asset_modified": false
+  },
+  "inputs": {
+    "authorization": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task8_progression_authorization.json",
+      "sha256": "b93b6cad9995c0b95fea0b39f296849c3f09cffcab56f908f21dfc98f80e7b36"
+    },
+    "baseline": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task8_baseline_inventory.json",
+      "sha256": "5c8b2b2d3ff520f81cfbddf4d520dbbd34b79ed85a3d16e5065c2c204962da67"
+    },
+    "benchmark": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task8_benchmark_comparison.json",
+      "sha256": "77e4eaa60bc03558ee4133cc4d18e8f3f22e2643a59d394f56f2e925f584ff42"
+    },
+    "candidate": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task8_visual_material_candidate.json",
+      "sha256": "d20722e94fa9bfa3582d0d79aa32b6c403c34f83af8425ce3f2dee8a338aee65"
+    }
+  },
+  "known_issue_policy": "NONBLOCKING_REMINDERS_RECALLED_ONLY_ON_MATCHING_FAILURE_OR_PROMOTION_REVIEW",
+  "next_optimization_boundary": {
+    "baseline_instanceable_prim_count": 84,
+    "baseline_payload_prim_count": 3,
+    "maximum_finger_visual_dedup_face_percent": 1.2414612192762624,
+    "maximum_finger_visual_dedup_faces": 3324,
+    "maximum_finger_visual_dedup_point_percent": 0.21142671049551703,
+    "maximum_finger_visual_dedup_points": 1662,
+    "nonproxy_supplier_finger_visual_mesh_count": 4,
+    "recommendation": "DEFER_TINY_FINGER_VISUAL_INSTANCING; NEXT_MEANINGFUL_SCOPE_IS_ISOLATED_COLLIDER_COMPLEXITY_CANDIDATE",
+    "visual_instance_proxy_mesh_count": 52,
+    "visual_mesh_count": 56
+  },
+  "schema_version": 1,
+  "status": "IN_PROGRESS_FIRST_CANDIDATE_NO_MEASURABLE_IMPROVEMENT",
+  "task7": "PARTIAL_ACCEPTED_FOR_TASK8",
+  "task8": "AUTHORIZED_IN_PROGRESS"
+}

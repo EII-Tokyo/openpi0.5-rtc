@@ -20,6 +20,33 @@
 - Machine-readable authorization:
   `reports/aloha1_mapping/aloha1_task8_progression_authorization.json/.md`.
 
+### Task 8 first isolated candidate
+
+- Two fresh Isaac 5.1 baseline inventory runs are byte-identical after
+  canonicalizing the process-local anonymous session-layer address. Frozen
+  Stage SHA-256 remains
+  `327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9`;
+  protected physics signature is
+  `132dda37bec7fd114105346e8a0feaf084a82f3bf7f3de98ddd2b85e42d8a402`.
+- The first isolated candidate authors 18 shared visual-material bindings and
+  reduces effective bound visual material paths from 20 to 4. Source Stage,
+  84 instanceable prims and protected physics signature remain unchanged.
+  Candidate root/configuration hashes are `c8178327...2533` and
+  `c7cdf3f5...864b`; it is not promoted.
+- Three fresh processes per profile used local
+  `isaacsim.benchmark.services` for 30 warmup + 180 measured frames. Stage-load,
+  App-frame, RSS and GPU ranges overlap. Physics frame time is reproducibly
+  worse: baseline `0.91-0.92 ms`, candidate `1.00-1.02 ms`.
+  Classification: `NO_MEASURABLE_IMPROVEMENT`; grasp smoke is not run because
+  the candidate is rejected before runtime acceptance.
+- No screenshot/video applies to this sub-millisecond performance-only
+  negative result: no render, collision or grasp failure occurred. The next
+  meaningful Task 8 scope is an isolated collider-complexity candidate; tiny
+  supplier-finger visual instancing is deferred (maximum 0.211% of visual
+  points / 1.241% of visual faces).
+- Current report:
+  `reports/aloha1_mapping/aloha1_task8_current_summary.json/.md`.
+
 ## 2026-08-03 model-first execution closure
 
 - Recommended order steps 1-2 are complete and already committed: runtime
