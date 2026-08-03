@@ -70,6 +70,8 @@ sim-to-real dynamics model and it is not yet accepted for bottle insertion.
 | Contact material / continuous duty | **HARD_BLOCKER** | runtime material binding is verified, but friction `0.7` remains `TEMPORARY_UNCALIBRATED`; exact surface-pair properties and a measured loaded thermal envelope are absent |
 | Task 8 optimization | **COMPLETE / NO_PROMOTION** | both isolated candidates are closed as `NO_MEASURABLE_IMPROVEMENT`; strict model-proof findings are retained as non-blocking reminders, final/default assets remain unchanged, and Task 8 reopens only by explicit request or a profiler-backed new bottleneck |
 | Task 8 collider LOD candidate | **NO_MEASURABLE_IMPROVEMENT** | isolated upper-arm candidate reduced authored convex pieces 8 → 2 and passed cooking/swept/smoke comparison, but fresh-process timing ranges overlap and the candidate is not promoted |
+| Home→Sleep→Home digital twin | **FAIL / deterministic source-limit conflict** | two fresh Isaac 5.1 runs completed three cycles with identical numeric signatures; final Home, directions, stationary right follower/grippers and zero impulse contacts pass, but three official Sleep targets exceed frozen USD limits |
+| Home→Sleep→Home real robot | **NOT_RUN_DIGITAL_GATE_FAILED** | offline preflight and runner remain literal DRY_RUN; no network, SSH, ROS, serial, torque or command publication occurred |
 
 `PASS`, `FAIL`, and `PARTIAL` are literal machine-report values. A clean
 viewport is not an acceptance criterion.
@@ -88,6 +90,61 @@ qualify three uninterrupted `Home -> Sleep -> Home` cycles on digital
 `follower_left`, then prepare a separately authorized real-robot comparison.
 This status change does not authorize access to `192.168.1.103` or any real
 motion and does not claim calibrated dynamic sim-to-real behavior.
+
+## 2026-08-03 Home/Sleep digital-twin qualification
+
+The exact pinned `aloha_vx300s` command authority was executed without tuning:
+Home `[0, -0.96, 1.16, 0, -0.3, 0] rad`, Sleep
+`[0, -2.05, 1.7, 0, -2.0, 0] rad`, 50 Hz commands, 5 s moves, 1 s holds and
+three cycles. Isaac physics ran at 60 Hz. `follower_left` was active;
+`follower_right` and both grippers were held stationary.
+
+Two independent Isaac Sim 5.1.0.0 / Kit 107.3.3 / PhysX 107.3.26 processes
+produced the same normalized numeric signature
+`91041520a780bd5d0bb15f803d8ac6dde7a6d67c60a434f07276eae138a60829`.
+Both runs passed movement direction, three-cycle completion, final Home,
+finite readback, stationary-right, stationary-gripper and zero
+impulse-carrying-contact gates. Both failed the same Sleep endpoint and legal
+target gates:
+
+| Joint | Official Sleep (rad) | Frozen USD limit (rad) | Excess (rad) |
+|---|---:|---:|---:|
+| shoulder | -2.050000 | lower -1.850049 | 0.199951 |
+| elbow | +1.700000 | upper +1.605703 | 0.094297 |
+| wrist_angle | -2.000000 | lower -1.867502 | 0.132498 |
+
+PhysX deterministically clamps those joints. The official exact-model command
+was not replaced, the frozen USD/URDF limits were not widened, and the endpoint
+gate was not relaxed. A third-party local mirror contains a different, legal
+Sleep vector, and a historical project robot-readback report also contains a
+different vector; neither is treated as the pinned official command authority
+or used to authorize motion here.
+
+The normal full-arm video passed visual review. The original collision overlay
+was rejected because its cyan color was not distinct from the robot material;
+only that mode was recaptured with bright-red collider geometry. The retake has
+558 frames at 15 fps over 37.2 s and its four raw/annotated key stages pass
+visual review. This is a `PASS_FAILURE_EVIDENCE` result, not a motion PASS.
+
+Consequently:
+
+- `DIGITAL_HOME_SLEEP=FAIL`;
+- `REAL_PREFLIGHT=NOT_RUN_DIGITAL_GATE_FAILED`;
+- `REAL_EXECUTION=NOT_RUN_DIGITAL_GATE_FAILED`;
+- `REAL_DIGITAL_COMPARISON=NOT_RUN_REAL_EVIDENCE_MISSING`.
+
+The offline real-preflight and runner tools instantiate no network, SSH, ROS,
+serial or live publisher transport and publish zero commands. The real robot
+and `192.168.1.103` were not accessed. Task 8 remains closed as
+`COMPLETE_WITH_NO_PROMOTION`.
+
+Machine reports:
+
+- `reports/aloha1_mapping/aloha1_home_sleep_digital_validation.json/.md`;
+- `reports/aloha1_mapping/aloha1_home_sleep_digital_evidence_review.json/.md`;
+- `reports/aloha1_mapping/aloha1_home_sleep_real_preflight.json/.md`;
+- `reports/aloha1_mapping/aloha1_home_sleep_real_run.json`;
+- `reports/aloha1_mapping/aloha1_home_sleep_real_sim_comparison.json`.
 
 ## 2026-08-02 Task 8 authorization boundary
 

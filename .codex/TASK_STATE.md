@@ -1,5 +1,39 @@
 # Task State
 
+## 2026-08-03 Home/Sleep digital-twin gate result
+
+- Active scope: `ALOHA1_REAL_SIM_HOME_SIGNAL_CORRESPONDENCE`.
+- `DIGITAL_HOME_SLEEP=FAIL` with classification
+  `OFFICIAL_SLEEP_TARGET_OUTSIDE_FROZEN_JOINT_LIMITS`.
+- Two fresh Isaac Sim 5.1.0.0 processes each completed all three
+  `Home -> Sleep -> Home` cycles and produced the identical normalized numeric
+  signature
+  `91041520a780bd5d0bb15f803d8ac6dde7a6d67c60a434f07276eae138a60829`.
+- Direction, final Home, follower-right stationarity, both-gripper
+  stationarity, finite readback and zero impulse-carrying contact gates pass.
+  Sleep endpoint and legal-target gates fail deterministically because the
+  pinned official exact-model Sleep targets exceed the frozen USD limits for:
+  - `shoulder`: `-2.05 rad` vs lower `-1.8500488997 rad`;
+  - `elbow`: `+1.70 rad` vs upper `+1.6057027578 rad`;
+  - `wrist_angle`: `-2.00 rad` vs lower `-1.8675020933 rad`.
+- The exact official command and frozen USD limits remain unchanged; no
+  clamped command was substituted. The third-party local mirror's different
+  Sleep vector is retained as non-authoritative evidence and was not used.
+- Visual failure evidence is `PASS_FAILURE_EVIDENCE`: the normal full-arm
+  capture passed; the first cyan collision-overlay batch was rejected as
+  insufficiently distinct; a bright-red collision-only retake passed visual
+  self-review. Visual PASS applies only to evidence quality.
+- `REAL_PREFLIGHT=NOT_RUN_DIGITAL_GATE_FAILED` and
+  `REAL_EXECUTION=NOT_RUN_DIGITAL_GATE_FAILED`. Offline tooling performed no
+  network, SSH, ROS, serial, torque or command-publication action. No access to
+  `192.168.1.103` occurred.
+- Authoritative reports:
+  - `reports/aloha1_mapping/aloha1_home_sleep_digital_validation.json/.md`;
+  - `reports/aloha1_mapping/aloha1_home_sleep_digital_evidence_review.json/.md`;
+  - `reports/aloha1_mapping/aloha1_home_sleep_real_preflight.json/.md`;
+  - `reports/aloha1_mapping/aloha1_home_sleep_real_run.json`;
+  - `reports/aloha1_mapping/aloha1_home_sleep_real_sim_comparison.json`.
+
 ## 2026-08-03 Task 8 final closure and next active scope
 
 - `TASK8_STATUS=COMPLETE` and
