@@ -1,0 +1,419 @@
+{
+  "REAL_DIGITAL_CORRESPONDENCE": "NOT_RUN_REAL_MOTION_EVIDENCE_MISSING",
+  "REAL_MOTION": "NOT_RUN_AUTHORIZATION_REQUIRED",
+  "STOP_HOLD_PATH": "NOT_VERIFIED",
+  "WORKSPACE_CLEAR_FOR_MOTION": "FAIL_CLUTTERED_TABLE",
+  "artifact_files": {
+    "camera_post_image": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-synchronized-real-sim/live_readback/cam_high_post_driver.jpg",
+      "sha256": "6d93f84e81c2263c3ccbbbdaba988df19083036c837b54a4ecf8d7e08f371386",
+      "size_bytes": 147428
+    },
+    "camera_post_report": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-synchronized-real-sim/live_readback/cam_high_probe_post_driver.json",
+      "sha256": "a537215530e76abadd534548213d7c189f9f73f5fec907db642ebfc9c7f37483",
+      "size_bytes": 1072
+    },
+    "camera_pre_image": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-synchronized-real-sim/live_readback/cam_high_pre_driver.jpg",
+      "sha256": "c4bfb20024d756d7f21cffe5443a5fc668547915f2a9899ba28df02b01947171",
+      "size_bytes": 149043
+    },
+    "camera_pre_report": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-synchronized-real-sim/live_readback/cam_high_probe_pre_driver.json",
+      "sha256": "8b5ee6171ca775107bd88d28db75ae78ffca47ec5fb67f8e6c8a102b06622dc4",
+      "size_bytes": 1071
+    },
+    "container_state": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-synchronized-real-sim/live_readback/container_state.jsonl",
+      "sha256": "c6b930c1ad6216bff0fa1e57fc26beb0d6016757dc5cf8e04d431a6ae6a94176",
+      "size_bytes": 2703
+    },
+    "driver_log": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-synchronized-real-sim/live_readback/puppet_left_driver.log",
+      "sha256": "b0c2bc52624646d8642f998df4e55d0d3a57f6faf059c0df760779a8448693ac",
+      "size_bytes": 4302
+    },
+    "joint_state_csv": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-synchronized-real-sim/live_readback/puppet_left_joint_states_20.csv",
+      "sha256": "148a5c9d0faec7e75ad1ec387fb91a9e479fcad81bfd073d28441a6a3ffe889c",
+      "size_bytes": 8762
+    },
+    "ros_report": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-synchronized-real-sim/live_readback/aloha1_home_sleep_live_ros_readback.json",
+      "sha256": "e1ba33c0dbccd089555022fb1ff21e50a9fef9cd378b22404341a1e2bade0cf4",
+      "size_bytes": 3662
+    }
+  },
+  "artifact_paths": {
+    "camera_post_image": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-synchronized-real-sim/live_readback/cam_high_post_driver.jpg",
+    "camera_post_report": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-synchronized-real-sim/live_readback/cam_high_probe_post_driver.json",
+    "camera_pre_image": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-synchronized-real-sim/live_readback/cam_high_pre_driver.jpg",
+    "camera_pre_report": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-synchronized-real-sim/live_readback/cam_high_probe_pre_driver.json",
+    "container_state": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-synchronized-real-sim/live_readback/container_state.jsonl",
+    "driver_log": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-synchronized-real-sim/live_readback/puppet_left_driver.log",
+    "joint_state_csv": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-synchronized-real-sim/live_readback/puppet_left_joint_states_20.csv",
+    "ros_report": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-synchronized-real-sim/live_readback/aloha1_home_sleep_live_ros_readback.json"
+  },
+  "authorization_boundary": {
+    "camera_hardware_authorized": true,
+    "driver_start_authorized": true,
+    "home_sleep_motion_authorized": false,
+    "other_motion_authorized": false,
+    "read_only_runtime_authorized": true
+  },
+  "camera_hardware_resets": 0,
+  "camera_post_driver": {
+    "camera_opened": true,
+    "contract": {
+      "fps": 60,
+      "height": 480,
+      "message_type": "aloha.msg/RGBGrayscaleImage",
+      "name": "cam_high",
+      "realsense_format": "bgr8",
+      "ros_encoding": "bgr8",
+      "serial": "130322270656",
+      "serial_evidence": "REMOTE_DEPLOYED_CONFIG_READBACK",
+      "topic": "/cam_high",
+      "width": 640
+    },
+    "discovered_serials": [
+      "218622270440",
+      "218622278936",
+      "130322272542",
+      "130322270656"
+    ],
+    "first_frame_number": 0,
+    "frames_captured": 600,
+    "frames_published": 600,
+    "hardware_resets": 0,
+    "host_interval_ms_max": 33.022412,
+    "host_interval_ms_mean": 16.718217207011683,
+    "last_frame_number": 600,
+    "last_pixels_sha256": "42be21835f60050cdbe2c95b9ad31c6e3ae1b6e73c2bc51ff3dc58e819bb4c57",
+    "robot_command_publishers": 0,
+    "ros_publisher_constructed": true,
+    "schema_version": 1,
+    "sensor_timestamp_ms_first": 1785739467593.154,
+    "sensor_timestamp_ms_last": 1785739477610.1028,
+    "snapshot": "/diagnostic/output/cam_high_first_frame.jpg",
+    "status": "PASS_CAM_HIGH_SINGLE_CAMERA_RUNTIME"
+  },
+  "camera_pre_driver": {
+    "camera_opened": true,
+    "contract": {
+      "fps": 60,
+      "height": 480,
+      "message_type": "aloha.msg/RGBGrayscaleImage",
+      "name": "cam_high",
+      "realsense_format": "bgr8",
+      "ros_encoding": "bgr8",
+      "serial": "130322270656",
+      "serial_evidence": "REMOTE_DEPLOYED_CONFIG_READBACK",
+      "topic": "/cam_high",
+      "width": 640
+    },
+    "discovered_serials": [
+      "218622270440",
+      "218622278936",
+      "130322272542",
+      "130322270656"
+    ],
+    "first_frame_number": 0,
+    "frames_captured": 600,
+    "frames_published": 600,
+    "hardware_resets": 0,
+    "host_interval_ms_max": 17.306128,
+    "host_interval_ms_mean": 16.674904716193655,
+    "last_frame_number": 599,
+    "last_pixels_sha256": "9de7ed97b6e0f5898d519d79bd9bd5226a311f07e1fbe95d87873dabd8508209",
+    "robot_command_publishers": 0,
+    "ros_publisher_constructed": true,
+    "schema_version": 1,
+    "sensor_timestamp_ms_first": 1785739313557.842,
+    "sensor_timestamp_ms_last": 1785739323557.969,
+    "snapshot": "/diagnostic/output/cam_high_first_frame.jpg",
+    "status": "PASS_CAM_HIGH_SINGLE_CAMERA_RUNTIME"
+  },
+  "commands_published": 0,
+  "deployment_files": {
+    "camera_probe": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/tools/probe_aloha1_cam_high_ros1.py",
+      "sha256": "341242c8d9f0f6e73d42b8162e3fb2f2e6ed0c977282d759027257e2f3658448",
+      "size_bytes": 8378
+    },
+    "compose": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/configs/aloha1_home_sleep_live_readback.compose.yaml",
+      "sha256": "d36b7b9384cdeca82af97ae324cd0d352682dc50373b1d86355e8b5b02093265",
+      "size_bytes": 1037
+    },
+    "launch": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/configs/aloha1_home_sleep_puppet_left_only_candidate.launch",
+      "sha256": "967f2855468358a10078929aa07b3b32548a974acd9dee08c98df37fa7023db1",
+      "size_bytes": 852
+    },
+    "ros_inspector": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/tools/inspect_aloha1_home_sleep_ros1_readback.py",
+      "sha256": "dc04f6fc0933df8310f86909e9abc5b250eb5595d6529cf1edddddde363b68fc",
+      "size_bytes": 7447
+    }
+  },
+  "deployment_hashes": {
+    "camera_probe": "341242c8d9f0f6e73d42b8162e3fb2f2e6ed0c977282d759027257e2f3658448",
+    "compose": "d36b7b9384cdeca82af97ae324cd0d352682dc50373b1d86355e8b5b02093265",
+    "launch": "967f2855468358a10078929aa07b3b32548a974acd9dee08c98df37fa7023db1",
+    "ros_inspector": "dc04f6fc0933df8310f86909e9abc5b250eb5595d6529cf1edddddde363b68fc"
+  },
+  "device_mapping": {
+    "evidence_class": "REMOTE_RUNTIME_UDEV_READBACK",
+    "ftdi_serial": "FTAAMM8J",
+    "hardcoded_ttyusb_used": false,
+    "resolved_device": "/dev/ttyUSB0",
+    "role_alias": "/dev/ttyDXL_puppet_left"
+  },
+  "driver": {
+    "arm_operating_mode": "position",
+    "forbidden_driver_nodes": [],
+    "gripper_operating_mode": "linear_position",
+    "left_driver_running": true,
+    "load_configs": false,
+    "log_checks": {
+      "arm_position_mode": true,
+      "gripper_linear_position_mode": true,
+      "puppet_left_mode_config": true,
+      "xs_sdk_up": true
+    },
+    "torque_state": "ENABLED_BY_DEPLOYED_MODE_CONFIG_AND_DRIVER_LOG_NOT_DIRECT_REGISTER_READBACK"
+  },
+  "joint_state_samples": {
+    "max_abs_reported_velocity": 0.0,
+    "max_position_span_rad": 0.0015339851379394531,
+    "position_columns": [
+      "field.position0",
+      "field.position1",
+      "field.position2",
+      "field.position3",
+      "field.position4",
+      "field.position5",
+      "field.position6",
+      "field.position7",
+      "field.position8"
+    ],
+    "position_span_rad_by_joint": {
+      "field.position0": 0.0015339808305725455,
+      "field.position1": 0.0,
+      "field.position2": 0.0,
+      "field.position3": 0.0,
+      "field.position4": 0.0015339851379394531,
+      "field.position5": 0.0,
+      "field.position6": 0.0,
+      "field.position7": 0.0,
+      "field.position8": 0.0
+    },
+    "rows": 20,
+    "source": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260803-aloha1-synchronized-real-sim/live_readback/puppet_left_joint_states_20.csv",
+      "sha256": "148a5c9d0faec7e75ad1ec387fb91a9e479fcad81bfd073d28441a6a3ffe889c",
+      "size_bytes": 8762
+    },
+    "velocity_columns": [
+      "field.velocity0",
+      "field.velocity1",
+      "field.velocity2",
+      "field.velocity3",
+      "field.velocity4",
+      "field.velocity5",
+      "field.velocity6",
+      "field.velocity7",
+      "field.velocity8"
+    ]
+  },
+  "remaining_gates": [
+    "operator_clear_table_and_confirm_workspace",
+    "operator_tested_stop_hold_path",
+    "explicit_real_motion_authorization",
+    "home_sleep_three_cycle_real_execution",
+    "real_digital_signal_comparison"
+  ],
+  "remote_runtime": {
+    "deployment_root": "/home/eii/openpi0.5-rtc-reward-learning/.codex/runtime/aloha1_home_sleep_live_readback",
+    "dirty_entries_preserved": 45,
+    "host": "192.168.1.103",
+    "project_branch": "paper_actor_sample",
+    "project_head": "ea818494bf9ee7756c955864ba3b0d62be6ce649",
+    "project_root": "/home/eii/openpi0.5-rtc-reward-learning"
+  },
+  "robot_command_publisher_constructed": false,
+  "ros_readback": {
+    "arm_command_publishers": [],
+    "arm_joint_order": [
+      "waist",
+      "shoulder",
+      "elbow",
+      "forearm_roll",
+      "wrist_angle",
+      "wrist_rotate"
+    ],
+    "checks": {
+      "arm_command_subscriber": true,
+      "arm_command_type": true,
+      "finite_joint_state": true,
+      "gripper_command_subscriber": true,
+      "gripper_command_type": true,
+      "joint_count": true,
+      "joint_order": true,
+      "joint_states_type": true,
+      "left_mode_config": true,
+      "load_configs_false": true,
+      "no_arm_command_publishers": true,
+      "no_forbidden_driver_nodes": true,
+      "no_gripper_command_publishers": true,
+      "puppet_left_driver_present": true,
+      "vx300s_motor_config": true
+    },
+    "commands_published_by_inspector": 0,
+    "forbidden_driver_nodes": [],
+    "full_joint_order": [
+      "waist",
+      "shoulder",
+      "elbow",
+      "forearm_roll",
+      "wrist_angle",
+      "wrist_rotate",
+      "gripper",
+      "left_finger",
+      "right_finger"
+    ],
+    "gripper_command_publishers": [],
+    "joint_efforts": [
+      0.0,
+      2.690000057220459,
+      0.0,
+      0.0,
+      0.0,
+      -2.690000057220459,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "joint_positions": [
+      0.0,
+      -1.8453789949417114,
+      1.6229517459869385,
+      -0.006135923322290182,
+      -1.8837285041809082,
+      -0.006135923322290182,
+      0.6887574195861816,
+      0.04572412371635437,
+      -0.04572412371635437
+    ],
+    "joint_velocities": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "nodes": [
+      "/aloha1_home_sleep_read_only_inspector",
+      "/puppet_left/robot_state_publisher",
+      "/puppet_left/xs_sdk",
+      "/rosout",
+      "/voice_assistant_web_backend_7_1785469450346"
+    ],
+    "publisher_constructed": false,
+    "ros_connected": true,
+    "schema_version": 1,
+    "services_called": 0,
+    "snapshot": {
+      "arm_command_publishers": [],
+      "arm_command_subscribers": [
+        "/puppet_left/xs_sdk"
+      ],
+      "arm_command_type": "interbotix_xs_msgs/JointGroupCommand",
+      "gripper_command_publishers": [],
+      "gripper_command_subscribers": [
+        "/puppet_left/xs_sdk"
+      ],
+      "gripper_command_type": "interbotix_xs_msgs/JointSingleCommand",
+      "joint_efforts": [
+        0.0,
+        2.690000057220459,
+        0.0,
+        0.0,
+        0.0,
+        -2.690000057220459,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "joint_names": [
+        "waist",
+        "shoulder",
+        "elbow",
+        "forearm_roll",
+        "wrist_angle",
+        "wrist_rotate",
+        "gripper",
+        "left_finger",
+        "right_finger"
+      ],
+      "joint_positions": [
+        0.0,
+        -1.8453789949417114,
+        1.6229517459869385,
+        -0.006135923322290182,
+        -1.8837285041809082,
+        -0.006135923322290182,
+        0.6887574195861816,
+        0.04572412371635437,
+        -0.04572412371635437
+      ],
+      "joint_state_header": {
+        "frame_id": "",
+        "seq": 24392,
+        "stamp_ns": 1785739626863261222
+      },
+      "joint_states_type": "sensor_msgs/JointState",
+      "joint_velocities": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "load_configs": false,
+      "mode_configs": "/root/interbotix_ws/src/aloha/config/puppet_modes_left.yaml",
+      "motor_configs": "/root/interbotix_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_control/config/vx300s.yaml",
+      "nodes": [
+        "/aloha1_home_sleep_read_only_inspector",
+        "/puppet_left/robot_state_publisher",
+        "/puppet_left/xs_sdk",
+        "/rosout",
+        "/voice_assistant_web_backend_7_1785469450346"
+      ],
+      "publisher_constructed": false,
+      "services_called": 0,
+      "subscriber_constructed": true
+    },
+    "status": "PASS_PUPPET_LEFT_READ_ONLY_RUNTIME"
+  },
+  "schema_version": 1,
+  "scope": "AUTHORIZED_PUPPET_LEFT_DRIVER_AND_CAM_HIGH_READ_ONLY_RUNTIME",
+  "services_called": 0,
+  "status": "PASS_READ_ONLY_RUNTIME_MOTION_NOT_RUN",
+  "visual_review": {
+    "evidence_role": "AUXILIARY_SAFETY_VISUAL_NOT_SIGNAL_PROOF",
+    "post_driver": "PASS_NO_VISIBLE_LEFT_ARM_POSE_CHANGE",
+    "pre_driver": "PASS_CAM_HIGH_VIEW_LEFT_ARM_VISIBLE",
+    "workspace": "FAIL_CLUTTERED_TABLE_FOR_FUTURE_MOTION"
+  }
+}
