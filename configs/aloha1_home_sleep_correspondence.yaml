@@ -1,0 +1,61 @@
+schema_version: 1
+experiment_id: ALOHA1_REAL_SIM_HOME_SIGNAL_CORRESPONDENCE
+product:
+  manufacturer: Trossen Robotics / Interbotix
+  model: aloha_vx300s
+  role: Stationary ALOHA 1 follower
+scope:
+  active_robot: follower_left
+  stationary:
+    follower_right: true
+    follower_left_gripper: true
+    follower_right_gripper: true
+joint_order: [waist, shoulder, elbow, forearm_roll, wrist_angle, wrist_rotate]
+command:
+  home_rad: [0.0, -0.96, 1.16, 0.0, -0.3, 0.0]
+  sleep_rad: [0.0, -2.05, 1.7, 0.0, -2.0, 0.0]
+  command_rate_hz: 50
+  physics_rate_hz: 60
+  move_seconds: 5
+  hold_seconds: 1
+  cycles: 3
+sources:
+  robot_utils:
+    repository: https://github.com/Interbotix/aloha.git
+    branch: main
+    commit: 4fa6b2c4428f5334441a7bee5ab2b2e8071cff93
+    license: MIT
+    local_path: .codex/artifacts/20260802-aloha1-official-model-first/sources/official_repo_probe/interbotix_aloha_main/aloha/robot_utils.py
+    sha256: 0d7ab1014210f311eebc2cdb0f5d2a58c5f870f8b875b7a05b3373413efe1179
+  constants:
+    repository: https://github.com/Interbotix/aloha.git
+    branch: main
+    commit: 4fa6b2c4428f5334441a7bee5ab2b2e8071cff93
+    license: MIT
+    local_path: .codex/artifacts/20260802-aloha1-official-model-first/sources/official_repo_probe/interbotix_aloha_main/aloha/constants.py
+    sha256: 2b553446f77b74c959e31b01d9901c21b8fc33096f87a43e3cc5462f96674ac5
+  aloha_vx300s:
+    repository: https://github.com/Interbotix/interbotix_ros_manipulators.git
+    branch: humble
+    commit: b66d5b905725351dd71d3251a06cd3f4c777940f
+    license: BSD-3-Clause
+    local_path: .codex/artifacts/20260802-aloha1-official-model-first/sources/interbotix_manipulators_b66d5b905725351dd71d3251a06cd3f4c777940f/aloha_vx300s.yaml
+    sha256: 999cc0863b7b1e0334c5cd75d5ed1430736d25aa13881e4c24f4bf6cb3a1924f
+digital:
+  isaac_sim: 5.1.0.0
+  kit: 107.3.3
+  physx: 107.3.26
+  stage:
+    path: assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda
+    sha256: 327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9
+    root_prim: /World
+  finger_limit_layer:
+    path: assets/Trossen/ALOHA1/1.0/diagnostics/finger_limit_pair_collision_candidate/1.0/configuration/finger_source_limits.usda
+    sha256: 2547e6fb374c213b5c6c54f200c7ced37605ab0e1a11735d0a32c0a231fd260f
+boundaries:
+  candidate_promoted: false
+  final_default_asset_modified: false
+  real_execution_authorized: false
+  surface_gripper: false
+  fixed_joint_attachment: false
+  parent_attachment: false

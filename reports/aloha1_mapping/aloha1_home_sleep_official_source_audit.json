@@ -1,0 +1,69 @@
+{
+  "classification": "OFFICIAL_EXACT_MODEL_HOME_SLEEP_SOURCE_AUDIT",
+  "command_dt_s": 0.02,
+  "deterministic_signature": "099d6b6b227fcbe7b65c0f27999b338aa601b40fde629291e947f646bd906332",
+  "generic_vx300s_substituted": false,
+  "home": {
+    "source_id": "robot_utils",
+    "value_rad": [
+      0.0,
+      -0.96,
+      1.16,
+      0.0,
+      -0.3,
+      0.0
+    ]
+  },
+  "joint_order": [
+    "waist",
+    "shoulder",
+    "elbow",
+    "forearm_roll",
+    "wrist_angle",
+    "wrist_rotate"
+  ],
+  "moving_time_s": 5.0,
+  "product": "aloha_vx300s",
+  "schema_version": 1,
+  "sleep": {
+    "source_id": "aloha_vx300s",
+    "value_rad": [
+      0.0,
+      -2.05,
+      1.7,
+      0.0,
+      -2.0,
+      0.0
+    ]
+  },
+  "sources": [
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/sources/official_repo_probe/interbotix_aloha_main/aloha/robot_utils.py",
+      "branch": "main",
+      "commit": "4fa6b2c4428f5334441a7bee5ab2b2e8071cff93",
+      "id": "robot_utils",
+      "license": "MIT",
+      "repository": "https://github.com/Interbotix/aloha.git",
+      "sha256": "0d7ab1014210f311eebc2cdb0f5d2a58c5f870f8b875b7a05b3373413efe1179"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/sources/official_repo_probe/interbotix_aloha_main/aloha/constants.py",
+      "branch": "main",
+      "commit": "4fa6b2c4428f5334441a7bee5ab2b2e8071cff93",
+      "id": "constants",
+      "license": "MIT",
+      "repository": "https://github.com/Interbotix/aloha.git",
+      "sha256": "2b553446f77b74c959e31b01d9901c21b8fc33096f87a43e3cc5462f96674ac5"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260802-aloha1-official-model-first/sources/interbotix_manipulators_b66d5b905725351dd71d3251a06cd3f4c777940f/aloha_vx300s.yaml",
+      "branch": "humble",
+      "commit": "b66d5b905725351dd71d3251a06cd3f4c777940f",
+      "id": "aloha_vx300s",
+      "license": "BSD-3-Clause",
+      "repository": "https://github.com/Interbotix/interbotix_ros_manipulators.git",
+      "sha256": "999cc0863b7b1e0334c5cd75d5ed1430736d25aa13881e4c24f4bf6cb3a1924f"
+    }
+  ],
+  "status": "PASS"
+}
