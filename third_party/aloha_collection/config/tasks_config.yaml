@@ -1,0 +1,41 @@
+# ==============================================================================
+# Task Configuration File (task_config.yaml)
+# ==============================================================================
+# This file contains configuration settings for various tasks on the Aloha robot
+# systems. Each task has specific parameters, such as dataset directory and
+# episode length, tailored for different Aloha robot setups (e.g., mobile,
+# stationary, solo).
+# ==============================================================================
+
+tasks:
+  # ----------------------------------------------------------------------------
+  # Task: Aloha Mobile Dummy
+  # ----------------------------------------------------------------------------
+  aloha_mobile_dummy:
+    # Path to the dataset storage directory
+    dataset_dir: "~/interbotix_ws/src/aloha/aloha_data/aloha_mobile_dummy"
+    # Length of each episode in timesteps
+    episode_len: 300
+
+  # ----------------------------------------------------------------------------
+  # Task: Aloha Stationary Dummy
+  # ----------------------------------------------------------------------------
+  aloha_stationary:
+    # Path to the dataset storage directory
+
+    dataset_dir: "~/interbotix_ws/src/aloha/aloha_data/aloha_stationary/2026-08-04_empty-bottle"
+    # dataset_dir: "~/interbotix_ws/src/aloha/aloha_data/aloha_stationary/2026.04.10_twist_tear_water-direction_tabacco-middle_lower"
+    # dataset_dir: "~/interbotix_ws/src/aloha/aloha_data/aloha_stationary/2026.04.10_twist_tear_water-direction_tabacco-all"
+    # dataset_dir: "~/interbotix_ws/src/aloha/aloha_data/aloha_stationary/2026.04.09_twist_water_tear-one_have_cap_right"
+    # Length of each episode in timesteps
+    episode_len: 6000001
+
+
+  # ----------------------------------------------------------------------------
+  # Task: Aloha Solo Dummy
+  # ----------------------------------------------------------------------------
+  aloha_solo_dummy:
+    # Path to the dataset storage directory
+    dataset_dir: "~/interbotix_ws/src/aloha/aloha_data/aloha_solo_dummy"
+    # Length of each episode in timesteps
+    episode_len: 500

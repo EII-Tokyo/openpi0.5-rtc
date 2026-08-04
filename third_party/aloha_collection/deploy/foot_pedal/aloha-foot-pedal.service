@@ -1,0 +1,23 @@
+[Unit]
+Description=ALOHA remote foot pedal relay
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=eii
+Group=eii
+SupplementaryGroups=input
+WorkingDirectory=/opt/aloha-foot-pedal
+Environment=PEDAL_EVENT_CODE=48
+EnvironmentFile=/etc/aloha-foot-pedal.env
+ExecStart=/usr/bin/python3 /opt/aloha-foot-pedal/scripts/foot_pedal_relay.py --device ${PEDAL_DEVICE} --event-code ${PEDAL_EVENT_CODE} --ssh-host aloha
+Restart=on-failure
+RestartSec=2
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+
+[Install]
+WantedBy=multi-user.target
