@@ -283,6 +283,7 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--finger-limit-sha256", default=DEFAULT_FINGER_SHA256)
     parser.add_argument("--report", type=Path, default=DEFAULT_REPORT)
     parser.add_argument("--startup-workspace", type=int, default=2)
+    parser.add_argument("--run-digital-only", action="store_true")
     return parser.parse_args()
 
 
@@ -599,6 +600,10 @@ def main(args: argparse.Namespace, app: Any) -> int:
             ui.Button("Check Initial Pose + Run Digital/Real Sleep -> Home -> Sleep", clicked_fn=request_integrated_run, height=32)
             ui.Label("ARM REAL ROBOT: AUTHORIZED FOR ONE follower_left CYCLE")
             status_label = ui.Label("Status: READY_REAL_POSE_CHECK_REQUIRED")
+    if args.run_digital_only:
+        # The explicit CLI mode is equivalent to pressing the Digital-only
+        # button and cannot construct or launch the real ROS bridge.
+        start_digital_only_run()
     args.report.parent.mkdir(parents=True, exist_ok=True)
     args.report.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(
