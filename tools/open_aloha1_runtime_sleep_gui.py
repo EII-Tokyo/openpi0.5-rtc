@@ -427,6 +427,14 @@ def main(args: argparse.Namespace, app: Any) -> int:
         "source_config": str((ROOT / RIGHT_RUNTIME_SLEEP_SOURCE).resolve()),
         "arm_q_rad": RIGHT_RUNTIME_INITIAL_REFERENCE_RAD.astype(np.float64).tolist(),
     }
+    right_readback = np.asarray(right.get_joint_positions(), dtype=np.float64)[:6]
+    right_error = float(np.max(np.abs(right_readback - RIGHT_RUNTIME_INITIAL_REFERENCE_RAD)))
+    report["right_initial_reference"]["readback_arm_q_rad"] = right_readback.tolist()
+    report["right_initial_reference"]["maximum_error_rad"] = right_error
+    report["right_initial_reference"]["position_gate_rad"] = POSITION_GATE_RAD
+    report["gates"]["right_runtime_sleep_readback"] = right_error <= POSITION_GATE_RAD
+    if not report["gates"]["right_runtime_sleep_readback"]:
+        report["status"] = "FAIL_NOT_READY"
 
     # The visible GUI is now the explicitly authorized single-source bridge.
     # It performs a read-only remote pose check before constructing the remote
