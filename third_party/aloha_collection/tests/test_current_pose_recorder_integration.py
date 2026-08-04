@@ -569,6 +569,11 @@ def test_current_pose_rearm_requires_post_pause_joint_states(monkeypatch):
         ),
     )
 
+    def rearm(**kwargs):
+        calls.append(("restore",))
+        kwargs["post_restore_health_gate"]()
+        return True
+
     assert recorder.prepare_episode_start(
         runtime,
         robots=runtime.env.robots,
@@ -577,7 +582,7 @@ def test_current_pose_rearm_requires_post_pause_joint_states(monkeypatch):
         start_arm_pose={},
         continuous_roll_joints=True,
         return_home_between_episodes=False,
-        rearm=lambda **_kwargs: calls.append(("rearm",)) or True,
+        rearm=rearm,
     )
 
     assert calls == [
@@ -588,8 +593,27 @@ def test_current_pose_rearm_requires_post_pause_joint_states(monkeypatch):
             "current_pose_rearm",
             recorder._TELEOP_LEADER_MAX_AGE_SECONDS,
         ),
-        ("rearm",),
+        ("restore",),
+        (
+            "fresh",
+            runtime.health,
+            frozenset(robot_names),
+            "current_pose_rearm_post_restore",
+            recorder._TELEOP_LEADER_MAX_AGE_SECONDS,
+        ),
     ]
+
+
+def test_recorder_source_wires_post_restore_health_gate():
+    source = RECORDER.read_text(encoding="utf-8")
+    prepare = source.split("def prepare_episode_start(", 1)[1].split(
+        "def _require_fresh_leaders(",
+        1,
+    )[0]
+
+    assert "post_restore_health_gate=lambda: _wait_for_health_gate(" in prepare
+    assert 'phase="current_pose_rearm_post_restore"' in prepare
+    assert "set(robots)" in prepare
 
 
 def test_require_fresh_leaders_uses_initialized_leader_interfaces():

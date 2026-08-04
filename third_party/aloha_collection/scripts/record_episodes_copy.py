@@ -1755,6 +1755,7 @@ def rearm_current_pose(
     debounce_samples: int = _REARM_DEBOUNCE_SAMPLES,
     abort_requested=lambda: False,
     health_check=lambda: None,
+    post_restore_health_gate=lambda: None,
 ) -> bool:
     """Restore teleoperation only after a safe current-pose gesture."""
     leader_bots = {
@@ -1800,6 +1801,7 @@ def rearm_current_pose(
         debounce_samples=debounce_samples,
         sleep=time.sleep,
         health_check=health_check,
+        post_restore_health_gate=post_restore_health_gate,
     )
 
 
@@ -1855,6 +1857,16 @@ def prepare_episode_start(
         robots=robots,
         gravity_compensation=gravity_compensation,
         continuous_roll_joints=continuous_roll_joints,
+        post_restore_health_gate=lambda: _wait_for_health_gate(
+            runtime.health,
+            set(robots),
+            phase="current_pose_rearm_post_restore",
+            max_age=_TELEOP_LEADER_MAX_AGE_SECONDS,
+            stop_requested=lambda: (
+                STOP_NO_SAVE_EVENT.is_set()
+                or STOP_AND_SAVE_EVENT.is_set()
+            ),
+        ),
     )
 
 
