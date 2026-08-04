@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 import math
+from pathlib import Path
 import shlex
 from typing import Any
 
@@ -110,6 +111,8 @@ def build_remote_dual_publisher_command(
     local_right = shlex.quote(str(right_local))
     local_script = shlex.quote(str(script_local))
     local_module = shlex.quote(str(module_local))
+    staged_left_name = shlex.quote(Path(str(left_local)).name)
+    staged_right_name = shlex.quote(Path(str(right_local)).name)
     remote_left = shlex.quote(str(left_remote))
     remote_right = shlex.quote(str(right_remote))
     output = shlex.quote(str(output_remote))
@@ -128,8 +131,8 @@ def build_remote_dual_publisher_command(
         f'docker cp /tmp/aloha1_dual_real_script.py "$C":{remote_script}; '
         'docker exec "$C" mkdir -p /app/tools/aloha1_mapping; '
         'docker cp /tmp/aloha1_dual_real_module.py "$C":/app/tools/aloha1_mapping/dual_real_publisher.py; '
-        f'docker cp /tmp/aloha1_gui_manifest_stage/$(basename {remote_left}) "$C":{remote_left}; '
-        f'docker cp /tmp/aloha1_gui_manifest_stage/$(basename {remote_right}) "$C":{remote_right}; '
+        f'docker cp /tmp/aloha1_gui_manifest_stage/{staged_left_name} "$C":{remote_left}; '
+        f'docker cp /tmp/aloha1_gui_manifest_stage/{staged_right_name} "$C":{remote_right}; '
         'docker exec "$C" bash -lc "cd /app; source /opt/ros/noetic/setup.bash; '
         "source /root/interbotix_ws/devel/setup.bash; "
         f"/usr/bin/python3 {remote_script} --left-manifest {remote_left} "

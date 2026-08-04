@@ -1,5 +1,18 @@
 # Task State
 
+## 2026-08-04 GUI bridge deployment filename diagnosis
+
+- The first post-implementation GUI click completed the digital side (`351`
+  samples) and passed both initial-pose readbacks, but no physical movement
+  occurred because the remote staging command copied a remote manifest basename
+  that differed from the staged local filename. The remote publisher therefore
+  never reached its live entry point; no new real command is claimed.
+- Fixed the staging command to use the actual staged basenames. The complete
+  local→103→container path was re-run in dry-run mode and returned
+  `NOT_RUN_AUTHORIZATION_REQUIRED` with zero commands on both sides.
+- A fresh GUI restart is required to load this correction; the old GUI process
+  must not be used for the next live-bridge test.
+
 ## 2026-08-04 digital target to real dual-follower bridge implemented
 
 - The GUI bridge no longer points at a static left-only manifest. On an
