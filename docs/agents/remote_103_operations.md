@@ -58,6 +58,27 @@ REMOTE
 - `rlt_warmup_runtime` container: `/usr/bin/uv`.
 - For compose commands that run `uv run ...`, assume container path `/usr/bin/uv`; do not rediscover this each time.
 
+## Project-Owned ROS2 Collection Runtime
+
+- The project-owned ROS2 collection source is
+  `/home/eii/openpi0.5-rtc-reward-learning/third_party/aloha_collection`.
+- `/home/eii/aloha-2.0` is the read-only source snapshot origin for this
+  project; do not modify or launch it for new project collection sessions.
+- Preview the resolved standalone collection container without touching robot
+  hardware:
+
+```bash
+cd /home/eii/openpi0.5-rtc-reward-learning
+third_party/aloha_collection/scripts/collect.sh --dry-run
+```
+
+- A real collection launch uses the same command without `--dry-run`, but only
+  after explicit real-robot authorization and the hardware safety rules have
+  been checked.
+- This ROS2 `aloha2-collect` path is separate from the ROS1 inference services
+  in the root `docker-compose.yml`; do not change the ROS1 mount as part of a
+  recorder-only fix.
+
 ## Container Control
 - When the user asks to stop all of their robot containers on `192.168.1.103`, do it in one compose command from the verified project directory:
 
