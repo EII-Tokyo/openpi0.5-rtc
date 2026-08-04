@@ -179,3 +179,13 @@ def test_gui_uses_installed_full_kit_experience() -> None:
 
     assert experience.name == "isaacsim.exp.full.kit"
     assert experience.is_file()
+
+
+def test_gui_right_arm_uses_legal_runtime_sleep_candidate() -> None:
+    source = inspect.getsource(main)
+
+    assert "RIGHT_RUNTIME_LEGAL_SLEEP_CANDIDATE" in inspect.getsource(__import__(
+        "tools.open_aloha1_runtime_sleep_gui", fromlist=["RIGHT_RUNTIME_SLEEP_SOURCE"]
+    ))
+    assert "right_button_samples" in source
+    assert "right_target_arm_rad" in source

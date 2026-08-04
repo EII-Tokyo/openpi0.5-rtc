@@ -54,10 +54,10 @@ REMOTE_RESULT_PATH = "/app/.codex/runtime/integrated_sleep_home_sleep_result.jso
 REAL_START_DELAY_S = 4.0
 DIGITAL_START_GUARD_S = 4.05
 RIGHT_RUNTIME_INITIAL_REFERENCE_RAD = np.asarray(
-    [0.08130098134279251, -1.8699226379394531, 1.650563359260559,
-     -0.006135923322290182, -1.951223611831665, 0.04141748324036598],
+    [0.0, -1.8, 1.55, 0.0, -1.57, 0.0],
     dtype=np.float32,
 )
+RIGHT_RUNTIME_SLEEP_SOURCE = "configs/aloha1_follower_right_runtime_sleep.yaml"
 
 
 def _sha256(path: Path) -> str:
@@ -328,6 +328,12 @@ def main(args: argparse.Namespace, app: Any) -> int:
         command_hz=GUI_BUTTON_PHYSICS_HZ,
         move_seconds=GUI_BUTTON_MOVE_SECONDS,
     )
+    right_button_samples = build_gui_button_samples(
+        sleep=RIGHT_RUNTIME_INITIAL_REFERENCE_RAD.astype(np.float64).tolist(),
+        home=manifest["home_rad"],
+        command_hz=GUI_BUTTON_PHYSICS_HZ,
+        move_seconds=GUI_BUTTON_MOVE_SECONDS,
+    )
     session = _install_session_layers(stage, Path(inputs["paths"]["finger_limit_layer"]), manifest)
 
     view_layer = Sdf.Layer.CreateAnonymous("aloha1_runtime_sleep_gui_view.usda")
@@ -416,8 +422,8 @@ def main(args: argparse.Namespace, app: Any) -> int:
         if prim.HasAuthoredReferences()
     ]
     report["right_initial_reference"] = {
-        "classification": "RIGHT_RUNTIME_INITIAL_REFERENCE_NOT_CANONICAL_SLEEP",
-        "source_report": str((ROOT / "reports/aloha1_mapping/aloha1_follower_right_readback_preflight_20260803.json").resolve()),
+        "classification": "RIGHT_RUNTIME_LEGAL_SLEEP_CANDIDATE",
+        "source_config": str((ROOT / RIGHT_RUNTIME_SLEEP_SOURCE).resolve()),
         "arm_q_rad": RIGHT_RUNTIME_INITIAL_REFERENCE_RAD.astype(np.float64).tolist(),
     }
 
@@ -522,6 +528,17 @@ def main(args: argparse.Namespace, app: Any) -> int:
                     )
                 )
             ) <= POSITION_GATE_RAD
+            digital_at_sleep = digital_at_sleep and (
+                float(
+                    np.max(
+                        np.abs(
+                            np.asarray(right.get_joint_positions(), dtype=np.float64)[:6]
+                            - RIGHT_RUNTIME_INITIAL_REFERENCE_RAD
+                        )
+                    )
+                )
+                <= POSITION_GATE_RAD
+            )
             if not digital_at_sleep:
                 raise ValueError("digital articulation is not at Sleep")
             real_pose = _read_remote_initial_arm_pose()
@@ -588,13 +605,19 @@ def main(args: argparse.Namespace, app: Any) -> int:
             and time.monotonic() >= float(control_state["next_deadline"])
         ):
             sample = button_samples[control_state["index"]]
+            right_sample = right_button_samples[control_state["index"]]
             target = np.asarray(sample["q_rad"], dtype=np.float32)
+            right_target = np.asarray(right_sample["q_rad"], dtype=np.float32)
             left_target_full = np.asarray(
                 compose_arm_target(left.get_joint_positions(), target[:6]),
                 dtype=np.float32,
             )
             _apply_targets(left, left_target_full, range(8))
-            _apply_targets(right, right_initial_target[:8], range(8))
+            right_target_full = np.asarray(
+                compose_arm_target(right.get_joint_positions(), right_target[:6]),
+                dtype=np.float32,
+            )
+            _apply_targets(right, right_target_full, range(8))
             world.step(render=True)
             control_state["telemetry"].append(
                 {
@@ -603,6 +626,8 @@ def main(args: argparse.Namespace, app: Any) -> int:
                     "segment": str(sample["segment"]),
                     "target_arm_rad": target[:6].astype(np.float64).tolist(),
                     "readback_arm_rad": np.asarray(left.get_joint_positions(), dtype=np.float64)[:6].tolist(),
+                    "right_target_arm_rad": right_target[:6].astype(np.float64).tolist(),
+                    "right_readback_arm_rad": np.asarray(right.get_joint_positions(), dtype=np.float64)[:6].tolist(),
                 }
             )
             control_state["index"] += 1
