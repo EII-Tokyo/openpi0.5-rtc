@@ -384,7 +384,7 @@ def main(args: argparse.Namespace, app: Any) -> int:
     world.play()
     for _ in range(30):
         _apply_targets(left, left_target[:8], range(8))
-        _apply_targets(right, right_initial[:8], range(8))
+        _apply_targets(right, right_initial_target[:8], range(8))
         world.step(render=True)
     world.pause()
     timeline = omni.timeline.get_timeline_interface()
