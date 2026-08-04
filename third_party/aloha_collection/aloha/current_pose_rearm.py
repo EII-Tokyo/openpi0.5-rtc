@@ -179,6 +179,7 @@ def wait_for_safe_current_pose_rearm(
     read_leader_positions: Callable[[], Mapping[str, Sequence[float]]],
     read_follower_positions: Callable[[], Mapping[str, Sequence[float]]],
     restore_teleop: Callable[[], None],
+    post_restore_health_gate: Callable[[], None] = lambda: None,
     stop_requested: Callable[[], bool],
     max_joint_error_rad: float,
     debounce_samples: int = 3,
@@ -213,6 +214,7 @@ def wait_for_safe_current_pose_rearm(
                 )
             health_check()
             restore_teleop()
+            post_restore_health_gate()
             logger(
                 "[current-pose rearm] accepted; maximum arm joint "
                 f"error={report.max_error_rad:.4f} rad"

@@ -198,6 +198,99 @@ def test_wait_warns_about_misalignment_but_accepts_the_gesture():
     assert any("warning" in message and "0.4000" in message for message in logs)
 
 
+def test_wait_gates_new_health_samples_after_restoring_teleop():
+    grippers = iter(
+        [
+            {"left": 0.4, "right": 0.4},
+            {"left": -0.05, "right": -0.05},
+        ]
+    )
+    events = []
+
+    accepted = wait_for_safe_current_pose_rearm(
+        read_grippers=lambda: next(grippers),
+        read_leader_positions=lambda: {
+            "left": [0.0] * 6,
+            "right": [0.0] * 6,
+        },
+        read_follower_positions=lambda: {
+            "left": [0.0] * 6,
+            "right": [0.0] * 6,
+        },
+        restore_teleop=lambda: events.append("restore"),
+        post_restore_health_gate=lambda: events.append(
+            "post_restore_gate"
+        ),
+        stop_requested=lambda: False,
+        max_joint_error_rad=0.1,
+        debounce_samples=1,
+        sleep=lambda _seconds: None,
+    )
+
+    assert accepted
+    assert events == ["restore", "post_restore_gate"]
+
+
+def test_wait_does_not_gate_when_restore_fails():
+    grippers = iter(
+        [
+            {"left": 0.4, "right": 0.4},
+            {"left": -0.05, "right": -0.05},
+        ]
+    )
+    events = []
+
+    def fail_restore():
+        events.append("restore")
+        raise RuntimeError("restore failed")
+
+    with pytest.raises(RuntimeError, match="restore failed"):
+        wait_for_safe_current_pose_rearm(
+            read_grippers=lambda: next(grippers),
+            read_leader_positions=lambda: {"left": [0.0] * 6},
+            read_follower_positions=lambda: {"left": [0.0] * 6},
+            restore_teleop=fail_restore,
+            post_restore_health_gate=lambda: events.append(
+                "post_restore_gate"
+            ),
+            stop_requested=lambda: False,
+            max_joint_error_rad=0.1,
+            debounce_samples=1,
+            sleep=lambda _seconds: None,
+        )
+
+    assert events == ["restore"]
+
+
+def test_wait_propagates_post_restore_health_gate_failure():
+    grippers = iter(
+        [
+            {"left": 0.4, "right": 0.4},
+            {"left": -0.05, "right": -0.05},
+        ]
+    )
+    events = []
+
+    def fail_gate():
+        events.append("post_restore_gate")
+        raise RuntimeError("publishers did not recover")
+
+    with pytest.raises(RuntimeError, match="publishers did not recover"):
+        wait_for_safe_current_pose_rearm(
+            read_grippers=lambda: next(grippers),
+            read_leader_positions=lambda: {"left": [0.0] * 6},
+            read_follower_positions=lambda: {"left": [0.0] * 6},
+            restore_teleop=lambda: events.append("restore"),
+            post_restore_health_gate=fail_gate,
+            stop_requested=lambda: False,
+            max_joint_error_rad=0.1,
+            debounce_samples=1,
+            sleep=lambda _seconds: None,
+        )
+
+    assert events == ["restore", "post_restore_gate"]
+
+
 def test_wait_returns_without_restoring_when_stop_is_requested():
     restored = []
 
