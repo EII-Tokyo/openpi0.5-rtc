@@ -562,9 +562,40 @@ def main(args: argparse.Namespace, app: Any) -> int:
                 can_confirm=False,
             )
 
+    def start_digital_only_run() -> None:
+        """Run one synchronized two-arm cycle without constructing ROS transport."""
+
+        left_error = float(
+            np.max(np.abs(np.asarray(left.get_joint_positions(), dtype=np.float64)[:6] - sleep))
+        )
+        right_error = float(
+            np.max(
+                np.abs(
+                    np.asarray(right.get_joint_positions(), dtype=np.float64)[:6]
+                    - RIGHT_RUNTIME_INITIAL_REFERENCE_RAD
+                )
+            )
+        )
+        if left_error > POSITION_GATE_RAD or right_error > POSITION_GATE_RAD:
+            control_state["status"] = (
+                f"BLOCKED_DIGITAL_INITIAL_POSE left={left_error:.6f} "
+                f"right={right_error:.6f}"
+            )
+            status_label.text = f"Status: {control_state['status']}"
+            return
+        control_state["requested"] = True
+        control_state["index"] = 0
+        control_state["status"] = "DIGITAL_ONLY_RUNNING"
+        control_state["real_launch_requested"] = False
+        control_state["started_monotonic"] = time.monotonic()
+        control_state["digital_start_monotonic"] = control_state["started_monotonic"]
+        control_state["next_deadline"] = control_state["started_monotonic"]
+        timeline.play()
+
     with control_window.frame:
         with ui.VStack(spacing=8, padding=10):
             ui.Label("Frozen runtime-measured Sleep manifest")
+            ui.Button("Run DIGITAL ONLY — both followers Sleep → Home → Sleep", clicked_fn=start_digital_only_run, height=32)
             ui.Button("Check Initial Pose + Run Digital/Real Sleep -> Home -> Sleep", clicked_fn=request_integrated_run, height=32)
             ui.Label("ARM REAL ROBOT: AUTHORIZED FOR ONE follower_left CYCLE")
             status_label = ui.Label("Status: READY_REAL_POSE_CHECK_REQUIRED")
@@ -641,9 +672,15 @@ def main(args: argparse.Namespace, app: Any) -> int:
                 button_report = {
                     "schema_version": 1,
                     "status": control_state["status"],
-                    "mode": "DIGITAL_AND_REAL_VISIBLE_GUI_BRIDGE",
+                    "mode": (
+                        "DIGITAL_ONLY_VISIBLE_GUI_BRIDGE"
+                        if not control_state["real_launch_requested"]
+                        else "DIGITAL_AND_REAL_VISIBLE_GUI_BRIDGE"
+                    ),
                     "real_armed": True,
-                    "real_commands_published": "REMOTE_RESULT_REQUIRED",
+                    "real_commands_published": (
+                        0 if not control_state["real_launch_requested"] else "REMOTE_RESULT_REQUIRED"
+                    ),
                     "real_launch_requested": bool(control_state["real_launch_requested"]),
                     "real_initial_pose": control_state["real_initial_pose"],
                     "real_initial_error_rad": control_state["real_initial_error_rad"],
