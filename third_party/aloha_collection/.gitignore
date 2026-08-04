@@ -1,0 +1,57 @@
+.idea
+.DS_store
+/aloha.egg-info/
+/aloha_scripts/.idea/
+*.png
+log*
+__pycache__/
+*.py[cod]
+act/
+aloha_data/
+
+# Local runtime outputs and editor/bridge buffers
+/Function
+/scripts/output.hdf5
+/freecad_bridge/command.py
+
+# Local backups and downloaded installers
+/scripts/*.bak*
+/tools/**/*.AppImage
+
+# Large CAD meshes require Git LFS or external artifact storage.
+# Git LFS is not installed on the current workstation.
+/freecad_bridge/assets/**/*.step
+/freecad_bridge/assets/**/*.STEP
+/freecad_bridge/assets/**/*.stl
+/freecad_bridge/assets/**/*.STL
+
+# Duplicate, experimental, hardware-control, and one-off local scripts
+/scripts/.gitignore
+/scripts/camera_group_test.sh
+/scripts/docker_guard.sh
+/scripts/realsense_usb_power_fix.sh
+/scripts/system_recover.sh
+/scripts/record_episodes_with_failures.py
+/scripts/get_arm_left_pose.py
+/scripts/get_pose.py
+/scripts/get_pose_arm.py
+/scripts/get_pose_class.py
+/scripts/get_pose_joint.py
+/scripts/h5py_changecam.py
+/scripts/hdf5_read_2.py
+/scripts/hdf5_read_copy.py
+/scripts/merge_20260304_into_20260203.py
+/scripts/merge_cut_data.py
+/scripts/record_copy.py
+/scripts/test_record.py
+/config/load_yaml_file_test.yaml
+
+# Remote foot-pedal runtime state
+/.runtime/
+/deploy/foot_pedal/foot-pedal.env
+
+# Temporary isolated development worktrees
+/.worktrees/
+
+# Project-local Python development environment
+/.venv/
