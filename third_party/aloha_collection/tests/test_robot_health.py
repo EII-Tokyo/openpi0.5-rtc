@@ -197,6 +197,47 @@ def test_wait_for_fresh_requires_new_samples_after_gate_entry():
     assert snapshots["leader_left"].sequence == 8
 
 
+def test_wait_for_fresh_requires_new_samples_from_every_rearmed_robot():
+    clock = FakeClock()
+    robot_names = (
+        "leader_left",
+        "leader_right",
+        "follower_left",
+        "follower_right",
+    )
+    monitor = None
+
+    def deliver_next_samples(_seconds):
+        clock.advance(0.01)
+        for robot_name in robot_names:
+            monitor.accept(robot_name, joint_state(0.1, 0.2, 0.3))
+
+    monitor = RobotHealthMonitor(
+        clock=clock,
+        sleeper=deliver_next_samples,
+    )
+    for robot_name in robot_names:
+        monitor.register_robot(
+            robot_name,
+            {"waist", "shoulder", "gripper"},
+        )
+        for _ in range(5):
+            monitor.accept(robot_name, joint_state(0.1, 0.2, 0.3))
+
+    snapshots = monitor.wait_for_fresh(
+        robot_names,
+        consecutive=3,
+        max_age=0.30,
+        timeout=1.0,
+        stop_requested=lambda: False,
+    )
+
+    assert {
+        robot_name: snapshot.sequence
+        for robot_name, snapshot in snapshots.items()
+    } == {robot_name: 8 for robot_name in robot_names}
+
+
 def test_require_fresh_returns_current_valid_snapshots():
     _, monitor = make_monitor()
     monitor.accept("leader_left", joint_state(0.1, 0.2, 0.3))
