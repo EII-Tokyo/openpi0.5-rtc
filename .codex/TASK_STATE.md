@@ -1,5 +1,24 @@
 # Task State
 
+## 2026-08-04 digital target to real dual-follower bridge implemented
+
+- The GUI bridge no longer points at a static left-only manifest. On an
+  explicitly confirmed run it serializes the current Isaac-generated left and
+  right target streams into separate manifests, records their hashes, stages
+  the bridge and module into the approved 103 container, and starts one shared
+  50 Hz dual publisher.
+- Read-only initial-pose checks now cover both `/puppet_left/joint_states` and
+  `/puppet_right/joint_states`; each side is compared against its own Sleep
+  reference. The per-arm diagnostic gate is `0.05 rad` and is recorded in the
+  GUI state/report. No publisher is constructed when the check or dialog is
+  rejected.
+- The remote path remains fail-closed outside the GUI confirmation: dry-run
+  has no ROS import or publisher, while live mode requires both
+  `--execute-real` and `--allow-dual-real-motion`.
+- Verification after implementation: dual bridge tests plus GUI tests `12
+  passed`; Ruff and py_compile passed; generated shell command passes
+  `bash -n`. No real motion was sent in this implementation step.
+
 ## 2026-08-04 digital dual-follower correspondence accepted; real dual publisher gate
 
 - User confirmed that the virtual environment has correctly controlled both

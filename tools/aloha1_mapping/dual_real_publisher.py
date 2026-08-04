@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 import math
+import shlex
 from typing import Any
 
 EXPECTED_JOINT_ORDER = (
@@ -88,6 +89,59 @@ def build_dual_command(
         f"--right-manifest {right_manifest} --output {output} "
         f"--start-delay-s {float(start_delay_s):g} --left-role puppet_left "
         f'--right-role puppet_right"',
+    ]
+
+
+def build_remote_dual_publisher_command(
+    *,
+    left_local: str,
+    right_local: str,
+    script_local: str,
+    module_local: str,
+    left_remote: str,
+    right_remote: str,
+    output_remote: str,
+    output_local: str,
+    start_delay_s: float = 4.0,
+) -> list[str]:
+    """Stage GUI-generated manifests and run one explicitly authorized bridge."""
+
+    local_left = shlex.quote(str(left_local))
+    local_right = shlex.quote(str(right_local))
+    local_script = shlex.quote(str(script_local))
+    local_module = shlex.quote(str(module_local))
+    remote_left = shlex.quote(str(left_remote))
+    remote_right = shlex.quote(str(right_remote))
+    output = shlex.quote(str(output_remote))
+    remote_script = "/tmp/aloha1_dual_real_script.py"
+    output_local_q = shlex.quote(str(output_local))
+    command = (
+        "set -e; "
+        "ssh -o BatchMode=yes 192.168.1.103 'mkdir -p /tmp/aloha1_gui_manifest_stage'; "
+        f"scp {local_left} 192.168.1.103:/tmp/aloha1_gui_manifest_stage/; "
+        f"scp {local_right} 192.168.1.103:/tmp/aloha1_gui_manifest_stage/; "
+        f"scp {local_script} 192.168.1.103:/tmp/aloha1_dual_real_script.py; "
+        f"scp {local_module} 192.168.1.103:/tmp/aloha1_dual_real_module.py; "
+        "ssh -o BatchMode=yes 192.168.1.103 "
+        f"'set -e; C=$(docker ps --format \"{{{{.Names}}}}\" | grep aloha_ros_nodes | head -1); "
+        'test -n "$C"; '
+        f'docker cp /tmp/aloha1_dual_real_script.py "$C":{remote_script}; '
+        'docker exec "$C" mkdir -p /app/tools/aloha1_mapping; '
+        'docker cp /tmp/aloha1_dual_real_module.py "$C":/app/tools/aloha1_mapping/dual_real_publisher.py; '
+        f'docker cp /tmp/aloha1_gui_manifest_stage/$(basename {remote_left}) "$C":{remote_left}; '
+        f'docker cp /tmp/aloha1_gui_manifest_stage/$(basename {remote_right}) "$C":{remote_right}; '
+        'docker exec "$C" bash -lc "cd /app; source /opt/ros/noetic/setup.bash; '
+        "source /root/interbotix_ws/devel/setup.bash; "
+        f"/usr/bin/python3 {remote_script} --left-manifest {remote_left} "
+        f"--right-manifest {remote_right} --output {output} --start-delay-s {float(start_delay_s):g} "
+        '--left-role puppet_left --right-role puppet_right --execute-real --allow-dual-real-motion"; '
+        f"docker cp \"$C\":{output} /tmp/aloha1_gui_result.json'; "
+        f"scp 192.168.1.103:/tmp/aloha1_gui_result.json {output_local_q}"
+    )
+    return [
+        "bash",
+        "-lc",
+        command,
     ]
 
 

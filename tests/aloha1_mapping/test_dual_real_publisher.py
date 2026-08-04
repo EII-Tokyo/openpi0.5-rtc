@@ -4,6 +4,7 @@ import pytest
 
 from tools.aloha1_mapping.dual_real_publisher import build_dual_command
 from tools.aloha1_mapping.dual_real_publisher import build_dual_dry_run_report
+from tools.aloha1_mapping.dual_real_publisher import build_remote_dual_publisher_command
 from tools.aloha1_mapping.dual_real_publisher import validate_dual_manifest
 
 
@@ -59,3 +60,24 @@ def test_dual_dry_run_report_is_fail_closed() -> None:
     assert report["commands_published"] == {"puppet_left": 0, "puppet_right": 0}
     assert report["ros_transport_instantiated"] is False
     assert report["real_motion_authorized"] is False
+
+
+def test_build_remote_dual_command_stages_both_manifests_before_publish() -> None:
+    command = build_remote_dual_publisher_command(
+        left_local="/tmp/left.json",
+        right_local="/tmp/right.json",
+        script_local="/tmp/script.py",
+        module_local="/tmp/module.py",
+        left_remote="/tmp/left.json",
+        right_remote="/tmp/right.json",
+        output_remote="/tmp/result.json",
+        output_local="/tmp/result-local.json",
+        start_delay_s=4.0,
+    )
+    text = command[-1]
+    assert "scp" in text
+    assert "docker cp" in text
+    assert "puppet_left" in text
+    assert "puppet_right" in text
+    assert "--execute-real" in text
+    assert "--allow-dual-real-motion" in text

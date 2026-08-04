@@ -17,18 +17,16 @@ from typing import Any
 
 import numpy as np
 
+from tools.aloha1_mapping.dual_real_publisher import build_remote_dual_publisher_command
+from tools.aloha1_mapping.gui_sleep_home_sleep_controller import GuiSleepHomeSleepController
+from tools.aloha1_mapping.gui_sleep_home_sleep_controller import build_gui_button_samples
+from tools.aloha1_mapping.gui_sleep_home_sleep_controller import compose_arm_target
 from tools.aloha1_mapping.home_sleep_correspondence import ARM_JOINT_ORDER
+from tools.aloha1_mapping.real_sync_bridge import initial_pose_error_rad
 from tools.validate_aloha1_home_sleep_digital import ARTICULATION_PATHS
 from tools.validate_aloha1_home_sleep_digital import EXPECTED_DOF_ORDER
 from tools.validate_aloha1_home_sleep_digital import EXPECTED_RUNTIME
 from tools.validate_aloha1_home_sleep_digital import POSITION_GATE_RAD
-from tools.aloha1_mapping.gui_sleep_home_sleep_controller import GuiSleepHomeSleepController
-from tools.aloha1_mapping.gui_sleep_home_sleep_controller import compose_arm_target
-from tools.aloha1_mapping.gui_sleep_home_sleep_controller import build_gui_button_samples
-from tools.aloha1_mapping.real_sync_bridge import INITIAL_POSE_GATE_RAD
-from tools.aloha1_mapping.real_sync_bridge import build_remote_publisher_command
-from tools.aloha1_mapping.real_sync_bridge import format_initial_pose_check
-from tools.aloha1_mapping.real_sync_bridge import initial_pose_error_rad
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_STAGE = ROOT / (
@@ -49,10 +47,9 @@ GUI_BUTTON_PHYSICS_HZ = 50
 # Approximately three seconds, with a small margin for zero-velocity
 # acceleration/deceleration at each endpoint.  The command stream remains 50 Hz.
 GUI_BUTTON_MOVE_SECONDS = 3.5
-REMOTE_MANIFEST_PATH = "/app/.codex/runtime/sleep_home_sleep_50hz_smooth_manifest.json"
-REMOTE_RESULT_PATH = "/app/.codex/runtime/integrated_sleep_home_sleep_result.json"
 REAL_START_DELAY_S = 4.0
 DIGITAL_START_GUARD_S = 4.05
+DUAL_INITIAL_POSE_GATE_RAD = 0.05
 RIGHT_RUNTIME_INITIAL_REFERENCE_RAD = np.asarray(
     [0.0, -1.8, 1.55, 0.0, -1.57, 0.0],
     dtype=np.float32,
@@ -115,6 +112,30 @@ def _read_remote_initial_arm_pose() -> list[float]:
     values = [float(value.strip()) for value in match.group(1).split(",")]
     if len(values) < 6:
         raise RuntimeError("joint_states readback contained fewer than six arm joints")
+    return values[:6]
+
+
+def _read_remote_initial_arm_pose_for_role(role: str) -> list[float]:
+    """Read one follower arm without constructing a ROS publisher."""
+
+    if role not in {"puppet_left", "puppet_right"}:
+        raise ValueError("unsupported follower role")
+    command = [
+        "ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=5", "192.168.1.103",
+        "C=$(docker ps --format '{{.Names}}' | grep aloha_ros_nodes | head -1); "
+        "docker exec \"$C\" bash -lc "
+        f"'source /opt/ros/noetic/setup.bash; timeout 5 rostopic echo -n 1 "
+        f"/{role}/joint_states'",
+    ]
+    completed = subprocess.run(command, capture_output=True, text=True, timeout=8, check=False)
+    if completed.returncode != 0:
+        raise RuntimeError(f"read-only {role} state failed: {completed.stderr[-500:]}")
+    match = re.search(r"position:\s*\[([^\]]+)\]", completed.stdout)
+    if match is None:
+        raise RuntimeError(f"{role} joint_states readback did not contain position")
+    values = [float(value.strip()) for value in match.group(1).split(",")]
+    if len(values) < 6:
+        raise RuntimeError(f"{role} joint_states readback contained fewer than six arm joints")
     return values[:6]
 
 
@@ -335,6 +356,29 @@ def main(args: argparse.Namespace, app: Any) -> int:
         command_hz=GUI_BUTTON_PHYSICS_HZ,
         move_seconds=GUI_BUTTON_MOVE_SECONDS,
     )
+
+    def write_bridge_manifest(path: Path, samples: list[dict[str, object]], sleep_q: list[float]) -> str:
+        payload = {
+            "schema_version": 1,
+            "sequence_kind": "SLEEP_HOME_SLEEP",
+            "robot": "follower_left_or_right_gui_generated",
+            "joint_order": list(ARM_JOINT_ORDER),
+            "sleep_rad": list(sleep_q),
+            "home_rad": [float(value) for value in manifest["home_rad"]],
+            "initial_arm_rad": list(sleep_q),
+            "terminal_arm_rad": list(sleep_q),
+            "command_rate_hz": GUI_BUTTON_PHYSICS_HZ,
+            "sample_count": len(samples),
+            "samples": samples,
+            "command_signature": hashlib.sha256(
+                json.dumps(samples, sort_keys=True, separators=(",", ":")).encode("utf-8")
+            ).hexdigest(),
+            "source": "Isaac Sim GUI current digital target stream",
+            "real_execution_authorized": True,
+        }
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        return _sha256(path)
     session = _install_session_layers(stage, Path(inputs["paths"]["finger_limit_layer"]), manifest)
 
     view_layer = Sdf.Layer.CreateAnonymous("aloha1_runtime_sleep_gui_view.usda")
@@ -454,13 +498,15 @@ def main(args: argparse.Namespace, app: Any) -> int:
         "pending_start_deadline": None,
         "bridge_launch_monotonic": None,
         "digital_start_monotonic": None,
+        "bridge_manifest_paths": None,
+        "bridge_output_path": None,
     }
     controller = GuiSleepHomeSleepController(real_armed=True)
     control_window = ui.Window("ALOHA1 Sleep/Home/Sleep Control", width=500, height=210, visible=True)
 
     def show_pose_dialog(message: str, *, can_confirm: bool, on_confirm: Any = None) -> None:
         dialog = ui.Window(
-            "Initial Pose Check — follower_left",
+            "Initial Pose Check — both followers",
             width=520,
             height=230,
             flags=ui.WINDOW_FLAGS_MODAL | ui.WINDOW_FLAGS_NO_SAVED_SETTINGS,
@@ -485,11 +531,11 @@ def main(args: argparse.Namespace, app: Any) -> int:
                     ui.Button("Cancel", clicked_fn=close_dialog, width=100)
                     ui.Spacer()
 
-    def start_integrated_run(real_pose: list[float], error_rad: float) -> None:
+    def start_integrated_run(real_poses: dict[str, list[float]], errors: dict[str, float]) -> None:
         try:
             decision = controller.request_run(
                 digital_at_sleep=float(np.max(np.abs(np.asarray(left.get_joint_positions(), dtype=np.float64)[:6] - sleep))) <= POSITION_GATE_RAD,
-                real_ready=error_rad <= INITIAL_POSE_GATE_RAD,
+                real_ready=all(error <= DUAL_INITIAL_POSE_GATE_RAD for error in errors.values()),
             )
         except ValueError as exc:
             control_state["status"] = f"BLOCKED: {exc}"
@@ -497,11 +543,31 @@ def main(args: argparse.Namespace, app: Any) -> int:
         if not decision.real_commands_allowed:
             control_state["status"] = f"BLOCKED: {decision.status}"
             return
+        bridge_dir = ROOT / ".codex/artifacts/20260804-digital-real-live-bridge"
+        left_manifest_path = bridge_dir / f"gui_left_manifest_{os.getpid()}.json"
+        right_manifest_path = bridge_dir / f"gui_right_manifest_{os.getpid()}.json"
+        output_path = bridge_dir / f"gui_real_result_{os.getpid()}.json"
+        left_hash = write_bridge_manifest(
+            left_manifest_path,
+            button_samples,
+            [float(value) for value in manifest["sleep_rad"]],
+        )
+        right_hash = write_bridge_manifest(
+            right_manifest_path,
+            right_button_samples,
+            RIGHT_RUNTIME_INITIAL_REFERENCE_RAD.astype(np.float64).tolist(),
+        )
         try:
             subprocess.Popen(
-                build_remote_publisher_command(
-                    manifest_path=REMOTE_MANIFEST_PATH,
-                    output_path=REMOTE_RESULT_PATH,
+                build_remote_dual_publisher_command(
+                    left_local=str(left_manifest_path),
+                    right_local=str(right_manifest_path),
+                    script_local=str(ROOT / "tools/run_aloha1_home_sleep_dual_real_publisher.py"),
+                    module_local=str(ROOT / "tools/aloha1_mapping/dual_real_publisher.py"),
+                    left_remote=f"/app/aloha1_gui_left_{os.getpid()}.json",
+                    right_remote=f"/app/aloha1_gui_right_{os.getpid()}.json",
+                    output_remote=f"/tmp/aloha1_gui_result_{os.getpid()}.json",
+                    output_local=str(output_path),
                     start_delay_s=REAL_START_DELAY_S,
                 ),
                 stdout=subprocess.DEVNULL,
@@ -512,8 +578,15 @@ def main(args: argparse.Namespace, app: Any) -> int:
             control_state["status"] = f"BLOCKED: remote publisher launch failed: {exc}"
             return
         control_state["real_launch_requested"] = True
-        control_state["real_initial_pose"] = list(real_pose)
-        control_state["real_initial_error_rad"] = float(error_rad)
+        control_state["real_initial_pose"] = real_poses
+        control_state["real_initial_error_rad"] = errors
+        control_state["bridge_manifest_paths"] = {
+            "left": str(left_manifest_path),
+            "right": str(right_manifest_path),
+            "left_sha256": left_hash,
+            "right_sha256": right_hash,
+        }
+        control_state["bridge_output_path"] = str(output_path)
         control_state["requested"] = False
         control_state["index"] = 0
         control_state["status"] = "WAITING_FOR_SHARED_START_BARRIER"
@@ -552,17 +625,30 @@ def main(args: argparse.Namespace, app: Any) -> int:
             )
             if not digital_at_sleep:
                 raise ValueError("digital articulation is not at Sleep")
-            real_pose = _read_remote_initial_arm_pose()
-            error_rad = initial_pose_error_rad(sleep, real_pose)
-            message = format_initial_pose_check(
-                max_error_rad=error_rad,
-                gate_rad=INITIAL_POSE_GATE_RAD,
-                real_position=real_pose,
+            real_poses = {
+                "puppet_left": _read_remote_initial_arm_pose_for_role("puppet_left"),
+                "puppet_right": _read_remote_initial_arm_pose_for_role("puppet_right"),
+            }
+            errors = {
+                "puppet_left": initial_pose_error_rad(sleep, real_poses["puppet_left"]),
+                "puppet_right": initial_pose_error_rad(
+                    RIGHT_RUNTIME_INITIAL_REFERENCE_RAD,
+                    real_poses["puppet_right"],
+                ),
+            }
+            message = (
+                "Initial pose check (read-only)\n"
+                f"puppet_left max error: {errors['puppet_left']:.6f} rad\n"
+                f"puppet_right max error: {errors['puppet_right']:.6f} rad\n"
+                f"Gate per arm: {DUAL_INITIAL_POSE_GATE_RAD:.6f} rad\n"
+                f"left readback: {real_poses['puppet_left']}\n"
+                f"right readback: {real_poses['puppet_right']}\n\n"
+                "Confirm will run exactly one synchronized dual-arm Sleep → Home → Sleep."
             )
             show_pose_dialog(
                 message,
-                can_confirm=error_rad <= INITIAL_POSE_GATE_RAD,
-                on_confirm=lambda: start_integrated_run(real_pose, error_rad),
+                can_confirm=all(error <= DUAL_INITIAL_POSE_GATE_RAD for error in errors.values()),
+                on_confirm=lambda: start_integrated_run(real_poses, errors),
             )
         except (OSError, RuntimeError, ValueError, subprocess.SubprocessError) as exc:
             control_state["status"] = f"BLOCKED_INITIAL_POSE_CHECK: {exc}"
@@ -608,7 +694,7 @@ def main(args: argparse.Namespace, app: Any) -> int:
             ui.Label("Frozen runtime-measured Sleep manifest")
             ui.Button("Run DIGITAL ONLY — both followers Sleep → Home → Sleep", clicked_fn=start_digital_only_run, height=32)
             ui.Button("Check Initial Pose + Run Digital/Real Sleep -> Home -> Sleep", clicked_fn=request_integrated_run, height=32)
-            ui.Label("ARM REAL ROBOT: AUTHORIZED FOR ONE follower_left CYCLE")
+            ui.Label("ARM REAL ROBOT: explicit dual-follower authorization required")
             status_label = ui.Label("Status: READY_REAL_POSE_CHECK_REQUIRED")
     if args.run_digital_only:
         # The explicit CLI mode is equivalent to pressing the Digital-only
