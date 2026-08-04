@@ -68,7 +68,8 @@ Run from the captured snapshot directory with:
 ```bash
 UV_PROJECT_ENVIRONMENT=/home/eii/project/openpi0.5-rtc-reward-learning/.venv-103 \
 uvx --isolated --from 'uv==0.11.24' uv sync \
-  --frozen --no-install-project --python /usr/bin/python3.12 --dry-run
+  --frozen --no-install-project --no-install-workspace \
+  --python /usr/bin/python3.12 --dry-run
 ```
 
 Expected: the command plans creation of `.venv-103`, does not report lockfile mutation, and exits 0.
@@ -98,7 +99,8 @@ Run from the captured snapshot directory:
 ```bash
 UV_PROJECT_ENVIRONMENT=/home/eii/project/openpi0.5-rtc-reward-learning/.venv-103 \
 uvx --isolated --from 'uv==0.11.24' uv sync \
-  --frozen --no-install-project --python /usr/bin/python3.12 --check
+  --frozen --no-install-project --no-install-workspace \
+  --python /usr/bin/python3.12 --check
 ```
 
 Expected: environment is synchronized and the command exits 0.

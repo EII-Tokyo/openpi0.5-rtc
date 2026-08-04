@@ -28,8 +28,9 @@ The ROS container's Python 3.10.12 is not a target because the project declares
 The new environment is `.venv-103` beneath the current project. The existing
 `.venv` remains unchanged. The remote configuration snapshot is used as a
 temporary uv project with `UV_PROJECT_ENVIRONMENT` set to the absolute
-`.venv-103` path. Synchronization uses `--no-install-project` because the
-snapshot contains dependency metadata but not a second copy of the project
+`.venv-103` path. Synchronization uses both `--no-install-project` and
+`--no-install-workspace` because the snapshot contains dependency metadata but
+not a second copy of the root project or its `packages/openpi-client` workspace
 source tree.
 
 No remote file is modified. No local tracked dependency file is overwritten.
