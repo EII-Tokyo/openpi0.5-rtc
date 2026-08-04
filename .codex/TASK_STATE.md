@@ -1,5 +1,41 @@
 # Task State
 
+## 2026-08-03 visible GUI Sleep/Home/Sleep button
+
+- Added an isolated Isaac Sim 5.1 Full GUI control window to
+  `tools/open_aloha1_runtime_sleep_gui.py`.
+- The visible button is digital-only and uses the frozen runtime-measured
+  Sleep/Home/Sleep manifest. The `ARM REAL ROBOT` path is visibly disarmed;
+  zero ROS transport is constructed by the GUI.
+- GUI process PID `392600`, window `127926283`, workspace `2`, timeline paused.
+- Button visibility was visually audited in:
+  `.codex/artifacts/20260803-aloha1-runtime-sleep-authorized/gui_button_review/button_window_raw.png`.
+- Focused tests: `42 passed`.
+- Real robot was not moved by the GUI button implementation. The earlier
+  separately authorized real run remains recorded as partial correspondence;
+  visible-GUI control and headless control are now explicitly separated.
+- Task 8 remains `NOT_RUN` for this GUI-control change; no final/default asset
+  was modified.
+
+## 2026-08-03 GUI button shape-mismatch fix
+
+- First button click exited Isaac Sim because the callback passed a six-value
+  arm target to the eight-DOF `apply_action` path. The exact exception and
+  full log are preserved in
+  `.codex/artifacts/20260803-aloha1-runtime-sleep-authorized/gui_button_launch.log`.
+- Added `compose_arm_target()` to preserve gripper/finger values while
+  replacing only the six arm DOFs; the regression test now covers this shape
+  contract.
+- Fresh GUI attempt 3 reached `READY_FOR_USER_REVIEW` on workspace 2. The
+  button was clicked in the visible window and completed 1850 samples without
+  exiting Isaac Sim:
+  `reports/aloha1_mapping/aloha1_runtime_sleep_gui_button_run.json`.
+- Completion report: `DIGITAL_RUN_COMPLETE`, `real_armed=false`,
+  `real_commands_published=0`. After-run screenshot:
+  `.codex/artifacts/20260803-aloha1-runtime-sleep-authorized/gui_button_review_attempt3/button_after_run_raw.png`.
+- Focused tests after the fix: `43 passed`; no real robot command was sent by
+  the GUI.
+
 ## 2026-08-03 active runtime-Sleep GUI review
 
 - A new isolated Isaac Sim GUI is running as PID `327371`; it is not the
@@ -2870,3 +2906,20 @@ scene design is reviewed and approved.
   `aloha1_official_model_runtime.json` is `NOT_RUN`. No Isaac process was
   launched; no diagnostic candidate directory, final/default asset or collider
   was created or modified.
+
+## 2026-08-04 follower_right runtime Sleep limit correction
+
+- Read-only 103 `puppet_right` diagnosis confirmed the prior digital Sleep target
+  was outside the deployed SDK limits at `elbow` and `wrist_angle`.
+- Created the isolated, project-selected legal right-arm candidate:
+  `configs/aloha1_follower_right_runtime_sleep.yaml`.
+- Candidate vector is `[0.0, -1.8, 1.55, 0.0, -1.57, 0.0]`; all six values are
+  within the runtime `get_robot_info` limits. It has not been sent to hardware.
+- Machine report:
+  `reports/aloha1_mapping/aloha1_follower_right_runtime_sleep_candidate.json`.
+- The one-shot command tool now reads this candidate and refuses to publish
+  unless `--allow-real-motion` is explicitly supplied.
+- Local verification: `tests/aloha1_mapping/test_home_sleep_correspondence.py`
+  32 passed; Python compilation passed.
+- Real motion commands after the prior authorized retry: 0. Separate physical
+  authorization remains required for one right-arm Sleep command.

@@ -1,0 +1,20 @@
+schema_version: 1
+name: aloha1_follower_right_runtime_sleep
+status: DIAGNOSTIC_ONLY_NOT_SENT
+joint_order: [waist, shoulder, elbow, forearm_roll, wrist_angle, wrist_rotate]
+# This is the project's previously selected legal ALOHA sleep reference.  It is
+# not the generic vx300s.yaml sleep vector and has not yet been sent to hardware.
+sleep_rad: [0.0, -1.8, 1.55, 0.0, -1.57, 0.0]
+source:
+  project_config: configs/aloha1_home_sleep_correspondence.yaml
+  classification: PROJECT_SELECTED_HISTORICAL_LEGAL_SLEEP
+  hardware_target: follower_right
+runtime_gate:
+  lower_rad: [-3.141582727432251, -1.8500490188598633, -1.7627825736999512, -3.141582727432251, -1.8675023317337036, -3.141582727432251]
+  upper_rad: [3.141582727432251, 1.2566370964050293, 1.6057028770446777, 3.141582727432251, 2.2340214252471924, 3.141582727432251]
+  source: /puppet_right/get_robot_info
+  margin_required_rad: 0.0
+  candidate_is_within_limits: true
+promotion:
+  sent_to_real_robot: false
+  final_default_modified: false

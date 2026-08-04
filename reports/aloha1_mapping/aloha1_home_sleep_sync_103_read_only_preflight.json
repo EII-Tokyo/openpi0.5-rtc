@@ -16,7 +16,7 @@
     "exit_code": 0,
     "remote_script_sha256": "16ca13bfacc6cff5eaf011164ccf9c707f9658dd78cf77d1b4303132e135e5dd",
     "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "stdout_sha256": "d5a9515f756ec67f85a2a926bac90c52f806911786ddfbea29516cf5b6d65139"
+    "stdout_sha256": "b25c6a16e9f10bd0e825de643f1d4044bd2b8ca1188a1166057148adc42b4c04"
   },
   "external_mount": {
     "declared_in_compose": true,
@@ -49,11 +49,11 @@
     "id": "sha256:fa02aebda4c30254380e87d0b6ee609a87fcfd99c59e98fb5c9c05df9c0aef7c"
   },
   "robot_stack": {
-    "container_count": 0,
-    "ros_master_listener_count": 0,
+    "container_count": 2,
+    "ros_master_listener_count": 1,
     "rosbridge_listener_count": 0
   },
-  "runtime_ros_evidence": "NOT_RUN_ROBOT_STACK_STOPPED",
+  "runtime_ros_evidence": "NOT_RUN_READ_ONLY_ROS_DISCOVERY_REQUIRED",
   "schema_version": 1,
   "snapshot": {
     "ALOHA_LAUNCH_COMMAND_PRESENT": "1",
@@ -66,10 +66,10 @@
     "IMAGE_DIGEST": "lyl472324464/robot@sha256:fa02aebda4c30254380e87d0b6ee609a87fcfd99c59e98fb5c9c05df9c0aef7c",
     "IMAGE_ID": "sha256:fa02aebda4c30254380e87d0b6ee609a87fcfd99c59e98fb5c9c05df9c0aef7c",
     "PROJECT_ROOT": "/home/eii/openpi0.5-rtc-reward-learning",
-    "ROBOT_CONTAINER_COUNT": "0",
+    "ROBOT_CONTAINER_COUNT": "2",
     "ROBOT_UTILS_SHA256": "479dd5845d639f32775460b1225d9f4b2d8611a2588649574de37237d83489d7",
     "ROSBRIDGE_PORT_LISTENERS": "0",
-    "ROS_MASTER_PORT_LISTENERS": "0",
+    "ROS_MASTER_PORT_LISTENERS": "1",
     "STATIC_CAM_HIGH_PRESENT": "1",
     "STATIC_JOINT_COMMAND_TOPIC_PRESENT": "1",
     "STATIC_JOINT_ORDER_PRESENT": "1",
@@ -102,6 +102,6 @@
     ],
     "joint_states_topic": "/puppet_left/joint_states"
   },
-  "status": "PARTIAL_RUNTIME_STACK_STOPPED",
+  "status": "PARTIAL_RUNTIME_READBACK_REQUIRED",
   "torque_changed": false
 }

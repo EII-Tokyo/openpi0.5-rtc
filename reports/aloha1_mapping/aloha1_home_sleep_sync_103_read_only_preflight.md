@@ -1,6 +1,6 @@
 # ALOHA1 103 read-only preflight
 
-Status: **PARTIAL_RUNTIME_STACK_STOPPED**
+Status: **PARTIAL_RUNTIME_READBACK_REQUIRED**
 
 The inspection was restricted to
 `/home/eii/openpi0.5-rtc-reward-learning`. It created no ROS publisher, sent

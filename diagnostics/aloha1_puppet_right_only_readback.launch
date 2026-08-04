@@ -1,0 +1,14 @@
+<!-- Readback-only diagnostic launch; no command publisher is created here. -->
+<launch>
+  <arg name="puppet_modes_right" default="/root/interbotix_ws/src/aloha/config/puppet_modes_right.yaml"/>
+  <include file="$(find interbotix_xsarm_control)/launch/xsarm_control.launch">
+    <arg name="robot_model" value="vx300s"/>
+    <arg name="robot_name" value="puppet_right"/>
+    <arg name="base_link_frame" value="base_link"/>
+    <arg name="use_world_frame" value="false"/>
+    <arg name="use_rviz" value="false"/>
+    <arg name="mode_configs" value="$(arg puppet_modes_right)"/>
+    <arg name="load_configs" value="false"/>
+    <arg name="use_sim" value="false"/>
+  </include>
+</launch>

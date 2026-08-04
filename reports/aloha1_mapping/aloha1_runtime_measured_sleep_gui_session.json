@@ -449,22 +449,22 @@
     "workspace_move_passed": true
   },
   "inputs": {
-    "paths": {
-      "finger_limit_layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/finger_limit_pair_collision_candidate/1.0/configuration/finger_source_limits.usda",
-      "manifest": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_runtime_measured_sleep_command_manifest.json",
-      "stage": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda"
-    },
     "hashes": {
       "finger_limit_layer": "2547e6fb374c213b5c6c54f200c7ced37605ab0e1a11735d0a32c0a231fd260f",
       "manifest": "d48047eadc6a02664efb01cba3e0345b523bf64052791491bb237639f24dad3c",
       "stage": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9"
     },
     "manifest": {
-      "sequence_kind": "SLEEP_HOME_SLEEP",
+      "command_signature": "6e454405843d0a231bef75f35b471e2f07c60f277f76e5c9690a4f89d745ed47",
       "initial_pose_label": "runtime_measured_sleep",
-      "terminal_pose_label": "runtime_measured_sleep",
       "sample_count": 1850,
-      "command_signature": "6e454405843d0a231bef75f35b471e2f07c60f277f76e5c9690a4f89d745ed47"
+      "sequence_kind": "SLEEP_HOME_SLEEP",
+      "terminal_pose_label": "runtime_measured_sleep"
+    },
+    "paths": {
+      "finger_limit_layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/finger_limit_pair_collision_candidate/1.0/configuration/finger_source_limits.usda",
+      "manifest": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_runtime_measured_sleep_command_manifest.json",
+      "stage": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda"
     }
   },
   "joint_order": [
@@ -478,7 +478,7 @@
   "maximum_sleep_error_rad": 0.000263480469584465,
   "position_gate_rad": 0.02,
   "readback_arm_rad": [
-    -0.000003994881808466744,
+    -3.994881808466744e-06,
     -1.8455941677093506,
     1.6229517459869385,
     -0.006399403791874647,
@@ -492,16 +492,16 @@
     "kit": "107.3.3",
     "physx": "107.3.26"
   },
-  "runtime_pid": 327371,
+  "runtime_pid": 357462,
   "schema_version": 1,
   "session_layers": [
-    "anon:0x5d4ed9f33ac0:aloha1_runtime_sleep_gui_view.usda",
-    "anon:0x5d4ed29df350:aloha1_home_sleep_contact_reports.usda",
-    "anon:0x5d4ed39275b0:aloha1_runtime_sleep_diagnostic_limits.usda",
+    "anon:0x5a257d3f5960:aloha1_runtime_sleep_gui_view.usda",
+    "anon:0x5a257de507b0:aloha1_home_sleep_contact_reports.usda",
+    "anon:0x5a257d635c30:aloha1_runtime_sleep_diagnostic_limits.usda",
     "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/finger_limit_pair_collision_candidate/1.0/configuration/finger_source_limits.usda",
     "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/finger_limit_pair_collision_candidate/1.0/configuration/finger_source_limits.usda",
-    "anon:0x5d4ed39275b0:aloha1_runtime_sleep_diagnostic_limits.usda",
-    "anon:0x5d4ed29df350:aloha1_home_sleep_contact_reports.usda"
+    "anon:0x5a257d635c30:aloha1_runtime_sleep_diagnostic_limits.usda",
+    "anon:0x5a257de507b0:aloha1_home_sleep_contact_reports.usda"
   ],
   "source_or_final_asset_modified": false,
   "stage_default_prim": "/World",

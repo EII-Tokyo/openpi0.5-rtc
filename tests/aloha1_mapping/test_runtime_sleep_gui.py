@@ -10,6 +10,7 @@ import pytest
 from tools.open_aloha1_runtime_sleep_gui import build_ready_report
 from tools.open_aloha1_runtime_sleep_gui import load_verified_inputs
 from tools.open_aloha1_runtime_sleep_gui import main
+from tools.open_aloha1_runtime_sleep_gui import resolve_full_experience
 
 
 def _sha256(path: Path) -> str:
@@ -171,3 +172,10 @@ def test_gui_runtime_version_readback_uses_kit_application() -> None:
     source = inspect.getsource(main)
 
     assert "runtime=_runtime_versions(kit_app)" in source
+
+
+def test_gui_uses_installed_full_kit_experience() -> None:
+    experience = resolve_full_experience()
+
+    assert experience.name == "isaacsim.exp.full.kit"
+    assert experience.is_file()
