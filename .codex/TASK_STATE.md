@@ -1,5 +1,25 @@
 # Task State
 
+## 2026-08-04 digital dual-follower correspondence accepted; real dual publisher gate
+
+- User confirmed that the virtual environment has correctly controlled both
+  ALOHA follower arms. This is recorded as user-confirmed digital evidence;
+  no new physical command is inferred from that statement.
+- Added the transport-free dual-manifest validator and fail-closed entry point:
+  `tools/aloha1_mapping/dual_real_publisher.py` and
+  `tools/run_aloha1_home_sleep_dual_real_publisher.py`.
+- Both sides must use the pinned six-joint order, 50 Hz sample clock, matching
+  sample index/time, and finite targets. The default path imports no ROS,
+  constructs no publisher, and publishes zero commands.
+- Dry-run evidence:
+  `reports/aloha1_mapping/aloha1_dual_real_publisher_dry_run.json`.
+- Verification: focused dual-publisher/ROS adapter tests `14 passed`, Ruff and
+  py_compile passed. Real dual-arm Sleep→Home→Sleep remains
+  `NOT_RUN_AUTHORIZATION_REQUIRED`; no 103 command was sent in this step.
+- Next gate is a fresh read-only 103 preflight for both roles, followed by a
+  separate explicit authorization before any dual real motion. Task 8 remains
+  complete with no promotion.
+
 ## 2026-08-03 visible GUI Sleep/Home/Sleep button
 
 - Added an isolated Isaac Sim 5.1 Full GUI control window to
