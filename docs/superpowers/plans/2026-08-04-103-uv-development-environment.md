@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Create `.venv-103` in the current project using machine 103's exact dependency lock, uv 0.11.24, and Python 3.12.3 without modifying the existing `.venv` or local dependency files.
+**Goal:** Create `.venv-103` in the current project using machine 103's exact dependency lock, uv 0.11.24, and Python 3.11.13 without modifying the existing `.venv` or local dependency files.
 
 **Architecture:** Capture the two remote source-of-truth files in a timestamped project artifact, invoke uv 0.11.24 through an isolated `uvx` tool environment, and point `UV_PROJECT_ENVIRONMENT` at the absolute local `.venv-103` path. Use frozen, dependency-only synchronization so the snapshot is never rewritten and its absent source tree is not installed.
 
@@ -55,11 +55,11 @@ Run: `uvx --isolated --from 'uv==0.11.24' uv --version`
 
 Expected: `uv 0.11.24`.
 
-- [ ] **Step 2: Verify Python 3.12.3 availability**
+- [ ] **Step 2: Verify Python 3.11.13 availability**
 
-Run: `/usr/bin/python3.12 --version`
+Run: `/home/eii/.local/share/uv/python/cpython-3.11.13-linux-x86_64-gnu/bin/python3.11 --version`
 
-Expected: `Python 3.12.3`.
+Expected: `Python 3.11.13`.
 
 - [ ] **Step 3: Dry-run the frozen synchronization**
 
@@ -69,7 +69,8 @@ Run from the captured snapshot directory with:
 UV_PROJECT_ENVIRONMENT=/home/eii/project/openpi0.5-rtc-reward-learning/.venv-103 \
 uvx --isolated --from 'uv==0.11.24' uv sync \
   --frozen --no-install-project --no-install-workspace \
-  --python /usr/bin/python3.12 --dry-run
+  --python /home/eii/.local/share/uv/python/cpython-3.11.13-linux-x86_64-gnu/bin/python3.11 \
+  --dry-run
 ```
 
 Expected: the command plans creation of `.venv-103`, does not report lockfile mutation, and exits 0.
@@ -78,7 +79,7 @@ Expected: the command plans creation of `.venv-103`, does not report lockfile mu
 
 - [ ] **Step 1: Execute the frozen synchronization**
 
-Run the Task 2 command without `--dry-run`. Expected: `.venv-103` is created using CPython 3.12.3 and the remote lock.
+Run the Task 2 command without `--dry-run`. Expected: `.venv-103` is created using CPython 3.11.13 and the remote lock.
 
 - [ ] **Step 2: Verify interpreter and dependency consistency**
 
@@ -90,7 +91,7 @@ uvx --isolated --from 'uv==0.11.24' uv pip check \
   --python .venv-103/bin/python
 ```
 
-Expected: Python 3.12.3 and no incompatible packages.
+Expected: Python 3.11.13 and no incompatible packages.
 
 - [ ] **Step 3: Verify the environment remains synchronized**
 
@@ -100,7 +101,8 @@ Run from the captured snapshot directory:
 UV_PROJECT_ENVIRONMENT=/home/eii/project/openpi0.5-rtc-reward-learning/.venv-103 \
 uvx --isolated --from 'uv==0.11.24' uv sync \
   --frozen --no-install-project --no-install-workspace \
-  --python /usr/bin/python3.12 --check
+  --python /home/eii/.local/share/uv/python/cpython-3.11.13-linux-x86_64-gnu/bin/python3.11 \
+  --check
 ```
 
 Expected: environment is synchronized and the command exits 0.

@@ -17,10 +17,14 @@ snapshot under `.codex/artifacts/103-uv-environment/`.
 The target toolchain is:
 
 - uv 0.11.24, matching machine 103;
-- uv-managed CPython 3.12.3, matching the machine 103 host Python version;
+- uv-managed CPython 3.11.13, matching the lockfile's available
+  `mujoco==2.3.7` Linux wheel and the project's verified development runtime;
 - the exact machine 103 lockfile, synchronized with `--frozen`.
 
-The ROS container's Python 3.10.12 is not a target because the project declares
+The machine 103 host's system Python 3.12.3 is not a usable target for this
+lock: `mujoco==2.3.7` has no CPython 3.12 wheel and its source build requires an
+external `MUJOCO_PATH` that is not configured on machine 103. The ROS
+container's Python 3.10.12 is also not a target because the project declares
 `requires-python = ">=3.11"`.
 
 ## Isolation
@@ -41,7 +45,7 @@ If `.venv-103` already exists, the operation stops rather than replacing it.
 Before installation, perform a uv dry run against the frozen remote snapshot.
 After synchronization, verify:
 
-- `.venv-103/bin/python` reports Python 3.12.3;
+- `.venv-103/bin/python` reports Python 3.11.13;
 - the invoked uv reports 0.11.24;
 - `uv sync --check` succeeds against the frozen snapshot;
 - `uv pip check --python .venv-103/bin/python` reports compatible packages;
