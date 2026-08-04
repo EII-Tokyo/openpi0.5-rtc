@@ -380,6 +380,8 @@ def main(args: argparse.Namespace, app: Any) -> int:
     left.set_joint_velocities(np.zeros_like(left_target))
     _apply_targets(left, left_target[:8], range(8))
     right_initial_target = right_runtime_reference.copy()
+    right.set_joint_positions(right_initial_target)
+    right.set_joint_velocities(np.zeros_like(right_initial_target))
     _apply_targets(right, right_initial_target[:8], range(8))
     world.play()
     for _ in range(30):
