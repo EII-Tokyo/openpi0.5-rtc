@@ -2943,3 +2943,21 @@ scene design is reviewed and approved.
   32 passed; Python compilation passed.
 - Real motion commands after the prior authorized retry: 0. Separate physical
   authorization remains required for one right-arm Sleep command.
+
+## 2026-08-04 authorized dual-follower real Sleep/Home/Sleep
+
+- User explicitly authorized one dual-arm physical run after the digital dual-arm
+  correspondence was accepted.
+- Read-only preflight passed on 103: both SDKs were active; left/right
+  `joint_states` had the pinned six-joint arm order; both command topics had
+  exactly their matching SDK subscriber.
+- Executed exactly one synchronized run using separate side manifests:
+  left runtime Sleep reference and right official legal Sleep reference, common
+  Home, 50 Hz, 1850 samples, one monotonic start barrier.
+- Result report:
+  `reports/aloha1_mapping/aloha1_dual_real_authorized_20260804.json`.
+  Status `PASS_REAL_DUAL_MANIFEST_PUBLISHED`; left and right each published
+  1850 commands; no abort occurred. Final readback was collected read-only in
+  `.codex/artifacts/20260804_dual_real_final_readback.txt`.
+- Final measured positions were stationary after completion. No second command
+  was sent. The user's third-desktop Isaac Sim was not operated.

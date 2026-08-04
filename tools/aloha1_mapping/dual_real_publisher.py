@@ -45,7 +45,7 @@ def validate_dual_manifest(
         if int(manifest.get("command_rate_hz", 0)) != 50:
             raise ValueError(f"{side} command rate must be 50 Hz")
     for index, (left_sample, right_sample) in enumerate(
-        zip(left_samples, right_samples, strict=True)
+        zip(left_samples, right_samples)  # noqa: B905  # Python 3.8 remote runtime
     ):
         if int(left_sample.get("index", -1)) != int(right_sample.get("index", -2)):
             raise ValueError(f"sample clock index mismatch at {index}")
@@ -53,7 +53,7 @@ def validate_dual_manifest(
             raise ValueError(f"sample clock time mismatch at {index}")
         for side, sample in (("left", left_sample), ("right", right_sample)):
             q_rad = sample.get("q_rad")
-            if not isinstance(q_rad, Sequence) or isinstance(q_rad, str | bytes) or len(q_rad) != 6:
+            if not isinstance(q_rad, Sequence) or isinstance(q_rad, (str, bytes)) or len(q_rad) != 6:  # noqa: UP038
                 raise ValueError(f"{side} sample {index} must contain six q_rad values")
             if not all(math.isfinite(float(value)) for value in q_rad):
                 raise ValueError(f"{side} sample {index} contains non-finite q_rad")
