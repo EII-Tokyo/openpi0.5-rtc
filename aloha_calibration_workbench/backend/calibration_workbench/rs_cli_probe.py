@@ -24,6 +24,7 @@ class CliDevice:
 
 
 RunCommand = Callable[[list[str]], subprocess.CompletedProcess[str]]
+ProcessOwnerReader = Callable[[list[str]], list[str]]
 
 
 def _default_run(command: list[str]) -> subprocess.CompletedProcess[str]:
@@ -41,6 +42,8 @@ class RsEnumerateCliProbe:
         runner: RunCommand = _default_run,
         video_node_resolver: Callable[[CliDevice], list[str]] | None = None,
         ownership_reader: Callable[[list[str]], tuple[OwnershipState, list[str]]] | None = None,
+        process_signatures_by_serial: dict[str, list[str]] | None = None,
+        process_owner_reader: ProcessOwnerReader | None = None,
     ):
         self._profile = profile
         self._executable = executable
@@ -49,6 +52,8 @@ class RsEnumerateCliProbe:
             lambda device: _video_nodes_for_physical_port(device.physical_port)
         )
         self._ownership_reader = ownership_reader or _read_ownership
+        self._process_signatures_by_serial = process_signatures_by_serial or {}
+        self._process_owner_reader = process_owner_reader or _read_process_owners
 
     def enumerate(self) -> list[CameraObservation]:
         executable = shutil.which(self._executable) if "/" not in self._executable else self._executable
@@ -63,6 +68,10 @@ class RsEnumerateCliProbe:
         for device in devices:
             nodes = self._video_node_resolver(device)
             ownership, owners = self._ownership_reader(nodes)
+            process_owners = self._process_owner_reader(self._process_signatures_by_serial.get(device.serial, []))
+            if process_owners:
+                ownership = OwnershipState.BUSY
+                owners = sorted(set(owners) | set(process_owners))
             observations.append(
                 CameraObservation(
                     serial=device.serial,
@@ -194,3 +203,33 @@ def _process_name(pid: str) -> str:
         return (Path("/proc") / pid / "comm").read_text(encoding="utf-8").strip()[:80]
     except OSError:
         return "unknown"
+
+
+def _read_process_owners(signatures: list[str]) -> list[str]:
+    if not signatures:
+        return []
+    process_table: list[tuple[str, str, str]] = []
+    for process_dir in Path("/proc").glob("[0-9]*"):
+        try:
+            command = (process_dir / "cmdline").read_bytes().replace(b"\0", b" ").decode("utf-8", errors="replace")
+            name = (process_dir / "comm").read_text(encoding="utf-8").strip()[:80]
+        except OSError:
+            continue
+        process_table.append((process_dir.name, name, command))
+    return owners_from_process_table(process_table, signatures)
+
+
+def owners_from_process_table(
+    process_table: list[tuple[str, str, str]],
+    signatures: list[str],
+) -> list[str]:
+    normalized_signatures = [signature.lower() for signature in signatures if signature]
+    owners: set[str] = set()
+    for pid, name, command in process_table:
+        normalized_command = command.lower()
+        is_camera_runtime = "realsense" in normalized_command or "realsense" in name.lower()
+        if not is_camera_runtime:
+            continue
+        if any(signature in normalized_command for signature in normalized_signatures):
+            owners.add(f"pid={pid}:{name[:80]}")
+    return sorted(owners)
