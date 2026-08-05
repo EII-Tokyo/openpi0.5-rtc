@@ -24,8 +24,6 @@ PANEL_COLORS = {
     "main": "#f2a900",
     "outer_z_min": "#2eaf62",
     "outer_z_max": "#2eaf62",
-    "inner_z_min": "#3378d4",
-    "inner_z_max": "#3378d4",
 }
 
 
@@ -126,9 +124,6 @@ def _render_flat(axis: Any, side_record: dict[str, Any], side: str) -> None:
     for fold in side_record["folds"]:
         line = np.asarray(fold["line_2d_mm"], dtype=np.float64)
         axis.plot(line[:, 0], line[:, 1], color="#1565c0", linewidth=1.4, linestyle=(0, (5, 3)))
-    for line_values in flat.get("relief_cut_lines_2d_mm", []):
-        line = np.asarray(line_values, dtype=np.float64)
-        axis.plot(line[:, 0], line[:, 1], color="#c62828", linewidth=1.8)
     width = float(flat["width_mm"])
     height = float(flat["height_mm"])
     margin = 7.0
@@ -146,7 +141,7 @@ def _render_flat(axis: Any, side_record: dict[str, Any], side: str) -> None:
     axis.text(
         0.0,
         -5.2,
-        "black=cut   blue dashed=fold   red=inner relief cut",
+        "black=cut   blue dashed=outer fold",
         fontsize=8,
         color="#333333",
     )

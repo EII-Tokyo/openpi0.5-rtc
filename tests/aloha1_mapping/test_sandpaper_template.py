@@ -40,12 +40,10 @@ def _report() -> dict[str, object]:
                     _panel("main", [[0.0, 0.0], [80.0, 0.0], [80.0, 50.0], [0.0, 50.0]]),
                     _panel("outer_z_min", [[0.0, -8.0], [80.0, -8.0], [80.0, 0.0], [0.0, 0.0]]),
                     _panel("outer_z_max", [[0.0, 50.0], [80.0, 50.0], [80.0, 58.0], [0.0, 58.0]]),
-                    _panel("inner_z_min", [[15.0, 12.0], [50.0, 12.0], [50.0, 18.0], [15.0, 18.0]]),
-                    _panel("inner_z_max", [[15.0, 32.0], [50.0, 32.0], [50.0, 38.0], [15.0, 38.0]]),
                 ],
                 "bounds_mm": [0.0, -8.0, 80.0, 50.0],
                 "maximum_panel_plane_residual_mm": 1e-12,
-                "relief_cut_lines_2d_mm": [[[30.0, 12.0], [30.0, 38.0]]],
+                "relief_cut_lines_2d_mm": [],
             },
         }
     return {
@@ -65,8 +63,8 @@ def _report() -> dict[str, object]:
             "material_total_thickness_mm": 0.0,
             "one_piece_per_finger": True,
             "overlap_tabs": False,
-            "fold_count_per_finger": 4,
-            "coverage": "FULL_INNER_PROFILE_PLUS_FOUR_ADJACENT_LONGITUDINAL_PANELS",
+            "fold_count_per_finger": 2,
+            "coverage": "FULL_INNER_PROFILE_PLUS_TWO_OUTER_LONGITUDINAL_PANELS",
         },
         "sides": sides,
     }
@@ -77,7 +75,7 @@ def test_contract_uses_two_installed_handed_fingers_without_mirroring() -> None:
     assert FINGER_CONTRACTS["right"]["object_name"] == "Part__Feature008"
     assert FINGER_CONTRACTS["left"]["main_face_index_1_based"] == 117
     assert FINGER_CONTRACTS["right"]["main_face_index_1_based"] == 128
-    assert all(len(contract["folds"]) == 4 for contract in FINGER_CONTRACTS.values())
+    assert all(len(contract["folds"]) == 2 for contract in FINGER_CONTRACTS.values())
     assert FINGER_CONTRACTS["left"]["mirror_applied"] is False
     assert FINGER_CONTRACTS["right"]["mirror_applied"] is False
 
@@ -103,7 +101,7 @@ def test_svg_is_physical_mm_and_distinguishes_cut_and_fold_lines(tmp_path: Path)
     assert 'height="297mm"' in text
     assert 'class="cut"' in text
     assert 'class="fold"' in text
-    assert 'class="relief"' in text
+    assert 'class="relief"' not in text
     assert "ZERO-THICKNESS REVIEW" in text
     assert "NOT FINAL PRINT TEMPLATE" in text
     assert "LEFT FINGER" in text

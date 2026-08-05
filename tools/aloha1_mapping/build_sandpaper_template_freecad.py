@@ -37,7 +37,6 @@ from tools.aloha1_mapping.sandpaper_template import validate_review_report  # no
 
 POINT_TOLERANCE_MM = 1.0e-8
 AREA_TOLERANCE_MM2 = 1.0e-7
-MAXIMUM_AUTOMATIC_RELIEF_FRACTION = 0.01
 DISPLAY_OFFSET_MM = 0.15
 REVIEW_LINEAR_DEFLECTION_MM = 0.20
 REVIEW_ANGULAR_DEFLECTION_DEG = 20.0
@@ -159,60 +158,6 @@ def _point_key(point: list[float]) -> tuple[float, float]:
     return (round(float(point[0]), 7), round(float(point[1]), 7))
 
 
-def _signed_side(point: list[float], start: list[float], end: list[float]) -> float:
-    return (end[0] - start[0]) * (point[1] - start[1]) - (end[1] - start[1]) * (point[0] - start[0])
-
-
-def _clip_polygon_half_plane(
-    points: list[list[float]],
-    *,
-    line_start: list[float],
-    line_end: list[float],
-    keep_point: list[float],
-) -> list[list[float]]:
-    keep_sign = 1.0 if _signed_side(keep_point, line_start, line_end) >= 0.0 else -1.0
-
-    def inside(point: list[float]) -> bool:
-        return keep_sign * _signed_side(point, line_start, line_end) >= -POINT_TOLERANCE_MM
-
-    def intersection(first: list[float], second: list[float]) -> list[float]:
-        first_value = _signed_side(first, line_start, line_end)
-        second_value = _signed_side(second, line_start, line_end)
-        denominator = first_value - second_value
-        if abs(denominator) <= 1.0e-14:
-            return list(first)
-        ratio = first_value / denominator
-        return [float(first[axis] + ratio * (second[axis] - first[axis])) for axis in range(2)]
-
-    output: list[list[float]] = []
-    for first, second in zip(points, [*points[1:], points[0]], strict=True):
-        first_inside = inside(first)
-        second_inside = inside(second)
-        if first_inside:
-            output.append(list(first))
-        if first_inside != second_inside:
-            output.append(intersection(first, second))
-    deduplicated: list[list[float]] = []
-    for point in output:
-        if not deduplicated or math.dist(point, deduplicated[-1]) > POINT_TOLERANCE_MM:
-            deduplicated.append(point)
-    if len(deduplicated) > 1 and math.dist(deduplicated[0], deduplicated[-1]) <= POINT_TOLERANCE_MM:
-        deduplicated.pop()
-    if len(deduplicated) < 3:
-        raise RuntimeError("balanced inner-panel seam removed an entire panel")
-    return deduplicated
-
-
-def _balanced_inner_seam(first_line: list[list[float]], second_line: list[list[float]]) -> list[list[float]]:
-    direct_cost = math.dist(first_line[0], second_line[0]) + math.dist(first_line[1], second_line[1])
-    crossed_cost = math.dist(first_line[0], second_line[1]) + math.dist(first_line[1], second_line[0])
-    paired_second = second_line if direct_cost <= crossed_cost else list(reversed(second_line))
-    seam = [[0.5 * (first_line[index][axis] + paired_second[index][axis]) for axis in range(2)] for index in range(2)]
-    if math.dist(seam[0], seam[1]) <= POINT_TOLERANCE_MM:
-        raise RuntimeError("balanced inner-panel seam is degenerate")
-    return seam
-
-
 def _boundary_wires(panel_wires: list[list[list[float]]]) -> list[list[list[float]]]:
     segments: dict[
         tuple[tuple[float, float], tuple[float, float]],
@@ -269,30 +214,6 @@ def _polygon_face_xy(wires: list[list[list[float]]], *, x_offset: float = 0.0) -
     wire_faces = []
     for points in wires:
         vectors = [App.Vector(x + x_offset, y, 0.0) for x, y in points]
-        wire = Part.makePolygon([*vectors, vectors[0]])
-        wire_faces.append(Part.Face(wire))
-    outer_index = max(range(len(wire_faces)), key=lambda index: float(wire_faces[index].Area))
-    shape = wire_faces[outer_index]
-    for index, candidate in enumerate(wire_faces):
-        if index != outer_index:
-            shape = shape.cut(candidate)
-    return shape
-
-
-def _polygon_face_on_plane(wires: list[list[list[float]]], basis: tuple[Any, Any, Any, Any]) -> Any:
-    origin, u_axis, v_axis, _ = basis
-    wire_faces = []
-    for points in wires:
-        vectors = []
-        for x_value, y_value in points:
-            point = App.Vector(origin)
-            u_component = App.Vector(u_axis)
-            u_component.multiply(float(x_value))
-            v_component = App.Vector(v_axis)
-            v_component.multiply(float(y_value))
-            point = point.add(u_component)
-            point = point.add(v_component)
-            vectors.append(point)
         wire = Part.makePolygon([*vectors, vectors[0]])
         wire_faces.append(Part.Face(wire))
     outer_index = max(range(len(wire_faces)), key=lambda index: float(wire_faces[index].Area))
@@ -404,26 +325,6 @@ def _build_side(
                 f"unfolded_normal=({unfolded_normal.x:.6f},{unfolded_normal.y:.6f},"
                 f"{unfolded_normal.z:.6f}))"
             )
-        relief_area = 0.0
-        if overlap_area > AREA_TOLERANCE_MM2:
-            relief_fraction = overlap_area / float(adjacent_face.Area)
-            if relief_fraction <= MAXIMUM_AUTOMATIC_RELIEF_FRACTION:
-                trimmed = unfolded.cut(main_face)
-                if len(trimmed.Faces) != 1:
-                    raise RuntimeError(f"{side}/{fold['name']}: automatic relief did not produce one panel")
-                unfolded = trimmed.Faces[0]
-                relief_area = overlap_area
-                overlap_area = float(abs(unfolded.common(main_face).Area))
-            else:
-                diagnostics = [
-                    {
-                        "angle_deg": candidate[3],
-                        "overlap_area_mm2": candidate[0],
-                        "plane_residual_mm": candidate[1],
-                    }
-                    for candidate in candidates
-                ]
-                raise RuntimeError(f"{side}/{fold['name']}: unfolded panel overlaps the main face: {diagnostics}")
         if overlap_area > AREA_TOLERANCE_MM2:
             diagnostics = [
                 {
@@ -447,8 +348,6 @@ def _build_side(
                 "shared_edge_residual_mm": shared_residual,
                 "panel_plane_residual_mm": plane_residual,
                 "main_overlap_area_mm2": overlap_area,
-                "automatic_relief_area_mm2": relief_area,
-                "automatic_relief_fraction_of_adjacent_panel": (relief_area / float(adjacent_face.Area)),
                 "line_2d_mm": [_project_point(point, basis[0], basis[1], basis[2]) for point in endpoints],
             }
         )
@@ -462,48 +361,6 @@ def _build_side(
         }
         for name in panel_names
     ]
-    raw_panel_by_name = {panel["name"]: panel for panel in raw_panels}
-    fold_by_name = {fold["name"]: fold for fold in fold_records}
-    inner_names = ("inner_z_min", "inner_z_max")
-    inner_seam = _balanced_inner_seam(
-        fold_by_name[inner_names[0]]["line_2d_mm"],
-        fold_by_name[inner_names[1]]["line_2d_mm"],
-    )
-    for name in inner_names:
-        panel = raw_panel_by_name[name]
-        if len(panel["wires_2d_mm"]) != 1:
-            raise RuntimeError(f"{side}/{name}: expected one exact polygon wire before seam trim")
-        original_area = float(_polygon_face_xy(panel["wires_2d_mm"]).Area)
-        fold_line = fold_by_name[name]["line_2d_mm"]
-        keep_point = [0.5 * (fold_line[0][axis] + fold_line[1][axis]) for axis in range(2)]
-        clipped_wire = _clip_polygon_half_plane(
-            panel["wires_2d_mm"][0],
-            line_start=inner_seam[0],
-            line_end=inner_seam[1],
-            keep_point=keep_point,
-        )
-        clipped_area = float(_polygon_face_xy([clipped_wire]).Area)
-        panel["wires_2d_mm"] = [clipped_wire]
-        panel["area_mm2"] = clipped_area
-        panel["balanced_inner_seam_trim_area_mm2"] = original_area - clipped_area
-        panel["balanced_inner_seam_original_area_mm2"] = original_area
-        fold_record = fold_by_name[name]
-        shared_edge = main_face.Edges[int(fold_record["main_edge_index_1_based"]) - 1]
-        endpoints = [vertex.Point for vertex in shared_edge.Vertexes]
-        axis = endpoints[1].sub(endpoints[0])
-        axis.normalize()
-        mapped_to_folded = _polygon_face_on_plane([clipped_wire], basis)
-        mapped_to_folded.rotate(endpoints[0], axis, -float(fold_record["unfold_rotation_deg"]))
-        source_adjacent = source_object.Shape.Faces[int(fold_record["adjacent_face_index_1_based"]) - 1]
-        membership_area = float(abs(mapped_to_folded.common(source_adjacent).Area))
-        membership_residual = abs(clipped_area - membership_area)
-        if membership_residual > AREA_TOLERANCE_MM2:
-            raise RuntimeError(f"{side}/{name}: trimmed flat panel did not map back to its source face")
-        folded_faces[name] = mapped_to_folded
-        fold_record["balanced_inner_seam_trim_area_mm2"] = original_area - clipped_area
-        fold_record["wrapped_coverage_area_mm2"] = clipped_area
-        fold_record["wrapped_membership_area_residual_mm2"] = membership_residual
-
     all_points = [point for panel in raw_panels for wire in panel["wires_2d_mm"] for point in wire]
     min_x = min(point[0] for point in all_points)
     min_y = min(point[1] for point in all_points)
@@ -520,8 +377,6 @@ def _build_side(
     ]
     for fold_record in fold_records:
         fold_record["line_2d_mm"] = [normalize(point) for point in fold_record["line_2d_mm"]]
-    normalized_inner_seam = [normalize(point) for point in inner_seam]
-
     panel_wires = [wire for panel in panels for wire in panel["wires_2d_mm"]]
     cut_wires = _boundary_wires(panel_wires)
     pairwise_overlaps = []
@@ -533,7 +388,7 @@ def _build_side(
             pairwise_overlaps.append({"left": left_panel["name"], "right": right_panel["name"], "area_mm2": area})
             if area > AREA_TOLERANCE_MM2:
                 raise RuntimeError(
-                    f"{side}: balanced flat panels still overlap: {left_panel['name']}/{right_panel['name']}={area}"
+                    f"{side}: flat panels overlap: {left_panel['name']}/{right_panel['name']}={area}"
                 )
     normalized_points = [point for wire in panel_wires for point in wire]
     width = max(point[0] for point in normalized_points)
@@ -613,7 +468,7 @@ def _build_side(
     parameters.addProperty("App::PropertyBool", "OverlapTabs", "Design")
     parameters.OverlapTabs = False
     parameters.addProperty("App::PropertyInteger", "FoldCount", "Design")
-    parameters.FoldCount = 4
+    parameters.FoldCount = len(contract["folds"])
     parameters.addProperty("App::PropertyString", "FingerSide", "Design")
     parameters.FingerSide = side
 
@@ -640,8 +495,6 @@ def _build_side(
         "main": (0.95, 0.65, 0.10),
         "outer_z_min": (0.20, 0.70, 0.35),
         "outer_z_max": (0.20, 0.70, 0.35),
-        "inner_z_min": (0.20, 0.45, 0.90),
-        "inner_z_max": (0.20, 0.45, 0.90),
     }
     for name in panel_names:
         normal = _face_normal(folded_faces[name])
@@ -706,8 +559,8 @@ def _build_side(
         "flat_pattern": {
             "panels": panels,
             "cut_wires_2d_mm": cut_wires,
-            "relief_cut_lines_2d_mm": [normalized_inner_seam],
-            "inner_overlap_resolution": "BALANCED_MID_SEAM_WITH_ZERO_WIDTH_RELIEF_CUT",
+            "relief_cut_lines_2d_mm": [],
+            "inner_overlap_resolution": "NOT_APPLICABLE_INNER_PANELS_EXCLUDED",
             "bounds_mm": [0.0, 0.0, float(width), float(height)],
             "width_mm": float(width),
             "height_mm": float(height),
@@ -775,8 +628,8 @@ report = {
         "edge_clearance_mm": 0.0,
         "one_piece_per_finger": True,
         "overlap_tabs": False,
-        "fold_count_per_finger": 4,
-        "coverage": "FULL_INNER_PROFILE_PLUS_FOUR_ADJACENT_LONGITUDINAL_PANELS",
+        "fold_count_per_finger": len(FINGER_CONTRACTS["left"]["folds"]),
+        "coverage": "FULL_INNER_PROFILE_PLUS_TWO_OUTER_LONGITUDINAL_PANELS",
         "photo_used_for_dimensions": False,
         "abrasive_side": "TOWARD_BOTTLE_AND_INWARD_GRIPPING_SURFACE",
     },
@@ -787,7 +640,6 @@ report = {
         "physical_robot_control_performed": False,
         "maximum_allowed_plane_residual_mm": POINT_TOLERANCE_MM,
         "maximum_allowed_overlap_area_mm2": AREA_TOLERANCE_MM2,
-        "maximum_automatic_relief_fraction": MAXIMUM_AUTOMATIC_RELIEF_FRACTION,
     },
 }
 validate_review_report(report)

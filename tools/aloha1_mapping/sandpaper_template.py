@@ -37,16 +37,6 @@ FINGER_CONTRACTS: dict[str, dict[str, Any]] = {
                 "main_edge_index_1_based": 6,
                 "adjacent_face_index_1_based": 123,
             },
-            {
-                "name": "inner_z_max",
-                "main_edge_index_1_based": 14,
-                "adjacent_face_index_1_based": 120,
-            },
-            {
-                "name": "inner_z_min",
-                "main_edge_index_1_based": 16,
-                "adjacent_face_index_1_based": 129,
-            },
         ),
     },
     "right": {
@@ -64,16 +54,6 @@ FINGER_CONTRACTS: dict[str, dict[str, Any]] = {
                 "name": "outer_z_min",
                 "main_edge_index_1_based": 6,
                 "adjacent_face_index_1_based": 134,
-            },
-            {
-                "name": "inner_z_min",
-                "main_edge_index_1_based": 14,
-                "adjacent_face_index_1_based": 131,
-            },
-            {
-                "name": "inner_z_max",
-                "main_edge_index_1_based": 16,
-                "adjacent_face_index_1_based": 140,
             },
         ),
     },
@@ -119,7 +99,11 @@ def validate_review_report(report: Mapping[str, Any]) -> None:
     _require(design.get("material_total_thickness_mm") == 0.0, "review must be zero-thickness")
     _require(design.get("one_piece_per_finger") is True, "expected one piece per finger")
     _require(design.get("overlap_tabs") is False, "review unexpectedly contains overlap tabs")
-    _require(design.get("fold_count_per_finger") == 4, "expected four folds per finger")
+    _require(design.get("fold_count_per_finger") == 2, "expected two folds per finger")
+    _require(
+        design.get("coverage") == "FULL_INNER_PROFILE_PLUS_TWO_OUTER_LONGITUDINAL_PANELS",
+        "unexpected coverage contract",
+    )
 
     sides = report.get("sides", {})
     _require(set(sides) == set(FINGER_CONTRACTS), "left/right review sides are incomplete")
@@ -135,7 +119,7 @@ def validate_review_report(report: Mapping[str, Any]) -> None:
             f"{side}: unexpected main face area",
         )
         folds = record.get("folds", [])
-        _require(len(folds) == 4, f"{side}: expected four fold records")
+        _require(len(folds) == 2, f"{side}: expected two fold records")
         by_name = {fold.get("name"): fold for fold in folds}
         for expected in contract["folds"]:
             fold = by_name.get(expected["name"], {})
@@ -157,7 +141,13 @@ def validate_review_report(report: Mapping[str, Any]) -> None:
                 f"{side}/{expected['name']}: shared edge moved during unfold",
             )
         flat = record.get("flat_pattern", {})
-        _require(len(flat.get("panels", [])) == 5, f"{side}: expected five flat panels")
+        _require(len(flat.get("panels", [])) == 3, f"{side}: expected three flat panels")
+        _require(
+            {panel.get("name") for panel in flat.get("panels", [])}
+            == {"main", "outer_z_min", "outer_z_max"},
+            f"{side}: unexpected flat panel set",
+        )
+        _require(not flat.get("relief_cut_lines_2d_mm", []), f"{side}: unexpected relief cuts")
         _require(
             float(flat.get("maximum_panel_plane_residual_mm", math.inf)) <= 1e-8,
             f"{side}: unfolded panels are not coplanar",
@@ -212,32 +202,22 @@ def render_flat_pattern_svg(
         )
         for fold in record["folds"]
     )
-    relief_paths = "\n".join(
-        (
-            '      <path class="relief" d="M '
-            f"{float(line[0][0]):.6f} {float(line[0][1]):.6f} L "
-            f'{float(line[1][0]):.6f} {float(line[1][1]):.6f}"/>'
-        )
-        for line in flat.get("relief_cut_lines_2d_mm", [])
-    )
     side_label = side.upper()
     svg = f"""<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="210mm" height="297mm" viewBox="0 0 210 297">
   <style>
     .cut {{ fill: none; stroke: #111; stroke-width: 0.35; }}
     .fold {{ fill: none; stroke: #1565c0; stroke-width: 0.3; stroke-dasharray: 3 2; }}
-    .relief {{ fill: none; stroke: #c62828; stroke-width: 0.4; }}
     .warning {{ fill: #b71c1c; font: bold 5px sans-serif; }}
     .label {{ fill: #111; font: 4px sans-serif; }}
     .small {{ fill: #333; font: 3px sans-serif; }}
   </style>
   <text class="warning" x="15" y="16">ZERO-THICKNESS REVIEW — NOT FINAL PRINT TEMPLATE</text>
-  <text class="label" x="15" y="25">ALOHA {side_label} FINGER — ONE PIECE / FOUR FOLDS / NO TABS</text>
-  <text class="small" x="15" y="31">Black: outer cut. Blue dashed: CAD fold. Red: zero-width relief cut.</text>
+  <text class="label" x="15" y="25">ALOHA {side_label} FINGER — ONE PIECE / TWO FOLDS / NO TABS</text>
+  <text class="small" x="15" y="31">Black: outer cut. Blue dashed: CAD-derived outer fold.</text>
   <g transform="translate({translate_x:.6f} {translate_y:.6f}) scale(1 -1)">
 {cut_paths}
 {fold_paths}
-{relief_paths}
   </g>
   <rect x="15" y="232" width="50" height="50" fill="none" stroke="#666" stroke-width="0.25"/>
   <text class="small" x="69" y="247">50 x 50 mm geometry check</text>

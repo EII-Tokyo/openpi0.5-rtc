@@ -8,10 +8,10 @@ not used as a dimensional source.
 ## Current review contract
 
 - One continuous piece per finger, with separate left and right outputs.
-- Full main inward profile plus four adjacent longitudinal panels.
-- Four CAD-derived folds and no overlap tabs.
-- A balanced zero-width relief cut resolves the otherwise overlapping inner
-  panels.
+- Full main inward profile plus two outer longitudinal wrap panels.
+- Two CAD-derived folds and no overlap tabs.
+- The inner wrap panels are intentionally excluded, so no inner relief cut is
+  present.
 - Material thickness, adhesive thickness, bend compensation, edge clearance,
   DXF, PDF, and final print approval remain intentionally pending.
 
@@ -44,9 +44,7 @@ panels, failed unfold alignment, and residual flat-pattern overlap.
 
 - Orange: complete main inward profile.
 - Green: the two outer longitudinal wrap panels.
-- Blue: the two balanced inner wrap panels.
-- Blue dashed: the four CAD-derived fold lines.
-- Red: the zero-width inner relief cut.
+- Blue dashed: the two CAD-derived outer fold lines.
 
 The generated SVG files are physically sized in millimetres on A4, but are
 watermarked `NOT FINAL PRINT TEMPLATE`. Do not use them as the final sandpaper
