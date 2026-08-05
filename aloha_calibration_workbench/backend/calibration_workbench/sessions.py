@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 import re
 import tempfile
+from typing import Any
 from uuid import uuid4
 
 from .models import CaptureStatus
@@ -108,6 +109,81 @@ class SessionStore:
         session_payload = updated.model_dump(mode="json", exclude={"latest_preflight"})
         self._atomic_write_json(self._session_path(session_id), session_payload)
         return updated
+
+    def record_workflow_artifact(
+        self,
+        session_id: str,
+        *,
+        expected_state: str,
+        next_state: str,
+        artifact_name: str,
+        payload: Any,
+    ) -> SessionRecord:
+        record = self.get(session_id)
+        if record.state != expected_state:
+            raise SessionTransitionError(
+                f"{next_state} requires {expected_state}, current state is {record.state}"
+            )
+        if not re.fullmatch(r"[a-z0-9_]+\.json", artifact_name):
+            raise ValueError("workflow artifact name is not safe")
+        if hasattr(payload, "model_dump_json"):
+            encoded = (payload.model_dump_json(indent=2) + "\n").encode("utf-8")
+        else:
+            encoded = (json.dumps(payload, ensure_ascii=False, indent=2) + "\n").encode("utf-8")
+        artifact_path = self._session_path(session_id).parent / "artifacts" / artifact_name
+        self._exclusive_write(artifact_path, encoded)
+        updated = record.model_copy(update={"state": next_state, "updated_at_utc": datetime.now(UTC)})
+        session_payload = updated.model_dump(mode="json", exclude={"latest_preflight"})
+        self._atomic_write_json(self._session_path(session_id), session_payload)
+        return updated
+
+    def read_workflow_artifact(self, session_id: str, artifact_name: str) -> dict:
+        self.get(session_id)
+        if not re.fullmatch(r"[a-z0-9_]+\.json", artifact_name):
+            raise ValueError("workflow artifact name is not safe")
+        path = self._session_path(session_id).parent / "artifacts" / artifact_name
+        try:
+            return json.loads(path.read_text(encoding="utf-8"))
+        except FileNotFoundError as exc:
+            raise SessionTransitionError(f"required workflow artifact is missing: {artifact_name}") from exc
+
+    def export_output_dir(self, session_id: str) -> Path:
+        self.get(session_id)
+        return self._session_path(session_id).parent / "artifacts" / "export"
+
+    def write_attempt_artifact(self, session_id: str, artifact_name: str, payload: Any) -> Path:
+        self.get(session_id)
+        if not re.fullmatch(r"[a-z0-9_]+\.json", artifact_name):
+            raise ValueError("attempt artifact name is not safe")
+        if hasattr(payload, "model_dump_json"):
+            encoded = (payload.model_dump_json(indent=2) + "\n").encode("utf-8")
+        else:
+            encoded = (json.dumps(payload, ensure_ascii=False, indent=2) + "\n").encode("utf-8")
+        path = self._session_path(session_id).parent / "artifacts" / artifact_name
+        self._exclusive_write(path, encoded)
+        return path
+
+    def write_numbered_attempt(self, session_id: str, prefix: str, payload: Any) -> Path:
+        self.get(session_id)
+        if not re.fullmatch(r"[a-z0-9_]+", prefix):
+            raise ValueError("attempt prefix is not safe")
+        artifacts = self._session_path(session_id).parent / "artifacts"
+        existing = sorted(artifacts.glob(f"{prefix}_attempt_*.json"))
+        return self.write_attempt_artifact(
+            session_id,
+            f"{prefix}_attempt_{len(existing) + 1:03d}.json",
+            payload,
+        )
+
+    def read_latest_attempt(self, session_id: str, prefix: str) -> dict:
+        self.get(session_id)
+        if not re.fullmatch(r"[a-z0-9_]+", prefix):
+            raise ValueError("attempt prefix is not safe")
+        artifacts = self._session_path(session_id).parent / "artifacts"
+        existing = sorted(artifacts.glob(f"{prefix}_attempt_*.json"))
+        if not existing:
+            raise SessionTransitionError(f"required attempt is missing: {prefix}")
+        return json.loads(existing[-1].read_text(encoding="utf-8"))
 
     def _session_path(self, session_id: str) -> Path:
         if not re.fullmatch(r"cal-[0-9T]+-[0-9a-f]{8}", session_id):

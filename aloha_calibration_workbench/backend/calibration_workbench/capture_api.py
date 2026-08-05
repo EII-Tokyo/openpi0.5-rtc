@@ -9,10 +9,14 @@ from fastapi.responses import Response
 from .intrinsics_capture import CaptureConflictError
 from .intrinsics_capture import CaptureNotRunningError
 from .intrinsics_capture import IntrinsicsCaptureService
+from .intrinsics_capture import RgbSnapshot
 from .models import CaptureStatus
 from .models import IntrinsicsStartRequest
 from .models import PreflightReport
 from .models import SampleRecord
+from .workflow import FactoryCameraSnapshot
+from .workflow import WorldOriginCaptureBatch
+from .workflow import WorldOriginCaptureRequest
 
 
 class PreflightRunner(Protocol):
@@ -38,6 +42,53 @@ def create_capture_app(
     @app.post("/api/preflight", response_model=PreflightReport)
     def run_preflight() -> PreflightReport:
         return service.run()
+
+    @app.post("/api/factory-intrinsics/snapshot", response_model=list[FactoryCameraSnapshot])
+    def snapshot_factory_intrinsics() -> list[FactoryCameraSnapshot]:
+        if capture is None:
+            raise HTTPException(status_code=503, detail="Capture pipeline is unavailable")
+        try:
+            return capture.snapshot_factory_intrinsics()
+        except CaptureConflictError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+    @app.post("/api/world-origin/capture", response_model=WorldOriginCaptureBatch)
+    def capture_world_origin(request: WorldOriginCaptureRequest) -> WorldOriginCaptureBatch:
+        if capture is None:
+            raise HTTPException(status_code=503, detail="Capture pipeline is unavailable")
+        try:
+            return capture.capture_world_origin_batch(
+                session_id=request.session_id,
+                tag_size_m=request.tag_size_m,
+                tag_plane_height_m=request.tag_plane_height_m,
+                frame_count=request.frame_count,
+            )
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+        except CaptureConflictError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+    @app.post("/api/table/snapshot")
+    def capture_table_snapshot(session_id: str) -> Response:
+        if capture is None:
+            raise HTTPException(status_code=503, detail="Capture pipeline is unavailable")
+        try:
+            snapshot: RgbSnapshot = capture.capture_table_snapshot(session_id=session_id)
+            return Response(
+                content=snapshot.jpeg,
+                media_type="image/jpeg",
+                headers={
+                    "Cache-Control": "no-store",
+                    "X-Attempt-Id": snapshot.attempt_id,
+                    "X-Frame-Number": str(snapshot.frame_number),
+                    "X-Device-Timestamp-Ms": str(snapshot.device_timestamp_ms),
+                    "X-Image-Sha256": snapshot.image_sha256,
+                },
+            )
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+        except CaptureConflictError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
 
     @app.get("/api/intrinsics/status", response_model=CaptureStatus)
     def intrinsics_status() -> CaptureStatus:

@@ -1,87 +1,98 @@
-# ALOHA 四相机标定工作台
+# ALOHA 桌面世界与 Bottle500 标定工作台
 
-交互式标定工作台目前实现阶段 0（只读预检）和阶段 1 的单相机内参验证采集。默认启动仍是纯 Preview；只有显式 `dev:live` 模式、预检通过且用户点击启动后，103 才会打开一台 RealSense 彩色流。
+这个 React + FastAPI 工作台只解决当前最小闭环：保留四台 D405 的出厂内参，不做 ChArUco 重标定；仅用 `camera_high` 的 RGB 流把真实桌面坐标系和带刚性标签夹具的 Bottle500 位姿传到 Isaac Sim。深度流、机器人控制和 Isaac timeline 均不在本流程中启用。
 
-## 本地预览
+默认 `npm run dev` 是零设备访问的 Preview。只有显式 `npm run dev:live` 才会显示可执行按钮，而且每一步仍受后端状态机约束。
+
+## 三个实验
+
+1. **世界锚点**：AprilTag 36h11 ID0 中心与真实桌面原点重合，标签印刷轴与桌面 `+X/+Y` 对齐。`camera_high` 连续采集 200 个不可覆盖 RGB 证据帧，求得 `camera_high_optical -> table_world`。
+2. **9 点桌面交叉验证**：用钢尺和直角尺对 9 个彩色圆点各测两次。服务端先冻结物理真值；网页拍摄一张不可变桌面快照，然后逐点在图上点击圆心。6 点用于求解，非共线的 `P11/P23/P32` 只用于盲测。这个实验只验证桌面平面 **XY**，不宣称验证了离面 Z。
+3. **Bottle500 刚性夹具传递**：冻结瓶长、直径、标签相对瓶体的变换、资产轴变换和垫块高度，再按服务端规定的 `B-A/B-B/B-C` 三种位置各采 150 帧。通过只表示“带标签刚性夹具的位姿传递通过”，不表示透明瓶无标签感知、碰撞或动力学通过。
+
+每次重新采集都会生成新的编号 attempt，已有图像和 JSON 不覆盖。浏览器不能在求解请求中修改已经冻结的圆点真值或 Bottle expected pose。
+
+## 本地 Preview
 
 ```bash
+cd /home/eii/project/openpi0.5-rtc-reward-learning/aloha_calibration_workbench
 npm install
 npm run dev
 ```
 
-在 `101` 本机打开 `http://127.0.0.1:4173`。
+打开 `http://127.0.0.1:4173`。Preview 不发出 API 请求。
 
-## 只读预检模式
+## Live 服务拓扑
 
-阶段 0 使用两个 localhost-only 服务：`103` 的 capture-agent 枚举相机、生产 Profile 和设备占用，`101` 的 orchestrator 创建不可变预检会话。两个后端都不提供机器人命令。
+相机连接在哪台机器，capture-agent 就运行在哪台机器。当前 ALOHA 拓扑使用 `103` 上的 localhost-only capture-agent；`101` 上的 orchestrator 只经 SSH localhost 转发访问它，两个服务都没有机器人命令 API。
+
+在相机主机启动 capture-agent：
 
 ```bash
-cd backend
+cd /home/eii/openpi0.5-rtc-reward-learning/aloha_calibration_workbench/backend
 /home/eii/.local/bin/uv sync --dev
 /home/eii/.local/bin/uv run aloha-calibration-capture-agent
 ```
 
-capture-agent 只绑定 103 的 `127.0.0.1:8017`。在 101 建立本地转发，将它暴露为 101 的同一 localhost 端口：
+在 `101` 建立转发：
 
 ```bash
 ssh -N -L 8017:127.0.0.1:8017 192.168.1.103
 ```
 
-随后在 101 分别启动 orchestrator 和显式 live 前端：
+在 `101` 启动 orchestrator 和 live 前端：
 
 ```bash
-cd backend
+cd /home/eii/project/openpi0.5-rtc-reward-learning/aloha_calibration_workbench/backend
+/home/eii/.local/bin/uv sync --dev
 /home/eii/.local/bin/uv run aloha-calibration-orchestrator
 
 cd ..
 npm run dev:live
 ```
 
-默认 `npm run dev` 始终保持纯 Preview，不产生任何 API 请求。
+网页中的执行顺序固定为：
 
-如需先在 103 命令行验证设备而不启动常驻服务：
+`PREFLIGHT_READY -> FACTORY_INTRINSICS_FROZEN -> WORLD_ORIGIN_SOLVED -> TABLE_POINT_CONTRACT_FROZEN -> WORLD_REGISTRATION_VALIDATED -> BOTTLE_FIXTURE_CONTRACT_FROZEN -> TAGGED_FIXTURE_TRANSFER_PASS -> EXPORT_READY`
+
+若门禁失败，不要改阈值绕过；根据页面错误重新摆放、消除遮挡或重新拍摄一个新 attempt。
+
+## USD 导出契约
+
+导出前固定核验：
+
+- 源 Stage：`assets/Trossen/ALOHA1/1.0/diagnostics/table_support_alignment/1.0/aloha1_table_support_aligned_workcell.usda`
+- 源 SHA-256：`2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c`
+- Bottle 资产：`assets/bottle_500ml/isaac/bottle_500ml_sim.usd` 的 `/Bottle500`
+- Bottle SHA-256：`16427135f152ec951de2321fd689366d745a2dd389cbe260976631783952533e`
+
+输出目录包含：
+
+- `calibration.json`：列向量、米、行主序、`wxyz` 的显式变换契约和源文件冻结信息；
+- `calibration.usda`：OpenCV optical 到 USD Camera 的 `Rx(π)` 轴转换、`CameraHigh` 和三个 Bottle ghost prim；
+- `calibrated_review.usda`：校准层强于冻结源层的独立组合 Stage。
+
+导出器不修改源 Stage。OpenUSD/Isaac 环境的可重复读回审计命令：
 
 ```bash
-cd /home/eii/openpi0.5-rtc-reward-learning/aloha_calibration_workbench/backend
-/home/eii/.local/bin/uv run aloha-calibration-preflight
+cd /home/eii/project/openpi0.5-rtc-reward-learning
+PYLIB=$(dirname $(find /home/eii/.local/share/uv/python -name 'libpython3.11.so.1.0' -print | head -n 1))
+USD_ROOT=.venv_issac/lib/python3.11/site-packages/isaacsim/extscache/omni.usd.libs-1.0.1+69cbf6ad.lx64.r.cp311
+PYTHONPATH="$USD_ROOT" LD_LIBRARY_PATH="$USD_ROOT/bin:$PYLIB${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" \
+  .venv_issac/bin/python aloha_calibration_workbench/backend/scripts/audit_calibration_bundle.py \
+  <export-dir>/calibrated_review.usda <export-dir>/calibration.json \
+  --json-output <export-dir>/openusd_audit.json
 ```
 
-该命令不会启动 RealSense pipeline。只有四台身份、生产 Profile 和独占权全部通过时才输出 `READY`；不能证明独占时输出 `BLOCKED`。
-
-## 阶段 1：cam_high 内参与正式 Profile
-
-当前标定板的冻结定义如下：
-
-- `DICT_5X5_100`
-- `7 × 5` squares
-- `squareLength = 0.030 m`
-- `markerLength = 0.022 m`
-- 文件：`~/Downloads/ALOHA_D405_calibration_starter/01_charuco_7x5_square30_marker22_A4_landscape.pdf`
-- 打印：A4 横向、100%/Actual size；开始前实测 PDF 底部检查线为 100 mm
-
-操作顺序：
-
-1. 在 live 页面运行只读预检。
-2. 只有页面显示 `PREFLIGHT_READY` 后，点击“启动 cam_high 内参采集”。
-3. 系统再次核验身份、正式 Profile 与独占权，然后只启动序列号 `130322270656` 的 `640 × 480 @ 60 Hz RGB8` 彩色流。
-4. 面向 cam_high 手持刚性 ChArUco 板，先让全板位于中央并避免反光；实时画面会叠加 marker、ChArUco corners 和 factory K/D 求得的坐标轴。
-5. 点击“采集当前 ChArUco 帧”写入不可覆盖的原始 PNG 与 JSON。每第五个样本预先分到 `HELD_OUT`，其余进入 `SOLVE`。
-6. 结束时点击“停止 cam_high”，释放唯一活动 pipeline。
-
-原始采集只保存在 103 的仓库内 `.calibration_captures/<session>/<role>/`，factory intrinsics 在启动时单独冻结。网页显示的角点数、清晰度、曝光裁剪与 factory K/D 重投影误差是诊断证据，不是 NVIDIA 官方 PASS 门限，也不会自动改写相机 EEPROM。
-
-## 安全边界
-
-- 不包含 WebSocket、机器人控制或自动建立 SSH 隧道的代码。
-- 默认 Preview 不产生 API 请求；显式 live 模式经过预检门禁后才允许单相机采集。
-- 不包含机器人运动按钮或命令接口。
-- 阶段 1 只启用彩色流，深度流关闭；不会改变曝光、固件或 EEPROM。
-- 同一时刻最多一台相机；当前流程只开放 `cam_high`，其它角色仍为待机。
-- Solve、Validate 与 Export 仍为 Preview，不能把“已采样”解释为“内参已验证”或“系统标定成功”。
+审计只有在组合 Stage 可打开、相机矩阵读回一致、Bottle 引用含 Mesh 且三者世界 AABB 有限时才输出 `CALIBRATION_BUNDLE_OPENUSD_AUDIT_PASS`。
 
 ## 验证
 
 ```bash
-npm test
+cd /home/eii/project/openpi0.5-rtc-reward-learning/aloha_calibration_workbench
+npm test -- --run
 npm run build
+PYTHONPATH=$PWD/backend backend/.venv/bin/python -m pytest backend/tests -q
 ```
+
+测试不会启动相机、机器人或 Isaac Sim GUI。

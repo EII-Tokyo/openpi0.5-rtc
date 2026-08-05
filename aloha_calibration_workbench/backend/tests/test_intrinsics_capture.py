@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
+import numpy as np
 from calibration_workbench.intrinsics_capture import CaptureConflictError
 from calibration_workbench.intrinsics_capture import IntrinsicsCaptureService
 from calibration_workbench.models import CharucoObservation
@@ -53,9 +54,13 @@ class FakePreflight:
 
 @dataclass
 class FakeFrame:
-    rgb: object = object()
+    rgb: object = None
     frame_number: int = 17
     device_timestamp_ms: float = 123.5
+
+    def __post_init__(self) -> None:
+        if self.rgb is None:
+            self.rgb = np.zeros((480, 640, 3), dtype=np.uint8)
 
 
 class FakeRunningCamera:
@@ -183,3 +188,19 @@ def test_rejects_invalid_session_identifier_before_any_device_access(tmp_path: P
         service.start(session_id="../../escape", role="cam_high")
 
     assert backend.calls == []
+
+
+def test_table_snapshot_returns_and_persists_the_same_evidence_frame(tmp_path: Path):
+    service, backend = _service(tmp_path)
+    session_id = "cal-20260805T120000-1234abcd"
+
+    snapshot = service.capture_table_snapshot(session_id=session_id)
+
+    assert snapshot.attempt_id == "A-001"
+    assert snapshot.frame_number == 17
+    assert snapshot.jpeg.startswith(b"\xff\xd8")
+    attempt = tmp_path / session_id / "cam_high/table_snapshot/A-001"
+    assert (attempt / "frame.png").is_file()
+    assert snapshot.image_sha256 == __import__("hashlib").sha256((attempt / "frame.png").read_bytes()).hexdigest()
+    assert (attempt / "frame.json").is_file()
+    assert backend.running.stopped is True

@@ -2,9 +2,12 @@ from __future__ import annotations
 
 import httpx
 
+from .intrinsics_capture import RgbSnapshot
 from .models import CaptureStatus
 from .models import PreflightReport
 from .models import SampleRecord
+from .workflow import FactoryCameraSnapshot
+from .workflow import WorldOriginCaptureBatch
 
 
 class CaptureAgentClient:
@@ -16,6 +19,50 @@ class CaptureAgentClient:
         response = httpx.post(f"{self._base_url}/api/preflight", timeout=self._timeout_seconds)
         response.raise_for_status()
         return PreflightReport.model_validate(response.json())
+
+    def snapshot_factory_intrinsics(self) -> list[FactoryCameraSnapshot]:
+        response = httpx.post(
+            f"{self._base_url}/api/factory-intrinsics/snapshot",
+            timeout=max(self._timeout_seconds, 60.0),
+        )
+        response.raise_for_status()
+        return [FactoryCameraSnapshot.model_validate(item) for item in response.json()]
+
+    def capture_world_origin(
+        self,
+        session_id: str,
+        *,
+        tag_size_m: float,
+        tag_plane_height_m: float,
+        frame_count: int,
+    ) -> WorldOriginCaptureBatch:
+        response = httpx.post(
+            f"{self._base_url}/api/world-origin/capture",
+            json={
+                "session_id": session_id,
+                "tag_size_m": tag_size_m,
+                "tag_plane_height_m": tag_plane_height_m,
+                "frame_count": frame_count,
+            },
+            timeout=max(self._timeout_seconds, 60.0),
+        )
+        response.raise_for_status()
+        return WorldOriginCaptureBatch.model_validate(response.json())
+
+    def capture_table_snapshot(self, session_id: str) -> RgbSnapshot:
+        response = httpx.post(
+            f"{self._base_url}/api/table/snapshot",
+            params={"session_id": session_id},
+            timeout=max(self._timeout_seconds, 30.0),
+        )
+        response.raise_for_status()
+        return RgbSnapshot(
+            jpeg=response.content,
+            attempt_id=response.headers["X-Attempt-Id"],
+            frame_number=int(response.headers["X-Frame-Number"]),
+            device_timestamp_ms=float(response.headers["X-Device-Timestamp-Ms"]),
+            image_sha256=response.headers["X-Image-Sha256"],
+        )
 
     def start_intrinsics(self, session_id: str, role: str) -> CaptureStatus:
         response = httpx.post(

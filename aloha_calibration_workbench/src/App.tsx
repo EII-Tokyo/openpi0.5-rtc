@@ -1,692 +1,288 @@
-import { useEffect, useState } from 'react'
+import { useMemo, useState } from 'react'
 
-import { captureIntrinsicsSample } from './api'
-import { getIntrinsicsStatus } from './api'
-import { runPreflightSession } from './api'
-import { startIntrinsicsCapture } from './api'
-import { stopIntrinsicsCapture } from './api'
-import type { CaptureStatus } from './api'
-import type { PreflightSession } from './api'
-import type { SampleRecord } from './api'
+import {
+  captureAndSolveWorldOrigin,
+  captureBottleTrial,
+  captureTableSnapshot,
+  exportCalibrationBundle,
+  freezeBottleContract,
+  freezeFactoryIntrinsics,
+  freezeTableContract,
+  runPreflightSession,
+  solveTableRegistration,
+  validateBottleTrials,
+} from './api'
+import type {
+  BottleCaptureResult,
+  BottleValidationResult,
+  ExportResult,
+  FactorySnapshotBundle,
+  FrozenBottleContract,
+  FrozenTableContract,
+  PreflightSession,
+  TableResult,
+  TableSnapshot,
+  TransformRecord,
+  WorldOriginResult,
+} from './api'
 
-type Workspace = 'Preview' | 'Dataset' | 'Solve' | 'Validate' | 'Export'
-type CameraRole = 'cam_high' | 'cam_low' | 'wrist_left' | 'wrist_right'
 export type AppMode = 'preview' | 'live'
+type Workspace = 'Guide' | 'Table Dots' | 'Bottle' | 'Export'
+type TrialId = 'B-A' | 'B-B' | 'B-C'
 
-type PreflightUiState =
-  | { kind: 'idle' }
-  | { kind: 'running' }
-  | { kind: 'complete'; session: PreflightSession }
-  | { kind: 'error'; message: string }
-
-type CaptureUiState =
-  | { kind: 'idle' }
-  | { kind: 'starting' }
-  | { kind: 'streaming'; status: CaptureStatus; actionError?: string }
-  | { kind: 'error'; message: string }
-
-const workspaces: Workspace[] = ['Preview', 'Dataset', 'Solve', 'Validate', 'Export']
-
-const stages = [
-  { id: 0, title: '预检与相机身份', detail: '序列号 · 独占权 · 生产 Profile', state: 'ready' },
-  { id: 1, title: '内参与正式 Profile', detail: '工厂 K/D · ChArUco 验证', state: 'locked' },
-  { id: 2, title: '世界原点板与固定相机', detail: 'cam_high · cam_low 分别注册', state: 'locked' },
-  { id: 3, title: '左腕 / 右腕手眼', detail: '两条运动链 · 两套数据集', state: 'locked' },
-  { id: 4, title: '独立三维检查点', detail: '留出数据 · 至少两个高度', state: 'locked' },
-  { id: 5, title: 'Isaac 叠加与带标夹具', detail: 'Session Layer · 三瓶传递', state: 'locked' },
+const cameraRoles = [
+  ['cam_high', '固定俯视 · ACTIVE'],
+  ['cam_low', '固定低位 · FACTORY ONLY'],
+  ['wrist_left', '左腕 · FACTORY ONLY'],
+  ['wrist_right', '右腕 · FACTORY ONLY'],
 ] as const
 
-const cameras: Array<{
-  role: CameraRole
-  label: string
-  kind: string
-  focus: string
-  tint: string
-}> = [
-  { role: 'cam_high', label: 'cam_high', kind: '固定 · 俯视', focus: 'ACTIVE', tint: '#24a1ff' },
-  { role: 'cam_low', label: 'cam_low', kind: '固定 · 低位', focus: 'STANDBY', tint: '#8aa0b6' },
-  { role: 'wrist_left', label: 'wrist_left', kind: '左臂 · eye-in-hand', focus: 'STANDBY', tint: '#8aa0b6' },
-  { role: 'wrist_right', label: 'wrist_right', kind: '右臂 · eye-in-hand', focus: 'STANDBY', tint: '#8aa0b6' },
-]
+const identity = (source: string, target: string): TransformRecord => ({
+  source_frame: source,
+  target_frame: target,
+  matrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]],
+  length_unit: 'meter',
+  matrix_order: 'row-major',
+  vector_convention: 'column-vector',
+  quaternion_order: 'wxyz',
+})
 
-const outcomes = [
-  { label: 'INTRINSICS_VALIDATED', state: 'candidate', note: '示例状态' },
-  { label: 'WORLD_REGISTRATION_VALIDATED', state: 'locked', note: '尚未求解' },
-  { label: 'HAND_EYE_NONCONTACT_VALIDATED', state: 'locked', note: '尚未采集' },
-  { label: 'ISAAC_IMPORT_PASS', state: 'locked', note: '尚未连接' },
-  { label: 'TAGGED_FIXTURE_TRANSFER_PASS', state: 'locked', note: 'V1 最终演示' },
-] as const
-
-function TargetBoard({ compact = false }: { compact?: boolean }) {
-  const cells = Array.from({ length: 35 }, (_, index) => index)
-  return (
-    <div className={`target-board ${compact ? 'compact' : ''}`} aria-label="模拟刚性多标记原点板">
-      <div className="target-grid" aria-hidden="true">
-        {cells.map((cell) => (
-          <span className={(cell + Math.floor(cell / 5)) % 2 === 0 ? 'dark' : 'light'} key={cell}>
-            {cell % 6 === 0 ? <i /> : null}
-          </span>
-        ))}
-      </div>
-      <span className="origin-dot">O</span>
-      <span className="axis axis-x"><b />+X</span>
-      <span className="axis axis-y"><b />+Y</span>
-    </div>
-  )
+const taskFromAsset: TransformRecord = {
+  ...identity('bottle_asset', 'bottle_task'),
+  matrix: [[0, 0, 1, 0], [1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 0, 1]],
 }
 
-function CameraTile({
-  camera,
-  index,
-  preflight,
-  capture,
-  previewNonce,
-}: {
-  camera: (typeof cameras)[number]
-  index: number
-  preflight: PreflightUiState
-  capture: CaptureUiState
-  previewNonce: number
-}) {
-  const liveCamera = preflight.kind === 'complete'
-    ? preflight.session.latest_preflight.cameras.find((item) => item.role === camera.role)
-    : undefined
-  const isStreaming = capture.kind === 'streaming' && capture.status.role === camera.role
-  const cameraState = isStreaming ? 'LIVE · EXCLUSIVE' : liveCamera
-    ? liveCamera.connected && liveCamera.identity_match ? 'IDENTITY OK' : 'CHECK FAILED'
-    : camera.focus
-  return (
-    <article
-      className={`camera-tile ${camera.focus === 'ACTIVE' ? 'active' : ''}`}
-      data-testid={`camera-${camera.role}`}
-      style={{ '--camera-tint': camera.tint } as React.CSSProperties}
-    >
-      <header className="camera-titlebar">
-        <div>
-          <strong>{camera.label}</strong>
-          <span>{camera.kind}</span>
-        </div>
-        <div className="camera-state"><i />{cameraState}</div>
-      </header>
-      {isStreaming ? (
-        <div className="synthetic-feed live-feed">
-          <img src={`/api/intrinsics/preview.jpg?t=${previewNonce}`} alt="cam_high ChArUco 实时检测画面" />
-          <div className="feed-meta"><span>LIVE · DEVICE TIME</span><span>640 × 480 · 60 RGB8</span></div>
-        </div>
-      ) : <div className={`synthetic-feed feed-${index}`}>
-        <div className="feed-grid" />
-        <div className="arm arm-left"><span /><span /><span /></div>
-        <div className="arm arm-right"><span /><span /><span /></div>
-        <div className="table-plane" />
-        <TargetBoard compact={index !== 0} />
-        {index === 0 ? (
-          <>
-            <div className="coverage-heatmap" aria-label="模拟覆盖热图"><i /><i /><i /><i /></div>
-            <div className="corner-points" aria-hidden="true">
-              {Array.from({ length: 18 }, (_, point) => <i key={point} />)}
-            </div>
-          </>
-        ) : null}
-        <div className="feed-meta">
-          <span>SYNTHETIC</span>
-          <span>640 × 480 · 60</span>
-        </div>
-      </div>}
-    </article>
-  )
+interface DotForm {
+  id: string
+  color: 'blue' | 'magenta' | 'lime'
+  partition: 'SOLVE' | 'HELD_OUT'
+  x1: number
+  y1: number
+  x2: number
+  y2: number
+  u: string
+  v: string
+  confirmed: boolean
 }
 
-function StageRail({ preflight, capture }: { preflight: PreflightUiState; capture: CaptureUiState }) {
-  return (
-    <aside className="stage-rail" aria-label="校准阶段">
-      <div className="rail-heading">
-        <span>CALIBRATION FLOW</span>
-        <strong>六阶段</strong>
-      </div>
-      <ol>
-        {stages.map((stage) => {
-          const state = stage.id === 0 && (preflight.kind === 'complete' || capture.kind === 'streaming')
-            ? 'done'
-            : stage.id === 1 && capture.kind === 'streaming'
-              ? 'active'
-              : stage.id === 1 && preflight.kind === 'complete' && preflight.session.latest_preflight.status === 'READY'
-                ? 'ready'
-              : stage.state
-          return (
-          <li className={state} key={stage.id}>
-            <div className="stage-index">{String(stage.id).padStart(2, '0')}</div>
-            <div className="stage-copy">
-              <strong>{stage.title}</strong>
-              <span>{stage.detail}</span>
-              <em>{state === 'done' ? 'COMPLETE' : state === 'active' ? 'ACTIVE · cam_high' : state === 'ready' ? 'READY · 等待确认' : 'LOCKED'}</em>
-            </div>
-          </li>
-          )
-        })}
-      </ol>
-      <div className="rail-note">
-        <span className="pulse-dot" />
-        {capture.kind === 'streaming' ? '仅 cam_high 图像 pipeline 已启动' : '未启动图像 pipeline'}
-      </div>
-    </aside>
-  )
-}
+const heldOut = new Set(['P11', 'P23', 'P32'])
+const initialDots: DotForm[] = [0.18, 0, -0.18].flatMap((y, row) =>
+  [-0.35, 0, 0.35].map((x, column) => {
+    const id = `P${row + 1}${column + 1}`
+    return {
+      id,
+      color: (['blue', 'magenta', 'lime'] as const)[row],
+      partition: heldOut.has(id) ? 'HELD_OUT' : 'SOLVE',
+      x1: x,
+      y1: y,
+      x2: x,
+      y2: y,
+      u: '',
+      v: '',
+      confirmed: false,
+    }
+  }),
+)
 
-function InstructionPanel({
-  mode,
-  preflight,
-  capture,
-  samples,
-  onRun,
-  onStart,
-  onSample,
-  onStop,
-}: {
-  mode: AppMode
-  preflight: PreflightUiState
-  capture: CaptureUiState
-  samples: SampleRecord[]
-  onRun: () => void
-  onStart: () => void
-  onSample: () => void
-  onStop: () => void
-}) {
-  const passingCameras = preflight.kind === 'complete'
-    ? preflight.session.latest_preflight.cameras.filter((camera) => (
-      camera.connected && camera.identity_match && camera.production_profile_supported && camera.ownership === 'FREE'
-    )).length
-    : 0
-  const actionLabel = mode === 'preview'
-    ? '开始检测（预览模式）'
-    : preflight.kind === 'running' ? '正在运行只读预检…' : '运行只读预检'
-  return (
-    <aside className="instruction-panel">
-      <section className="instruction-card primary">
-        <div className="instruction-number">01</div>
-        <div>
-          <h2>现在放什么 / 怎么摆</h2>
-          <p>{capture.kind === 'streaming' ? '手持 ChArUco 板面对 cam_high；本阶段不使用 AprilTag。' : '准备 A4 横向 ChArUco 板，确认底部 100 mm 检查线实测正确。'}</p>
-          <ul>
-            <li>打印必须为 100%，贴在刚性平板上</li>
-            <li>先让整块板位于俯视相机中央</li>
-            <li>保持平整、无反光、无遮挡</li>
-          </ul>
-        </div>
-        <TargetBoard compact />
-      </section>
-      <section className="instruction-card">
-        <div className="instruction-number">02</div>
-        <div>
-          <h2>系统现在检查什么</h2>
-          <p>实时质量只决定当前帧是否可采，不代表标定已经成功。</p>
-          <div className="check-list">
-            <span><i className="good" />角点完整可见</span>
-            <span><i className="good" />画面清晰、曝光稳定</span>
-            <span><i />设备身份与 Profile</span>
-            <span><i />采集服务独占权</span>
-          </div>
-        </div>
-      </section>
-      <section className="instruction-card">
-        <div className="instruction-number">03</div>
-        <div>
-          <h2>通过后会得到什么</h2>
-          <p>{capture.kind === 'streaming' ? '保存 factory K/D、原始 PNG、角点与设备时间戳；仍不等于内参已验收。' : '预检通过后才允许单独启动 cam_high，不会同时打开其它三台。'}</p>
-          <div className="artifact-preview">
-            <span>camera_registry.json</span>
-            <span>profile_snapshot.json</span>
-            <span>preflight_report.html</span>
-          </div>
-        </div>
-      </section>
-      {preflight.kind === 'complete' ? (
-        <section className={`preflight-result ${preflight.session.latest_preflight.status.toLowerCase()}`} aria-live="polite">
-          <strong>{preflight.session.state}</strong>
-          <span>{passingCameras} / 4 相机身份通过</span>
-          {preflight.session.latest_preflight.issues.length > 0 ? (
-            <div className="preflight-issues">
-              {preflight.session.latest_preflight.issues.map((issue) => (
-                <span className={issue.severity.toLowerCase()} key={`${issue.code}-${issue.camera_role ?? 'system'}`}>
-                  {issue.code} · {issue.camera_role ?? 'system'}
-                </span>
-              ))}
-            </div>
-          ) : null}
-          <em>session · {preflight.session.id}</em>
-        </section>
-      ) : null}
-      {capture.kind === 'streaming' && capture.status.factory_intrinsics ? (
-        <section className="intrinsics-result" aria-live="polite">
-          <strong>FACTORY K/D LOADED</strong>
-          <span>fx {capture.status.factory_intrinsics.fx.toFixed(2)} · fy {capture.status.factory_intrinsics.fy.toFixed(2)}</span>
-          <span>cx {capture.status.factory_intrinsics.cx.toFixed(2)} · cy {capture.status.factory_intrinsics.cy.toFixed(2)}</span>
-          <em>DEPTH OFF · ROBOT API NONE</em>
-          {capture.status.latest_observation ? (
-            <div className="live-metrics">
-              <span>corners {capture.status.latest_observation.charuco_corner_count}</span>
-              <span>markers {capture.status.latest_observation.marker_count}</span>
-              <span>blur {capture.status.latest_observation.blur_variance.toFixed(1)}</span>
-              <span>RMS {capture.status.latest_observation.reprojection_rms_px == null ? '—' : `${capture.status.latest_observation.reprojection_rms_px.toFixed(3)} px`}</span>
-            </div>
-          ) : <span>等待第一帧检测…</span>}
-          {capture.actionError ? <small className="action-error">{capture.actionError}</small> : null}
-          <div className="capture-actions">
-            <button onClick={onSample}>采集当前 ChArUco 帧</button>
-            <button className="stop" onClick={onStop}>停止 cam_high</button>
-          </div>
-          <small>{samples.length} 个不可覆盖样本已写入 103</small>
-        </section>
-      ) : null}
-      {capture.kind === 'error' ? <p className="preflight-error" role="alert">{capture.message}</p> : null}
-      {preflight.kind === 'error' ? <p className="preflight-error" role="alert">{preflight.message}</p> : null}
-      {preflight.kind === 'complete' && preflight.session.latest_preflight.status === 'READY' && capture.kind !== 'streaming' ? (
-        <button className="primary-action" disabled={capture.kind === 'starting'} onClick={onStart}>
-          {capture.kind === 'starting' ? '正在启动 cam_high…' : '启动 cam_high 内参采集'}
-        </button>
-      ) : capture.kind !== 'streaming' ? (
-        <button
-          className="primary-action"
-          disabled={mode === 'preview' || preflight.kind === 'running' || preflight.kind === 'complete'}
-          onClick={onRun}
-        >{actionLabel}</button>
-      ) : null}
-      <p className="action-hint">
-        {capture.kind === 'streaming' ? '角点数与重投影误差用于记录诊断；尚未声明 PASS 门限。' : mode === 'preview' ? '连接真实设备前，必须先确认此页面的操作顺序。' : '启动前会再次核验设备、Profile 与独占权。'}
-      </p>
-    </aside>
-  )
-}
-
-function SampleStrip({ liveSamples, observation }: { liveSamples?: SampleRecord[]; observation?: CaptureStatus['latest_observation'] }) {
-  const previewSamples = [
-    { id: 'S-001', state: 'accepted', reason: '覆盖新增' },
-    { id: 'S-002', state: 'accepted', reason: '尺度变化' },
-    { id: 'S-003', state: 'accepted', reason: '边缘视角' },
-    { id: 'S-004', state: 'accepted', reason: '倾斜新增' },
-    { id: 'S-005', state: 'rejected', reason: '运动模糊' },
-    { id: 'S-006', state: 'rejected', reason: '角点遮挡' },
-  ]
-  if (liveSamples) {
-    const accepted = liveSamples.filter((sample) => sample.accepted).length
-    const rejected = liveSamples.length - accepted
-    return (
-      <section className="sample-strip live-sample-strip">
-        <div className="sample-summary">
-          <span>本次 cam_high 样本</span>
-          {liveSamples.length === 0 ? <strong>尚未采集</strong> : <strong>{accepted} accepted <em>/ {rejected} rejected</em></strong>}
-        </div>
-        <div className="sample-list">
-          {liveSamples.length === 0 ? <p className="empty-samples">把整块 ChArUco 板放入画面，确认角点后再采集。</p> : liveSamples.slice(-6).map((sample) => (
-            <article className={`sample ${sample.accepted ? 'accepted' : 'rejected'}`} key={sample.id}>
-              <div className="mini-board"><i /><i /><i /></div>
-              <div><strong>{sample.id} · {sample.partition}</strong><span>{sample.reason}</span></div>
-            </article>
-          ))}
-        </div>
-        <div className="coverage-metrics">
-          {[
-            ['Corners', observation ? String(observation.charuco_corner_count) : '—', Math.min(100, (observation?.charuco_corner_count ?? 0) / 24 * 100)],
-            ['Area', observation?.board_area_percent == null ? '—' : `${observation.board_area_percent.toFixed(1)}%`, Math.min(100, observation?.board_area_percent ?? 0)],
-            ['Center X', observation?.centroid_x == null ? '—' : observation.centroid_x.toFixed(2), (observation?.centroid_x ?? 0) * 100],
-            ['RMS', observation?.reprojection_rms_px == null ? '—' : `${observation.reprojection_rms_px.toFixed(3)}px`, 0],
-          ].map(([label, value, width]) => (
-            <div className="metric" key={label as string}>
-              <span>{label}</span><strong>{value}</strong>
-              <i><b style={{ width: `${width}%` }} /></i>
-            </div>
-          ))}
-        </div>
-      </section>
-    )
+function eulerTransform(
+  tx: number,
+  ty: number,
+  tz: number,
+  rollDeg: number,
+  pitchDeg: number,
+  yawDeg: number,
+): TransformRecord {
+  const [roll, pitch, yaw] = [rollDeg, pitchDeg, yawDeg].map((value) => value * Math.PI / 180)
+  const [cr, sr, cp, sp, cy, sy] = [Math.cos(roll), Math.sin(roll), Math.cos(pitch), Math.sin(pitch), Math.cos(yaw), Math.sin(yaw)]
+  return {
+    ...identity('bottle_task', 'tag'),
+    matrix: [
+      [cy * cp, cy * sp * sr - sy * cr, cy * sp * cr + sy * sr, tx],
+      [sy * cp, sy * sp * sr + cy * cr, sy * sp * cr - cy * sr, ty],
+      [-sp, cp * sr, cp * cr, tz],
+      [0, 0, 0, 1],
+    ],
   }
-  return (
-    <section className="sample-strip">
-      <div className="sample-summary">
-        <span>当前相机样本</span>
-        <strong>4 accepted <em>/ 2 rejected</em></strong>
-      </div>
-      <div className="sample-list">
-        {previewSamples.map((sample, index) => (
-          <article className={`sample ${sample.state}`} key={sample.id}>
-            <div className={`mini-board angle-${index}`}><i /><i /><i /></div>
-            <div><strong>{sample.id}</strong><span>{sample.reason}</span></div>
-          </article>
-        ))}
-      </div>
-      <div className="coverage-metrics">
-        {[
-          ['X 覆盖', '78%', 78],
-          ['Y 覆盖', '71%', 71],
-          ['Size', '64%', 64],
-          ['Skew', '42%', 42],
-          ['Rotation', '18%', 18],
-        ].map(([label, value, width]) => (
-          <div className="metric" key={label as string}>
-            <span>{label}</span><strong>{value}</strong>
-            <i><b style={{ width: `${width}%` }} /></i>
-          </div>
-        ))}
-      </div>
-    </section>
-  )
 }
 
-function PreviewWorkspace({
-  mode,
-  preflight,
-  capture,
-  samples,
-  previewNonce,
-  onRun,
-  onStart,
-  onSample,
-  onStop,
+function StageRail({ state }: { state: string }) {
+  const stages = [
+    ['预检与身份', 'PREFLIGHT_READY'],
+    ['冻结出厂 K/D', 'FACTORY_INTRINSICS_FROZEN'],
+    ['实验一 · 世界锚点', 'WORLD_ORIGIN_SOLVED'],
+    ['实验二 · 9 点桌面', 'WORLD_REGISTRATION_VALIDATED'],
+    ['实验三 · Bottle500', 'TAGGED_FIXTURE_TRANSFER_PASS'],
+    ['独立 USD 导出', 'EXPORT_READY'],
+  ]
+  const current = Math.max(0, stages.findIndex((item) => item[1] === state))
+  return <aside className="stage-rail"><div className="rail-heading"><span>CALIBRATION FLOW</span><strong>三实验</strong></div><ol>
+    {stages.map(([title, gate], index) => <li className={index < current ? 'done' : index === current ? 'active' : 'locked'} key={gate}>
+      <div className="stage-index">{String(index).padStart(2, '0')}</div>
+      <div className="stage-copy"><strong>{title}</strong><span>{gate}</span><em>{index < current ? 'COMPLETE' : index === current ? 'CURRENT' : 'LOCKED'}</em></div>
+    </li>)}
+  </ol></aside>
+}
+
+function CameraWall({ factory }: { factory?: FactorySnapshotBundle }) {
+  return <section className="camera-workspace"><div className="workspace-heading"><div><span>RGB ONLY · FACTORY K/D</span><h2>仅 camera_high 参与三个实验</h2></div></div>
+    <div className="camera-grid">{cameraRoles.map(([role, label]) => {
+      const snapshot = factory?.cameras.find((camera) => camera.role === role)
+      return <article className={`camera-tile ${role === 'cam_high' ? 'active' : ''}`} data-testid={`camera-${role}`} key={role}>
+        <header className="camera-titlebar"><div><strong>{role}</strong><span>{label}</span></div><div className="camera-state"><i />{snapshot ? `FROZEN · ${snapshot.serial}` : 'NOT FROZEN'}</div></header>
+        <div className="synthetic-feed"><div className="feed-grid" /><div className="table-plane" /><div className="feed-meta"><span>{role === 'cam_high' ? 'APRILTAG / DOTS / BOTTLE' : 'NO EXPERIMENT STREAM'}</span><span>640×480@60 RGB8</span></div></div>
+      </article>
+    })}</div>
+  </section>
+}
+
+function Guide({
+  mode, session, factory, world, busy, error, onPreflight, onFactory, onWorld,
 }: {
   mode: AppMode
-  preflight: PreflightUiState
-  capture: CaptureUiState
-  samples: SampleRecord[]
-  previewNonce: number
-  onRun: () => void
-  onStart: () => void
-  onSample: () => void
-  onStop: () => void
+  session?: PreflightSession
+  factory?: FactorySnapshotBundle
+  world?: WorldOriginResult
+  busy: string | null
+  error: string | null
+  onPreflight: () => void
+  onFactory: () => void
+  onWorld: (tagSize: number, tagHeight: number) => void
 }) {
-  const live = capture.kind === 'streaming'
-  return (
-    <div className="preview-layout">
-      <StageRail capture={capture} preflight={preflight} />
-      <section className="camera-workspace">
-        <div className="workspace-heading">
-          <div>
-            <span>{live ? 'SINGLE CAMERA · EXCLUSIVE LIVE' : 'SIMULATED CAMERA WALL'}</span>
-            <h2>{live ? '实时 ChArUco 检测' : '模拟画面'} <i>·</i> 当前活动：<strong>cam_high</strong></h2>
-          </div>
-          <div className="quality-legend"><i className="active" />活动 <i />待机</div>
-        </div>
-        <div className="camera-grid">
-          {cameras.map((camera, index) => <CameraTile camera={camera} capture={capture} index={index} key={camera.role} preflight={preflight} previewNonce={previewNonce} />)}
-        </div>
-        <SampleStrip liveSamples={live ? samples : undefined} observation={capture.kind === 'streaming' ? capture.status.latest_observation : undefined} />
-      </section>
-      <InstructionPanel capture={capture} mode={mode} onRun={onRun} onSample={onSample} onStart={onStart} onStop={onStop} preflight={preflight} samples={samples} />
+  const [tagSizeMm, setTagSizeMm] = useState(80)
+  const [tagHeightMm, setTagHeightMm] = useState(3)
+  return <aside className="instruction-panel">
+    <section className="instruction-card primary"><div className="instruction-number">01</div><div><h2>实验一 · 世界锚点</h2><p>将 AprilTag ID0 中心对准桌面原点，印刷 +X/+Y 对准真实桌面 +X/+Y。</p><ul><li>标签贴在刚性平板上</li><li>输入黑边实测尺寸和印刷面高度</li><li>一次采 200 个不可覆盖 RGB 帧</li></ul></div></section>
+    <section className="form-card"><label>Tag 黑边 / mm<input type="number" value={tagSizeMm} onChange={(event) => setTagSizeMm(Number(event.target.value))} /></label><label>印刷面高出桌面 / mm<input type="number" value={tagHeightMm} onChange={(event) => setTagHeightMm(Number(event.target.value))} /></label></section>
+    {!session ? <button className="primary-action" disabled={mode === 'preview' || busy !== null} onClick={onPreflight}>{mode === 'preview' ? '运行只读预检（预览禁用）' : '运行只读预检'}</button> : null}
+    {session && !factory ? <><strong className="gate-status">{session.state}</strong><button className="primary-action" disabled={busy !== null} onClick={onFactory}>冻结四台出厂 K/D</button></> : null}
+    {factory && !world ? <><strong className="gate-status">{factory.status}</strong><button className="primary-action" disabled={busy !== null} onClick={() => onWorld(tagSizeMm / 1000, tagHeightMm / 1000)}>采集 200 帧并求解世界锚点</button></> : null}
+    {world ? <section className="preflight-result ready"><strong>{world.status}</strong><span>{world.accepted_frames}/{world.total_frames} accepted</span><span>median {world.median_reprojection_rms_px.toFixed(3)} px</span><span>jitter {(world.translation_jitter_m * 1000).toFixed(2)} mm · {world.rotation_jitter_deg.toFixed(3)}°</span></section> : null}
+    {busy ? <p className="action-hint">正在执行：{busy}</p> : null}{error ? <p className="preflight-error">{error}</p> : null}
+  </aside>
+}
+
+function TableDots({
+  enabled, contract, result, snapshot, busy, onSnapshot, onFreeze, onSolve,
+}: {
+  enabled: boolean
+  contract?: FrozenTableContract
+  result?: TableResult
+  snapshot?: TableSnapshot & { url: string }
+  busy: string | null
+  onSnapshot: () => void
+  onFreeze: (dots: DotForm[]) => void
+  onSolve: (dots: DotForm[]) => void
+}) {
+  const [dots, setDots] = useState(initialDots)
+  const [selectedDot, setSelectedDot] = useState('P11')
+  const update = (id: string, patch: Partial<DotForm>) => setDots((current) => current.map((dot) => dot.id === id ? { ...dot, ...patch } : dot))
+  const observationsReady = dots.every((dot) => dot.u !== '' && dot.v !== '' && dot.confirmed)
+  const clickSnapshot = (event: React.MouseEvent<HTMLImageElement>) => {
+    const image = event.currentTarget
+    const rect = image.getBoundingClientRect()
+    const u = (event.clientX - rect.left) * image.naturalWidth / rect.width
+    const v = (event.clientY - rect.top) * image.naturalHeight / rect.height
+    update(selectedDot, { u: u.toFixed(2), v: v.toFixed(2) })
+  }
+  return <section className="secondary-workspace"><header><span>EXPERIMENT 2 · TABLETOP XY</span><h2>9 个彩色圆点</h2><p>先冻结钢尺/直角尺测量，再输入图像中心；求解请求不能携带或修改物理真值。</p></header>
+    <div className="validation-warning"><strong>范围</strong><span>范围：桌面平面 XY 交叉验证，不声明离面 Z 已验证</span></div>
+    <section className="table-snapshot-card"><div><strong>同一张不可变证据图</strong><span>{snapshot ? `${snapshot.attemptId} · frame ${snapshot.frameNumber} · ${snapshot.imageSha256.slice(0, 12)}…` : '先让 9 个圆点全部可见，再拍摄'}</span><button className="primary-action" disabled={!enabled || busy !== null} onClick={onSnapshot}>{snapshot ? '拍摄新的不可覆盖 attempt' : '拍摄 camera_high 桌面快照'}</button></div>{snapshot ? <div className="clickable-snapshot"><img alt="camera_high 桌面圆点证据" src={snapshot.url} onClick={clickSnapshot} />{dots.filter((dot) => dot.u !== '' && dot.v !== '').map((dot) => <i key={dot.id} style={{ left: `${Number(dot.u) / 640 * 100}%`, top: `${Number(dot.v) / 480 * 100}%` }}><b>{dot.id}</b></i>)}</div> : null}</section>
+    <div className="dot-table">{dots.map((dot) => <article className={`dot-row ${dot.partition.toLowerCase()}`} key={dot.id}>
+      <button className={selectedDot === dot.id ? 'point-selector selected' : 'point-selector'} onClick={() => setSelectedDot(dot.id)}>{dot.id} · {dot.partition}</button><i className={`color-${dot.color}`} />
+      {(['x1', 'y1', 'x2', 'y2'] as const).map((field) => <label key={field}>{field}<input type="number" step="0.001" value={dot[field]} onChange={(event) => update(dot.id, { [field]: Number(event.target.value) })} /></label>)}
+      <label>u px<input value={dot.u} onChange={(event) => update(dot.id, { u: event.target.value })} /></label><label>v px<input value={dot.v} onChange={(event) => update(dot.id, { v: event.target.value })} /></label>
+      <label className="confirm"><input type="checkbox" checked={dot.confirmed} onChange={(event) => update(dot.id, { confirmed: event.target.checked })} />中心已确认</label>
+    </article>)}</div>
+    {!contract ? <button className="primary-action" disabled={!enabled || busy !== null} onClick={() => onFreeze(dots)}>冻结 9 点测量 contract</button> : null}
+    {contract && !result ? <><strong className="gate-status">{contract.status}</strong><button className="primary-action" disabled={!observationsReady || busy !== null} onClick={() => onSolve(dots)}>运行 6 点求解 + 3 点盲测</button></> : null}
+    {result ? <section className="preflight-result ready"><strong>{result.status}</strong><span>{result.validation_scope}</span><span>held-out RMS {(result.held_out_rms_m * 1000).toFixed(2)} mm · max {(result.held_out_max_m * 1000).toFixed(2)} mm</span></section> : null}
+  </section>
+}
+
+function Bottle({
+  enabled, contract, captures, result, busy, onFreeze, onCapture, onValidate,
+}: {
+  enabled: boolean
+  contract?: FrozenBottleContract
+  captures: Partial<Record<TrialId, BottleCaptureResult>>
+  result?: BottleValidationResult
+  busy: string | null
+  onFreeze: (input: unknown) => void
+  onCapture: (trial: TrialId) => void
+  onValidate: () => void
+}) {
+  const [lengthMm, setLengthMm] = useState(206)
+  const [diameterMm, setDiameterMm] = useState(68)
+  const [blockMm, setBlockMm] = useState(50)
+  const [tagPose, setTagPose] = useState({ tx: 0, ty: 0, tz: 0, roll: 0, pitch: 0, yaw: 0 })
+  const [repeatMm, setRepeatMm] = useState(0)
+  const trials: Array<[TrialId, string]> = [
+    ['B-A', 'P22 · 长轴 +X · 桌面支撑'],
+    ['B-B', 'P23 · 长轴 +Y · 桌面支撑'],
+    ['B-C', 'P11 · 长轴 -X · 已知垫块'],
+  ]
+  const freeze = () => onFreeze({
+    fixture_id: 'bottle500-v-block-001', revision: 1,
+    measured_length_m: lengthMm / 1000, measured_diameter_m: diameterMm / 1000,
+    tag_from_bottle: eulerTransform(tagPose.tx / 1000, tagPose.ty / 1000, tagPose.tz / 1000, tagPose.roll, tagPose.pitch, tagPose.yaw),
+    task_from_asset: taskFromAsset, block_height_m: blockMm / 1000,
+    measurement_method: 'steel-ruler-square-and-rigid-stops', repeated_installation_delta_m: repeatMm / 1000,
+  })
+  return <section className="secondary-workspace"><header><span>EXPERIMENT 3 · TAGGED RIGID FIXTURE</span><h2>Bottle500 三位置传递</h2><p>expected pose 由冻结圆点与夹具 contract 在服务端产生；浏览器不能提交 expected pose。</p></header>
+    <div className="validation-warning"><strong>能力边界</strong><span>不代表无标签透明瓶识别、碰撞或动力学通过</span></div>
+    <div className="form-card bottle-form"><label>瓶长 / mm<input type="number" value={lengthMm} onChange={(e) => setLengthMm(Number(e.target.value))} /></label><label>最大直径 / mm<input type="number" value={diameterMm} onChange={(e) => setDiameterMm(Number(e.target.value))} /></label><label>垫块 / mm<input type="number" value={blockMm} onChange={(e) => setBlockMm(Number(e.target.value))} /></label><label>重复安装差 / mm<input type="number" value={repeatMm} onChange={(e) => setRepeatMm(Number(e.target.value))} /></label>
+      {(['tx', 'ty', 'tz', 'roll', 'pitch', 'yaw'] as const).map((field) => <label key={field}>{field}{field.length === 2 ? ' / mm' : ' / deg'}<input type="number" value={tagPose[field]} onChange={(event) => setTagPose((current) => ({ ...current, [field]: Number(event.target.value) }))} /></label>)}
     </div>
-  )
+    {!contract ? <button className="primary-action" disabled={!enabled || busy !== null} onClick={freeze}>冻结瓶子夹具 contract</button> : null}
+    {contract ? <div className="validation-grid">{trials.map(([trial, note]) => <article key={trial}><div className="validation-icon">{trial}</div><div><h3>{note}</h3><p>{captures[trial] ? `${captures[trial]?.stability.accepted_frames} frames · captured` : '按物理挡块摆放后采集'}</p></div><button disabled={busy !== null} onClick={() => onCapture(trial)}>{captures[trial] ? '重新采集新 attempt' : '采集 150 帧'}</button></article>)}</div> : null}
+    {contract && !result ? <button className="primary-action" disabled={trials.some(([trial]) => !captures[trial]) || busy !== null} onClick={onValidate}>运行三位置独立验收</button> : null}
+    {result ? <section className="preflight-result ready"><strong>{result.status}</strong><span>{result.claim_scope}</span><span>center RMS {(result.center_rms_m * 1000).toFixed(2)} mm · axis RMS {result.long_axis_rms_deg.toFixed(2)}°</span></section> : null}
+    <strong className="gate-status">TAGGED_FIXTURE_TRANSFER_PASS</strong>
+  </section>
 }
 
-function DatasetWorkspace() {
-  return (
-    <WorkspaceFrame eyebrow="DATASET · IMMUTABLE RAW TAKE" title="数据集审查" description="逐帧查看接受与拒绝原因；求解数据和 held-out 数据在采集前分区。">
-      <div className="dataset-toolbar">
-        <div><span>数据集</span><strong>intrinsics_cam_high_preview_001</strong></div>
-        <div><span>Profile</span><strong>640 × 480 @ 60 · RGB</strong></div>
-        <div><span>来源</span><strong>MOCK · 无设备连接</strong></div>
-        <button disabled>移除上一帧</button>
-      </div>
-      <div className="dataset-grid">
-        {Array.from({ length: 12 }, (_, index) => (
-          <article className={`dataset-sample ${index === 7 || index === 10 ? 'bad' : ''}`} key={index}>
-            <div className="dataset-image"><div className={`mini-board angle-${index % 6}`}><i /><i /><i /></div></div>
-            <div className="dataset-sample-title"><strong>S-{String(index + 1).padStart(3, '0')}</strong><span>{index < 8 ? 'SOLVE' : 'HELD-OUT'}</span></div>
-            <p>{index === 7 ? '拒绝 · 角点遮挡' : index === 10 ? '拒绝 · 运动模糊' : '接受 · 新增覆盖'}</p>
-          </article>
-        ))}
-      </div>
-    </WorkspaceFrame>
-  )
-}
-
-function SolveWorkspace() {
-  return (
-    <WorkspaceFrame eyebrow="SOLVE · REVIEW BEFORE VALIDATE" title="求解结果" description="候选解只能比较，不能通过人工拖动变换制造 PASS。">
-      <div className="solve-layout">
-        <section className="large-card">
-          <div className="card-heading"><span>变换语义</span><em>MOCK RESULT</em></div>
-          <div className="transform-diagram">
-            <div><span>W</span><small>桌面世界坐标系</small></div>
-            <i><b>T<sub>W</sub><sup>C-high</sup></b><small>parent: W · child: cam_high</small></i>
-            <div><span>C</span><small>cam_high 光学坐标系</small></div>
-          </div>
-          <pre>{`units: meters\nquaternion: wxyz\nsolver: preview-placeholder\ninput_hash: unavailable`}</pre>
-        </section>
-        <section className="large-card candidate-table">
-          <div className="card-heading"><span>候选解比较</span><em>不作为验收</em></div>
-          <div className="table-row header"><span>候选</span><span>Median px</span><span>Held-out</span><span>状态</span></div>
-          <div className="table-row selected"><span>Factory K/D</span><span>0.42*</span><span>未运行</span><span>待验证</span></div>
-          <div className="table-row"><span>Software K/D</span><span>0.39*</span><span>未运行</span><span>仅比较</span></div>
-          <p>* 示例数值，不是 NVIDIA 或项目验收门限。</p>
-        </section>
-      </div>
-    </WorkspaceFrame>
-  )
-}
-
-function ValidateWorkspace() {
-  return (
-    <WorkspaceFrame eyebrow="VALIDATE · NO REFIT ALLOWED" title="独立验证" description="冻结求解参数后，使用未参与拟合的图像、三维工装和重复会话检验。">
-      <div className="validation-grid">
-        {[
-          ['Held-out 图像', '检查未参与求解的视角', 'WAITING'],
-          ['三维检查工装', '覆盖桌面与离面高度', 'LOCKED'],
-          ['跨相机一致性', '只作诊断，不作独立真值', 'LOCKED'],
-          ['冷启动重复性', '至少三次独立会话', 'LOCKED'],
-          ['反向接近重复', '暴露腕部背隙与柔顺误差', 'LOCKED'],
-          ['TCP 指针触碰', '需要用户另行授权', 'AUTH REQUIRED'],
-        ].map(([title, note, state], index) => (
-          <article className={index === 0 ? 'waiting' : ''} key={title}>
-            <div className="validation-icon">{String(index + 1).padStart(2, '0')}</div>
-            <div><h3>{title}</h3><p>{note}</p></div>
-            <span>{state}</span>
-          </article>
-        ))}
-      </div>
-      <div className="validation-warning"><strong>禁止循环证明</strong><span>同一标定板、同一标签尺寸或同一拟合数据不能同时充当独立真值。</span></div>
-    </WorkspaceFrame>
-  )
-}
-
-function ExportWorkspace() {
-  return (
-    <WorkspaceFrame eyebrow="EXPORT · EXPLICIT COMMIT" title="导出与提交" description="只有独立验收通过并绑定 AcceptancePolicy 后，才能生成正式校准包。">
-      <div className="export-layout">
-        <section className="large-card artifact-list">
-          {[
-            ['camera_registry.json', '设备身份与正式 Profile', 'DRAFT'],
-            ['dataset_manifest.json', '原始数据、分区与哈希', 'MISSING'],
-            ['transforms.yaml', '父子坐标系、单位与协方差', 'MISSING'],
-            ['validation_report.html', '独立验证与重复性报告', 'MISSING'],
-            ['camera_calibration.usda', 'Isaac 独立校准层', 'LOCKED'],
-          ].map(([name, note, state]) => (
-            <div className="artifact-row" key={name}><i /><div><strong>{name}</strong><span>{note}</span></div><em>{state}</em></div>
-          ))}
-        </section>
-        <section className="commit-card">
-          <span>COMMIT GATE</span>
-          <h3>当前不能提交</h3>
-          <p>Preview 没有原始数据、冻结变换、独立验证或批准的门限策略。</p>
-          <div><i />SOLVED <i />VALIDATED <i />POLICY APPROVED</div>
-          <button disabled>导出正式校准包</button>
-        </section>
-      </div>
-    </WorkspaceFrame>
-  )
-}
-
-function WorkspaceFrame({ eyebrow, title, description, children }: { eyebrow: string; title: string; description: string; children: React.ReactNode }) {
-  return (
-    <section className="secondary-workspace">
-      <header><span>{eyebrow}</span><h2>{title}</h2><p>{description}</p></header>
-      {children}
-    </section>
-  )
-}
-
-function SafetyBanner({ mode, preflight, capture }: { mode: AppMode; preflight: PreflightUiState; capture: CaptureUiState }) {
-  let captureStatus = mode === 'preview' ? 'OFF / EXCLUSIVE' : 'NOT CHECKED'
-  if (preflight.kind === 'running') captureStatus = 'CHECKING'
-  if (preflight.kind === 'complete') captureStatus = preflight.session.latest_preflight.status === 'READY' ? 'FREE / EXCLUSIVE' : preflight.session.latest_preflight.status
-  if (preflight.kind === 'error') captureStatus = 'ERROR'
-  if (capture.kind === 'starting') captureStatus = 'STARTING cam_high'
-  if (capture.kind === 'streaming') captureStatus = 'cam_high LIVE / EXCLUSIVE'
-  if (capture.kind === 'error') captureStatus = 'CAPTURE ERROR'
-  return (
-    <section className="safety-banner" aria-label="系统所有权状态">
-      <div><i className="host" /><span>101 本机浏览器</span></div>
-      <div><i className="off" /><span>103 Capture: {captureStatus}</span></div>
-      <div><i className="blocked" /><span>Robot command APIs: NONE</span></div>
-      <div><i className="cloud" /><span>Isaac: DISCONNECTED</span></div>
-      <div><i className="clock" /><span>Browser time: <strong>NOT USED</strong></span></div>
-    </section>
-  )
-}
-
-function OutcomeBar() {
-  return (
-    <section className="outcome-bar" aria-label="独立验收状态">
-      {outcomes.map((outcome) => (
-        <article className={outcome.state} key={outcome.label}>
-          <i>{outcome.state === 'candidate' ? '◇' : '⌁'}</i>
-          <div><strong>{outcome.label}</strong><span>{outcome.note}</span></div>
-        </article>
-      ))}
-    </section>
-  )
+function ExportPanel({ enabled, result, busy, onExport }: { enabled: boolean; result?: ExportResult; busy: string | null; onExport: () => void }) {
+  return <section className="secondary-workspace"><header><span>USD · EXPLICIT COMPOSITION</span><h2>独立校准层与组合 Stage</h2><p>源 Stage 与 Bottle500 都先核验哈希；校准层强于冻结源层，源资产不被保存或改写。</p></header>
+    <button className="primary-action" disabled={!enabled || busy !== null} onClick={onExport}>生成 calibration.usda 与 calibrated_review.usda</button>
+    {result ? <section className="artifact-list large-card"><div className="artifact-row"><i /><div><strong>{result.calibration_json}</strong><span>列向量 JSON 与冻结 manifest</span></div><em>READY</em></div><div className="artifact-row"><i /><div><strong>{result.calibration_layer}</strong><span>CameraHigh + 三个 Bottle ghost prim</span></div><em>AUTHORED</em></div><div className="artifact-row"><i /><div><strong>{result.review_stage}</strong><span>等待 Isaac runtime readback</span></div><em>PENDING ISAAC</em></div></section> : null}
+  </section>
 }
 
 export default function App({ mode }: { mode?: AppMode }) {
-  const [workspace, setWorkspace] = useState<Workspace>('Preview')
-  const [preflight, setPreflight] = useState<PreflightUiState>({ kind: 'idle' })
-  const [capture, setCapture] = useState<CaptureUiState>({ kind: 'idle' })
-  const [samples, setSamples] = useState<SampleRecord[]>([])
-  const [previewNonce, setPreviewNonce] = useState(0)
-  const activeMode: AppMode = mode ?? (import.meta.env.VITE_CALIBRATION_API_MODE === 'live' ? 'live' : 'preview')
+  const activeMode = mode ?? (import.meta.env.VITE_CALIBRATION_API_MODE === 'live' ? 'live' : 'preview')
+  const [workspace, setWorkspace] = useState<Workspace>('Guide')
+  const [session, setSession] = useState<PreflightSession>()
+  const [factory, setFactory] = useState<FactorySnapshotBundle>()
+  const [world, setWorld] = useState<WorldOriginResult>()
+  const [tableContract, setTableContract] = useState<FrozenTableContract>()
+  const [tableResult, setTableResult] = useState<TableResult>()
+  const [tableSnapshot, setTableSnapshot] = useState<(TableSnapshot & { url: string })>()
+  const [bottleContract, setBottleContract] = useState<FrozenBottleContract>()
+  const [captures, setCaptures] = useState<Partial<Record<TrialId, BottleCaptureResult>>>({})
+  const [bottleResult, setBottleResult] = useState<BottleValidationResult>()
+  const [exportResult, setExportResult] = useState<ExportResult>()
+  const [busy, setBusy] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const sessionId = session?.id
+  const workflowState = exportResult ? 'EXPORT_READY' : bottleResult ? bottleResult.status : tableResult ? tableResult.status : world ? world.status : factory ? factory.status : session ? session.state : 'PREFLIGHT_READY'
 
-  useEffect(() => {
-    if (activeMode !== 'live') return
-    void getIntrinsicsStatus()
-      .then((status) => {
-        if (status.state === 'STREAMING' && status.pipeline_started) {
-          setCapture({ kind: 'streaming', status })
-        }
-      })
-      .catch(() => {
-        // Startup recovery is best-effort; explicit preflight remains available.
-      })
-  }, [activeMode])
-
-  useEffect(() => {
-    if (capture.kind !== 'streaming') return undefined
-    const interval = window.setInterval(() => setPreviewNonce((value) => value + 1), 500)
-    return () => window.clearInterval(interval)
-  }, [capture.kind])
-
-  useEffect(() => {
-    if (capture.kind !== 'streaming') return undefined
-    const interval = window.setInterval(async () => {
-      try {
-        const status = await getIntrinsicsStatus()
-        setCapture((current) => current.kind === 'streaming' ? { kind: 'streaming', status } : current)
-      } catch {
-        // A transient status-poll failure must not hide the stop control for an active device.
-      }
-    }, 1500)
-    return () => window.clearInterval(interval)
-  }, [capture.kind])
-
-  async function handleRunPreflight() {
-    if (activeMode !== 'live' || preflight.kind !== 'idle') return
-    setPreflight({ kind: 'running' })
-    try {
-      const session = await runPreflightSession()
-      setPreflight({ kind: 'complete', session })
-    } catch (error) {
-      setPreflight({ kind: 'error', message: error instanceof Error ? error.message : 'Unknown preflight error' })
-    }
+  async function run<T>(label: string, action: () => Promise<T>, commit: (value: T) => void) {
+    setBusy(label); setError(null)
+    try { commit(await action()) } catch (caught) { setError(caught instanceof Error ? caught.message : String(caught)) } finally { setBusy(null) }
   }
 
-  async function handleStartIntrinsics() {
-    if (activeMode !== 'live' || preflight.kind !== 'complete' || preflight.session.latest_preflight.status !== 'READY') return
-    setCapture({ kind: 'starting' })
-    try {
-      const status = await startIntrinsicsCapture(preflight.session.id, 'cam_high')
-      setCapture({ kind: 'streaming', status })
-    } catch (error) {
-      setCapture({ kind: 'error', message: error instanceof Error ? error.message : 'Unknown intrinsics start error' })
-    }
-  }
+  const dotsContractInput = (dots: DotForm[]) => ({ contract_id: 'table-dots-20260805', revision: 1, measurement_method: 'steel-ruler-and-square', points: dots.map((dot) => ({ id: dot.id, color: dot.color, measurement_1_xy_m: [dot.x1, dot.y1], measurement_2_xy_m: [dot.x2, dot.y2] })) })
+  const dotObservationInput = (dots: DotForm[]) => ({ observations: dots.map((dot) => ({ id: dot.id, image_uv_px: [Number(dot.u), Number(dot.v)], operator_confirmed: dot.confirmed })) })
+  const tabs: Workspace[] = ['Guide', 'Table Dots', 'Bottle', 'Export']
+  const content = useMemo(() => {
+    if (workspace === 'Table Dots') return <TableDots enabled={Boolean(world)} contract={tableContract} result={tableResult} snapshot={tableSnapshot} busy={busy} onSnapshot={() => sessionId && void run('拍摄桌面圆点快照', () => captureTableSnapshot(sessionId), (value) => setTableSnapshot((current) => { if (current) URL.revokeObjectURL(current.url); return { ...value, url: URL.createObjectURL(value.blob) } }))} onFreeze={(dots) => sessionId && void run('冻结桌面点', () => freezeTableContract(sessionId, dotsContractInput(dots)), setTableContract)} onSolve={(dots) => sessionId && void run('求解桌面外参', () => solveTableRegistration(sessionId, dotObservationInput(dots)), setTableResult)} />
+    if (workspace === 'Bottle') return <Bottle enabled={Boolean(tableResult)} contract={bottleContract} captures={captures} result={bottleResult} busy={busy} onFreeze={(input) => sessionId && void run('冻结瓶子夹具', () => freezeBottleContract(sessionId, input), setBottleContract)} onCapture={(trial) => sessionId && void run(`采集 ${trial}`, () => captureBottleTrial(sessionId, trial, { tag_size_m: 0.080, frame_count: 150 }), (value) => setCaptures((current) => ({ ...current, [trial]: value })))} onValidate={() => sessionId && void run('验收瓶子传递', () => validateBottleTrials(sessionId), setBottleResult)} />
+    if (workspace === 'Export') return <ExportPanel enabled={Boolean(bottleResult)} result={exportResult} busy={busy} onExport={() => sessionId && void run('导出 USD 标定包', () => exportCalibrationBundle(sessionId, {
+      stage: { path: '/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/table_support_alignment/1.0/aloha1_table_support_aligned_workcell.usda', sha256: '2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c' },
+      bottle_asset_path: '/home/eii/project/openpi0.5-rtc-reward-learning/assets/bottle_500ml/isaac/bottle_500ml_sim.usd', bottle_asset_sha256: '16427135f152ec951de2321fd689366d745a2dd389cbe260976631783952533e', bottle_asset_prim: '/Bottle500',
+    }), setExportResult)} />
+    return <div className="preview-layout"><StageRail state={workflowState} /><CameraWall factory={factory} /><Guide mode={activeMode} session={session} factory={factory} world={world} busy={busy} error={error} onPreflight={() => void run('相机预检', runPreflightSession, setSession)} onFactory={() => sessionId && void run('冻结出厂内参', () => freezeFactoryIntrinsics(sessionId), setFactory)} onWorld={(tagSize, tagHeight) => sessionId && void run('世界锚点 200 帧', () => captureAndSolveWorldOrigin(sessionId, { tag_size_m: tagSize, tag_plane_height_m: tagHeight, frame_count: 200 }), setWorld)} /></div>
+  }, [workspace, session, factory, world, tableContract, tableResult, tableSnapshot, bottleContract, captures, bottleResult, exportResult, busy, error, workflowState, activeMode, sessionId])
 
-  async function handleCaptureSample() {
-    if (capture.kind !== 'streaming') return
-    try {
-      const sample = await captureIntrinsicsSample()
-      setSamples((current) => [...current, sample])
-      setCapture({ kind: 'streaming', status: { ...capture.status, latest_observation: sample.observation } })
-    } catch (error) {
-      setCapture({
-        kind: 'streaming',
-        status: capture.status,
-        actionError: error instanceof Error ? error.message : 'Unknown sample error',
-      })
-    }
-  }
-
-  async function handleStopIntrinsics() {
-    if (capture.kind !== 'streaming') return
-    try {
-      await stopIntrinsicsCapture()
-      setCapture({ kind: 'idle' })
-    } catch (error) {
-      setCapture({ kind: 'error', message: error instanceof Error ? error.message : 'Unknown stop error' })
-    }
-  }
-
-  return (
-    <main className="app-shell">
-      <header className="app-header">
-        <div className="brand-mark">A</div>
-        <div className="title-block">
-          <span>ROBOTICS METROLOGY</span>
-          <h1>ALOHA 四相机标定工作台</h1>
-        </div>
-        <div className={`preview-badge ${activeMode === 'live' ? 'live' : ''}`}>
-          <i />{activeMode === 'live' ? capture.kind === 'streaming' ? 'LIVE · cam_high ONLY' : 'LIVE · GATED DEVICE ACCESS' : 'PREVIEW · 不执行设备操作'}
-        </div>
-        <nav role="tablist" aria-label="工作区">
-          {workspaces.map((item) => (
-            <button
-              aria-selected={workspace === item}
-              className={workspace === item ? 'active' : ''}
-              key={item}
-              onClick={() => setWorkspace(item)}
-              role="tab"
-            >{item}</button>
-          ))}
-        </nav>
-        <div className="session-meta"><span>SESSION</span><strong>{capture.kind === 'streaming' ? capture.status.session_id : preflight.kind === 'complete' ? preflight.session.id : 'preview_001'}</strong></div>
-      </header>
-
-      <div className="workspace-container">
-        {workspace === 'Preview' ? (
-          <PreviewWorkspace
-            capture={capture}
-            mode={activeMode}
-            onRun={handleRunPreflight}
-            onSample={handleCaptureSample}
-            onStart={handleStartIntrinsics}
-            onStop={handleStopIntrinsics}
-            preflight={preflight}
-            previewNonce={previewNonce}
-            samples={samples}
-          />
-        ) : null}
-        {workspace === 'Dataset' ? <DatasetWorkspace /> : null}
-        {workspace === 'Solve' ? <SolveWorkspace /> : null}
-        {workspace === 'Validate' ? <ValidateWorkspace /> : null}
-        {workspace === 'Export' ? <ExportWorkspace /> : null}
-      </div>
-
-      <SafetyBanner capture={capture} mode={activeMode} preflight={preflight} />
-      <OutcomeBar />
-    </main>
-  )
+  return <main className="app-shell"><header className="app-header"><div className="brand-mark">A</div><div className="title-block"><span>ROBOTICS METROLOGY</span><h1>ALOHA 桌面与瓶子标定工作台</h1></div><div className={`preview-badge ${activeMode === 'live' ? 'live' : ''}`}><i />{activeMode === 'live' ? 'LIVE · GATED CAMERA ACCESS' : 'PREVIEW · 不执行设备操作'}</div><nav role="tablist" aria-label="工作区">{tabs.map((tab) => <button aria-selected={workspace === tab} className={workspace === tab ? 'active' : ''} key={tab} onClick={() => setWorkspace(tab)} role="tab">{tab}</button>)}</nav><div className="session-meta"><span>SESSION</span><strong>{sessionId ?? 'preview_001'}</strong></div></header><div className="workspace-container">{content}</div><section className="safety-banner"><div><span>DEPTH OFF · ROBOT API NONE</span></div><div><span>camera_high RGB ONLY</span></div><div><span>Isaac timeline: PAUSED</span></div><div><span>{workflowState}</span></div></section></main>
 }

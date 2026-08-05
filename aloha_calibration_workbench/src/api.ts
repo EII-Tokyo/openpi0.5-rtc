@@ -1,115 +1,151 @@
-export type OwnershipState = 'FREE' | 'BUSY' | 'UNKNOWN'
-export type PreflightStatus = 'READY' | 'BLOCKED' | 'FAILED'
+export type CameraRole = 'cam_high' | 'cam_low' | 'wrist_left' | 'wrist_right'
 
 export interface PreflightCamera {
-  role: string
+  role: CameraRole
   connected: boolean
   identity_match: boolean
   production_profile_supported: boolean
-  ownership: OwnershipState
-}
-
-export interface PreflightIssue {
-  code: string
-  severity: 'WARNING' | 'BLOCKING' | 'ERROR'
-  message: string
-  camera_role?: string | null
-}
-
-export interface PreflightReport {
-  status: PreflightStatus
-  cameras: PreflightCamera[]
-  issues: PreflightIssue[]
+  ownership: 'FREE' | 'BUSY' | 'UNKNOWN'
 }
 
 export interface PreflightSession {
   id: string
   state: 'PREFLIGHT_READY' | 'PREFLIGHT_BLOCKED' | 'PREFLIGHT_FAILED'
-  latest_preflight: PreflightReport
+  latest_preflight: {
+    status: 'READY' | 'BLOCKED' | 'FAILED'
+    cameras: PreflightCamera[]
+    issues: Array<{ code: string; severity: string; camera_role?: string | null }>
+  }
 }
 
-export interface FactoryIntrinsics {
-  width: number
-  height: number
-  fx: number
-  fy: number
-  cx: number
-  cy: number
-  distortion_model: string
-  distortion_coefficients: number[]
+export interface FactorySnapshotBundle {
+  status: 'FACTORY_INTRINSICS_FROZEN'
+  cameras: Array<{ role: CameraRole; serial: string }>
 }
 
-export interface CharucoObservation {
-  board_detected: boolean
-  marker_count: number
-  charuco_corner_count: number
-  blur_variance: number
-  black_clip_percent: number
-  white_clip_percent: number
-  centroid_x?: number | null
-  centroid_y?: number | null
-  board_area_percent?: number | null
-  reprojection_rms_px?: number | null
-  frame_number: number
-  device_timestamp_ms: number
+export interface TransformRecord {
+  source_frame: string
+  target_frame: string
+  matrix: number[][]
+  length_unit?: 'meter'
+  matrix_order?: 'row-major'
+  vector_convention?: 'column-vector'
+  quaternion_order?: 'wxyz'
 }
 
-export interface CaptureStatus {
-  state: 'IDLE' | 'STREAMING' | 'UNAVAILABLE'
-  session_id?: string | null
-  role?: string | null
-  serial?: string | null
-  profile?: { stream: string; width: number; height: number; fps: number; format: string } | null
-  factory_intrinsics?: FactoryIntrinsics | null
-  latest_observation?: CharucoObservation | null
-  pipeline_started: boolean
-  depth_stream_started: boolean
-  robot_command_api: boolean
+export interface WorldOriginResult {
+  status: 'WORLD_ORIGIN_SOLVED'
+  world_from_camera: TransformRecord
+  accepted_frames: number
+  total_frames: number
+  median_reprojection_rms_px: number
+  p95_reprojection_rms_px: number
+  translation_jitter_m: number
+  rotation_jitter_deg: number
 }
 
-export interface SampleRecord {
-  id: string
-  partition: 'SOLVE' | 'HELD_OUT'
-  accepted: boolean
-  reason: string
-  observation: CharucoObservation
+export interface FrozenTableContract {
+  status: 'TABLE_POINT_CONTRACT_FROZEN'
+  contract_sha256: string
 }
 
-export async function runPreflightSession(): Promise<PreflightSession> {
-  const response = await fetch('/api/preflight-session', {
+export interface TableResult {
+  status: 'WORLD_REGISTRATION_VALIDATED'
+  validation_scope: 'tabletop-xy-cross-validation'
+  held_out_rms_m: number
+  held_out_max_m: number
+  refinement_translation_m: number
+  refinement_rotation_deg: number
+}
+
+export interface TableSnapshot {
+  blob: Blob
+  attemptId: string
+  frameNumber: number
+  deviceTimestampMs: number
+  imageSha256: string
+}
+
+export interface FrozenBottleContract {
+  status: 'BOTTLE_FIXTURE_CONTRACT_FROZEN'
+  contract_sha256: string
+}
+
+export interface BottleCaptureResult {
+  observation: { id: 'B-A' | 'B-B' | 'B-C'; camera_from_tag: TransformRecord }
+  stability: { accepted_frames: number; translation_jitter_m: number; rotation_jitter_deg: number }
+}
+
+export interface BottleValidationResult {
+  status: 'TAGGED_FIXTURE_TRANSFER_PASS'
+  claim_scope: 'tagged-rigid-fixture-transfer-only'
+  center_rms_m: number
+  long_axis_rms_deg: number
+  support_max_abs_m: number
+}
+
+export interface ExportResult {
+  calibration_json: string
+  calibration_layer: string
+  review_stage: string
+  source_stage_sha256: string
+}
+
+async function postJson<T>(url: string, body?: unknown): Promise<T> {
+  const response = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
+    ...(body === undefined ? {} : { body: JSON.stringify(body) }),
   })
   if (!response.ok) {
-    throw new Error(`Preflight request failed: HTTP ${response.status}`)
+    const message = await response.json().catch(() => null) as { detail?: string } | null
+    throw new Error(message?.detail ?? `Request failed: HTTP ${response.status}`)
   }
-  return response.json() as Promise<PreflightSession>
+  return response.json() as Promise<T>
 }
 
-export async function startIntrinsicsCapture(sessionId: string, role = 'cam_high'): Promise<CaptureStatus> {
-  const response = await fetch(`/api/sessions/${sessionId}/actions/intrinsics/start`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ role }),
-  })
-  if (!response.ok) throw new Error(`Intrinsics start failed: HTTP ${response.status}`)
-  return response.json() as Promise<CaptureStatus>
+export const runPreflightSession = () => postJson<PreflightSession>('/api/preflight-session')
+
+export const freezeFactoryIntrinsics = (sessionId: string) =>
+  postJson<FactorySnapshotBundle>(`/api/sessions/${sessionId}/actions/factory/freeze`)
+
+export const captureAndSolveWorldOrigin = (
+  sessionId: string,
+  input: { tag_size_m: number; tag_plane_height_m: number; frame_count: number },
+) => postJson<WorldOriginResult>(`/api/sessions/${sessionId}/actions/world-origin/capture-solve`, input)
+
+export const freezeTableContract = (sessionId: string, input: unknown) =>
+  postJson<FrozenTableContract>(`/api/sessions/${sessionId}/actions/table-contract/freeze`, input)
+
+export async function captureTableSnapshot(sessionId: string): Promise<TableSnapshot> {
+  const response = await fetch(`/api/sessions/${sessionId}/actions/table/snapshot`, { method: 'POST' })
+  if (!response.ok) {
+    const message = await response.json().catch(() => null) as { detail?: string } | null
+    throw new Error(message?.detail ?? `Request failed: HTTP ${response.status}`)
+  }
+  return {
+    blob: await response.blob(),
+    attemptId: response.headers.get('X-Attempt-Id') ?? 'UNKNOWN',
+    frameNumber: Number(response.headers.get('X-Frame-Number') ?? 0),
+    deviceTimestampMs: Number(response.headers.get('X-Device-Timestamp-Ms') ?? 0),
+    imageSha256: response.headers.get('X-Image-Sha256') ?? '',
+  }
 }
 
-export async function getIntrinsicsStatus(): Promise<CaptureStatus> {
-  const response = await fetch('/api/intrinsics/status', { cache: 'no-store' })
-  if (!response.ok) throw new Error(`Intrinsics status failed: HTTP ${response.status}`)
-  return response.json() as Promise<CaptureStatus>
-}
+export const solveTableRegistration = (sessionId: string, input: unknown) =>
+  postJson<TableResult>(`/api/sessions/${sessionId}/actions/table/solve`, input)
 
-export async function captureIntrinsicsSample(): Promise<SampleRecord> {
-  const response = await fetch('/api/intrinsics/sample', { method: 'POST' })
-  if (!response.ok) throw new Error(`Sample capture failed: HTTP ${response.status}`)
-  return response.json() as Promise<SampleRecord>
-}
+export const freezeBottleContract = (sessionId: string, input: unknown) =>
+  postJson<FrozenBottleContract>(`/api/sessions/${sessionId}/actions/bottle-contract/freeze`, input)
 
-export async function stopIntrinsicsCapture(): Promise<CaptureStatus> {
-  const response = await fetch('/api/intrinsics/stop', { method: 'POST' })
-  if (!response.ok) throw new Error(`Intrinsics stop failed: HTTP ${response.status}`)
-  return response.json() as Promise<CaptureStatus>
-}
+export const captureBottleTrial = (
+  sessionId: string,
+  trialId: 'B-A' | 'B-B' | 'B-C',
+  input: { tag_size_m: number; frame_count: number },
+) => postJson<BottleCaptureResult>(`/api/sessions/${sessionId}/actions/bottle/${trialId}/capture`, input)
+
+export const validateBottleTrials = (sessionId: string) =>
+  postJson<BottleValidationResult>(`/api/sessions/${sessionId}/actions/bottle/validate`)
+
+export const exportCalibrationBundle = (sessionId: string, input: unknown) =>
+  postJson<ExportResult>(`/api/sessions/${sessionId}/actions/export`, input)
