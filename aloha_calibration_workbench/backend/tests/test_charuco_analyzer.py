@@ -19,7 +19,7 @@ def test_detects_the_exact_7x5_dict_5x5_100_target_and_reports_factory_reproject
         fy=600.0,
         cx=320.0,
         cy=240.0,
-        distortion_model="brown_conrady",
+        distortion_model="inverse_brown_conrady",
         distortion_coefficients=[0.0] * 5,
     )
 
