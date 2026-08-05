@@ -103,4 +103,6 @@ def test_preflight_blocks_when_production_profile_is_not_supported():
     report = PreflightService(registry=registry, probe=FakeProbe(observations)).run()
 
     assert report.status is PreflightStatus.BLOCKED
-    assert any(issue.code == "PRODUCTION_PROFILE_UNSUPPORTED" and issue.camera_role == "cam_high" for issue in report.issues)
+    assert any(
+        issue.code == "PRODUCTION_PROFILE_UNSUPPORTED" and issue.camera_role == "cam_high" for issue in report.issues
+    )

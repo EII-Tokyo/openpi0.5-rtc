@@ -112,4 +112,53 @@ describe('ALOHA calibration preview workbench', () => {
     expect(screen.getByText('FIRMWARE_DIFFERS_FROM_RECOMMENDED · cam_low')).toBeInTheDocument()
     fetchSpy.mockRestore()
   })
+
+  it('gates the cam_high pipeline behind a ready preflight and shows factory intrinsics', async () => {
+    const user = userEvent.setup()
+    const fetchSpy = vi.spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        id: 'cal-20260805T120000-1234abcd',
+        state: 'PREFLIGHT_READY',
+        latest_preflight: {
+          status: 'READY',
+          cameras: [
+            { role: 'cam_high', connected: true, identity_match: true, production_profile_supported: true, ownership: 'FREE' },
+            { role: 'cam_low', connected: true, identity_match: true, production_profile_supported: true, ownership: 'FREE' },
+            { role: 'wrist_left', connected: true, identity_match: true, production_profile_supported: true, ownership: 'FREE' },
+            { role: 'wrist_right', connected: true, identity_match: true, production_profile_supported: true, ownership: 'FREE' },
+          ],
+          issues: [],
+        },
+      }), { status: 200, headers: { 'Content-Type': 'application/json' } }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        state: 'STREAMING',
+        session_id: 'cal-20260805T120000-1234abcd',
+        role: 'cam_high',
+        serial: '130322270656',
+        profile: { stream: 'color', width: 640, height: 480, fps: 60, format: 'rgb8' },
+        factory_intrinsics: {
+          width: 640, height: 480, fx: 600.25, fy: 601.5, cx: 319.8, cy: 239.7,
+          distortion_model: 'brown_conrady', distortion_coefficients: [0, 0, 0, 0, 0],
+        },
+        pipeline_started: true,
+        depth_stream_started: false,
+        robot_command_api: false,
+      }), { status: 200, headers: { 'Content-Type': 'application/json' } }))
+
+    render(<App mode="live" />)
+    expect(screen.queryByRole('button', { name: '启动 cam_high 内参采集' })).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: '运行只读预检' }))
+    await user.click(await screen.findByRole('button', { name: '启动 cam_high 内参采集' }))
+
+    expect(fetchSpy).toHaveBeenNthCalledWith(
+      2,
+      '/api/sessions/cal-20260805T120000-1234abcd/actions/intrinsics/start',
+      expect.objectContaining({ method: 'POST' }),
+    )
+    expect(await screen.findByText('FACTORY K/D LOADED')).toBeInTheDocument()
+    expect(screen.getByText('fx 600.25 · fy 601.50')).toBeInTheDocument()
+    expect(screen.getByText('DEPTH OFF · ROBOT API NONE')).toBeInTheDocument()
+    fetchSpy.mockRestore()
+  })
 })

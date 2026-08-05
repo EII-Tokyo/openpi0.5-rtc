@@ -10,6 +10,7 @@ import re
 import tempfile
 from uuid import uuid4
 
+from .models import CaptureStatus
 from .models import PreflightReport
 from .models import PreflightStatus
 from .models import SessionRecord
@@ -84,6 +85,26 @@ class SessionStore:
                 "latest_preflight": report,
             }
         )
+        session_payload = updated.model_dump(mode="json", exclude={"latest_preflight"})
+        self._atomic_write_json(self._session_path(session_id), session_payload)
+        return updated
+
+    def assert_intrinsics_start_allowed(self, session_id: str) -> None:
+        record = self.get(session_id)
+        if record.state != "PREFLIGHT_READY":
+            raise SessionTransitionError(
+                f"Intrinsics capture requires PREFLIGHT_READY, current state is {record.state}"
+            )
+
+    def record_intrinsics_start(self, session_id: str, status: CaptureStatus) -> SessionRecord:
+        self.assert_intrinsics_start_allowed(session_id)
+        if status.state != "STREAMING" or not status.pipeline_started:
+            raise SessionTransitionError("Capture agent did not report a streaming pipeline")
+        artifact_path = self._session_path(session_id).parent / "artifacts/intrinsics_start.json"
+        payload = (status.model_dump_json(indent=2) + "\n").encode("utf-8")
+        self._exclusive_write(artifact_path, payload)
+        record = self.get(session_id)
+        updated = record.model_copy(update={"state": "INTRINSICS_CAPTURING", "updated_at_utc": datetime.now(UTC)})
         session_payload = updated.model_dump(mode="json", exclude={"latest_preflight"})
         self._atomic_write_json(self._session_path(session_id), session_payload)
         return updated
