@@ -15,7 +15,11 @@ from .rs_cli_probe import RsEnumerateCliProbe
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 ROBOT_CONFIG = PROJECT_ROOT / "third_party/aloha_collection/config/robot/aloha_stationary.yaml"
 registry = load_candidate_registry(ROBOT_CONFIG)
-preflight = PreflightService(registry=registry, probe=RsEnumerateCliProbe(registry.profile))
+process_signatures = {camera.serial: [camera.role, camera.config_name] for camera in registry.cameras}
+preflight = PreflightService(
+    registry=registry,
+    probe=RsEnumerateCliProbe(registry.profile, process_signatures_by_serial=process_signatures),
+)
 CAPTURE_ROOT = PROJECT_ROOT / ".calibration_captures"
 capture = IntrinsicsCaptureService(
     preflight=preflight,

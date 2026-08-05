@@ -16,5 +16,9 @@ def main() -> None:
     parser.add_argument("--robot-config", type=Path, default=DEFAULT_ROBOT_CONFIG)
     args = parser.parse_args()
     registry = load_candidate_registry(args.robot_config)
-    report = PreflightService(registry=registry, probe=RsEnumerateCliProbe(registry.profile)).run()
+    process_signatures = {camera.serial: [camera.role, camera.config_name] for camera in registry.cameras}
+    report = PreflightService(
+        registry=registry,
+        probe=RsEnumerateCliProbe(registry.profile, process_signatures_by_serial=process_signatures),
+    ).run()
     print(report.model_dump_json(indent=2))

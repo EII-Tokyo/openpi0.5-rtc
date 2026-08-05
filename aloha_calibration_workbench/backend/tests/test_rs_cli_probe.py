@@ -4,6 +4,7 @@ from calibration_workbench.models import OwnershipState
 from calibration_workbench.models import ProductionProfile
 from calibration_workbench.rs_cli_probe import RsEnumerateCliProbe
 from calibration_workbench.rs_cli_probe import _parse_udev_properties
+from calibration_workbench.rs_cli_probe import owners_from_process_table
 from calibration_workbench.rs_cli_probe import parse_rs_enumerate_output
 
 SAMPLE_OUTPUT = """Device info:
@@ -77,3 +78,35 @@ def test_udev_property_parser_keeps_asic_serial_separate_from_logical_serial():
     )
 
     assert properties["ID_USB_SERIAL_SHORT"] == "227123070438"
+
+
+def test_containerized_realsense_process_marks_role_busy_even_when_fuser_is_empty(tmp_path):
+    executable = tmp_path / "rs-enumerate-devices"
+    executable.write_text("test executable", encoding="utf-8")
+    probe = RsEnumerateCliProbe(
+        ProductionProfile(width=640, height=480, fps=60, format="rgb8"),
+        executable=str(executable),
+        runner=lambda command: subprocess.CompletedProcess(command, 0, stdout=SAMPLE_OUTPUT, stderr=""),
+        video_node_resolver=lambda device: [f"/dev/by-serial/{device.serial}"],
+        ownership_reader=lambda nodes: (OwnershipState.FREE, []),
+        process_signatures_by_serial={"218622270440": ["camera_low", "cam_low"]},
+        process_owner_reader=lambda signatures: ["pid=321225:realsense2_camera"] if "camera_low" in signatures else [],
+    )
+
+    observations = probe.enumerate()
+
+    assert observations[0].ownership is OwnershipState.BUSY
+    assert observations[0].owner_processes == ["pid=321225:realsense2_camera"]
+    assert observations[1].ownership is OwnershipState.FREE
+
+
+def test_process_scan_requires_both_realsense_identity_and_camera_role_signature():
+    process_table = [
+        ("321212", "realsense2_came", "realsense2_camera_node --ros-args -r __ns:=/camera_high"),
+        ("321225", "realsense2_came", "realsense2_camera_node --ros-args -r __ns:=/camera_low"),
+        ("400000", "editor", "notes about camera_high calibration"),
+    ]
+
+    owners = owners_from_process_table(process_table, ["camera_high", "cam_high"])
+
+    assert owners == ["pid=321212:realsense2_came"]
