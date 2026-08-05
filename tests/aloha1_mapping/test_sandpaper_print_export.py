@@ -20,7 +20,11 @@ def _report() -> dict[str, object]:
                     "name": fold["name"],
                     "main_edge_index_1_based": fold["main_edge_index_1_based"],
                     "adjacent_face_index_1_based": fold["adjacent_face_index_1_based"],
-                    "line_2d_mm": [[10.0 + index, 10.0], [10.0 + index, 50.0]],
+                    "line_2d_mm": (
+                        [[80.0, 20.0], [20.0, 0.0]]
+                        if index == 0
+                        else [[80.0, 40.0], [20.0, 60.0]]
+                    ),
                     "normal_alignment_residual": 1e-14,
                     "shared_edge_residual_mm": 1e-13,
                 }
@@ -39,6 +43,10 @@ def _report() -> dict[str, object]:
                     },
                 ],
                 "bounds_mm": [0.0, -8.0, 80.0, 58.0],
+                "cut_wires_2d_mm": [
+                    [[0.0, 0.0], [80.0, 0.0], [80.0, 60.0], [0.0, 60.0]],
+                    [[10.0, 20.0], [60.0, 20.0], [60.0, 40.0], [10.0, 40.0]],
+                ],
                 "maximum_panel_plane_residual_mm": 1e-12,
                 "relief_cut_lines_2d_mm": [],
             },
@@ -99,3 +107,25 @@ def test_export_print_template_set_is_a4_mm_layered_and_deterministic(tmp_path: 
             assert side_artifacts[artifact_type]["sha256"] == second["sides"][side]["artifacts"][artifact_type][
                 "sha256"
             ]
+
+
+def test_distal_only_export_connects_fold_roots_and_removes_base_side(tmp_path: Path) -> None:
+    report_path = tmp_path / "review.json"
+    report_path.write_text(json.dumps(_report()), encoding="utf-8")
+
+    manifest = export_print_template_set(
+        report_path=report_path,
+        output_dir=tmp_path / "distal",
+        distal_only_at_fold_root=True,
+    )
+
+    assert manifest["classification"] == "LOCAL_ONLY_APPROVED_DISTAL_ZERO_THICKNESS_PRINT_TEMPLATE"
+    assert manifest["distal_only_at_fold_root"] is True
+    for side in ("left", "right"):
+        side_record = manifest["sides"][side]
+        assert side_record["pattern_bounds_mm"] == [60.0, 60.0]
+        assert side_record["root_cut"]["line_2d_mm"] == [[20.0, 0.0], [20.0, 60.0]]
+        assert side_record["root_cut"]["kept_side"] == "TIPWARD_GREATER_LENGTH_COORDINATE"
+        assert side_record["root_cut"]["discarded_side"] == "BASEWARD_SMALLER_LENGTH_COORDINATE"
+        assert side_record["artifacts"]["dxf"]["cut_wire_count"] == 1
+        assert side_record["artifacts"]["dxf"]["minimum_cut_x_mm"] == 20.0

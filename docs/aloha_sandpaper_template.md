@@ -80,3 +80,20 @@ The final export manifest records the source review hash, dimensions, file
 hashes, scale, zero bend compensation, and the user-approved material
 assumption. Generated PDF/DXF files remain local-only while the supplier CAD
 redistribution license is unresolved.
+
+### Distal-only root-cut variant
+
+To connect the two fold lines at their base-side endpoints, discard all
+material toward the finger base, and retain only the tipward portion, add:
+
+```bash
+  --distal-only-at-fold-root
+```
+
+The exporter proves the finger tip has the greater CAD length coordinate,
+constructs the root-cut line from the two lower-length fold endpoints, and
+keeps only that line's greater-length half-plane. Because the original inner
+opening intersects the root-cut line, the final retained material is exported
+as one continuous closed cut contour: the root cut appears as two collinear
+boundary segments separated by the now-open inner opening. The manifest
+records the exact root-cut coordinates and the kept/discarded side semantics.
