@@ -72,4 +72,36 @@ describe('ALOHA calibration preview workbench', () => {
     expect(screen.getByText('ISAAC_IMPORT_PASS')).toBeInTheDocument()
     expect(screen.getByText('TAGGED_FIXTURE_TRANSFER_PASS')).toBeInTheDocument()
   })
+
+  it('enables only the read-only preflight action in explicit live mode', async () => {
+    const user = userEvent.setup()
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(JSON.stringify({
+        id: 'session-live-001',
+        state: 'PREFLIGHT_READY',
+        latest_preflight: {
+          status: 'READY',
+          cameras: [
+            { role: 'cam_high', connected: true, identity_match: true, production_profile_supported: true, ownership: 'FREE' },
+            { role: 'cam_low', connected: true, identity_match: true, production_profile_supported: true, ownership: 'FREE' },
+            { role: 'wrist_left', connected: true, identity_match: true, production_profile_supported: true, ownership: 'FREE' },
+            { role: 'wrist_right', connected: true, identity_match: true, production_profile_supported: true, ownership: 'FREE' },
+          ],
+          issues: [],
+        },
+      }), { status: 200, headers: { 'Content-Type': 'application/json' } }),
+    )
+
+    render(<App mode="live" />)
+    const action = screen.getByRole('button', { name: '运行只读预检' })
+    expect(action).toBeEnabled()
+
+    await user.click(action)
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1)
+    expect(fetchSpy).toHaveBeenCalledWith('/api/preflight-session', expect.objectContaining({ method: 'POST' }))
+    expect(await screen.findByText('PREFLIGHT_READY')).toBeInTheDocument()
+    expect(screen.getByText('4 / 4 相机身份通过')).toBeInTheDocument()
+    fetchSpy.mockRestore()
+  })
 })

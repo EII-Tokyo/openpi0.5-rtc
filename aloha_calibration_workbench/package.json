@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1 --port 4173",
+    "dev:live": "VITE_CALIBRATION_API_MODE=live vite --host 127.0.0.1 --port 4173",
     "build": "tsc --noEmit && vite build",
     "test": "vitest run",
     "test:watch": "vitest"
