@@ -297,8 +297,8 @@ function InstructionPanel({
   )
 }
 
-function SampleStrip() {
-  const samples = [
+function SampleStrip({ liveSamples, observation }: { liveSamples?: SampleRecord[]; observation?: CaptureStatus['latest_observation'] }) {
+  const previewSamples = [
     { id: 'S-001', state: 'accepted', reason: '覆盖新增' },
     { id: 'S-002', state: 'accepted', reason: '尺度变化' },
     { id: 'S-003', state: 'accepted', reason: '边缘视角' },
@@ -306,6 +306,39 @@ function SampleStrip() {
     { id: 'S-005', state: 'rejected', reason: '运动模糊' },
     { id: 'S-006', state: 'rejected', reason: '角点遮挡' },
   ]
+  if (liveSamples) {
+    const accepted = liveSamples.filter((sample) => sample.accepted).length
+    const rejected = liveSamples.length - accepted
+    return (
+      <section className="sample-strip live-sample-strip">
+        <div className="sample-summary">
+          <span>本次 cam_high 样本</span>
+          {liveSamples.length === 0 ? <strong>尚未采集</strong> : <strong>{accepted} accepted <em>/ {rejected} rejected</em></strong>}
+        </div>
+        <div className="sample-list">
+          {liveSamples.length === 0 ? <p className="empty-samples">把整块 ChArUco 板放入画面，确认角点后再采集。</p> : liveSamples.slice(-6).map((sample) => (
+            <article className={`sample ${sample.accepted ? 'accepted' : 'rejected'}`} key={sample.id}>
+              <div className="mini-board"><i /><i /><i /></div>
+              <div><strong>{sample.id} · {sample.partition}</strong><span>{sample.reason}</span></div>
+            </article>
+          ))}
+        </div>
+        <div className="coverage-metrics">
+          {[
+            ['Corners', observation ? String(observation.charuco_corner_count) : '—', Math.min(100, (observation?.charuco_corner_count ?? 0) / 24 * 100)],
+            ['Area', observation?.board_area_percent == null ? '—' : `${observation.board_area_percent.toFixed(1)}%`, Math.min(100, observation?.board_area_percent ?? 0)],
+            ['Center X', observation?.centroid_x == null ? '—' : observation.centroid_x.toFixed(2), (observation?.centroid_x ?? 0) * 100],
+            ['RMS', observation?.reprojection_rms_px == null ? '—' : `${observation.reprojection_rms_px.toFixed(3)}px`, 0],
+          ].map(([label, value, width]) => (
+            <div className="metric" key={label as string}>
+              <span>{label}</span><strong>{value}</strong>
+              <i><b style={{ width: `${width}%` }} /></i>
+            </div>
+          ))}
+        </div>
+      </section>
+    )
+  }
   return (
     <section className="sample-strip">
       <div className="sample-summary">
@@ -313,7 +346,7 @@ function SampleStrip() {
         <strong>4 accepted <em>/ 2 rejected</em></strong>
       </div>
       <div className="sample-list">
-        {samples.map((sample, index) => (
+        {previewSamples.map((sample, index) => (
           <article className={`sample ${sample.state}`} key={sample.id}>
             <div className={`mini-board angle-${index}`}><i /><i /><i /></div>
             <div><strong>{sample.id}</strong><span>{sample.reason}</span></div>
@@ -374,7 +407,7 @@ function PreviewWorkspace({
         <div className="camera-grid">
           {cameras.map((camera, index) => <CameraTile camera={camera} capture={capture} index={index} key={camera.role} preflight={preflight} previewNonce={previewNonce} />)}
         </div>
-        <SampleStrip />
+        <SampleStrip liveSamples={live ? samples : undefined} observation={capture.kind === 'streaming' ? capture.status.latest_observation : undefined} />
       </section>
       <InstructionPanel capture={capture} mode={mode} onRun={onRun} onSample={onSample} onStart={onStart} onStop={onStop} preflight={preflight} samples={samples} />
     </div>

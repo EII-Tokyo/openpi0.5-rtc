@@ -192,6 +192,8 @@ describe('ALOHA calibration preview workbench', () => {
     expect(await screen.findByText('FACTORY K/D LOADED')).toBeInTheDocument()
     expect(screen.getByAltText('cam_high ChArUco 实时检测画面')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '采集当前 ChArUco 帧' })).toBeEnabled()
+    expect(screen.getAllByText('尚未采集').length).toBeGreaterThan(0)
+    expect(screen.queryByText(/4 accepted/)).not.toBeInTheDocument()
     vi.restoreAllMocks()
   })
 })
