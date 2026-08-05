@@ -186,6 +186,15 @@ function InstructionPanel({ mode, preflight, onRun }: { mode: AppMode; preflight
         <section className={`preflight-result ${preflight.session.latest_preflight.status.toLowerCase()}`} aria-live="polite">
           <strong>{preflight.session.state}</strong>
           <span>{passingCameras} / 4 相机身份通过</span>
+          {preflight.session.latest_preflight.issues.length > 0 ? (
+            <div className="preflight-issues">
+              {preflight.session.latest_preflight.issues.map((issue) => (
+                <span className={issue.severity.toLowerCase()} key={`${issue.code}-${issue.camera_role ?? 'system'}`}>
+                  {issue.code} · {issue.camera_role ?? 'system'}
+                </span>
+              ))}
+            </div>
+          ) : null}
           <em>session · {preflight.session.id}</em>
         </section>
       ) : null}

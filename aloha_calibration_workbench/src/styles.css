@@ -166,6 +166,8 @@ button { font: inherit; }
 .action-hint { margin: -2px 0 0; text-align: center; color: #526a7c; font-size: 8px; }
 .preflight-result { display: grid; gap: 3px; padding: 9px 10px; border: 1px solid #276645; border-left: 3px solid var(--green); background: rgba(18, 84, 48, .16); }
 .preflight-result strong { color: var(--green); font: 800 10px ui-monospace; }.preflight-result span { color: #9fb5c4; font-size: 9px; }.preflight-result em { color: #587386; font: 7px ui-monospace; font-style: normal; }
+.preflight-issues { display: grid; gap: 3px; padding: 5px 0; border-top: 1px solid rgba(255,255,255,.07); border-bottom: 1px solid rgba(255,255,255,.07); }
+.preflight-issues span { color: #9cb1c0; font: 7px ui-monospace; }.preflight-issues span.warning { color: #e7ae54; }.preflight-issues span.blocking, .preflight-issues span.error { color: #ee7777; }
 .preflight-result.blocked { border-color: #7b5a20; border-left-color: var(--amber); }.preflight-result.blocked strong { color: var(--amber); }
 .preflight-result.failed { border-color: #773638; border-left-color: var(--red); }.preflight-result.failed strong { color: var(--red); }
 .preflight-error { margin: 0; padding: 8px 10px; border-left: 3px solid var(--red); background: rgba(115, 37, 39, .18); color: #e88787; font-size: 9px; }

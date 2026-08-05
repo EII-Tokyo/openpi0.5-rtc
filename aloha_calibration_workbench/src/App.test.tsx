@@ -87,7 +87,14 @@ describe('ALOHA calibration preview workbench', () => {
             { role: 'wrist_left', connected: true, identity_match: true, production_profile_supported: true, ownership: 'FREE' },
             { role: 'wrist_right', connected: true, identity_match: true, production_profile_supported: true, ownership: 'FREE' },
           ],
-          issues: [],
+          issues: [
+            {
+              code: 'FIRMWARE_DIFFERS_FROM_RECOMMENDED',
+              severity: 'WARNING',
+              camera_role: 'cam_low',
+              message: 'No update was attempted',
+            },
+          ],
         },
       }), { status: 200, headers: { 'Content-Type': 'application/json' } }),
     )
@@ -102,6 +109,7 @@ describe('ALOHA calibration preview workbench', () => {
     expect(fetchSpy).toHaveBeenCalledWith('/api/preflight-session', expect.objectContaining({ method: 'POST' }))
     expect(await screen.findByText('PREFLIGHT_READY')).toBeInTheDocument()
     expect(screen.getByText('4 / 4 相机身份通过')).toBeInTheDocument()
+    expect(screen.getByText('FIRMWARE_DIFFERS_FROM_RECOMMENDED · cam_low')).toBeInTheDocument()
     fetchSpy.mockRestore()
   })
 })
