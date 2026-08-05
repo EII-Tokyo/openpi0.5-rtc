@@ -171,6 +171,12 @@ button { font: inherit; }
 .preflight-result.blocked { border-color: #7b5a20; border-left-color: var(--amber); }.preflight-result.blocked strong { color: var(--amber); }
 .preflight-result.failed { border-color: #773638; border-left-color: var(--red); }.preflight-result.failed strong { color: var(--red); }
 .preflight-error { margin: 0; padding: 8px 10px; border-left: 3px solid var(--red); background: rgba(115, 37, 39, .18); color: #e88787; font-size: 9px; }
+.live-feed img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #02070b; }
+.intrinsics-result { display: grid; gap: 4px; padding: 10px; border: 1px solid #287749; border-left: 3px solid var(--green); background: rgba(17,85,49,.18); }
+.intrinsics-result strong { color: var(--green); font: 800 10px ui-monospace; }.intrinsics-result span { color: #b0c8d7; font: 8px ui-monospace; }.intrinsics-result em { color: #6d92aa; font: 7px ui-monospace; font-style: normal; }.intrinsics-result small { color: #70899a; font-size: 7px; }
+.capture-actions { display: grid; grid-template-columns: 1fr auto; gap: 6px; margin-top: 4px; }.capture-actions button { min-height: 32px; border: 1px solid #277bb4; border-radius: 3px; background: #124f78; color: #e0f2ff; font-size: 8px; cursor: pointer; }.capture-actions button.stop { border-color: #714145; background: #3c2428; color: #e9a0a0; }
+.live-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; padding: 5px; background: #07151f; }.live-metrics span { color: #8eb7d1; }.intrinsics-result small.action-error { color: #ed8484; }
+.stage-rail li.active { border-color: #2783bf; background: rgba(20,87,132,.2); }.stage-rail li.active .stage-index { color: var(--blue); border-color: var(--blue); }.stage-rail li.done .stage-index { color: var(--green); border-color: var(--green); }.stage-rail li.done .stage-copy em { color: var(--green); }
 
 .sample-strip { margin-top: 9px; padding-top: 9px; border-top: 1px solid #1b3042; display: grid; grid-template-columns: 125px minmax(350px, 1fr) 170px; gap: 9px; min-height: 88px; }
 .sample-summary { display: grid; align-content: center; gap: 5px; padding-right: 10px; border-right: 1px solid #172c3e; }

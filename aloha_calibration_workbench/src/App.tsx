@@ -1,7 +1,13 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
+import { captureIntrinsicsSample } from './api'
+import { getIntrinsicsStatus } from './api'
 import { runPreflightSession } from './api'
+import { startIntrinsicsCapture } from './api'
+import { stopIntrinsicsCapture } from './api'
+import type { CaptureStatus } from './api'
 import type { PreflightSession } from './api'
+import type { SampleRecord } from './api'
 
 type Workspace = 'Preview' | 'Dataset' | 'Solve' | 'Validate' | 'Export'
 type CameraRole = 'cam_high' | 'cam_low' | 'wrist_left' | 'wrist_right'
@@ -11,6 +17,12 @@ type PreflightUiState =
   | { kind: 'idle' }
   | { kind: 'running' }
   | { kind: 'complete'; session: PreflightSession }
+  | { kind: 'error'; message: string }
+
+type CaptureUiState =
+  | { kind: 'idle' }
+  | { kind: 'starting' }
+  | { kind: 'streaming'; status: CaptureStatus; actionError?: string }
   | { kind: 'error'; message: string }
 
 const workspaces: Workspace[] = ['Preview', 'Dataset', 'Solve', 'Validate', 'Export']
@@ -63,11 +75,24 @@ function TargetBoard({ compact = false }: { compact?: boolean }) {
   )
 }
 
-function CameraTile({ camera, index, preflight }: { camera: (typeof cameras)[number]; index: number; preflight: PreflightUiState }) {
+function CameraTile({
+  camera,
+  index,
+  preflight,
+  capture,
+  previewNonce,
+}: {
+  camera: (typeof cameras)[number]
+  index: number
+  preflight: PreflightUiState
+  capture: CaptureUiState
+  previewNonce: number
+}) {
   const liveCamera = preflight.kind === 'complete'
     ? preflight.session.latest_preflight.cameras.find((item) => item.role === camera.role)
     : undefined
-  const cameraState = liveCamera
+  const isStreaming = capture.kind === 'streaming' && capture.status.role === camera.role
+  const cameraState = isStreaming ? 'LIVE · EXCLUSIVE' : liveCamera
     ? liveCamera.connected && liveCamera.identity_match ? 'IDENTITY OK' : 'CHECK FAILED'
     : camera.focus
   return (
@@ -83,7 +108,12 @@ function CameraTile({ camera, index, preflight }: { camera: (typeof cameras)[num
         </div>
         <div className="camera-state"><i />{cameraState}</div>
       </header>
-      <div className={`synthetic-feed feed-${index}`}>
+      {isStreaming ? (
+        <div className="synthetic-feed live-feed">
+          <img src={`/api/intrinsics/preview.jpg?t=${previewNonce}`} alt="cam_high ChArUco 实时检测画面" />
+          <div className="feed-meta"><span>LIVE · DEVICE TIME</span><span>640 × 480 · 60 RGB8</span></div>
+        </div>
+      ) : <div className={`synthetic-feed feed-${index}`}>
         <div className="feed-grid" />
         <div className="arm arm-left"><span /><span /><span /></div>
         <div className="arm arm-right"><span /><span /><span /></div>
@@ -101,12 +131,12 @@ function CameraTile({ camera, index, preflight }: { camera: (typeof cameras)[num
           <span>SYNTHETIC</span>
           <span>640 × 480 · 60</span>
         </div>
-      </div>
+      </div>}
     </article>
   )
 }
 
-function StageRail() {
+function StageRail({ preflight, capture }: { preflight: PreflightUiState; capture: CaptureUiState }) {
   return (
     <aside className="stage-rail" aria-label="校准阶段">
       <div className="rail-heading">
@@ -114,26 +144,51 @@ function StageRail() {
         <strong>六阶段</strong>
       </div>
       <ol>
-        {stages.map((stage) => (
-          <li className={stage.state} key={stage.id}>
+        {stages.map((stage) => {
+          const state = stage.id === 0 && preflight.kind === 'complete'
+            ? 'done'
+            : stage.id === 1 && preflight.kind === 'complete' && preflight.session.latest_preflight.status === 'READY'
+              ? capture.kind === 'streaming' ? 'active' : 'ready'
+              : stage.state
+          return (
+          <li className={state} key={stage.id}>
             <div className="stage-index">{String(stage.id).padStart(2, '0')}</div>
             <div className="stage-copy">
               <strong>{stage.title}</strong>
               <span>{stage.detail}</span>
-              <em>{stage.state === 'ready' ? 'READY · 等待确认' : 'LOCKED'}</em>
+              <em>{state === 'done' ? 'COMPLETE' : state === 'active' ? 'ACTIVE · cam_high' : state === 'ready' ? 'READY · 等待确认' : 'LOCKED'}</em>
             </div>
           </li>
-        ))}
+          )
+        })}
       </ol>
       <div className="rail-note">
         <span className="pulse-dot" />
-        Preview 使用模拟数据，不读取设备
+        {capture.kind === 'streaming' ? '仅 cam_high 图像 pipeline 已启动' : '未启动图像 pipeline'}
       </div>
     </aside>
   )
 }
 
-function InstructionPanel({ mode, preflight, onRun }: { mode: AppMode; preflight: PreflightUiState; onRun: () => void }) {
+function InstructionPanel({
+  mode,
+  preflight,
+  capture,
+  samples,
+  onRun,
+  onStart,
+  onSample,
+  onStop,
+}: {
+  mode: AppMode
+  preflight: PreflightUiState
+  capture: CaptureUiState
+  samples: SampleRecord[]
+  onRun: () => void
+  onStart: () => void
+  onSample: () => void
+  onStop: () => void
+}) {
   const passingCameras = preflight.kind === 'complete'
     ? preflight.session.latest_preflight.cameras.filter((camera) => (
       camera.connected && camera.identity_match && camera.production_profile_supported && camera.ownership === 'FREE'
@@ -148,11 +203,11 @@ function InstructionPanel({ mode, preflight, onRun }: { mode: AppMode; preflight
         <div className="instruction-number">01</div>
         <div>
           <h2>现在放什么 / 怎么摆</h2>
-          <p>将刚性多标记原点板放在桌面中心定位止挡内。</p>
+          <p>{capture.kind === 'streaming' ? '手持 ChArUco 板面对 cam_high；本阶段不使用 AprilTag。' : '准备 A4 横向 ChArUco 板，确认底部 100 mm 检查线实测正确。'}</p>
           <ul>
-            <li>板上的 O 对准桌面中心</li>
-            <li>+X / +Y 对准实体刻线</li>
-            <li>保持平整、无翘曲、无遮挡</li>
+            <li>打印必须为 100%，贴在刚性平板上</li>
+            <li>先让整块板位于俯视相机中央</li>
+            <li>保持平整、无反光、无遮挡</li>
           </ul>
         </div>
         <TargetBoard compact />
@@ -174,7 +229,7 @@ function InstructionPanel({ mode, preflight, onRun }: { mode: AppMode; preflight
         <div className="instruction-number">03</div>
         <div>
           <h2>通过后会得到什么</h2>
-          <p>这里只完成设备身份预检，不产生“系统校准成功”。</p>
+          <p>{capture.kind === 'streaming' ? '保存 factory K/D、原始 PNG、角点与设备时间戳；仍不等于内参已验收。' : '预检通过后才允许单独启动 cam_high，不会同时打开其它三台。'}</p>
           <div className="artifact-preview">
             <span>camera_registry.json</span>
             <span>profile_snapshot.json</span>
@@ -198,14 +253,43 @@ function InstructionPanel({ mode, preflight, onRun }: { mode: AppMode; preflight
           <em>session · {preflight.session.id}</em>
         </section>
       ) : null}
+      {capture.kind === 'streaming' && capture.status.factory_intrinsics ? (
+        <section className="intrinsics-result" aria-live="polite">
+          <strong>FACTORY K/D LOADED</strong>
+          <span>fx {capture.status.factory_intrinsics.fx.toFixed(2)} · fy {capture.status.factory_intrinsics.fy.toFixed(2)}</span>
+          <span>cx {capture.status.factory_intrinsics.cx.toFixed(2)} · cy {capture.status.factory_intrinsics.cy.toFixed(2)}</span>
+          <em>DEPTH OFF · ROBOT API NONE</em>
+          {capture.status.latest_observation ? (
+            <div className="live-metrics">
+              <span>corners {capture.status.latest_observation.charuco_corner_count}</span>
+              <span>markers {capture.status.latest_observation.marker_count}</span>
+              <span>blur {capture.status.latest_observation.blur_variance.toFixed(1)}</span>
+              <span>RMS {capture.status.latest_observation.reprojection_rms_px == null ? '—' : `${capture.status.latest_observation.reprojection_rms_px.toFixed(3)} px`}</span>
+            </div>
+          ) : <span>等待第一帧检测…</span>}
+          {capture.actionError ? <small className="action-error">{capture.actionError}</small> : null}
+          <div className="capture-actions">
+            <button onClick={onSample}>采集当前 ChArUco 帧</button>
+            <button className="stop" onClick={onStop}>停止 cam_high</button>
+          </div>
+          <small>{samples.length} 个不可覆盖样本已写入 103</small>
+        </section>
+      ) : null}
+      {capture.kind === 'error' ? <p className="preflight-error" role="alert">{capture.message}</p> : null}
       {preflight.kind === 'error' ? <p className="preflight-error" role="alert">{preflight.message}</p> : null}
-      <button
-        className="primary-action"
-        disabled={mode === 'preview' || preflight.kind === 'running' || preflight.kind === 'complete'}
-        onClick={onRun}
-      >{actionLabel}</button>
+      {preflight.kind === 'complete' && preflight.session.latest_preflight.status === 'READY' && capture.kind !== 'streaming' ? (
+        <button className="primary-action" disabled={capture.kind === 'starting'} onClick={onStart}>
+          {capture.kind === 'starting' ? '正在启动 cam_high…' : '启动 cam_high 内参采集'}
+        </button>
+      ) : capture.kind !== 'streaming' ? (
+        <button
+          className="primary-action"
+          disabled={mode === 'preview' || preflight.kind === 'running' || preflight.kind === 'complete'}
+          onClick={onRun}
+        >{actionLabel}</button>
+      ) : null}
       <p className="action-hint">
-        {mode === 'preview' ? '连接真实设备前，必须先确认此页面的操作顺序。' : '只枚举设备、Profile 与占用状态；不会启动图像 pipeline。'}
+        {capture.kind === 'streaming' ? '角点数与重投影误差用于记录诊断；尚未声明 PASS 门限。' : mode === 'preview' ? '连接真实设备前，必须先确认此页面的操作顺序。' : '启动前会再次核验设备、Profile 与独占权。'}
       </p>
     </aside>
   )
@@ -252,24 +336,45 @@ function SampleStrip() {
   )
 }
 
-function PreviewWorkspace({ mode, preflight, onRun }: { mode: AppMode; preflight: PreflightUiState; onRun: () => void }) {
+function PreviewWorkspace({
+  mode,
+  preflight,
+  capture,
+  samples,
+  previewNonce,
+  onRun,
+  onStart,
+  onSample,
+  onStop,
+}: {
+  mode: AppMode
+  preflight: PreflightUiState
+  capture: CaptureUiState
+  samples: SampleRecord[]
+  previewNonce: number
+  onRun: () => void
+  onStart: () => void
+  onSample: () => void
+  onStop: () => void
+}) {
+  const live = capture.kind === 'streaming'
   return (
     <div className="preview-layout">
-      <StageRail />
+      <StageRail capture={capture} preflight={preflight} />
       <section className="camera-workspace">
         <div className="workspace-heading">
           <div>
-            <span>SIMULATED CAMERA WALL</span>
-            <h2>模拟画面 <i>·</i> 当前活动：<strong>cam_high</strong></h2>
+            <span>{live ? 'SINGLE CAMERA · EXCLUSIVE LIVE' : 'SIMULATED CAMERA WALL'}</span>
+            <h2>{live ? '实时 ChArUco 检测' : '模拟画面'} <i>·</i> 当前活动：<strong>cam_high</strong></h2>
           </div>
           <div className="quality-legend"><i className="active" />活动 <i />待机</div>
         </div>
         <div className="camera-grid">
-          {cameras.map((camera, index) => <CameraTile camera={camera} index={index} key={camera.role} preflight={preflight} />)}
+          {cameras.map((camera, index) => <CameraTile camera={camera} capture={capture} index={index} key={camera.role} preflight={preflight} previewNonce={previewNonce} />)}
         </div>
         <SampleStrip />
       </section>
-      <InstructionPanel mode={mode} preflight={preflight} onRun={onRun} />
+      <InstructionPanel capture={capture} mode={mode} onRun={onRun} onSample={onSample} onStart={onStart} onStop={onStop} preflight={preflight} samples={samples} />
     </div>
   )
 }
@@ -381,11 +486,14 @@ function WorkspaceFrame({ eyebrow, title, description, children }: { eyebrow: st
   )
 }
 
-function SafetyBanner({ mode, preflight }: { mode: AppMode; preflight: PreflightUiState }) {
+function SafetyBanner({ mode, preflight, capture }: { mode: AppMode; preflight: PreflightUiState; capture: CaptureUiState }) {
   let captureStatus = mode === 'preview' ? 'OFF / EXCLUSIVE' : 'NOT CHECKED'
   if (preflight.kind === 'running') captureStatus = 'CHECKING'
   if (preflight.kind === 'complete') captureStatus = preflight.session.latest_preflight.status === 'READY' ? 'FREE / EXCLUSIVE' : preflight.session.latest_preflight.status
   if (preflight.kind === 'error') captureStatus = 'ERROR'
+  if (capture.kind === 'starting') captureStatus = 'STARTING cam_high'
+  if (capture.kind === 'streaming') captureStatus = 'cam_high LIVE / EXCLUSIVE'
+  if (capture.kind === 'error') captureStatus = 'CAPTURE ERROR'
   return (
     <section className="safety-banner" aria-label="系统所有权状态">
       <div><i className="host" /><span>101 本机浏览器</span></div>
@@ -413,7 +521,29 @@ function OutcomeBar() {
 export default function App({ mode }: { mode?: AppMode }) {
   const [workspace, setWorkspace] = useState<Workspace>('Preview')
   const [preflight, setPreflight] = useState<PreflightUiState>({ kind: 'idle' })
+  const [capture, setCapture] = useState<CaptureUiState>({ kind: 'idle' })
+  const [samples, setSamples] = useState<SampleRecord[]>([])
+  const [previewNonce, setPreviewNonce] = useState(0)
   const activeMode: AppMode = mode ?? (import.meta.env.VITE_CALIBRATION_API_MODE === 'live' ? 'live' : 'preview')
+
+  useEffect(() => {
+    if (capture.kind !== 'streaming') return undefined
+    const interval = window.setInterval(() => setPreviewNonce((value) => value + 1), 500)
+    return () => window.clearInterval(interval)
+  }, [capture.kind])
+
+  useEffect(() => {
+    if (capture.kind !== 'streaming') return undefined
+    const interval = window.setInterval(async () => {
+      try {
+        const status = await getIntrinsicsStatus()
+        setCapture((current) => current.kind === 'streaming' ? { kind: 'streaming', status } : current)
+      } catch {
+        // A transient status-poll failure must not hide the stop control for an active device.
+      }
+    }, 1500)
+    return () => window.clearInterval(interval)
+  }, [capture.kind])
 
   async function handleRunPreflight() {
     if (activeMode !== 'live' || preflight.kind !== 'idle') return
@@ -426,6 +556,42 @@ export default function App({ mode }: { mode?: AppMode }) {
     }
   }
 
+  async function handleStartIntrinsics() {
+    if (activeMode !== 'live' || preflight.kind !== 'complete' || preflight.session.latest_preflight.status !== 'READY') return
+    setCapture({ kind: 'starting' })
+    try {
+      const status = await startIntrinsicsCapture(preflight.session.id, 'cam_high')
+      setCapture({ kind: 'streaming', status })
+    } catch (error) {
+      setCapture({ kind: 'error', message: error instanceof Error ? error.message : 'Unknown intrinsics start error' })
+    }
+  }
+
+  async function handleCaptureSample() {
+    if (capture.kind !== 'streaming') return
+    try {
+      const sample = await captureIntrinsicsSample()
+      setSamples((current) => [...current, sample])
+      setCapture({ kind: 'streaming', status: { ...capture.status, latest_observation: sample.observation } })
+    } catch (error) {
+      setCapture({
+        kind: 'streaming',
+        status: capture.status,
+        actionError: error instanceof Error ? error.message : 'Unknown sample error',
+      })
+    }
+  }
+
+  async function handleStopIntrinsics() {
+    if (capture.kind !== 'streaming') return
+    try {
+      await stopIntrinsicsCapture()
+      setCapture({ kind: 'idle' })
+    } catch (error) {
+      setCapture({ kind: 'error', message: error instanceof Error ? error.message : 'Unknown stop error' })
+    }
+  }
+
   return (
     <main className="app-shell">
       <header className="app-header">
@@ -435,7 +601,7 @@ export default function App({ mode }: { mode?: AppMode }) {
           <h1>ALOHA 四相机标定工作台</h1>
         </div>
         <div className={`preview-badge ${activeMode === 'live' ? 'live' : ''}`}>
-          <i />{activeMode === 'live' ? 'LIVE PREFLIGHT · READ ONLY' : 'PREVIEW · 不执行设备操作'}
+          <i />{activeMode === 'live' ? capture.kind === 'streaming' ? 'LIVE · cam_high ONLY' : 'LIVE · GATED DEVICE ACCESS' : 'PREVIEW · 不执行设备操作'}
         </div>
         <nav role="tablist" aria-label="工作区">
           {workspaces.map((item) => (
@@ -448,18 +614,30 @@ export default function App({ mode }: { mode?: AppMode }) {
             >{item}</button>
           ))}
         </nav>
-        <div className="session-meta"><span>SESSION</span><strong>preview_001</strong></div>
+        <div className="session-meta"><span>SESSION</span><strong>{preflight.kind === 'complete' ? preflight.session.id : 'preview_001'}</strong></div>
       </header>
 
       <div className="workspace-container">
-        {workspace === 'Preview' ? <PreviewWorkspace mode={activeMode} preflight={preflight} onRun={handleRunPreflight} /> : null}
+        {workspace === 'Preview' ? (
+          <PreviewWorkspace
+            capture={capture}
+            mode={activeMode}
+            onRun={handleRunPreflight}
+            onSample={handleCaptureSample}
+            onStart={handleStartIntrinsics}
+            onStop={handleStopIntrinsics}
+            preflight={preflight}
+            previewNonce={previewNonce}
+            samples={samples}
+          />
+        ) : null}
         {workspace === 'Dataset' ? <DatasetWorkspace /> : null}
         {workspace === 'Solve' ? <SolveWorkspace /> : null}
         {workspace === 'Validate' ? <ValidateWorkspace /> : null}
         {workspace === 'Export' ? <ExportWorkspace /> : null}
       </div>
 
-      <SafetyBanner mode={activeMode} preflight={preflight} />
+      <SafetyBanner capture={capture} mode={activeMode} preflight={preflight} />
       <OutcomeBar />
     </main>
   )

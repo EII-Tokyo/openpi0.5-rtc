@@ -1,6 +1,8 @@
 from pathlib import Path
 
 from calibration_workbench.capture_api import create_capture_app
+from calibration_workbench.models import CaptureStatus
+from calibration_workbench.models import FactoryIntrinsics
 from calibration_workbench.models import PreflightReport
 from calibration_workbench.models import PreflightStatus
 from calibration_workbench.orchestrator_api import create_orchestrator_app
@@ -26,6 +28,27 @@ class FakePreflightService:
 class FakeCaptureClient:
     def run_preflight(self) -> PreflightReport:
         return _report()
+
+    def start_intrinsics(self, session_id: str, role: str) -> CaptureStatus:
+        assert role == "cam_high"
+        return CaptureStatus(
+            state="STREAMING",
+            session_id=session_id,
+            role=role,
+            serial="130322270656",
+            profile={"width": 640, "height": 480, "fps": 60, "format": "rgb8"},
+            pipeline_started=True,
+            factory_intrinsics=FactoryIntrinsics(
+                width=640,
+                height=480,
+                fx=600.0,
+                fy=601.0,
+                cx=320.0,
+                cy=240.0,
+                distortion_model="brown_conrady",
+                distortion_coefficients=[0.0] * 5,
+            ),
+        )
 
 
 class FailingCaptureClient:
@@ -104,3 +127,27 @@ def test_preflight_artifact_cannot_be_overwritten(tmp_path: Path):
 
     assert second.status_code == 409
     assert "create a new session" in second.json()["detail"]
+
+
+def test_orchestrator_starts_intrinsics_only_after_ready_preflight(tmp_path: Path):
+    store = SessionStore(tmp_path)
+    client = TestClient(create_orchestrator_app(FakeCaptureClient(), store))
+    session_id = client.post("/api/sessions", json={"name": "cam-high-intrinsics"}).json()["id"]
+
+    blocked = client.post(f"/api/sessions/{session_id}/actions/intrinsics/start", json={"role": "cam_high"})
+    assert blocked.status_code == 409
+
+    assert client.post(f"/api/sessions/{session_id}/actions/preflight").status_code == 200
+    started = client.post(f"/api/sessions/{session_id}/actions/intrinsics/start", json={"role": "cam_high"})
+
+    assert started.status_code == 200
+    assert started.json()["state"] == "STREAMING"
+    assert started.json()["profile"] == {
+        "stream": "color",
+        "width": 640,
+        "height": 480,
+        "fps": 60,
+        "format": "rgb8",
+    }
+    assert store.get(session_id).state == "INTRINSICS_CAPTURING"
+    assert (tmp_path / session_id / "artifacts/intrinsics_start.json").is_file()

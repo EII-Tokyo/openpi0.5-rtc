@@ -2,25 +2,25 @@ from __future__ import annotations
 
 from datetime import UTC
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 
 from pydantic import BaseModel
 from pydantic import Field
 
 
-class OwnershipState(str, Enum):
+class OwnershipState(StrEnum):
     FREE = "FREE"
     BUSY = "BUSY"
     UNKNOWN = "UNKNOWN"
 
 
-class PreflightStatus(str, Enum):
+class PreflightStatus(StrEnum):
     READY = "READY"
     BLOCKED = "BLOCKED"
     FAILED = "FAILED"
 
 
-class IssueSeverity(str, Enum):
+class IssueSeverity(StrEnum):
     WARNING = "WARNING"
     BLOCKING = "BLOCKING"
     ERROR = "ERROR"
@@ -97,3 +97,65 @@ class SessionRecord(BaseModel):
     updated_at_utc: datetime
     latest_preflight_sha256: str | None = None
     latest_preflight: PreflightReport | None = None
+
+
+class FactoryIntrinsics(BaseModel):
+    width: int
+    height: int
+    fx: float
+    fy: float
+    cx: float
+    cy: float
+    distortion_model: str
+    distortion_coefficients: list[float]
+
+
+class CharucoObservation(BaseModel):
+    board_detected: bool
+    marker_count: int
+    charuco_corner_count: int
+    blur_variance: float
+    black_clip_percent: float
+    white_clip_percent: float
+    centroid_x: float | None = None
+    centroid_y: float | None = None
+    board_area_percent: float | None = None
+    reprojection_rms_px: float | None = None
+    frame_number: int
+    device_timestamp_ms: float
+    captured_at_utc: datetime = Field(default_factory=lambda: datetime.now(UTC))
+
+
+class CaptureStatus(BaseModel):
+    state: str
+    session_id: str | None = None
+    role: str | None = None
+    serial: str | None = None
+    profile: ProductionProfile | None = None
+    factory_intrinsics: FactoryIntrinsics | None = None
+    latest_observation: CharucoObservation | None = None
+    pipeline_started: bool = False
+    depth_stream_started: bool = False
+    robot_command_api: bool = False
+    board_definition: str = "DICT_5X5_100 · 7x5 · square 0.030 m · marker 0.022 m"
+    acceptance_policy: str = "engineering-candidate-v1 · not NVIDIA acceptance criteria"
+
+
+class IntrinsicsStartRequest(BaseModel):
+    session_id: str
+    role: str
+
+
+class IntrinsicsRoleRequest(BaseModel):
+    role: str
+
+
+class SampleRecord(BaseModel):
+    id: str
+    session_id: str
+    role: str
+    partition: str
+    accepted: bool
+    reason: str
+    observation: CharucoObservation
+    image_sha256: str

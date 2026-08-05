@@ -231,6 +231,7 @@ cython_debug/
 
 # Local ALOHA calibration sessions and immutable runtime evidence
 .calibration_sessions/
+.calibration_captures/
 
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can

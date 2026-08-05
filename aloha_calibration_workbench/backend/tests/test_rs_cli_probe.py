@@ -73,9 +73,7 @@ def test_cli_probe_uses_enumeration_only_and_never_starts_a_pipeline(tmp_path):
 
 def test_udev_property_parser_keeps_asic_serial_separate_from_logical_serial():
     properties = _parse_udev_properties(
-        "DEVNAME=/dev/video0\n"
-        "ID_SERIAL_SHORT=227123070438\n"
-        "ID_USB_SERIAL_SHORT=227123070438\n"
+        "DEVNAME=/dev/video0\nID_SERIAL_SHORT=227123070438\nID_USB_SERIAL_SHORT=227123070438\n"
     )
 
     assert properties["ID_USB_SERIAL_SHORT"] == "227123070438"
