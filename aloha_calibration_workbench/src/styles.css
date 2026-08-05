@@ -182,6 +182,7 @@ button { font: inherit; }
 .sample-summary { display: grid; align-content: center; gap: 5px; padding-right: 10px; border-right: 1px solid #172c3e; }
 .sample-summary span { color: #6f879a; font-size: 9px; }.sample-summary strong { font: 700 10px ui-monospace; color: var(--green); }.sample-summary em { color: var(--red); font-style: normal; }
 .sample-list { min-width: 0; display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; }
+.empty-samples { grid-column: 1 / -1; align-self: center; margin: 0; padding: 12px; border: 1px dashed #29445a; color: #6f879a; font-size: 8px; text-align: center; }.live-sample-strip .metric { grid-template-columns: 55px 48px 1fr; }
 .sample { min-width: 0; overflow: hidden; border: 1px solid #24543e; border-radius: 3px; background: #0d1921; }
 .sample.rejected { border-color: #743436; }.sample > div:last-child { display: grid; padding: 3px 4px; }.sample strong { color: #9bb0bf; font: 700 7px ui-monospace; }.sample span { color: #668092; font-size: 6px; white-space: nowrap; }
 .mini-board { position: relative; height: 38px; margin: 4px; background: repeating-conic-gradient(#13171a 0 25%, #d8dbd7 0 50%) 50% / 12px 12px; box-shadow: 0 2px 5px #000; transform: perspective(100px) rotateX(18deg) rotateZ(-3deg); }
