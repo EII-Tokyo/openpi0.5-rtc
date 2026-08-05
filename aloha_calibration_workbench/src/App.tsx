@@ -1,7 +1,17 @@
 import { useState } from 'react'
 
+import { runPreflightSession } from './api'
+import type { PreflightSession } from './api'
+
 type Workspace = 'Preview' | 'Dataset' | 'Solve' | 'Validate' | 'Export'
 type CameraRole = 'cam_high' | 'cam_low' | 'wrist_left' | 'wrist_right'
+export type AppMode = 'preview' | 'live'
+
+type PreflightUiState =
+  | { kind: 'idle' }
+  | { kind: 'running' }
+  | { kind: 'complete'; session: PreflightSession }
+  | { kind: 'error'; message: string }
 
 const workspaces: Workspace[] = ['Preview', 'Dataset', 'Solve', 'Validate', 'Export']
 
@@ -53,7 +63,13 @@ function TargetBoard({ compact = false }: { compact?: boolean }) {
   )
 }
 
-function CameraTile({ camera, index }: { camera: (typeof cameras)[number]; index: number }) {
+function CameraTile({ camera, index, preflight }: { camera: (typeof cameras)[number]; index: number; preflight: PreflightUiState }) {
+  const liveCamera = preflight.kind === 'complete'
+    ? preflight.session.latest_preflight.cameras.find((item) => item.role === camera.role)
+    : undefined
+  const cameraState = liveCamera
+    ? liveCamera.connected && liveCamera.identity_match ? 'IDENTITY OK' : 'CHECK FAILED'
+    : camera.focus
   return (
     <article
       className={`camera-tile ${camera.focus === 'ACTIVE' ? 'active' : ''}`}
@@ -65,7 +81,7 @@ function CameraTile({ camera, index }: { camera: (typeof cameras)[number]; index
           <strong>{camera.label}</strong>
           <span>{camera.kind}</span>
         </div>
-        <div className="camera-state"><i />{camera.focus}</div>
+        <div className="camera-state"><i />{cameraState}</div>
       </header>
       <div className={`synthetic-feed feed-${index}`}>
         <div className="feed-grid" />
@@ -117,7 +133,15 @@ function StageRail() {
   )
 }
 
-function InstructionPanel() {
+function InstructionPanel({ mode, preflight, onRun }: { mode: AppMode; preflight: PreflightUiState; onRun: () => void }) {
+  const passingCameras = preflight.kind === 'complete'
+    ? preflight.session.latest_preflight.cameras.filter((camera) => (
+      camera.connected && camera.identity_match && camera.production_profile_supported && camera.ownership === 'FREE'
+    )).length
+    : 0
+  const actionLabel = mode === 'preview'
+    ? '开始检测（预览模式）'
+    : preflight.kind === 'running' ? '正在运行只读预检…' : '运行只读预检'
   return (
     <aside className="instruction-panel">
       <section className="instruction-card primary">
@@ -158,8 +182,22 @@ function InstructionPanel() {
           </div>
         </div>
       </section>
-      <button className="primary-action" disabled>开始检测（预览模式）</button>
-      <p className="action-hint">连接真实设备前，必须先确认此页面的操作顺序。</p>
+      {preflight.kind === 'complete' ? (
+        <section className={`preflight-result ${preflight.session.latest_preflight.status.toLowerCase()}`} aria-live="polite">
+          <strong>{preflight.session.state}</strong>
+          <span>{passingCameras} / 4 相机身份通过</span>
+          <em>session · {preflight.session.id}</em>
+        </section>
+      ) : null}
+      {preflight.kind === 'error' ? <p className="preflight-error" role="alert">{preflight.message}</p> : null}
+      <button
+        className="primary-action"
+        disabled={mode === 'preview' || preflight.kind === 'running' || preflight.kind === 'complete'}
+        onClick={onRun}
+      >{actionLabel}</button>
+      <p className="action-hint">
+        {mode === 'preview' ? '连接真实设备前，必须先确认此页面的操作顺序。' : '只枚举设备、Profile 与占用状态；不会启动图像 pipeline。'}
+      </p>
     </aside>
   )
 }
@@ -205,7 +243,7 @@ function SampleStrip() {
   )
 }
 
-function PreviewWorkspace() {
+function PreviewWorkspace({ mode, preflight, onRun }: { mode: AppMode; preflight: PreflightUiState; onRun: () => void }) {
   return (
     <div className="preview-layout">
       <StageRail />
@@ -218,11 +256,11 @@ function PreviewWorkspace() {
           <div className="quality-legend"><i className="active" />活动 <i />待机</div>
         </div>
         <div className="camera-grid">
-          {cameras.map((camera, index) => <CameraTile camera={camera} index={index} key={camera.role} />)}
+          {cameras.map((camera, index) => <CameraTile camera={camera} index={index} key={camera.role} preflight={preflight} />)}
         </div>
         <SampleStrip />
       </section>
-      <InstructionPanel />
+      <InstructionPanel mode={mode} preflight={preflight} onRun={onRun} />
     </div>
   )
 }
@@ -334,11 +372,15 @@ function WorkspaceFrame({ eyebrow, title, description, children }: { eyebrow: st
   )
 }
 
-function SafetyBanner() {
+function SafetyBanner({ mode, preflight }: { mode: AppMode; preflight: PreflightUiState }) {
+  let captureStatus = mode === 'preview' ? 'OFF / EXCLUSIVE' : 'NOT CHECKED'
+  if (preflight.kind === 'running') captureStatus = 'CHECKING'
+  if (preflight.kind === 'complete') captureStatus = preflight.session.latest_preflight.status === 'READY' ? 'FREE / EXCLUSIVE' : preflight.session.latest_preflight.status
+  if (preflight.kind === 'error') captureStatus = 'ERROR'
   return (
     <section className="safety-banner" aria-label="系统所有权状态">
       <div><i className="host" /><span>101 本机浏览器</span></div>
-      <div><i className="off" /><span>103 Capture: OFF / EXCLUSIVE</span></div>
+      <div><i className="off" /><span>103 Capture: {captureStatus}</span></div>
       <div><i className="blocked" /><span>Robot command APIs: NONE</span></div>
       <div><i className="cloud" /><span>Isaac: DISCONNECTED</span></div>
       <div><i className="clock" /><span>Browser time: <strong>NOT USED</strong></span></div>
@@ -359,8 +401,21 @@ function OutcomeBar() {
   )
 }
 
-export default function App() {
+export default function App({ mode }: { mode?: AppMode }) {
   const [workspace, setWorkspace] = useState<Workspace>('Preview')
+  const [preflight, setPreflight] = useState<PreflightUiState>({ kind: 'idle' })
+  const activeMode: AppMode = mode ?? (import.meta.env.VITE_CALIBRATION_API_MODE === 'live' ? 'live' : 'preview')
+
+  async function handleRunPreflight() {
+    if (activeMode !== 'live' || preflight.kind !== 'idle') return
+    setPreflight({ kind: 'running' })
+    try {
+      const session = await runPreflightSession()
+      setPreflight({ kind: 'complete', session })
+    } catch (error) {
+      setPreflight({ kind: 'error', message: error instanceof Error ? error.message : 'Unknown preflight error' })
+    }
+  }
 
   return (
     <main className="app-shell">
@@ -370,7 +425,9 @@ export default function App() {
           <span>ROBOTICS METROLOGY</span>
           <h1>ALOHA 四相机标定工作台</h1>
         </div>
-        <div className="preview-badge"><i />PREVIEW · 不执行设备操作</div>
+        <div className={`preview-badge ${activeMode === 'live' ? 'live' : ''}`}>
+          <i />{activeMode === 'live' ? 'LIVE PREFLIGHT · READ ONLY' : 'PREVIEW · 不执行设备操作'}
+        </div>
         <nav role="tablist" aria-label="工作区">
           {workspaces.map((item) => (
             <button
@@ -386,14 +443,14 @@ export default function App() {
       </header>
 
       <div className="workspace-container">
-        {workspace === 'Preview' ? <PreviewWorkspace /> : null}
+        {workspace === 'Preview' ? <PreviewWorkspace mode={activeMode} preflight={preflight} onRun={handleRunPreflight} /> : null}
         {workspace === 'Dataset' ? <DatasetWorkspace /> : null}
         {workspace === 'Solve' ? <SolveWorkspace /> : null}
         {workspace === 'Validate' ? <ValidateWorkspace /> : null}
         {workspace === 'Export' ? <ExportWorkspace /> : null}
       </div>
 
-      <SafetyBanner />
+      <SafetyBanner mode={activeMode} preflight={preflight} />
       <OutcomeBar />
     </main>
   )
