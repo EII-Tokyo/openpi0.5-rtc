@@ -50,3 +50,33 @@ The generated SVG files are physically sized in millimetres on A4, but are
 watermarked `NOT FINAL PRINT TEMPLATE`. Do not use them as the final sandpaper
 cutting template until the wrapped geometry is approved and the combined
 sandpaper-plus-adhesive thickness is measured.
+
+## Export the approved zero-thickness print templates
+
+After the wrapped geometry is approved and the user explicitly accepts the
+very thin material as a zero-thickness approximation, export the local-only
+1:1 PDF and millimetre DXF files with:
+
+```bash
+PRINT_DIR="$PWD/.codex/artifacts/<print-directory>"
+.venv/bin/python tools/aloha1_mapping/export_sandpaper_print_templates.py \
+  "$REVIEW_DIR/aloha_sandpaper_zero_thickness_review.json" \
+  --output-dir "$PRINT_DIR" \
+  --approved-zero-thickness
+```
+
+Each A4 PDF contains one left- or right-finger template and a 50 x 50 mm
+calibration square. Print with `Actual Size` / `100%`; disable fit, shrink,
+and scale-to-page options. Measure the calibration square after printing and
+reject the print if either side is not 50.0 mm.
+
+Each DXF declares `$INSUNITS=4` (millimetres) and separates geometry into:
+
+- `CUT`: the closed external and internal cutting contours;
+- `FOLD`: the two outer fold lines;
+- `REFERENCE`: a non-cutting 50 x 50 mm calibration square.
+
+The final export manifest records the source review hash, dimensions, file
+hashes, scale, zero bend compensation, and the user-approved material
+assumption. Generated PDF/DXF files remain local-only while the supplier CAD
+redistribution license is unresolved.
