@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import App from './App'
@@ -75,7 +75,11 @@ describe('ALOHA calibration preview workbench', () => {
 
   it('enables only the read-only preflight action in explicit live mode', async () => {
     const user = userEvent.setup()
-    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+    const fetchSpy = vi.spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        state: 'IDLE', pipeline_started: false, depth_stream_started: false, robot_command_api: false,
+      }), { status: 200, headers: { 'Content-Type': 'application/json' } }))
+      .mockResolvedValueOnce(
       new Response(JSON.stringify({
         id: 'session-live-001',
         state: 'PREFLIGHT_READY',
@@ -97,16 +101,17 @@ describe('ALOHA calibration preview workbench', () => {
           ],
         },
       }), { status: 200, headers: { 'Content-Type': 'application/json' } }),
-    )
+      )
 
     render(<App mode="live" />)
+    await waitFor(() => expect(fetchSpy).toHaveBeenCalledTimes(1))
     const action = screen.getByRole('button', { name: '运行只读预检' })
     expect(action).toBeEnabled()
 
     await user.click(action)
 
-    expect(fetchSpy).toHaveBeenCalledTimes(1)
-    expect(fetchSpy).toHaveBeenCalledWith('/api/preflight-session', expect.objectContaining({ method: 'POST' }))
+    expect(fetchSpy).toHaveBeenCalledTimes(2)
+    expect(fetchSpy).toHaveBeenNthCalledWith(2, '/api/preflight-session', expect.objectContaining({ method: 'POST' }))
     expect(await screen.findByText('PREFLIGHT_READY')).toBeInTheDocument()
     expect(screen.getByText('4 / 4 相机身份通过')).toBeInTheDocument()
     expect(screen.getByText('FIRMWARE_DIFFERS_FROM_RECOMMENDED · cam_low')).toBeInTheDocument()
@@ -116,6 +121,9 @@ describe('ALOHA calibration preview workbench', () => {
   it('gates the cam_high pipeline behind a ready preflight and shows factory intrinsics', async () => {
     const user = userEvent.setup()
     const fetchSpy = vi.spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        state: 'IDLE', pipeline_started: false, depth_stream_started: false, robot_command_api: false,
+      }), { status: 200, headers: { 'Content-Type': 'application/json' } }))
       .mockResolvedValueOnce(new Response(JSON.stringify({
         id: 'cal-20260805T120000-1234abcd',
         state: 'PREFLIGHT_READY',
@@ -146,13 +154,14 @@ describe('ALOHA calibration preview workbench', () => {
       }), { status: 200, headers: { 'Content-Type': 'application/json' } }))
 
     render(<App mode="live" />)
+    await waitFor(() => expect(fetchSpy).toHaveBeenCalledTimes(1))
     expect(screen.queryByRole('button', { name: '启动 cam_high 内参采集' })).not.toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: '运行只读预检' }))
     await user.click(await screen.findByRole('button', { name: '启动 cam_high 内参采集' }))
 
     expect(fetchSpy).toHaveBeenNthCalledWith(
-      2,
+      3,
       '/api/sessions/cal-20260805T120000-1234abcd/actions/intrinsics/start',
       expect.objectContaining({ method: 'POST' }),
     )
@@ -160,5 +169,29 @@ describe('ALOHA calibration preview workbench', () => {
     expect(screen.getByText('fx 600.25 · fy 601.50')).toBeInTheDocument()
     expect(screen.getByText('DEPTH OFF · ROBOT API NONE')).toBeInTheDocument()
     fetchSpy.mockRestore()
+  })
+
+  it('recovers an already streaming cam_high session after a page refresh', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(new Response(JSON.stringify({
+      state: 'STREAMING',
+      session_id: 'cal-20260805T060427-5205b9c4',
+      role: 'cam_high',
+      serial: '130322270656',
+      profile: { stream: 'color', width: 640, height: 480, fps: 60, format: 'rgb8' },
+      factory_intrinsics: {
+        width: 640, height: 480, fx: 388.16, fy: 387.66, cx: 311.69, cy: 238.93,
+        distortion_model: 'inverse_brown_conrady', distortion_coefficients: [0, 0, 0, 0, 0],
+      },
+      pipeline_started: true,
+      depth_stream_started: false,
+      robot_command_api: false,
+    }), { status: 200, headers: { 'Content-Type': 'application/json' } }))
+
+    render(<App mode="live" />)
+
+    expect(await screen.findByText('FACTORY K/D LOADED')).toBeInTheDocument()
+    expect(screen.getByAltText('cam_high ChArUco 实时检测画面')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '采集当前 ChArUco 帧' })).toBeEnabled()
+    vi.restoreAllMocks()
   })
 })

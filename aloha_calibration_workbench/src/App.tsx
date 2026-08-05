@@ -145,10 +145,12 @@ function StageRail({ preflight, capture }: { preflight: PreflightUiState; captur
       </div>
       <ol>
         {stages.map((stage) => {
-          const state = stage.id === 0 && preflight.kind === 'complete'
+          const state = stage.id === 0 && (preflight.kind === 'complete' || capture.kind === 'streaming')
             ? 'done'
-            : stage.id === 1 && preflight.kind === 'complete' && preflight.session.latest_preflight.status === 'READY'
-              ? capture.kind === 'streaming' ? 'active' : 'ready'
+            : stage.id === 1 && capture.kind === 'streaming'
+              ? 'active'
+              : stage.id === 1 && preflight.kind === 'complete' && preflight.session.latest_preflight.status === 'READY'
+                ? 'ready'
               : stage.state
           return (
           <li className={state} key={stage.id}>
@@ -527,6 +529,19 @@ export default function App({ mode }: { mode?: AppMode }) {
   const activeMode: AppMode = mode ?? (import.meta.env.VITE_CALIBRATION_API_MODE === 'live' ? 'live' : 'preview')
 
   useEffect(() => {
+    if (activeMode !== 'live') return
+    void getIntrinsicsStatus()
+      .then((status) => {
+        if (status.state === 'STREAMING' && status.pipeline_started) {
+          setCapture({ kind: 'streaming', status })
+        }
+      })
+      .catch(() => {
+        // Startup recovery is best-effort; explicit preflight remains available.
+      })
+  }, [activeMode])
+
+  useEffect(() => {
     if (capture.kind !== 'streaming') return undefined
     const interval = window.setInterval(() => setPreviewNonce((value) => value + 1), 500)
     return () => window.clearInterval(interval)
@@ -614,7 +629,7 @@ export default function App({ mode }: { mode?: AppMode }) {
             >{item}</button>
           ))}
         </nav>
-        <div className="session-meta"><span>SESSION</span><strong>{preflight.kind === 'complete' ? preflight.session.id : 'preview_001'}</strong></div>
+        <div className="session-meta"><span>SESSION</span><strong>{capture.kind === 'streaming' ? capture.status.session_id : preflight.kind === 'complete' ? preflight.session.id : 'preview_001'}</strong></div>
       </header>
 
       <div className="workspace-container">
