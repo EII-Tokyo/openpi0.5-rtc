@@ -10,6 +10,7 @@ from pydantic import Field
 
 class OwnershipState(StrEnum):
     FREE = "FREE"
+    ROS_SOURCE = "ROS_SOURCE"
     BUSY = "BUSY"
     UNKNOWN = "UNKNOWN"
 

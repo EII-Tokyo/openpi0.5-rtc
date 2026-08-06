@@ -7,6 +7,9 @@ from .intrinsics_capture import FramePacket
 from .models import FactoryIntrinsics
 from .models import ProductionProfile
 
+_FRAME_TIMEOUT_MS = 5000
+_MAX_FRAME_WAIT_ATTEMPTS = 3
+
 
 class RealSenseRunningCamera:
     def __init__(self, pipeline: rs.pipeline, active_profile: rs.pipeline_profile) -> None:
@@ -28,7 +31,19 @@ class RealSenseRunningCamera:
         )
 
     def next_frame(self) -> FramePacket:
-        frames = self._pipeline.wait_for_frames(timeout_ms=5000)
+        last_error: RuntimeError | None = None
+        frames = None
+        for _ in range(_MAX_FRAME_WAIT_ATTEMPTS):
+            try:
+                frames = self._pipeline.wait_for_frames(timeout_ms=_FRAME_TIMEOUT_MS)
+                break
+            except RuntimeError as exc:
+                last_error = exc
+        if frames is None:
+            raise RuntimeError(
+                "RealSense color frame did not arrive after "
+                f"{_MAX_FRAME_WAIT_ATTEMPTS} attempts of {_FRAME_TIMEOUT_MS} ms"
+            ) from last_error
         color_frame = frames.get_color_frame()
         if not color_frame:
             raise RuntimeError("RealSense frameset did not contain the configured color stream")

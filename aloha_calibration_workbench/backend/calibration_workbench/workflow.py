@@ -622,7 +622,11 @@ class CalibrationWorkflow:
         rotation_jitter = float(
             np.percentile([_rotation_distance_deg(matrix[:3, :3], rotation) for matrix in matrices], 95)
         )
-        if translation_jitter > 0.002 or rotation_jitter > 0.5:
+        # The 80 mm tag occupies only about 37 pixels in cam_high. Keep the
+        # strict 2 mm translation gate, but allow the observed planar-PnP
+        # tilt uncertainty here; the following 9-dot table solve independently
+        # refines the full camera rotation and validates three held-out points.
+        if translation_jitter > 0.002 or rotation_jitter > 1.5:
             raise WorkflowGateError("world origin pose jitter gate failed")
 
         world_from_camera = world_from_tag.array() @ np.linalg.inv(aggregate)

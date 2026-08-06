@@ -189,10 +189,15 @@ def create_orchestrator_app(
         request: WorldOriginPhysicalRequest,
     ) -> WorldOriginResult:
         try:
-            if store.get(session_id).state != "FACTORY_INTRINSICS_FROZEN":
+            state = store.get(session_id).state
+            if state == "WORLD_ORIGIN_SOLVED":
+                return WorldOriginResult.model_validate(
+                    store.read_workflow_artifact(session_id, "world_origin.json")
+                )
+            if state != "FACTORY_INTRINSICS_FROZEN":
                 raise SessionTransitionError(
                     "WORLD_ORIGIN_SOLVED requires FACTORY_INTRINSICS_FROZEN, "
-                    f"current state is {store.get(session_id).state}"
+                    f"current state is {state}"
                 )
             batch = capture_client.capture_world_origin(
                 session_id,

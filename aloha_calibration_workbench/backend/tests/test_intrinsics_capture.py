@@ -66,6 +66,7 @@ class FakeFrame:
 class FakeRunningCamera:
     def __init__(self) -> None:
         self.stopped = False
+        self.frame_calls = 0
 
     def factory_intrinsics(self) -> FactoryIntrinsics:
         return FactoryIntrinsics(
@@ -80,6 +81,7 @@ class FakeRunningCamera:
         )
 
     def next_frame(self) -> FakeFrame:
+        self.frame_calls += 1
         return FakeFrame()
 
     def stop(self) -> None:
@@ -94,6 +96,24 @@ class FakeBackend:
     def start(self, serial: str, profile: ProductionProfile) -> FakeRunningCamera:
         self.calls.append((serial, profile))
         return self.running
+
+
+class FakeSharedRosBackend(FakeBackend):
+    shared_source = True
+
+
+class FakeRosPreflight:
+    def run(self) -> PreflightReport:
+        report = _ready_report()
+        return report.model_copy(
+            update={
+                "exclusive_capture_required": False,
+                "cameras": [
+                    camera.model_copy(update={"ownership": OwnershipState.ROS_SOURCE})
+                    for camera in report.cameras
+                ],
+            }
+        )
 
 
 class FakeAnalyzer:
@@ -203,4 +223,21 @@ def test_table_snapshot_returns_and_persists_the_same_evidence_frame(tmp_path: P
     assert (attempt / "frame.png").is_file()
     assert snapshot.image_sha256 == __import__("hashlib").sha256((attempt / "frame.png").read_bytes()).hexdigest()
     assert (attempt / "frame.json").is_file()
+    assert backend.running.frame_calls == 31
     assert backend.running.stopped is True
+
+
+def test_table_snapshot_accepts_a_verified_shared_ros_source(tmp_path: Path):
+    backend = FakeSharedRosBackend()
+    service = IntrinsicsCaptureService(
+        preflight=FakeRosPreflight(),
+        profile=ProductionProfile(width=640, height=480, fps=60, format="rgb8"),
+        backend=backend,
+        analyzer=FakeAnalyzer(),
+        artifact_root=tmp_path,
+    )
+
+    snapshot = service.capture_table_snapshot(session_id="cal-20260805T120000-1234abcd")
+
+    assert snapshot.attempt_id == "A-001"
+    assert backend.running.frame_calls == 31

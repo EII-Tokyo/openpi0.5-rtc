@@ -5,7 +5,7 @@ export interface PreflightCamera {
   connected: boolean
   identity_match: boolean
   production_profile_supported: boolean
-  ownership: 'FREE' | 'BUSY' | 'UNKNOWN'
+  ownership: 'FREE' | 'ROS_SOURCE' | 'BUSY' | 'UNKNOWN'
 }
 
 export interface PreflightSession {

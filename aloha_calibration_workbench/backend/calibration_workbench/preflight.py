@@ -32,9 +32,16 @@ class DeviceProbe(Protocol):
 
 
 class PreflightService:
-    def __init__(self, *, registry: CandidateRegistry, probe: DeviceProbe):
+    def __init__(
+        self,
+        *,
+        registry: CandidateRegistry,
+        probe: DeviceProbe,
+        exclusive_capture_required: bool = True,
+    ):
         self._registry = registry
         self._probe = probe
+        self._exclusive_capture_required = exclusive_capture_required
 
     def run(self) -> PreflightReport:
         try:
@@ -135,6 +142,7 @@ class PreflightService:
             registry_sha256=self._registry.source_sha256,
             cameras=cameras,
             issues=issues,
+            exclusive_capture_required=self._exclusive_capture_required,
         )
 
     def _probe_failure(self, error_name: str) -> PreflightReport:
@@ -158,6 +166,7 @@ class PreflightService:
                     message=f"Read-only device probe failed: {error_name}",
                 )
             ],
+            exclusive_capture_required=self._exclusive_capture_required,
         )
 
     @staticmethod

@@ -36,7 +36,14 @@ class AprilTagAnalyzer:
         self._tag_id = tag_id
         self._tag_size_m = tag_size_m
         dictionary = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_APRILTAG_36h11)
-        self._detector = cv2.aruco.ArucoDetector(dictionary)
+        detector_parameters = cv2.aruco.DetectorParameters()
+        # The high camera sees the 80 mm world-origin tag at only about 37 px
+        # per side. Integer contour corners can therefore move the recovered
+        # depth by more than 10 mm when a single corner toggles by one pixel.
+        # OpenCV's AprilTag-specific refinement is also more stable than the
+        # generic sub-pixel optimizer for this small, distant marker.
+        detector_parameters.cornerRefinementMethod = cv2.aruco.CORNER_REFINE_APRILTAG
+        self._detector = cv2.aruco.ArucoDetector(dictionary, detector_parameters)
 
     def analyze(self, frame: FramePacket, intrinsics: FactoryIntrinsics) -> AprilTagDetection:
         rgb = np.asarray(frame.rgb, dtype=np.uint8)

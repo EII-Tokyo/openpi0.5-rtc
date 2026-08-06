@@ -90,6 +90,13 @@ def test_workflow_api_freezes_factory_bundle_then_solves_world_origin(tmp_path: 
     assert solved.json()["status"] == "WORLD_ORIGIN_SOLVED"
     assert store.get(session_id).state == "WORLD_ORIGIN_SOLVED"
 
+    cached = client.post(
+        f"/api/sessions/{session_id}/actions/world-origin/capture-solve",
+        json={"tag_size_m": 0.080, "tag_plane_height_m": 0.0, "frame_count": 200},
+    )
+    assert cached.status_code == 200
+    assert cached.json() == solved.json()
+
     snapshot = client.post(f"/api/sessions/{session_id}/actions/table/snapshot")
     assert snapshot.status_code == 200
     assert snapshot.content == b"jpeg-evidence"

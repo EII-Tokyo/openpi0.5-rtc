@@ -95,6 +95,38 @@ def test_world_origin_rejects_too_few_frames():
         )
 
 
+def test_world_origin_allows_small_tag_tilt_jitter_for_later_table_refinement():
+    workflow = CalibrationWorkflow()
+    samples = []
+    for index, angle_deg in enumerate(np.linspace(-1.2, 1.2, 160)):
+        angle = np.deg2rad(angle_deg)
+        camera_from_tag = np.eye(4)
+        camera_from_tag[:3, :3] = np.array(
+            [
+                [np.cos(angle), 0.0, np.sin(angle)],
+                [0.0, 1.0, 0.0],
+                [-np.sin(angle), 0.0, np.cos(angle)],
+            ]
+        )
+        camera_from_tag[2, 3] = 0.84
+        samples.append(
+            TagPoseSample(
+                camera_from_tag=_transform(camera_from_tag, "tag", "camera_high_optical"),
+                reprojection_rms_px=0.1,
+                frame_id=f"F-{index:03d}",
+                device_timestamp_ms=index * 33.4,
+                image_sha256=hashlib.sha256(f"tilt-frame-{index}".encode()).hexdigest(),
+            )
+        )
+
+    result = workflow.solve_world_origin(
+        samples=samples,
+        world_from_tag=_transform(np.eye(4), "tag", "table_world"),
+    )
+
+    assert 0.5 < result.rotation_jitter_deg < 1.5
+
+
 def test_table_solver_keeps_six_solve_points_and_three_held_out_points_separate():
     workflow = CalibrationWorkflow()
     a, b = 0.35, 0.18

@@ -57,6 +57,28 @@ npm run dev:live
 
 若门禁失败，不要改阈值绕过；根据页面错误重新摆放、消除遮挡或重新拍摄一个新 attempt。
 
+### 复用 `aloha2-collect` 的 ROS2 相机流
+
+当 `aloha2-collect` 已经运行四个 `realsense2_camera_node` 时，它必须是 D405 的唯一设备所有者。此时不要让 capture-agent 再通过 `pyrealsense2.pipeline.start()` 打开相机；使用容器内只读 ROS bridge：
+
+```bash
+cd /home/eii/openpi0.5-rtc-reward-learning
+bash third_party/aloha_collection/scripts/run_calibration_camera_bridge.sh
+```
+
+bridge 只订阅四组 `sensor_msgs/msg/Image` 和 `sensor_msgs/msg/CameraInfo`，绑定 `127.0.0.1:8018`，不创建 ROS publisher、service/action client 或机器人命令 API。它通过 stdin 把项目内脚本送入已有容器，不修改容器挂载的 ALOHA 源码。
+
+另一个终端在 103 启动 capture-agent：
+
+```bash
+cd /home/eii/openpi0.5-rtc-reward-learning/aloha_calibration_workbench/backend
+ALOHA_CALIBRATION_CAMERA_SOURCE=ros_bridge \
+ALOHA_CALIBRATION_ROS_BRIDGE_URL=http://127.0.0.1:8018 \
+.venv/bin/aloha-calibration-capture-agent
+```
+
+该模式下预检必须显示 `exclusive_capture_required: false`，四台相机所有权为 `ROS_SOURCE`。出厂 K/D 来自各相机的 `CameraInfo`；正式证据帧来自 `Image`，经 bridge 无损编码为 PNG，并保留 ROS header 时间戳。`plumb_bob` 在宿主适配层显式映射为 OpenCV 的 `brown_conrady`，不修改数值。
+
 ## USD 导出契约
 
 导出前固定核验：

@@ -26,6 +26,7 @@ from .workflow import WorldOriginCaptureBatch
 
 _SESSION_ID = re.compile(r"cal-[0-9T]+-[0-9a-f]{8}")
 _ENABLED_STAGE1_ROLES = {"cam_high"}
+_AUTO_EXPOSURE_WARMUP_FRAMES = 30
 
 
 class CaptureConflictError(RuntimeError):
@@ -83,7 +84,7 @@ class FrameAnalyzer(Protocol):
 
 
 class IntrinsicsCaptureService:
-    """Own exactly one color-only RealSense pipeline and immutable sample artifacts."""
+    """Consume one color source at a time and write immutable sample artifacts."""
 
     def __init__(
         self,
@@ -108,6 +109,17 @@ class IntrinsicsCaptureService:
         with self._lock:
             return self._status.model_copy(deep=True)
 
+    def _assert_camera_source_available(self, camera: object) -> None:
+        shared_source = bool(getattr(self._backend, "shared_source", False))
+        expected = OwnershipState.ROS_SOURCE if shared_source else OwnershipState.FREE
+        ownership = getattr(camera, "ownership")
+        if ownership is not expected:
+            mode = "ROS subscription" if shared_source else "exclusive RealSense"
+            raise CaptureConflictError(
+                f"Camera {getattr(camera, 'role')} ownership is {ownership.value}; "
+                f"{mode} source requires {expected.value}"
+            )
+
     def snapshot_factory_intrinsics(self) -> list[FactoryCameraSnapshot]:
         """Open each configured color stream sequentially and freeze its factory K/D."""
         with self._lock:
@@ -120,8 +132,7 @@ class IntrinsicsCaptureService:
             for camera in sorted(report.cameras, key=lambda item: item.role):
                 if not camera.identity_match or not camera.production_profile_supported:
                     raise CaptureConflictError(f"Camera {camera.role} did not pass identity/profile preflight")
-                if camera.ownership is not OwnershipState.FREE:
-                    raise CaptureConflictError(f"Camera {camera.role} ownership is {camera.ownership.value}")
+                self._assert_camera_source_available(camera)
                 running = self._backend.start(camera.expected_serial, self._profile)
                 try:
                     intrinsics = running.factory_intrinsics()
@@ -167,12 +178,15 @@ class IntrinsicsCaptureService:
             selected = next((camera for camera in report.cameras if camera.role == "cam_high"), None)
             if selected is None or not selected.identity_match or not selected.production_profile_supported:
                 raise CaptureConflictError("Camera cam_high did not pass identity/profile preflight")
-            if selected.ownership is not OwnershipState.FREE:
-                raise CaptureConflictError(f"Camera cam_high ownership is {selected.ownership.value}")
+            self._assert_camera_source_available(selected)
             running = self._backend.start(selected.expected_serial, self._profile)
             try:
                 intrinsics = running.factory_intrinsics()
                 analyzer = AprilTagAnalyzer(tag_id=0, tag_size_m=tag_size_m)
+                # Librealsense examples discard the first 30 frames so automatic
+                # exposure and other camera settings can settle before evidence capture.
+                for _ in range(_AUTO_EXPOSURE_WARMUP_FRAMES):
+                    running.next_frame()
                 attempts_root = self._camera_root(session_id, "cam_high") / "world_origin"
                 attempts_root.mkdir(parents=True, exist_ok=True, mode=0o700)
                 attempt_number = 1 + len([path for path in attempts_root.iterdir() if path.is_dir()])
@@ -245,14 +259,13 @@ class IntrinsicsCaptureService:
             selected = next((camera for camera in report.cameras if camera.role == "cam_high"), None)
             if selected is None or not selected.identity_match or not selected.production_profile_supported:
                 raise CaptureConflictError("Camera cam_high did not pass identity/profile preflight")
-            if selected.ownership is not OwnershipState.FREE:
-                raise CaptureConflictError(f"Camera cam_high ownership is {selected.ownership.value}")
+            self._assert_camera_source_available(selected)
             running = self._backend.start(selected.expected_serial, self._profile)
             try:
                 # Let auto-exposure settle without authoring those warm-up frames as evidence.
+                for _ in range(_AUTO_EXPOSURE_WARMUP_FRAMES):
+                    running.next_frame()
                 packet = running.next_frame()
-                for _ in range(29):
-                    packet = running.next_frame()
                 rgb = np.asarray(packet.rgb)
                 expected_shape = (self._profile.height, self._profile.width, 3)
                 if rgb.shape != expected_shape or rgb.dtype != np.uint8:
@@ -312,8 +325,7 @@ class IntrinsicsCaptureService:
             selected = next((camera for camera in report.cameras if camera.role == role), None)
             if selected is None or not selected.identity_match or not selected.production_profile_supported:
                 raise CaptureConflictError(f"Camera {role} did not pass identity/profile preflight")
-            if selected.ownership is not OwnershipState.FREE:
-                raise CaptureConflictError(f"Camera {role} ownership is {selected.ownership.value}")
+            self._assert_camera_source_available(selected)
 
             running = self._backend.start(selected.expected_serial, self._profile)
             try:
