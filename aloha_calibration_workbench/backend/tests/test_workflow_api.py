@@ -145,6 +145,36 @@ def test_workflow_api_freezes_factory_bundle_then_solves_world_origin(tmp_path: 
     )
     assert forbidden_truth.status_code == 422
 
+    cached_payload = {
+        "status": "WORLD_REGISTRATION_VALIDATED",
+        "validation_scope": "tabletop-xy-cross-validation",
+        "world_from_camera": _identity("camera_high_optical", "table_world"),
+        "solve_point_ids": ["P12", "P13", "P21", "P22", "P31", "P33"],
+        "held_out_point_ids": ["P11", "P23", "P32"],
+        "solve_reprojection_rms_px": 1.8,
+        "initial_reprojection_rms_px": 3.0,
+        "refinement_translation_m": 0.031,
+        "refinement_rotation_deg": 2.0,
+        "held_out_rms_m": 0.007,
+        "held_out_max_m": 0.009,
+        "quality_gate_passed": False,
+        "operator_override": {"reason": "explicit test approval"},
+    }
+    store.record_workflow_artifact(
+        session_id,
+        expected_state="TABLE_POINT_CONTRACT_FROZEN",
+        next_state="WORLD_REGISTRATION_VALIDATED",
+        artifact_name="table_registration.json",
+        payload=cached_payload,
+    )
+    cached = client.post(
+        f"/api/sessions/{session_id}/actions/table/solve",
+        json={"observations": []},
+    )
+    assert cached.status_code == 200
+    assert cached.json()["status"] == "WORLD_REGISTRATION_VALIDATED"
+    assert cached.json()["solve_reprojection_rms_px"] == 1.8
+
 
 def test_workflow_api_rejects_skipping_factory_freeze(tmp_path: Path):
     client = TestClient(create_orchestrator_app(WorkflowCaptureClient(), SessionStore(tmp_path)))

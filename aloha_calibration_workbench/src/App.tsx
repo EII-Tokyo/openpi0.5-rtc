@@ -176,7 +176,6 @@ function TableDots({
   const [dots, setDots] = useState(initialDots)
   const [selectedDot, setSelectedDot] = useState('P11')
   const update = (id: string, patch: Partial<DotForm>) => setDots((current) => current.map((dot) => dot.id === id ? { ...dot, ...patch } : dot))
-  const observationsReady = dots.every((dot) => dot.u !== '' && dot.v !== '' && dot.confirmed)
   const clickSnapshot = (event: React.MouseEvent<HTMLImageElement>) => {
     const image = event.currentTarget
     const rect = image.getBoundingClientRect()
@@ -194,7 +193,7 @@ function TableDots({
       <label className="confirm"><input type="checkbox" checked={dot.confirmed} onChange={(event) => update(dot.id, { confirmed: event.target.checked })} />中心已确认</label>
     </article>)}</div>
     {!contract ? <button className="primary-action" disabled={!enabled || busy !== null} onClick={() => onFreeze(dots)}>冻结 9 点测量 contract</button> : null}
-    {contract && !result ? <><strong className="gate-status">{contract.status}</strong><button className="primary-action" disabled={!observationsReady || busy !== null} onClick={() => onSolve(dots)}>运行 6 点求解 + 3 点盲测</button></> : null}
+    {contract && !result ? <><strong className="gate-status">{contract.status}</strong><button className="primary-action" disabled={busy !== null} onClick={() => onSolve(dots)}>运行或载入 6 点求解 + 3 点盲测</button></> : null}
     {result ? <section className="preflight-result ready"><strong>{result.status}</strong><span>{result.validation_scope}</span><span>held-out RMS {(result.held_out_rms_m * 1000).toFixed(2)} mm · max {(result.held_out_max_m * 1000).toFixed(2)} mm</span></section> : null}
   </section>
 }

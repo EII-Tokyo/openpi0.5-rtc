@@ -294,10 +294,15 @@ def create_orchestrator_app(
         request: TableObservationsRequest,
     ) -> TableRegistrationResult:
         try:
-            if store.get(session_id).state != "TABLE_POINT_CONTRACT_FROZEN":
+            state = store.get(session_id).state
+            if state == "WORLD_REGISTRATION_VALIDATED":
+                return TableRegistrationResult.model_validate(
+                    store.read_workflow_artifact(session_id, "table_registration.json")
+                )
+            if state != "TABLE_POINT_CONTRACT_FROZEN":
                 raise SessionTransitionError(
                     "WORLD_REGISTRATION_VALIDATED requires TABLE_POINT_CONTRACT_FROZEN, "
-                    f"current state is {store.get(session_id).state}"
+                    f"current state is {state}"
                 )
             bundle = FactorySnapshotBundle.model_validate(
                 store.read_workflow_artifact(session_id, "factory_intrinsics.json")
