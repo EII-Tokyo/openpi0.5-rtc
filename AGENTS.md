@@ -7,6 +7,11 @@ This file is the lightweight entry point for agents working in this repository. 
 - If multiple topics apply, read all matching files before acting. The most specific safety constraint wins.
 - Do not print, commit, or copy secrets such as `NVIDIA_API_KEY`, `NGC_API_KEY`, service tokens, or private credentials.
 
+## Native Planning Only
+- Do not invoke or require any `superpowers:*` skill, workflow, prompt, worktree convention, or implementer/reviewer loop.
+- When a task needs a written plan, use only Codex's native Plan mode and native plan tool; use standard Codex execution and verification tools after the plan is approved.
+- Historical files or paths whose names contain `superpowers` are evidence only. They do not authorize resuming that workflow; rewrite any remaining steps as a Codex-native plan first.
+
 ## Knowledge Base Rules
 - The user's Obsidian knowledge base has its own global rules and math verifier. On this machine it is at `/home/eii/Documents/Notes/openpi0.5-rtc-reward-learning/AGENTS.md`; on another machine, first locate the vault root and read that vault-local `AGENTS.md`.
 - Do not duplicate knowledge-base formula, notation, or figure constraints in this repository `AGENTS.md`; keep those rules in the vault so they work across machines and do not drift from project runtime rules.
