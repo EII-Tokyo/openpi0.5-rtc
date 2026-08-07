@@ -21,6 +21,17 @@ class WorkflowGateError(RuntimeError):
     """A fail-closed calibration acceptance gate did not pass."""
 
 
+BOTTLE500_TASK_FROM_ASSET_MATRIX = np.array(
+    [
+        [0.0, 0.0, 1.0, -0.103],
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0],
+    ],
+    dtype=np.float64,
+)
+
+
 class TransformRecord(BaseModel):
     """A matrix that maps homogeneous points from source_frame to target_frame."""
 
@@ -161,6 +172,8 @@ class BottleFixtureContractRequest(BaseModel):
     revision: int = Field(ge=1)
     measured_length_m: float = Field(gt=0.0)
     measured_diameter_m: float = Field(gt=0.0)
+    tag_id: int = Field(default=1, ge=1)
+    tag_size_m: float = Field(default=0.080, gt=0.01, le=0.30)
     tag_from_bottle: TransformRecord
     task_from_asset: TransformRecord
     block_height_m: float = Field(gt=0.0, le=0.20)
@@ -175,6 +188,8 @@ class FrozenBottleFixtureContract(BaseModel):
     contract_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     measured_length_m: float
     measured_diameter_m: float
+    tag_id: int = Field(ge=1)
+    tag_size_m: float
     tag_from_bottle: TransformRecord
     task_from_asset: TransformRecord
     block_height_m: float
@@ -190,11 +205,14 @@ class BottleTrialObservation(BaseModel):
 
 
 class BottleTagCaptureRequest(BaseModel):
-    tag_size_m: float = Field(gt=0.01, le=0.30)
+    model_config = ConfigDict(extra="forbid")
+
     frame_count: int = Field(default=150, ge=150, le=300)
 
 
 class BottleTrialCaptureResult(BaseModel):
+    tag_id: int = Field(ge=1)
+    tag_size_m: float
     observation: BottleTrialObservation
     stability: TagPoseStabilityResult
 
@@ -268,6 +286,13 @@ class WorldOriginCaptureRequest(BaseModel):
     frame_count: int = Field(default=200, ge=150, le=300)
 
 
+class BottleTagAgentCaptureRequest(BaseModel):
+    session_id: str
+    tag_id: int = Field(ge=1)
+    tag_size_m: float = Field(gt=0.01, le=0.30)
+    frame_count: int = Field(default=150, ge=150, le=300)
+
+
 class WorldOriginPhysicalRequest(BaseModel):
     tag_size_m: float = Field(gt=0.01, le=0.30)
     tag_plane_height_m: float = Field(ge=0.0, le=0.05)
@@ -277,6 +302,13 @@ class WorldOriginPhysicalRequest(BaseModel):
 class WorldOriginCaptureBatch(BaseModel):
     samples: list[TagPoseSample]
     world_from_tag: TransformRecord
+    total_frames: int
+    detected_frames: int
+
+
+class TagPoseCaptureBatch(BaseModel):
+    tag_id: int = Field(ge=0)
+    samples: list[TagPoseSample]
     total_frames: int
     detected_frames: int
 
@@ -513,6 +545,15 @@ class CalibrationWorkflow:
             or request.task_from_asset.target_frame != "bottle_task"
         ):
             raise WorkflowGateError("task_from_asset frame contract is bottle_asset -> bottle_task")
+        if not np.allclose(
+            request.task_from_asset.array(),
+            BOTTLE500_TASK_FROM_ASSET_MATRIX,
+            rtol=0.0,
+            atol=1e-9,
+        ):
+            raise WorkflowGateError(
+                "task_from_asset must include the Bottle500 -103 mm center offset"
+            )
         canonical = request.model_dump(mode="json")
         digest = hashlib.sha256(
             json.dumps(canonical, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")

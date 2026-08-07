@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
-import App from './App'
+import App, { BOTTLE500_TASK_FROM_ASSET, DEFAULT_BOTTLE_TAG_ID } from './App'
 
 describe('ALOHA table and Bottle500 calibration workbench', () => {
   it('is device-safe in preview mode and explains the three experiments', () => {
@@ -44,6 +44,19 @@ describe('ALOHA table and Bottle500 calibration workbench', () => {
 
     expect(screen.getByText('TAGGED_FIXTURE_TRANSFER_PASS')).toBeInTheDocument()
     expect(screen.getByText('不代表无标签透明瓶识别、碰撞或动力学通过')).toBeInTheDocument()
+    expect(screen.getByLabelText('瓶夹具 Tag ID')).toHaveValue(DEFAULT_BOTTLE_TAG_ID)
+  })
+
+  it('maps the Bottle500 asset midpoint to the bottle task origin', () => {
+    const matrix = BOTTLE500_TASK_FROM_ASSET.matrix
+    const assetMidpoint = [0, 0, 0.103, 1]
+    const mapped = matrix.map((row) => row.reduce(
+      (total, value, index) => total + value * assetMidpoint[index],
+      0,
+    ))
+
+    expect(mapped).toEqual([0, 0, 0, 1])
+    expect(matrix[0][3]).toBe(-0.103)
   })
 
   it('gates factory snapshots behind a successful live preflight', async () => {

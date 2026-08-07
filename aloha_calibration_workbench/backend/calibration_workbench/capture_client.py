@@ -7,6 +7,7 @@ from .models import CaptureStatus
 from .models import PreflightReport
 from .models import SampleRecord
 from .workflow import FactoryCameraSnapshot
+from .workflow import TagPoseCaptureBatch
 from .workflow import WorldOriginCaptureBatch
 
 
@@ -48,6 +49,27 @@ class CaptureAgentClient:
         )
         response.raise_for_status()
         return WorldOriginCaptureBatch.model_validate(response.json())
+
+    def capture_bottle_tag(
+        self,
+        session_id: str,
+        *,
+        tag_id: int,
+        tag_size_m: float,
+        frame_count: int,
+    ) -> TagPoseCaptureBatch:
+        response = httpx.post(
+            f"{self._base_url}/api/bottle-tag/capture",
+            json={
+                "session_id": session_id,
+                "tag_id": tag_id,
+                "tag_size_m": tag_size_m,
+                "frame_count": frame_count,
+            },
+            timeout=max(self._timeout_seconds, 60.0),
+        )
+        response.raise_for_status()
+        return TagPoseCaptureBatch.model_validate(response.json())
 
     def capture_table_snapshot(self, session_id: str) -> RgbSnapshot:
         response = httpx.post(

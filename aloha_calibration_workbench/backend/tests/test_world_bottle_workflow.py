@@ -8,6 +8,7 @@ import pytest
 
 from calibration_workbench.models import FactoryIntrinsics
 from calibration_workbench.workflow import BottleFixtureContractRequest
+from calibration_workbench.workflow import BottleTagCaptureRequest
 from calibration_workbench.workflow import BottleTrialObservation
 from calibration_workbench.workflow import CalibrationWorkflow
 from calibration_workbench.workflow import DotObservation
@@ -20,6 +21,18 @@ from calibration_workbench.workflow import WorkflowGateError
 
 def _transform(matrix: np.ndarray, source: str, target: str) -> TransformRecord:
     return TransformRecord(source_frame=source, target_frame=target, matrix=matrix.tolist())
+
+
+def _bottle_task_from_asset() -> TransformRecord:
+    matrix = np.array(
+        [
+            [0.0, 0.0, 1.0, -0.103],
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0],
+        ]
+    )
+    return _transform(matrix, "bottle_asset", "bottle_task")
 
 
 def _intrinsics() -> FactoryIntrinsics:
@@ -240,8 +253,10 @@ def test_three_bottle_trials_prove_tagged_fixture_transfer_only():
         revision=1,
         measured_length_m=0.206,
         measured_diameter_m=0.068,
+        tag_id=1,
+        tag_size_m=0.080,
         tag_from_bottle=_transform(np.eye(4), "bottle_task", "tag"),
-        task_from_asset=_transform(np.eye(4), "bottle_asset", "bottle_task"),
+        task_from_asset=_bottle_task_from_asset(),
         block_height_m=0.050,
         measurement_method="steel-ruler-square-and-rigid-stops",
         repeated_installation_delta_m=0.001,
@@ -266,6 +281,55 @@ def test_three_bottle_trials_prove_tagged_fixture_transfer_only():
     assert report.status == "TAGGED_FIXTURE_TRANSFER_PASS"
     assert report.claim_scope == "tagged-rigid-fixture-transfer-only"
     assert report.center_rms_m == pytest.approx(0.0)
+
+
+def test_bottle_contract_freezes_non_world_tag_and_rejects_missing_asset_center_offset():
+    workflow = CalibrationWorkflow()
+    base = {
+        "fixture_id": "bottle500-v-block-test",
+        "revision": 1,
+        "measured_length_m": 0.206,
+        "measured_diameter_m": 0.068,
+        "tag_id": 1,
+        "tag_size_m": 0.080,
+        "tag_from_bottle": _transform(np.eye(4), "bottle_task", "tag"),
+        "block_height_m": 0.050,
+        "measurement_method": "steel-ruler-square-and-rigid-stops",
+        "repeated_installation_delta_m": 0.001,
+    }
+
+    frozen = workflow.freeze_bottle_fixture_contract(
+        BottleFixtureContractRequest(**base, task_from_asset=_bottle_task_from_asset())
+    )
+    assert frozen.tag_id == 1
+    assert frozen.tag_size_m == pytest.approx(0.080)
+
+    with pytest.raises(WorkflowGateError, match="103 mm center offset"):
+        workflow.freeze_bottle_fixture_contract(
+            BottleFixtureContractRequest(
+                **base,
+                task_from_asset=_transform(
+                    np.array(
+                        [
+                            [0.0, 0.0, 1.0, 0.0],
+                            [1.0, 0.0, 0.0, 0.0],
+                            [0.0, 1.0, 0.0, 0.0],
+                            [0.0, 0.0, 0.0, 1.0],
+                        ]
+                    ),
+                    "bottle_asset",
+                    "bottle_task",
+                ),
+            )
+        )
+
+    with pytest.raises(ValueError, match="greater than or equal to 1"):
+        BottleFixtureContractRequest(
+            **{**base, "tag_id": 0},
+            task_from_asset=_bottle_task_from_asset(),
+        )
+
+    assert BottleTagCaptureRequest().frame_count == 150
 
 
 def test_export_refuses_stage_hash_mismatch_and_writes_independent_layers(tmp_path: Path):

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
 from calibration_workbench.intrinsics_capture import CaptureConflictError
@@ -13,6 +14,8 @@ from calibration_workbench.models import PreflightCamera
 from calibration_workbench.models import PreflightReport
 from calibration_workbench.models import PreflightStatus
 from calibration_workbench.models import ProductionProfile
+from calibration_workbench.workflow import TagPoseSample
+from calibration_workbench.workflow import TransformRecord
 import pytest
 
 
@@ -241,3 +244,53 @@ def test_table_snapshot_accepts_a_verified_shared_ros_source(tmp_path: Path):
 
     assert snapshot.attempt_id == "A-001"
     assert backend.running.frame_calls == 31
+
+
+def test_bottle_tag_capture_uses_id_one_and_persists_it(tmp_path: Path, monkeypatch):
+    analyzer_arguments: list[tuple[int, float]] = []
+
+    class FakeAprilTagAnalyzer:
+        def __init__(self, *, tag_id: int, tag_size_m: float) -> None:
+            analyzer_arguments.append((tag_id, tag_size_m))
+
+        def analyze(self, frame: FakeFrame, intrinsics: FactoryIntrinsics):
+            return SimpleNamespace(
+                png=b"tag-frame",
+                sample=TagPoseSample(
+                    camera_from_tag=TransformRecord(
+                        source_frame="tag",
+                        target_frame="camera_high_optical",
+                        matrix=np.eye(4).tolist(),
+                    ),
+                    reprojection_rms_px=0.2,
+                ),
+                frame_number=frame.frame_number,
+                device_timestamp_ms=frame.device_timestamp_ms,
+                detected=True,
+                corners_px=[[1.0, 1.0], [2.0, 1.0], [2.0, 2.0], [1.0, 2.0]],
+            )
+
+    monkeypatch.setattr(
+        "calibration_workbench.apriltag_analyzer.AprilTagAnalyzer",
+        FakeAprilTagAnalyzer,
+    )
+    service, backend = _service(tmp_path)
+    session_id = "cal-20260805T120000-1234abcd"
+
+    batch = service.capture_bottle_tag_batch(
+        session_id=session_id,
+        tag_id=1,
+        tag_size_m=0.080,
+        frame_count=150,
+    )
+
+    assert analyzer_arguments == [(1, 0.080)]
+    assert batch.tag_id == 1
+    assert batch.detected_frames == 150
+    assert backend.running.stopped is True
+    manifest = (
+        tmp_path
+        / session_id
+        / "cam_high/bottle_tag_id_001/A-001/capture_manifest.json"
+    ).read_text(encoding="utf-8")
+    assert '"tag_id": 1' in manifest

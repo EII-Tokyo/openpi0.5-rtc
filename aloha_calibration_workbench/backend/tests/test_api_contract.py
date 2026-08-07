@@ -7,6 +7,7 @@ from calibration_workbench.models import PreflightReport
 from calibration_workbench.models import PreflightStatus
 from calibration_workbench.orchestrator_api import create_orchestrator_app
 from calibration_workbench.sessions import SessionStore
+from calibration_workbench.workflow import TagPoseCaptureBatch
 from fastapi.testclient import TestClient
 
 
@@ -23,6 +24,34 @@ def _report() -> PreflightReport:
 class FakePreflightService:
     def run(self) -> PreflightReport:
         return _report()
+
+
+class FakeBottleCaptureService:
+    def __init__(self) -> None:
+        self.calls: list[dict] = []
+
+    def capture_bottle_tag_batch(
+        self,
+        *,
+        session_id: str,
+        tag_id: int,
+        tag_size_m: float,
+        frame_count: int,
+    ) -> TagPoseCaptureBatch:
+        self.calls.append(
+            {
+                "session_id": session_id,
+                "tag_id": tag_id,
+                "tag_size_m": tag_size_m,
+                "frame_count": frame_count,
+            }
+        )
+        return TagPoseCaptureBatch(
+            tag_id=tag_id,
+            samples=[],
+            total_frames=frame_count,
+            detected_frames=0,
+        )
 
 
 class FakeCaptureClient:
@@ -74,6 +103,36 @@ def test_capture_agent_exposes_read_only_safety_contract():
     assert response.json()["status"] == "READY"
     assert response.json()["pipeline_started"] is False
     assert response.json()["hardware_reset_called"] is False
+
+
+def test_capture_agent_has_a_separate_bottle_tag_endpoint():
+    capture = FakeBottleCaptureService()
+    client = TestClient(create_capture_app(FakePreflightService(), capture))
+
+    response = client.post(
+        "/api/bottle-tag/capture",
+        json={
+            "session_id": "cal-20260805T120000-1234abcd",
+            "tag_id": 1,
+            "tag_size_m": 0.080,
+            "frame_count": 150,
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.json()["tag_id"] == 1
+    assert capture.calls[0]["tag_id"] == 1
+
+    rejected = client.post(
+        "/api/bottle-tag/capture",
+        json={
+            "session_id": "cal-20260805T120000-1234abcd",
+            "tag_id": 0,
+            "tag_size_m": 0.080,
+            "frame_count": 150,
+        },
+    )
+    assert rejected.status_code == 422
 
 
 def test_orchestrator_creates_session_and_persists_preflight_artifact(tmp_path: Path):

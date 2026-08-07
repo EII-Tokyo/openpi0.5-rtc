@@ -11,12 +11,19 @@ from calibration_workbench.intrinsics_capture import RgbSnapshot
 from calibration_workbench.orchestrator_api import create_orchestrator_app
 from calibration_workbench.sessions import SessionStore
 from calibration_workbench.workflow import FactoryCameraSnapshot
+from calibration_workbench.workflow import BottleFixtureContractRequest
+from calibration_workbench.workflow import CalibrationWorkflow
+from calibration_workbench.workflow import TagPoseCaptureBatch
+from calibration_workbench.workflow import TagPoseSample
 from calibration_workbench.workflow import TransformRecord
 
 from test_api_contract import FakeCaptureClient
 
 
 class WorkflowCaptureClient(FakeCaptureClient):
+    def __init__(self) -> None:
+        self.bottle_capture_calls: list[dict] = []
+
     def snapshot_factory_intrinsics(self) -> list[FactoryCameraSnapshot]:
         roles = {
             "cam_high": "130322270656",
@@ -51,6 +58,43 @@ class WorkflowCaptureClient(FakeCaptureClient):
             frame_number=42,
             device_timestamp_ms=1234.5,
             image_sha256="b" * 64,
+        )
+
+    def capture_bottle_tag(
+        self,
+        session_id: str,
+        *,
+        tag_id: int,
+        tag_size_m: float,
+        frame_count: int,
+    ) -> TagPoseCaptureBatch:
+        self.bottle_capture_calls.append(
+            {
+                "session_id": session_id,
+                "tag_id": tag_id,
+                "tag_size_m": tag_size_m,
+                "frame_count": frame_count,
+            }
+        )
+        samples = [
+            TagPoseSample(
+                camera_from_tag=TransformRecord(
+                    source_frame="tag",
+                    target_frame="camera_high_optical",
+                    matrix=np.eye(4).tolist(),
+                ),
+                reprojection_rms_px=0.2,
+                frame_id=f"F-{index + 1:03d}",
+                device_timestamp_ms=index * 16.7,
+                image_sha256=hashlib.sha256(f"bottle-{index}".encode()).hexdigest(),
+            )
+            for index in range(frame_count)
+        ]
+        return TagPoseCaptureBatch(
+            tag_id=tag_id,
+            samples=samples,
+            total_frames=frame_count,
+            detected_frames=frame_count,
         )
 
 
@@ -197,3 +241,64 @@ def test_workflow_api_rejects_skipping_factory_freeze(tmp_path: Path):
 
     assert response.status_code == 409
     assert "FACTORY_INTRINSICS_FROZEN" in response.json()["detail"]
+
+
+def test_bottle_capture_uses_frozen_fixture_tag_id_one(tmp_path: Path):
+    capture = WorkflowCaptureClient()
+    store = SessionStore(tmp_path)
+    client = TestClient(create_orchestrator_app(capture, store))
+    session_id = client.post("/api/preflight-session").json()["id"]
+    task_from_asset = np.array(
+        [
+            [0.0, 0.0, 1.0, -0.103],
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0],
+        ]
+    )
+    contract = CalibrationWorkflow().freeze_bottle_fixture_contract(
+        BottleFixtureContractRequest(
+            fixture_id="bottle500-v-block-test",
+            revision=1,
+            measured_length_m=0.206,
+            measured_diameter_m=0.068,
+            tag_id=1,
+            tag_size_m=0.080,
+            tag_from_bottle=TransformRecord(
+                source_frame="bottle_task",
+                target_frame="tag",
+                matrix=np.eye(4).tolist(),
+            ),
+            task_from_asset=TransformRecord(
+                source_frame="bottle_asset",
+                target_frame="bottle_task",
+                matrix=task_from_asset.tolist(),
+            ),
+            block_height_m=0.050,
+            measurement_method="steel-ruler-square-and-rigid-stops",
+            repeated_installation_delta_m=0.001,
+        )
+    )
+    store.record_workflow_artifact(
+        session_id,
+        expected_state="PREFLIGHT_READY",
+        next_state="BOTTLE_FIXTURE_CONTRACT_FROZEN",
+        artifact_name="bottle_fixture_contract.json",
+        payload=contract,
+    )
+
+    response = client.post(
+        f"/api/sessions/{session_id}/actions/bottle/B-A/capture",
+        json={"frame_count": 150},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["tag_id"] == 1
+    assert capture.bottle_capture_calls == [
+        {
+            "session_id": session_id,
+            "tag_id": 1,
+            "tag_size_m": 0.080,
+            "frame_count": 150,
+        }
+    ]

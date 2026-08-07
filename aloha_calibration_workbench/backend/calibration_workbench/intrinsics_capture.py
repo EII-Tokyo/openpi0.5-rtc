@@ -21,6 +21,7 @@ from .models import PreflightStatus
 from .models import ProductionProfile
 from .models import SampleRecord
 from .workflow import FactoryCameraSnapshot
+from .workflow import TagPoseCaptureBatch
 from .workflow import TransformRecord
 from .workflow import WorldOriginCaptureBatch
 
@@ -163,18 +164,81 @@ class IntrinsicsCaptureService:
         frame_count: int = 200,
     ) -> WorldOriginCaptureBatch:
         """Capture one immutable, RGB-only AprilTag attempt from camera_high."""
+        captured, attempt_root = self._capture_apriltag_batch(
+            session_id=session_id,
+            tag_id=0,
+            tag_size_m=tag_size_m,
+            frame_count=frame_count,
+            artifact_group="world_origin",
+            capture_label="world origin",
+        )
+        world_from_tag = np.eye(4, dtype=np.float64)
+        world_from_tag[2, 3] = tag_plane_height_m
+        batch = WorldOriginCaptureBatch(
+            samples=captured.samples,
+            world_from_tag=TransformRecord(
+                source_frame="tag",
+                target_frame="table_world",
+                matrix=world_from_tag.tolist(),
+            ),
+            total_frames=captured.total_frames,
+            detected_frames=captured.detected_frames,
+        )
+        self.write_exclusive_artifact(
+            attempt_root / "capture_manifest.json",
+            (batch.model_dump_json(indent=2) + "\n").encode("utf-8"),
+        )
+        return batch
+
+    def capture_bottle_tag_batch(
+        self,
+        *,
+        session_id: str,
+        tag_id: int,
+        tag_size_m: float,
+        frame_count: int = 150,
+    ) -> TagPoseCaptureBatch:
+        """Capture the non-world AprilTag rigidly registered to the bottle fixture."""
+        if tag_id < 1:
+            raise ValueError("bottle tag_id must be greater than or equal to 1")
+        batch, attempt_root = self._capture_apriltag_batch(
+            session_id=session_id,
+            tag_id=tag_id,
+            tag_size_m=tag_size_m,
+            frame_count=frame_count,
+            artifact_group=f"bottle_tag_id_{tag_id:03d}",
+            capture_label="bottle tag",
+        )
+        self.write_exclusive_artifact(
+            attempt_root / "capture_manifest.json",
+            (batch.model_dump_json(indent=2) + "\n").encode("utf-8"),
+        )
+        return batch
+
+    def _capture_apriltag_batch(
+        self,
+        *,
+        session_id: str,
+        tag_id: int,
+        tag_size_m: float,
+        frame_count: int,
+        artifact_group: str,
+        capture_label: str,
+    ) -> tuple[TagPoseCaptureBatch, Path]:
         from .apriltag_analyzer import AprilTagAnalyzer
 
         if _SESSION_ID.fullmatch(session_id) is None:
             raise ValueError("Invalid calibration session identifier")
         if not 150 <= frame_count <= 300:
-            raise ValueError("world-origin frame_count must be between 150 and 300")
+            raise ValueError(f"{capture_label} frame_count must be between 150 and 300")
         with self._lock:
             if self._camera is not None:
-                raise CaptureConflictError("stop the active camera before capturing world origin")
+                raise CaptureConflictError(f"stop the active camera before capturing {capture_label}")
             report = self._preflight.run()
             if report.status is not PreflightStatus.READY:
-                raise CaptureConflictError(f"Preflight is {report.status.value}; world capture was not started")
+                raise CaptureConflictError(
+                    f"Preflight is {report.status.value}; {capture_label} capture was not started"
+                )
             selected = next((camera for camera in report.cameras if camera.role == "cam_high"), None)
             if selected is None or not selected.identity_match or not selected.production_profile_supported:
                 raise CaptureConflictError("Camera cam_high did not pass identity/profile preflight")
@@ -182,12 +246,12 @@ class IntrinsicsCaptureService:
             running = self._backend.start(selected.expected_serial, self._profile)
             try:
                 intrinsics = running.factory_intrinsics()
-                analyzer = AprilTagAnalyzer(tag_id=0, tag_size_m=tag_size_m)
+                analyzer = AprilTagAnalyzer(tag_id=tag_id, tag_size_m=tag_size_m)
                 # Librealsense examples discard the first 30 frames so automatic
                 # exposure and other camera settings can settle before evidence capture.
                 for _ in range(_AUTO_EXPOSURE_WARMUP_FRAMES):
                     running.next_frame()
-                attempts_root = self._camera_root(session_id, "cam_high") / "world_origin"
+                attempts_root = self._camera_root(session_id, "cam_high") / artifact_group
                 attempts_root.mkdir(parents=True, exist_ok=True, mode=0o700)
                 attempt_number = 1 + len([path for path in attempts_root.iterdir() if path.is_dir()])
                 attempt_root = attempts_root / f"A-{attempt_number:03d}"
@@ -223,23 +287,13 @@ class IntrinsicsCaptureService:
                     )
                     if enriched_sample is not None:
                         samples.append(enriched_sample)
-                world_from_tag = np.eye(4, dtype=np.float64)
-                world_from_tag[2, 3] = tag_plane_height_m
-                batch = WorldOriginCaptureBatch(
+                batch = TagPoseCaptureBatch(
+                    tag_id=tag_id,
                     samples=samples,
-                    world_from_tag=TransformRecord(
-                        source_frame="tag",
-                        target_frame="table_world",
-                        matrix=world_from_tag.tolist(),
-                    ),
                     total_frames=frame_count,
                     detected_frames=len(samples),
                 )
-                self.write_exclusive_artifact(
-                    attempt_root / "capture_manifest.json",
-                    (batch.model_dump_json(indent=2) + "\n").encode("utf-8"),
-                )
-                return batch
+                return batch, attempt_root
             finally:
                 running.stop()
 

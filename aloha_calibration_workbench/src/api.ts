@@ -69,9 +69,13 @@ export interface TableSnapshot {
 export interface FrozenBottleContract {
   status: 'BOTTLE_FIXTURE_CONTRACT_FROZEN'
   contract_sha256: string
+  tag_id: number
+  tag_size_m: number
 }
 
 export interface BottleCaptureResult {
+  tag_id: number
+  tag_size_m: number
   observation: { id: 'B-A' | 'B-B' | 'B-C'; camera_from_tag: TransformRecord }
   stability: { accepted_frames: number; translation_jitter_m: number; rotation_jitter_deg: number }
 }
@@ -141,7 +145,7 @@ export const freezeBottleContract = (sessionId: string, input: unknown) =>
 export const captureBottleTrial = (
   sessionId: string,
   trialId: 'B-A' | 'B-B' | 'B-C',
-  input: { tag_size_m: number; frame_count: number },
+  input: { frame_count: number },
 ) => postJson<BottleCaptureResult>(`/api/sessions/${sessionId}/actions/bottle/${trialId}/capture`, input)
 
 export const validateBottleTrials = (sessionId: string) =>

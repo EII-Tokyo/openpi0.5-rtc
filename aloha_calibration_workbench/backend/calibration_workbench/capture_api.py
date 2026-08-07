@@ -15,6 +15,8 @@ from .models import IntrinsicsStartRequest
 from .models import PreflightReport
 from .models import SampleRecord
 from .workflow import FactoryCameraSnapshot
+from .workflow import BottleTagAgentCaptureRequest
+from .workflow import TagPoseCaptureBatch
 from .workflow import WorldOriginCaptureBatch
 from .workflow import WorldOriginCaptureRequest
 
@@ -61,6 +63,22 @@ def create_capture_app(
                 session_id=request.session_id,
                 tag_size_m=request.tag_size_m,
                 tag_plane_height_m=request.tag_plane_height_m,
+                frame_count=request.frame_count,
+            )
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+        except CaptureConflictError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+    @app.post("/api/bottle-tag/capture", response_model=TagPoseCaptureBatch)
+    def capture_bottle_tag(request: BottleTagAgentCaptureRequest) -> TagPoseCaptureBatch:
+        if capture is None:
+            raise HTTPException(status_code=503, detail="Capture pipeline is unavailable")
+        try:
+            return capture.capture_bottle_tag_batch(
+                session_id=request.session_id,
+                tag_id=request.tag_id,
+                tag_size_m=request.tag_size_m,
                 frame_count=request.frame_count,
             )
         except ValueError as exc:

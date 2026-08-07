@@ -32,6 +32,7 @@ from .workflow import FrozenTablePointContract
 from .workflow import TableObservationsRequest
 from .workflow import TablePointContractRequest
 from .workflow import TableRegistrationResult
+from .workflow import TagPoseCaptureBatch
 from .workflow import TransformRecord
 from .workflow import WorkflowGateError
 from .workflow import WorldOriginResult
@@ -53,6 +54,15 @@ class CaptureClient(Protocol):
         tag_plane_height_m: float,
         frame_count: int,
     ) -> WorldOriginCaptureBatch: ...
+
+    def capture_bottle_tag(
+        self,
+        session_id: str,
+        *,
+        tag_id: int,
+        tag_size_m: float,
+        frame_count: int,
+    ) -> TagPoseCaptureBatch: ...
 
     def capture_table_snapshot(self, session_id: str) -> RgbSnapshot: ...
 
@@ -384,10 +394,13 @@ def create_orchestrator_app(
                     "bottle capture requires BOTTLE_FIXTURE_CONTRACT_FROZEN, "
                     f"current state is {store.get(session_id).state}"
                 )
-            batch = capture_client.capture_world_origin(
+            fixture = FrozenBottleFixtureContract.model_validate(
+                store.read_workflow_artifact(session_id, "bottle_fixture_contract.json")
+            )
+            batch = capture_client.capture_bottle_tag(
                 session_id,
-                tag_size_m=request.tag_size_m,
-                tag_plane_height_m=0.0,
+                tag_id=fixture.tag_id,
+                tag_size_m=fixture.tag_size_m,
                 frame_count=request.frame_count,
             )
             stability = calibration.aggregate_tag_pose(
@@ -396,6 +409,8 @@ def create_orchestrator_app(
                 total_frames=batch.total_frames,
             )
             result = BottleTrialCaptureResult(
+                tag_id=fixture.tag_id,
+                tag_size_m=fixture.tag_size_m,
                 observation=BottleTrialObservation(
                     id=trial_id,
                     camera_from_tag=stability.camera_from_tag,

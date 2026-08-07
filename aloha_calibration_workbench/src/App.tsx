@@ -47,9 +47,11 @@ const identity = (source: string, target: string): TransformRecord => ({
   quaternion_order: 'wxyz',
 })
 
-const taskFromAsset: TransformRecord = {
+export const DEFAULT_BOTTLE_TAG_ID = 1
+
+export const BOTTLE500_TASK_FROM_ASSET: TransformRecord = {
   ...identity('bottle_asset', 'bottle_task'),
-  matrix: [[0, 0, 1, 0], [1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 0, 1]],
+  matrix: [[0, 0, 1, -0.103], [1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 0, 1]],
 }
 
 interface DotForm {
@@ -213,6 +215,8 @@ function Bottle({
   const [lengthMm, setLengthMm] = useState(206)
   const [diameterMm, setDiameterMm] = useState(68)
   const [blockMm, setBlockMm] = useState(50)
+  const [tagId, setTagId] = useState(DEFAULT_BOTTLE_TAG_ID)
+  const [tagSizeMm, setTagSizeMm] = useState(80)
   const [tagPose, setTagPose] = useState({ tx: 0, ty: 0, tz: 0, roll: 0, pitch: 0, yaw: 0 })
   const [repeatMm, setRepeatMm] = useState(0)
   const trials: Array<[TrialId, string]> = [
@@ -223,17 +227,18 @@ function Bottle({
   const freeze = () => onFreeze({
     fixture_id: 'bottle500-v-block-001', revision: 1,
     measured_length_m: lengthMm / 1000, measured_diameter_m: diameterMm / 1000,
+    tag_id: tagId, tag_size_m: tagSizeMm / 1000,
     tag_from_bottle: eulerTransform(tagPose.tx / 1000, tagPose.ty / 1000, tagPose.tz / 1000, tagPose.roll, tagPose.pitch, tagPose.yaw),
-    task_from_asset: taskFromAsset, block_height_m: blockMm / 1000,
+    task_from_asset: BOTTLE500_TASK_FROM_ASSET, block_height_m: blockMm / 1000,
     measurement_method: 'steel-ruler-square-and-rigid-stops', repeated_installation_delta_m: repeatMm / 1000,
   })
   return <section className="secondary-workspace"><header><span>EXPERIMENT 3 · TAGGED RIGID FIXTURE</span><h2>Bottle500 三位置传递</h2><p>expected pose 由冻结圆点与夹具 contract 在服务端产生；浏览器不能提交 expected pose。</p></header>
     <div className="validation-warning"><strong>能力边界</strong><span>不代表无标签透明瓶识别、碰撞或动力学通过</span></div>
-    <div className="form-card bottle-form"><label>瓶长 / mm<input type="number" value={lengthMm} onChange={(e) => setLengthMm(Number(e.target.value))} /></label><label>最大直径 / mm<input type="number" value={diameterMm} onChange={(e) => setDiameterMm(Number(e.target.value))} /></label><label>垫块 / mm<input type="number" value={blockMm} onChange={(e) => setBlockMm(Number(e.target.value))} /></label><label>重复安装差 / mm<input type="number" value={repeatMm} onChange={(e) => setRepeatMm(Number(e.target.value))} /></label>
+    <div className="form-card bottle-form"><label>瓶长 / mm<input type="number" value={lengthMm} onChange={(e) => setLengthMm(Number(e.target.value))} /></label><label>最大直径 / mm<input type="number" value={diameterMm} onChange={(e) => setDiameterMm(Number(e.target.value))} /></label><label>垫块 / mm<input type="number" value={blockMm} onChange={(e) => setBlockMm(Number(e.target.value))} /></label><label>重复安装差 / mm<input type="number" value={repeatMm} onChange={(e) => setRepeatMm(Number(e.target.value))} /></label><label>瓶夹具 Tag ID<input min="1" step="1" type="number" value={tagId} onChange={(e) => setTagId(Number(e.target.value))} /></label><label>瓶夹具 Tag 黑边 / mm<input type="number" value={tagSizeMm} onChange={(e) => setTagSizeMm(Number(e.target.value))} /></label>
       {(['tx', 'ty', 'tz', 'roll', 'pitch', 'yaw'] as const).map((field) => <label key={field}>{field}{field.length === 2 ? ' / mm' : ' / deg'}<input type="number" value={tagPose[field]} onChange={(event) => setTagPose((current) => ({ ...current, [field]: Number(event.target.value) }))} /></label>)}
     </div>
     {!contract ? <button className="primary-action" disabled={!enabled || busy !== null} onClick={freeze}>冻结瓶子夹具 contract</button> : null}
-    {contract ? <div className="validation-grid">{trials.map(([trial, note]) => <article key={trial}><div className="validation-icon">{trial}</div><div><h3>{note}</h3><p>{captures[trial] ? `${captures[trial]?.stability.accepted_frames} frames · captured` : '按物理挡块摆放后采集'}</p></div><button disabled={busy !== null} onClick={() => onCapture(trial)}>{captures[trial] ? '重新采集新 attempt' : '采集 150 帧'}</button></article>)}</div> : null}
+    {contract ? <div className="validation-grid">{trials.map(([trial, note]) => <article key={trial}><div className="validation-icon">{trial}</div><div><h3>{note}</h3><p>{captures[trial] ? `Tag ID ${captures[trial]?.tag_id} · ${captures[trial]?.stability.accepted_frames} frames · captured` : `只检测冻结的瓶夹具 Tag ID ${contract.tag_id}`}</p></div><button disabled={busy !== null} onClick={() => onCapture(trial)}>{captures[trial] ? '重新采集新 attempt' : '采集 150 帧'}</button></article>)}</div> : null}
     {contract && !result ? <button className="primary-action" disabled={trials.some(([trial]) => !captures[trial]) || busy !== null} onClick={onValidate}>运行三位置独立验收</button> : null}
     {result ? <section className="preflight-result ready"><strong>{result.status}</strong><span>{result.claim_scope}</span><span>center RMS {(result.center_rms_m * 1000).toFixed(2)} mm · axis RMS {result.long_axis_rms_deg.toFixed(2)}°</span></section> : null}
     <strong className="gate-status">TAGGED_FIXTURE_TRANSFER_PASS</strong>
@@ -275,7 +280,7 @@ export default function App({ mode }: { mode?: AppMode }) {
   const tabs: Workspace[] = ['Guide', 'Table Dots', 'Bottle', 'Export']
   const content = useMemo(() => {
     if (workspace === 'Table Dots') return <TableDots enabled={Boolean(world)} contract={tableContract} result={tableResult} snapshot={tableSnapshot} busy={busy} onSnapshot={() => sessionId && void run('拍摄桌面圆点快照', () => captureTableSnapshot(sessionId), (value) => setTableSnapshot((current) => { if (current) URL.revokeObjectURL(current.url); return { ...value, url: URL.createObjectURL(value.blob) } }))} onFreeze={(dots) => sessionId && void run('冻结桌面点', () => freezeTableContract(sessionId, dotsContractInput(dots)), setTableContract)} onSolve={(dots) => sessionId && void run('求解桌面外参', () => solveTableRegistration(sessionId, dotObservationInput(dots)), setTableResult)} />
-    if (workspace === 'Bottle') return <Bottle enabled={Boolean(tableResult)} contract={bottleContract} captures={captures} result={bottleResult} busy={busy} onFreeze={(input) => sessionId && void run('冻结瓶子夹具', () => freezeBottleContract(sessionId, input), setBottleContract)} onCapture={(trial) => sessionId && void run(`采集 ${trial}`, () => captureBottleTrial(sessionId, trial, { tag_size_m: 0.080, frame_count: 150 }), (value) => setCaptures((current) => ({ ...current, [trial]: value })))} onValidate={() => sessionId && void run('验收瓶子传递', () => validateBottleTrials(sessionId), setBottleResult)} />
+    if (workspace === 'Bottle') return <Bottle enabled={Boolean(tableResult)} contract={bottleContract} captures={captures} result={bottleResult} busy={busy} onFreeze={(input) => sessionId && void run('冻结瓶子夹具', () => freezeBottleContract(sessionId, input), setBottleContract)} onCapture={(trial) => sessionId && void run(`采集 ${trial}`, () => captureBottleTrial(sessionId, trial, { frame_count: 150 }), (value) => setCaptures((current) => ({ ...current, [trial]: value })))} onValidate={() => sessionId && void run('验收瓶子传递', () => validateBottleTrials(sessionId), setBottleResult)} />
     if (workspace === 'Export') return <ExportPanel enabled={Boolean(bottleResult)} result={exportResult} busy={busy} onExport={() => sessionId && void run('导出 USD 标定包', () => exportCalibrationBundle(sessionId, {
       stage: { path: '/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/table_support_alignment/1.0/aloha1_table_support_aligned_workcell.usda', sha256: '2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c' },
       bottle_asset_path: '/home/eii/project/openpi0.5-rtc-reward-learning/assets/bottle_500ml/isaac/bottle_500ml_sim.usd', bottle_asset_sha256: '16427135f152ec951de2321fd689366d745a2dd389cbe260976631783952533e', bottle_asset_prim: '/Bottle500',
