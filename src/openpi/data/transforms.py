@@ -331,12 +331,12 @@ class AlohaInputs(DataTransformFn):
 
     adapt_to_pi: bool = True
     image_keys: tuple[str, ...] | None = None
-    include_subtask: bool = True
+    use_good_bad_action_prompt: bool = True
     EXPECTED_CAMERAS: ClassVar[tuple[str, ...]] = ("cam_high", "cam_low", "cam_left_wrist", "cam_right_wrist")
 
     def __call__(self, data: dict) -> dict:
         data = dict(data)
-        if not self.include_subtask:
+        if not self.use_good_bad_action_prompt:
             data.pop("subtask", None)
         data = _decode_aloha(data, adapt_to_pi=self.adapt_to_pi)
 
@@ -394,7 +394,7 @@ class AlohaTransformPipeline:
     """The single transform pipeline used by this ALOHA-real-only branch."""
 
     include_low: bool
-    include_subtask: bool
+    use_good_bad_action_prompt: bool
     image_resolution: tuple[int, int]
     max_token_len: int
     discrete_state_input: bool
@@ -456,7 +456,7 @@ class AlohaTransformPipeline:
         }
         if include_actions:
             structure["actions"] = "action"
-        if self.include_subtask:
+        if self.use_good_bad_action_prompt:
             structure["subtask"] = "subtask"
         return RepackTransform(structure)
 
@@ -465,7 +465,7 @@ class AlohaTransformPipeline:
             AlohaInputs(
                 adapt_to_pi=self.adapt_to_pi,
                 image_keys=self.raw_image_keys,
-                include_subtask=self.include_subtask,
+                use_good_bad_action_prompt=self.use_good_bad_action_prompt,
             ),
         ]
         if self.use_delta_joint_actions:
@@ -488,7 +488,7 @@ class AlohaTransformPipeline:
             image_keys=self.raw_image_keys,
             require_action=require_action,
             require_task=require_task,
-            require_subtask=self.include_subtask,
+            require_subtask=self.use_good_bad_action_prompt,
         )
 
     def training_input_transforms(self) -> list[DataTransformFn]:
@@ -517,7 +517,7 @@ class AlohaTransformPipeline:
             AlohaInputs(
                 adapt_to_pi=self.adapt_to_pi,
                 image_keys=self.raw_image_keys,
-                include_subtask=self.include_subtask,
+                use_good_bad_action_prompt=self.use_good_bad_action_prompt,
             )
         ]
         if self.use_delta_joint_actions:

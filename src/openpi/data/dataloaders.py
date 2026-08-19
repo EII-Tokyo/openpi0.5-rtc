@@ -2,17 +2,18 @@ from collections.abc import Iterator
 import logging
 import multiprocessing
 import os
+import typing
 from typing import Protocol, TypeVar
 
 import jax
 import numpy as np
+import torch
 
 import openpi.models.model as _model
 from openpi.data import datasets as _datasets
 import openpi.training.config as _config
 
 T_co = TypeVar("T_co", covariant=True)
-_WORKER_DATASET = None
 
 
 class DataLoader(Protocol[T_co]):
@@ -33,18 +34,25 @@ def create_data_loader(
     shuffle: bool = False,
     num_batches: int | None = None,
 ) -> DataLoader[tuple[_model.Observation, _model.Actions]]:
-    """Create a data loader for training."""
-    data_config = config.data
-    logging.info("data_config: %s", data_config)
+    """Create a data loader for training.
 
-    dataset = _datasets.create_dataset(data_config, config.model.action_horizon)
+    Args:
+        config: The training configuration.
+        sharding: The sharding to use for the data loader (JAX only).
+        shuffle: Whether to shuffle the data.
+        num_batches: Determines the number of batches to return.
+    """
+    data_config = config.data
+    logging.info(f"data_config: {data_config}")
+
+    dataset = _datasets.create_torch_dataset(data_config, config.model.action_horizon)
     dataset = _datasets.transform_dataset(dataset, data_config)
 
     local_batch_size = config.batch_size // jax.process_count()
 
-    logging.info("dataset length: %d", len(dataset))
-    logging.info("local_batch_size: %d", local_batch_size)
-    data_loader = BatchDataLoader(
+    logging.info(f"dataset length: {len(dataset)}")
+    logging.info(f"local_batch_size: {local_batch_size}")
+    data_loader = TorchDataLoader(
         dataset,
         local_batch_size=local_batch_size,
         sharding=sharding,
@@ -57,22 +65,8 @@ def create_data_loader(
     return DataLoaderImpl(data_config, data_loader)
 
 
-def _init_worker(dataset, seed: int) -> None:
-    global _WORKER_DATASET
-    _WORKER_DATASET = dataset
-    os.environ["XLA_PYTHON_CLIENT_PREALLOCATE"] = "false"
-    os.environ["XLA_PYTHON_CLIENT_ALLOCATOR"] = "platform"
-    np.random.seed(seed + os.getpid())
-
-
-def _worker_get_item(index: int):
-    if _WORKER_DATASET is None:
-        raise RuntimeError("Data loader worker was not initialized.")
-    return _WORKER_DATASET[index]
-
-
-class BatchDataLoader:
-    """Small numpy/JAX batch loader for random-access datasets."""
+class TorchDataLoader:
+    """Torch data loader implementation."""
 
     def __init__(
         self,
@@ -85,20 +79,26 @@ class BatchDataLoader:
         num_workers: int = 0,
         seed: int = 0,
     ):
+        """Create a PyTorch data loader.
+
+        Args:
+            dataset: The dataset to load.
+            local_batch_size: The local batch size for each process.
+            sharding: The sharding to use for the data loader.
+            shuffle: Whether to shuffle the data.
+            num_batches: If provided, determines the number of returned batches. If the
+                number is larger than the number of batches in the dataset, the data loader
+                will loop over the dataset. If not provided, will iterate over the dataset
+                indefinitely.
+            num_workers: The number of worker processes to use. If zero, the data loader will
+                execute in the main process.
+            seed: The seed to use for shuffling the data.
+        """
         if jax.process_count() > 1:
             raise NotImplementedError("Data loading with multiple processes is not supported.")
 
         if len(dataset) < local_batch_size:
             raise ValueError(f"Local batch size ({local_batch_size}) is larger than the dataset size ({len(dataset)}).")
-
-        self._dataset = dataset
-        self._local_batch_size = local_batch_size
-        self._shuffle = shuffle
-        self._num_batches = num_batches
-        self._rng = np.random.default_rng(seed)
-        self._num_workers = num_workers
-        self._pool = None
-        self._worker_context = None
 
         self._sharding = sharding
         if sharding is None:
@@ -106,51 +106,73 @@ class BatchDataLoader:
                 jax.sharding.Mesh(jax.devices(), ("B",)),
                 jax.sharding.PartitionSpec("B"),
             )
+        self._num_batches = num_batches
 
-    def _indices_for_epoch(self) -> np.ndarray:
-        indices = np.arange(len(self._dataset), dtype=np.int64)
-        if self._shuffle:
-            self._rng.shuffle(indices)
-        return indices
+        mp_context = None
+        if num_workers > 0:
+            mp_context = multiprocessing.get_context("spawn")
 
-    def _get_pool(self):
-        if self._num_workers <= 0:
-            return None
-        if self._pool is None:
-            self._worker_context = multiprocessing.get_context("spawn")
-            self._pool = self._worker_context.Pool(
-                processes=self._num_workers,
-                initializer=_init_worker,
-                initargs=(self._dataset, int(self._rng.integers(0, 2**31 - 1))),
-            )
-        return self._pool
+        generator = torch.Generator()
+        generator.manual_seed(seed)
+        self._data_loader = torch.utils.data.DataLoader(
+            typing.cast(torch.utils.data.Dataset, dataset),
+            batch_size=local_batch_size,
+            shuffle=shuffle,
+            num_workers=num_workers,
+            multiprocessing_context=mp_context,
+            persistent_workers=num_workers > 0,
+            collate_fn=_collate_fn,
+            worker_init_fn=_WorkerInitFn(seed),
+            drop_last=True,
+            generator=generator,
+        )
 
-    def _load_items(self, indices: np.ndarray):
-        pool = self._get_pool()
-        if pool is None:
-            return [self._dataset[int(index)] for index in indices]
-        return pool.map(_worker_get_item, [int(index) for index in indices])
+    @property
+    def torch_loader(self) -> torch.utils.data.DataLoader:
+        return self._data_loader
 
     def __iter__(self):
         num_items = 0
         while True:
-            indices = self._indices_for_epoch()
-            for start in range(0, len(indices) - self._local_batch_size + 1, self._local_batch_size):
+            data_iter = iter(self._data_loader)
+            while True:
                 if self._num_batches is not None and num_items >= self._num_batches:
                     return
-                batch_indices = indices[start : start + self._local_batch_size]
-                batch = _collate_fn(self._load_items(batch_indices))
+                try:
+                    batch = next(data_iter)
+                except StopIteration:
+                    break  # We've exhausted the dataset. Create a new iterator and start over.
                 num_items += 1
                 yield jax.tree.map(lambda x: jax.make_array_from_process_local_data(self._sharding, x), batch)
 
 
 def _collate_fn(items):
     """Collate the batch elements into batched numpy arrays."""
+    # Make sure to convert to numpy arrays before stacking since some of the incoming elements
+    # may be JAX arrays.
     return jax.tree.map(lambda *xs: np.stack([np.asarray(x) for x in xs], axis=0), *items)
 
 
+class _WorkerInitFn:
+    """Worker initialization function that can be pickled for multiprocessing."""
+
+    def __init__(self, seed: int):
+        self.seed = seed
+
+    def __call__(self, worker_id: int) -> None:
+        """Initialize worker process with JAX settings and numpy random seed."""
+        # Tell JAX inside the worker process not to preallocate the GPU memory.
+        # NOTE: This is called after jax is imported inside the worker process. This
+        # means that this approach will not work for selecting the backend.
+        os.environ["XLA_PYTHON_CLIENT_PREALLOCATE"] = "false"
+        os.environ["XLA_PYTHON_CLIENT_ALLOCATOR"] = "platform"
+        # Set numpy random seed for each worker to ensure different random states
+        # Use seed + worker_id to ensure each worker has a different seed
+        np.random.seed(self.seed + worker_id)
+
+
 class DataLoaderImpl(DataLoader):
-    def __init__(self, data_config: _config.LeRobotAlohaDataConfig, data_loader: BatchDataLoader):
+    def __init__(self, data_config: _config.LeRobotAlohaDataConfig, data_loader: TorchDataLoader):
         self._data_config = data_config
         self._data_loader = data_loader
 
