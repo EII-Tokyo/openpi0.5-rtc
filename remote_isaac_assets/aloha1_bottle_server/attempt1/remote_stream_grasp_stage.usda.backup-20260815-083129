@@ -1,0 +1,21 @@
+#usda 1.0
+(
+    defaultPrim = "World"
+    metersPerUnit = 1
+    subLayers = [
+        @assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda@
+    ]
+    upAxis = "Z"
+)
+
+over "World"
+{
+    def Xform "ALOHA1RemoteBottleSession"
+    {
+        def Xform "Bottle500" (
+            prepend references = @assets/bottle_500ml/isaac/bottle_500ml_remote_sim.usd@</Bottle500>
+        )
+        {
+        }
+    }
+}

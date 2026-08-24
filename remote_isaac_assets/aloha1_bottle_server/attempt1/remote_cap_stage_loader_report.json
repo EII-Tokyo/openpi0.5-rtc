@@ -1,0 +1,224 @@
+{
+  "bottle_mesh_count": 42,
+  "cap_mesh_count": 1,
+  "default_prim": "/World",
+  "meters_per_unit": 1.0,
+  "required_prims": {
+    "/World": true,
+    "/World/ALOHA1RemoteBottleSession/Bottle500": true,
+    "/World/ALOHA1RemoteBottleSession/BottleCap": true,
+    "/World/ALOHA1RemoteBottleSession/BottleThreadJoints": true,
+    "/World/ALOHA1RemoteBottleSession/BottleThreadJoints/RightHandThreadCoupling": true,
+    "/World/ALOHA1RemoteBottleSession/BottleThreadJoints/ThreadPrismatic": true,
+    "/World/ALOHA1RemoteBottleSession/BottleThreadJoints/ThreadRevolute": true,
+    "/World/ALOHA1RemoteBottleSession/BottleThreadSlider": true,
+    "/World/BottleTaskPhysicsMaterials/BottleSurface_TEMP": true,
+    "/World/BottleTaskPhysicsMaterials/CapSurface_TEMP": true,
+    "/World/BottleTaskPhysicsMaterials/GripperPad_TEMP": true,
+    "/World/BottleTaskPhysicsMaterials/TableSurface_TEMP": true,
+    "/World/environment/worldBody/user_confirmed_table": true,
+    "/World/follower_left/vx300s_left/root_joint": true
+  },
+  "runtime_binding_ok": true,
+  "runtime_state": {
+    "arm_runtime_profile": {
+      "classification": "VALIDATED_RUNTIME_ONLY_NOT_SAVED_TO_USD",
+      "damping_rad_units": 100.0,
+      "drive_type": "acceleration",
+      "robot_gravity_compensation": true,
+      "stiffness_rad_units": 1600.0
+    },
+    "bottle_center_world_m": [
+      0.0,
+      0.0,
+      0.034
+    ],
+    "bottle_mouth_world_axis": "+X",
+    "contact_report_prim_paths": [
+      "/World/follower_left/vx300s_left/root_joint",
+      "/World/follower_left/vx300s_left/follower_left_left_finger_link",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link",
+      "/World/ALOHA1RemoteBottleSession/Bottle500"
+    ],
+    "gripper_material_profile": {
+      "classification": "USER_ACCEPTED_SIMULATION_EFFECTIVE_FRICTION",
+      "compliant_contact_acceleration_spring": false,
+      "compliant_contact_damping": 0.0,
+      "compliant_contact_stiffness": 0.0,
+      "dynamic_friction": 1.5,
+      "friction_combine_mode": "maximum",
+      "requested_compliance_profile": "rigid_baseline",
+      "static_friction": 2.0
+    },
+    "gripper_usd_control": {
+      "left": {
+        "classification": "HUMAN_ACCEPTED_FREE_SPACE_FULL_STROKE_USD_PROFILE",
+        "commanded_joint": "/World/follower_left/vx300s_left/joints/left_finger",
+        "follower_side": "left",
+        "mimic_reference_joint": [
+          "/World/follower_left/vx300s_left/joints/left_finger"
+        ],
+        "source_layer": "assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/configuration/aloha1_human_accepted_gripper_control.usda",
+        "uncommanded_mimic_joint": "/World/follower_left/vx300s_left/joints/right_finger",
+        "usd_drive": {
+          "damping": 50.0,
+          "max_force_n": 5.0,
+          "stiffness": 200.0,
+          "type": "acceleration"
+        },
+        "usd_mimic": {
+          "damping_ratio": 1.0,
+          "gearing": 1.0,
+          "natural_frequency_hz": 25.0,
+          "offset": 0.0
+        }
+      },
+      "right": {
+        "classification": "HUMAN_ACCEPTED_FREE_SPACE_FULL_STROKE_USD_PROFILE",
+        "commanded_joint": "/World/follower_right/vx300s_right/joints/left_finger",
+        "follower_side": "right",
+        "mimic_reference_joint": [
+          "/World/follower_right/vx300s_right/joints/left_finger"
+        ],
+        "source_layer": "assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/configuration/aloha1_human_accepted_gripper_control.usda",
+        "uncommanded_mimic_joint": "/World/follower_right/vx300s_right/joints/right_finger",
+        "usd_drive": {
+          "damping": 50.0,
+          "max_force_n": 5.0,
+          "stiffness": 200.0,
+          "type": "acceleration"
+        },
+        "usd_mimic": {
+          "damping_ratio": 1.0,
+          "gearing": 1.0,
+          "natural_frequency_hz": 25.0,
+          "offset": 0.0
+        }
+      }
+    },
+    "kinematic_prim_paths": [],
+    "material_binding_counts": {
+      "bottle": 41,
+      "cap": 17,
+      "gripper": 4,
+      "table": 1
+    },
+    "material_paths": {
+      "bottle": "/World/BottleTaskPhysicsMaterials/BottleSurface_TEMP",
+      "cap": "/World/BottleTaskPhysicsMaterials/CapSurface_TEMP",
+      "gripper": "/World/BottleTaskPhysicsMaterials/GripperPad_TEMP",
+      "table": "/World/BottleTaskPhysicsMaterials/TableSurface_TEMP"
+    },
+    "maximum_sleep_error_rad": 5.507469177246094e-05,
+    "rigid_body_modes": {
+      "/World/ALOHA1RemoteBottleSession/Bottle500": {
+        "kinematic_enabled": false,
+        "mode": "DYNAMIC"
+      },
+      "/World/ALOHA1RemoteBottleSession/BottleCap": {
+        "kinematic_enabled": false,
+        "mode": "DYNAMIC"
+      }
+    },
+    "sleep_readback_arm_rad": {
+      "left": [
+        -3.5746370485867374e-06,
+        -1.7999870777130127,
+        1.549989938735962,
+        3.956984437536448e-05,
+        -1.5700551271438599,
+        -1.3291781215230003e-05
+      ],
+      "right": [
+        -3.5746320463658776e-06,
+        -1.7999870777130127,
+        1.549989938735962,
+        3.956977161578834e-05,
+        -1.5700551271438599,
+        -1.329174392594723e-05
+      ]
+    },
+    "sleep_target_arm_rad": [
+      0.0,
+      -1.7999999523162842,
+      1.5499999523162842,
+      0.0,
+      -1.5700000524520874,
+      0.0
+    ],
+    "startup_object_poses": {
+      "/World/ALOHA1RemoteBottleSession/Bottle500": {
+        "orientation_wxyz": [
+          0.7071067811865475,
+          0.0,
+          0.7071067811865475,
+          0.0
+        ],
+        "position_m": [
+          -0.103,
+          0.0,
+          0.034
+        ]
+      },
+      "/World/ALOHA1RemoteBottleSession/BottleCap": {
+        "orientation_wxyz": [
+          0.7071067811865475,
+          0.0,
+          0.7071067811865475,
+          0.0
+        ],
+        "position_m": [
+          0.085,
+          0.0,
+          0.034
+        ]
+      }
+    },
+    "thread_usd_control": {
+      "angular_drive_present": false,
+      "axial_travel_m": 0.012,
+      "classification": "PERSISTED_VERSIONED_LOCKED_THREADED_BASELINE",
+      "joint_enabled": {
+        "/World/ALOHA1RemoteBottleSession/BottleThreadJoints/RightHandThreadCoupling": false,
+        "/World/ALOHA1RemoteBottleSession/BottleThreadJoints/ThreadPrismatic": true,
+        "/World/ALOHA1RemoteBottleSession/BottleThreadJoints/ThreadRevolute": true
+      },
+      "pitch_m_per_turn": 0.003,
+      "positive_removal_rotation": "CAP_POSITIVE_LOCAL_Z",
+      "prim_paths": [
+        "/World/ALOHA1RemoteBottleSession/BottleThreadSlider",
+        "/World/ALOHA1RemoteBottleSession/BottleThreadJoints",
+        "/World/ALOHA1RemoteBottleSession/BottleThreadJoints/ThreadPrismatic",
+        "/World/ALOHA1RemoteBottleSession/BottleThreadJoints/ThreadRevolute",
+        "/World/ALOHA1RemoteBottleSession/BottleThreadJoints/RightHandThreadCoupling"
+      ],
+      "prismatic_limits_m": [
+        0.0,
+        0.0
+      ],
+      "rack_and_pinion_ratio": -120000.0,
+      "revolute_limits_deg": [
+        0.0,
+        0.0
+      ],
+      "thread_handedness": "RIGHT_HAND",
+      "thread_state": "THREADED",
+      "version": "thread_release_v1"
+    },
+    "threaded_ordinary_play_check": {
+      "classification": "PHYSX_TENSOR_RUNTIME_RELATIVE_POSE_CHECK",
+      "initial_bottle_cap_relative_angle_deg": 0.0,
+      "limit_deg": 0.1,
+      "maximum_bottle_cap_relative_angle_deg": 2.4148365394514667e-06,
+      "physics_steps": 30,
+      "status": "PASS"
+    },
+    "timeline_paused": true
+  },
+  "saved": false,
+  "source_stage_modified": false,
+  "stage": "/home/eii/project/openpi0.5-rtc-reward-learning/remote_isaac_assets/aloha1_bottle_server/attempt1/versions/thread_release_v1/remote_stream_threaded_release_v1.usda",
+  "stage_sha256": "faf1ca14d8f0b0e5e845cfb7537a1631061993f279951235637be62dbb054cfc",
+  "status": "PASS",
+  "up_axis": "Z"
+}

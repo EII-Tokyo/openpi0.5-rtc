@@ -1,0 +1,50 @@
+{
+  "bottle_mesh_count": 42,
+  "default_prim": "/World",
+  "meters_per_unit": 1.0,
+  "required_prims": {
+    "/World": true,
+    "/World/ALOHA1RemoteBottleSession/Bottle500": true,
+    "/World/environment/worldBody/user_confirmed_table": true,
+    "/World/follower_left/vx300s_left/root_joint": true
+  },
+  "runtime_state": {
+    "bottle_kinematic_prim_paths": [
+      "/World/ALOHA1RemoteBottleSession/Bottle500"
+    ],
+    "maximum_sleep_error_rad": 0.0010543743846938014,
+    "sleep_readback_arm_rad": {
+      "left": [
+        0.0001889600680442527,
+        -1.7999835014343262,
+        1.5499526262283325,
+        4.129081571591087e-05,
+        -1.5700597763061523,
+        0.0010543743846938014
+      ],
+      "right": [
+        0.000188915801118128,
+        -1.799984097480774,
+        1.5499515533447266,
+        4.121011443203315e-05,
+        -1.5700640678405762,
+        0.0010539984796196222
+      ]
+    },
+    "sleep_target_arm_rad": [
+      0.0,
+      -1.7999999523162842,
+      1.5499999523162842,
+      0.0,
+      -1.5700000524520874,
+      0.0
+    ],
+    "timeline_paused": true
+  },
+  "saved": false,
+  "source_stage_modified": false,
+  "stage": "/home/eii/openpi0.5-rtc-reward-learning/remote_isaac_assets/aloha1_bottle_server/attempt1/remote_stream_grasp_stage.usda",
+  "stage_sha256": "d7da82416f7ac90a681d8fabe74c8402155670ce75b33c7bbbfaa84f4e90b9f8",
+  "status": "PASS",
+  "up_axis": "Z"
+}

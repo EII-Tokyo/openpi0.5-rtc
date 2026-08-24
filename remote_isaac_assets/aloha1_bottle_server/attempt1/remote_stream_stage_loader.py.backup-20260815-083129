@@ -1,0 +1,100 @@
+#!/usr/bin/env python3
+"""Startup loader for an explicitly approved Isaac Sim streaming Stage.
+
+Run only as a Kit ``--exec`` script on the remote streaming server. It opens a
+Stage; it does not edit, save, or promote the Stage.
+"""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+
+
+def sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    bundle = Path(
+        os.environ.get(
+            "ALOHA1_REMOTE_BUNDLE",
+            "/home/eii/openpi0.5-rtc-reward-learning/remote_isaac_assets/"
+            "aloha1_bottle_server/attempt1",
+        )
+    )
+    default_stage = bundle / (
+        "remote_stream_grasp_stage.usda"
+    )
+    parser.add_argument("--stage", type=Path, default=default_stage)
+    parser.add_argument(
+        "--expected-sha256",
+        default="99a0670c7d9dae6cf9b1c763c230fe76ad845564a7fa9ee1772af756f3c05c6a",
+    )
+    parser.add_argument(
+        "--report", type=Path, default=bundle / "remote_stage_loader_report.json"
+    )
+    args = parser.parse_args()
+    stage_path = args.stage.resolve(strict=True)
+    actual = sha256(stage_path)
+    if actual != args.expected_sha256:
+        raise RuntimeError(f"Stage SHA-256 mismatch: {actual} != {args.expected_sha256}")
+
+    import omni.usd  # type: ignore
+    from pxr import UsdGeom
+
+    context = omni.usd.get_context()
+    opened = bool(context.open_stage(str(stage_path)))
+    stage = context.get_stage()
+    required = [
+        "/World",
+        "/World/follower_left/vx300s_left/root_joint",
+        "/World/environment/worldBody/user_confirmed_table",
+        "/World/ALOHA1RemoteBottleSession/Bottle500",
+    ]
+    required_state = {
+        path: bool(stage.GetPrimAtPath(path)) if stage is not None else False
+        for path in required
+    }
+    bottle_mesh_count = sum(
+        1
+        for prim in stage.Traverse()
+        if str(prim.GetPath()).startswith(
+            "/World/ALOHA1RemoteBottleSession/Bottle500/"
+        )
+        and prim.GetTypeName() == "Mesh"
+    ) if stage is not None else 0
+    payload = {
+        "status": "PASS"
+        if opened and stage is not None and all(required_state.values())
+        else "FAIL",
+        "stage": str(stage_path),
+        "stage_sha256": actual,
+        "default_prim": str(stage.GetDefaultPrim().GetPath())
+        if stage is not None and stage.GetDefaultPrim()
+        else None,
+        "up_axis": UsdGeom.GetStageUpAxis(stage) if stage is not None else None,
+        "meters_per_unit": UsdGeom.GetStageMetersPerUnit(stage)
+        if stage is not None
+        else None,
+        "required_prims": required_state,
+        "bottle_mesh_count": bottle_mesh_count,
+        "source_stage_modified": False,
+        "saved": False,
+    }
+    args.report.parent.mkdir(parents=True, exist_ok=True)
+    args.report.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
+    print(json.dumps(payload, sort_keys=True))
+    return 0 if payload["status"] == "PASS" else 1
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,163 @@
+#usda 1.0
+(
+    defaultPrim = "World"
+    metersPerUnit = 1
+    subLayers = [
+        @assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda@
+    ]
+    upAxis = "Z"
+)
+
+over "World"
+{
+    def Xform "ALOHA1RemoteBottleSession"
+    {
+        def Xform "Bottle500" (
+            prepend references = @assets/bottle_500ml/isaac/bottle_500ml_remote_sim.usd@</Bottle500>
+        )
+        {
+            double3 xformOp:translate = (-0.103, 0, 0.034)
+            quatf xformOp:orient = (0.70710677, 0, 0.70710677, 0)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient"]
+        }
+
+        def Xform "BottleCap" (
+            prepend references = @assets/bottle_cap/1.0/usd/bottle_cap_diagnostic_v1.usda@</BottleCap>
+        )
+        {
+            bool physics:kinematicEnabled = 1
+            bool physxRigidBody:enableCCD = 0
+            double3 xformOp:translate = (0.085, 0, 0.034)
+            quatf xformOp:orient = (0.70710677, 0, 0.70710677, 0)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient"]
+        }
+    }
+
+    def Scope "BottleTaskPhysicsMaterials"
+    {
+        def Material "BottleSurface_TEMP" (
+            apiSchemas = ["PhysicsMaterialAPI", "PhysxMaterialAPI"]
+            customData = { string calibrationStatus = "TEMPORARY_UNCALIBRATED" }
+        )
+        {
+            float physics:dynamicFriction = 0.5
+            float physics:restitution = 0
+            float physics:staticFriction = 0.65
+            custom token physxMaterial:frictionCombineMode = "average"
+            custom token physxMaterial:restitutionCombineMode = "min"
+        }
+        def Material "CapSurface_TEMP" (
+            apiSchemas = ["PhysicsMaterialAPI", "PhysxMaterialAPI"]
+            customData = { string calibrationStatus = "TEMPORARY_UNCALIBRATED" }
+        )
+        {
+            float physics:dynamicFriction = 0.75
+            float physics:restitution = 0
+            float physics:staticFriction = 0.9
+            custom token physxMaterial:frictionCombineMode = "average"
+            custom token physxMaterial:restitutionCombineMode = "min"
+        }
+        def Material "TableSurface_TEMP" (
+            apiSchemas = ["PhysicsMaterialAPI", "PhysxMaterialAPI"]
+            customData = { string calibrationStatus = "TEMPORARY_UNCALIBRATED" }
+        )
+        {
+            float physics:dynamicFriction = 0.5
+            float physics:restitution = 0
+            float physics:staticFriction = 0.6
+            custom token physxMaterial:frictionCombineMode = "average"
+            custom token physxMaterial:restitutionCombineMode = "min"
+        }
+        def Material "GripperPad_TEMP" (
+            apiSchemas = ["PhysicsMaterialAPI", "PhysxMaterialAPI"]
+            customData = { string calibrationStatus = "TEMPORARY_UNCALIBRATED" }
+        )
+        {
+            float physics:dynamicFriction = 0.75
+            float physics:restitution = 0
+            float physics:staticFriction = 0.9
+            custom token physxMaterial:frictionCombineMode = "average"
+            custom token physxMaterial:restitutionCombineMode = "min"
+        }
+    }
+
+    over "follower_left"
+    {
+        over "vx300s_left"
+        {
+            over "joints"
+            {
+                over "waist"
+                {
+                    float drive:angular:physics:targetPosition = 0
+                    float state:angular:physics:position = 0
+                }
+                over "shoulder"
+                {
+                    float drive:angular:physics:targetPosition = -103.1324
+                    float state:angular:physics:position = -103.1324
+                }
+                over "elbow"
+                {
+                    float drive:angular:physics:targetPosition = 88.80846
+                    float state:angular:physics:position = 88.80846
+                }
+                over "forearm_roll"
+                {
+                    float drive:angular:physics:targetPosition = 0
+                    float state:angular:physics:position = 0
+                }
+                over "wrist_angle"
+                {
+                    float drive:angular:physics:targetPosition = -89.95438
+                    float state:angular:physics:position = -89.95438
+                }
+                over "wrist_rotate"
+                {
+                    float drive:angular:physics:targetPosition = 0
+                    float state:angular:physics:position = 0
+                }
+            }
+        }
+    }
+
+    over "follower_right"
+    {
+        over "vx300s_right"
+        {
+            over "joints"
+            {
+                over "waist"
+                {
+                    float drive:angular:physics:targetPosition = 0
+                    float state:angular:physics:position = 0
+                }
+                over "shoulder"
+                {
+                    float drive:angular:physics:targetPosition = -103.1324
+                    float state:angular:physics:position = -103.1324
+                }
+                over "elbow"
+                {
+                    float drive:angular:physics:targetPosition = 88.80846
+                    float state:angular:physics:position = 88.80846
+                }
+                over "forearm_roll"
+                {
+                    float drive:angular:physics:targetPosition = 0
+                    float state:angular:physics:position = 0
+                }
+                over "wrist_angle"
+                {
+                    float drive:angular:physics:targetPosition = -89.95438
+                    float state:angular:physics:position = -89.95438
+                }
+                over "wrist_rotate"
+                {
+                    float drive:angular:physics:targetPosition = 0
+                    float state:angular:physics:position = 0
+                }
+            }
+        }
+    }
+}
