@@ -3,6 +3,7 @@
     defaultPrim = "World"
     metersPerUnit = 1
     subLayers = [
+        @configuration/aloha1_human_accepted_gripper_control.usda@,
         @aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_diagnostic.usda@
     ]
     upAxis = "Z"
@@ -11,4 +12,3 @@
 over "World"
 {
 }
-
