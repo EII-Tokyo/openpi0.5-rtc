@@ -1,0 +1,522 @@
+#usda 1.0
+(
+    defaultPrim = "World"
+    metersPerUnit = 1
+    upAxis = "Z"
+)
+
+def Xform "World"
+{
+    def PhysicsScene "PhysicsScene"
+    {
+        vector3f physics:gravityDirection = (0, 0, -1)
+        float physics:gravityMagnitude = 9.81
+    }
+
+    def "PhysicsMaterials"
+    {
+        def Material "BottleSurface_TEMP" (
+            apiSchemas = ["PhysicsMaterialAPI", "PhysxMaterialAPI"]
+            customData = {
+                string calibrationStatus = "TEMPORARY_UNCALIBRATED"
+            }
+        )
+        {
+            float physics:dynamicFriction = 0.5
+            float physics:restitution = 0
+            float physics:staticFriction = 0.65
+            custom token physxMaterial:frictionCombineMode = "average"
+            custom token physxMaterial:restitutionCombineMode = "min"
+        }
+
+        def Material "CapSurface_TEMP" (
+            apiSchemas = ["PhysicsMaterialAPI", "PhysxMaterialAPI"]
+            customData = {
+                string calibrationStatus = "TEMPORARY_UNCALIBRATED"
+            }
+        )
+        {
+            float physics:dynamicFriction = 0.75
+            float physics:restitution = 0
+            float physics:staticFriction = 0.9
+            custom token physxMaterial:frictionCombineMode = "average"
+            custom token physxMaterial:restitutionCombineMode = "min"
+        }
+
+        def Material "TableSurface_TEMP" (
+            apiSchemas = ["PhysicsMaterialAPI", "PhysxMaterialAPI"]
+            customData = {
+                string calibrationStatus = "TEMPORARY_UNCALIBRATED"
+            }
+        )
+        {
+            float physics:dynamicFriction = 0.5
+            float physics:restitution = 0
+            float physics:staticFriction = 0.6
+            custom token physxMaterial:frictionCombineMode = "average"
+            custom token physxMaterial:restitutionCombineMode = "min"
+        }
+
+        def Material "GripperPad_TEMP" (
+            apiSchemas = ["PhysicsMaterialAPI", "PhysxMaterialAPI"]
+            customData = {
+                string calibrationStatus = "TEMPORARY_UNCALIBRATED"
+            }
+        )
+        {
+            float physics:dynamicFriction = 0.75
+            float physics:restitution = 0
+            float physics:staticFriction = 0.9
+            custom token physxMaterial:frictionCombineMode = "average"
+            custom token physxMaterial:restitutionCombineMode = "min"
+        }
+    }
+
+    def Cube "Table" (
+        prepend apiSchemas = ["PhysicsCollisionAPI"]
+    )
+    {
+        custom rel material:binding:physics = </World/PhysicsMaterials/TableSurface_TEMP>
+        double size = 1
+        float3 xformOp:scale = (0.6, 0.6, 0.02)
+        double3 xformOp:translate = (0, 0, -0.01)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+    }
+
+    def Xform "Bottle500" (
+        prepend references = @../../../bottle_500ml/isaac/bottle_500ml_sim.usd@</Bottle500>
+    )
+    {
+        bool physics:kinematicEnabled = 1
+
+        over "Collisions"
+        {
+            over "COL_Shoulder_02"
+            {
+                over "COL_Shoulder_02Mesh"
+                {
+                    custom rel material:binding:physics = </World/PhysicsMaterials/BottleSurface_TEMP>
+                }
+            }
+
+            over "COL_Body_00"
+            {
+                over "COL_Body_00Mesh"
+                {
+                    custom rel material:binding:physics = </World/PhysicsMaterials/BottleSurface_TEMP>
+                }
+            }
+
+            over "COL_Bottom"
+            {
+                over "COL_BottomMesh"
+                {
+                    custom rel material:binding:physics = </World/PhysicsMaterials/BottleSurface_TEMP>
+                }
+            }
+
+            over "COL_Neck_02"
+            {
+                over "COL_Neck_02Mesh"
+                {
+                    custom rel material:binding:physics = </World/PhysicsMaterials/BottleSurface_TEMP>
+                }
+            }
+
+            over "COL_Neck_10"
+            {
+                over "COL_Neck_10Mesh"
+                {
+                    custom rel material:binding:physics = </World/PhysicsMaterials/BottleSurface_TEMP>
+                }
+            }
+
+            over "COL_Shoulder_06"
+            {
+                over "COL_Shoulder_06Mesh"
+                {
+                    custom rel material:binding:physics = </World/PhysicsMaterials/BottleSurface_TEMP>
+                }
+            }
+
+            over "COL_Shoulder_01"
+            {
+                over "COL_Shoulder_01Mesh"
+                {
+                    custom rel material:binding:physics = </World/PhysicsMaterials/BottleSurface_TEMP>
+                }
+            }
+
+            over "COL_Body_08"
+            {
+                over "COL_Body_08Mesh"
+                {
+                    custom rel material:binding:physics = </World/PhysicsMaterials/BottleSurface_TEMP>
+                }
+            }
+
+            over "COL_Body_11"
+            {
+                over "COL_Body_11Mesh"
+                {
+                    custom rel material:binding:physics = </World/PhysicsMaterials/BottleSurface_TEMP>
+                }
+            }
+
+            over "COL_Body_01"
+            {
+                over "COL_Body_01Mesh"
+                {
+                    custom rel material:binding:physics = </World/PhysicsMaterials/BottleSurface_TEMP>
+                }
+            }
+
+            over "COL_Shoulder_00"
+            {
+                over "COL_Shoulder_00Mesh"
+                {
+                    custom rel material:binding:physics = </World/PhysicsMaterials/BottleSurface_TEMP>
+                }
+            }
+
+            over "COL_Body_02"
+            {
+                over "COL_Body_02Mesh"
+                {
+                    custom rel material:binding:physics = </World/PhysicsMaterials/BottleSurface_TEMP>
+                }
+            }
+
+            over "COL_Shoulder_04"
+            {
+                over "COL_Shoulder_04Mesh"
+                {
+                    custom rel material:binding:physics = </World/PhysicsMaterials/BottleSurface_TEMP>
+                }
+            }
+
+            over "COL_Neck_01"
+            {
+                over "COL_Neck_01Mesh"
+                {
+                    custom rel material:binding:physics = </World/PhysicsMaterials/BottleSurface_TEMP>
+                }
+            }
+
+            over "COL_Body_03"
+            {
+                over "COL_Body_03Mesh"
+                {
+                    custom rel material:binding:physics = </World/PhysicsMaterials/BottleSurface_TEMP>
+                }
+            }
+
+            over "COL_Shoulder_05"
+            {
+                over "COL_Shoulder_05Mesh"
+                {
+                    custom rel material:binding:physics = </World/PhysicsMaterials/BottleSurface_TEMP>
+                }
+            }
+
+            over "COL_Body_10"
+            {
+                over "COL_Body_10Mesh"
+                {
+                    custom rel material:binding:physics = </World/PhysicsMaterials/BottleSurface_TEMP>
+                }
+            }
+
+            over "COL_Neck_06"
+            {
+                over "COL_Neck_06Mesh"
+                {
+                    custom rel material:binding:physics = </World/PhysicsMaterials/BottleSurface_TEMP>
+                }
+            }
+
+            over "COL_Neck_05"
+            {
+                over "COL_Neck_05Mesh"
+                {
+                    custom rel material:binding:physics = </World/PhysicsMaterials/BottleSurface_TEMP>
+                }
+            }
+
+            over "COL_Body_15"
+            {
+                over "COL_Body_15Mesh"
+                {
+                    custom rel material:binding:physics = </World/PhysicsMaterials/BottleSurface_TEMP>
+                }
+            }
+
+            over "COL_Body_05"
+            {
+                over "COL_Body_05Mesh"
+                {
+                    custom rel material:binding:physics = </World/PhysicsMaterials/BottleSurface_TEMP>
+                }
+            }
+
+            over "COL_Neck_11"
+            {
+                over "COL_Neck_11Mesh"
+                {
+                    custom rel material:binding:physics = </World/PhysicsMaterials/BottleSurface_TEMP>
+                }
+            }
+
+            over "COL_Shoulder_07"
+            {
+                over "COL_Shoulder_07Mesh"
+                {
+                    custom rel material:binding:physics = </World/PhysicsMaterials/BottleSurface_TEMP>
+                }
+            }
+
+            over "COL_Neck_09"
+            {
+                over "COL_Neck_09Mesh"
+                {
+                    custom rel material:binding:physics = </World/PhysicsMaterials/BottleSurface_TEMP>
+                }
+            }
+
+            over "COL_Body_04"
+            {
+                over "COL_Body_04Mesh"
+                {
+                    custom rel material:binding:physics = </World/PhysicsMaterials/BottleSurface_TEMP>
+                }
+            }
+
+            over "COL_Body_06"
+            {
+                over "COL_Body_06Mesh"
+                {
+                    custom rel material:binding:physics = </World/PhysicsMaterials/BottleSurface_TEMP>
+                }
+            }
+
+            over "COL_Body_09"
+            {
+                over "COL_Body_09Mesh"
+                {
+                    custom rel material:binding:physics = </World/PhysicsMaterials/BottleSurface_TEMP>
+                }
+            }
+
+            over "COL_Body_07"
+            {
+                over "COL_Body_07Mesh"
+                {
+                    custom rel material:binding:physics = </World/PhysicsMaterials/BottleSurface_TEMP>
+                }
+            }
+
+            over "COL_Shoulder_09"
+            {
+                over "COL_Shoulder_09Mesh"
+                {
+                    custom rel material:binding:physics = </World/PhysicsMaterials/BottleSurface_TEMP>
+                }
+            }
+
+            over "COL_Body_14"
+            {
+                over "COL_Body_14Mesh"
+                {
+                    custom rel material:binding:physics = </World/PhysicsMaterials/BottleSurface_TEMP>
+                }
+            }
+
+            over "COL_Shoulder_10"
+            {
+                over "COL_Shoulder_10Mesh"
+                {
+                    custom rel material:binding:physics = </World/PhysicsMaterials/BottleSurface_TEMP>
+                }
+            }
+
+            over "COL_Neck_04"
+            {
+                over "COL_Neck_04Mesh"
+                {
+                    custom rel material:binding:physics = </World/PhysicsMaterials/BottleSurface_TEMP>
+                }
+            }
+
+            over "COL_Shoulder_03"
+            {
+                over "COL_Shoulder_03Mesh"
+                {
+                    custom rel material:binding:physics = </World/PhysicsMaterials/BottleSurface_TEMP>
+                }
+            }
+
+            over "COL_Neck_07"
+            {
+                over "COL_Neck_07Mesh"
+                {
+                    custom rel material:binding:physics = </World/PhysicsMaterials/BottleSurface_TEMP>
+                }
+            }
+
+            over "COL_Shoulder_11"
+            {
+                over "COL_Shoulder_11Mesh"
+                {
+                    custom rel material:binding:physics = </World/PhysicsMaterials/BottleSurface_TEMP>
+                }
+            }
+
+            over "COL_Shoulder_08"
+            {
+                over "COL_Shoulder_08Mesh"
+                {
+                    custom rel material:binding:physics = </World/PhysicsMaterials/BottleSurface_TEMP>
+                }
+            }
+
+            over "COL_Neck_00"
+            {
+                over "COL_Neck_00Mesh"
+                {
+                    custom rel material:binding:physics = </World/PhysicsMaterials/BottleSurface_TEMP>
+                }
+            }
+
+            over "COL_Neck_03"
+            {
+                over "COL_Neck_03Mesh"
+                {
+                    custom rel material:binding:physics = </World/PhysicsMaterials/BottleSurface_TEMP>
+                }
+            }
+
+            over "COL_Body_13"
+            {
+                over "COL_Body_13Mesh"
+                {
+                    custom rel material:binding:physics = </World/PhysicsMaterials/BottleSurface_TEMP>
+                }
+            }
+
+            over "COL_Body_12"
+            {
+                over "COL_Body_12Mesh"
+                {
+                    custom rel material:binding:physics = </World/PhysicsMaterials/BottleSurface_TEMP>
+                }
+            }
+
+            over "COL_Neck_08"
+            {
+                over "COL_Neck_08Mesh"
+                {
+                    custom rel material:binding:physics = </World/PhysicsMaterials/BottleSurface_TEMP>
+                }
+            }
+        }
+    }
+
+    def Xform "BottleCap" (
+        prepend references = @../usd/bottle_cap_diagnostic_v1.usda@</BottleCap>
+    )
+    {
+        bool physics:kinematicEnabled = 1
+        custom bool physxRigidBody:enableCCD = 0
+        double3 xformOp:translate = (0, 0, 0.188)
+        uniform token[] xformOpOrder = ["xformOp:translate"]
+
+        over "Collisions"
+        {
+            over "COL_Side_00"
+            {
+                custom rel material:binding:physics = </World/PhysicsMaterials/CapSurface_TEMP>
+            }
+
+            over "COL_Side_01"
+            {
+                custom rel material:binding:physics = </World/PhysicsMaterials/CapSurface_TEMP>
+            }
+
+            over "COL_Side_02"
+            {
+                custom rel material:binding:physics = </World/PhysicsMaterials/CapSurface_TEMP>
+            }
+
+            over "COL_Side_03"
+            {
+                custom rel material:binding:physics = </World/PhysicsMaterials/CapSurface_TEMP>
+            }
+
+            over "COL_Side_04"
+            {
+                custom rel material:binding:physics = </World/PhysicsMaterials/CapSurface_TEMP>
+            }
+
+            over "COL_Side_05"
+            {
+                custom rel material:binding:physics = </World/PhysicsMaterials/CapSurface_TEMP>
+            }
+
+            over "COL_Side_06"
+            {
+                custom rel material:binding:physics = </World/PhysicsMaterials/CapSurface_TEMP>
+            }
+
+            over "COL_Side_07"
+            {
+                custom rel material:binding:physics = </World/PhysicsMaterials/CapSurface_TEMP>
+            }
+
+            over "COL_Side_08"
+            {
+                custom rel material:binding:physics = </World/PhysicsMaterials/CapSurface_TEMP>
+            }
+
+            over "COL_Side_09"
+            {
+                custom rel material:binding:physics = </World/PhysicsMaterials/CapSurface_TEMP>
+            }
+
+            over "COL_Side_10"
+            {
+                custom rel material:binding:physics = </World/PhysicsMaterials/CapSurface_TEMP>
+            }
+
+            over "COL_Side_11"
+            {
+                custom rel material:binding:physics = </World/PhysicsMaterials/CapSurface_TEMP>
+            }
+
+            over "COL_Side_12"
+            {
+                custom rel material:binding:physics = </World/PhysicsMaterials/CapSurface_TEMP>
+            }
+
+            over "COL_Side_13"
+            {
+                custom rel material:binding:physics = </World/PhysicsMaterials/CapSurface_TEMP>
+            }
+
+            over "COL_Side_14"
+            {
+                custom rel material:binding:physics = </World/PhysicsMaterials/CapSurface_TEMP>
+            }
+
+            over "COL_Side_15"
+            {
+                custom rel material:binding:physics = </World/PhysicsMaterials/CapSurface_TEMP>
+            }
+
+            over "COL_Top"
+            {
+                custom rel material:binding:physics = </World/PhysicsMaterials/CapSurface_TEMP>
+            }
+        }
+    }
+}
+

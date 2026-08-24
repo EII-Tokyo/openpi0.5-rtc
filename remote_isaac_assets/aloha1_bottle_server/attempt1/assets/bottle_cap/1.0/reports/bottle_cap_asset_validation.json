@@ -1,0 +1,122 @@
+{
+  "checks": {
+    "ccd_enabled": true,
+    "classification_present": true,
+    "collision_prim_count": true,
+    "default_prim": true,
+    "dynamic_friction": true,
+    "friction_combine_average": true,
+    "inertia_finite_positive": true,
+    "mass_api": true,
+    "mass_positive": true,
+    "material_api": true,
+    "material_bindings": true,
+    "meters_per_unit": true,
+    "neck_radial_clearance_positive": true,
+    "outer_diameter": true,
+    "physx_material_api": true,
+    "physx_rigid_body_api": true,
+    "plastic_clearcoat": true,
+    "plastic_roughness": true,
+    "restitution": true,
+    "rigid_body_api": true,
+    "root_exists": true,
+    "static_friction": true,
+    "top_accent_present": true,
+    "up_axis_z": true,
+    "visual_envelope_height": true,
+    "visual_mesh_count": true,
+    "visual_rib_count": true,
+    "visual_style_present": true
+  },
+  "classification": "TEMPORARY_UNCALIBRATED_DIAGNOSTIC_CAP",
+  "computed": {
+    "bounds_max_m": [
+      0.017000000923871994,
+      0.017000000923871994,
+      0.02225000000593718
+    ],
+    "bounds_min_m": [
+      -0.017000000923871994,
+      -0.017000000923871994,
+      0.0
+    ],
+    "center_of_mass_m": [
+      0.0,
+      0.0,
+      0.010999999940395355
+    ],
+    "collision_paths": [
+      "/BottleCap/Collisions/COL_Side_00",
+      "/BottleCap/Collisions/COL_Side_01",
+      "/BottleCap/Collisions/COL_Side_02",
+      "/BottleCap/Collisions/COL_Side_03",
+      "/BottleCap/Collisions/COL_Side_04",
+      "/BottleCap/Collisions/COL_Side_05",
+      "/BottleCap/Collisions/COL_Side_06",
+      "/BottleCap/Collisions/COL_Side_07",
+      "/BottleCap/Collisions/COL_Side_08",
+      "/BottleCap/Collisions/COL_Side_09",
+      "/BottleCap/Collisions/COL_Side_10",
+      "/BottleCap/Collisions/COL_Side_11",
+      "/BottleCap/Collisions/COL_Side_12",
+      "/BottleCap/Collisions/COL_Side_13",
+      "/BottleCap/Collisions/COL_Side_14",
+      "/BottleCap/Collisions/COL_Side_15",
+      "/BottleCap/Collisions/COL_Top"
+    ],
+    "diagonal_inertia_kg_m2": [
+      6.8749335468965e-07,
+      6.8749335468965e-07,
+      1.052320044436783e-06
+    ],
+    "mass_kg": 0.004000000189989805,
+    "size_m": [
+      0.03400000184774399,
+      0.03400000184774399,
+      0.02225000000593718
+    ],
+    "visual_mesh_paths": [
+      "/BottleCap/Visuals/VIS_BottleCap"
+    ],
+    "visual_rib_paths": [
+      "/BottleCap/Visuals/Ribs/VIS_Rib_00",
+      "/BottleCap/Visuals/Ribs/VIS_Rib_01",
+      "/BottleCap/Visuals/Ribs/VIS_Rib_02",
+      "/BottleCap/Visuals/Ribs/VIS_Rib_03",
+      "/BottleCap/Visuals/Ribs/VIS_Rib_04",
+      "/BottleCap/Visuals/Ribs/VIS_Rib_05",
+      "/BottleCap/Visuals/Ribs/VIS_Rib_06",
+      "/BottleCap/Visuals/Ribs/VIS_Rib_07",
+      "/BottleCap/Visuals/Ribs/VIS_Rib_08",
+      "/BottleCap/Visuals/Ribs/VIS_Rib_09",
+      "/BottleCap/Visuals/Ribs/VIS_Rib_10",
+      "/BottleCap/Visuals/Ribs/VIS_Rib_11",
+      "/BottleCap/Visuals/Ribs/VIS_Rib_12",
+      "/BottleCap/Visuals/Ribs/VIS_Rib_13",
+      "/BottleCap/Visuals/Ribs/VIS_Rib_14",
+      "/BottleCap/Visuals/Ribs/VIS_Rib_15",
+      "/BottleCap/Visuals/Ribs/VIS_Rib_16",
+      "/BottleCap/Visuals/Ribs/VIS_Rib_17",
+      "/BottleCap/Visuals/Ribs/VIS_Rib_18",
+      "/BottleCap/Visuals/Ribs/VIS_Rib_19",
+      "/BottleCap/Visuals/Ribs/VIS_Rib_20",
+      "/BottleCap/Visuals/Ribs/VIS_Rib_21",
+      "/BottleCap/Visuals/Ribs/VIS_Rib_22",
+      "/BottleCap/Visuals/Ribs/VIS_Rib_23",
+      "/BottleCap/Visuals/Ribs/VIS_Rib_24",
+      "/BottleCap/Visuals/Ribs/VIS_Rib_25",
+      "/BottleCap/Visuals/Ribs/VIS_Rib_26",
+      "/BottleCap/Visuals/Ribs/VIS_Rib_27",
+      "/BottleCap/Visuals/Ribs/VIS_Rib_28",
+      "/BottleCap/Visuals/Ribs/VIS_Rib_29",
+      "/BottleCap/Visuals/Ribs/VIS_Rib_30",
+      "/BottleCap/Visuals/Ribs/VIS_Rib_31"
+    ]
+  },
+  "status": "PASS",
+  "usd": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/bottle_cap/1.0/usd/bottle_cap_diagnostic_v1.usda",
+    "sha256": "14a1d0b77e37c97620a1dfdec9154c51cb7eaabe4bf0ed92be2391470c0725f2"
+  }
+}

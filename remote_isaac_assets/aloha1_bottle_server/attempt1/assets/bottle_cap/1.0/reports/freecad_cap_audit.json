@@ -1,0 +1,67 @@
+{
+  "classification": "TEMPORARY_UNCALIBRATED_DIAGNOSTIC_CAP",
+  "geometry": {
+    "bounds_mm": {
+      "max": [
+        17.0,
+        17.0,
+        22.0
+      ],
+      "min": [
+        -17.0,
+        -17.0,
+        0.0
+      ]
+    },
+    "center_of_mass_mm": [
+      -1.93622273598334e-14,
+      -1.5136494682874837e-15,
+      13.937329700272482
+    ],
+    "height_mm": 22.0,
+    "inner_diameter_mm": 30.8,
+    "outer_diameter_mm": 34.0,
+    "solid_count": 1,
+    "surface_area_mm2": 6100.972933271379,
+    "thread_radial_clearance_mm": 0.4,
+    "top_thickness_mm": 2.0,
+    "valid": true,
+    "volume_mm3": 5073.0438170167945,
+    "wall_thickness_mm": 1.5999999999999996
+  },
+  "outputs": {
+    "fcstd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/bottle_cap/1.0/geometry/cad_intermediate/bottle_cap_diagnostic_v1.FCStd",
+    "fcstd_sha256": "28fd3e85a29d74fe6e6cf9bf68faca46c5599ff5869dd15645698c35e5fa6f13",
+    "obj": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/bottle_cap/1.0/geometry/visual/bottle_cap_visual.obj",
+    "obj_sha256": "c2d6c67ce553e873d0af50b33a08a2b6152a4f3b802d679e22c279462329d747",
+    "step": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/bottle_cap/1.0/geometry/cad_intermediate/bottle_cap_diagnostic_v1.step",
+    "step_sha256": "4383ae5a56124d9dbf23dcc5ab0923203a9cb006af85f19e8a91cf39ccc6b638"
+  },
+  "source_bottle": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/bottle_500ml/cad/bottle_500ml.FCStd",
+    "read_only": true,
+    "sha256": "3594f60200e54181bc8480a229484293a0d386c146d3f235b32e31a0c16bbf8a",
+    "support_od_mm": 34.0,
+    "thread_od_mm": 30.0
+  },
+  "status": "PASS",
+  "tessellation": {
+    "angular_deflection_deg": 10.0,
+    "facet_count": 572,
+    "linear_deflection_mm": 0.05,
+    "relative": false
+  },
+  "toolchain": {
+    "freecad_version": [
+      "1",
+      "1",
+      "1",
+      "20260414 (Git shallow)",
+      "Unknown",
+      "2026/04/14 22:09:59",
+      "(HEAD detached at 0108fd4b4)",
+      "0108fd4b4850cc46e625b60e53cea7a7bbe69f8d"
+    ],
+    "opencascade_version": "7.8.1"
+  }
+}

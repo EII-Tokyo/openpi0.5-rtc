@@ -1,0 +1,61 @@
+{
+  "version": "thread_release_v1",
+  "created_date": "2026-08-20",
+  "isaac_sim_version": "5.1",
+  "entry_stage": "remote_stream_threaded_release_v1.usda",
+  "initial_thread_state": "THREADED",
+  "gripper_pad_effective_friction": {
+    "static_friction": 2.0,
+    "dynamic_friction": 1.5,
+    "friction_combine_mode": "maximum",
+    "classification": "USER_ACCEPTED_SIMULATION_EFFECTIVE_FRICTION",
+    "validation_result": "BOTTLE_LIFT_SUCCEEDED",
+    "additional_threshold_scan_performed": false
+  },
+  "runtime_validation": {
+    "server_pid": 2851078,
+    "base_joints": "PASS",
+    "right_hand_coupling": "PASS",
+    "threaded_to_released": "PASS",
+    "release_extension_m": 0.0118,
+    "timeline_final": "PAUSED",
+    "stage_saved_during_test": false,
+    "ros_used": false,
+    "real_robot_touched": false
+  },
+  "active_startup_validation": {
+    "validated_date": "2026-08-20",
+    "server_pid": 3397792,
+    "loader_status": "PASS",
+    "bottle500_kinematic_enabled": false,
+    "bottle_cap_kinematic_enabled": false,
+    "thread_state": "THREADED",
+    "thread_handedness": "RIGHT_HAND",
+    "prismatic_limits_m": [0.0, 0.0],
+    "revolute_limits_deg": [0.0, 0.0],
+    "coupling_enabled": false,
+    "revolute_angular_drive_present": false,
+    "ordinary_play_physics_steps": 30,
+    "maximum_bottle_cap_relative_angle_deg": 2.4148365394514667e-06,
+    "ordinary_play_relative_angle_limit_deg": 0.1,
+    "timeline_final": "PAUSED",
+    "ros_used": false,
+    "real_robot_touched": false
+  },
+  "source_hashes": {
+    "aloha_lula_base_aligned_extension_py": "134055837fc73547b4fa5eae369c8d9bed341b23d1dc99ed6c5135e83694f077",
+    "remote_stream_cap_stage_usda": "41af2047922e10cc415c84bf57a2f1965ede9fb3f9e58cef27618d1bb9a6874b",
+    "remote_stream_cap_stage_loader_py": "8a51947d083eb730ef55cfb870bebd52080b5faabbbb91a920e263dae3dc8b99",
+    "bottle_thread_constraint_v1_usda": "0a398bed8d56b90fa2b82653efe8fc837ca265ef4f4ba0464a4f886090368ac4",
+    "usd_composition_validation_json": "91e0ef6147f616731e410a55bf920343b64d524bb6003d96dc1081363e2af514",
+    "bottle_thread_reset_tight_py": "6bb4a6998b372aacfeb428678c756abafce623e2a2271e8e4a03a1bd0f15bc89",
+    "bottle_thread_begin_unthreading_py": "bc467bc2e5f119acd726450a957d453155633428db026a07940c09924a3411e0",
+    "bottle_thread_set_released_py": "88f5cb26c878f58395898a8acb032c8781570e2dc2d6a84266a9288c7e2e5fb6",
+    "base_joint_report": "73ad49a3dd50d6173b82ec5f1056f20636ff4d76e74b62802ee0533d0de64e41",
+    "coupling_report": "0d8bc8332c858f24c657d3d766dff83360b52bd481306e53f44f868e318181ae",
+    "release_report": "b1b1fecc35f3e4eaa36b7f289fc5d20e4132fc6d26e453616133ee2589c40227"
+  },
+  "thread_parameter_status": "TEMPORARY_UNCALIBRATED",
+  "gripper_friction_status": "USER_ACCEPTED_SIMULATION_EFFECTIVE_FRICTION",
+  "promotion_status": "ACTIVE_SERVER_STAGE"
+}

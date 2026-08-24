@@ -1,0 +1,42 @@
+{
+  "cap_bounds_after": {
+    "max": [
+      0.017000000923871994,
+      0.017000000923871994,
+      0.2102500000059372
+    ],
+    "min": [
+      -0.017000000923871994,
+      -0.017000000923871994,
+      0.188
+    ]
+  },
+  "cap_bounds_before": {
+    "max": [
+      0.017000000923871994,
+      0.017000000923871994,
+      0.2102500000059372
+    ],
+    "min": [
+      -0.017000000923871994,
+      -0.017000000923871994,
+      0.188
+    ]
+  },
+  "checks": {
+    "bottle_valid": true,
+    "cap_collision_count_17": true,
+    "cap_physx_rigid_body_api": true,
+    "cap_valid": true,
+    "finite_bounds": true,
+    "four_physx_materials": true,
+    "kinematic_hold_stable": true,
+    "stage_opened": true
+  },
+  "classification": "ISAAC_SIM_RUNTIME_LOAD_PHASE_1_2_DIAGNOSTIC",
+  "max_bbox_motion_m": 0.0,
+  "note": "Kinematic hold is intentional until the cap-thread constraint is implemented in a later phase.",
+  "physics_updates": 60,
+  "stage": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/bottle_cap/1.0/tests/bottle_cap_integration_test.usda",
+  "status": "PASS"
+}

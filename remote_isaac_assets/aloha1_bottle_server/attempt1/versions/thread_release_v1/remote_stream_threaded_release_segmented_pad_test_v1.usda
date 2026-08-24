@@ -1,0 +1,19 @@
+#usda 1.0
+(
+    customLayerData = {
+        string classification = "VERSIONED_THREADED_RELEASE_SEGMENTED_PAD_TEST"
+        string gripperPadGeometry = "segmented_conformal_pad_v1"
+        string gripperPadProfile = "accel_50ms_critical_v1"
+        string initialThreadState = "THREADED"
+        string version = "thread_release_segmented_pad_test_v1"
+    }
+    defaultPrim = "World"
+    metersPerUnit = 1
+    subLayers = [
+        @gripper_segmented_conformal_pad_v1.usda@,
+        @gripper_pad_compliant_accel_50ms_critical_v1.usda@,
+        @bottle_thread_constraint_v1.usda@,
+        @../../remote_stream_cap_stage.usda@
+    ]
+    upAxis = "Z"
+)

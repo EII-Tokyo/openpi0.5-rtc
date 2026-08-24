@@ -1,0 +1,43 @@
+{
+  "status": "PASS",
+  "validation_date": "2026-08-20",
+  "validator": "Isaac Sim 5.1 bundled USD 24.05",
+  "stage": "remote_stream_threaded_release_v1.usda",
+  "types": {
+    "slider": "Xform",
+    "prismatic": "PhysicsPrismaticJoint",
+    "revolute": "PhysicsRevoluteJoint",
+    "coupling": "PhysxPhysicsRackAndPinionJoint",
+    "cap": "Xform",
+    "scope": "Scope"
+  },
+  "cap_position_m": [0.085, 0.0, 0.034],
+  "slider_position_m": [0.085, 0.0, 0.034],
+  "cap_slider_position_error_m": 0.0,
+  "joint_enabled": {
+    "prismatic": true,
+    "revolute": true,
+    "coupling": false
+  },
+  "prismatic_limits_m": [0.0, 0.0],
+  "revolute_limits_deg": [0.0, 0.0],
+  "revolute_angular_drive_present": false,
+  "thread_state_scope": "THREADED",
+  "thread_state_coupling": "THREADED",
+  "ratio_deg_per_m": -120000.0,
+  "gripper_pad_effective_friction": {
+    "static_friction": 2.0,
+    "dynamic_friction": 1.5,
+    "friction_combine_mode": "maximum",
+    "classification": "USER_ACCEPTED_SIMULATION_EFFECTIVE_FRICTION",
+    "validation_result": "BOTTLE_LIFT_SUCCEEDED"
+  },
+  "runtime_dynamic_evidence": {
+    "server_pid": 3397792,
+    "ordinary_play_physics_steps": 30,
+    "maximum_bottle_cap_relative_angle_deg": 2.4148365394514667e-06,
+    "limit_deg": 0.1,
+    "status": "PASS"
+  },
+  "active_server_stage_switched": true
+}

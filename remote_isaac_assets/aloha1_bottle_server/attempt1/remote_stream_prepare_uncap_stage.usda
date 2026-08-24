@@ -1,0 +1,604 @@
+#usda 1.0
+(
+    customLayerData = {
+        string helicalConstraint = "PHYSX_RACK_AND_PINION_RIGHT_HAND"
+        string purpose = "PREPARE_UNCAP_DIAGNOSTIC"
+    }
+    defaultPrim = "World"
+    metersPerUnit = 1
+    subLayers = [
+        @../../../assets/bottle_cap/1.0/usd/physics/bottle_cap_right_hand_helical_constraint.usda@,
+        @remote_stream_cap_stage.usda@
+    ]
+    upAxis = "Z"
+)
+
+def "Render" (
+    hide_in_stage_window = true
+    no_delete = true
+)
+{
+    def "OmniverseKit"
+    {
+        def "HydraTextures" (
+            hide_in_stage_window = true
+            no_delete = true
+        )
+        {
+            def RenderProduct "omni_kit_widget_viewport_ViewportTexture_0" (
+                prepend apiSchemas = ["OmniRtxSettingsCommonAdvancedAPI_1", "OmniRtxSettingsRtAdvancedAPI_1", "OmniRtxSettingsPtAdvancedAPI_1", "OmniRtxPostColorGradingAPI_1", "OmniRtxPostChromaticAberrationAPI_1", "OmniRtxPostBloomPhysicalAPI_1", "OmniRtxPostMatteObjectAPI_1", "OmniRtxPostCompositingAPI_1", "OmniRtxPostDofAPI_1", "OmniRtxPostMotionBlurAPI_1", "OmniRtxPostTvNoiseAPI_1", "OmniRtxPostTonemapIrayReinhardAPI_1", "OmniRtxPostDebugSettingsAPI_1", "OmniRtxDebugSettingsAPI_1"]
+                hide_in_stage_window = true
+                no_delete = true
+            )
+            {
+                rel camera = </OmniverseKit_Persp>
+                token omni:rtx:background:source:texture:textureMode = "repeatMirrored"
+                token omni:rtx:background:source:type = "domeLight"
+                bool omni:rtx:dlss:frameGeneration = 0
+                bool omni:rtx:material:db:nonVisualMaterialCSV:enabled = 0
+                bool omni:rtx:material:db:syncLoads = 1
+                token omni:rtx:post:dlss:execMode = "performance"
+                bool omni:rtx:post:registeredCompositing:invertColorCorrection = 1
+                bool omni:rtx:post:registeredCompositing:invertToneMap = 1
+                int omni:rtx:pt:clampSpp = 64
+                bool omni:rtx:pt:lightcache:cached:dontResolveConflicts = 1
+                int omni:rtx:pt:maxSamplesPerLaunch = 2073600
+                int omni:rtx:pt:maxVolumeBounces = 4
+                int omni:rtx:pt:mgpu:maxPixelsPerRegionExponent = 12
+                int omni:rtx:pt:samplesPerIteration = 64
+                int omni:rtx:pt:samplesPerPixel = 64
+                color3f omni:rtx:rt:ambientLight:color = (0.1, 0.1, 0.1)
+                bool omni:rtx:rt:demoire = 0
+                bool omni:rtx:rt:lightcache:spatialCache:dontResolveConflicts = 1
+                bool omni:rtx:scene:hydra:materialSyncLoads = 1
+                bool omni:rtx:scene:hydra:mdlMaterialWarmup = 1
+                uint omni:rtx:viewTile:limit = 4294967295
+                rel orderedVars = </Render/Vars/LdrColor>
+                custom bool overrideClipRange = 0
+                uniform int2 resolution = (1280, 720)
+            }
+        }
+    }
+
+    def RenderSettings "OmniverseGlobalRenderSettings" (
+        prepend apiSchemas = ["OmniRtxSettingsGlobalRtAdvancedAPI_1", "OmniRtxSettingsGlobalPtAdvancedAPI_1"]
+        no_delete = true
+    )
+    {
+        rel products = </Render/OmniverseKit/HydraTextures/omni_kit_widget_viewport_ViewportTexture_0>
+    }
+
+    def "Vars"
+    {
+        def RenderVar "LdrColor" (
+            hide_in_stage_window = true
+            no_delete = true
+        )
+        {
+            uniform string sourceName = "LdrColor"
+        }
+    }
+}
+
+over "World"
+{
+    over "PhysicsScene" (
+        prepend apiSchemas = ["PhysxSceneAPI"]
+    )
+    {
+    }
+
+    def OmniGraph "PrepareUncap"
+    {
+        token evaluationMode = "Automatic"
+        token evaluator:type = "execution"
+        token fabricCacheBacking = "StageWithoutHistory"
+        int2 fileFormatVersion = (1, 9)
+        token pipelineStage = "pipelineStageSimulation"
+        custom bool prepare:accelerationLimitCalibrated = 0
+        custom bool prepare:actualBottleMeshDeformation = 0
+        custom string[] prepare:blockers = ["Dynamic bottle settle, bilateral clamp, lift, reorientation, and hold have not been executed.", "Trajectory acceleration and jerk limits are not calibrated; only the episode18 observed velocity envelope is enforced.", "The horizontal grasp candidate still has confidence 0 until dynamic support-to-lift validation passes.", "Twenty fresh-world dynamic acceptance repeats and force/slip gates remain pending.", "Thread torque, pitch, travel, friction, and detachment behavior remain uncalibrated."]
+        custom double[] prepare:bottleAxisTiltXRangeDeg = [-6, 6]
+        custom double[] prepare:bottleAxisTiltYRangeDeg = [-6, 6]
+        custom double[] prepare:bottleDiameterScaleRange = [1, 1.12]
+        custom string prepare:classification = "SAFE_INERT_OBJECT_RELATIVE_TRANSITION_SWEEP_PASS"
+        custom bool prepare:contactEventCountIsFailureMetric = 0
+        custom string prepare:contactPrecheckSha256 = "cad28bc34b2660d16a7704aa4828c863aa32d4abfe545e92746762329fda42fe"
+        custom string prepare:domainContactReportSha256 = "ce68803a77fca3ea6ecfe61c4e29f07411e765143e96119fa2223656543be46a"
+        custom string prepare:domainRandomizationConfigSha256 = "b01cc2198bacfcf2d490eca6c6330eeec794a7974085d04b0498e1752ad3a7f3"
+        custom int prepare:domainScenarioCount = 33
+        custom double prepare:domainScenarioPassFraction = 1
+        custom bool prepare:dynamicPickupValidated = 0
+        custom double[] prepare:effectiveRadialIndentRangeM = [0, 0.004]
+        custom bool prepare:executionEnabled = 0
+        custom string prepare:expertAnalysisSha256 = "5b9cc9e215c208bd4dd3cdf01c4ade533c9f42d0712312be960fc620fb673d98"
+        custom double[] prepare:expertLeftTwistRadians = [-1.6819659080323681, -3.0139660947267557, -1.6650473999956341]
+        custom double[] prepare:expertRelativeTwistRadians = [2.761853228997902, 4.128386261377366, 2.4215017441848508]
+        custom double[] prepare:expertRightTwistRadians = [1.0798873209655337, 1.1144201666506102, 0.7564543441892164]
+        custom string[] prepare:expertSegments = ["RIGHT_APPROACH_AND_CAP_GRASP_1:311-356", "UNSCREW_STROKE_1:357-487", "RELEASE_REWIND_AND_APPROACH_2:488-557", "RIGHT_APPROACH_AND_CAP_GRASP_2:558-608", "UNSCREW_STROKE_2:609-706", "RELEASE_REWIND_AND_APPROACH_3:707-795", "RIGHT_APPROACH_AND_CAP_GRASP_3:796-846", "UNSCREW_STROKE_3_AND_DETACH:847-895"]
+        custom string prepare:ikReportSha256 = "ff2e5b0889d720b2a9df6bc59c687b501a5483f01325c15ab969db434fd90024"
+        custom string prepare:jointTargetPolicy = "OBJECT_RELATIVE_ONLINE_IK_NOT_EXPERT_ABSOLUTE_JOINT_REPLAY"
+        custom double[] prepare:leftFingerPositions = [0.048316875, -0.048316875]
+        custom double[] prepare:leftGraspAxialShiftRangeM = [-0.025, 0.025]
+        custom double[] prepare:leftVerticalBottleGraspQ = [-0.32457755, 0.34024913, 0.62688293, 2.07482453, 1.24933412, 0.52021967]
+        custom bool prepare:onlineIkRequired = 1
+        custom string prepare:positiveRemovalAxis = "BOTTLE_LOCAL_POSITIVE_Z"
+        custom bool prepare:ready = 0
+        custom bool prepare:requested = 0
+        custom double[] prepare:rightCapGraspQ = [-0.07363698, -0.24392602, 0.67205698, -0.17585126, -0.43403109, 0.15983596]
+        custom double3 prepare:rightCapGraspWorldPosition = (0.035, 0, 0.328)
+        custom double[] prepare:rightFingerPositions = [0.0336, -0.0336]
+        custom string prepare:robustIkReportSha256 = "49ff1a0685af5a36816030710d7618e51a548f350a65cb6cb3b80fb541890b67"
+        custom string prepare:softBottleModel = "EFFECTIVE_CONTACT_INDENTATION_PROXY_NO_MESH_DEFORMATION"
+        custom string prepare:state = "TRANSITION_SWEEP_PASS_DYNAMIC_GRASP_BLOCKED"
+        custom double3 prepare:targetCapAxisWorld = (0, 0, 1)
+        custom string prepare:threadHandedness = "RIGHT_HAND"
+        custom bool prepare:transitionCollisionSweepPassed = 1
+        custom double prepare:transitionDurationS = 22.266666666666666
+        custom double prepare:transitionFrequencyHz = 60
+        custom double prepare:transitionMaximumArmCorrectionRad = 0.012366130948066711
+        custom string prepare:transitionPlanReportSha256 = "5b2273581cd570053905bd273bdf9838b6282d97b5d7501f2a9dd820375a759d"
+        custom int prepare:transitionSampleCount = 1337
+        custom string prepare:transitionSweepReportSha256 = "f71eaf64a1fdbae78b814f8a2199440bf49aa8daca3a1e630a7a10d1be8a6cb3"
+        custom string prepare:transitionTrajectorySha256 = "36acf0c0d2dd79614232d3c78d24c38af738674c950970cc4cce8ab2700ed802"
+
+        def OmniGraphNode "OnPlaybackTick_DISABLED"
+        {
+            token node:type = "omni.graph.action.OnPlaybackTick"
+            int node:typeVersion = 2
+            custom double outputs:deltaSeconds
+            custom double outputs:frame
+            custom uint outputs:tick (
+                customData = {
+                    bool isExecution = 1
+                }
+            )
+            custom double outputs:time
+        }
+
+        def OmniGraphNode "LeftArmJointNames"
+        {
+            custom int inputs:arraySize = 6
+            custom token inputs:arrayType = "token[]" (
+                allowedTokens = ["auto", "bool[]", "double[]", "float[]", "half[]", "int[]", "int64[]", "token[]", "uchar[]", "uint[]", "uint64[]", "double[2][]", "double[3][]", "double[4][]", "matrixd[2][]", "matrixd[3][]", "matrixd[4][]", "float[2][]", "float[3][]", "float[4][]", "half[2][]", "half[3][]", "half[4][]", "int[2][]", "int[3][]", "int[4][]", "timecode[]", "frame[4][]", "colord[3][]", "colorf[3][]", "colorh[3][]", "colord[4][]", "colorf[4][]", "colorh[4][]", "normald[3][]", "normalf[3][]", "normalh[3][]", "pointd[3][]", "pointf[3][]", "pointh[3][]", "quatd[4][]", "quatf[4][]", "quath[4][]", "texcoordd[2][]", "texcoordf[2][]", "texcoordh[2][]", "texcoordd[3][]", "texcoordf[3][]", "texcoordh[3][]", "vectord[3][]", "vectorf[3][]", "vectorh[3][]"]
+            )
+            custom token inputs:input0 (
+                customData = {
+                    dictionary omni = {
+                        dictionary graph = {
+                            token attrValue = "waist"
+                            string resolvedType = "token"
+                        }
+                    }
+                }
+            )
+            custom token inputs:input1 = "shoulder"
+            custom token inputs:input2 = "elbow"
+            custom token inputs:input3 = "forearm_roll"
+            custom token inputs:input4 = "wrist_angle"
+            custom token inputs:input5 = "wrist_rotate"
+            token node:type = "omni.graph.nodes.ConstructArray"
+            int node:typeVersion = 1
+            custom token outputs:array
+        }
+
+        def OmniGraphNode "LeftArmSleepCommand"
+        {
+            custom int inputs:arraySize = 6
+            custom token inputs:arrayType = "double[]" (
+                allowedTokens = ["auto", "bool[]", "double[]", "float[]", "half[]", "int[]", "int64[]", "token[]", "uchar[]", "uint[]", "uint64[]", "double[2][]", "double[3][]", "double[4][]", "matrixd[2][]", "matrixd[3][]", "matrixd[4][]", "float[2][]", "float[3][]", "float[4][]", "half[2][]", "half[3][]", "half[4][]", "int[2][]", "int[3][]", "int[4][]", "timecode[]", "frame[4][]", "colord[3][]", "colorf[3][]", "colorh[3][]", "colord[4][]", "colorf[4][]", "colorh[4][]", "normald[3][]", "normalf[3][]", "normalh[3][]", "pointd[3][]", "pointf[3][]", "pointh[3][]", "quatd[4][]", "quatf[4][]", "quath[4][]", "texcoordd[2][]", "texcoordf[2][]", "texcoordh[2][]", "texcoordd[3][]", "texcoordf[3][]", "texcoordh[3][]", "vectord[3][]", "vectorf[3][]", "vectorh[3][]"]
+            )
+            custom token inputs:input0 (
+                customData = {
+                    dictionary omni = {
+                        dictionary graph = {
+                            double attrValue = 0
+                            string resolvedType = "double"
+                        }
+                    }
+                }
+            )
+            custom double inputs:input1 = -1.8
+            custom double inputs:input2 = 1.55
+            custom double inputs:input3 = 0
+            custom double inputs:input4 = -1.57
+            custom double inputs:input5 = 0
+            token node:type = "omni.graph.nodes.ConstructArray"
+            int node:typeVersion = 1
+            custom token outputs:array
+        }
+
+        def OmniGraphNode "LeftArmController_DISABLED"
+        {
+            custom double[] inputs:effortCommand
+            custom uint inputs:execIn (
+                customData = {
+                    bool isExecution = 1
+                }
+            )
+            custom int[] inputs:jointIndices
+            custom token[] inputs:jointNames
+            prepend token[] inputs:jointNames.connect = </World/PrepareUncap/LeftArmJointNames.outputs:array>
+            custom double[] inputs:positionCommand
+            prepend double[] inputs:positionCommand.connect = </World/PrepareUncap/LeftArmSleepCommand.outputs:array>
+            custom string inputs:robotPath = "/World/follower_left/vx300s_left/root_joint"
+            custom rel inputs:targetPrim (
+                customData = {
+                    dictionary omni = {
+                        dictionary graph = {
+                            string relType = "target"
+                        }
+                    }
+                }
+            )
+            custom double[] inputs:velocityCommand
+            token node:type = "isaacsim.core.nodes.IsaacArticulationController"
+            int node:typeVersion = 1
+        }
+
+        def OmniGraphNode "LeftGripperOpen"
+        {
+            custom int inputs:arraySize = 2
+            custom token inputs:arrayType = "double[]" (
+                allowedTokens = ["auto", "bool[]", "double[]", "float[]", "half[]", "int[]", "int64[]", "token[]", "uchar[]", "uint[]", "uint64[]", "double[2][]", "double[3][]", "double[4][]", "matrixd[2][]", "matrixd[3][]", "matrixd[4][]", "float[2][]", "float[3][]", "float[4][]", "half[2][]", "half[3][]", "half[4][]", "int[2][]", "int[3][]", "int[4][]", "timecode[]", "frame[4][]", "colord[3][]", "colorf[3][]", "colorh[3][]", "colord[4][]", "colorf[4][]", "colorh[4][]", "normald[3][]", "normalf[3][]", "normalh[3][]", "pointd[3][]", "pointf[3][]", "pointh[3][]", "quatd[4][]", "quatf[4][]", "quath[4][]", "texcoordd[2][]", "texcoordf[2][]", "texcoordh[2][]", "texcoordd[3][]", "texcoordf[3][]", "texcoordh[3][]", "vectord[3][]", "vectorf[3][]", "vectorh[3][]"]
+            )
+            custom token inputs:input0 (
+                customData = {
+                    dictionary omni = {
+                        dictionary graph = {
+                            double attrValue = 0.057
+                            string resolvedType = "double"
+                        }
+                    }
+                }
+            )
+            custom double inputs:input1 = -0.057
+            token node:type = "omni.graph.nodes.ConstructArray"
+            int node:typeVersion = 1
+            custom token outputs:array
+        }
+
+        def OmniGraphNode "LeftGripperClose"
+        {
+            custom int inputs:arraySize = 2
+            custom token inputs:arrayType = "double[]" (
+                allowedTokens = ["auto", "bool[]", "double[]", "float[]", "half[]", "int[]", "int64[]", "token[]", "uchar[]", "uint[]", "uint64[]", "double[2][]", "double[3][]", "double[4][]", "matrixd[2][]", "matrixd[3][]", "matrixd[4][]", "float[2][]", "float[3][]", "float[4][]", "half[2][]", "half[3][]", "half[4][]", "int[2][]", "int[3][]", "int[4][]", "timecode[]", "frame[4][]", "colord[3][]", "colorf[3][]", "colorh[3][]", "colord[4][]", "colorf[4][]", "colorh[4][]", "normald[3][]", "normalf[3][]", "normalh[3][]", "pointd[3][]", "pointf[3][]", "pointh[3][]", "quatd[4][]", "quatf[4][]", "quath[4][]", "texcoordd[2][]", "texcoordf[2][]", "texcoordh[2][]", "texcoordd[3][]", "texcoordf[3][]", "texcoordh[3][]", "vectord[3][]", "vectorf[3][]", "vectorh[3][]"]
+            )
+            custom token inputs:input0 (
+                customData = {
+                    dictionary omni = {
+                        dictionary graph = {
+                            double attrValue = 0.021
+                            string resolvedType = "double"
+                        }
+                    }
+                }
+            )
+            custom double inputs:input1 = -0.021
+            token node:type = "omni.graph.nodes.ConstructArray"
+            int node:typeVersion = 1
+            custom token outputs:array
+        }
+
+        def OmniGraphNode "LeftGripperSpeed"
+        {
+            custom int inputs:arraySize = 2
+            custom token inputs:arrayType = "double[]" (
+                allowedTokens = ["auto", "bool[]", "double[]", "float[]", "half[]", "int[]", "int64[]", "token[]", "uchar[]", "uint[]", "uint64[]", "double[2][]", "double[3][]", "double[4][]", "matrixd[2][]", "matrixd[3][]", "matrixd[4][]", "float[2][]", "float[3][]", "float[4][]", "half[2][]", "half[3][]", "half[4][]", "int[2][]", "int[3][]", "int[4][]", "timecode[]", "frame[4][]", "colord[3][]", "colorf[3][]", "colorh[3][]", "colord[4][]", "colorf[4][]", "colorh[4][]", "normald[3][]", "normalf[3][]", "normalh[3][]", "pointd[3][]", "pointf[3][]", "pointh[3][]", "quatd[4][]", "quatf[4][]", "quath[4][]", "texcoordd[2][]", "texcoordf[2][]", "texcoordh[2][]", "texcoordd[3][]", "texcoordf[3][]", "texcoordh[3][]", "vectord[3][]", "vectorf[3][]", "vectorh[3][]"]
+            )
+            custom token inputs:input0 (
+                customData = {
+                    dictionary omni = {
+                        dictionary graph = {
+                            double attrValue = 0.02
+                            string resolvedType = "double"
+                        }
+                    }
+                }
+            )
+            custom double inputs:input1 = 0.02
+            token node:type = "omni.graph.nodes.ConstructArray"
+            int node:typeVersion = 1
+            custom token outputs:array
+        }
+
+        def OmniGraphNode "LeftGripperJointNames"
+        {
+            custom int inputs:arraySize = 2
+            custom token inputs:arrayType = "token[]" (
+                allowedTokens = ["auto", "bool[]", "double[]", "float[]", "half[]", "int[]", "int64[]", "token[]", "uchar[]", "uint[]", "uint64[]", "double[2][]", "double[3][]", "double[4][]", "matrixd[2][]", "matrixd[3][]", "matrixd[4][]", "float[2][]", "float[3][]", "float[4][]", "half[2][]", "half[3][]", "half[4][]", "int[2][]", "int[3][]", "int[4][]", "timecode[]", "frame[4][]", "colord[3][]", "colorf[3][]", "colorh[3][]", "colord[4][]", "colorf[4][]", "colorh[4][]", "normald[3][]", "normalf[3][]", "normalh[3][]", "pointd[3][]", "pointf[3][]", "pointh[3][]", "quatd[4][]", "quatf[4][]", "quath[4][]", "texcoordd[2][]", "texcoordf[2][]", "texcoordh[2][]", "texcoordd[3][]", "texcoordf[3][]", "texcoordh[3][]", "vectord[3][]", "vectorf[3][]", "vectorh[3][]"]
+            )
+            custom token inputs:input0 (
+                customData = {
+                    dictionary omni = {
+                        dictionary graph = {
+                            token attrValue = "left_finger"
+                            string resolvedType = "token"
+                        }
+                    }
+                }
+            )
+            custom token inputs:input1 = "right_finger"
+            token node:type = "omni.graph.nodes.ConstructArray"
+            int node:typeVersion = 1
+            custom token outputs:array
+        }
+
+        def OmniGraphNode "LeftGripperController_DISABLED"
+        {
+            custom rel inputs:articulationRootPrim = </World/follower_left/vx300s_left/root_joint> (
+                customData = {
+                    dictionary omni = {
+                        dictionary graph = {
+                            string relType = "target"
+                        }
+                    }
+                }
+            )
+            custom uint inputs:close (
+                customData = {
+                    bool isExecution = 1
+                }
+            )
+            custom double[] inputs:closePosition
+            prepend double[] inputs:closePosition.connect = </World/PrepareUncap/LeftGripperClose.outputs:array>
+            custom uint inputs:execIn (
+                customData = {
+                    bool isExecution = 1
+                }
+            )
+            custom rel inputs:gripperPrim = </World/follower_left/vx300s_left/follower_left_gripper_link> (
+                customData = {
+                    dictionary omni = {
+                        dictionary graph = {
+                            string relType = "target"
+                        }
+                    }
+                }
+            )
+            custom double[] inputs:gripperSpeed
+            prepend double[] inputs:gripperSpeed.connect = </World/PrepareUncap/LeftGripperSpeed.outputs:array>
+            custom token[] inputs:jointNames
+            prepend token[] inputs:jointNames.connect = </World/PrepareUncap/LeftGripperJointNames.outputs:array>
+            custom uint inputs:open (
+                customData = {
+                    bool isExecution = 1
+                }
+            )
+            custom double[] inputs:openPosition
+            prepend double[] inputs:openPosition.connect = </World/PrepareUncap/LeftGripperOpen.outputs:array>
+            custom uint inputs:stop (
+                customData = {
+                    bool isExecution = 1
+                }
+            )
+            token node:type = "isaacsim.robot.manipulators.IsaacGripperController"
+            int node:typeVersion = 1
+            custom token[] outputs:jointNames
+            custom double[] outputs:positionCommands
+        }
+
+        def OmniGraphNode "RightArmJointNames"
+        {
+            custom int inputs:arraySize = 6
+            custom token inputs:arrayType = "token[]" (
+                allowedTokens = ["auto", "bool[]", "double[]", "float[]", "half[]", "int[]", "int64[]", "token[]", "uchar[]", "uint[]", "uint64[]", "double[2][]", "double[3][]", "double[4][]", "matrixd[2][]", "matrixd[3][]", "matrixd[4][]", "float[2][]", "float[3][]", "float[4][]", "half[2][]", "half[3][]", "half[4][]", "int[2][]", "int[3][]", "int[4][]", "timecode[]", "frame[4][]", "colord[3][]", "colorf[3][]", "colorh[3][]", "colord[4][]", "colorf[4][]", "colorh[4][]", "normald[3][]", "normalf[3][]", "normalh[3][]", "pointd[3][]", "pointf[3][]", "pointh[3][]", "quatd[4][]", "quatf[4][]", "quath[4][]", "texcoordd[2][]", "texcoordf[2][]", "texcoordh[2][]", "texcoordd[3][]", "texcoordf[3][]", "texcoordh[3][]", "vectord[3][]", "vectorf[3][]", "vectorh[3][]"]
+            )
+            custom token inputs:input0 (
+                customData = {
+                    dictionary omni = {
+                        dictionary graph = {
+                            token attrValue = "waist"
+                            string resolvedType = "token"
+                        }
+                    }
+                }
+            )
+            custom token inputs:input1 = "shoulder"
+            custom token inputs:input2 = "elbow"
+            custom token inputs:input3 = "forearm_roll"
+            custom token inputs:input4 = "wrist_angle"
+            custom token inputs:input5 = "wrist_rotate"
+            token node:type = "omni.graph.nodes.ConstructArray"
+            int node:typeVersion = 1
+            custom token outputs:array
+        }
+
+        def OmniGraphNode "RightArmSleepCommand"
+        {
+            custom int inputs:arraySize = 6
+            custom token inputs:arrayType = "double[]" (
+                allowedTokens = ["auto", "bool[]", "double[]", "float[]", "half[]", "int[]", "int64[]", "token[]", "uchar[]", "uint[]", "uint64[]", "double[2][]", "double[3][]", "double[4][]", "matrixd[2][]", "matrixd[3][]", "matrixd[4][]", "float[2][]", "float[3][]", "float[4][]", "half[2][]", "half[3][]", "half[4][]", "int[2][]", "int[3][]", "int[4][]", "timecode[]", "frame[4][]", "colord[3][]", "colorf[3][]", "colorh[3][]", "colord[4][]", "colorf[4][]", "colorh[4][]", "normald[3][]", "normalf[3][]", "normalh[3][]", "pointd[3][]", "pointf[3][]", "pointh[3][]", "quatd[4][]", "quatf[4][]", "quath[4][]", "texcoordd[2][]", "texcoordf[2][]", "texcoordh[2][]", "texcoordd[3][]", "texcoordf[3][]", "texcoordh[3][]", "vectord[3][]", "vectorf[3][]", "vectorh[3][]"]
+            )
+            custom token inputs:input0 (
+                customData = {
+                    dictionary omni = {
+                        dictionary graph = {
+                            double attrValue = 0
+                            string resolvedType = "double"
+                        }
+                    }
+                }
+            )
+            custom double inputs:input1 = -1.8
+            custom double inputs:input2 = 1.55
+            custom double inputs:input3 = 0
+            custom double inputs:input4 = -1.57
+            custom double inputs:input5 = 0
+            token node:type = "omni.graph.nodes.ConstructArray"
+            int node:typeVersion = 1
+            custom token outputs:array
+        }
+
+        def OmniGraphNode "RightArmController_DISABLED"
+        {
+            custom double[] inputs:effortCommand
+            custom uint inputs:execIn (
+                customData = {
+                    bool isExecution = 1
+                }
+            )
+            custom int[] inputs:jointIndices
+            custom token[] inputs:jointNames
+            prepend token[] inputs:jointNames.connect = </World/PrepareUncap/RightArmJointNames.outputs:array>
+            custom double[] inputs:positionCommand
+            prepend double[] inputs:positionCommand.connect = </World/PrepareUncap/RightArmSleepCommand.outputs:array>
+            custom string inputs:robotPath = "/World/follower_right/vx300s_right/root_joint"
+            custom rel inputs:targetPrim (
+                customData = {
+                    dictionary omni = {
+                        dictionary graph = {
+                            string relType = "target"
+                        }
+                    }
+                }
+            )
+            custom double[] inputs:velocityCommand
+            token node:type = "isaacsim.core.nodes.IsaacArticulationController"
+            int node:typeVersion = 1
+        }
+
+        def OmniGraphNode "RightGripperOpen"
+        {
+            custom int inputs:arraySize = 2
+            custom token inputs:arrayType = "double[]" (
+                allowedTokens = ["auto", "bool[]", "double[]", "float[]", "half[]", "int[]", "int64[]", "token[]", "uchar[]", "uint[]", "uint64[]", "double[2][]", "double[3][]", "double[4][]", "matrixd[2][]", "matrixd[3][]", "matrixd[4][]", "float[2][]", "float[3][]", "float[4][]", "half[2][]", "half[3][]", "half[4][]", "int[2][]", "int[3][]", "int[4][]", "timecode[]", "frame[4][]", "colord[3][]", "colorf[3][]", "colorh[3][]", "colord[4][]", "colorf[4][]", "colorh[4][]", "normald[3][]", "normalf[3][]", "normalh[3][]", "pointd[3][]", "pointf[3][]", "pointh[3][]", "quatd[4][]", "quatf[4][]", "quath[4][]", "texcoordd[2][]", "texcoordf[2][]", "texcoordh[2][]", "texcoordd[3][]", "texcoordf[3][]", "texcoordh[3][]", "vectord[3][]", "vectorf[3][]", "vectorh[3][]"]
+            )
+            custom token inputs:input0 (
+                customData = {
+                    dictionary omni = {
+                        dictionary graph = {
+                            double attrValue = 0.057
+                            string resolvedType = "double"
+                        }
+                    }
+                }
+            )
+            custom double inputs:input1 = -0.057
+            token node:type = "omni.graph.nodes.ConstructArray"
+            int node:typeVersion = 1
+            custom token outputs:array
+        }
+
+        def OmniGraphNode "RightGripperClose"
+        {
+            custom int inputs:arraySize = 2
+            custom token inputs:arrayType = "double[]" (
+                allowedTokens = ["auto", "bool[]", "double[]", "float[]", "half[]", "int[]", "int64[]", "token[]", "uchar[]", "uint[]", "uint64[]", "double[2][]", "double[3][]", "double[4][]", "matrixd[2][]", "matrixd[3][]", "matrixd[4][]", "float[2][]", "float[3][]", "float[4][]", "half[2][]", "half[3][]", "half[4][]", "int[2][]", "int[3][]", "int[4][]", "timecode[]", "frame[4][]", "colord[3][]", "colorf[3][]", "colorh[3][]", "colord[4][]", "colorf[4][]", "colorh[4][]", "normald[3][]", "normalf[3][]", "normalh[3][]", "pointd[3][]", "pointf[3][]", "pointh[3][]", "quatd[4][]", "quatf[4][]", "quath[4][]", "texcoordd[2][]", "texcoordf[2][]", "texcoordh[2][]", "texcoordd[3][]", "texcoordf[3][]", "texcoordh[3][]", "vectord[3][]", "vectorf[3][]", "vectorh[3][]"]
+            )
+            custom token inputs:input0 (
+                customData = {
+                    dictionary omni = {
+                        dictionary graph = {
+                            double attrValue = 0.021
+                            string resolvedType = "double"
+                        }
+                    }
+                }
+            )
+            custom double inputs:input1 = -0.021
+            token node:type = "omni.graph.nodes.ConstructArray"
+            int node:typeVersion = 1
+            custom token outputs:array
+        }
+
+        def OmniGraphNode "RightGripperSpeed"
+        {
+            custom int inputs:arraySize = 2
+            custom token inputs:arrayType = "double[]" (
+                allowedTokens = ["auto", "bool[]", "double[]", "float[]", "half[]", "int[]", "int64[]", "token[]", "uchar[]", "uint[]", "uint64[]", "double[2][]", "double[3][]", "double[4][]", "matrixd[2][]", "matrixd[3][]", "matrixd[4][]", "float[2][]", "float[3][]", "float[4][]", "half[2][]", "half[3][]", "half[4][]", "int[2][]", "int[3][]", "int[4][]", "timecode[]", "frame[4][]", "colord[3][]", "colorf[3][]", "colorh[3][]", "colord[4][]", "colorf[4][]", "colorh[4][]", "normald[3][]", "normalf[3][]", "normalh[3][]", "pointd[3][]", "pointf[3][]", "pointh[3][]", "quatd[4][]", "quatf[4][]", "quath[4][]", "texcoordd[2][]", "texcoordf[2][]", "texcoordh[2][]", "texcoordd[3][]", "texcoordf[3][]", "texcoordh[3][]", "vectord[3][]", "vectorf[3][]", "vectorh[3][]"]
+            )
+            custom token inputs:input0 (
+                customData = {
+                    dictionary omni = {
+                        dictionary graph = {
+                            double attrValue = 0.02
+                            string resolvedType = "double"
+                        }
+                    }
+                }
+            )
+            custom double inputs:input1 = 0.02
+            token node:type = "omni.graph.nodes.ConstructArray"
+            int node:typeVersion = 1
+            custom token outputs:array
+        }
+
+        def OmniGraphNode "RightGripperJointNames"
+        {
+            custom int inputs:arraySize = 2
+            custom token inputs:arrayType = "token[]" (
+                allowedTokens = ["auto", "bool[]", "double[]", "float[]", "half[]", "int[]", "int64[]", "token[]", "uchar[]", "uint[]", "uint64[]", "double[2][]", "double[3][]", "double[4][]", "matrixd[2][]", "matrixd[3][]", "matrixd[4][]", "float[2][]", "float[3][]", "float[4][]", "half[2][]", "half[3][]", "half[4][]", "int[2][]", "int[3][]", "int[4][]", "timecode[]", "frame[4][]", "colord[3][]", "colorf[3][]", "colorh[3][]", "colord[4][]", "colorf[4][]", "colorh[4][]", "normald[3][]", "normalf[3][]", "normalh[3][]", "pointd[3][]", "pointf[3][]", "pointh[3][]", "quatd[4][]", "quatf[4][]", "quath[4][]", "texcoordd[2][]", "texcoordf[2][]", "texcoordh[2][]", "texcoordd[3][]", "texcoordf[3][]", "texcoordh[3][]", "vectord[3][]", "vectorf[3][]", "vectorh[3][]"]
+            )
+            custom token inputs:input0 (
+                customData = {
+                    dictionary omni = {
+                        dictionary graph = {
+                            token attrValue = "left_finger"
+                            string resolvedType = "token"
+                        }
+                    }
+                }
+            )
+            custom token inputs:input1 = "right_finger"
+            token node:type = "omni.graph.nodes.ConstructArray"
+            int node:typeVersion = 1
+            custom token outputs:array
+        }
+
+        def OmniGraphNode "RightGripperController_DISABLED"
+        {
+            custom rel inputs:articulationRootPrim = </World/follower_right/vx300s_right/root_joint> (
+                customData = {
+                    dictionary omni = {
+                        dictionary graph = {
+                            string relType = "target"
+                        }
+                    }
+                }
+            )
+            custom uint inputs:close (
+                customData = {
+                    bool isExecution = 1
+                }
+            )
+            custom double[] inputs:closePosition
+            prepend double[] inputs:closePosition.connect = </World/PrepareUncap/RightGripperClose.outputs:array>
+            custom uint inputs:execIn (
+                customData = {
+                    bool isExecution = 1
+                }
+            )
+            custom rel inputs:gripperPrim = </World/follower_right/vx300s_right/follower_right_gripper_link> (
+                customData = {
+                    dictionary omni = {
+                        dictionary graph = {
+                            string relType = "target"
+                        }
+                    }
+                }
+            )
+            custom double[] inputs:gripperSpeed
+            prepend double[] inputs:gripperSpeed.connect = </World/PrepareUncap/RightGripperSpeed.outputs:array>
+            custom token[] inputs:jointNames
+            prepend token[] inputs:jointNames.connect = </World/PrepareUncap/RightGripperJointNames.outputs:array>
+            custom uint inputs:open (
+                customData = {
+                    bool isExecution = 1
+                }
+            )
+            custom double[] inputs:openPosition
+            prepend double[] inputs:openPosition.connect = </World/PrepareUncap/RightGripperOpen.outputs:array>
+            custom uint inputs:stop (
+                customData = {
+                    bool isExecution = 1
+                }
+            )
+            token node:type = "isaacsim.robot.manipulators.IsaacGripperController"
+            int node:typeVersion = 1
+            custom token[] outputs:jointNames
+            custom double[] outputs:positionCommands
+        }
+    }
+}
+

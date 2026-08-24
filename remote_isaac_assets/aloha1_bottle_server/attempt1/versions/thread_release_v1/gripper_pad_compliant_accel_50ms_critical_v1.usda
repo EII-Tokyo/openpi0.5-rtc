@@ -1,0 +1,22 @@
+#usda 1.0
+(
+    customLayerData = {
+        string classification = "GRIPPER_PAD_COMPLIANT_CONTACT_TEST"
+        string profile = "accel_50ms_critical_v1"
+        string tuning = "timeConstant=0.05s,dampingRatio=1.0"
+    }
+)
+
+over "World"
+{
+    over "BottleTaskPhysicsMaterials"
+    {
+        over "GripperPad_TEMP"
+        {
+            custom bool physxMaterial:compliantContactAccelerationSpring = 1
+            custom float physxMaterial:compliantContactStiffness = 15791.367
+            custom float physxMaterial:compliantContactDamping = 251.32741
+            custom token physxMaterial:dampingCombineMode = "maximum"
+        }
+    }
+}

@@ -1,0 +1,15 @@
+#usda 1.0
+(
+    customLayerData = {
+        string classification = "VERSIONED_THREADED_RELEASE_DESIGN"
+        string initialThreadState = "THREADED"
+        string version = "thread_release_v1"
+    }
+    defaultPrim = "World"
+    metersPerUnit = 1
+    subLayers = [
+        @bottle_thread_constraint_v1.usda@,
+        @../../remote_stream_cap_stage.usda@
+    ]
+    upAxis = "Z"
+)

@@ -1,0 +1,45 @@
+{
+  "classification": "SAVED_COMPLIANT_GRIPPER_PAD_CANDIDATE",
+  "saved_at": "2026-08-20",
+  "status": "SAVED_NOT_PROMOTED_TO_DEFAULT",
+  "profile": "accel_50ms_critical_v1",
+  "parameters": {
+    "compliant_contact_acceleration_spring": true,
+    "compliant_contact_stiffness": 15791.367,
+    "compliant_contact_damping": 251.32741,
+    "static_friction": 2.0,
+    "dynamic_friction": 1.5,
+    "friction_combine_mode": "maximum"
+  },
+  "files": {
+    "material_layer": {
+      "path": "gripper_pad_compliant_accel_50ms_critical_v1.usda",
+      "sha256": "f198ad2feaa1ab417e84f8a3295c8c9671bd4223360cbefabf9ba7099be80c47"
+    },
+    "composed_stage": {
+      "path": "remote_stream_threaded_release_compliant_pad_test_v1.usda",
+      "sha256": "0153d33ec166519736dd5ee593cb08748cf15e73907fefd16832027380100f5a"
+    },
+    "loader": {
+      "path": "../../tools/remote_stream_cap_stage_loader.py",
+      "sha256": "f5d3c22183852988ced503f70771fde107a4ab6487355211aa60c1b35a205c6d"
+    },
+    "restart_script": {
+      "path": "../../tools/restart_remote_isaac_stream_with_compliant_pad_test.sh",
+      "sha256": "0caacd6ef6d03fd200f06a3e1efa1dd3b8c6833ff82491d88513a440303352b0"
+    }
+  },
+  "evidence": {
+    "loader_report_status": "PASS",
+    "loader_report_sha256": "bedc6e658bb05bb06d7ec65d49616e4f05d4f2b767120ad68779031d023a48f2",
+    "post_grasp_two_second_report_sha256": "ea399062f4fca34f843a108c49d2f2fb5ff7cadd52fa9bdc982ce7787047be40"
+  },
+  "limitations": [
+    "The post-grasp two-second observation passed, but it did not record the gripper-closing transient.",
+    "The reported continuing cap rotation during gripper closure remains under diagnosis.",
+    "Do not promote this candidate to the default Stage until the closure transient is recorded."
+  ],
+  "stage_saved_from_ui": false,
+  "ros_used": false,
+  "real_robot_touched": false
+}
