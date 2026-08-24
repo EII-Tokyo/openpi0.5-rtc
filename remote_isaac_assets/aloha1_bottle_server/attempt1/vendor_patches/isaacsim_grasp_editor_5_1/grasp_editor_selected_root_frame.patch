@@ -1,0 +1,32 @@
+--- ui_builder.py.original
++++ ui_builder.py
+@@ -213,6 +213,20 @@
+     def build_reference_frame(self):
+         if self._articulation is None:
+             return
++
++        # Session compatibility fix for imported articulations whose
++        # ArticulationRootAPI prim is a joint sibling of the link hierarchy.
++        # SingleArticulation.prim can resolve to that root joint, leaving no
++        # descendant Xforms for the frame selector.  Traverse from the path
++        # originally selected in the Grasp Editor instead.
++        stage = omni.usd.get_context().get_stage()
++        selected_gripper_path = self._gripper_selection_dropdown.get_selection()
++        selected_gripper_prim = stage.GetPrimAtPath(selected_gripper_path) if stage else None
++        gripper_frame_root = (
++            selected_gripper_prim
++            if selected_gripper_prim is not None and selected_gripper_prim.IsValid()
++            else self._articulation.prim
++        )
+ 
+         def populate_subframes(prim, filter: StringField):
+             frames = [
+@@ -257,7 +271,7 @@
+ 
+             self._gripper_subframe = DropDown(
+                 "Gripper Frame",
+-                populate_fn=partial(populate_subframes, self._articulation.prim, self._gripper_subframe_filter),
++                populate_fn=partial(populate_subframes, gripper_frame_root, self._gripper_subframe_filter),
+                 tooltip="Frame of reference that will be saved for where the Gripper is relative to the Rigid Body.",
+                 keep_old_selections=True,
+             )

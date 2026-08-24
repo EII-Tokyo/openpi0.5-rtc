@@ -1,0 +1,15 @@
+[Unit]
+Description=Codex-assisted read-only monitor for ALOHA Isaac Sim
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/eii/openpi0.5-rtc-reward-learning
+Environment=HOME=/home/eii
+Environment=PATH=/home/eii/.local/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=/usr/bin/python3 /home/eii/openpi0.5-rtc-reward-learning/remote_isaac_assets/aloha1_bottle_server/attempt1/tools/codex_isaac_monitor.py
+TimeoutStartSec=300
+Nice=10
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,12 @@
+[Unit]
+Description=Run the ALOHA Codex Isaac Sim monitor every two minutes
+
+[Timer]
+OnBootSec=60
+OnUnitActiveSec=120
+AccuracySec=10
+Persistent=true
+Unit=aloha-codex-isaac-monitor.service
+
+[Install]
+WantedBy=timers.target
