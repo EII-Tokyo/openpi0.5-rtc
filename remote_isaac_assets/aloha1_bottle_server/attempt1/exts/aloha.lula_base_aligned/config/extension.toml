@@ -1,0 +1,18 @@
+[package]
+version = "0.1.2"
+reloadable = true
+category = "Simulation"
+title = "ALOHA Lula Base Aligned"
+description = "Base-pose-aligned, gated Lula IK diagnostics for the ALOHA follower-left arm"
+authors = ["ALOHA project"]
+keywords = ["isaac", "lula", "aloha", "ik"]
+writeTarget.kit = true
+
+[dependencies]
+"isaacsim.core.api" = {}
+"isaacsim.gui.components" = {}
+"isaacsim.robot_motion.motion_generation" = {}
+"omni.kit.uiapp" = {}
+
+[[python.module]]
+name = "aloha.lula_base_aligned"

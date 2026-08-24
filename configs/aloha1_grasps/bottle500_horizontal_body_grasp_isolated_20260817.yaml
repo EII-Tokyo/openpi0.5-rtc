@@ -1,0 +1,28 @@
+format: isaac_grasp
+format_version: 1.0
+object_frame: /World/ALOHA1RemoteBottleSession/Bottle500
+gripper_frame: /World/follower_left/vx300s_left/follower_left_ee_gripper_link
+grasps:
+  horizontal_body_grasp:
+    confidence: 0.0
+    position:
+    - -0.02473675376396886
+    - -0.00329308906472091
+    # The guided extension applies a -10 mm audited axial correction below,
+    # so 78.6667 mm here yields an operational grasp station at exactly
+    # L_bot/3 = 68.6667 mm from the Bottle bottom for L_bot = 206 mm.
+    - 0.07866666666666666
+    # Grasp Editor's Bottle-local authored orientation seed. The guided Lula
+    # extension validates this field but imposes the operational top-down
+    # orientation as a world-frame constraint: orange Target +Z = world +Z,
+    # with native ALOHA EE +X = world -Z through Target->EE RotY(+90 deg).
+    orientation:
+      w: 0.0
+      xyz:
+      - 0.0
+      - 0.0
+      - -1.0
+    cspace_position:
+      left_finger: 0.048316874538855845
+    pregrasp_cspace_position:
+      left_finger: 0.057
