@@ -1,0 +1,45 @@
+#usda 1.0
+(
+    defaultPrim = "World"
+    metersPerUnit = 1
+    subLayers = [
+        @configuration/aloha1_signal_home_targets.usda@
+    ]
+    upAxis = "Z"
+)
+
+def Xform "World" (
+    customData = {
+        dictionary aloha1 = {
+            string baselineId = "ALOHA1_STATIONARY_USER_CONFIRMED_BASELINE_V1"
+            string classification = "USER_CONFIRMED_PROJECT_BASELINE"
+            bool realRobotConnected = 0
+            string task8 = "NOT_RUN"
+        }
+    }
+)
+{
+    def Xform "environment" (
+        prepend references = @workcell/aloha1_signal_correspondence_environment.usda@</environment>
+    )
+    {
+    }
+
+    def Xform "follower_left" (
+        prepend references = @follower_left_asset/aloha1_signal_follower_left.usda@</follower_left>
+    )
+    {
+        double3 xformOp:rotateXYZ = (0.0, 0.0, 0.0)
+        double3 xformOp:translate = (-0.4695, -0.019, 0.02)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateXYZ"]
+    }
+
+    def Xform "follower_right" (
+        prepend references = @../../supplier_cad_follower_right/1.0/supplier_cad_follower_right.usda@</follower_right>
+    )
+    {
+        double3 xformOp:rotateXYZ = (0.0, 0.0, 180.0)
+        double3 xformOp:translate = (0.4695, -0.019, 0.02)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateXYZ"]
+    }
+}

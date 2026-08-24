@@ -1,0 +1,15 @@
+#usda 1.0
+(
+    defaultPrim = "World"
+    metersPerUnit = 1
+    subLayers = [
+        @physics/physics_inspector_collision_gate_physics.usda@,
+        @../../table_support_alignment/1.0/configuration/aloha1_tabletop_world_zero.usda@,
+        @aloha1_cad_derived_full_body_collider_gripper_decomposition_diagnostic.usda@
+    ]
+    upAxis = "Z"
+)
+
+over "World"
+{
+}

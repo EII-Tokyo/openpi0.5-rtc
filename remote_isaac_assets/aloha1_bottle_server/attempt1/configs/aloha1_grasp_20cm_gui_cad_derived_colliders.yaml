@@ -1,0 +1,124 @@
+schema_version: 1
+classification: DIAGNOSTIC_ONLY_NOT_FINAL_CONTROL_MAPPING
+runtime:
+  isaac_sim: 5.1.0.0
+  kit: 107.3.3
+  physx: 107.3.26
+stage:
+  path: assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda
+  sha256: 327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9
+  root_prim: /World
+  articulation_prim: /World/follower_left/vx300s_left/root_joint
+  table_prim: /World/environment/worldBody/user_confirmed_table
+bottle:
+  path: assets/bottle_500ml/isaac/bottle_500ml_sim.usd
+  sha256: 16427135f152ec951de2321fd689366d745a2dd389cbe260976631783952533e
+  reference_prim: /Bottle500
+  session_prim: /World/ALOHA1Grasp20cmSession/Bottle500
+frozen_inputs:
+  task7b2_runtime_profile:
+    path: configs/aloha1_task7b2_horizontal_grasp_cad_derived_colliders.yaml
+    sha256: 689cbc8b1290d6858accf2d23e7908805d571ef6255747ec8f0751f0cbe01ebe
+  lula_descriptor:
+    path: configs/aloha1_lula_follower_left.yaml
+    sha256: 4038d3692693ae673be907b3088c5a2ba83790f14f1a26900aaeccadb564c031
+  grasp_editor_semantics:
+    path: reports/aloha1_mapping/aloha1_grasp_editor_semantics_audit_v2.json
+    sha256: 61f2e23f54fca02d3b47b12a9f29f9b97446a1aa5e79049e73e7192db71416f9
+  grasp_editor_variant_b_raw:
+    path: .codex/artifacts/20260730-aloha1-official-gripper-unattended/stage4/grasp_editor_passing_coupling_run00/grasp_editor_variant_b_native_raw.yaml
+    sha256: fa1270a547e0ac89da2e7afc3965b1d6e7bcc34aab46005d6c65f977e3f69e5e
+  kinematics_report:
+    path: reports/aloha1_mapping/aloha1_task7b2_horizontal_kinematics_cad_derived_colliders.json
+    sha256: 5d4d97e7166984c41ad7c4131b80afbca4d2be72a34900e5328385d9b6e145ca
+  ik_correspondence_report:
+    path: reports/aloha1_mapping/aloha1_ik_correspondence_v2.json
+    sha256: 6b9af0569b2e1cb829da208b69e36c18fe0dd2ba1d22b12e42b84dc625c279f9
+  coupling_report:
+    path: reports/aloha1_mapping/aloha1_gripper_coupling_ab.json
+    sha256: df8a1857b7cd945fd38e9d0c921f736c766aadc854534eab6b04eac935f7f90c
+  follower_left_urdf:
+    path: generated/urdf/follower_left.urdf
+    sha256: d9e4b32723ee71dfce26fb4e78546cfcfef147b2d7dbf5e53e3620e3d8aa96bd
+  joint_map:
+    path: configs/aloha1_joint_map.yaml
+    sha256: f56be097d859f7361b804705af6659e0d51d9e480d1c721a60040ab787530308
+robot:
+  name: follower_left
+  articulation_prim: /World/follower_left/vx300s_left/root_joint
+  end_effector_prim: /World/follower_left/vx300s_left/follower_left_ee_gripper_link
+  left_finger_prim: /World/follower_left/vx300s_left/follower_left_left_finger_link
+  right_finger_prim: /World/follower_left/vx300s_left/follower_left_right_finger_link
+  dof_order:
+    - waist
+    - shoulder
+    - elbow
+    - forearm_roll
+    - wrist_angle
+    - wrist_rotate
+    - gripper
+    - left_finger
+    - right_finger
+target:
+  measurement: BOTTLE_COLLISION_MIN_WORLD_Z_MINUS_TABLE_TOP_WORLD_Z
+  clearance_m: 0.200
+  hold_duration_s: 2.0
+  hold_drop_gate_m: 0.010
+  support_contact_latch_clearance_m: 0.0005
+physics:
+  frequency_hz: 60
+  mass_kg: 0.020
+  friction: 0.7
+  restitution: 0.0
+  solve_articulation_contact_last: true
+  finger_drive_type: force
+  preload_delta_m: 0.0
+finger_safety:
+  classification: DIAGNOSTIC_ONLY_NOT_FINAL_CONTROL_MAPPING
+  dof_names: [left_finger, right_finger]
+  dof_indices: [7, 8]
+  source_limits_m:
+    left_finger: {lower: 0.021, upper: 0.057}
+    right_finger: {lower: -0.057, upper: -0.021}
+  source_urdf:
+    path: generated/urdf/follower_left.urdf
+    sha256: d9e4b32723ee71dfce26fb4e78546cfcfef147b2d7dbf5e53e3620e3d8aa96bd
+    left_joint_xpath: joint[@name='left_finger']/limit
+    right_joint_xpath: joint[@name='right_finger']/limit
+    right_mimic: {joint: left_finger, multiplier: -1.0, offset: 0.0}
+  require_world_reset: true
+  require_immediate_readback: true
+  require_zero_pair_overlap: true
+  abort_on_first_runtime_violation: true
+  pair_overlap_tolerance_m3: 0.0
+evidence:
+  full_arm_view: overview
+  contact_view: gripper_closeup
+  collider_overlay:
+    display_setting: /persistent/physics/visualizationDisplayColliders
+    display_value: 2
+    authored_geometry_clone: true
+    semantics: ISAAC_PHYSICS_DEBUG_DISPLAY_PLUS_SESSION_AUTHORED_COLLIDER_CLONE_NOT_COOKED_HULL_READBACK
+    finger_colliders:
+      left:
+        link: /World/follower_left/vx300s_left/follower_left_left_finger_link
+        visual: /World/follower_left/vx300s_left/follower_left_left_finger_link/visuals/diagnostic_supplier_cad_left_finger/mesh
+        collider: /World/follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh
+      right:
+        link: /World/follower_left/vx300s_left/follower_left_right_finger_link
+        visual: /World/follower_left/vx300s_left/follower_left_right_finger_link/visuals/diagnostic_supplier_cad_right_finger/mesh
+        collider: /World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh
+  collision_overlay_phases:
+    - RELEASE_DYNAMIC
+    - OPEN_PREGRASP
+    - BILATERAL_CONTACT
+    - HEIGHT_REACHED
+    - HOLD
+  video_fps: 60
+  user_confirmation_required: true
+boundaries:
+  real_robot: false
+  remote_103: false
+  source_stage_modified: false
+  final_collider_modified: false
+  task8: NOT_RUN

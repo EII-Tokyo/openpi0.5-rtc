@@ -1,0 +1,401 @@
+#usda 1.0
+(
+    defaultPrim = "World"
+    metersPerUnit = 1
+    subLayers = [
+        @/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose_with_user_table_pipe.usda@
+    ]
+    upAxis = "Z"
+)
+
+over "scene"
+{
+    over "left_base_link"
+    {
+        over "left_left_finger_link"
+        {
+            over "collisions" (
+                prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                instanceable = false
+            )
+            {
+                uniform token physics:approximation = "convexHull"
+                bool physics:collisionEnabled = 0
+
+                over "left_left_g0" (
+                    prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                )
+                {
+                    uniform token physics:approximation = "convexHull"
+                    bool physics:collisionEnabled = 0
+
+                    over "left_left_g0" (
+                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                    )
+                    {
+                        uniform token physics:approximation = "convexHull"
+                        bool physics:collisionEnabled = 0
+                    }
+                }
+
+                over "left_left_g1" (
+                    prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                )
+                {
+                    uniform token physics:approximation = "convexHull"
+                    bool physics:collisionEnabled = 0
+
+                    over "left_left_g1" (
+                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                    )
+                    {
+                        uniform token physics:approximation = "convexHull"
+                        bool physics:collisionEnabled = 0
+                    }
+                }
+
+                over "left_left_g2" (
+                    prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                )
+                {
+                    uniform token physics:approximation = "convexHull"
+                    bool physics:collisionEnabled = 0
+
+                    over "left_left_g2" (
+                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                    )
+                    {
+                        uniform token physics:approximation = "convexHull"
+                        bool physics:collisionEnabled = 0
+                    }
+                }
+
+                over "vx300s_8_custom_finger_left" (
+                    prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                )
+                {
+                    uniform token physics:approximation = "convexHull"
+                    bool physics:collisionEnabled = 0
+
+                    over "vx300s_8_custom_finger_left" (
+                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                    )
+                    {
+                        uniform token physics:approximation = "convexHull"
+                        bool physics:collisionEnabled = 0
+                    }
+                }
+            }
+
+            def Cube "bbox_collision_proxy" (
+                prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/PhysicsMaterials/FingertipProxyMaterial>
+                bool physics:collisionEnabled = 1
+                float physxCollision:contactOffset = 0.02
+                float physxCollision:restOffset = 0
+                color3f[] primvars:displayColor = [(0.1, 0.8, 1)]
+                uniform token purpose = "proxy"
+                double size = 1
+                double3 xformOp:scale = (0.01622162014245987, 0.03247025012969971, 0.059604280069470404)
+                double3 xformOp:translate = (0.046506982296705246, 0.0004752315580844879, 0.06147023383527994)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+        }
+
+        over "left_right_finger_link"
+        {
+            over "collisions" (
+                prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                instanceable = false
+            )
+            {
+                uniform token physics:approximation = "convexHull"
+                bool physics:collisionEnabled = 0
+
+                over "left_right_g0" (
+                    prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                )
+                {
+                    uniform token physics:approximation = "convexHull"
+                    bool physics:collisionEnabled = 0
+
+                    over "left_right_g0" (
+                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                    )
+                    {
+                        uniform token physics:approximation = "convexHull"
+                        bool physics:collisionEnabled = 0
+                    }
+                }
+
+                over "left_right_g1" (
+                    prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                )
+                {
+                    uniform token physics:approximation = "convexHull"
+                    bool physics:collisionEnabled = 0
+
+                    over "left_right_g1" (
+                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                    )
+                    {
+                        uniform token physics:approximation = "convexHull"
+                        bool physics:collisionEnabled = 0
+                    }
+                }
+
+                over "left_right_g2" (
+                    prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                )
+                {
+                    uniform token physics:approximation = "convexHull"
+                    bool physics:collisionEnabled = 0
+
+                    over "left_right_g2" (
+                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                    )
+                    {
+                        uniform token physics:approximation = "convexHull"
+                        bool physics:collisionEnabled = 0
+                    }
+                }
+
+                over "vx300s_8_custom_finger_right" (
+                    prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                )
+                {
+                    uniform token physics:approximation = "convexHull"
+                    bool physics:collisionEnabled = 0
+
+                    over "vx300s_8_custom_finger_right" (
+                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                    )
+                    {
+                        uniform token physics:approximation = "convexHull"
+                        bool physics:collisionEnabled = 0
+                    }
+                }
+            }
+
+            def Cube "bbox_collision_proxy" (
+                prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/PhysicsMaterials/FingertipProxyMaterial>
+                bool physics:collisionEnabled = 1
+                float physxCollision:contactOffset = 0.02
+                float physxCollision:restOffset = 0
+                color3f[] primvars:displayColor = [(0.1, 0.8, 1)]
+                uniform token purpose = "proxy"
+                double size = 1
+                double3 xformOp:scale = (0.016335656493902204, 0.032574908807873726, 0.059604280069470404)
+                double3 xformOp:translate = (-0.04644062928855419, 0.0004808800294995308, 0.06147023383527994)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+        }
+    }
+
+    over "right_base_link"
+    {
+        over "right_left_finger_link"
+        {
+            over "collisions" (
+                prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                instanceable = false
+            )
+            {
+                uniform token physics:approximation = "convexHull"
+                bool physics:collisionEnabled = 0
+
+                over "right_left_g0" (
+                    prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                )
+                {
+                    uniform token physics:approximation = "convexHull"
+                    bool physics:collisionEnabled = 0
+
+                    over "right_left_g0" (
+                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                    )
+                    {
+                        uniform token physics:approximation = "convexHull"
+                        bool physics:collisionEnabled = 0
+                    }
+                }
+
+                over "right_left_g1" (
+                    prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                )
+                {
+                    uniform token physics:approximation = "convexHull"
+                    bool physics:collisionEnabled = 0
+
+                    over "right_left_g1" (
+                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                    )
+                    {
+                        uniform token physics:approximation = "convexHull"
+                        bool physics:collisionEnabled = 0
+                    }
+                }
+
+                over "right_left_g2" (
+                    prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                )
+                {
+                    uniform token physics:approximation = "convexHull"
+                    bool physics:collisionEnabled = 0
+
+                    over "right_left_g2" (
+                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                    )
+                    {
+                        uniform token physics:approximation = "convexHull"
+                        bool physics:collisionEnabled = 0
+                    }
+                }
+
+                over "vx300s_8_custom_finger_left" (
+                    prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                )
+                {
+                    uniform token physics:approximation = "convexHull"
+                    bool physics:collisionEnabled = 0
+
+                    over "vx300s_8_custom_finger_left" (
+                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                    )
+                    {
+                        uniform token physics:approximation = "convexHull"
+                        bool physics:collisionEnabled = 0
+                    }
+                }
+            }
+
+            def Cube "bbox_collision_proxy" (
+                prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/PhysicsMaterials/FingertipProxyMaterial>
+                bool physics:collisionEnabled = 1
+                float physxCollision:contactOffset = 0.02
+                float physxCollision:restOffset = 0
+                color3f[] primvars:displayColor = [(0.1, 0.8, 1)]
+                uniform token purpose = "proxy"
+                double size = 1
+                double3 xformOp:scale = (0.01622162014245987, 0.03247025012969971, 0.059604280069470404)
+                double3 xformOp:translate = (0.046506982296705246, 0.0004752315580844879, 0.06147023383527994)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+        }
+
+        over "right_right_finger_link"
+        {
+            over "collisions" (
+                prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                instanceable = false
+            )
+            {
+                uniform token physics:approximation = "convexHull"
+                bool physics:collisionEnabled = 0
+
+                over "right_right_g0" (
+                    prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                )
+                {
+                    uniform token physics:approximation = "convexHull"
+                    bool physics:collisionEnabled = 0
+
+                    over "right_right_g0" (
+                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                    )
+                    {
+                        uniform token physics:approximation = "convexHull"
+                        bool physics:collisionEnabled = 0
+                    }
+                }
+
+                over "right_right_g1" (
+                    prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                )
+                {
+                    uniform token physics:approximation = "convexHull"
+                    bool physics:collisionEnabled = 0
+
+                    over "right_right_g1" (
+                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                    )
+                    {
+                        uniform token physics:approximation = "convexHull"
+                        bool physics:collisionEnabled = 0
+                    }
+                }
+
+                over "right_right_g2" (
+                    prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                )
+                {
+                    uniform token physics:approximation = "convexHull"
+                    bool physics:collisionEnabled = 0
+
+                    over "right_right_g2" (
+                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                    )
+                    {
+                        uniform token physics:approximation = "convexHull"
+                        bool physics:collisionEnabled = 0
+                    }
+                }
+
+                over "vx300s_8_custom_finger_right" (
+                    prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                )
+                {
+                    uniform token physics:approximation = "convexHull"
+                    bool physics:collisionEnabled = 0
+
+                    over "vx300s_8_custom_finger_right" (
+                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                    )
+                    {
+                        uniform token physics:approximation = "convexHull"
+                        bool physics:collisionEnabled = 0
+                    }
+                }
+            }
+
+            def Cube "bbox_collision_proxy" (
+                prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/PhysicsMaterials/FingertipProxyMaterial>
+                bool physics:collisionEnabled = 1
+                float physxCollision:contactOffset = 0.02
+                float physxCollision:restOffset = 0
+                color3f[] primvars:displayColor = [(0.1, 0.8, 1)]
+                uniform token purpose = "proxy"
+                double size = 1
+                double3 xformOp:scale = (0.016335656493902204, 0.032574908807873726, 0.059604280069470404)
+                double3 xformOp:translate = (-0.04644062928855419, 0.0004808800294995308, 0.06147023383527994)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+        }
+    }
+}
+
+over "World"
+{
+    def "PhysicsMaterials"
+    {
+        def Material "FingertipProxyMaterial" (
+            prepend apiSchemas = ["PhysicsMaterialAPI"]
+        )
+        {
+            float physics:dynamicFriction = 1
+            float physics:staticFriction = 1
+        }
+    }
+}
+

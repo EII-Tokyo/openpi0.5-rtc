@@ -1,0 +1,681 @@
+#usda 1.0
+
+over "World"
+{
+    over "follower_left"
+    {
+        over "vx300s_left"
+        {
+            over "follower_left_base_link"
+            {
+                over "collisions" (
+                    active = false
+                )
+                {
+                }
+
+                over "cad_derived_collisions"
+                {
+                    over "cad_derived_base_link"
+                    {
+                        over "piece_000"
+                        {
+                            over "mesh" (
+                                prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                            )
+                            {
+                                uniform token physics:approximation = "convexHull"
+                                bool physics:collisionEnabled = 1
+                            }
+                        }
+                    }
+                }
+            }
+
+            over "follower_left_shoulder_link"
+            {
+                over "collisions" (
+                    active = false
+                )
+                {
+                }
+
+                over "cad_derived_collisions"
+                {
+                    over "cad_derived_shoulder_link"
+                    {
+                        over "piece_000"
+                        {
+                            over "mesh" (
+                                prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                            )
+                            {
+                                uniform token physics:approximation = "convexHull"
+                                bool physics:collisionEnabled = 1
+                            }
+                        }
+                    }
+                }
+            }
+
+            over "follower_left_upper_arm_link"
+            {
+                over "collisions" (
+                    active = false
+                )
+                {
+                }
+
+                over "cad_derived_collisions"
+                {
+                    over "cad_derived_upper_arm_link"
+                    {
+                        over "piece_000"
+                        {
+                            over "mesh" (
+                                prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                            )
+                            {
+                                uniform token physics:approximation = "convexHull"
+                                bool physics:collisionEnabled = 1
+                            }
+                        }
+
+                        over "piece_001"
+                        {
+                            over "mesh" (
+                                prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                            )
+                            {
+                                uniform token physics:approximation = "convexHull"
+                                bool physics:collisionEnabled = 1
+                            }
+                        }
+
+                        over "piece_002"
+                        {
+                            over "mesh" (
+                                prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                            )
+                            {
+                                uniform token physics:approximation = "convexHull"
+                                bool physics:collisionEnabled = 1
+                            }
+                        }
+
+                        over "piece_003"
+                        {
+                            over "mesh" (
+                                prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                            )
+                            {
+                                uniform token physics:approximation = "convexHull"
+                                bool physics:collisionEnabled = 1
+                            }
+                        }
+                    }
+                }
+            }
+
+            over "follower_left_upper_forearm_link"
+            {
+                over "collisions" (
+                    active = false
+                )
+                {
+                }
+
+                over "cad_derived_collisions"
+                {
+                    over "cad_derived_upper_forearm_link"
+                    {
+                        over "piece_000"
+                        {
+                            over "mesh" (
+                                prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                            )
+                            {
+                                uniform token physics:approximation = "convexHull"
+                                bool physics:collisionEnabled = 1
+                            }
+                        }
+                    }
+                }
+            }
+
+            over "follower_left_lower_forearm_link"
+            {
+                over "collisions" (
+                    active = false
+                )
+                {
+                }
+
+                over "cad_derived_collisions"
+                {
+                    over "cad_derived_lower_forearm_link"
+                    {
+                        over "piece_000"
+                        {
+                            over "mesh" (
+                                prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                            )
+                            {
+                                uniform token physics:approximation = "convexHull"
+                                bool physics:collisionEnabled = 1
+                            }
+                        }
+                    }
+                }
+            }
+
+            over "follower_left_gripper_link"
+            {
+                over "collisions" (
+                    active = false
+                )
+                {
+                }
+
+                over "cad_derived_collisions"
+                {
+                    over "cad_derived_gripper_link"
+                    {
+                        over "piece_000"
+                        {
+                            over "mesh" (
+                                prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                            )
+                            {
+                                uniform token physics:approximation = "convexDecomposition"
+                                bool physics:collisionEnabled = 1
+                            }
+                        }
+
+                        over "piece_001"
+                        {
+                            over "mesh" (
+                                prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                            )
+                            {
+                                uniform token physics:approximation = "convexDecomposition"
+                                bool physics:collisionEnabled = 1
+                            }
+                        }
+
+                        over "piece_002"
+                        {
+                            over "mesh" (
+                                prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                            )
+                            {
+                                uniform token physics:approximation = "convexDecomposition"
+                                bool physics:collisionEnabled = 1
+                            }
+                        }
+
+                        over "piece_003"
+                        {
+                            over "mesh" (
+                                prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                            )
+                            {
+                                uniform token physics:approximation = "convexDecomposition"
+                                bool physics:collisionEnabled = 1
+                            }
+                        }
+
+                        over "piece_004"
+                        {
+                            over "mesh" (
+                                prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                            )
+                            {
+                                uniform token physics:approximation = "convexDecomposition"
+                                bool physics:collisionEnabled = 1
+                            }
+                        }
+
+                        over "piece_005"
+                        {
+                            over "mesh" (
+                                prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                            )
+                            {
+                                uniform token physics:approximation = "convexDecomposition"
+                                bool physics:collisionEnabled = 1
+                            }
+                        }
+
+                        over "piece_006"
+                        {
+                            over "mesh" (
+                                prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                            )
+                            {
+                                uniform token physics:approximation = "convexDecomposition"
+                                bool physics:collisionEnabled = 1
+                            }
+                        }
+
+                        over "piece_007"
+                        {
+                            over "mesh" (
+                                prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                            )
+                            {
+                                uniform token physics:approximation = "convexDecomposition"
+                                bool physics:collisionEnabled = 1
+                            }
+                        }
+
+                        over "piece_008"
+                        {
+                            over "mesh" (
+                                prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                            )
+                            {
+                                uniform token physics:approximation = "convexDecomposition"
+                                bool physics:collisionEnabled = 1
+                            }
+                        }
+                    }
+                }
+            }
+
+            over "follower_left_wrist_link"
+            {
+                over "collisions" (
+                    active = false
+                )
+                {
+                }
+
+                over "materialized_baseline_fallback"
+                {
+                    over "wrist_link"
+                    {
+                        over "mesh" (
+                            prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                        )
+                        {
+                            uniform token physics:approximation = "convexHull"
+                            bool physics:collisionEnabled = 1
+                        }
+                    }
+                }
+            }
+
+            over "follower_left_gripper_prop_link"
+            {
+                over "collisions" (
+                    active = false
+                )
+                {
+                }
+
+                over "materialized_baseline_fallback"
+                {
+                    over "gripper_prop_link"
+                    {
+                        over "mesh" (
+                            prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                        )
+                        {
+                            uniform token physics:approximation = "convexHull"
+                            bool physics:collisionEnabled = 1
+                        }
+                    }
+                }
+            }
+
+            over "follower_left_gripper_bar_link"
+            {
+                over "collisions" (
+                    active = false
+                )
+                {
+                }
+            }
+        }
+    }
+
+    over "follower_right"
+    {
+        over "vx300s_right"
+        {
+            over "follower_right_base_link"
+            {
+                over "collisions" (
+                    active = false
+                )
+                {
+                }
+
+                over "cad_derived_collisions"
+                {
+                    over "cad_derived_base_link"
+                    {
+                        over "piece_000"
+                        {
+                            over "mesh" (
+                                prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                            )
+                            {
+                                uniform token physics:approximation = "convexHull"
+                                bool physics:collisionEnabled = 1
+                            }
+                        }
+                    }
+                }
+            }
+
+            over "follower_right_shoulder_link"
+            {
+                over "collisions" (
+                    active = false
+                )
+                {
+                }
+
+                over "cad_derived_collisions"
+                {
+                    over "cad_derived_shoulder_link"
+                    {
+                        over "piece_000"
+                        {
+                            over "mesh" (
+                                prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                            )
+                            {
+                                uniform token physics:approximation = "convexHull"
+                                bool physics:collisionEnabled = 1
+                            }
+                        }
+                    }
+                }
+            }
+
+            over "follower_right_upper_arm_link"
+            {
+                over "collisions" (
+                    active = false
+                )
+                {
+                }
+
+                over "cad_derived_collisions"
+                {
+                    over "cad_derived_upper_arm_link"
+                    {
+                        over "piece_000"
+                        {
+                            over "mesh" (
+                                prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                            )
+                            {
+                                uniform token physics:approximation = "convexHull"
+                                bool physics:collisionEnabled = 1
+                            }
+                        }
+
+                        over "piece_001"
+                        {
+                            over "mesh" (
+                                prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                            )
+                            {
+                                uniform token physics:approximation = "convexHull"
+                                bool physics:collisionEnabled = 1
+                            }
+                        }
+
+                        over "piece_002"
+                        {
+                            over "mesh" (
+                                prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                            )
+                            {
+                                uniform token physics:approximation = "convexHull"
+                                bool physics:collisionEnabled = 1
+                            }
+                        }
+
+                        over "piece_003"
+                        {
+                            over "mesh" (
+                                prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                            )
+                            {
+                                uniform token physics:approximation = "convexHull"
+                                bool physics:collisionEnabled = 1
+                            }
+                        }
+                    }
+                }
+            }
+
+            over "follower_right_upper_forearm_link"
+            {
+                over "collisions" (
+                    active = false
+                )
+                {
+                }
+
+                over "cad_derived_collisions"
+                {
+                    over "cad_derived_upper_forearm_link"
+                    {
+                        over "piece_000"
+                        {
+                            over "mesh" (
+                                prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                            )
+                            {
+                                uniform token physics:approximation = "convexHull"
+                                bool physics:collisionEnabled = 1
+                            }
+                        }
+                    }
+                }
+            }
+
+            over "follower_right_lower_forearm_link"
+            {
+                over "collisions" (
+                    active = false
+                )
+                {
+                }
+
+                over "cad_derived_collisions"
+                {
+                    over "cad_derived_lower_forearm_link"
+                    {
+                        over "piece_000"
+                        {
+                            over "mesh" (
+                                prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                            )
+                            {
+                                uniform token physics:approximation = "convexHull"
+                                bool physics:collisionEnabled = 1
+                            }
+                        }
+                    }
+                }
+            }
+
+            over "follower_right_gripper_link"
+            {
+                over "collisions" (
+                    active = false
+                )
+                {
+                }
+
+                over "cad_derived_collisions"
+                {
+                    over "cad_derived_gripper_link"
+                    {
+                        over "piece_000"
+                        {
+                            over "mesh" (
+                                prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                            )
+                            {
+                                uniform token physics:approximation = "convexDecomposition"
+                                bool physics:collisionEnabled = 1
+                            }
+                        }
+
+                        over "piece_001"
+                        {
+                            over "mesh" (
+                                prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                            )
+                            {
+                                uniform token physics:approximation = "convexDecomposition"
+                                bool physics:collisionEnabled = 1
+                            }
+                        }
+
+                        over "piece_002"
+                        {
+                            over "mesh" (
+                                prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                            )
+                            {
+                                uniform token physics:approximation = "convexDecomposition"
+                                bool physics:collisionEnabled = 1
+                            }
+                        }
+
+                        over "piece_003"
+                        {
+                            over "mesh" (
+                                prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                            )
+                            {
+                                uniform token physics:approximation = "convexDecomposition"
+                                bool physics:collisionEnabled = 1
+                            }
+                        }
+
+                        over "piece_004"
+                        {
+                            over "mesh" (
+                                prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                            )
+                            {
+                                uniform token physics:approximation = "convexDecomposition"
+                                bool physics:collisionEnabled = 1
+                            }
+                        }
+
+                        over "piece_005"
+                        {
+                            over "mesh" (
+                                prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                            )
+                            {
+                                uniform token physics:approximation = "convexDecomposition"
+                                bool physics:collisionEnabled = 1
+                            }
+                        }
+
+                        over "piece_006"
+                        {
+                            over "mesh" (
+                                prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                            )
+                            {
+                                uniform token physics:approximation = "convexDecomposition"
+                                bool physics:collisionEnabled = 1
+                            }
+                        }
+
+                        over "piece_007"
+                        {
+                            over "mesh" (
+                                prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                            )
+                            {
+                                uniform token physics:approximation = "convexDecomposition"
+                                bool physics:collisionEnabled = 1
+                            }
+                        }
+
+                        over "piece_008"
+                        {
+                            over "mesh" (
+                                prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                            )
+                            {
+                                uniform token physics:approximation = "convexDecomposition"
+                                bool physics:collisionEnabled = 1
+                            }
+                        }
+                    }
+                }
+            }
+
+            over "follower_right_wrist_link"
+            {
+                over "collisions" (
+                    active = false
+                )
+                {
+                }
+
+                over "materialized_baseline_fallback"
+                {
+                    over "wrist_link"
+                    {
+                        over "mesh" (
+                            prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                        )
+                        {
+                            uniform token physics:approximation = "convexHull"
+                            bool physics:collisionEnabled = 1
+                        }
+                    }
+                }
+            }
+
+            over "follower_right_gripper_prop_link"
+            {
+                over "collisions" (
+                    active = false
+                )
+                {
+                }
+
+                over "materialized_baseline_fallback"
+                {
+                    over "gripper_prop_link"
+                    {
+                        over "mesh" (
+                            prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                        )
+                        {
+                            uniform token physics:approximation = "convexHull"
+                            bool physics:collisionEnabled = 1
+                        }
+                    }
+                }
+            }
+
+            over "follower_right_gripper_bar_link"
+            {
+                over "collisions" (
+                    active = false
+                )
+                {
+                }
+            }
+        }
+    }
+}
+

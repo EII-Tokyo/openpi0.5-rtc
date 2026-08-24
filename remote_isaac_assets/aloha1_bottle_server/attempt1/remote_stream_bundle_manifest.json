@@ -1,0 +1,506 @@
+{
+  "bottle": {
+    "prim_path": "/Bottle500",
+    "relative_path": "assets/bottle_500ml/isaac/bottle_500ml_sim.usd",
+    "sha256": "16427135f152ec951de2321fd689366d745a2dd389cbe260976631783952533e"
+  },
+  "bundle_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260813-aloha1-remote-stream/bundle_attempt2",
+  "classification": "ISOLATED_REMOTE_STREAM_DIAGNOSTIC_BUNDLE",
+  "file_count": 59,
+  "files": [
+    {
+      "bytes": 291,
+      "deployed_relative_path": "assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_diagnostic.usda",
+      "deployed_sha256": "7c76a8970e6b0dbca562304c64e9bfcd2e1ca3e790d25dfa52baf2e510b82c68",
+      "relative_path": "assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_diagnostic.usda",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_diagnostic.usda",
+      "source_sha256": "7c76a8970e6b0dbca562304c64e9bfcd2e1ca3e790d25dfa52baf2e510b82c68"
+    },
+    {
+      "bytes": 363,
+      "deployed_relative_path": "assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_diagnostic.usda",
+      "deployed_sha256": "165093c3e7bf359b2ef5dbb595feb4ed976b194844830e70f387d6b882c1d6f2",
+      "relative_path": "assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_diagnostic.usda",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_diagnostic.usda",
+      "source_sha256": "165093c3e7bf359b2ef5dbb595feb4ed976b194844830e70f387d6b882c1d6f2"
+    },
+    {
+      "bytes": 289,
+      "deployed_relative_path": "assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "deployed_sha256": "a68dd722d1451398652115a09cfff718962563a9bed3f3fd74292c454a387c14",
+      "relative_path": "assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+      "source_sha256": "a68dd722d1451398652115a09cfff718962563a9bed3f3fd74292c454a387c14"
+    },
+    {
+      "bytes": 1956,
+      "deployed_relative_path": "assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/configuration/aloha1_human_accepted_gripper_control.usda",
+      "deployed_sha256": "b0b1e9aaca78bef9e22e09dbe03119d680a9a8aa456e74a81ee50f2baaf0e965",
+      "relative_path": "assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/configuration/aloha1_human_accepted_gripper_control.usda",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/configuration/aloha1_human_accepted_gripper_control.usda",
+      "source_sha256": "b0b1e9aaca78bef9e22e09dbe03119d680a9a8aa456e74a81ee50f2baaf0e965"
+    },
+    {
+      "bytes": 2047093,
+      "deployed_relative_path": "assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/geometry/cad_derived_colliders.usda",
+      "deployed_sha256": "06295762f1f513dae63a1188e360c209ac2bbbabef730db8a103eb3ea4b1df81",
+      "relative_path": "assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/geometry/cad_derived_colliders.usda",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/geometry/cad_derived_colliders.usda",
+      "source_sha256": "06295762f1f513dae63a1188e360c209ac2bbbabef730db8a103eb3ea4b1df81"
+    },
+    {
+      "bytes": 24587,
+      "deployed_relative_path": "assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/physics/cad_derived_colliders_gripper_decomposition_physics.usda",
+      "deployed_sha256": "352503bd2ccc8d4253fdc0561da67d2ec8bc92afba45d3112e677e4b5bb7ac9e",
+      "relative_path": "assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/physics/cad_derived_colliders_gripper_decomposition_physics.usda",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/physics/cad_derived_colliders_gripper_decomposition_physics.usda",
+      "source_sha256": "352503bd2ccc8d4253fdc0561da67d2ec8bc92afba45d3112e677e4b5bb7ac9e"
+    },
+    {
+      "bytes": 3409,
+      "deployed_relative_path": "assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/physics/physics_inspector_collision_gate_physics.usda",
+      "deployed_sha256": "e8c4da828d5ccec975e81f942eb5e33759857c9489f3abc1de98e46850ff427d",
+      "relative_path": "assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/physics/physics_inspector_collision_gate_physics.usda",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/physics/physics_inspector_collision_gate_physics.usda",
+      "source_sha256": "e8c4da828d5ccec975e81f942eb5e33759857c9489f3abc1de98e46850ff427d"
+    },
+    {
+      "bytes": 132779,
+      "deployed_relative_path": "assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_convex_hull/geometry/supplier_cad_finger_mesh.usda",
+      "deployed_sha256": "781613d408843737b17d9f9a75e8c1b037ecc45749358d4b34ab48a8a7e98d4f",
+      "relative_path": "assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_convex_hull/geometry/supplier_cad_finger_mesh.usda",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_convex_hull/geometry/supplier_cad_finger_mesh.usda",
+      "source_sha256": "781613d408843737b17d9f9a75e8c1b037ecc45749358d4b34ab48a8a7e98d4f"
+    },
+    {
+      "bytes": 1336,
+      "deployed_relative_path": "assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/aloha1_signal_correspondence_workcell.usda",
+      "deployed_sha256": "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf",
+      "relative_path": "assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/aloha1_signal_correspondence_workcell.usda",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/aloha1_signal_correspondence_workcell.usda",
+      "source_sha256": "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf"
+    },
+    {
+      "bytes": 5099,
+      "deployed_relative_path": "assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/configuration/aloha1_signal_home_targets.usda",
+      "deployed_sha256": "484f17e3c638ea729a260eb67a666954f346b37a69987d9fe4f15cf7fad9d141",
+      "relative_path": "assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/configuration/aloha1_signal_home_targets.usda",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/configuration/aloha1_signal_home_targets.usda",
+      "source_sha256": "484f17e3c638ea729a260eb67a666954f346b37a69987d9fe4f15cf7fad9d141"
+    },
+    {
+      "bytes": 490,
+      "deployed_relative_path": "assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/follower_left_asset/aloha1_signal_follower_left.usda",
+      "deployed_sha256": "34badd857a3327b3605dc4ffd2fc40eb9c4c72a31c427c20967a3273f003aa7c",
+      "relative_path": "assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/follower_left_asset/aloha1_signal_follower_left.usda",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/follower_left_asset/aloha1_signal_follower_left.usda",
+      "source_sha256": "34badd857a3327b3605dc4ffd2fc40eb9c4c72a31c427c20967a3273f003aa7c"
+    },
+    {
+      "bytes": 1158,
+      "deployed_relative_path": "assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/follower_left_asset/configuration/aloha1_signal_follower_left_configuration.usda",
+      "deployed_sha256": "5e2da1b91ee561b5202ef71b6f1d4b91be02abab83368584b22f84332e31d267",
+      "relative_path": "assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/follower_left_asset/configuration/aloha1_signal_follower_left_configuration.usda",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/follower_left_asset/configuration/aloha1_signal_follower_left_configuration.usda",
+      "source_sha256": "5e2da1b91ee561b5202ef71b6f1d4b91be02abab83368584b22f84332e31d267"
+    },
+    {
+      "bytes": 3147,
+      "deployed_relative_path": "assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/follower_left_asset/geometry/aloha1_signal_follower_left_geometry.usda",
+      "deployed_sha256": "c5b1fec30df75daa7541f6de1818514dafb612d1b5af92a6a2ce8fc81112a86a",
+      "relative_path": "assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/follower_left_asset/geometry/aloha1_signal_follower_left_geometry.usda",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/follower_left_asset/geometry/aloha1_signal_follower_left_geometry.usda",
+      "source_sha256": "c5b1fec30df75daa7541f6de1818514dafb612d1b5af92a6a2ce8fc81112a86a"
+    },
+    {
+      "bytes": 1267,
+      "deployed_relative_path": "assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/follower_left_asset/physics/aloha1_signal_follower_left_physics.usda",
+      "deployed_sha256": "7aa18a04fe453253d6482852a0b47b60202f3fa6197d8cfb8b0b23f50b813d42",
+      "relative_path": "assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/follower_left_asset/physics/aloha1_signal_follower_left_physics.usda",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/follower_left_asset/physics/aloha1_signal_follower_left_physics.usda",
+      "source_sha256": "7aa18a04fe453253d6482852a0b47b60202f3fa6197d8cfb8b0b23f50b813d42"
+    },
+    {
+      "bytes": 1218,
+      "deployed_relative_path": "assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/workcell/aloha1_signal_correspondence_environment.usda",
+      "deployed_sha256": "43840c44fae108be1872ef97e38d806f90f99bd595b68a3aaaa4be6cf75b213b",
+      "relative_path": "assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/workcell/aloha1_signal_correspondence_environment.usda",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/workcell/aloha1_signal_correspondence_environment.usda",
+      "source_sha256": "43840c44fae108be1872ef97e38d806f90f99bd595b68a3aaaa4be6cf75b213b"
+    },
+    {
+      "bytes": 13831,
+      "deployed_relative_path": "assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/configuration/supplier_cad_follower_right_configuration.usda",
+      "deployed_sha256": "916004c26000ab468f8500db470c3dfc0e796a704a70813aff8d1372ad543159",
+      "relative_path": "assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/configuration/supplier_cad_follower_right_configuration.usda",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/configuration/supplier_cad_follower_right_configuration.usda",
+      "source_sha256": "916004c26000ab468f8500db470c3dfc0e796a704a70813aff8d1372ad543159"
+    },
+    {
+      "bytes": 3140,
+      "deployed_relative_path": "assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/geometry/supplier_cad_follower_right_geometry.usda",
+      "deployed_sha256": "168ad2705541ea17afe46f4fe2389a53f4ab660f5f4df09b25fff7fa5007fd65",
+      "relative_path": "assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/geometry/supplier_cad_follower_right_geometry.usda",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/geometry/supplier_cad_follower_right_geometry.usda",
+      "source_sha256": "168ad2705541ea17afe46f4fe2389a53f4ab660f5f4df09b25fff7fa5007fd65"
+    },
+    {
+      "bytes": 1275,
+      "deployed_relative_path": "assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/physics/supplier_cad_follower_right_physics.usda",
+      "deployed_sha256": "1be0f008e9b421b6cdd611b52ada0e731c975b5383636d0e5e4575a36c3e6348",
+      "relative_path": "assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/physics/supplier_cad_follower_right_physics.usda",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/physics/supplier_cad_follower_right_physics.usda",
+      "source_sha256": "1be0f008e9b421b6cdd611b52ada0e731c975b5383636d0e5e4575a36c3e6348"
+    },
+    {
+      "bytes": 494,
+      "deployed_relative_path": "assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/supplier_cad_follower_right.usda",
+      "deployed_sha256": "95c7878f794f5f557b70997a2240b6476836b8ffbeed5a4992cb114a169487ea",
+      "relative_path": "assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/supplier_cad_follower_right.usda",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/supplier_cad_follower_right.usda",
+      "source_sha256": "95c7878f794f5f557b70997a2240b6476836b8ffbeed5a4992cb114a169487ea"
+    },
+    {
+      "bytes": 423,
+      "deployed_relative_path": "assets/Trossen/ALOHA1/1.0/diagnostics/table_support_alignment/1.0/configuration/aloha1_tabletop_world_zero.usda",
+      "deployed_sha256": "c9f8c656ed3a1b2722bfe0fb18dd2e5056da0320782e5dd3a7d4df2d7e845afc",
+      "relative_path": "assets/Trossen/ALOHA1/1.0/diagnostics/table_support_alignment/1.0/configuration/aloha1_tabletop_world_zero.usda",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/table_support_alignment/1.0/configuration/aloha1_tabletop_world_zero.usda",
+      "source_sha256": "c9f8c656ed3a1b2722bfe0fb18dd2e5056da0320782e5dd3a7d4df2d7e845afc"
+    },
+    {
+      "bytes": 2100,
+      "deployed_relative_path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/configuration/follower_left_debug_acceleration_drive.usd",
+      "deployed_sha256": "7fe1d086c4d79e60cf6f3e10b67f164de4684df8d941603055764d6f230528a2",
+      "relative_path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/configuration/follower_left_debug_acceleration_drive.usd",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/configuration/follower_left_debug_acceleration_drive.usd",
+      "source_sha256": "7fe1d086c4d79e60cf6f3e10b67f164de4684df8d941603055764d6f230528a2"
+    },
+    {
+      "bytes": 2096,
+      "deployed_relative_path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/configuration/follower_left_sim2real_force_drive.usd",
+      "deployed_sha256": "12a294db48610bcf01c173552321020eafda0eae34c5d5d014c1e8db42aafc6d",
+      "relative_path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/configuration/follower_left_sim2real_force_drive.usd",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/configuration/follower_left_sim2real_force_drive.usd",
+      "source_sha256": "12a294db48610bcf01c173552321020eafda0eae34c5d5d014c1e8db42aafc6d"
+    },
+    {
+      "bytes": 702,
+      "deployed_relative_path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/follower_left.usd",
+      "deployed_sha256": "a1e6beb663f70e4c1d6493f5be80da2894e075c931e0fa5211e8c91d59a8205d",
+      "relative_path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/follower_left.usd",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/follower_left.usd",
+      "source_sha256": "a1e6beb663f70e4c1d6493f5be80da2894e075c931e0fa5211e8c91d59a8205d"
+    },
+    {
+      "bytes": 2012767,
+      "deployed_relative_path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_base.usd",
+      "deployed_sha256": "85f967be7ef7ff5b2820103c5c696ac39d834fe579d57f424c4f0b2587da8c85",
+      "relative_path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_base.usd",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_base.usd",
+      "source_sha256": "85f967be7ef7ff5b2820103c5c696ac39d834fe579d57f424c4f0b2587da8c85"
+    },
+    {
+      "bytes": 6622,
+      "deployed_relative_path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_physics.usd",
+      "deployed_sha256": "bd11491cc330e28ee7abce7e4a4cf9a891646da45324da7d14cf7c6f48b76a15",
+      "relative_path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_physics.usd",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_physics.usd",
+      "source_sha256": "bd11491cc330e28ee7abce7e4a4cf9a891646da45324da7d14cf7c6f48b76a15"
+    },
+    {
+      "bytes": 2021,
+      "deployed_relative_path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_robot.usd",
+      "deployed_sha256": "054087c020a79e9655dff127f084caf4a87605c231e0142893b0148c3d0d1a48",
+      "relative_path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_robot.usd",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_robot.usd",
+      "source_sha256": "054087c020a79e9655dff127f084caf4a87605c231e0142893b0148c3d0d1a48"
+    },
+    {
+      "bytes": 653,
+      "deployed_relative_path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_sensor.usd",
+      "deployed_sha256": "bea6c3045b08ee788823e5b61d1fa12cc6cec7f48239e41a2d795f4de5a6f512",
+      "relative_path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_sensor.usd",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_sensor.usd",
+      "source_sha256": "bea6c3045b08ee788823e5b61d1fa12cc6cec7f48239e41a2d795f4de5a6f512"
+    },
+    {
+      "bytes": 20352,
+      "deployed_relative_path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/follower_left.urdf",
+      "deployed_sha256": "d9e4b32723ee71dfce26fb4e78546cfcfef147b2d7dbf5e53e3620e3d8aa96bd",
+      "relative_path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/follower_left.urdf",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/follower_left.urdf",
+      "source_sha256": "d9e4b32723ee71dfce26fb4e78546cfcfef147b2d7dbf5e53e3620e3d8aa96bd"
+    },
+    {
+      "bytes": 1471,
+      "deployed_relative_path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/follower_left_imported.usd",
+      "deployed_sha256": "955c34600846c8b4a08bedc639caef7d5e3c1d0e3a02a6900c80d27d52adadec",
+      "relative_path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/follower_left_imported.usd",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/follower_left_imported.usd",
+      "source_sha256": "955c34600846c8b4a08bedc639caef7d5e3c1d0e3a02a6900c80d27d52adadec"
+    },
+    {
+      "bytes": 5171,
+      "deployed_relative_path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/import_manifest.json",
+      "deployed_sha256": "084ab798d68e0c94c2a05f3eb6e3961bfaf47f1953d4907a6d1353a6cd45ce1f",
+      "relative_path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/import_manifest.json",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/import_manifest.json",
+      "source_sha256": "084ab798d68e0c94c2a05f3eb6e3961bfaf47f1953d4907a6d1353a6cd45ce1f"
+    },
+    {
+      "bytes": 2104,
+      "deployed_relative_path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/configuration/follower_right_debug_acceleration_drive.usd",
+      "deployed_sha256": "919c8013e9921eaa2aaf8e032aa5ed81bc64cd07c90233ad9418996e9ecea249",
+      "relative_path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/configuration/follower_right_debug_acceleration_drive.usd",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/configuration/follower_right_debug_acceleration_drive.usd",
+      "source_sha256": "919c8013e9921eaa2aaf8e032aa5ed81bc64cd07c90233ad9418996e9ecea249"
+    },
+    {
+      "bytes": 2097,
+      "deployed_relative_path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/configuration/follower_right_sim2real_force_drive.usd",
+      "deployed_sha256": "cdd9b619c409cf8133df64f27106e2678007f2c6d6c5424e0ec276530f4d1b11",
+      "relative_path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/configuration/follower_right_sim2real_force_drive.usd",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/configuration/follower_right_sim2real_force_drive.usd",
+      "source_sha256": "cdd9b619c409cf8133df64f27106e2678007f2c6d6c5424e0ec276530f4d1b11"
+    },
+    {
+      "bytes": 703,
+      "deployed_relative_path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/follower_right.usd",
+      "deployed_sha256": "86d850cea5b35fb2969d3a78834317b51e2ac0d301f09aaaa9dad191f9bb3d5d",
+      "relative_path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/follower_right.usd",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/follower_right.usd",
+      "source_sha256": "86d850cea5b35fb2969d3a78834317b51e2ac0d301f09aaaa9dad191f9bb3d5d"
+    },
+    {
+      "bytes": 2012768,
+      "deployed_relative_path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_base.usd",
+      "deployed_sha256": "8443936246beabf2df88eb35a42225e76070bffaa709f09aa5091a5d911a4f9a",
+      "relative_path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_base.usd",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_base.usd",
+      "source_sha256": "8443936246beabf2df88eb35a42225e76070bffaa709f09aa5091a5d911a4f9a"
+    },
+    {
+      "bytes": 6625,
+      "deployed_relative_path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_physics.usd",
+      "deployed_sha256": "ae9188318501cde7774f1dc68c42b44ab2d8a60405104e6038fd45be496f8825",
+      "relative_path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_physics.usd",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_physics.usd",
+      "source_sha256": "ae9188318501cde7774f1dc68c42b44ab2d8a60405104e6038fd45be496f8825"
+    },
+    {
+      "bytes": 2013,
+      "deployed_relative_path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_robot.usd",
+      "deployed_sha256": "733776b5a3a543650938031ac5b6d8c06f2a38142cdb0268068d2ecbbe2181e6",
+      "relative_path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_robot.usd",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_robot.usd",
+      "source_sha256": "733776b5a3a543650938031ac5b6d8c06f2a38142cdb0268068d2ecbbe2181e6"
+    },
+    {
+      "bytes": 654,
+      "deployed_relative_path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_sensor.usd",
+      "deployed_sha256": "deb15cc9d5713481030a8c36966fa25985141a5545615b8eed255e02bb56bce1",
+      "relative_path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_sensor.usd",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_sensor.usd",
+      "source_sha256": "deb15cc9d5713481030a8c36966fa25985141a5545615b8eed255e02bb56bce1"
+    },
+    {
+      "bytes": 20393,
+      "deployed_relative_path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/follower_right.urdf",
+      "deployed_sha256": "268a5e5b56ce48af679256380008606f64358d6ead2619b52946b37f47fb624b",
+      "relative_path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/follower_right.urdf",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/follower_right.urdf",
+      "source_sha256": "268a5e5b56ce48af679256380008606f64358d6ead2619b52946b37f47fb624b"
+    },
+    {
+      "bytes": 1472,
+      "deployed_relative_path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/follower_right_imported.usd",
+      "deployed_sha256": "205d3b8fe72532f608446b18e80eccb5c8b0992fb71946b9737145afe4efa7ed",
+      "relative_path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/follower_right_imported.usd",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/follower_right_imported.usd",
+      "source_sha256": "205d3b8fe72532f608446b18e80eccb5c8b0992fb71946b9737145afe4efa7ed"
+    },
+    {
+      "bytes": 5235,
+      "deployed_relative_path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/import_manifest.json",
+      "deployed_sha256": "53699880d6a4a420853958003e00c3c1dfb03e402e775674d6c19457dd6d4572",
+      "relative_path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/import_manifest.json",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/import_manifest.json",
+      "source_sha256": "53699880d6a4a420853958003e00c3c1dfb03e402e775674d6c19457dd6d4572"
+    },
+    {
+      "bytes": 6484,
+      "deployed_relative_path": "assets/bottle_500ml/isaac/bottle_500ml_sim.usd",
+      "deployed_sha256": "16427135f152ec951de2321fd689366d745a2dd389cbe260976631783952533e",
+      "relative_path": "assets/bottle_500ml/isaac/bottle_500ml_sim.usd",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/bottle_500ml/isaac/bottle_500ml_sim.usd",
+      "source_sha256": "16427135f152ec951de2321fd689366d745a2dd389cbe260976631783952533e"
+    },
+    {
+      "bytes": 5328,
+      "deployed_relative_path": "configs/aloha1_grasp_20cm_gui_cad_derived_colliders.yaml",
+      "deployed_sha256": "37c65baf67f91ee1c2608c5eaed24cea20c44d59fe1d9ce28db590747ae0a5e4",
+      "relative_path": "configs/aloha1_grasp_20cm_gui_cad_derived_colliders.yaml",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/configs/aloha1_grasp_20cm_gui_cad_derived_colliders.yaml",
+      "source_sha256": "37c65baf67f91ee1c2608c5eaed24cea20c44d59fe1d9ce28db590747ae0a5e4"
+    },
+    {
+      "bytes": 32,
+      "deployed_relative_path": "local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/.asset_hash",
+      "deployed_sha256": "748e73e6b7e658c2e0287cc20e2a1c317846c3e349e85858ef0819ad9ce13614",
+      "relative_path": "local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/.asset_hash",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/.asset_hash",
+      "source_sha256": "748e73e6b7e658c2e0287cc20e2a1c317846c3e349e85858ef0819ad9ce13614"
+    },
+    {
+      "bytes": 1317,
+      "deployed_relative_path": "local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene.usd",
+      "deployed_sha256": "6363ffea7e369b2172eaeec1ff0492e563a038089caecfbc20f7e4fde778785e",
+      "relative_path": "local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene.usd",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene.usd",
+      "source_sha256": "6363ffea7e369b2172eaeec1ff0492e563a038089caecfbc20f7e4fde778785e"
+    },
+    {
+      "bytes": 2456,
+      "deployed_relative_path": "local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_black.usd",
+      "deployed_sha256": "ae43a54c4e7d4f94331699a2645dcb17901b03f93f94330781fedbd6da9b28fd",
+      "relative_path": "local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_black.usd",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_black.usd",
+      "source_sha256": "ae43a54c4e7d4f94331699a2645dcb17901b03f93f94330781fedbd6da9b28fd"
+    },
+    {
+      "bytes": 2835,
+      "deployed_relative_path": "local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black.usd",
+      "deployed_sha256": "d6424b06654aaf3f719dd55b9307efa2bee0948934218e10a82f82a50b2089a6",
+      "relative_path": "local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black.usd",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black.usd",
+      "source_sha256": "d6424b06654aaf3f719dd55b9307efa2bee0948934218e10a82f82a50b2089a6"
+    },
+    {
+      "bytes": 11283,
+      "deployed_relative_path": "local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd",
+      "deployed_sha256": "236d2d133047d665cf7d3ad0e58e04ae218e56dcf70bbe63e110d1307d3f3215",
+      "relative_path": "local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd",
+      "source_sha256": "236d2d133047d665cf7d3ad0e58e04ae218e56dcf70bbe63e110d1307d3f3215"
+    },
+    {
+      "bytes": 16257,
+      "deployed_relative_path": "local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose_finger_mesh_proxy_runtime.usda",
+      "deployed_sha256": "7899ca0861ab1d27e325ef146ffab1fcf41ea1c76f3c32229b8f43c316c0c911",
+      "relative_path": "local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose_finger_mesh_proxy_runtime.usda",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose_finger_mesh_proxy_runtime.usda",
+      "source_sha256": "7899ca0861ab1d27e325ef146ffab1fcf41ea1c76f3c32229b8f43c316c0c911"
+    },
+    {
+      "bytes": 16107,
+      "deployed_relative_path": "local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose_inner_pad_proxy_runtime.usda",
+      "deployed_sha256": "5809f9f05c3f1c4007702143dd4a870e7bdb8e2ef8ffdf93522c39f592e012d2",
+      "relative_path": "local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose_inner_pad_proxy_runtime.usda",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose_inner_pad_proxy_runtime.usda",
+      "source_sha256": "5809f9f05c3f1c4007702143dd4a870e7bdb8e2ef8ffdf93522c39f592e012d2"
+    },
+    {
+      "bytes": 19151,
+      "deployed_relative_path": "local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose_measured_workcell_no_gripper_base_bar_runtime.usda",
+      "deployed_sha256": "d6c1888a6c0fcdd1224c49a62a4d2c69da5a7cc89c6ccf89bb6a706c3b0e44d8",
+      "relative_path": "local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose_measured_workcell_no_gripper_base_bar_runtime.usda",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose_measured_workcell_no_gripper_base_bar_runtime.usda",
+      "source_sha256": "d6c1888a6c0fcdd1224c49a62a4d2c69da5a7cc89c6ccf89bb6a706c3b0e44d8"
+    },
+    {
+      "bytes": 18561,
+      "deployed_relative_path": "local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose_measured_workcell_runtime.usda",
+      "deployed_sha256": "deaecc4b3d2d3e42c6af47c04121e6259c533928245ed361ba33b96676d970a8",
+      "relative_path": "local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose_measured_workcell_runtime.usda",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose_measured_workcell_runtime.usda",
+      "source_sha256": "deaecc4b3d2d3e42c6af47c04121e6259c533928245ed361ba33b96676d970a8"
+    },
+    {
+      "bytes": 16256,
+      "deployed_relative_path": "local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose_proxy_runtime.usda",
+      "deployed_sha256": "b256a4ef05acd0436659b3791322d339a36c71df52867c7cfc5b8c1ef94fc011",
+      "relative_path": "local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose_proxy_runtime.usda",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose_proxy_runtime.usda",
+      "source_sha256": "b256a4ef05acd0436659b3791322d339a36c71df52867c7cfc5b8c1ef94fc011"
+    },
+    {
+      "bytes": 104233,
+      "deployed_relative_path": "local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose_with_user_table_pipe.usda",
+      "deployed_sha256": "8e6db58762d06e3fe64ff9f5dc755d6d40cacd34fbf7c36f90c56518cde65b22",
+      "relative_path": "local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose_with_user_table_pipe.usda",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose_with_user_table_pipe.usda",
+      "source_sha256": "8e6db58762d06e3fe64ff9f5dc755d6d40cacd34fbf7c36f90c56518cde65b22"
+    },
+    {
+      "bytes": 16124,
+      "deployed_relative_path": "local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose_with_user_table_pipe_inner_pad_proxy_runtime.usda",
+      "deployed_sha256": "1a145af76c386d0178a3859d85b432c3670d55c8590576e8929be340b71610ac",
+      "relative_path": "local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose_with_user_table_pipe_inner_pad_proxy_runtime.usda",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose_with_user_table_pipe_inner_pad_proxy_runtime.usda",
+      "source_sha256": "1a145af76c386d0178a3859d85b432c3670d55c8590576e8929be340b71610ac"
+    },
+    {
+      "bytes": 457,
+      "deployed_relative_path": "local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/config.yaml",
+      "deployed_sha256": "83d101c4966e43274db85682b19be83169827bcaf7d7183d02c8f8d663e67cd6",
+      "relative_path": "local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/config.yaml",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/config.yaml",
+      "source_sha256": "83d101c4966e43274db85682b19be83169827bcaf7d7183d02c8f8d663e67cd6"
+    },
+    {
+      "bytes": 18911416,
+      "deployed_relative_path": "local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/configuration/aloha2_menagerie_scene_base.usd",
+      "deployed_sha256": "9a99f9cc5f15551a03deee66073cf6ac39cf287de03d15632fd473aab4449c86",
+      "relative_path": "local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/configuration/aloha2_menagerie_scene_base.usd",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/configuration/aloha2_menagerie_scene_base.usd",
+      "source_sha256": "9a99f9cc5f15551a03deee66073cf6ac39cf287de03d15632fd473aab4449c86"
+    },
+    {
+      "bytes": 16517,
+      "deployed_relative_path": "local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/configuration/aloha2_menagerie_scene_physics.usd",
+      "deployed_sha256": "2513daa9d91ad914c815d8e3bcdd4f8d11081242364281d83f1daff27680c86e",
+      "relative_path": "local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/configuration/aloha2_menagerie_scene_physics.usd",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/configuration/aloha2_menagerie_scene_physics.usd",
+      "source_sha256": "2513daa9d91ad914c815d8e3bcdd4f8d11081242364281d83f1daff27680c86e"
+    },
+    {
+      "bytes": 1945,
+      "deployed_relative_path": "local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/configuration/aloha2_menagerie_scene_robot.usd",
+      "deployed_sha256": "4010cd65dafc88ab8f12cedc9de552851c469dc704fc82e08f0e3b71522b1a9c",
+      "relative_path": "local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/configuration/aloha2_menagerie_scene_robot.usd",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/configuration/aloha2_menagerie_scene_robot.usd",
+      "source_sha256": "4010cd65dafc88ab8f12cedc9de552851c469dc704fc82e08f0e3b71522b1a9c"
+    },
+    {
+      "bytes": 645,
+      "deployed_relative_path": "local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/configuration/aloha2_menagerie_scene_sensor.usd",
+      "deployed_sha256": "651786da257bbcfa16c5070368d5c07e2bf7ea67804ab1cd336fc1e2c348f92a",
+      "relative_path": "local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/configuration/aloha2_menagerie_scene_sensor.usd",
+      "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/configuration/aloha2_menagerie_scene_sensor.usd",
+      "source_sha256": "651786da257bbcfa16c5070368d5c07e2bf7ea67804ab1cd336fc1e2c348f92a"
+    }
+  ],
+  "runtime_config": {
+    "relative_path": "configs/aloha1_grasp_20cm_gui_cad_derived_colliders.yaml",
+    "sha256": "37c65baf67f91ee1c2608c5eaed24cea20c44d59fe1d9ce28db590747ae0a5e4"
+  },
+  "schema_version": 1,
+  "server": {
+    "expected_client": "NVIDIA Isaac Sim WebRTC Streaming Client on macOS",
+    "host": "192.168.1.103",
+    "isaac_application": "isaacsim.exp.full.streaming.kit",
+    "server_process_mutated": false
+  },
+  "source_project_root": "/home/eii/project/openpi0.5-rtc-reward-learning",
+  "stage": {
+    "relative_path": "assets/Trossen/ALOHA1/1.0/diagnostics/cad_derived_full_body_colliders/1.0/aloha1_cad_derived_full_body_collider_gripper_decomposition_tabletop_zero_z_up_meters_diagnostic.usda",
+    "required_prim_paths": [
+      "/World",
+      "/World/follower_left/vx300s_left/root_joint",
+      "/World/environment/worldBody/user_confirmed_table"
+    ],
+    "root_prim": "/World",
+    "sha256": "327361d291b13a316fe3390e2add54c1d76ed6c2393455970a6e59f954eb9bb9"
+  }
+}

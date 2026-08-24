@@ -1,0 +1,2224 @@
+#usda 1.0
+(
+    metersPerUnit = 1
+    subLayers = [
+        @aloha2_menagerie_scene_deep_black_real_start_pose.usd@
+    ]
+    upAxis = "Z"
+)
+
+def Xform "World" (
+    customData = {
+        string overlay_base_usd = "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd"
+        string overlay_config = "/home/eii/project/openpi0.5-rtc-reward-learning/examples/aloha_isaac/config/workcell_user_measured.yaml"
+        string overlay_scope = "user_measured_table_pipe_over_confirmed_aloha"
+    }
+)
+{
+    def Cube "Table" (
+        prepend apiSchemas = ["PhysicsCollisionAPI"]
+    )
+    {
+        color3f[] primvars:displayColor = [(0.18, 0.18, 0.18)]
+        double size = 1
+        float3 xformOp:scale = (1.22, 0.625, 0.04)
+        double3 xformOp:translate = (0, 0, -0.02)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+    }
+
+    def "TableFrameT"
+    {
+        def Cylinder "x_axis"
+        {
+            uniform token axis = "Z"
+            double height = 0.25
+            color3f[] primvars:displayColor = [(1, 0, 0)]
+            double radius = 0.006
+            quatf xformOp:orient = (0.70710677, 0, 0.70710677, 0)
+            double3 xformOp:translate = (-0.42500000000000004, -0.3, 0.025)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient"]
+        }
+
+        def Cylinder "y_axis"
+        {
+            uniform token axis = "Z"
+            double height = 0.25
+            color3f[] primvars:displayColor = [(0, 0.8, 0)]
+            double radius = 0.006
+            quatf xformOp:orient = (0.70710677, -0.70710677, 0, 0)
+            double3 xformOp:translate = (-0.55, -0.175, 0.025)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient"]
+        }
+
+        def Cylinder "z_axis"
+        {
+            uniform token axis = "Z"
+            double height = 0.25
+            color3f[] primvars:displayColor = [(0.1, 0.2, 1)]
+            double radius = 0.006
+            quatf xformOp:orient = (1, 0, 0, 0)
+            double3 xformOp:translate = (-0.55, -0.3, 0.15000000000000002)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient"]
+        }
+
+        def Cube "origin"
+        {
+            color3f[] primvars:displayColor = [(0.1, 0.2, 1)]
+            double size = 1
+            float3 xformOp:scale = (0.03, 0.03, 0.03)
+            double3 xformOp:translate = (-0.55, -0.3, 0.025)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+    }
+
+    def "PipePlaceholder"
+    {
+        def Cylinder "axis" (
+            prepend apiSchemas = ["PhysicsCollisionAPI"]
+        )
+        {
+            uniform token axis = "Z"
+            double height = 0.2250362193070262
+            color3f[] primvars:displayColor = [(1, 0.05, 0.05)]
+            double radius = 0.0025
+            quatf xformOp:orient = (0.92047673, 0, -0.39079735, 0)
+            double3 xformOp:translate = (-0.11095, 0.4075, 0.14815)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient"]
+        }
+
+        def Sphere "inlet_center"
+        {
+            color3f[] primvars:displayColor = [(1, 0.05, 0.05)]
+            double radius = 0.012
+            double3 xformOp:translate = (-0.1919, 0.4075, 0.2263)
+            uniform token[] xformOpOrder = ["xformOp:translate"]
+        }
+
+        def Cube "support_base_placeholder" (
+            prepend apiSchemas = ["PhysicsCollisionAPI"]
+        )
+        {
+            color3f[] primvars:displayColor = [(0.85, 0.85, 0.82)]
+            double size = 1
+            float3 xformOp:scale = (0.12, 0.025, 0.018)
+            double3 xformOp:translate = (-0.03, 0.4075, 0.02500000000000001)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+
+        def Sphere "measurement_A_on_w1_edge"
+        {
+            color3f[] primvars:displayColor = [(0.1, 0.45, 1)]
+            double radius = 0.01
+            double3 xformOp:translate = (-0.03, 0.3125, 0)
+            uniform token[] xformOpOrder = ["xformOp:translate"]
+        }
+
+        def Cylinder "measurement_9p5cm_base_offset"
+        {
+            uniform token axis = "Z"
+            double height = 0.09499999999999997
+            color3f[] primvars:displayColor = [(0.1, 0.45, 1)]
+            double radius = 0.004
+            quatf xformOp:orient = (0.70710677, -0.70710677, 0, 0)
+            double3 xformOp:translate = (-0.03, 0.36, 0)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient"]
+        }
+    }
+
+    def Xform "OfficeEnvironment"
+    {
+        def Xform "industrial_lab_corner" (
+            customData = {
+                string environment_intent = "industrial office lab corner with official Isaac props"
+                string official_asset_root = "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/nvidia_isaac_5_1_environments/Isaac/Environments"
+                string reference_photo = "/home/eii/Downloads/iphone/IMG_5334.JPG"
+                string startup_camera_side = "open_positive_y"
+                int window_depth_layer_count = 3
+            }
+        )
+        {
+            def Xform "Materials"
+            {
+                def Material "wall_acoustic_neutral"
+                {
+                    token outputs:surface.connect = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_acoustic_neutral/PreviewSurface.outputs:surface>
+
+                    def Shader "PreviewSurface"
+                    {
+                        uniform token info:id = "UsdPreviewSurface"
+                        color3f inputs:diffuseColor = (0.7, 0.71, 0.68)
+                        float inputs:metallic = 0
+                        float inputs:roughness = 0.82
+                        token outputs:surface
+                    }
+                }
+
+                def Material "ceiling_neutral"
+                {
+                    token outputs:surface.connect = </World/OfficeEnvironment/industrial_lab_corner/Materials/ceiling_neutral/PreviewSurface.outputs:surface>
+
+                    def Shader "PreviewSurface"
+                    {
+                        uniform token info:id = "UsdPreviewSurface"
+                        color3f inputs:diffuseColor = (0.62, 0.64, 0.61)
+                        float inputs:metallic = 0
+                        float inputs:roughness = 0.78
+                        token outputs:surface
+                    }
+                }
+
+                def Material "floor_matte_epoxy"
+                {
+                    token outputs:surface.connect = </World/OfficeEnvironment/industrial_lab_corner/Materials/floor_matte_epoxy/PreviewSurface.outputs:surface>
+
+                    def Shader "PreviewSurface"
+                    {
+                        uniform token info:id = "UsdPreviewSurface"
+                        color3f inputs:diffuseColor = (0.42, 0.44, 0.43)
+                        float inputs:metallic = 0
+                        float inputs:roughness = 0.7
+                        token outputs:surface
+                    }
+                }
+
+                def Material "window_soft_blue"
+                {
+                    token outputs:surface.connect = </World/OfficeEnvironment/industrial_lab_corner/Materials/window_soft_blue/PreviewSurface.outputs:surface>
+
+                    def Shader "PreviewSurface"
+                    {
+                        uniform token info:id = "UsdPreviewSurface"
+                        color3f inputs:diffuseColor = (0.46, 0.62, 0.82)
+                        color3f inputs:emissiveColor = (0.08, 0.13, 0.2)
+                        float inputs:metallic = 0
+                        float inputs:roughness = 0.22
+                        token outputs:surface
+                    }
+                }
+
+                def Material "exterior_sky_gradient"
+                {
+                    token outputs:surface.connect = </World/OfficeEnvironment/industrial_lab_corner/Materials/exterior_sky_gradient/PreviewSurface.outputs:surface>
+
+                    def Shader "PreviewSurface"
+                    {
+                        uniform token info:id = "UsdPreviewSurface"
+                        color3f inputs:diffuseColor = (0.56, 0.7, 0.9)
+                        color3f inputs:emissiveColor = (0.2, 0.27, 0.36)
+                        float inputs:metallic = 0
+                        float inputs:roughness = 0.38
+                        token outputs:surface
+                    }
+                }
+
+                def Material "exterior_warm_daylight"
+                {
+                    token outputs:surface.connect = </World/OfficeEnvironment/industrial_lab_corner/Materials/exterior_warm_daylight/PreviewSurface.outputs:surface>
+
+                    def Shader "PreviewSurface"
+                    {
+                        uniform token info:id = "UsdPreviewSurface"
+                        color3f inputs:diffuseColor = (0.86, 0.8, 0.58)
+                        color3f inputs:emissiveColor = (0.32, 0.25, 0.13)
+                        float inputs:metallic = 0
+                        float inputs:roughness = 0.52
+                        token outputs:surface
+                    }
+                }
+
+                def Material "exterior_soft_shadow"
+                {
+                    token outputs:surface.connect = </World/OfficeEnvironment/industrial_lab_corner/Materials/exterior_soft_shadow/PreviewSurface.outputs:surface>
+
+                    def Shader "PreviewSurface"
+                    {
+                        uniform token info:id = "UsdPreviewSurface"
+                        color3f inputs:diffuseColor = (0.38, 0.48, 0.58)
+                        color3f inputs:emissiveColor = (0.08, 0.1, 0.13)
+                        float inputs:metallic = 0
+                        float inputs:roughness = 0.68
+                        token outputs:surface
+                    }
+                }
+
+                def Material "blind_tan"
+                {
+                    token outputs:surface.connect = </World/OfficeEnvironment/industrial_lab_corner/Materials/blind_tan/PreviewSurface.outputs:surface>
+
+                    def Shader "PreviewSurface"
+                    {
+                        uniform token info:id = "UsdPreviewSurface"
+                        color3f inputs:diffuseColor = (0.78, 0.76, 0.68)
+                        float inputs:metallic = 0
+                        float inputs:roughness = 0.72
+                        token outputs:surface
+                    }
+                }
+
+                def Material "workbench_warm_maple"
+                {
+                    token outputs:surface.connect = </World/OfficeEnvironment/industrial_lab_corner/Materials/workbench_warm_maple/PreviewSurface.outputs:surface>
+
+                    def Shader "PreviewSurface"
+                    {
+                        uniform token info:id = "UsdPreviewSurface"
+                        color3f inputs:diffuseColor = (0.66, 0.52, 0.34)
+                        float inputs:metallic = 0
+                        float inputs:roughness = 0.5
+                        token outputs:surface
+                    }
+                }
+
+                def Material "wall_grain_matte"
+                {
+                    token outputs:surface.connect = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte/PreviewSurface.outputs:surface>
+
+                    def Shader "PreviewSurface"
+                    {
+                        uniform token info:id = "UsdPreviewSurface"
+                        color3f inputs:diffuseColor = (0.68, 0.69, 0.66)
+                        float inputs:metallic = 0
+                        float inputs:roughness = 0.92
+                        token outputs:surface
+                    }
+                }
+
+                def Material "cabinet_dark_gray"
+                {
+                    token outputs:surface.connect = </World/OfficeEnvironment/industrial_lab_corner/Materials/cabinet_dark_gray/PreviewSurface.outputs:surface>
+
+                    def Shader "PreviewSurface"
+                    {
+                        uniform token info:id = "UsdPreviewSurface"
+                        color3f inputs:diffuseColor = (0.36, 0.38, 0.37)
+                        float inputs:metallic = 0
+                        float inputs:roughness = 0.66
+                        token outputs:surface
+                    }
+                }
+
+                def Material "shelf_powder_coated_metal"
+                {
+                    token outputs:surface.connect = </World/OfficeEnvironment/industrial_lab_corner/Materials/shelf_powder_coated_metal/PreviewSurface.outputs:surface>
+
+                    def Shader "PreviewSurface"
+                    {
+                        uniform token info:id = "UsdPreviewSurface"
+                        color3f inputs:diffuseColor = (0.46, 0.47, 0.45)
+                        float inputs:metallic = 0
+                        float inputs:roughness = 0.54
+                        token outputs:surface
+                    }
+                }
+
+                def Material "cardboard_warm"
+                {
+                    token outputs:surface.connect = </World/OfficeEnvironment/industrial_lab_corner/Materials/cardboard_warm/PreviewSurface.outputs:surface>
+
+                    def Shader "PreviewSurface"
+                    {
+                        uniform token info:id = "UsdPreviewSurface"
+                        color3f inputs:diffuseColor = (0.62, 0.46, 0.27)
+                        float inputs:metallic = 0
+                        float inputs:roughness = 0.86
+                        token outputs:surface
+                    }
+                }
+            }
+
+            def Xform "official_props"
+            {
+                def Xform "office_file_cabinet" (
+                    customData = {
+                        string official_asset_source = "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/nvidia_isaac_5_1_environments/Isaac/Environments/Office/Props/SM_FileCabinet_01.usd"
+                    }
+                    prepend references = @/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/nvidia_isaac_5_1_environments/Isaac/Environments/Office/Props/SM_FileCabinet_01.usd@
+                )
+                {
+                    quatf xformOp:orient = (0.99939084, 0, 0, 0.034899496)
+                    float3 xformOp:scale = (0.42, 0.42, 0.42)
+                    double3 xformOp:translate = (-1.78, -1.6, -0.3)
+                    uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+                }
+
+                def Xform "office_blinds" (
+                    customData = {
+                        string official_asset_source = "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/nvidia_isaac_5_1_environments/Isaac/Environments/Office/Props/SM_BlindsBigOpen.usd"
+                    }
+                    prepend references = @/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/nvidia_isaac_5_1_environments/Isaac/Environments/Office/Props/SM_BlindsBigOpen.usd@
+                )
+                {
+                    quatf xformOp:orient = (0.70710677, 0, 0, 0.70710677)
+                    float3 xformOp:scale = (0.54, 0.54, 0.54)
+                    double3 xformOp:translate = (2.42, -0.45, 1.12)
+                    uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+                }
+
+                def Xform "warehouse_cardboard_boxes" (
+                    customData = {
+                        string official_asset_source = "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/nvidia_isaac_5_1_environments/Isaac/Environments/Simple_Warehouse/Props/SM_CardBoxA_01.usd"
+                    }
+                    prepend references = @/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/nvidia_isaac_5_1_environments/Isaac/Environments/Simple_Warehouse/Props/SM_CardBoxA_01.usd@
+                )
+                {
+                    quatf xformOp:orient = (0.9945219, 0, 0, -0.104528464)
+                    float3 xformOp:scale = (0.34, 0.34, 0.34)
+                    double3 xformOp:translate = (1.62, -1.54, -0.23)
+                    uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+                }
+
+                def Xform "warehouse_bottle_reference" (
+                    customData = {
+                        string official_asset_source = "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/nvidia_isaac_5_1_environments/Isaac/Environments/Simple_Warehouse/Props/SM_BottlePlasticA_01.usd"
+                    }
+                    prepend references = @/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/nvidia_isaac_5_1_environments/Isaac/Environments/Simple_Warehouse/Props/SM_BottlePlasticA_01.usd@
+                )
+                {
+                    quatf xformOp:orient = (0.9848077, 0, 0, 0.17364818)
+                    float3 xformOp:scale = (0.28, 0.28, 0.28)
+                    double3 xformOp:translate = (1.18, -1.5, -0.01)
+                    uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+                }
+            }
+
+            def Cube "matte_epoxy_floor" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/floor_matte_epoxy>
+                color3f[] primvars:displayColor = [(0.42, 0.44, 0.43)]
+                double size = 1
+                float3 xformOp:scale = (4.8, 4, 0.04)
+                double3 xformOp:translate = (0, 0.15, -0.055)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "ceiling_baffle" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/ceiling_neutral>
+                color3f[] primvars:displayColor = [(0.62, 0.64, 0.61)]
+                double size = 1
+                float3 xformOp:scale = (4.8, 4, 0.035)
+                double3 xformOp:translate = (0, 0.15, 2.55)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "rear_acoustic_wall" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_acoustic_neutral>
+                color3f[] primvars:displayColor = [(0.7, 0.71, 0.68)]
+                double size = 1
+                float3 xformOp:scale = (4.8, 0.035, 2.48)
+                double3 xformOp:translate = (0, -1.86, 1.22)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "left_side_wall" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_acoustic_neutral>
+                color3f[] primvars:displayColor = [(0.7, 0.71, 0.68)]
+                double size = 1
+                float3 xformOp:scale = (0.035, 4, 2.48)
+                double3 xformOp:translate = (-2.38, 0.15, 1.22)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "rear_wall_grain_01" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.675, 0.68175, 0.651375)]
+                double size = 1
+                float3 xformOp:scale = (0.03, 0.002, 0.018)
+                double3 xformOp:translate = (-2.05, -1.839, 0.32)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "rear_wall_grain_02" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.693, 0.69993, 0.668745)]
+                double size = 1
+                float3 xformOp:scale = (0.03, 0.002, 0.018)
+                double3 xformOp:translate = (-1.69, -1.839, 0.32)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "rear_wall_grain_03" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.711, 0.71811, 0.686115)]
+                double size = 1
+                float3 xformOp:scale = (0.03, 0.002, 0.018)
+                double3 xformOp:translate = (-1.33, -1.839, 0.32)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "rear_wall_grain_04" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.675, 0.68175, 0.651375)]
+                double size = 1
+                float3 xformOp:scale = (0.03, 0.002, 0.018)
+                double3 xformOp:translate = (-0.97, -1.839, 0.32)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "rear_wall_grain_05" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.693, 0.69993, 0.668745)]
+                double size = 1
+                float3 xformOp:scale = (0.03, 0.002, 0.018)
+                double3 xformOp:translate = (-0.61, -1.839, 0.32)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "rear_wall_grain_06" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.711, 0.71811, 0.686115)]
+                double size = 1
+                float3 xformOp:scale = (0.03, 0.002, 0.018)
+                double3 xformOp:translate = (-0.25, -1.839, 0.32)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "rear_wall_grain_07" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.675, 0.68175, 0.651375)]
+                double size = 1
+                float3 xformOp:scale = (0.03, 0.002, 0.018)
+                double3 xformOp:translate = (0.11, -1.839, 0.32)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "rear_wall_grain_08" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.693, 0.69993, 0.668745)]
+                double size = 1
+                float3 xformOp:scale = (0.03, 0.002, 0.018)
+                double3 xformOp:translate = (0.47, -1.839, 0.32)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "rear_wall_grain_09" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.711, 0.71811, 0.686115)]
+                double size = 1
+                float3 xformOp:scale = (0.03, 0.002, 0.018)
+                double3 xformOp:translate = (0.83, -1.839, 0.32)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "rear_wall_grain_10" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.675, 0.68175, 0.651375)]
+                double size = 1
+                float3 xformOp:scale = (0.03, 0.002, 0.018)
+                double3 xformOp:translate = (1.19, -1.839, 0.32)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "rear_wall_grain_11" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.693, 0.69993, 0.668745)]
+                double size = 1
+                float3 xformOp:scale = (0.03, 0.002, 0.018)
+                double3 xformOp:translate = (1.55, -1.839, 0.32)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "rear_wall_grain_12" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.711, 0.71811, 0.686115)]
+                double size = 1
+                float3 xformOp:scale = (0.03, 0.002, 0.018)
+                double3 xformOp:translate = (1.91, -1.839, 0.32)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "rear_wall_grain_13" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.675, 0.68175, 0.651375)]
+                double size = 1
+                float3 xformOp:scale = (0.03, 0.002, 0.018)
+                double3 xformOp:translate = (-2.05, -1.839, 0.74)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "rear_wall_grain_14" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.693, 0.69993, 0.668745)]
+                double size = 1
+                float3 xformOp:scale = (0.03, 0.002, 0.018)
+                double3 xformOp:translate = (-1.69, -1.839, 0.74)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "rear_wall_grain_15" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.711, 0.71811, 0.686115)]
+                double size = 1
+                float3 xformOp:scale = (0.03, 0.002, 0.018)
+                double3 xformOp:translate = (-1.33, -1.839, 0.74)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "rear_wall_grain_16" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.675, 0.68175, 0.651375)]
+                double size = 1
+                float3 xformOp:scale = (0.03, 0.002, 0.018)
+                double3 xformOp:translate = (-0.97, -1.839, 0.74)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "rear_wall_grain_17" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.693, 0.69993, 0.668745)]
+                double size = 1
+                float3 xformOp:scale = (0.03, 0.002, 0.018)
+                double3 xformOp:translate = (-0.61, -1.839, 0.74)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "rear_wall_grain_18" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.711, 0.71811, 0.686115)]
+                double size = 1
+                float3 xformOp:scale = (0.03, 0.002, 0.018)
+                double3 xformOp:translate = (-0.25, -1.839, 0.74)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "rear_wall_grain_19" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.675, 0.68175, 0.651375)]
+                double size = 1
+                float3 xformOp:scale = (0.03, 0.002, 0.018)
+                double3 xformOp:translate = (0.11, -1.839, 0.74)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "rear_wall_grain_20" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.693, 0.69993, 0.668745)]
+                double size = 1
+                float3 xformOp:scale = (0.03, 0.002, 0.018)
+                double3 xformOp:translate = (0.47, -1.839, 0.74)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "rear_wall_grain_21" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.711, 0.71811, 0.686115)]
+                double size = 1
+                float3 xformOp:scale = (0.03, 0.002, 0.018)
+                double3 xformOp:translate = (0.83, -1.839, 0.74)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "rear_wall_grain_22" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.675, 0.68175, 0.651375)]
+                double size = 1
+                float3 xformOp:scale = (0.03, 0.002, 0.018)
+                double3 xformOp:translate = (1.19, -1.839, 0.74)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "rear_wall_grain_23" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.693, 0.69993, 0.668745)]
+                double size = 1
+                float3 xformOp:scale = (0.03, 0.002, 0.018)
+                double3 xformOp:translate = (1.55, -1.839, 0.74)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "rear_wall_grain_24" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.711, 0.71811, 0.686115)]
+                double size = 1
+                float3 xformOp:scale = (0.03, 0.002, 0.018)
+                double3 xformOp:translate = (1.91, -1.839, 0.74)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "rear_wall_grain_25" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.675, 0.68175, 0.651375)]
+                double size = 1
+                float3 xformOp:scale = (0.03, 0.002, 0.018)
+                double3 xformOp:translate = (-2.05, -1.839, 1.16)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "rear_wall_grain_26" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.693, 0.69993, 0.668745)]
+                double size = 1
+                float3 xformOp:scale = (0.03, 0.002, 0.018)
+                double3 xformOp:translate = (-1.69, -1.839, 1.16)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "rear_wall_grain_27" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.711, 0.71811, 0.686115)]
+                double size = 1
+                float3 xformOp:scale = (0.03, 0.002, 0.018)
+                double3 xformOp:translate = (-1.33, -1.839, 1.16)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "rear_wall_grain_28" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.675, 0.68175, 0.651375)]
+                double size = 1
+                float3 xformOp:scale = (0.03, 0.002, 0.018)
+                double3 xformOp:translate = (-0.97, -1.839, 1.16)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "rear_wall_grain_29" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.693, 0.69993, 0.668745)]
+                double size = 1
+                float3 xformOp:scale = (0.03, 0.002, 0.018)
+                double3 xformOp:translate = (-0.61, -1.839, 1.16)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "rear_wall_grain_30" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.711, 0.71811, 0.686115)]
+                double size = 1
+                float3 xformOp:scale = (0.03, 0.002, 0.018)
+                double3 xformOp:translate = (-0.25, -1.839, 1.16)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "rear_wall_grain_31" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.675, 0.68175, 0.651375)]
+                double size = 1
+                float3 xformOp:scale = (0.03, 0.002, 0.018)
+                double3 xformOp:translate = (0.11, -1.839, 1.16)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "rear_wall_grain_32" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.693, 0.69993, 0.668745)]
+                double size = 1
+                float3 xformOp:scale = (0.03, 0.002, 0.018)
+                double3 xformOp:translate = (0.47, -1.839, 1.16)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "rear_wall_grain_33" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.711, 0.71811, 0.686115)]
+                double size = 1
+                float3 xformOp:scale = (0.03, 0.002, 0.018)
+                double3 xformOp:translate = (0.83, -1.839, 1.16)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "rear_wall_grain_34" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.675, 0.68175, 0.651375)]
+                double size = 1
+                float3 xformOp:scale = (0.03, 0.002, 0.018)
+                double3 xformOp:translate = (1.19, -1.839, 1.16)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "rear_wall_grain_35" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.693, 0.69993, 0.668745)]
+                double size = 1
+                float3 xformOp:scale = (0.03, 0.002, 0.018)
+                double3 xformOp:translate = (1.55, -1.839, 1.16)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "rear_wall_grain_36" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.711, 0.71811, 0.686115)]
+                double size = 1
+                float3 xformOp:scale = (0.03, 0.002, 0.018)
+                double3 xformOp:translate = (1.91, -1.839, 1.16)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "left_wall_grain_01" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.665, 0.67165, 0.641725)]
+                double size = 1
+                float3 xformOp:scale = (0.002, 0.024, 0.016)
+                double3 xformOp:translate = (-2.359, -1.42, 0.36)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "left_wall_grain_02" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.679, 0.68579, 0.655235)]
+                double size = 1
+                float3 xformOp:scale = (0.002, 0.024, 0.016)
+                double3 xformOp:translate = (-2.359, -1.14, 0.36)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "left_wall_grain_03" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.693, 0.69993, 0.668745)]
+                double size = 1
+                float3 xformOp:scale = (0.002, 0.024, 0.016)
+                double3 xformOp:translate = (-2.359, -0.86, 0.36)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "left_wall_grain_04" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.707, 0.71407, 0.682255)]
+                double size = 1
+                float3 xformOp:scale = (0.002, 0.024, 0.016)
+                double3 xformOp:translate = (-2.359, -0.58, 0.36)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "left_wall_grain_05" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.665, 0.67165, 0.641725)]
+                double size = 1
+                float3 xformOp:scale = (0.002, 0.024, 0.016)
+                double3 xformOp:translate = (-2.359, -0.3, 0.36)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "left_wall_grain_06" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.679, 0.68579, 0.655235)]
+                double size = 1
+                float3 xformOp:scale = (0.002, 0.024, 0.016)
+                double3 xformOp:translate = (-2.359, -0.02, 0.36)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "left_wall_grain_07" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.693, 0.69993, 0.668745)]
+                double size = 1
+                float3 xformOp:scale = (0.002, 0.024, 0.016)
+                double3 xformOp:translate = (-2.359, 0.26, 0.36)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "left_wall_grain_08" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.707, 0.71407, 0.682255)]
+                double size = 1
+                float3 xformOp:scale = (0.002, 0.024, 0.016)
+                double3 xformOp:translate = (-2.359, 0.54, 0.36)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "left_wall_grain_09" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.665, 0.67165, 0.641725)]
+                double size = 1
+                float3 xformOp:scale = (0.002, 0.024, 0.016)
+                double3 xformOp:translate = (-2.359, 0.82, 0.36)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "left_wall_grain_10" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.679, 0.68579, 0.655235)]
+                double size = 1
+                float3 xformOp:scale = (0.002, 0.024, 0.016)
+                double3 xformOp:translate = (-2.359, 1.1, 0.36)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "left_wall_grain_11" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.693, 0.69993, 0.668745)]
+                double size = 1
+                float3 xformOp:scale = (0.002, 0.024, 0.016)
+                double3 xformOp:translate = (-2.359, 1.38, 0.36)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "left_wall_grain_12" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.707, 0.71407, 0.682255)]
+                double size = 1
+                float3 xformOp:scale = (0.002, 0.024, 0.016)
+                double3 xformOp:translate = (-2.359, 1.66, 0.36)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "left_wall_grain_13" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.665, 0.67165, 0.641725)]
+                double size = 1
+                float3 xformOp:scale = (0.002, 0.024, 0.016)
+                double3 xformOp:translate = (-2.359, -1.42, 0.75)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "left_wall_grain_14" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.679, 0.68579, 0.655235)]
+                double size = 1
+                float3 xformOp:scale = (0.002, 0.024, 0.016)
+                double3 xformOp:translate = (-2.359, -1.14, 0.75)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "left_wall_grain_15" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.693, 0.69993, 0.668745)]
+                double size = 1
+                float3 xformOp:scale = (0.002, 0.024, 0.016)
+                double3 xformOp:translate = (-2.359, -0.86, 0.75)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "left_wall_grain_16" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.707, 0.71407, 0.682255)]
+                double size = 1
+                float3 xformOp:scale = (0.002, 0.024, 0.016)
+                double3 xformOp:translate = (-2.359, -0.58, 0.75)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "left_wall_grain_17" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.665, 0.67165, 0.641725)]
+                double size = 1
+                float3 xformOp:scale = (0.002, 0.024, 0.016)
+                double3 xformOp:translate = (-2.359, -0.3, 0.75)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "left_wall_grain_18" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.679, 0.68579, 0.655235)]
+                double size = 1
+                float3 xformOp:scale = (0.002, 0.024, 0.016)
+                double3 xformOp:translate = (-2.359, -0.02, 0.75)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "left_wall_grain_19" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.693, 0.69993, 0.668745)]
+                double size = 1
+                float3 xformOp:scale = (0.002, 0.024, 0.016)
+                double3 xformOp:translate = (-2.359, 0.26, 0.75)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "left_wall_grain_20" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.707, 0.71407, 0.682255)]
+                double size = 1
+                float3 xformOp:scale = (0.002, 0.024, 0.016)
+                double3 xformOp:translate = (-2.359, 0.54, 0.75)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "left_wall_grain_21" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.665, 0.67165, 0.641725)]
+                double size = 1
+                float3 xformOp:scale = (0.002, 0.024, 0.016)
+                double3 xformOp:translate = (-2.359, 0.82, 0.75)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "left_wall_grain_22" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.679, 0.68579, 0.655235)]
+                double size = 1
+                float3 xformOp:scale = (0.002, 0.024, 0.016)
+                double3 xformOp:translate = (-2.359, 1.1, 0.75)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "left_wall_grain_23" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.693, 0.69993, 0.668745)]
+                double size = 1
+                float3 xformOp:scale = (0.002, 0.024, 0.016)
+                double3 xformOp:translate = (-2.359, 1.38, 0.75)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "left_wall_grain_24" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.707, 0.71407, 0.682255)]
+                double size = 1
+                float3 xformOp:scale = (0.002, 0.024, 0.016)
+                double3 xformOp:translate = (-2.359, 1.66, 0.75)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "left_wall_grain_25" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.665, 0.67165, 0.641725)]
+                double size = 1
+                float3 xformOp:scale = (0.002, 0.024, 0.016)
+                double3 xformOp:translate = (-2.359, -1.42, 1.14)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "left_wall_grain_26" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.679, 0.68579, 0.655235)]
+                double size = 1
+                float3 xformOp:scale = (0.002, 0.024, 0.016)
+                double3 xformOp:translate = (-2.359, -1.14, 1.14)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "left_wall_grain_27" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.693, 0.69993, 0.668745)]
+                double size = 1
+                float3 xformOp:scale = (0.002, 0.024, 0.016)
+                double3 xformOp:translate = (-2.359, -0.86, 1.14)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "left_wall_grain_28" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.707, 0.71407, 0.682255)]
+                double size = 1
+                float3 xformOp:scale = (0.002, 0.024, 0.016)
+                double3 xformOp:translate = (-2.359, -0.58, 1.14)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "left_wall_grain_29" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.665, 0.67165, 0.641725)]
+                double size = 1
+                float3 xformOp:scale = (0.002, 0.024, 0.016)
+                double3 xformOp:translate = (-2.359, -0.3, 1.14)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "left_wall_grain_30" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.679, 0.68579, 0.655235)]
+                double size = 1
+                float3 xformOp:scale = (0.002, 0.024, 0.016)
+                double3 xformOp:translate = (-2.359, -0.02, 1.14)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "left_wall_grain_31" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.693, 0.69993, 0.668745)]
+                double size = 1
+                float3 xformOp:scale = (0.002, 0.024, 0.016)
+                double3 xformOp:translate = (-2.359, 0.26, 1.14)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "left_wall_grain_32" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.707, 0.71407, 0.682255)]
+                double size = 1
+                float3 xformOp:scale = (0.002, 0.024, 0.016)
+                double3 xformOp:translate = (-2.359, 0.54, 1.14)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "left_wall_grain_33" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.665, 0.67165, 0.641725)]
+                double size = 1
+                float3 xformOp:scale = (0.002, 0.024, 0.016)
+                double3 xformOp:translate = (-2.359, 0.82, 1.14)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "left_wall_grain_34" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.679, 0.68579, 0.655235)]
+                double size = 1
+                float3 xformOp:scale = (0.002, 0.024, 0.016)
+                double3 xformOp:translate = (-2.359, 1.1, 1.14)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "left_wall_grain_35" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.693, 0.69993, 0.668745)]
+                double size = 1
+                float3 xformOp:scale = (0.002, 0.024, 0.016)
+                double3 xformOp:translate = (-2.359, 1.38, 1.14)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "left_wall_grain_36" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/wall_grain_matte>
+                color3f[] primvars:displayColor = [(0.707, 0.71407, 0.682255)]
+                double size = 1
+                float3 xformOp:scale = (0.002, 0.024, 0.016)
+                double3 xformOp:translate = (-2.359, 1.66, 1.14)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "rear_low_cabinet" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/cabinet_dark_gray>
+                color3f[] primvars:displayColor = [(0.36, 0.38, 0.37)]
+                double size = 1
+                float3 xformOp:scale = (1.28, 0.18, 0.58)
+                double3 xformOp:translate = (-0.62, -1.72, 0.3)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "left_equipment_cabinet" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/cabinet_dark_gray>
+                color3f[] primvars:displayColor = [(0.4, 0.42, 0.41)]
+                double size = 1
+                float3 xformOp:scale = (0.34, 0.42, 1.34)
+                double3 xformOp:translate = (-2.06, -1.12, 0.72)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "rear_storage_shelf" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/shelf_powder_coated_metal>
+                color3f[] primvars:displayColor = [(0.46, 0.47, 0.45)]
+                double size = 1
+                float3 xformOp:scale = (0.95, 0.12, 1.06)
+                double3 xformOp:translate = (1.38, -1.72, 0.62)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "warm_archive_boxes" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/cardboard_warm>
+                color3f[] primvars:displayColor = [(0.62, 0.46, 0.27)]
+                double size = 1
+                float3 xformOp:scale = (0.54, 0.24, 0.32)
+                double3 xformOp:translate = (1.3, -1.62, 0.32)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "warm_maple_workbench_top" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/workbench_warm_maple>
+                color3f[] primvars:displayColor = [(0.66, 0.52, 0.34)]
+                double size = 1
+                float3 xformOp:scale = (1.16, 0.66, 0.008)
+                double3 xformOp:translate = (0, 0, 0.004)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "right_side_daylight_window" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/window_soft_blue>
+                color3f[] primvars:displayColor = [(0.46, 0.62, 0.82)]
+                double size = 1
+                float3 xformOp:scale = (0.018, 2.45, 1.34)
+                double3 xformOp:translate = (2.355, 0.15, 1.22)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "exterior_sky_gradient_top" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/exterior_sky_gradient>
+                color3f[] primvars:displayColor = [(0.56, 0.7, 0.9)]
+                double size = 1
+                float3 xformOp:scale = (0.014, 2.25, 0.34)
+                double3 xformOp:translate = (2.405, 0.15, 1.68)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "exterior_sunlit_floor_band" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/exterior_warm_daylight>
+                color3f[] primvars:displayColor = [(0.86, 0.8, 0.58)]
+                double size = 1
+                float3 xformOp:scale = (0.014, 2.18, 0.28)
+                double3 xformOp:translate = (2.415, 0.18, 0.88)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "exterior_soft_shadow_band" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/exterior_soft_shadow>
+                color3f[] primvars:displayColor = [(0.38, 0.48, 0.58)]
+                double size = 1
+                float3 xformOp:scale = (0.014, 0.72, 0.94)
+                double3 xformOp:translate = (2.425, -0.42, 1.18)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "vertical_blind_01" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/blind_tan>
+                color3f[] primvars:displayColor = [(0.78, 0.76, 0.68)]
+                double size = 1
+                float3 xformOp:scale = (0.025, 0.018, 1.22)
+                double3 xformOp:translate = (2.335, -0.88, 1.22)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "vertical_blind_02" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/blind_tan>
+                color3f[] primvars:displayColor = [(0.78, 0.76, 0.68)]
+                double size = 1
+                float3 xformOp:scale = (0.025, 0.018, 1.22)
+                double3 xformOp:translate = (2.335, -0.63, 1.22)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "vertical_blind_03" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/blind_tan>
+                color3f[] primvars:displayColor = [(0.78, 0.76, 0.68)]
+                double size = 1
+                float3 xformOp:scale = (0.025, 0.018, 1.22)
+                double3 xformOp:translate = (2.335, -0.38, 1.22)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "vertical_blind_04" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/blind_tan>
+                color3f[] primvars:displayColor = [(0.78, 0.76, 0.68)]
+                double size = 1
+                float3 xformOp:scale = (0.025, 0.018, 1.22)
+                double3 xformOp:translate = (2.335, -0.13, 1.22)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "vertical_blind_05" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/blind_tan>
+                color3f[] primvars:displayColor = [(0.78, 0.76, 0.68)]
+                double size = 1
+                float3 xformOp:scale = (0.025, 0.018, 1.22)
+                double3 xformOp:translate = (2.335, 0.12, 1.22)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "vertical_blind_06" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/blind_tan>
+                color3f[] primvars:displayColor = [(0.78, 0.76, 0.68)]
+                double size = 1
+                float3 xformOp:scale = (0.025, 0.018, 1.22)
+                double3 xformOp:translate = (2.335, 0.37, 1.22)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "vertical_blind_07" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/blind_tan>
+                color3f[] primvars:displayColor = [(0.78, 0.76, 0.68)]
+                double size = 1
+                float3 xformOp:scale = (0.025, 0.018, 1.22)
+                double3 xformOp:translate = (2.335, 0.62, 1.22)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+
+            def Cube "vertical_blind_08" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/OfficeEnvironment/industrial_lab_corner/Materials/blind_tan>
+                color3f[] primvars:displayColor = [(0.78, 0.76, 0.68)]
+                double size = 1
+                float3 xformOp:scale = (0.025, 0.018, 1.22)
+                double3 xformOp:translate = (2.335, 0.87, 1.22)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+        }
+    }
+
+    def "Lighting"
+    {
+        def Xform "industrial_office_lab" (
+            customData = {
+                string aloha_light_link_targets = "/scene/left_base_link, /scene/right_base_link, /World/PipePlaceholder"
+                string lighting_intent = "layered window light plus stage-style multi-angle highlights for black ALOHA"
+                string lighting_reference_photo = "/home/eii/Downloads/iphone/IMG_5334.JPG"
+                int satin_black_visuals_bound = 20
+                int stage_spot_light_count = 6
+            }
+        )
+        {
+            def Xform "Materials"
+            {
+                def Material "warm_fluorescent_panel"
+                {
+                    token outputs:surface.connect = </World/Lighting/industrial_office_lab/Materials/warm_fluorescent_panel/PreviewSurface.outputs:surface>
+
+                    def Shader "PreviewSurface"
+                    {
+                        uniform token info:id = "UsdPreviewSurface"
+                        color3f inputs:diffuseColor = (1, 0.94, 0.78)
+                        color3f inputs:emissiveColor = (1, 0.94, 0.78)
+                        float inputs:opacity = 1
+                        float inputs:roughness = 0.18
+                        token outputs:surface
+                    }
+                }
+
+                def Material "aloha_satin_black_for_indoor_light"
+                {
+                    token outputs:surface.connect = </World/Lighting/industrial_office_lab/Materials/aloha_satin_black_for_indoor_light/PreviewSurface.outputs:surface>
+
+                    def Shader "PreviewSurface"
+                    {
+                        uniform token info:id = "UsdPreviewSurface"
+                        color3f inputs:diffuseColor = (0.022, 0.021, 0.019)
+                        color3f inputs:emissiveColor = (0, 0, 0)
+                        float inputs:metallic = 0
+                        float inputs:opacity = 1
+                        float inputs:roughness = 0.42
+                        token outputs:surface
+                    }
+                }
+            }
+
+            def DomeLight "ambient_dome"
+            {
+                color3f inputs:color = (0.78, 0.83, 0.88)
+                float inputs:intensity = 105
+            }
+
+            def RectLight "soft_window_key_from_right"
+            {
+                color3f inputs:color = (0.86, 0.94, 1)
+                float inputs:diffuse = 0.74
+                float inputs:exposure = -0.25
+                float inputs:height = 1.34
+                float inputs:intensity = 1120
+                bool inputs:normalize = 1
+                float inputs:specular = 0.92
+                float inputs:width = 2.45
+                matrix4d xformOp:transform = ( (-0.024382992454708537, 0.9997026906430498, 1.7347234759768067e-18, 0), (-0.43818801417799114, -0.010687512540926617, 0.8988198046919281, 0), (0.8985525771537813, 0.021915916515945894, 0.4383183303189177, -0), (2.05, 0.05, 1.28, 1) )
+                uniform token[] xformOpOrder = ["xformOp:transform"]
+            }
+
+            def RectLight "large_softbox_over_workbench"
+            {
+                color3f inputs:color = (1, 0.98, 0.92)
+                float inputs:diffuse = 0.68
+                float inputs:exposure = -0.2
+                float inputs:height = 0.95
+                float inputs:intensity = 3400
+                bool inputs:normalize = 1
+                float inputs:specular = 1.05
+                float inputs:width = 1.65
+                matrix4d xformOp:transform = ( (1, 0, -0, 0), (0, 0.999951945025081, 0.009803450441422362, 0), (0, -0.009803450441422362, 0.999951945025081, 0), (0, -0.02, 2.2, 1) )
+                uniform token[] xformOpOrder = ["xformOp:transform"]
+            }
+
+            def Cube "large_softbox_over_workbench_visible_panel" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/Lighting/industrial_office_lab/Materials/warm_fluorescent_panel>
+                color3f[] primvars:displayColor = [(1, 0.96, 0.86)]
+                double size = 1
+                quatf xformOp:orient = (1, 0, 0, 0)
+                float3 xformOp:scale = (1.65, 0.95, 0.018)
+                double3 xformOp:translate = (0, -0.02, 2.2)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+            }
+
+            def RectLight "front_fill_for_black_aloha"
+            {
+                color3f inputs:color = (1, 0.97, 0.9)
+                float inputs:diffuse = 0.55
+                float inputs:exposure = -0.25
+                float inputs:height = 0.85
+                float inputs:intensity = 860
+                bool inputs:normalize = 1
+                float inputs:specular = 1
+                float inputs:width = 1.7
+                matrix4d xformOp:transform = ( (-1.0000000000000002, 0, 0, 0), (0, -0.4496758759515176, 0.8931918083968501, -0), (0, 0.89319180839685, 0.44967587595151753, -0), (0, 1.4499999999999997, 0.95, 1) )
+                uniform token[] xformOpOrder = ["xformOp:transform"]
+            }
+
+            def RectLight "camera_angle_aloha_beauty_key" (
+                customData = {
+                    bool intended_light_link_include_root = 0
+                    string intended_light_link_targets = "/scene/left_base_link, /scene/right_base_link, /World/PipePlaceholder"
+                }
+            )
+            {
+                color3f inputs:color = (0.96, 0.98, 1)
+                float inputs:diffuse = 0.2
+                float inputs:exposure = 0.35
+                float inputs:height = 0.34
+                float inputs:intensity = 2050
+                bool inputs:normalize = 1
+                float inputs:specular = 2.45
+                float inputs:width = 0.52
+                matrix4d xformOp:transform = ( (-0.9348985074237818, -0.3549151741145838, 2.7755575615628914e-17, 0), (0.12632850489845393, -0.33276776900080546, 0.9345088125664456, -0), (-0.33167135792363295, 0.8736708940427406, 0.3559399938692646, 0), (-0.8200000000000002, 2.1800000000000006, 1.1200000000000006, 1.0000000000000002) )
+                uniform token[] xformOpOrder = ["xformOp:transform"]
+            }
+
+            def RectLight "left_front_arm_highlight" (
+                customData = {
+                    bool intended_light_link_include_root = 0
+                    string intended_light_link_targets = "/scene/left_base_link, /scene/right_base_link, /World/PipePlaceholder"
+                }
+            )
+            {
+                color3f inputs:color = (1, 0.91, 0.8)
+                float inputs:diffuse = 0.28
+                float inputs:exposure = 0.2
+                float inputs:height = 0.42
+                float inputs:intensity = 1650
+                bool inputs:normalize = 1
+                float inputs:specular = 2.2
+                float inputs:width = 0.54
+                matrix4d xformOp:transform = ( (-0.8180887022730321, -0.5750920580335175, -2.775557561562892e-17, 0), (0.3287129345658173, -0.46760572381897964, 0.8205441448824415, -0), (-0.47188842098779593, 0.6712778946446112, 0.5715831578162035, 0), (-1.0500000000000003, 1.0400000000000003, 1.18, 1) )
+                uniform token[] xformOpOrder = ["xformOp:transform"]
+            }
+
+            def RectLight "right_front_arm_highlight" (
+                customData = {
+                    bool intended_light_link_include_root = 0
+                    string intended_light_link_targets = "/scene/left_base_link, /scene/right_base_link, /World/PipePlaceholder"
+                }
+            )
+            {
+                color3f inputs:color = (1, 0.92, 0.82)
+                float inputs:diffuse = 0.28
+                float inputs:exposure = 0.2
+                float inputs:height = 0.42
+                float inputs:intensity = 1650
+                bool inputs:normalize = 1
+                float inputs:specular = 2.2
+                float inputs:width = 0.54
+                matrix4d xformOp:transform = ( (-0.8180887022730321, 0.5750920580335175, 2.775557561562892e-17, 0), (-0.3287129345658173, -0.46760572381897964, 0.8205441448824415, 0), (0.47188842098779593, 0.6712778946446112, 0.5715831578162035, -0), (1.0500000000000003, 1.0400000000000003, 1.18, 1) )
+                uniform token[] xformOpOrder = ["xformOp:transform"]
+            }
+
+            def RectLight "rear_rim_light" (
+                customData = {
+                    bool intended_light_link_include_root = 0
+                    string intended_light_link_targets = "/scene/left_base_link, /scene/right_base_link, /World/PipePlaceholder"
+                }
+            )
+            {
+                color3f inputs:color = (0.82, 0.91, 1)
+                float inputs:diffuse = 0.18
+                float inputs:exposure = 0.45
+                float inputs:height = 0.36
+                float inputs:intensity = 1420
+                bool inputs:normalize = 1
+                float inputs:specular = 2.8
+                float inputs:width = 0.68
+                matrix4d xformOp:transform = ( (1, 0, -0, 0), (0, 0.6787925315325735, 0.7343301022943294, 0), (0, -0.7343301022943294, 0.6787925315325735, 0), (0, -1.22, 1.58, 1) )
+                uniform token[] xformOpOrder = ["xformOp:transform"]
+            }
+
+            def RectLight "pipe_task_highlight" (
+                customData = {
+                    bool intended_light_link_include_root = 0
+                    string intended_light_link_targets = "/scene/left_base_link, /scene/right_base_link, /World/PipePlaceholder"
+                }
+            )
+            {
+                color3f inputs:color = (1, 0.96, 0.84)
+                float inputs:diffuse = 0.34
+                float inputs:exposure = 0.1
+                float inputs:height = 0.24
+                float inputs:intensity = 1180
+                bool inputs:normalize = 1
+                float inputs:specular = 1.75
+                float inputs:width = 0.34
+                matrix4d xformOp:transform = ( (-0.5311351897557698, 0.8472870884199182, 0, 0), (-0.6791316407919257, -0.4257243121382221, 0.5979456702157014, 0), (0.5066316459503584, 0.31758998701365754, 0.8015366338916117, -0), (0.7200000000000001, 0.7200000000000002, 1.38, 1.0000000000000002) )
+                uniform token[] xformOpOrder = ["xformOp:transform"]
+            }
+
+            def RectLight "low_cross_fill" (
+                customData = {
+                    bool intended_light_link_include_root = 0
+                    string intended_light_link_targets = "/scene/left_base_link, /scene/right_base_link, /World/PipePlaceholder"
+                }
+            )
+            {
+                color3f inputs:color = (0.92, 0.96, 1)
+                float inputs:diffuse = 0.32
+                float inputs:exposure = -0.1
+                float inputs:height = 0.38
+                float inputs:intensity = 740
+                bool inputs:normalize = 1
+                float inputs:specular = 1.4
+                float inputs:width = 0.78
+                matrix4d xformOp:transform = ( (-0.6024069059118721, -0.7981891503332307, -1.3877787807814457e-17, 0), (0.1979694768132243, -0.14941092589677304, 0.9687540768806948, -0), (-0.7732489935072551, 0.5835841460432113, 0.24802326206836478, 0), (-0.88, 0.78, 0.5799999999999998, 0.9999999999999999) )
+                uniform token[] xformOpOrder = ["xformOp:transform"]
+            }
+
+            def RectLight "left_cabinet_soft_fill"
+            {
+                color3f inputs:color = (1, 0.98, 0.93)
+                float inputs:diffuse = 0.64
+                float inputs:exposure = -0.3
+                float inputs:height = 1.25
+                float inputs:intensity = 650
+                bool inputs:normalize = 1
+                float inputs:specular = 0.9
+                float inputs:width = 1.75
+                matrix4d xformOp:transform = ( (-0.027163885694948497, -0.9996309935741047, 0, 0), (0.3464097138703684, -0.009413307442129577, 0.9380360866082121, -0), (-0.9376899452645321, 0.02548070503436229, 0.34653758846732713, 0), (-1.8800000000000001, 0.05000000000000001, 0.9200000000000002, 1) )
+                uniform token[] xformOpOrder = ["xformOp:transform"]
+            }
+
+            def RectLight "rear_wall_gentle_fill"
+            {
+                color3f inputs:color = (1, 0.98, 0.93)
+                float inputs:diffuse = 0.58
+                float inputs:exposure = -0.35
+                float inputs:height = 1.35
+                float inputs:intensity = 470
+                bool inputs:normalize = 1
+                float inputs:specular = 0.82
+                float inputs:width = 2.4
+                matrix4d xformOp:transform = ( (1, 0, -0, 0), (0, 0.49869419222966477, 0.8667780007801316, 0), (0, -0.8667780007801316, 0.49869419222966477, 0), (0, -1.4599999999999997, 1.08, 1) )
+                uniform token[] xformOpOrder = ["xformOp:transform"]
+            }
+
+            def RectLight "ceiling_strip_workbench_1"
+            {
+                color3f inputs:color = (1, 0.96, 0.88)
+                float inputs:diffuse = 0.72
+                float inputs:exposure = -0.3
+                float inputs:height = 0.065
+                float inputs:intensity = 360
+                bool inputs:normalize = 1
+                float inputs:specular = 0.88
+                float inputs:width = 0.46
+                matrix4d xformOp:transform = ( (0.7893522173763264, -0.6139406135149206, 1.387778780781446e-17, 0), (0.592496333153704, 0.761780999769048, 0.2619881745237466, 0), (-0.16084518060076305, -0.20680094648669534, 0.9650710836045784, 0), (-0.6600000000000001, -0.42000000000000004, 1.8600000000000005, 1.0000000000000002) )
+                uniform token[] xformOpOrder = ["xformOp:transform"]
+            }
+
+            def Cube "ceiling_strip_workbench_1_visible_panel" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/Lighting/industrial_office_lab/Materials/warm_fluorescent_panel>
+                color3f[] primvars:displayColor = [(1, 0.96, 0.86)]
+                double size = 1
+                quatf xformOp:orient = (1, 0, 0, 0)
+                float3 xformOp:scale = (0.46, 0.065, 0.018)
+                double3 xformOp:translate = (-0.66, -0.42, 1.86)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+            }
+
+            def RectLight "ceiling_strip_workbench_2"
+            {
+                color3f inputs:color = (1, 0.96, 0.88)
+                float inputs:diffuse = 0.72
+                float inputs:exposure = -0.3
+                float inputs:height = 0.065
+                float inputs:intensity = 360
+                bool inputs:normalize = 1
+                float inputs:specular = 0.88
+                float inputs:width = 0.46
+                matrix4d xformOp:transform = ( (0.9730802874900094, -0.23046638387921276, 6.938893903907228e-18, 0), (0.2247465372077658, 0.9489298237661223, 0.22140727987199152, 0), (-0.05102693515663069, -0.21544705955021848, 0.9751814274378311, 0), (-0.21999999999999997, -0.42, 1.9000000000000001, 1.0000000000000002) )
+                uniform token[] xformOpOrder = ["xformOp:transform"]
+            }
+
+            def Cube "ceiling_strip_workbench_2_visible_panel" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/Lighting/industrial_office_lab/Materials/warm_fluorescent_panel>
+                color3f[] primvars:displayColor = [(1, 0.96, 0.86)]
+                double size = 1
+                quatf xformOp:orient = (1, 0, 0, 0)
+                float3 xformOp:scale = (0.46, 0.065, 0.018)
+                double3 xformOp:translate = (-0.22, -0.42, 1.9)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+            }
+
+            def RectLight "ceiling_strip_workbench_3"
+            {
+                color3f inputs:color = (1, 0.96, 0.88)
+                float inputs:diffuse = 0.72
+                float inputs:exposure = -0.3
+                float inputs:height = 0.065
+                float inputs:intensity = 360
+                bool inputs:normalize = 1
+                float inputs:specular = 0.88
+                float inputs:width = 0.46
+                matrix4d xformOp:transform = ( (0.9730802874900094, 0.23046638387921276, -6.938893903907228e-18, 0), (-0.2247465372077658, 0.9489298237661223, 0.22140727987199152, -0), (0.05102693515663069, -0.21544705955021848, 0.9751814274378311, 0), (0.21999999999999997, -0.42, 1.9000000000000001, 1.0000000000000002) )
+                uniform token[] xformOpOrder = ["xformOp:transform"]
+            }
+
+            def Cube "ceiling_strip_workbench_3_visible_panel" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/Lighting/industrial_office_lab/Materials/warm_fluorescent_panel>
+                color3f[] primvars:displayColor = [(1, 0.96, 0.86)]
+                double size = 1
+                quatf xformOp:orient = (1, 0, 0, 0)
+                float3 xformOp:scale = (0.46, 0.065, 0.018)
+                double3 xformOp:translate = (0.22, -0.42, 1.9)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+            }
+
+            def RectLight "ceiling_strip_workbench_4"
+            {
+                color3f inputs:color = (1, 0.96, 0.88)
+                float inputs:diffuse = 0.72
+                float inputs:exposure = -0.3
+                float inputs:height = 0.065
+                float inputs:intensity = 360
+                bool inputs:normalize = 1
+                float inputs:specular = 0.88
+                float inputs:width = 0.46
+                matrix4d xformOp:transform = ( (0.7893522173763264, 0.6139406135149206, -1.387778780781446e-17, 0), (-0.592496333153704, 0.761780999769048, 0.2619881745237466, -0), (0.16084518060076305, -0.20680094648669534, 0.9650710836045784, 0), (0.6600000000000001, -0.42000000000000004, 1.8600000000000005, 1.0000000000000002) )
+                uniform token[] xformOpOrder = ["xformOp:transform"]
+            }
+
+            def Cube "ceiling_strip_workbench_4_visible_panel" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/Lighting/industrial_office_lab/Materials/warm_fluorescent_panel>
+                color3f[] primvars:displayColor = [(1, 0.96, 0.86)]
+                double size = 1
+                quatf xformOp:orient = (1, 0, 0, 0)
+                float3 xformOp:scale = (0.46, 0.065, 0.018)
+                double3 xformOp:translate = (0.66, -0.42, 1.86)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+            }
+
+            def RectLight "ceiling_strip_background_1"
+            {
+                color3f inputs:color = (1, 0.96, 0.88)
+                float inputs:diffuse = 0.72
+                float inputs:exposure = -0.3
+                float inputs:height = 0.07
+                float inputs:intensity = 260
+                bool inputs:normalize = 1
+                float inputs:specular = 0.88
+                float inputs:width = 0.5
+                matrix4d xformOp:transform = ( (-0.7619393177594596, -0.6476484200955406, 0, 0), (0.6200420218768493, -0.7294612022080582, 0.2888498668513517, -0), (-0.18707315991108514, 0.22008607048362963, 0.9573744066037888, 0), (-0.7200000000000001, 0.48000000000000015, 1.9399999999999997, 1) )
+                uniform token[] xformOpOrder = ["xformOp:transform"]
+            }
+
+            def Cube "ceiling_strip_background_1_visible_panel" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/Lighting/industrial_office_lab/Materials/warm_fluorescent_panel>
+                color3f[] primvars:displayColor = [(1, 0.96, 0.86)]
+                double size = 1
+                quatf xformOp:orient = (1, 0, 0, 0)
+                float3 xformOp:scale = (0.5, 0.07, 0.018)
+                double3 xformOp:translate = (-0.72, 0.48, 1.94)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+            }
+
+            def RectLight "ceiling_strip_background_2"
+            {
+                color3f inputs:color = (1, 0.96, 0.88)
+                float inputs:diffuse = 0.72
+                float inputs:exposure = -0.3
+                float inputs:height = 0.07
+                float inputs:intensity = 260
+                bool inputs:normalize = 1
+                float inputs:specular = 0.88
+                float inputs:width = 0.5
+                matrix4d xformOp:transform = ( (-0.9642053928037901, -0.2651564830210423, 0, 0), (0.258235838419868, -0.9390394124358837, 0.226978487191314, -0), (-0.06018481738508554, 0.21885388140031103, 0.9738997722313842, 0), (-0.23999999999999994, 0.47999999999999987, 1.9799999999999998, 1) )
+                uniform token[] xformOpOrder = ["xformOp:transform"]
+            }
+
+            def Cube "ceiling_strip_background_2_visible_panel" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/Lighting/industrial_office_lab/Materials/warm_fluorescent_panel>
+                color3f[] primvars:displayColor = [(1, 0.96, 0.86)]
+                double size = 1
+                quatf xformOp:orient = (1, 0, 0, 0)
+                float3 xformOp:scale = (0.5, 0.07, 0.018)
+                double3 xformOp:translate = (-0.24, 0.48, 1.98)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+            }
+
+            def RectLight "ceiling_strip_background_3"
+            {
+                color3f inputs:color = (1, 0.96, 0.88)
+                float inputs:diffuse = 0.72
+                float inputs:exposure = -0.3
+                float inputs:height = 0.07
+                float inputs:intensity = 260
+                bool inputs:normalize = 1
+                float inputs:specular = 0.88
+                float inputs:width = 0.5
+                matrix4d xformOp:transform = ( (-0.9642053928037901, 0.2651564830210423, 0, 0), (-0.258235838419868, -0.9390394124358837, 0.226978487191314, 0), (0.06018481738508554, 0.21885388140031103, 0.9738997722313842, -0), (0.23999999999999994, 0.47999999999999987, 1.9799999999999998, 1) )
+                uniform token[] xformOpOrder = ["xformOp:transform"]
+            }
+
+            def Cube "ceiling_strip_background_3_visible_panel" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/Lighting/industrial_office_lab/Materials/warm_fluorescent_panel>
+                color3f[] primvars:displayColor = [(1, 0.96, 0.86)]
+                double size = 1
+                quatf xformOp:orient = (1, 0, 0, 0)
+                float3 xformOp:scale = (0.5, 0.07, 0.018)
+                double3 xformOp:translate = (0.24, 0.48, 1.98)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+            }
+
+            def RectLight "ceiling_strip_background_4"
+            {
+                color3f inputs:color = (1, 0.96, 0.88)
+                float inputs:diffuse = 0.72
+                float inputs:exposure = -0.3
+                float inputs:height = 0.07
+                float inputs:intensity = 260
+                bool inputs:normalize = 1
+                float inputs:specular = 0.88
+                float inputs:width = 0.5
+                matrix4d xformOp:transform = ( (-0.7619393177594596, 0.6476484200955406, 0, 0), (-0.6200420218768493, -0.7294612022080582, 0.2888498668513517, 0), (0.18707315991108514, 0.22008607048362963, 0.9573744066037888, -0), (0.7200000000000001, 0.48000000000000015, 1.9399999999999997, 1) )
+                uniform token[] xformOpOrder = ["xformOp:transform"]
+            }
+
+            def Cube "ceiling_strip_background_4_visible_panel" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/Lighting/industrial_office_lab/Materials/warm_fluorescent_panel>
+                color3f[] primvars:displayColor = [(1, 0.96, 0.86)]
+                double size = 1
+                quatf xformOp:orient = (1, 0, 0, 0)
+                float3 xformOp:scale = (0.5, 0.07, 0.018)
+                double3 xformOp:translate = (0.72, 0.48, 1.94)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+            }
+        }
+    }
+
+    def "Cameras"
+    {
+        def Camera "cam_low" (
+            customData = {
+                string aloha_name = "cam_low"
+            }
+        )
+        {
+            float focalLength = 18
+            quatf xformOp:orient = (0.89304125, 0.4493741, -0.023243489, 0)
+            double3 xformOp:translate = (0, -0.28, 0.55)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient"]
+        }
+
+        def Camera "cam_right_wrist_hint" (
+            customData = {
+                string aloha_name = "cam_right_wrist"
+            }
+        )
+        {
+            float focalLength = 18
+            quatf xformOp:orient = (0.8246294, 0.34728983, 0.4465155, 0)
+            double3 xformOp:translate = (0.48, -0.05, 0.34)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient"]
+        }
+    }
+}
+
+over "scene"
+{
+    over "left_base_link"
+    {
+        over "left_base_link"
+        {
+            over "visuals" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/Lighting/industrial_office_lab/Materials/aloha_satin_black_for_indoor_light>
+            }
+        }
+
+        over "left_shoulder_link"
+        {
+            over "visuals" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/Lighting/industrial_office_lab/Materials/aloha_satin_black_for_indoor_light>
+            }
+        }
+
+        over "left_upper_arm_link"
+        {
+            over "visuals" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/Lighting/industrial_office_lab/Materials/aloha_satin_black_for_indoor_light>
+            }
+        }
+
+        over "left_upper_forearm_link"
+        {
+            over "visuals" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/Lighting/industrial_office_lab/Materials/aloha_satin_black_for_indoor_light>
+            }
+        }
+
+        over "left_lower_forearm_link"
+        {
+            over "visuals" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/Lighting/industrial_office_lab/Materials/aloha_satin_black_for_indoor_light>
+            }
+        }
+
+        over "left_wrist_link"
+        {
+            over "visuals" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/Lighting/industrial_office_lab/Materials/aloha_satin_black_for_indoor_light>
+            }
+        }
+
+        over "left_gripper_link"
+        {
+            over "visuals" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/Lighting/industrial_office_lab/Materials/aloha_satin_black_for_indoor_light>
+            }
+        }
+
+        over "left_gripper_base"
+        {
+            over "visuals" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/Lighting/industrial_office_lab/Materials/aloha_satin_black_for_indoor_light>
+            }
+        }
+
+        over "left_left_finger_link"
+        {
+            over "visuals" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/Lighting/industrial_office_lab/Materials/aloha_satin_black_for_indoor_light>
+            }
+        }
+
+        over "left_right_finger_link"
+        {
+            over "visuals" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/Lighting/industrial_office_lab/Materials/aloha_satin_black_for_indoor_light>
+            }
+        }
+    }
+
+    over "right_base_link"
+    {
+        over "right_base_link"
+        {
+            over "visuals" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/Lighting/industrial_office_lab/Materials/aloha_satin_black_for_indoor_light>
+            }
+        }
+
+        over "right_shoulder_link"
+        {
+            over "visuals" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/Lighting/industrial_office_lab/Materials/aloha_satin_black_for_indoor_light>
+            }
+        }
+
+        over "right_upper_arm_link"
+        {
+            over "visuals" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/Lighting/industrial_office_lab/Materials/aloha_satin_black_for_indoor_light>
+            }
+        }
+
+        over "right_upper_forearm_link"
+        {
+            over "visuals" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/Lighting/industrial_office_lab/Materials/aloha_satin_black_for_indoor_light>
+            }
+        }
+
+        over "right_lower_forearm_link"
+        {
+            over "visuals" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/Lighting/industrial_office_lab/Materials/aloha_satin_black_for_indoor_light>
+            }
+        }
+
+        over "right_wrist_link"
+        {
+            over "visuals" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/Lighting/industrial_office_lab/Materials/aloha_satin_black_for_indoor_light>
+            }
+        }
+
+        over "right_gripper_link"
+        {
+            over "visuals" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/Lighting/industrial_office_lab/Materials/aloha_satin_black_for_indoor_light>
+            }
+        }
+
+        over "right_gripper_base"
+        {
+            over "visuals" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/Lighting/industrial_office_lab/Materials/aloha_satin_black_for_indoor_light>
+            }
+        }
+
+        over "right_left_finger_link"
+        {
+            over "visuals" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/Lighting/industrial_office_lab/Materials/aloha_satin_black_for_indoor_light>
+            }
+        }
+
+        over "right_right_finger_link"
+        {
+            over "visuals" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </World/Lighting/industrial_office_lab/Materials/aloha_satin_black_for_indoor_light>
+            }
+        }
+    }
+}
+
+over "Render"
+{
+    over "OmniverseKit"
+    {
+        over "HydraTextures"
+        {
+            over "omni_kit_widget_viewport_ViewportTexture_0"
+            {
+                rel camera = </OmniverseKit_Persp>
+                token omni:rtx:background:source:texture:textureMode = "repeatMirrored"
+                token omni:rtx:background:source:type = "domeLight"
+                rel orderedVars = </Render/Vars/LdrColor>
+                custom bool overrideClipRange = 0
+                uniform int2 resolution = (320, 240)
+            }
+        }
+    }
+}
+

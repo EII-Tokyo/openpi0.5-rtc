@@ -1,0 +1,20 @@
+#usda 1.0
+(
+    defaultPrim = "follower_left"
+    metersPerUnit = 1
+    subLayers = [
+        @physics/aloha1_signal_follower_left_physics.usda@,
+        @configuration/aloha1_signal_follower_left_configuration.usda@,
+        @geometry/aloha1_signal_follower_left_geometry.usda@
+    ]
+    upAxis = "Z"
+)
+
+def Xform "follower_left"
+{
+    def Xform "vx300s_left" (
+        prepend references = @../../../../follower_vx300s/follower_left/follower_left.usd@</follower_left>
+    )
+    {
+    }
+}
