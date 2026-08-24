@@ -1,0 +1,11 @@
+{
+  "simulation_only": true,
+  "horizontal_on_table": true,
+  "save_stage": false,
+  "physics_hz": [200],
+  "finger_approximations": ["convexHull", "convexDecomposition"],
+  "repeats_per_approximation": 2,
+  "center_world_m": [-0.202153, -0.046512, 0.034],
+  "yaw_deg": -11.754,
+  "experiment_note": "Fingertip-only smoke: real ALOHA finger colliders; non-finger left robot colliders disabled; 180 mm 0.2 kg horizontal Cylinder; own lower-end one-third grasp"
+}

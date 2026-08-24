@@ -1,0 +1,448 @@
+{
+  "status": "NO_SAFE_ROUTE",
+  "timestamp": "2026-08-23T18:26:50.998",
+  "cap_axis_start_world": [
+    0.999938925334827,
+    0.010421442650957437,
+    -0.003679556128731498
+  ],
+  "alignment_axis_world": [
+    0.010421513200324457,
+    -0.9999456945567671,
+    0.0
+  ],
+  "alignment_angle_rad": 1.574475891226679,
+  "endpoint_orientation_candidates": [
+    {
+      "final_roll_deg": 0.0,
+      "success": true,
+      "joint_distance_rad": 1.9811802712930644,
+      "joints_rad": [
+        0.047844668363396015,
+        -0.08913557041297508,
+        0.8071649791577968,
+        0.05714100732677557,
+        -0.7213576305586211,
+        -0.03252179744997505
+      ],
+      "orientation_wxyz": [
+        0.9999734544728812,
+        0.005261443384142829,
+        -0.0010485680014022392,
+        0.004930321311472145
+      ]
+    },
+    {
+      "final_roll_deg": 45.0,
+      "success": true,
+      "joint_distance_rad": 3.0265522183055324,
+      "joints_rad": [
+        -0.34605633283875237,
+        0.11714318990907806,
+        0.5439080859036752,
+        1.8461857597687068,
+        1.237814806554562,
+        -2.26758821390479
+      ],
+      "orientation_wxyz": [
+        0.9219682553599652,
+        0.0052622094559212915,
+        0.0010447166984966045,
+        0.3872282967800314
+      ]
+    },
+    {
+      "final_roll_deg": -45.0,
+      "success": true,
+      "joint_distance_rad": 2.952018709027592,
+      "joints_rad": [
+        0.4203385693844403,
+        0.13712179211750794,
+        0.5157944086019431,
+        -1.8071814988965658,
+        1.277143294097023,
+        2.27091248050983
+      ],
+      "orientation_wxyz": [
+        0.9257417599242389,
+        0.004459670252231678,
+        -0.002982217728380152,
+        -0.3781182508832847
+      ]
+    },
+    {
+      "final_roll_deg": 90.0,
+      "success": true,
+      "joint_distance_rad": 2.6719462636194726,
+      "joints_rad": [
+        -0.3566399433811149,
+        0.49657070634570877,
+        -0.052970000843714796,
+        1.410482907249915,
+        1.9017143726366936,
+        -2.029745834716224
+      ],
+      "orientation_wxyz": [
+        0.7036017470315412,
+        0.004461851840083242,
+        0.0029789527514297383,
+        0.7105742742970822
+      ]
+    },
+    {
+      "final_roll_deg": -90.0,
+      "success": true,
+      "joint_distance_rad": 2.6363552606108844,
+      "joints_rad": [
+        0.41532983347575503,
+        0.5190798036693296,
+        -0.09202093791382587,
+        -1.3978556791565033,
+        1.9387252624101323,
+        2.0403349512256934
+      ],
+      "orientation_wxyz": [
+        0.7105742742970822,
+        0.002978952751429731,
+        -0.004461851840083249,
+        -0.7036017470315412
+      ]
+    },
+    {
+      "final_roll_deg": 135.0,
+      "success": false,
+      "joint_distance_rad": 4.410949910156417,
+      "joints_rad": [
+        -0.19328679090520004,
+        1.46873558319782,
+        -1.9382009854937237,
+        -0.968919984842505,
+        3.8734769657984,
+        2.327489820954574
+      ],
+      "orientation_wxyz": [
+        0.3781182508832848,
+        0.0029822177283800877,
+        0.004459670252231683,
+        0.9257417599242389
+      ]
+    },
+    {
+      "final_roll_deg": -135.0,
+      "success": false,
+      "joint_distance_rad": 2.817725030127385,
+      "joints_rad": [
+        5.33101449134033e-310,
+        0.0,
+        -0.20697790369860217,
+        1.080214909399956,
+        2.234021442552742,
+        -2.231047682932348
+      ],
+      "orientation_wxyz": [
+        0.3872282967800314,
+        0.001044716698496595,
+        -0.005262209455921295,
+        -0.9219682553599652
+      ]
+    },
+    {
+      "final_roll_deg": 180.0,
+      "success": false,
+      "joint_distance_rad": 4.443947678115269,
+      "joints_rad": [
+        -3.116488972260757,
+        -1.5988099550675454,
+        -1.3748575003593846,
+        -0.09777117063490696,
+        2.953650507810539,
+        -0.08589158164663148
+      ],
+      "orientation_wxyz": [
+        -0.004930321311472083,
+        0.0010485680014022949,
+        0.005261443384142831,
+        0.9999734544728813
+      ]
+    }
+  ],
+  "chosen_final_roll_deg": 0.0,
+  "start_ee_position_m": [
+    -0.03432195606938737,
+    -0.0048450658585913065,
+    0.07423473961167867
+  ],
+  "start_ee_orientation_wxyz": [
+    0.7065675423202575,
+    -0.000176438482046107,
+    0.7076455466341058,
+    -0.0002394533164281058
+  ],
+  "bottle_position_m": [
+    -0.10188087821006775,
+    -0.00691793579608202,
+    0.03452419862151146
+  ],
+  "bottle_orientation_wxyz": [
+    0.7057963749947312,
+    -0.003949781624710665,
+    0.708395494966959,
+    0.0034203771621248726
+  ],
+  "attempts": [
+    {
+      "lift_distance_m": 0.1777197401426648,
+      "chosen_final_roll_deg": 0.0,
+      "sample_count": 137,
+      "failure": null,
+      "maximum_joint_step_rad": 2.357797575891841,
+      "maximum_cartesian_step_m": 0.004135060402567198,
+      "maximum_orientation_step_rad": 0.028939557837764078,
+      "maximum_fk_position_error_m": 0.000464947251157765,
+      "maximum_fk_orientation_error_rad": 0.002282157366749162,
+      "minimum_predicted_bottle_bottom_z_m": 0.03452419862151145,
+      "final_predicted_cap_axis_world": [
+        -2.3580085532949034e-16,
+        -5.4862587498581256e-18,
+        1.0000000000000004
+      ],
+      "final_predicted_cap_axis_error_rad": 0.0
+    },
+    {
+      "lift_distance_m": 0.1777197401426648,
+      "chosen_final_roll_deg": 0.0,
+      "sample_count": 206,
+      "failure": null,
+      "maximum_joint_step_rad": 2.604323522455677,
+      "maximum_cartesian_step_m": 0.0027433583378070614,
+      "maximum_orientation_step_rad": 0.01920050245373965,
+      "maximum_fk_position_error_m": 0.0004648489576116559,
+      "maximum_fk_orientation_error_rad": 0.0022319319581237274,
+      "minimum_predicted_bottle_bottom_z_m": 0.03452419862151145,
+      "final_predicted_cap_axis_world": [
+        -2.3580085532949034e-16,
+        -5.4862587498581256e-18,
+        1.0000000000000004
+      ],
+      "final_predicted_cap_axis_error_rad": 0.0
+    },
+    {
+      "lift_distance_m": 0.1777197401426648,
+      "chosen_final_roll_deg": 0.0,
+      "sample_count": 274,
+      "failure": null,
+      "maximum_joint_step_rad": 2.730936499633069,
+      "maximum_cartesian_step_m": 0.002060375052767266,
+      "maximum_orientation_step_rad": 0.014417754337356098,
+      "maximum_fk_position_error_m": 0.0004885315138103461,
+      "maximum_fk_orientation_error_rad": 0.0022627045165258754,
+      "minimum_predicted_bottle_bottom_z_m": 0.03452419862151145,
+      "final_predicted_cap_axis_world": [
+        -2.3580085532949034e-16,
+        -5.4862587498581256e-18,
+        1.0000000000000004
+      ],
+      "final_predicted_cap_axis_error_rad": 0.0
+    },
+    {
+      "lift_distance_m": 0.1777197401426648,
+      "chosen_final_roll_deg": 0.0,
+      "sample_count": 411,
+      "failure": null,
+      "maximum_joint_step_rad": 2.8648752708194367,
+      "maximum_cartesian_step_m": 0.0013718832068600195,
+      "maximum_orientation_step_rad": 0.009600251226856952,
+      "maximum_fk_position_error_m": 0.0004648489576116559,
+      "maximum_fk_orientation_error_rad": 0.002299887977135113,
+      "minimum_predicted_bottle_bottom_z_m": 0.03452419862151145,
+      "final_predicted_cap_axis_world": [
+        -2.3580085532949034e-16,
+        -5.4862587498581256e-18,
+        1.0000000000000004
+      ],
+      "final_predicted_cap_axis_error_rad": 0.0
+    }
+  ],
+  "joint_continuous_attempts": [
+    {
+      "trajectory_type": "FK_VALIDATED_CONTINUOUS_JOINT_LIFT_ROTATE",
+      "lift_distance_m": 0.1777197401426648,
+      "final_roll_deg": 0.0,
+      "endpoint_ik_success": true,
+      "sample_count": 337,
+      "maximum_joint_step_rad": 0.009985438876138453,
+      "maximum_ee_step_m": 0.0034588711358935907,
+      "maximum_ee_z_drop_per_step_m": 0.00044066146438337395,
+      "maximum_cap_axis_error_increase_rad": 1.9112412826821938e-05,
+      "minimum_predicted_bottle_bottom_z_m": 0.03452419862151145,
+      "quarter_progress_lift_m": 0.14549013553589582,
+      "quarter_progress_cap_rotation_rad": 0.04957072102111315,
+      "maximum_rotation_before_clearance_rad": 0.0003911058015939606,
+      "rotation_start_bottle_lift_m": 0.1442025720015267,
+      "minimum_bottle_lift_during_rotation_m": 0.08892408444836115,
+      "actual_fk_lift_m": 0.1777193650466122,
+      "final_predicted_bottle_lift_m": 0.15001130180716746,
+      "final_predicted_cap_axis_world": [
+        -0.0003221996262753283,
+        -0.0013644414161829274,
+        0.9999990172430289
+      ],
+      "final_predicted_cap_axis_error_rad": 0.0014019679968556573,
+      "checks": {
+        "joint_step": true,
+        "ee_step": true,
+        "no_downward_ee_step": true,
+        "cap_error_monotonic": true,
+        "bottle_bottom_sweep": true,
+        "bottle_lift_height": true,
+        "cap_axis": true,
+        "clearance_then_lift_rotate": false
+      },
+      "failure": "FK sweep gate failed"
+    },
+    {
+      "trajectory_type": "FK_VALIDATED_CONTINUOUS_JOINT_LIFT_ROTATE",
+      "lift_distance_m": 0.1777197401426648,
+      "final_roll_deg": 45.0,
+      "endpoint_ik_success": true,
+      "sample_count": 346,
+      "maximum_joint_step_rad": 0.009987759234001192,
+      "maximum_ee_step_m": 0.0034588711358935907,
+      "maximum_ee_z_drop_per_step_m": 0.0003870668400434707,
+      "maximum_cap_axis_error_increase_rad": 0.00038110583187411784,
+      "minimum_predicted_bottle_bottom_z_m": 0.03452419862151145,
+      "quarter_progress_lift_m": 0.1446116844489818,
+      "quarter_progress_cap_rotation_rad": -0.007871426974828122,
+      "maximum_rotation_before_clearance_rad": 0.0003911058015939606,
+      "rotation_start_bottle_lift_m": 0.13140277421087307,
+      "minimum_bottle_lift_during_rotation_m": 0.11337254595527604,
+      "actual_fk_lift_m": 0.17771973822859358,
+      "final_predicted_bottle_lift_m": 0.1500375040917501,
+      "final_predicted_cap_axis_world": [
+        -0.0001972796264059175,
+        -0.001150214453795319,
+        0.9999993190434983
+      ],
+      "final_predicted_cap_axis_error_rad": 0.0011670103504472147,
+      "checks": {
+        "joint_step": true,
+        "ee_step": true,
+        "no_downward_ee_step": true,
+        "cap_error_monotonic": true,
+        "bottle_bottom_sweep": true,
+        "bottle_lift_height": true,
+        "cap_axis": true,
+        "clearance_then_lift_rotate": false
+      },
+      "failure": "FK sweep gate failed"
+    },
+    {
+      "trajectory_type": "FK_VALIDATED_CONTINUOUS_JOINT_LIFT_ROTATE",
+      "lift_distance_m": 0.1777197401426648,
+      "final_roll_deg": -45.0,
+      "endpoint_ik_success": true,
+      "sample_count": 338,
+      "maximum_joint_step_rad": 0.009987200053101386,
+      "maximum_ee_step_m": 0.0034588711358935907,
+      "maximum_ee_z_drop_per_step_m": 0.00040521980570412675,
+      "maximum_cap_axis_error_increase_rad": 0.0003219520561499323,
+      "minimum_predicted_bottle_bottom_z_m": 0.03452419862151145,
+      "quarter_progress_lift_m": 0.14496870055931324,
+      "quarter_progress_cap_rotation_rad": -0.006110213920259788,
+      "maximum_rotation_before_clearance_rad": 0.0003911058015939606,
+      "rotation_start_bottle_lift_m": 0.13216705367341006,
+      "minimum_bottle_lift_during_rotation_m": 0.1131335553671379,
+      "actual_fk_lift_m": 0.1777197100199456,
+      "final_predicted_bottle_lift_m": 0.15001981213144128,
+      "final_predicted_cap_axis_world": [
+        -0.00037357851379296716,
+        0.00032921530459302354,
+        0.9999998760281813
+      ],
+      "final_predicted_cap_axis_error_rad": 0.0004979393964351699,
+      "checks": {
+        "joint_step": true,
+        "ee_step": true,
+        "no_downward_ee_step": true,
+        "cap_error_monotonic": true,
+        "bottle_bottom_sweep": true,
+        "bottle_lift_height": true,
+        "cap_axis": true,
+        "clearance_then_lift_rotate": false
+      },
+      "failure": "FK sweep gate failed"
+    },
+    {
+      "trajectory_type": "FK_VALIDATED_CONTINUOUS_JOINT_LIFT_ROTATE",
+      "lift_distance_m": 0.1777197401426648,
+      "final_roll_deg": 90.0,
+      "endpoint_ik_success": true,
+      "sample_count": 316,
+      "maximum_joint_step_rad": 0.009986263225372216,
+      "maximum_ee_step_m": 0.0034588711358935907,
+      "maximum_ee_z_drop_per_step_m": 0.0004432289258184674,
+      "maximum_cap_axis_error_increase_rad": 0.0015733342066150957,
+      "minimum_predicted_bottle_bottom_z_m": 0.03452419862151145,
+      "quarter_progress_lift_m": 0.146522625299672,
+      "quarter_progress_cap_rotation_rad": -0.01778980885467596,
+      "maximum_rotation_before_clearance_rad": 0.0003911058015939606,
+      "rotation_start_bottle_lift_m": 0.12711742221428057,
+      "minimum_bottle_lift_during_rotation_m": 0.11532919364518918,
+      "actual_fk_lift_m": 0.17771955237494155,
+      "final_predicted_bottle_lift_m": 0.15000696416406872,
+      "final_predicted_cap_axis_world": [
+        0.00023191441300073686,
+        -0.00018469939166487824,
+        0.9999999560509193
+      ],
+      "final_predicted_cap_axis_error_rad": 0.00029647624198225135,
+      "checks": {
+        "joint_step": true,
+        "ee_step": true,
+        "no_downward_ee_step": true,
+        "cap_error_monotonic": true,
+        "bottle_bottom_sweep": true,
+        "bottle_lift_height": true,
+        "cap_axis": true,
+        "clearance_then_lift_rotate": false
+      },
+      "failure": "FK sweep gate failed"
+    },
+    {
+      "trajectory_type": "FK_VALIDATED_CONTINUOUS_JOINT_LIFT_ROTATE",
+      "lift_distance_m": 0.1777197401426648,
+      "final_roll_deg": -90.0,
+      "endpoint_ik_success": true,
+      "sample_count": 309,
+      "maximum_joint_step_rad": 0.009987857940248368,
+      "maximum_ee_step_m": 0.0034588711358935907,
+      "maximum_ee_z_drop_per_step_m": 0.00044873165615361144,
+      "maximum_cap_axis_error_increase_rad": 0.0015074915397916833,
+      "minimum_predicted_bottle_bottom_z_m": 0.03452419862151145,
+      "quarter_progress_lift_m": 0.1469632933967559,
+      "quarter_progress_cap_rotation_rad": -0.01492952339755238,
+      "maximum_rotation_before_clearance_rad": 0.0003911058015939606,
+      "rotation_start_bottle_lift_m": 0.12847265496489452,
+      "minimum_bottle_lift_during_rotation_m": 0.11728829934397411,
+      "actual_fk_lift_m": 0.1777198399901774,
+      "final_predicted_bottle_lift_m": 0.15001368976424617,
+      "final_predicted_cap_axis_world": [
+        1.6338110344286126e-05,
+        0.00033951488543203966,
+        0.9999999422313531
+      ],
+      "final_predicted_cap_axis_error_rad": 0.00033990777402799304,
+      "checks": {
+        "joint_step": true,
+        "ee_step": true,
+        "no_downward_ee_step": true,
+        "cap_error_monotonic": true,
+        "bottle_bottom_sweep": true,
+        "bottle_lift_height": true,
+        "cap_axis": true,
+        "clearance_then_lift_rotate": false
+      },
+      "failure": "FK sweep gate failed"
+    }
+  ]
+}

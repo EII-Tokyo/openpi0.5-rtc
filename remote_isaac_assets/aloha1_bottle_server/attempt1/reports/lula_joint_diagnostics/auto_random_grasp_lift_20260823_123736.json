@@ -1,0 +1,131 @@
+{
+  "status": "EXCEPTION",
+  "classification": "SLEEP_HOVER_NEAR10_CLOSE_CONTINUOUS_LIFT_ROTATE_CAP_POSITIVE_Z",
+  "phase_sequence": [
+    "SLEEP_TO_PLAN_HOVER",
+    "PLAN_HOVER_TO_NEAR_PLUS_10_MM",
+    "DYNAMIC_CONTINUOUS_CLOSE",
+    "CONTINUOUS_LIFT_AND_ROTATE_CAP_TO_POSITIVE_Z"
+  ],
+  "stage_saved": false,
+  "ros_used": false,
+  "real_robot_touched": false,
+  "error": "RuntimeError: opening gripper changed an arm joint by 0.033906 rad",
+  "traceback": [
+    "Traceback (most recent call last):",
+    "  File \"/home/eii/Applications/isaacsim-5.1.0/extsUser/aloha.lula_base_aligned/aloha/lula_base_aligned/extension.py\", line 2011, in _auto_grasp_lift_transaction",
+    "    await self._prepare_robot_for_automatic_grasp(",
+    "  File \"/home/eii/Applications/isaacsim-5.1.0/extsUser/aloha.lula_base_aligned/aloha/lula_base_aligned/extension.py\", line 1541, in _prepare_robot_for_automatic_grasp",
+    "    await self._open_left_gripper_transaction()",
+    "  File \"/home/eii/Applications/isaacsim-5.1.0/extsUser/aloha.lula_base_aligned/aloha/lula_base_aligned/extension.py\", line 5692, in _open_left_gripper_transaction",
+    "    raise RuntimeError(f\"opening gripper changed an arm joint by {arm_change:.6f} rad\")",
+    "RuntimeError: opening gripper changed an arm joint by 0.033906 rad"
+  ],
+  "configured_joint_step_rad": 0.03,
+  "automatic_start_recovery": null,
+  "random_pose": {
+    "center_world_m": [
+      0.0,
+      0.0,
+      0.034
+    ],
+    "yaw_deg": 0.0,
+    "component_readback": {
+      "/World/ALOHA1RemoteBottleSession/Bottle500": {
+        "position_m": [
+          -0.10300000011920929,
+          1.5265566588595902e-16,
+          0.03400000184774399
+        ],
+        "orientation_wxyz": [
+          0.7071067811865475,
+          6.687586826001632e-15,
+          0.7071067811865475,
+          5.4676582935845655e-15
+        ],
+        "position_error_m": 1.8515854311430055e-09,
+        "orientation_error_rad": 0.0
+      },
+      "/World/ALOHA1RemoteBottleSession/BottleCap": {
+        "position_m": [
+          0.08500000089406967,
+          -1.665663423949286e-16,
+          0.03400000184774399
+        ],
+        "orientation_wxyz": [
+          0.7071067811865475,
+          6.688088692989165e-15,
+          0.7071067811865475,
+          5.4681614311214335e-15
+        ],
+        "position_error_m": 2.0526856688798757e-09,
+        "orientation_error_rad": 0.0
+      },
+      "/World/ALOHA1RemoteBottleSession/BottleThreadSlider": {
+        "position_m": [
+          0.08500000089406967,
+          -1.6657780380949612e-16,
+          0.034000009298324585
+        ],
+        "orientation_wxyz": [
+          0.7071067811865475,
+          6.687586826001632e-15,
+          0.7071067811865475,
+          5.46765787006812e-15
+        ],
+        "position_error_m": 9.34120982373179e-09,
+        "orientation_error_rad": 0.0
+      }
+    },
+    "assembly_kinematic": false,
+    "source": "CANONICAL_RESET_POSE"
+  },
+  "active_waypoint": "BOTTLE INITIAL POSE / robot unchanged",
+  "completed_routes": [],
+  "close_readback": null,
+  "dynamic_continuous_self_center": null,
+  "exception_pose_diagnostic": {
+    "actual_ee_position_m": [
+      -0.27732983076011686,
+      -0.053935035561485434,
+      0.07437159533024346
+    ],
+    "actual_ee_orientation_wxyz": [
+      0.6447294256259594,
+      -0.2895633850781507,
+      0.6452850664450925,
+      0.2899727517837766
+    ],
+    "target_ee_position_m": [
+      -0.2772848606109619,
+      -0.0539039745926857,
+      0.07423675805330276
+    ],
+    "target_ee_orientation_wxyz": [
+      0.6450524561276436,
+      -0.28966761787209566,
+      0.6450524561276436,
+      0.28966761787209566
+    ],
+    "actual_to_target_position_error_m": [
+      -4.4970149154943684e-05,
+      -3.10609687997343e-05,
+      0.00013483727694069136
+    ],
+    "actual_to_target_orientation_error_rad": 0.0010245534636294886,
+    "computed_grasp_position_m": [
+      -0.2772848646077243,
+      -0.05390397334937947,
+      0.06423675561171284
+    ],
+    "left_finger_actual_m": 0.05698608607053757,
+    "right_finger_actual_m": -0.0573124997317791,
+    "mimic_residual_m": 0.00032641366124153137
+  },
+  "left_contact": false,
+  "right_contact": false,
+  "nonfinger_contact": false,
+  "active_contact_pairs": [],
+  "recent_contact_paths": [],
+  "timeline_paused": true
+}

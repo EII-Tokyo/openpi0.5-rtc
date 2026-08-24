@@ -1,0 +1,362 @@
+{
+  "status": "EXCEPTION",
+  "classification": "SLEEP_HOVER_NEAR10_CLOSE_LIFT_TO_PLAN_HOVER",
+  "phase_sequence": [
+    "SLEEP_TO_PLAN_HOVER",
+    "PLAN_HOVER_TO_NEAR_PLUS_10_MM",
+    "DYNAMIC_CONTINUOUS_CLOSE",
+    "LIFT_TO_PLAN_HOVER"
+  ],
+  "stage_saved": false,
+  "ros_used": false,
+  "real_robot_touched": false,
+  "error": "RuntimeError: non-finger Bottle contact detected during AUTO NEAR +10 mm",
+  "traceback": [
+    "Traceback (most recent call last):",
+    "  File \"/home/eii/Applications/isaacsim-5.1.0/extsUser/aloha.lula_base_aligned/aloha/lula_base_aligned/extension.py\", line 2004, in _auto_grasp_lift_transaction",
+    "    raise RuntimeError(",
+    "RuntimeError: non-finger Bottle contact detected during AUTO NEAR +10 mm"
+  ],
+  "configured_joint_step_rad": 0.01,
+  "random_pose": {
+    "center_world_m": [
+      0.0,
+      0.0,
+      0.034
+    ],
+    "yaw_deg": 0.0,
+    "component_readback": {
+      "/World/ALOHA1RemoteBottleSession/Bottle500": {
+        "position_m": [
+          -0.10300000011920929,
+          1.5265566588595902e-16,
+          0.03400000184774399
+        ],
+        "orientation_wxyz": [
+          0.7071067811865475,
+          6.687586826001632e-15,
+          0.7071067811865475,
+          5.4676582935845655e-15
+        ],
+        "position_error_m": 1.8515854311430055e-09,
+        "orientation_error_rad": 0.0
+      },
+      "/World/ALOHA1RemoteBottleSession/BottleCap": {
+        "position_m": [
+          0.08500000089406967,
+          -1.665663423949286e-16,
+          0.03400000184774399
+        ],
+        "orientation_wxyz": [
+          0.7071067811865475,
+          6.688088692989165e-15,
+          0.7071067811865475,
+          5.4681614311214335e-15
+        ],
+        "position_error_m": 2.0526856688798757e-09,
+        "orientation_error_rad": 0.0
+      },
+      "/World/ALOHA1RemoteBottleSession/BottleThreadSlider": {
+        "position_m": [
+          0.08500000089406967,
+          -1.6657780380949612e-16,
+          0.034000009298324585
+        ],
+        "orientation_wxyz": [
+          0.7071067811865475,
+          6.687586826001632e-15,
+          0.7071067811865475,
+          5.46765787006812e-15
+        ],
+        "position_error_m": 9.34120982373179e-09,
+        "orientation_error_rad": 0.0
+      }
+    },
+    "assembly_kinematic": false,
+    "source": "CANONICAL_RESET_POSE"
+  },
+  "active_waypoint": "AUTO NEAR +10 mm / REACHED",
+  "completed_routes": [
+    {
+      "route_name": "AUTO HOVER",
+      "render_updates": 214,
+      "physics_elapsed_s": 2.400000125169754,
+      "metrics": {
+        "sample_count": 104.0,
+        "chosen_clearance_m": 0.16,
+        "chosen_warm_start": "current",
+        "chosen_axial_fraction_from_bottom": 0.3333333333333333,
+        "chosen_axial_distance_from_bottom_m": 0.06866666666666665,
+        "chosen_target_yaw_deg": -8.526512829121202e-14,
+        "minimum_ee_z_m": 0.22423670066936463,
+        "maximum_sampled_ee_step_m": 0.008738065714156008,
+        "final_fk_position_error_m": 3.837912890471332e-07,
+        "final_fk_orientation_error_rad": 0.0008751405637949359,
+        "visible_target_z_dot_world_z": 1.0,
+        "planned_joint_step_rad": 0.03,
+        "control_hz": 50.0
+      }
+    },
+    {
+      "route_name": "AUTO NEAR +10 mm",
+      "render_updates": 106,
+      "physics_elapsed_s": 1.200000062584877,
+      "metrics": {
+        "route_name": "AUTO NEAR +10 mm",
+        "sample_count": 46.0,
+        "clearance_m": 0.01,
+        "world_position_offset_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "chosen_warm_start": "validated_top_down_1",
+        "maximum_sampled_ee_step_m": 0.0034793828738244144,
+        "maximum_lateral_deviation_m": 0.007569921087235998,
+        "minimum_ee_z_m": 0.07423659677996891,
+        "final_fk_position_error_m": 1.5418385318531349e-06,
+        "final_fk_orientation_error_rad": 0.0016171330984922408,
+        "visible_target_z_dot_world_z": 1.0,
+        "ik_attempts": [
+          {
+            "warm_start": "current",
+            "success": true,
+            "returned_joints_rad": [
+              0.03281334558265846,
+              0.4096170203773503,
+              0.10375390860807863,
+              -0.0005031085065830397,
+              1.0575990157494648,
+              0.032943514615125506
+            ],
+            "fk_position_error_m": 1.329194130418991e-07,
+            "fk_orientation_error_rad": 0.0004856847185835493
+          },
+          {
+            "warm_start": "validated_top_down_1",
+            "success": true,
+            "returned_joints_rad": [
+              0.03275850218836204,
+              0.41033831330816656,
+              0.10255362145645891,
+              -0.0003475568503958838,
+              1.0594928537395907,
+              0.032939624836918695
+            ],
+            "fk_position_error_m": 1.5418385318531349e-06,
+            "fk_orientation_error_rad": 0.0016171330984922408
+          },
+          {
+            "warm_start": "validated_top_down_2",
+            "success": true,
+            "returned_joints_rad": [
+              0.03228835539287506,
+              0.40991863699696385,
+              0.10325137978403663,
+              0.0009856179946935767,
+              1.058397625180743,
+              0.03151201829548027
+            ],
+            "fk_position_error_m": 9.252109167564228e-07,
+            "fk_orientation_error_rad": 0.0011909131989946788
+          }
+        ],
+        "planned_joint_step_rad": 0.01,
+        "control_hz": 50.0
+      }
+    }
+  ],
+  "close_readback": null,
+  "dynamic_continuous_self_center": null,
+  "exception_pose_diagnostic": {
+    "actual_ee_position_m": [
+      -0.0343347369655948,
+      -0.004794849826591428,
+      0.0742395298472838
+    ],
+    "actual_ee_orientation_wxyz": [
+      0.7065297586596859,
+      -0.000130317960891419,
+      0.7076833095845689,
+      -0.0001283781379077264
+    ],
+    "target_ee_position_m": [
+      -0.03433333337306976,
+      -0.004793088883161545,
+      0.07423675805330276
+    ],
+    "target_ee_orientation_wxyz": [
+      0.7071067811865476,
+      0.0,
+      0.7071067811865476,
+      0.0
+    ],
+    "actual_to_target_position_error_m": [
+      -1.403592525039965e-06,
+      -1.760943429882783e-06,
+      2.7717939810323333e-06
+    ],
+    "actual_to_target_orientation_error_rad": 0.001671889647121468,
+    "computed_grasp_position_m": [
+      -0.03433333345254261,
+      -0.004793089064721395,
+      0.06423675561171276
+    ],
+    "left_finger_actual_m": 0.05699922516942024,
+    "right_finger_actual_m": -0.05700822174549103,
+    "mimic_residual_m": 8.996576070785522e-06
+  },
+  "left_contact": true,
+  "right_contact": true,
+  "nonfinger_contact": true,
+  "active_contact_pairs": [
+    {
+      "paths": [
+        "/World/ALOHA1RemoteBottleSession/Bottle500",
+        "/World/ALOHA1RemoteBottleSession/Bottle500/Collisions/COL_Bottom/COL_BottomMesh",
+        "/World/follower_left/vx300s_left/follower_left_base_link",
+        "/World/follower_left/vx300s_left/follower_left_base_link/cad_derived_collisions/cad_derived_base_link/piece_000/mesh"
+      ],
+      "classification": "nonfinger"
+    },
+    {
+      "paths": [
+        "/World/ALOHA1RemoteBottleSession/Bottle500",
+        "/World/ALOHA1RemoteBottleSession/Bottle500/Collisions/COL_Body_04/COL_Body_04Mesh",
+        "/World/follower_left/vx300s_left/follower_left_left_finger_link",
+        "/World/follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh"
+      ],
+      "classification": "left"
+    },
+    {
+      "paths": [
+        "/World/ALOHA1RemoteBottleSession/Bottle500",
+        "/World/ALOHA1RemoteBottleSession/Bottle500/Collisions/COL_Body_13/COL_Body_13Mesh",
+        "/World/follower_left/vx300s_left/follower_left_right_finger_link",
+        "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh"
+      ],
+      "classification": "right"
+    }
+  ],
+  "recent_contact_paths": [
+    [
+      "/World/ALOHA1RemoteBottleSession/Bottle500",
+      "/World/ALOHA1RemoteBottleSession/Bottle500/Collisions/COL_Body_13/COL_Body_13Mesh",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh"
+    ],
+    [
+      "/World/ALOHA1RemoteBottleSession/Bottle500",
+      "/World/ALOHA1RemoteBottleSession/Bottle500/Collisions/COL_Body_13/COL_Body_13Mesh",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh"
+    ],
+    [
+      "/World/ALOHA1RemoteBottleSession/Bottle500",
+      "/World/ALOHA1RemoteBottleSession/Bottle500/Collisions/COL_Body_13/COL_Body_13Mesh",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh"
+    ],
+    [
+      "/World/ALOHA1RemoteBottleSession/Bottle500",
+      "/World/ALOHA1RemoteBottleSession/Bottle500/Collisions/COL_Body_13/COL_Body_13Mesh",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh"
+    ],
+    [
+      "/World/ALOHA1RemoteBottleSession/Bottle500",
+      "/World/ALOHA1RemoteBottleSession/Bottle500/Collisions/COL_Body_13/COL_Body_13Mesh",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh"
+    ],
+    [
+      "/World/ALOHA1RemoteBottleSession/Bottle500",
+      "/World/ALOHA1RemoteBottleSession/Bottle500/Collisions/COL_Body_13/COL_Body_13Mesh",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh"
+    ],
+    [
+      "/World/ALOHA1RemoteBottleSession/Bottle500",
+      "/World/ALOHA1RemoteBottleSession/Bottle500/Collisions/COL_Body_13/COL_Body_13Mesh",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh"
+    ],
+    [
+      "/World/ALOHA1RemoteBottleSession/Bottle500",
+      "/World/ALOHA1RemoteBottleSession/Bottle500/Collisions/COL_Body_13/COL_Body_13Mesh",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh"
+    ],
+    [
+      "/World/ALOHA1RemoteBottleSession/Bottle500",
+      "/World/ALOHA1RemoteBottleSession/Bottle500/Collisions/COL_Body_13/COL_Body_13Mesh",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh"
+    ],
+    [
+      "/World/ALOHA1RemoteBottleSession/Bottle500",
+      "/World/ALOHA1RemoteBottleSession/Bottle500/Collisions/COL_Body_13/COL_Body_13Mesh",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh"
+    ],
+    [
+      "/World/ALOHA1RemoteBottleSession/Bottle500",
+      "/World/ALOHA1RemoteBottleSession/Bottle500/Collisions/COL_Body_13/COL_Body_13Mesh",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh"
+    ],
+    [
+      "/World/ALOHA1RemoteBottleSession/Bottle500",
+      "/World/ALOHA1RemoteBottleSession/Bottle500/Collisions/COL_Body_13/COL_Body_13Mesh",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh"
+    ],
+    [
+      "/World/ALOHA1RemoteBottleSession/Bottle500",
+      "/World/ALOHA1RemoteBottleSession/Bottle500/Collisions/COL_Body_13/COL_Body_13Mesh",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh"
+    ],
+    [
+      "/World/ALOHA1RemoteBottleSession/Bottle500",
+      "/World/ALOHA1RemoteBottleSession/Bottle500/Collisions/COL_Body_13/COL_Body_13Mesh",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh"
+    ],
+    [
+      "/World/ALOHA1RemoteBottleSession/Bottle500",
+      "/World/ALOHA1RemoteBottleSession/Bottle500/Collisions/COL_Body_13/COL_Body_13Mesh",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh"
+    ],
+    [
+      "/World/ALOHA1RemoteBottleSession/Bottle500",
+      "/World/ALOHA1RemoteBottleSession/Bottle500/Collisions/COL_Body_13/COL_Body_13Mesh",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh"
+    ],
+    [
+      "/World/ALOHA1RemoteBottleSession/Bottle500",
+      "/World/ALOHA1RemoteBottleSession/Bottle500/Collisions/COL_Body_13/COL_Body_13Mesh",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh"
+    ],
+    [
+      "/World/ALOHA1RemoteBottleSession/Bottle500",
+      "/World/ALOHA1RemoteBottleSession/Bottle500/Collisions/COL_Body_13/COL_Body_13Mesh",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh"
+    ],
+    [
+      "/World/ALOHA1RemoteBottleSession/Bottle500",
+      "/World/ALOHA1RemoteBottleSession/Bottle500/Collisions/COL_Body_13/COL_Body_13Mesh",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh"
+    ],
+    [
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh"
+    ]
+  ],
+  "timeline_paused": true
+}

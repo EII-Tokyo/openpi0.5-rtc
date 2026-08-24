@@ -1,0 +1,159 @@
+{
+  "status": "EXCEPTION",
+  "classification": "SLEEP_HOVER_NEAR10_CLOSE_CONTINUOUS_LIFT_ROTATE_CAP_POSITIVE_Z",
+  "phase_sequence": [
+    "SLEEP_TO_PLAN_HOVER",
+    "PLAN_HOVER_TO_NEAR_PLUS_10_MM",
+    "DYNAMIC_CONTINUOUS_CLOSE",
+    "CONTINUOUS_LIFT_AND_ROTATE_CAP_TO_POSITIVE_Z"
+  ],
+  "stage_saved": false,
+  "ros_used": false,
+  "real_robot_touched": false,
+  "error": "RuntimeError: automatic grasp has no verified random Bottle pose",
+  "traceback": [
+    "Traceback (most recent call last):",
+    "  File \"/home/eii/Applications/isaacsim-5.1.0/extsUser/aloha.lula_base_aligned/aloha/lula_base_aligned/extension.py\", line 2010, in _auto_grasp_lift_transaction",
+    "    raise RuntimeError(\"automatic grasp has no verified random Bottle pose\")",
+    "RuntimeError: automatic grasp has no verified random Bottle pose"
+  ],
+  "configured_joint_step_rad": 0.01,
+  "random_pose": null,
+  "active_waypoint": "AUTO NEAR +10 mm / REACHED",
+  "completed_routes": [
+    {
+      "route_name": "AUTO HOVER",
+      "render_updates": 214,
+      "physics_elapsed_s": 2.400000125169754,
+      "metrics": {
+        "sample_count": 104.0,
+        "chosen_clearance_m": 0.16,
+        "chosen_warm_start": "current",
+        "chosen_axial_fraction_from_bottom": 0.3333333333333333,
+        "chosen_axial_distance_from_bottom_m": 0.06866666666666665,
+        "chosen_target_yaw_deg": 2.8421709430404007e-13,
+        "minimum_ee_z_m": 0.2242366591497337,
+        "maximum_sampled_ee_step_m": 0.008738064388863749,
+        "final_fk_position_error_m": 3.9382239456491705e-07,
+        "final_fk_orientation_error_rad": 0.0008754100127594765,
+        "visible_target_z_dot_world_z": 1.0,
+        "planned_joint_step_rad": 0.03,
+        "control_hz": 50.0
+      }
+    },
+    {
+      "route_name": "AUTO NEAR +10 mm",
+      "render_updates": 106,
+      "physics_elapsed_s": 1.200000062584877,
+      "metrics": {
+        "route_name": "AUTO NEAR +10 mm",
+        "sample_count": 46.0,
+        "clearance_m": 0.01,
+        "world_position_offset_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "chosen_warm_start": "validated_top_down_1",
+        "maximum_sampled_ee_step_m": 0.0034793830606102112,
+        "maximum_lateral_deviation_m": 0.007569919600738933,
+        "minimum_ee_z_m": 0.0742365568038442,
+        "final_fk_position_error_m": 1.54173256729749e-06,
+        "final_fk_orientation_error_rad": 0.001617123600624561,
+        "visible_target_z_dot_world_z": 1.0,
+        "ik_attempts": [
+          {
+            "warm_start": "current",
+            "success": true,
+            "returned_joints_rad": [
+              0.032813343513458944,
+              0.4096170521291768,
+              0.10375400864122593,
+              -0.0005031010537387315,
+              1.0575988687902722,
+              0.03294350983203799
+            ],
+            "fk_position_error_m": 1.3296878062966714e-07,
+            "fk_orientation_error_rad": 0.00048567319206263863
+          },
+          {
+            "warm_start": "validated_top_down_1",
+            "success": true,
+            "returned_joints_rad": [
+              0.03275850266391484,
+              0.4103383474319026,
+              0.10255371750260364,
+              -0.00034755695879778526,
+              1.0594927138824695,
+              0.032939626015861014
+            ],
+            "fk_position_error_m": 1.54173256729749e-06,
+            "fk_orientation_error_rad": 0.001617123600624561
+          },
+          {
+            "warm_start": "validated_top_down_2",
+            "success": true,
+            "returned_joints_rad": [
+              0.03228835668600983,
+              0.4099186766849471,
+              0.10325146670208805,
+              0.0009856162320431427,
+              1.0583974990995841,
+              0.0315120226379077
+            ],
+            "fk_position_error_m": 9.252080324235052e-07,
+            "fk_orientation_error_rad": 0.0011909118229999976
+          }
+        ],
+        "planned_joint_step_rad": 0.01,
+        "control_hz": 50.0
+      }
+    }
+  ],
+  "close_readback": null,
+  "dynamic_continuous_self_center": null,
+  "exception_pose_diagnostic": {
+    "actual_ee_position_m": [
+      -0.0343347232038011,
+      -0.004794859075911031,
+      0.07423949540444011
+    ],
+    "actual_ee_orientation_wxyz": [
+      0.7065298038619083,
+      -0.00013039980496837414,
+      0.7076832644516737,
+      -0.00012831900313103658
+    ],
+    "target_ee_position_m": [
+      -0.03433334082365036,
+      -0.004793088883161545,
+      0.07423671334981918
+    ],
+    "target_ee_orientation_wxyz": [
+      0.7071067811865476,
+      0.0,
+      0.7071067811865476,
+      0.0
+    ],
+    "actual_to_target_position_error_m": [
+      -1.3823801507384381e-06,
+      -1.7701927494864073e-06,
+      2.7820546209256225e-06
+    ],
+    "actual_to_target_orientation_error_rad": 0.0016717723579856966,
+    "computed_grasp_position_m": [
+      -0.03433334222120997,
+      -0.004793089064721105,
+      0.06423671560798654
+    ],
+    "left_finger_actual_m": 0.05691026896238327,
+    "right_finger_actual_m": -0.05690108612179756,
+    "mimic_residual_m": 9.182840585708618e-06
+  },
+  "left_contact": false,
+  "right_contact": false,
+  "nonfinger_contact": false,
+  "active_contact_pairs": [],
+  "recent_contact_paths": [],
+  "timeline_paused": true
+}

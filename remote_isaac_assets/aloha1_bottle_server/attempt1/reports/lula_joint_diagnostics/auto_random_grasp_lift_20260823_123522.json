@@ -1,0 +1,1268 @@
+{
+  "status": "PASS",
+  "classification": "SLEEP_HOVER_NEAR10_CLOSE_CONTINUOUS_LIFT_ROTATE_CAP_POSITIVE_Z",
+  "phase_sequence": [
+    "SLEEP_TO_PLAN_HOVER",
+    "PLAN_HOVER_TO_NEAR_PLUS_10_MM",
+    "DYNAMIC_CONTINUOUS_CLOSE",
+    "CONTINUOUS_LIFT_AND_ROTATE_CAP_TO_POSITIVE_Z"
+  ],
+  "stage_saved": false,
+  "ros_used": false,
+  "real_robot_touched": false,
+  "configured_joint_step_rad": 0.03,
+  "approach_joint_step_rad": 0.01,
+  "control_hz": 50.0,
+  "automatic_start_recovery": {
+    "status": "PASS",
+    "park_center_world_m": [
+      0.0,
+      0.0,
+      0.75
+    ],
+    "restored_center_world_m": [
+      0.0,
+      0.0,
+      0.034
+    ],
+    "restored_yaw_deg": 0.0,
+    "restored_source": "CANONICAL_DEFAULT_AFTER_CLEAN_START",
+    "stale_contact_pairs_cleared": true,
+    "robot_reset_to_sleep_after_parking": true
+  },
+  "random_pose": {
+    "center_world_m": [
+      0.0,
+      0.0,
+      0.034
+    ],
+    "yaw_deg": 0.0,
+    "component_readback": {
+      "/World/ALOHA1RemoteBottleSession/Bottle500": {
+        "position_m": [
+          -0.10300000011920929,
+          0.0,
+          0.03400000184774399
+        ],
+        "orientation_wxyz": [
+          0.7071067811865475,
+          0.0,
+          0.7071067811865475,
+          0.0
+        ],
+        "physx_tensor_position_error_m": 1.8515854311429991e-09,
+        "physx_tensor_orientation_error_rad": 0.0,
+        "usd_visible_position_m": [
+          -0.10300000011920929,
+          0.0,
+          0.03400000184774399
+        ],
+        "usd_visible_orientation_wxyz": [
+          0.7071067690849304,
+          0.0,
+          0.7071067932881645,
+          0.0
+        ],
+        "usd_visible_position_error_m": 1.8515854311429991e-09,
+        "usd_visible_orientation_error_rad": 0.0,
+        "fabric_visible_position_m": [
+          -0.10300000011920929,
+          0.0,
+          0.03400000184774399
+        ],
+        "fabric_visible_orientation_wxyz": [
+          0.7071067690849304,
+          0.0,
+          0.7071067932881645,
+          0.0
+        ],
+        "fabric_visible_position_error_m": 1.8515854311429991e-09,
+        "fabric_visible_orientation_error_rad": 0.0
+      },
+      "/World/ALOHA1RemoteBottleSession/BottleCap": {
+        "position_m": [
+          0.08500000089406967,
+          0.0,
+          0.03400000184774399
+        ],
+        "orientation_wxyz": [
+          0.7071067811865475,
+          0.0,
+          0.7071067811865475,
+          0.0
+        ],
+        "physx_tensor_position_error_m": 2.0526856688798686e-09,
+        "physx_tensor_orientation_error_rad": 0.0,
+        "usd_visible_position_m": [
+          0.08500000089406967,
+          0.0,
+          0.03400000184774399
+        ],
+        "usd_visible_orientation_wxyz": [
+          0.7071067690849304,
+          0.0,
+          0.7071067932881645,
+          0.0
+        ],
+        "usd_visible_position_error_m": 2.0526856688798686e-09,
+        "usd_visible_orientation_error_rad": 0.0,
+        "fabric_visible_position_m": [
+          0.08500000089406967,
+          0.0,
+          0.03400000184774399
+        ],
+        "fabric_visible_orientation_wxyz": [
+          0.7071067690849304,
+          0.0,
+          0.7071067932881645,
+          0.0
+        ],
+        "fabric_visible_position_error_m": 2.0526856688798686e-09,
+        "fabric_visible_orientation_error_rad": 0.0
+      },
+      "/World/ALOHA1RemoteBottleSession/BottleThreadSlider": {
+        "position_m": [
+          0.08500000089406967,
+          0.0,
+          0.03400000184774399
+        ],
+        "orientation_wxyz": [
+          0.7071067811865475,
+          0.0,
+          0.7071067811865475,
+          0.0
+        ],
+        "physx_tensor_position_error_m": 2.0526856688798686e-09,
+        "physx_tensor_orientation_error_rad": 0.0,
+        "usd_visible_position_m": [
+          0.08500000089406967,
+          0.0,
+          0.03400000184774399
+        ],
+        "usd_visible_orientation_wxyz": [
+          0.7071067690849304,
+          0.0,
+          0.7071067932881645,
+          0.0
+        ],
+        "usd_visible_position_error_m": 2.0526856688798686e-09,
+        "usd_visible_orientation_error_rad": 0.0,
+        "fabric_visible_position_m": [
+          0.08500000089406967,
+          0.0,
+          0.03400000184774399
+        ],
+        "fabric_visible_orientation_wxyz": [
+          0.7071067690849304,
+          0.0,
+          0.7071067932881645,
+          0.0
+        ],
+        "fabric_visible_position_error_m": 2.0526856688798686e-09,
+        "fabric_visible_orientation_error_rad": 0.0
+      }
+    },
+    "assembly_kinematic": true,
+    "thread_prismatic_enabled": false,
+    "thread_revolute_enabled": false,
+    "thread_coupling_enabled": false,
+    "source": "CANONICAL_DEFAULT_AFTER_CLEAN_START"
+  },
+  "routes": [
+    {
+      "route_name": "AUTO HOVER",
+      "render_updates": 214,
+      "physics_elapsed_s": 2.400000125169754,
+      "metrics": {
+        "sample_count": 104.0,
+        "chosen_clearance_m": 0.16,
+        "chosen_warm_start": "current",
+        "chosen_axial_fraction_from_bottom": 0.3333333333333333,
+        "chosen_axial_distance_from_bottom_m": 0.06866666666666665,
+        "chosen_target_yaw_deg": 0.0,
+        "minimum_ee_z_m": 0.22423669908005173,
+        "maximum_sampled_ee_step_m": 0.008738064621056977,
+        "final_fk_position_error_m": 3.9413257909584456e-07,
+        "final_fk_orientation_error_rad": 0.0008754255773797623,
+        "visible_target_z_dot_world_z": 1.0,
+        "planned_joint_step_rad": 0.03,
+        "control_hz": 50.0
+      }
+    },
+    {
+      "route_name": "AUTO NEAR +10 mm",
+      "render_updates": 106,
+      "physics_elapsed_s": 1.200000062584877,
+      "metrics": {
+        "route_name": "AUTO NEAR +10 mm",
+        "sample_count": 46.0,
+        "clearance_m": 0.01,
+        "world_position_offset_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "chosen_warm_start": "validated_top_down_1",
+        "maximum_sampled_ee_step_m": 0.003479382540978325,
+        "maximum_lateral_deviation_m": 0.007569918102430618,
+        "minimum_ee_z_m": 0.0742365967799691,
+        "final_fk_position_error_m": 1.541838531882609e-06,
+        "final_fk_orientation_error_rad": 0.001617133098766856,
+        "visible_target_z_dot_world_z": 1.0,
+        "ik_attempts": [
+          {
+            "warm_start": "current",
+            "success": true,
+            "returned_joints_rad": [
+              0.03281334294457217,
+              0.4096170147110908,
+              0.10375391794128866,
+              -0.0005031012184372525,
+              1.057599000900308,
+              0.032943509307441256
+            ],
+            "fk_position_error_m": 1.329565270691452e-07,
+            "fk_orientation_error_rad": 0.0004856747711920587
+          },
+          {
+            "warm_start": "validated_top_down_1",
+            "success": true,
+            "returned_joints_rad": [
+              0.03275850218836332,
+              0.41033831330815107,
+              0.10255362145648443,
+              -0.00034755685039591244,
+              1.05949285373955,
+              0.032939624836917036
+            ],
+            "fk_position_error_m": 1.541838531882609e-06,
+            "fk_orientation_error_rad": 0.001617133098766856
+          },
+          {
+            "warm_start": "validated_top_down_2",
+            "success": true,
+            "returned_joints_rad": [
+              0.03228835539297233,
+              0.4099186369970683,
+              0.10325137978386431,
+              0.0009856179944418319,
+              1.0583976251810232,
+              0.031512018295081906
+            ],
+            "fk_position_error_m": 9.252109199178079e-07,
+            "fk_orientation_error_rad": 0.001190913199367577
+          }
+        ],
+        "planned_joint_step_rad": 0.01,
+        "control_hz": 50.0
+      }
+    },
+    {
+      "route_name": "AUTO LIFT + ROTATE CAP TO +Z",
+      "render_updates": 1237,
+      "physics_elapsed_s": 13.766667384654284,
+      "metrics": {
+        "route_name": "AUTO LIFT + ROTATE CAP TO +Z",
+        "trajectory_type": "FK_VALIDATED_CONTINUOUS_JOINT_LIFT_ROTATE",
+        "lift_profile": "continuous upward motion with an initial 25 mm orientation-preserving clearance",
+        "rotation_profile": "starts after approximately 25 mm clearance and continues during the remaining lift",
+        "cap_axis_start_world": [
+          0.999938925334827,
+          0.010421442650957437,
+          -0.003679556128731498
+        ],
+        "requested_alignment_axis_world": [
+          0.010421513200324457,
+          -0.9999456945567671,
+          0.0
+        ],
+        "requested_alignment_angle_rad": 1.574475891226679,
+        "endpoint_orientation_candidates": [
+          {
+            "final_roll_deg": 0.0,
+            "success": true,
+            "joint_distance_rad": 2.084179695739744,
+            "orientation_wxyz": [
+              0.9999734544728812,
+              0.005261443384142829,
+              -0.0010485680014022392,
+              0.004930321311472145
+            ]
+          },
+          {
+            "final_roll_deg": 45.0,
+            "success": true,
+            "joint_distance_rad": 3.126809099711269,
+            "orientation_wxyz": [
+              0.9219682553599652,
+              0.0052622094559212915,
+              0.0010447166984966045,
+              0.3872282967800314
+            ]
+          },
+          {
+            "final_roll_deg": -45.0,
+            "success": true,
+            "joint_distance_rad": 3.045830665121026,
+            "orientation_wxyz": [
+              0.9257417599242389,
+              0.004459670252231678,
+              -0.002982217728380152,
+              -0.3781182508832847
+            ]
+          },
+          {
+            "final_roll_deg": 90.0,
+            "success": true,
+            "joint_distance_rad": 2.71827550474744,
+            "orientation_wxyz": [
+              0.7036017470315412,
+              0.004461851840083242,
+              0.0029789527514297383,
+              0.7105742742970822
+            ]
+          },
+          {
+            "final_roll_deg": -90.0,
+            "success": true,
+            "joint_distance_rad": 2.679668384685047,
+            "orientation_wxyz": [
+              0.7105742742970822,
+              0.002978952751429731,
+              -0.004461851840083249,
+              -0.7036017470315412
+            ]
+          },
+          {
+            "final_roll_deg": 135.0,
+            "success": false,
+            "joint_distance_rad": 4.604708707465305,
+            "orientation_wxyz": [
+              0.3781182508832848,
+              0.0029822177283800877,
+              0.004459670252231683,
+              0.9257417599242389
+            ]
+          },
+          {
+            "final_roll_deg": -135.0,
+            "success": false,
+            "joint_distance_rad": 2.8553095484669484,
+            "orientation_wxyz": [
+              0.3872282967800314,
+              0.001044716698496595,
+              -0.005262209455921295,
+              -0.9219682553599652
+            ]
+          },
+          {
+            "final_roll_deg": 180.0,
+            "success": false,
+            "joint_distance_rad": 6.411531805438548,
+            "orientation_wxyz": [
+              -0.004930321311472083,
+              0.0010485680014022949,
+              0.005261443384142831,
+              0.9999734544728813
+            ]
+          }
+        ],
+        "chosen_final_roll_deg": 0.0,
+        "measured_ee_to_bottle_position_m": [
+          0.03981470423803281,
+          -0.00205550105554559,
+          -0.06749811892318659
+        ],
+        "selected": {
+          "trajectory_type": "FK_VALIDATED_CONTINUOUS_JOINT_LIFT_ROTATE",
+          "lift_distance_m": 0.15,
+          "final_roll_deg": 0.0,
+          "endpoint_ik_success": true,
+          "sample_count": 682,
+          "maximum_joint_step_rad": 0.002996419608206846,
+          "maximum_ee_step_m": 0.0010931545316653437,
+          "maximum_ee_z_drop_per_step_m": 6.932406137301339e-05,
+          "maximum_cap_axis_error_increase_rad": 0.0,
+          "minimum_predicted_bottle_bottom_z_m": 0.03452419862151145,
+          "quarter_progress_lift_m": 0.02526394624388363,
+          "quarter_progress_cap_rotation_rad": 0.35497550005975587,
+          "maximum_rotation_before_clearance_rad": 0.0007723450762591177,
+          "rotation_start_lift_m": 0.024062057908031065,
+          "actual_fk_lift_m": 0.14999965456068792,
+          "final_predicted_cap_axis_world": [
+            -0.0004087424729239297,
+            -0.0006930382483674733,
+            0.9999996763137367
+          ],
+          "final_predicted_cap_axis_error_rad": 0.000804594656718967,
+          "checks": {
+            "joint_step": true,
+            "ee_step": true,
+            "no_downward_ee_step": true,
+            "cap_error_monotonic": true,
+            "bottle_bottom_sweep": true,
+            "lift_height": true,
+            "cap_axis": true,
+            "clearance_then_lift_rotate": true
+          }
+        },
+        "all_attempts": [
+          {
+            "lift_distance_m": 0.15,
+            "chosen_final_roll_deg": 0.0,
+            "sample_count": 137,
+            "failure": null,
+            "maximum_joint_step_rad": 0.8662538630179879,
+            "maximum_cartesian_step_m": 0.0011029411764706398,
+            "maximum_orientation_step_rad": 0.020837930440920804,
+            "maximum_fk_position_error_m": 6.9794077924676155e-06,
+            "maximum_fk_orientation_error_rad": 0.0034242624520772584,
+            "minimum_predicted_bottle_bottom_z_m": 0.03452419862151145,
+            "final_predicted_cap_axis_world": [
+              -2.3580085532949034e-16,
+              -5.4862587498581256e-18,
+              1.0000000000000004
+            ],
+            "final_predicted_cap_axis_error_rad": 0.0
+          },
+          {
+            "lift_distance_m": 0.15,
+            "chosen_final_roll_deg": 0.0,
+            "sample_count": 206,
+            "failure": null,
+            "maximum_joint_step_rad": 0.6971729305892638,
+            "maximum_cartesian_step_m": 0.0007317073170731991,
+            "maximum_orientation_step_rad": 0.013824495301259567,
+            "maximum_fk_position_error_m": 1.9077629403628175e-05,
+            "maximum_fk_orientation_error_rad": 0.004904179018040732,
+            "minimum_predicted_bottle_bottom_z_m": 0.03452419862151145,
+            "final_predicted_cap_axis_world": [
+              -2.3580085532949034e-16,
+              -5.4862587498581256e-18,
+              1.0000000000000004
+            ],
+            "final_predicted_cap_axis_error_rad": 0.0
+          },
+          {
+            "lift_distance_m": 0.15,
+            "chosen_final_roll_deg": 0.0,
+            "sample_count": 274,
+            "failure": null,
+            "maximum_joint_step_rad": 0.9118328904001015,
+            "maximum_cartesian_step_m": 0.000549450549450603,
+            "maximum_orientation_step_rad": 0.010381042718616399,
+            "maximum_fk_position_error_m": 5.658627750088047e-05,
+            "maximum_fk_orientation_error_rad": 0.007113977222082502,
+            "minimum_predicted_bottle_bottom_z_m": 0.03452419862151145,
+            "final_predicted_cap_axis_world": [
+              -2.3580085532949034e-16,
+              -5.4862587498581256e-18,
+              1.0000000000000004
+            ],
+            "final_predicted_cap_axis_error_rad": 0.0
+          },
+          {
+            "lift_distance_m": 0.15,
+            "chosen_final_roll_deg": 0.0,
+            "sample_count": 411,
+            "failure": null,
+            "maximum_joint_step_rad": 0.6244926761804521,
+            "maximum_cartesian_step_m": 0.00036585365853661345,
+            "maximum_orientation_step_rad": 0.006912287126194288,
+            "maximum_fk_position_error_m": 0.0003677763828582257,
+            "maximum_fk_orientation_error_rad": 0.008402016910880487,
+            "minimum_predicted_bottle_bottom_z_m": 0.03452419862151145,
+            "final_predicted_cap_axis_world": [
+              -2.3580085532949034e-16,
+              -5.4862587498581256e-18,
+              1.0000000000000004
+            ],
+            "final_predicted_cap_axis_error_rad": 0.0
+          },
+          {
+            "lift_distance_m": 0.18,
+            "chosen_final_roll_deg": 0.0,
+            "sample_count": 137,
+            "failure": null,
+            "maximum_joint_step_rad": 0.830338526639754,
+            "maximum_cartesian_step_m": 0.0013235294117647511,
+            "maximum_orientation_step_rad": 0.02016592865345587,
+            "maximum_fk_position_error_m": 1.569186702869843e-05,
+            "maximum_fk_orientation_error_rad": 0.004516946468779369,
+            "minimum_predicted_bottle_bottom_z_m": 0.03452419862151145,
+            "final_predicted_cap_axis_world": [
+              -2.3580085532949034e-16,
+              -5.4862587498581256e-18,
+              1.0000000000000004
+            ],
+            "final_predicted_cap_axis_error_rad": 0.0
+          },
+          {
+            "lift_distance_m": 0.18,
+            "chosen_final_roll_deg": 0.0,
+            "sample_count": 206,
+            "failure": null,
+            "maximum_joint_step_rad": 0.7706386029988288,
+            "maximum_cartesian_step_m": 0.0008780487804878334,
+            "maximum_orientation_step_rad": 0.013378470536296863,
+            "maximum_fk_position_error_m": 4.6530558179937116e-05,
+            "maximum_fk_orientation_error_rad": 0.006694911819594992,
+            "minimum_predicted_bottle_bottom_z_m": 0.03452419862151145,
+            "final_predicted_cap_axis_world": [
+              -2.3580085532949034e-16,
+              -5.4862587498581256e-18,
+              1.0000000000000004
+            ],
+            "final_predicted_cap_axis_error_rad": 0.0
+          },
+          {
+            "lift_distance_m": 0.18,
+            "chosen_final_roll_deg": 0.0,
+            "sample_count": 274,
+            "failure": null,
+            "maximum_joint_step_rad": 0.6956161911827712,
+            "maximum_cartesian_step_m": 0.0006593406593407014,
+            "maximum_orientation_step_rad": 0.010046221744363903,
+            "maximum_fk_position_error_m": 3.364837053009239e-05,
+            "maximum_fk_orientation_error_rad": 0.0059664683856212085,
+            "minimum_predicted_bottle_bottom_z_m": 0.03452419862151145,
+            "final_predicted_cap_axis_world": [
+              -2.3580085532949034e-16,
+              -5.4862587498581256e-18,
+              1.0000000000000004
+            ],
+            "final_predicted_cap_axis_error_rad": 0.0
+          },
+          {
+            "lift_distance_m": 0.18,
+            "chosen_final_roll_deg": 0.0,
+            "sample_count": 411,
+            "failure": null,
+            "maximum_joint_step_rad": 0.5627729762608515,
+            "maximum_cartesian_step_m": 0.0004390243902439306,
+            "maximum_orientation_step_rad": 0.006689336636908051,
+            "maximum_fk_position_error_m": 0.00044091254833898127,
+            "maximum_fk_orientation_error_rad": 0.008560751058357387,
+            "minimum_predicted_bottle_bottom_z_m": 0.03452419862151145,
+            "final_predicted_cap_axis_world": [
+              -2.3580085532949034e-16,
+              -5.4862587498581256e-18,
+              1.0000000000000004
+            ],
+            "final_predicted_cap_axis_error_rad": 0.0
+          },
+          {
+            "lift_distance_m": 0.2,
+            "chosen_final_roll_deg": 0.0,
+            "sample_count": 137,
+            "failure": null,
+            "maximum_joint_step_rad": 0.784020923844711,
+            "maximum_cartesian_step_m": 0.001470588235294168,
+            "maximum_orientation_step_rad": 0.01984586760387777,
+            "maximum_fk_position_error_m": 1.5902065180637778e-05,
+            "maximum_fk_orientation_error_rad": 0.004484504226268796,
+            "minimum_predicted_bottle_bottom_z_m": 0.03452419862151145,
+            "final_predicted_cap_axis_world": [
+              -2.3580085532949034e-16,
+              -5.4862587498581256e-18,
+              1.0000000000000004
+            ],
+            "final_predicted_cap_axis_error_rad": 0.0
+          },
+          {
+            "lift_distance_m": 0.2,
+            "chosen_final_roll_deg": 0.0,
+            "sample_count": 206,
+            "failure": null,
+            "maximum_joint_step_rad": 0.5385384928369903,
+            "maximum_cartesian_step_m": 0.0009756097560975896,
+            "maximum_orientation_step_rad": 0.01316615496976422,
+            "maximum_fk_position_error_m": 3.284794728836264e-05,
+            "maximum_fk_orientation_error_rad": 0.0059290957810422575,
+            "minimum_predicted_bottle_bottom_z_m": 0.03452419862151145,
+            "final_predicted_cap_axis_world": [
+              -2.3580085532949034e-16,
+              -5.4862587498581256e-18,
+              1.0000000000000004
+            ],
+            "final_predicted_cap_axis_error_rad": 0.0
+          },
+          {
+            "lift_distance_m": 0.2,
+            "chosen_final_roll_deg": 0.0,
+            "sample_count": 274,
+            "failure": null,
+            "maximum_joint_step_rad": 0.6420741232653,
+            "maximum_cartesian_step_m": 0.0007326007326007855,
+            "maximum_orientation_step_rad": 0.009886758320293874,
+            "maximum_fk_position_error_m": 5.406616604828639e-05,
+            "maximum_fk_orientation_error_rad": 0.00679591711787951,
+            "minimum_predicted_bottle_bottom_z_m": 0.03452419862151145,
+            "final_predicted_cap_axis_world": [
+              -2.3580085532949034e-16,
+              -5.4862587498581256e-18,
+              1.0000000000000004
+            ],
+            "final_predicted_cap_axis_error_rad": 0.0
+          },
+          {
+            "lift_distance_m": 0.2,
+            "chosen_final_roll_deg": 0.0,
+            "sample_count": 411,
+            "failure": null,
+            "maximum_joint_step_rad": 0.5801702224108624,
+            "maximum_cartesian_step_m": 0.0004878048780488087,
+            "maximum_orientation_step_rad": 0.006583154210812026,
+            "maximum_fk_position_error_m": 0.0004895099150434367,
+            "maximum_fk_orientation_error_rad": 0.008509331279433001,
+            "minimum_predicted_bottle_bottom_z_m": 0.03452419862151145,
+            "final_predicted_cap_axis_world": [
+              -2.3580085532949034e-16,
+              -5.4862587498581256e-18,
+              1.0000000000000004
+            ],
+            "final_predicted_cap_axis_error_rad": 0.0
+          },
+          {
+            "lift_distance_m": 0.12,
+            "chosen_final_roll_deg": 0.0,
+            "sample_count": 137,
+            "failure": null,
+            "maximum_joint_step_rad": 1.146712925698759,
+            "maximum_cartesian_step_m": 0.0008823529411765008,
+            "maximum_orientation_step_rad": 0.02193395086637565,
+            "maximum_fk_position_error_m": 1.0732044688648542e-05,
+            "maximum_fk_orientation_error_rad": 0.004064686005724295,
+            "minimum_predicted_bottle_bottom_z_m": 0.03452419862151145,
+            "final_predicted_cap_axis_world": [
+              -2.3580085532949034e-16,
+              -5.4862587498581256e-18,
+              1.0000000000000004
+            ],
+            "final_predicted_cap_axis_error_rad": 0.0
+          },
+          {
+            "lift_distance_m": 0.12,
+            "chosen_final_roll_deg": 0.0,
+            "sample_count": 206,
+            "failure": null,
+            "maximum_joint_step_rad": 0.6984556767886134,
+            "maximum_cartesian_step_m": 0.0005853658536585371,
+            "maximum_orientation_step_rad": 0.014551818998443572,
+            "maximum_fk_position_error_m": 3.105301644433923e-05,
+            "maximum_fk_orientation_error_rad": 0.005922071187395557,
+            "minimum_predicted_bottle_bottom_z_m": 0.03452419862151145,
+            "final_predicted_cap_axis_world": [
+              -2.3580085532949034e-16,
+              -5.4862587498581256e-18,
+              1.0000000000000004
+            ],
+            "final_predicted_cap_axis_error_rad": 0.0
+          },
+          {
+            "lift_distance_m": 0.12,
+            "chosen_final_roll_deg": 0.0,
+            "sample_count": 274,
+            "failure": null,
+            "maximum_joint_step_rad": 0.606601546315005,
+            "maximum_cartesian_step_m": 0.00043956043956047686,
+            "maximum_orientation_step_rad": 0.010927279454961393,
+            "maximum_fk_position_error_m": 0.0004407791272236825,
+            "maximum_fk_orientation_error_rad": 0.008712164395069359,
+            "minimum_predicted_bottle_bottom_z_m": 0.03452419862151145,
+            "final_predicted_cap_axis_world": [
+              -2.3580085532949034e-16,
+              -5.4862587498581256e-18,
+              1.0000000000000004
+            ],
+            "final_predicted_cap_axis_error_rad": 0.0
+          },
+          {
+            "lift_distance_m": 0.12,
+            "chosen_final_roll_deg": 0.0,
+            "sample_count": 411,
+            "failure": null,
+            "maximum_joint_step_rad": 0.7155183654963497,
+            "maximum_cartesian_step_m": 0.00029268292682926855,
+            "maximum_orientation_step_rad": 0.007276105179112953,
+            "maximum_fk_position_error_m": 0.0002952093011911139,
+            "maximum_fk_orientation_error_rad": 0.008684574801861142,
+            "minimum_predicted_bottle_bottom_z_m": 0.03452419862151145,
+            "final_predicted_cap_axis_world": [
+              -2.3580085532949034e-16,
+              -5.4862587498581256e-18,
+              1.0000000000000004
+            ],
+            "final_predicted_cap_axis_error_rad": 0.0
+          }
+        ],
+        "joint_continuous_attempts": [
+          {
+            "trajectory_type": "FK_VALIDATED_CONTINUOUS_JOINT_LIFT_ROTATE",
+            "lift_distance_m": 0.15,
+            "final_roll_deg": 0.0,
+            "endpoint_ik_success": true,
+            "sample_count": 682,
+            "maximum_joint_step_rad": 0.002996419608206846,
+            "maximum_ee_step_m": 0.0010931545316653437,
+            "maximum_ee_z_drop_per_step_m": 6.932406137301339e-05,
+            "maximum_cap_axis_error_increase_rad": 0.0,
+            "minimum_predicted_bottle_bottom_z_m": 0.03452419862151145,
+            "quarter_progress_lift_m": 0.02526394624388363,
+            "quarter_progress_cap_rotation_rad": 0.35497550005975587,
+            "maximum_rotation_before_clearance_rad": 0.0007723450762591177,
+            "rotation_start_lift_m": 0.024062057908031065,
+            "actual_fk_lift_m": 0.14999965456068792,
+            "final_predicted_cap_axis_world": [
+              -0.0004087424729239297,
+              -0.0006930382483674733,
+              0.9999996763137367
+            ],
+            "final_predicted_cap_axis_error_rad": 0.000804594656718967,
+            "checks": {
+              "joint_step": true,
+              "ee_step": true,
+              "no_downward_ee_step": true,
+              "cap_error_monotonic": true,
+              "bottle_bottom_sweep": true,
+              "lift_height": true,
+              "cap_axis": true,
+              "clearance_then_lift_rotate": true
+            }
+          }
+        ],
+        "control_hz": 50.0
+      },
+      "loaded_grasp_monitor": {
+        "bilateral_contact_fraction": 0.9951495553759094,
+        "maximum_mimic_residual_m": 0.0090516097843647,
+        "minimum_bottle_bottom_z_m": 0.03456965088844299,
+        "final_left_contact": true,
+        "final_right_contact": true,
+        "nonfinger_contact": false
+      }
+    }
+  ],
+  "close_readback": {
+    "target_m": 0.021,
+    "left_actual_m": 0.049693524837493896,
+    "right_actual_m": -0.05222519859671593,
+    "mimic_residual_m": 0.0025316737592220306,
+    "left_contact": true,
+    "right_contact": true,
+    "bilateral_stable_steps": 12,
+    "nonfinger_contact": false,
+    "maximum_arm_joint_change_rad": 0.00025873733102343976,
+    "settle_updates": 19,
+    "settled_reason": "stable_bilateral_dynamic_contact"
+  },
+  "dynamic_continuous_self_center": {
+    "method": "DYNAMIC_CONTINUOUS_SELF_CENTER",
+    "status": "STABLE_BILATERAL_CONTACT",
+    "single_continuous_close_command": true,
+    "gripper_reopen_count": 0,
+    "gripper_lateral_adjustment_count": 0,
+    "dynamic_updates": 19,
+    "dynamic_mimic_residual_gate_m": 0.01,
+    "maximum_dynamic_mimic_residual_m": 0.0025316737592220306,
+    "bottle_displacement_during_close_m": [
+      0.0011191219091415405,
+      -0.00691793579608202,
+      0.0005241967737674713
+    ],
+    "bottle_displacement_during_close_norm_m": 0.007027449877719642,
+    "samples": [
+      {
+        "update": 1,
+        "left_actual_m": 0.05556975677609444,
+        "right_actual_m": -0.055839020758867264,
+        "mimic_residual_m": 0.00026926398277282715,
+        "left_contact": true,
+        "right_contact": false,
+        "bilateral_streak": 0,
+        "bottle_position_m": [
+          -0.10297568142414093,
+          -0.00021474724053405225,
+          0.03400686755776405
+        ],
+        "bottle_orientation_wxyz": [
+          0.7070927945423663,
+          -0.0001948868664848586,
+          0.7071206895150538,
+          0.0002690448497387811
+        ]
+      },
+      {
+        "update": 2,
+        "left_actual_m": 0.05556975677609444,
+        "right_actual_m": -0.055839020758867264,
+        "mimic_residual_m": 0.00026926398277282715,
+        "left_contact": true,
+        "right_contact": false,
+        "bilateral_streak": 0,
+        "bottle_position_m": [
+          -0.10297568142414093,
+          -0.00021474724053405225,
+          0.03400686755776405
+        ],
+        "bottle_orientation_wxyz": [
+          0.7070927945423663,
+          -0.0001948868664848586,
+          0.7071206895150538,
+          0.0002690448497387811
+        ]
+      },
+      {
+        "update": 3,
+        "left_actual_m": 0.05556975677609444,
+        "right_actual_m": -0.055839020758867264,
+        "mimic_residual_m": 0.00026926398277282715,
+        "left_contact": true,
+        "right_contact": false,
+        "bilateral_streak": 0,
+        "bottle_position_m": [
+          -0.10297568142414093,
+          -0.00021474724053405225,
+          0.03400686755776405
+        ],
+        "bottle_orientation_wxyz": [
+          0.7070927945423663,
+          -0.0001948868664848586,
+          0.7071206895150538,
+          0.0002690448497387811
+        ]
+      },
+      {
+        "update": 4,
+        "left_actual_m": 0.053221434354782104,
+        "right_actual_m": -0.05361904576420784,
+        "mimic_residual_m": 0.0003976114094257355,
+        "left_contact": true,
+        "right_contact": false,
+        "bilateral_streak": 0,
+        "bottle_position_m": [
+          -0.10267999768257141,
+          -0.0031007020734250546,
+          0.03409535065293312
+        ],
+        "bottle_orientation_wxyz": [
+          0.7068223126176787,
+          -0.003230323676608025,
+          0.707374847656687,
+          0.0035508164441061794
+        ]
+      },
+      {
+        "update": 5,
+        "left_actual_m": 0.053221434354782104,
+        "right_actual_m": -0.05361904576420784,
+        "mimic_residual_m": 0.0003976114094257355,
+        "left_contact": true,
+        "right_contact": false,
+        "bilateral_streak": 0,
+        "bottle_position_m": [
+          -0.10267999768257141,
+          -0.0031007020734250546,
+          0.03409535065293312
+        ],
+        "bottle_orientation_wxyz": [
+          0.7068223126176787,
+          -0.003230323676608025,
+          0.707374847656687,
+          0.0035508164441061794
+        ]
+      },
+      {
+        "update": 6,
+        "left_actual_m": 0.053221434354782104,
+        "right_actual_m": -0.05361904576420784,
+        "mimic_residual_m": 0.0003976114094257355,
+        "left_contact": true,
+        "right_contact": false,
+        "bilateral_streak": 0,
+        "bottle_position_m": [
+          -0.10267999768257141,
+          -0.0031007020734250546,
+          0.03409535065293312
+        ],
+        "bottle_orientation_wxyz": [
+          0.7068223126176787,
+          -0.003230323676608025,
+          0.707374847656687,
+          0.0035508164441061794
+        ]
+      },
+      {
+        "update": 7,
+        "left_actual_m": 0.05068199709057808,
+        "right_actual_m": -0.05148932710289955,
+        "mimic_residual_m": 0.0008073300123214722,
+        "left_contact": true,
+        "right_contact": true,
+        "bilateral_streak": 1,
+        "bottle_position_m": [
+          -0.10234062373638153,
+          -0.006474453955888748,
+          0.034197188913822174
+        ],
+        "bottle_orientation_wxyz": [
+          0.7065211770538032,
+          -0.007598254908136644,
+          0.7076186177174876,
+          0.0067812061207205695
+        ]
+      },
+      {
+        "update": 8,
+        "left_actual_m": 0.05068199709057808,
+        "right_actual_m": -0.05148932710289955,
+        "mimic_residual_m": 0.0008073300123214722,
+        "left_contact": true,
+        "right_contact": true,
+        "bilateral_streak": 1,
+        "bottle_position_m": [
+          -0.10234062373638153,
+          -0.006474453955888748,
+          0.034197188913822174
+        ],
+        "bottle_orientation_wxyz": [
+          0.7065211770538032,
+          -0.007598254908136644,
+          0.7076186177174876,
+          0.0067812061207205695
+        ]
+      },
+      {
+        "update": 9,
+        "left_actual_m": 0.05068199709057808,
+        "right_actual_m": -0.05148932710289955,
+        "mimic_residual_m": 0.0008073300123214722,
+        "left_contact": true,
+        "right_contact": true,
+        "bilateral_streak": 1,
+        "bottle_position_m": [
+          -0.10234062373638153,
+          -0.006474453955888748,
+          0.034197188913822174
+        ],
+        "bottle_orientation_wxyz": [
+          0.7065211770538032,
+          -0.007598254908136644,
+          0.7076186177174876,
+          0.0067812061207205695
+        ]
+      },
+      {
+        "update": 10,
+        "left_actual_m": 0.05023038014769554,
+        "right_actual_m": -0.05159134417772293,
+        "mimic_residual_m": 0.0013609640300273895,
+        "left_contact": false,
+        "right_contact": true,
+        "bilateral_streak": 0,
+        "bottle_position_m": [
+          -0.1021905243396759,
+          -0.006607630290091038,
+          0.03428276628255844
+        ],
+        "bottle_orientation_wxyz": [
+          0.7063237017781503,
+          -0.006578427356760156,
+          0.7078380768998642,
+          0.00536744730988445
+        ]
+      },
+      {
+        "update": 11,
+        "left_actual_m": 0.05023038014769554,
+        "right_actual_m": -0.05159134417772293,
+        "mimic_residual_m": 0.0013609640300273895,
+        "left_contact": false,
+        "right_contact": true,
+        "bilateral_streak": 0,
+        "bottle_position_m": [
+          -0.1021905243396759,
+          -0.006607630290091038,
+          0.03428276628255844
+        ],
+        "bottle_orientation_wxyz": [
+          0.7063237017781503,
+          -0.006578427356760156,
+          0.7078380768998642,
+          0.00536744730988445
+        ]
+      },
+      {
+        "update": 12,
+        "left_actual_m": 0.05023038014769554,
+        "right_actual_m": -0.05159134417772293,
+        "mimic_residual_m": 0.0013609640300273895,
+        "left_contact": false,
+        "right_contact": true,
+        "bilateral_streak": 0,
+        "bottle_position_m": [
+          -0.1021905243396759,
+          -0.006607630290091038,
+          0.03428276628255844
+        ],
+        "bottle_orientation_wxyz": [
+          0.7063237017781503,
+          -0.006578427356760156,
+          0.7078380768998642,
+          0.00536744730988445
+        ]
+      },
+      {
+        "update": 13,
+        "left_actual_m": 0.04993433132767677,
+        "right_actual_m": -0.0517437644302845,
+        "mimic_residual_m": 0.001809433102607727,
+        "left_contact": false,
+        "right_contact": true,
+        "bilateral_streak": 0,
+        "bottle_position_m": [
+          -0.10194471478462219,
+          -0.006563836243003607,
+          0.03446832671761513
+        ],
+        "bottle_orientation_wxyz": [
+          0.7059155049085889,
+          -0.004850695335870442,
+          0.7082691731023217,
+          0.003814330526314171
+        ]
+      },
+      {
+        "update": 14,
+        "left_actual_m": 0.04993433132767677,
+        "right_actual_m": -0.0517437644302845,
+        "mimic_residual_m": 0.001809433102607727,
+        "left_contact": false,
+        "right_contact": true,
+        "bilateral_streak": 0,
+        "bottle_position_m": [
+          -0.10194471478462219,
+          -0.006563836243003607,
+          0.03446832671761513
+        ],
+        "bottle_orientation_wxyz": [
+          0.7059155049085889,
+          -0.004850695335870442,
+          0.7082691731023217,
+          0.003814330526314171
+        ]
+      },
+      {
+        "update": 15,
+        "left_actual_m": 0.04993433132767677,
+        "right_actual_m": -0.0517437644302845,
+        "mimic_residual_m": 0.001809433102607727,
+        "left_contact": false,
+        "right_contact": true,
+        "bilateral_streak": 0,
+        "bottle_position_m": [
+          -0.10194471478462219,
+          -0.006563836243003607,
+          0.03446832671761513
+        ],
+        "bottle_orientation_wxyz": [
+          0.7059155049085889,
+          -0.004850695335870442,
+          0.7082691731023217,
+          0.003814330526314171
+        ]
+      },
+      {
+        "update": 16,
+        "left_actual_m": 0.049878671765327454,
+        "right_actual_m": -0.05204005166888237,
+        "mimic_residual_m": 0.0021613799035549164,
+        "left_contact": true,
+        "right_contact": true,
+        "bilateral_streak": 4,
+        "bottle_position_m": [
+          -0.1018732562661171,
+          -0.006756412331014872,
+          0.03452501446008682
+        ],
+        "bottle_orientation_wxyz": [
+          0.705804930557472,
+          -0.003998196141796974,
+          0.7083867653012496,
+          0.0034066368175063857
+        ]
+      },
+      {
+        "update": 17,
+        "left_actual_m": 0.049878671765327454,
+        "right_actual_m": -0.05204005166888237,
+        "mimic_residual_m": 0.0021613799035549164,
+        "left_contact": true,
+        "right_contact": true,
+        "bilateral_streak": 4,
+        "bottle_position_m": [
+          -0.1018732562661171,
+          -0.006756412331014872,
+          0.03452501446008682
+        ],
+        "bottle_orientation_wxyz": [
+          0.705804930557472,
+          -0.003998196141796974,
+          0.7083867653012496,
+          0.0034066368175063857
+        ]
+      },
+      {
+        "update": 18,
+        "left_actual_m": 0.049878671765327454,
+        "right_actual_m": -0.05204005166888237,
+        "mimic_residual_m": 0.0021613799035549164,
+        "left_contact": true,
+        "right_contact": true,
+        "bilateral_streak": 4,
+        "bottle_position_m": [
+          -0.1018732562661171,
+          -0.006756412331014872,
+          0.03452501446008682
+        ],
+        "bottle_orientation_wxyz": [
+          0.705804930557472,
+          -0.003998196141796974,
+          0.7083867653012496,
+          0.0034066368175063857
+        ]
+      },
+      {
+        "update": 19,
+        "left_actual_m": 0.049693524837493896,
+        "right_actual_m": -0.05222519859671593,
+        "mimic_residual_m": 0.0025316737592220306,
+        "left_contact": true,
+        "right_contact": true,
+        "bilateral_streak": 12,
+        "bottle_position_m": [
+          -0.10188087821006775,
+          -0.00691793579608202,
+          0.03452419862151146
+        ],
+        "bottle_orientation_wxyz": [
+          0.7057963749947311,
+          -0.003949781624710664,
+          0.7083954949669589,
+          0.0034203771621248717
+        ]
+      }
+    ],
+    "final_close_readback": {
+      "target_m": 0.021,
+      "left_actual_m": 0.049693524837493896,
+      "right_actual_m": -0.05222519859671593,
+      "mimic_residual_m": 0.0025316737592220306,
+      "left_contact": true,
+      "right_contact": true,
+      "bilateral_stable_steps": 12,
+      "nonfinger_contact": false,
+      "maximum_arm_joint_change_rad": 0.00025873733102343976,
+      "settle_updates": 19,
+      "settled_reason": "stable_bilateral_dynamic_contact"
+    }
+  },
+  "dynamic_self_center_updates": 19,
+  "post_lift_settle_updates": 5,
+  "post_lift_stable_updates": 5,
+  "post_lift_mimic_residual_classification": "LOADED_COMPLIANT_DEFLECTION_RECORDED_NOT_CLOSE_GATE",
+  "bottle_before_release_position_m": [
+    -0.10300000011920929,
+    0.0,
+    0.03400000184774399
+  ],
+  "bottle_before_release_orientation_wxyz": [
+    0.7071067811865475,
+    0.0,
+    0.7071067811865475,
+    0.0
+  ],
+  "bottle_before_lift_position_m": [
+    -0.10188087821006775,
+    -0.00691793579608202,
+    0.03452419862151146
+  ],
+  "bottle_after_lift_position_m": [
+    0.00554342707619071,
+    -0.008469718508422375,
+    0.15694287419319153
+  ],
+  "bottle_after_lift_orientation_wxyz": [
+    0.9999833850367194,
+    0.0017183844858828729,
+    0.0008751222820347654,
+    0.005432399677352345
+  ],
+  "bottle_lift_delta_m": [
+    0.10742430528625846,
+    -0.001551782712340355,
+    0.12241867557168007
+  ],
+  "bottle_cap_axis_after_lift_world": [
+    0.0017688853864737215,
+    -0.0034272038419703365,
+    0.9999925626315004
+  ],
+  "bottle_cap_axis_error_from_positive_z_rad": 0.0038567804497305915,
+  "bottle_cap_axis_gate_rad": 0.17453292519943295,
+  "bottle_cap_positive_z_required": true,
+  "final_visible_pose_verified": true,
+  "final_visible_component_readback": {
+    "/World/ALOHA1RemoteBottleSession/Bottle500": {
+      "position_m": [
+        0.00554342707619071,
+        -0.008469718508422375,
+        0.15694287419319153
+      ],
+      "orientation_wxyz": [
+        0.9999833703041077,
+        0.0017191461902910858,
+        0.0008755101965909956,
+        0.0054348075872063155
+      ],
+      "position_error_m": 0.0,
+      "orientation_error_rad": 5.110381419510357e-06
+    },
+    "/World/ALOHA1RemoteBottleSession/BottleCap": {
+      "position_m": [
+        0.005875977221876383,
+        -0.009113975800573826,
+        0.3449414074420929
+      ],
+      "orientation_wxyz": [
+        0.9999835491180421,
+        0.0017183161628854808,
+        0.0008749751876225779,
+        0.005402157094153204
+      ],
+      "position_error_m": 0.0,
+      "orientation_error_rad": 2.3297335304253314e-06
+    },
+    "/World/ALOHA1RemoteBottleSession/BottleThreadSlider": {
+      "position_m": [
+        0.005875977221876383,
+        -0.00911398883908987,
+        0.344941645860672
+      ],
+      "orientation_wxyz": [
+        0.9999833703041077,
+        0.001719371580003503,
+        0.0008754297699243582,
+        0.005434749242208783
+      ],
+      "position_error_m": 0.0,
+      "orientation_error_rad": 4.840469678832906e-06
+    }
+  },
+  "final_left_contact": true,
+  "final_right_contact": true,
+  "final_nonfinger_contact": false,
+  "final_mimic_residual_m": 0.009027492254972458,
+  "timeline_paused": true,
+  "bottle_assembly_dynamic": true
+}

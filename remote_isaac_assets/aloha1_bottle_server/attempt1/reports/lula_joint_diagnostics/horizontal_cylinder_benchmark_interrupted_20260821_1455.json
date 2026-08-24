@@ -1,0 +1,1854 @@
+{
+  "status": "RUNNING",
+  "classification": "ALOHA_HORIZONTAL_CYLINDER_ONE_THIRD_CONVEX_DECOMPOSITION_AB",
+  "started_at": "2026-08-21T14:54:59",
+  "stage_saved": false,
+  "ros_used": false,
+  "real_robot_touched": false,
+  "horizontal_on_table": true,
+  "cylinder": {
+    "geometry": "UsdGeom.Cylinder analytic collider",
+    "axis_local": "Z",
+    "length_m": 0.18,
+    "radius_m": 0.032,
+    "mass_kg": 0.2,
+    "center_of_mass_local_m": [
+      0.0,
+      0.0,
+      0.09866666666666667
+    ],
+    "diagonal_inertia_kg_m2": [
+      0.0005912,
+      0.0005912,
+      0.0001024
+    ],
+    "principal_axes_wxyz": [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "mass_properties_explicit": true,
+    "center_local_z_m": 0.09866666666666667,
+    "low_end_local_z_m": 0.00866666666666667,
+    "grasp_station_local_z_m": 0.06866666666666667,
+    "grasp_fraction_from_low_end": 0.3333333333333333,
+    "grasp_offset_from_com_m": -0.03,
+    "expected_gravity_torque_nm": 0.05886,
+    "centered_at_grasp_station": false,
+    "center_world_m": [
+      -0.202153,
+      -0.046512,
+      0.034
+    ],
+    "yaw_deg": -11.754
+  },
+  "control_hz": 50.0,
+  "physics_hz": [
+    200
+  ],
+  "torsional_patch_radii_m": [],
+  "finger_approximations": [
+    "convexHull",
+    "convexDecomposition"
+  ],
+  "repeats_per_approximation": 10,
+  "hold_duration_s": 2.0,
+  "quality_gates": {
+    "lift_height_min_m": 0.1,
+    "axis_direction_change_max_deg": 3.0,
+    "axis_elevation_from_table_max_deg": 3.0,
+    "final_angular_speed_max_deg_s": 1.0,
+    "mimic_residual_max_m": 0.0025,
+    "bilateral_contact_fraction_min": 0.8,
+    "axial_contact_centroid_mismatch_max_m": 0.005,
+    "actual_contact_station_tolerance_m": 0.002,
+    "total_hold_rotation_max_deg": 1.0,
+    "finger_line_hold_rotation_max_deg": 1.0
+  },
+  "approximation_results": [
+    {
+      "requested_physics_hz": 200,
+      "actual_physics_dt_s": 0.005,
+      "rendering_dt_s": 0.02,
+      "trials": [
+        {
+          "trial": 1,
+          "requested_physics_hz": 200,
+          "status": "COMPLETE",
+          "finger_approximation": "convexHull",
+          "initial_component_readback": {
+            "position_m": [
+              -0.30299320816993713,
+              -0.025529859587550163,
+              0.03400000184774399
+            ],
+            "orientation_wxyz": [
+              0.703390228463678,
+              0.07240294539461047,
+              0.703390228463678,
+              -0.07240294539461047
+            ],
+            "physx_tensor_position_error_m": 1.1067332411914758e-08,
+            "physx_tensor_orientation_error_rad": 0.0,
+            "usd_visible_position_m": [
+              -0.30299320816993713,
+              -0.025529859587550163,
+              0.03400000184774399
+            ],
+            "usd_visible_orientation_wxyz": [
+              0.7033902406692505,
+              0.07240294416431019,
+              0.7033902165113854,
+              -0.07240294416431019
+            ],
+            "usd_visible_position_error_m": 1.1067332411914758e-08,
+            "usd_visible_orientation_error_rad": 0.0,
+            "fabric_visible_position_m": [
+              -0.30299320816993713,
+              -0.025529859587550163,
+              0.03400000184774399
+            ],
+            "fabric_visible_orientation_wxyz": [
+              0.7033902406692505,
+              0.07240294416431019,
+              0.7033902165113854,
+              -0.07240294416431019
+            ],
+            "fabric_visible_position_error_m": 1.1067332411914758e-08,
+            "fabric_visible_orientation_error_rad": 0.0
+          },
+          "workflow_status": "PASS",
+          "workflow_error": null,
+          "lift_delta_m": [
+            0.0670352429151535,
+            -0.024044979363679886,
+            0.26503559201955795
+          ],
+          "close_readback": {
+            "target_m": 0.021,
+            "left_actual_m": 0.047955822199583054,
+            "right_actual_m": -0.04858852177858353,
+            "mimic_residual_m": 0.000632699579000473,
+            "left_contact": true,
+            "right_contact": true,
+            "bilateral_stable_steps": 5,
+            "nonfinger_contact": false,
+            "maximum_arm_joint_change_rad": 0.0034987261751666665,
+            "settle_updates": 22,
+            "settled_reason": "stable_bilateral_dynamic_contact"
+          },
+          "post_lift_mimic_residual_m": 0.006938077509403229,
+          "hold_updates": 301,
+          "hold_start_position_m": [
+            -0.23648251593112946,
+            -0.05543641746044159,
+            0.29945701360702515
+          ],
+          "hold_start_orientation_wxyz": [
+            0.0563588294161336,
+            0.0363229589449533,
+            0.9977225113997963,
+            0.007356306573941926
+          ],
+          "hold_start_finger_line_world": [
+            0.09326692101050288,
+            -0.9956411408962673,
+            0.0
+          ],
+          "hold_final_position_m": [
+            -0.23652833700180054,
+            -0.056172315031290054,
+            0.2994517385959625
+          ],
+          "hold_position_delta_m": [
+            -4.582107067108154e-05,
+            -0.000735897570848465,
+            -5.27501106262207e-06
+          ],
+          "hold_final_orientation_wxyz": [
+            0.056407050921520305,
+            0.036827402679614825,
+            0.9977016077172671,
+            0.007313615835601214
+          ],
+          "axis_metrics": {
+            "initial_axis_world": [
+              0.9790312539927405,
+              -0.20371009721023306,
+              -2.220446049250313e-16
+            ],
+            "final_axis_world": [
+              0.11309349373282451,
+              0.010438962198298856,
+              -0.9935295112594922
+            ],
+            "axis_direction_change_deg": 83.76563889102695,
+            "axis_elevation_from_table_deg": 83.47860319700814
+          },
+          "table_to_hold_orientation_metrics": {
+            "rotation_vector_world_rad": [
+              0.21661867883316105,
+              1.44363460291014,
+              0.12255588884784717
+            ],
+            "total_rotation_deg": 83.934395451261,
+            "signed_rotation_about_finger_line_deg": -81.1960633932728,
+            "signed_rotation_about_initial_cylinder_axis_deg": -4.698625684803851,
+            "signed_rotation_about_world_up_deg": 7.021935185456076,
+            "finger_line_world": [
+              0.09326692101050288,
+              -0.9956411408962673,
+              0.0
+            ],
+            "initial_cylinder_axis_world": [
+              0.9790312539927405,
+              -0.20371009721023306,
+              -2.220446049250313e-16
+            ]
+          },
+          "hold_orientation_metrics": {
+            "rotation_vector_world_rad": [
+              -3.152285364538328e-05,
+              -8.805658747817346e-05,
+              -0.0010136298150143252
+            ],
+            "total_rotation_deg": 0.058323418453399015,
+            "signed_rotation_about_finger_line_deg": 0.00485482734116842,
+            "signed_rotation_about_initial_cylinder_axis_deg": 0.05744399714405915,
+            "signed_rotation_about_world_up_deg": -0.0580767103889472,
+            "finger_line_world": [
+              0.09326692101050288,
+              -0.9956411408962673,
+              0.0
+            ],
+            "initial_cylinder_axis_world": [
+              0.11299535129257862,
+              0.010584866445024646,
+              -0.9935391342008668
+            ]
+          },
+          "hold_final_angular_velocity_rad_s": [
+            0.00011433879262767732,
+            0.0004651347117032856,
+            5.882390541955829e-05
+          ],
+          "hold_final_angular_speed_deg_s": 0.0276498242868328,
+          "hold_final_mimic_residual_m": 0.008020028471946716,
+          "hold_mimic_residual_median_m": 0.007869243621826172,
+          "hold_bilateral_contact_fraction": 1.0,
+          "contact_hold": {
+            "physics_steps": 404,
+            "elapsed_s": 2.0199999548494816,
+            "counts": {
+              "left": {
+                "median_points_per_physics_step": 1.0,
+                "p95_points_per_physics_step": 1.0,
+                "max_points_per_physics_step": 1,
+                "contact_step_fraction": 0.9975247524752475,
+                "impulse_weighted_centroid_cylinder_local_m": [
+                  0.005541982281383237,
+                  0.030403284204080228,
+                  0.12313256363221889
+                ]
+              },
+              "right": {
+                "median_points_per_physics_step": 1.0,
+                "p95_points_per_physics_step": 1.0,
+                "max_points_per_physics_step": 1,
+                "contact_step_fraction": 0.9975247524752475,
+                "impulse_weighted_centroid_cylinder_local_m": [
+                  0.008059836932691739,
+                  -0.029831327596582722,
+                  0.11323108722109332
+                ]
+              },
+              "nonfinger": {
+                "median_points_per_physics_step": 0.0,
+                "p95_points_per_physics_step": 0.0,
+                "max_points_per_physics_step": 0,
+                "contact_step_fraction": 0.0,
+                "impulse_weighted_centroid_cylinder_local_m": null
+              }
+            },
+            "left_right_axial_centroid_mismatch_m": 0.00990147641112557,
+            "active_paths": [
+              {
+                "side": "left",
+                "paths": [
+                  "/World/ALOHA1RemoteBottleSession/Bottle500",
+                  "/World/ALOHA1RemoteBottleSession/Bottle500/HorizontalCylinderBenchmark",
+                  "/World/follower_left/vx300s_left/follower_left_left_finger_link",
+                  "/World/follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh"
+                ]
+              },
+              {
+                "side": "right",
+                "paths": [
+                  "/World/ALOHA1RemoteBottleSession/Bottle500",
+                  "/World/ALOHA1RemoteBottleSession/Bottle500/HorizontalCylinderBenchmark",
+                  "/World/follower_left/vx300s_left/follower_left_right_finger_link",
+                  "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh"
+                ]
+              }
+            ],
+            "collector_errors": []
+          },
+          "contact_station_error_m": {
+            "left": 0.05446589696555222,
+            "right": 0.04456442055442665
+          },
+          "strict_quality_checks": {
+            "lift_height": true,
+            "axis_direction": false,
+            "axis_elevation": false,
+            "final_angular_speed": true,
+            "mimic": false,
+            "bilateral_contact_fraction": true,
+            "axial_contact_centroid": false,
+            "actual_contact_station": false,
+            "total_hold_rotation": true,
+            "finger_line_hold_rotation": true
+          },
+          "strict_quality_pass": false,
+          "inter_trial_recovery": "PASS"
+        },
+        {
+          "trial": 2,
+          "requested_physics_hz": 200,
+          "status": "COMPLETE",
+          "finger_approximation": "convexHull",
+          "initial_component_readback": {
+            "position_m": [
+              -0.30299320816993713,
+              -0.025529859587550163,
+              0.03400000184774399
+            ],
+            "orientation_wxyz": [
+              0.703390228463678,
+              0.07240294539461047,
+              0.703390228463678,
+              -0.07240294539461047
+            ],
+            "physx_tensor_position_error_m": 1.1067332411914758e-08,
+            "physx_tensor_orientation_error_rad": 0.0,
+            "usd_visible_position_m": [
+              -0.30299320816993713,
+              -0.025529859587550163,
+              0.03400000184774399
+            ],
+            "usd_visible_orientation_wxyz": [
+              0.7033902406692505,
+              0.07240294416431019,
+              0.7033902165113854,
+              -0.07240294416431019
+            ],
+            "usd_visible_position_error_m": 1.1067332411914758e-08,
+            "usd_visible_orientation_error_rad": 0.0,
+            "fabric_visible_position_m": [
+              -0.30299320816993713,
+              -0.025529859587550163,
+              0.03400000184774399
+            ],
+            "fabric_visible_orientation_wxyz": [
+              0.7033902406692505,
+              0.07240294416431019,
+              0.7033902165113854,
+              -0.07240294416431019
+            ],
+            "fabric_visible_position_error_m": 1.1067332411914758e-08,
+            "fabric_visible_orientation_error_rad": 0.0
+          },
+          "workflow_status": "PASS",
+          "workflow_error": null,
+          "lift_delta_m": [
+            0.06652224063873291,
+            -0.02394178882241249,
+            0.26470600441098213
+          ],
+          "close_readback": {
+            "target_m": 0.021,
+            "left_actual_m": 0.04797276109457016,
+            "right_actual_m": -0.04860474541783333,
+            "mimic_residual_m": 0.0006319843232631683,
+            "left_contact": true,
+            "right_contact": true,
+            "bilateral_stable_steps": 5,
+            "nonfinger_contact": false,
+            "maximum_arm_joint_change_rad": 0.0034974016016349196,
+            "settle_updates": 22,
+            "settled_reason": "stable_bilateral_dynamic_contact"
+          },
+          "post_lift_mimic_residual_m": 0.006947077810764313,
+          "hold_updates": 301,
+          "hold_start_position_m": [
+            -0.23699182271957397,
+            -0.05532106012105942,
+            0.2991235852241516
+          ],
+          "hold_start_orientation_wxyz": [
+            0.05820647038383288,
+            0.03794207040158623,
+            0.9975571219448066,
+            0.007224580007960083
+          ],
+          "hold_start_finger_line_world": [
+            0.08536762990158589,
+            -0.9963495208836033,
+            0.0
+          ],
+          "hold_final_position_m": [
+            -0.23703539371490479,
+            -0.05607478693127632,
+            0.29911869764328003
+          ],
+          "hold_position_delta_m": [
+            -4.357099533081055e-05,
+            -0.0007537268102169037,
+            -4.887580871582031e-06
+          ],
+          "hold_final_orientation_wxyz": [
+            0.058222723298015616,
+            0.038493024269878724,
+            0.9975353614651191,
+            0.007183606404537483
+          ],
+          "axis_metrics": {
+            "initial_axis_world": [
+              0.9790312539927405,
+              -0.20371009721023306,
+              -2.220446049250313e-16
+            ],
+            "final_axis_world": [
+              0.11671148813248947,
+              0.009849465420808988,
+              -0.9931170205815747
+            ],
+            "axis_direction_change_deg": 83.55451808868727,
+            "axis_elevation_from_table_deg": 83.27371470460105
+          },
+          "table_to_hold_orientation_metrics": {
+            "rotation_vector_world_rad": [
+              0.21848288853968922,
+              1.4395823078481658,
+              0.12006523257149612
+            ],
+            "total_rotation_deg": 83.70965650422997,
+            "signed_rotation_about_finger_line_deg": -81.11224714252057,
+            "signed_rotation_about_initial_cylinder_axis_deg": -4.546756747486823,
+            "signed_rotation_about_world_up_deg": 6.8792310926033915,
+            "finger_line_world": [
+              0.08536762990158589,
+              -0.9963495208836033,
+              0.0
+            ],
+            "initial_cylinder_axis_world": [
+              0.9790312539927405,
+              -0.20371009721023306,
+              -2.220446049250313e-16
+            ]
+          },
+          "hold_orientation_metrics": {
+            "rotation_vector_world_rad": [
+              -1.8527778496754133e-05,
+              -2.3889555946177763e-05,
+              -0.001105871940680333
+            ],
+            "total_rotation_deg": 0.06338546758671715,
+            "signed_rotation_about_finger_line_deg": 0.0012731509002153008,
+            "signed_rotation_about_initial_cylinder_axis_deg": 0.06278829863566747,
+            "signed_rotation_about_world_up_deg": -0.0633617948829248,
+            "finger_line_world": [
+              0.08536762990158589,
+              -0.9963495208836033,
+              0.0
+            ],
+            "initial_cylinder_axis_world": [
+              0.11667678919589172,
+              0.009996914485738834,
+              -0.9931196244983294
+            ]
+          },
+          "hold_final_angular_velocity_rad_s": [
+            0.0002659439342096448,
+            0.00031234018388204277,
+            -0.00018871836073230952
+          ],
+          "hold_final_angular_speed_deg_s": 0.02587189552188478,
+          "hold_final_mimic_residual_m": 0.008026275783777237,
+          "hold_mimic_residual_median_m": 0.007877353578805923,
+          "hold_bilateral_contact_fraction": 1.0,
+          "contact_hold": {
+            "physics_steps": 404,
+            "elapsed_s": 2.0199999548494816,
+            "counts": {
+              "left": {
+                "median_points_per_physics_step": 1.0,
+                "p95_points_per_physics_step": 1.0,
+                "max_points_per_physics_step": 1,
+                "contact_step_fraction": 0.9975247524752475,
+                "impulse_weighted_centroid_cylinder_local_m": [
+                  0.0055904972161811995,
+                  0.030392740819621716,
+                  0.12293244653154027
+                ]
+              },
+              "right": {
+                "median_points_per_physics_step": 1.0,
+                "p95_points_per_physics_step": 1.0,
+                "max_points_per_physics_step": 1,
+                "contact_step_fraction": 0.9975247524752475,
+                "impulse_weighted_centroid_cylinder_local_m": [
+                  0.00792054857672939,
+                  -0.029867597339863824,
+                  0.11313004729212475
+                ]
+              },
+              "nonfinger": {
+                "median_points_per_physics_step": 0.0,
+                "p95_points_per_physics_step": 0.0,
+                "max_points_per_physics_step": 0,
+                "contact_step_fraction": 0.0,
+                "impulse_weighted_centroid_cylinder_local_m": null
+              }
+            },
+            "left_right_axial_centroid_mismatch_m": 0.009802399239415518,
+            "active_paths": [
+              {
+                "side": "left",
+                "paths": [
+                  "/World/ALOHA1RemoteBottleSession/Bottle500",
+                  "/World/ALOHA1RemoteBottleSession/Bottle500/HorizontalCylinderBenchmark",
+                  "/World/follower_left/vx300s_left/follower_left_left_finger_link",
+                  "/World/follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh"
+                ]
+              },
+              {
+                "side": "right",
+                "paths": [
+                  "/World/ALOHA1RemoteBottleSession/Bottle500",
+                  "/World/ALOHA1RemoteBottleSession/Bottle500/HorizontalCylinderBenchmark",
+                  "/World/follower_left/vx300s_left/follower_left_right_finger_link",
+                  "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh"
+                ]
+              }
+            ],
+            "collector_errors": []
+          },
+          "contact_station_error_m": {
+            "left": 0.0542657798648736,
+            "right": 0.044463380625458085
+          },
+          "strict_quality_checks": {
+            "lift_height": true,
+            "axis_direction": false,
+            "axis_elevation": false,
+            "final_angular_speed": true,
+            "mimic": false,
+            "bilateral_contact_fraction": true,
+            "axial_contact_centroid": false,
+            "actual_contact_station": false,
+            "total_hold_rotation": true,
+            "finger_line_hold_rotation": true
+          },
+          "strict_quality_pass": false,
+          "inter_trial_recovery": "PASS"
+        },
+        {
+          "trial": 3,
+          "requested_physics_hz": 200,
+          "status": "COMPLETE",
+          "finger_approximation": "convexHull",
+          "initial_component_readback": {
+            "position_m": [
+              -0.30299320816993713,
+              -0.025529859587550163,
+              0.03400000184774399
+            ],
+            "orientation_wxyz": [
+              0.703390228463678,
+              0.07240294539461047,
+              0.703390228463678,
+              -0.07240294539461047
+            ],
+            "physx_tensor_position_error_m": 1.1067332411914758e-08,
+            "physx_tensor_orientation_error_rad": 0.0,
+            "usd_visible_position_m": [
+              -0.30299320816993713,
+              -0.025529859587550163,
+              0.03400000184774399
+            ],
+            "usd_visible_orientation_wxyz": [
+              0.7033902406692505,
+              0.07240294416431019,
+              0.7033902165113854,
+              -0.07240294416431019
+            ],
+            "usd_visible_position_error_m": 1.1067332411914758e-08,
+            "usd_visible_orientation_error_rad": 0.0,
+            "fabric_visible_position_m": [
+              -0.30299320816993713,
+              -0.025529859587550163,
+              0.03400000184774399
+            ],
+            "fabric_visible_orientation_wxyz": [
+              0.7033902406692505,
+              0.07240294416431019,
+              0.7033902165113854,
+              -0.07240294416431019
+            ],
+            "fabric_visible_position_error_m": 1.1067332411914758e-08,
+            "fabric_visible_orientation_error_rad": 0.0
+          },
+          "workflow_status": "PASS",
+          "workflow_error": null,
+          "lift_delta_m": [
+            0.06654161214828491,
+            -0.023943472653627396,
+            0.26472698524594307
+          ],
+          "close_readback": {
+            "target_m": 0.021,
+            "left_actual_m": 0.047972798347473145,
+            "right_actual_m": -0.048604175448417664,
+            "mimic_residual_m": 0.000631377100944519,
+            "left_contact": true,
+            "right_contact": true,
+            "bilateral_stable_steps": 5,
+            "nonfinger_contact": false,
+            "maximum_arm_joint_change_rad": 0.003497690660879016,
+            "settle_updates": 22,
+            "settled_reason": "stable_bilateral_dynamic_contact"
+          },
+          "post_lift_mimic_residual_m": 0.006953615695238113,
+          "hold_updates": 301,
+          "hold_start_position_m": [
+            -0.23697084188461304,
+            -0.0553206130862236,
+            0.2991475462913513
+          ],
+          "hold_start_orientation_wxyz": [
+            0.05810399995659091,
+            0.037902168258323175,
+            0.9975647153613749,
+            0.007210374216443365
+          ],
+          "hold_start_finger_line_world": [
+            0.08538259918480916,
+            -0.9963482381960869,
+            0.0
+          ],
+          "hold_final_position_m": [
+            -0.23700496554374695,
+            -0.05607187747955322,
+            0.2991427481174469
+          ],
+          "hold_position_delta_m": [
+            -3.412365913391113e-05,
+            -0.0007512643933296204,
+            -4.798173904418945e-06
+          ],
+          "hold_final_orientation_wxyz": [
+            0.05808554659947853,
+            0.03845365643767828,
+            0.9975449475973075,
+            0.007173779052740699
+          ],
+          "axis_metrics": {
+            "initial_axis_world": [
+              0.9790312539927405,
+              -0.20371009721023306,
+              -2.220446049250313e-16
+            ],
+            "final_axis_world": [
+              0.11643760314758335,
+              0.009845130792619568,
+              -0.9931492123406838
+            ],
+            "axis_direction_change_deg": 83.56992807089976,
+            "axis_elevation_from_table_deg": 83.28948063647871
+          },
+          "table_to_hold_orientation_metrics": {
+            "rotation_vector_world_rad": [
+              0.21842267579903266,
+              1.4397977947969003,
+              0.12009288660088484
+            ],
+            "total_rotation_deg": 83.72143639236754,
+            "signed_rotation_about_finger_line_deg": -81.12454992695444,
+            "signed_rotation_about_initial_cylinder_axis_deg": -4.552649447798128,
+            "signed_rotation_about_world_up_deg": 6.880815551773896,
+            "finger_line_world": [
+              0.08538259918480916,
+              -0.9963482381960869,
+              0.0
+            ],
+            "initial_cylinder_axis_world": [
+              0.9790312539927405,
+              -0.20371009721023306,
+              -2.220446049250313e-16
+            ]
+          },
+          "hold_orientation_metrics": {
+            "rotation_vector_world_rad": [
+              -7.240839751121353e-06,
+              4.5246610257058266e-05,
+              -0.0011057753755595323
+            ],
+            "total_rotation_deg": 0.06341063640528975,
+            "signed_rotation_about_finger_line_deg": -0.0026183954735175033,
+            "signed_rotation_about_initial_cylinder_axis_deg": 0.06289943830247266,
+            "signed_rotation_about_world_up_deg": -0.06335626210905476,
+            "finger_line_world": [
+              0.08538259918480916,
+              -0.9963482381960869,
+              0.0
+            ],
+            "initial_cylinder_axis_world": [
+              0.11647157798962211,
+              0.009981094640078025,
+              -0.9931438713854064
+            ]
+          },
+          "hold_final_angular_velocity_rad_s": [
+            1.1917218216694891e-05,
+            -5.537380638998002e-05,
+            0.0004365890345070511
+          ],
+          "hold_final_angular_speed_deg_s": 0.025224349871014327,
+          "hold_final_mimic_residual_m": 0.008027162402868271,
+          "hold_mimic_residual_median_m": 0.00787540152668953,
+          "hold_bilateral_contact_fraction": 1.0,
+          "contact_hold": {
+            "physics_steps": 404,
+            "elapsed_s": 2.0199999548494816,
+            "counts": {
+              "left": {
+                "median_points_per_physics_step": 1.0,
+                "p95_points_per_physics_step": 1.0,
+                "max_points_per_physics_step": 1,
+                "contact_step_fraction": 0.9975247524752475,
+                "impulse_weighted_centroid_cylinder_local_m": [
+                  0.005589508118719794,
+                  0.030392859336492942,
+                  0.1229636553331719
+                ]
+              },
+              "right": {
+                "median_points_per_physics_step": 1.0,
+                "p95_points_per_physics_step": 1.0,
+                "max_points_per_physics_step": 1,
+                "contact_step_fraction": 0.9975247524752475,
+                "impulse_weighted_centroid_cylinder_local_m": [
+                  0.007925097736717967,
+                  -0.029866432931960403,
+                  0.11316008955507419
+                ]
+              },
+              "nonfinger": {
+                "median_points_per_physics_step": 0.0,
+                "p95_points_per_physics_step": 0.0,
+                "max_points_per_physics_step": 0,
+                "contact_step_fraction": 0.0,
+                "impulse_weighted_centroid_cylinder_local_m": null
+              }
+            },
+            "left_right_axial_centroid_mismatch_m": 0.009803565778097711,
+            "active_paths": [
+              {
+                "side": "left",
+                "paths": [
+                  "/World/ALOHA1RemoteBottleSession/Bottle500",
+                  "/World/ALOHA1RemoteBottleSession/Bottle500/HorizontalCylinderBenchmark",
+                  "/World/follower_left/vx300s_left/follower_left_left_finger_link",
+                  "/World/follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh"
+                ]
+              },
+              {
+                "side": "right",
+                "paths": [
+                  "/World/ALOHA1RemoteBottleSession/Bottle500",
+                  "/World/ALOHA1RemoteBottleSession/Bottle500/HorizontalCylinderBenchmark",
+                  "/World/follower_left/vx300s_left/follower_left_right_finger_link",
+                  "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh"
+                ]
+              }
+            ],
+            "collector_errors": []
+          },
+          "contact_station_error_m": {
+            "left": 0.05429698866650523,
+            "right": 0.04449342288840752
+          },
+          "strict_quality_checks": {
+            "lift_height": true,
+            "axis_direction": false,
+            "axis_elevation": false,
+            "final_angular_speed": true,
+            "mimic": false,
+            "bilateral_contact_fraction": true,
+            "axial_contact_centroid": false,
+            "actual_contact_station": false,
+            "total_hold_rotation": true,
+            "finger_line_hold_rotation": true
+          },
+          "strict_quality_pass": false,
+          "inter_trial_recovery": "PASS"
+        },
+        {
+          "trial": 4,
+          "requested_physics_hz": 200,
+          "status": "COMPLETE",
+          "finger_approximation": "convexHull",
+          "initial_component_readback": {
+            "position_m": [
+              -0.30299320816993713,
+              -0.025529859587550163,
+              0.03400000184774399
+            ],
+            "orientation_wxyz": [
+              0.703390228463678,
+              0.07240294539461047,
+              0.703390228463678,
+              -0.07240294539461047
+            ],
+            "physx_tensor_position_error_m": 1.1067332411914758e-08,
+            "physx_tensor_orientation_error_rad": 0.0,
+            "usd_visible_position_m": [
+              -0.30299320816993713,
+              -0.025529859587550163,
+              0.03400000184774399
+            ],
+            "usd_visible_orientation_wxyz": [
+              0.7033902406692505,
+              0.07240294416431019,
+              0.7033902165113854,
+              -0.07240294416431019
+            ],
+            "usd_visible_position_error_m": 1.1067332411914758e-08,
+            "usd_visible_orientation_error_rad": 0.0,
+            "fabric_visible_position_m": [
+              -0.30299320816993713,
+              -0.025529859587550163,
+              0.03400000184774399
+            ],
+            "fabric_visible_orientation_wxyz": [
+              0.7033902406692505,
+              0.07240294416431019,
+              0.7033902165113854,
+              -0.07240294416431019
+            ],
+            "fabric_visible_position_error_m": 1.1067332411914758e-08,
+            "fabric_visible_orientation_error_rad": 0.0
+          },
+          "workflow_status": "PASS",
+          "workflow_error": null,
+          "lift_delta_m": [
+            0.06496500968933105,
+            -0.023708872497081757,
+            0.26407185569405556
+          ],
+          "close_readback": {
+            "target_m": 0.021,
+            "left_actual_m": 0.047972582280635834,
+            "right_actual_m": -0.04860395938158035,
+            "mimic_residual_m": 0.000631377100944519,
+            "left_contact": true,
+            "right_contact": true,
+            "bilateral_stable_steps": 5,
+            "nonfinger_contact": false,
+            "maximum_arm_joint_change_rad": 0.003497755737043917,
+            "settle_updates": 22,
+            "settled_reason": "stable_bilateral_dynamic_contact"
+          },
+          "post_lift_mimic_residual_m": 0.006960093975067139,
+          "hold_updates": 301,
+          "hold_start_position_m": [
+            -0.2385464310646057,
+            -0.05508582293987274,
+            0.29849162697792053
+          ],
+          "hold_start_orientation_wxyz": [
+            0.0644924640867803,
+            0.03643165157444428,
+            0.9972305301134079,
+            0.006687798539515315
+          ],
+          "hold_start_finger_line_world": [
+            0.06676330143663098,
+            -0.9977688417570884,
+            0.0
+          ],
+          "hold_final_position_m": [
+            -0.23861873149871826,
+            -0.05587230622768402,
+            0.29848554730415344
+          ],
+          "hold_position_delta_m": [
+            -7.230043411254883e-05,
+            -0.0007864832878112793,
+            -6.079673767089844e-06
+          ],
+          "hold_final_orientation_wxyz": [
+            0.06459382094495443,
+            0.03703113598360364,
+            0.9972022049345456,
+            0.006640462120614107
+          ],
+          "axis_metrics": {
+            "initial_axis_world": [
+              0.9790312539927405,
+              -0.20371009721023306,
+              -2.220446049250313e-16
+            ],
+            "final_axis_world": [
+              0.12931800905447646,
+              0.008459801802695125,
+              -0.9915670851171112
+            ],
+            "axis_direction_change_deg": 82.82599929455431,
+            "axis_elevation_from_table_deg": 82.5538435140742
+          },
+          "table_to_hold_orientation_metrics": {
+            "rotation_vector_world_rad": [
+              0.21394783334093087,
+              1.4274957477713437,
+              0.1223187494057312
+            ],
+            "total_rotation_deg": 82.99941179895404,
+            "signed_rotation_about_finger_line_deg": -80.7885912395462,
+            "signed_rotation_about_initial_cylinder_axis_deg": -4.660076709764426,
+            "signed_rotation_about_world_up_deg": 7.008348096266745,
+            "finger_line_world": [
+              0.06676330143663098,
+              -0.9977688417570884,
+              0.0
+            ],
+            "initial_cylinder_axis_world": [
+              0.9790312539927405,
+              -0.20371009721023306,
+              -2.220446049250313e-16
+            ]
+          },
+          "hold_orientation_metrics": {
+            "rotation_vector_world_rad": [
+              -2.4092521572699227e-05,
+              -0.00019433829029542762,
+              -0.0012051736443246604
+            ],
+            "total_rotation_deg": 0.06995698147171449,
+            "signed_rotation_about_finger_line_deg": 0.01101776036339645,
+            "signed_rotation_about_initial_cylinder_axis_deg": 0.06819635068062102,
+            "signed_rotation_about_world_up_deg": -0.06905136340020364,
+            "finger_line_world": [
+              0.06676330143663098,
+              -0.9977688417570884,
+              0.0
+            ],
+            "initial_cylinder_axis_world": [
+              0.12911500339154308,
+              0.008639419804131184,
+              -0.9915919908534203
+            ]
+          },
+          "hold_final_angular_velocity_rad_s": [
+            -0.0006757363444194198,
+            0.0005760230706073344,
+            -6.39955178485252e-05
+          ],
+          "hold_final_angular_speed_deg_s": 0.05100668433668805,
+          "hold_final_mimic_residual_m": 0.00803578644990921,
+          "hold_mimic_residual_median_m": 0.007885836064815521,
+          "hold_bilateral_contact_fraction": 1.0,
+          "contact_hold": {
+            "physics_steps": 404,
+            "elapsed_s": 2.0199999548494816,
+            "counts": {
+              "left": {
+                "median_points_per_physics_step": 1.0,
+                "p95_points_per_physics_step": 1.0,
+                "max_points_per_physics_step": 1,
+                "contact_step_fraction": 0.9975247524752475,
+                "impulse_weighted_centroid_cylinder_local_m": [
+                  0.0053616666827920245,
+                  0.030430227643662544,
+                  0.1223557960475738
+                ]
+              },
+              "right": {
+                "median_points_per_physics_step": 1.0,
+                "p95_points_per_physics_step": 1.0,
+                "max_points_per_physics_step": 1,
+                "contact_step_fraction": 0.9975247524752475,
+                "impulse_weighted_centroid_cylinder_local_m": [
+                  0.007666369195025477,
+                  -0.029937980468741302,
+                  0.11235630656360514
+                ]
+              },
+              "nonfinger": {
+                "median_points_per_physics_step": 0.0,
+                "p95_points_per_physics_step": 0.0,
+                "max_points_per_physics_step": 0,
+                "contact_step_fraction": 0.0,
+                "impulse_weighted_centroid_cylinder_local_m": null
+              }
+            },
+            "left_right_axial_centroid_mismatch_m": 0.009999489483968657,
+            "active_paths": [
+              {
+                "side": "left",
+                "paths": [
+                  "/World/ALOHA1RemoteBottleSession/Bottle500",
+                  "/World/ALOHA1RemoteBottleSession/Bottle500/HorizontalCylinderBenchmark",
+                  "/World/follower_left/vx300s_left/follower_left_left_finger_link",
+                  "/World/follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh"
+                ]
+              },
+              {
+                "side": "right",
+                "paths": [
+                  "/World/ALOHA1RemoteBottleSession/Bottle500",
+                  "/World/ALOHA1RemoteBottleSession/Bottle500/HorizontalCylinderBenchmark",
+                  "/World/follower_left/vx300s_left/follower_left_right_finger_link",
+                  "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh"
+                ]
+              }
+            ],
+            "collector_errors": []
+          },
+          "contact_station_error_m": {
+            "left": 0.05368912938090713,
+            "right": 0.04368963989693847
+          },
+          "strict_quality_checks": {
+            "lift_height": true,
+            "axis_direction": false,
+            "axis_elevation": false,
+            "final_angular_speed": true,
+            "mimic": false,
+            "bilateral_contact_fraction": true,
+            "axial_contact_centroid": false,
+            "actual_contact_station": false,
+            "total_hold_rotation": true,
+            "finger_line_hold_rotation": true
+          },
+          "strict_quality_pass": false,
+          "inter_trial_recovery": "PASS"
+        },
+        {
+          "trial": 5,
+          "requested_physics_hz": 200,
+          "status": "COMPLETE",
+          "finger_approximation": "convexHull",
+          "initial_component_readback": {
+            "position_m": [
+              -0.30299320816993713,
+              -0.025529859587550163,
+              0.03400000184774399
+            ],
+            "orientation_wxyz": [
+              0.703390228463678,
+              0.07240294539461047,
+              0.703390228463678,
+              -0.07240294539461047
+            ],
+            "physx_tensor_position_error_m": 1.1067332411914758e-08,
+            "physx_tensor_orientation_error_rad": 0.0,
+            "usd_visible_position_m": [
+              -0.30299320816993713,
+              -0.025529859587550163,
+              0.03400000184774399
+            ],
+            "usd_visible_orientation_wxyz": [
+              0.7033902406692505,
+              0.07240294416431019,
+              0.7033902165113854,
+              -0.07240294416431019
+            ],
+            "usd_visible_position_error_m": 1.1067332411914758e-08,
+            "usd_visible_orientation_error_rad": 0.0,
+            "fabric_visible_position_m": [
+              -0.30299320816993713,
+              -0.025529859587550163,
+              0.03400000184774399
+            ],
+            "fabric_visible_orientation_wxyz": [
+              0.7033902406692505,
+              0.07240294416431019,
+              0.7033902165113854,
+              -0.07240294416431019
+            ],
+            "fabric_visible_position_error_m": 1.1067332411914758e-08,
+            "fabric_visible_orientation_error_rad": 0.0
+          },
+          "workflow_status": "PASS",
+          "workflow_error": null,
+          "lift_delta_m": [
+            0.0666249692440033,
+            -0.023974448442459106,
+            0.26481154188513756
+          ],
+          "close_readback": {
+            "target_m": 0.021,
+            "left_actual_m": 0.047972630709409714,
+            "right_actual_m": -0.04860512167215347,
+            "mimic_residual_m": 0.0006324909627437592,
+            "left_contact": true,
+            "right_contact": true,
+            "bilateral_stable_steps": 5,
+            "nonfinger_contact": false,
+            "maximum_arm_joint_change_rad": 0.0034971662098541856,
+            "settle_updates": 22,
+            "settled_reason": "stable_bilateral_dynamic_contact"
+          },
+          "post_lift_mimic_residual_m": 0.006952282041311264,
+          "hold_updates": 301,
+          "hold_start_position_m": [
+            -0.2368927299976349,
+            -0.05535430088639259,
+            0.2992308735847473
+          ],
+          "hold_start_orientation_wxyz": [
+            0.05765097026070444,
+            0.0383306592574513,
+            0.9975736360432775,
+            0.007346214010141543
+          ],
+          "hold_start_finger_line_world": [
+            0.08822279477289406,
+            -0.9961007672331449,
+            0.0
+          ],
+          "hold_final_position_m": [
+            -0.23697982728481293,
+            -0.056101903319358826,
+            0.2992231845855713
+          ],
+          "hold_position_delta_m": [
+            -8.709728717803955e-05,
+            -0.0007476024329662323,
+            -7.68899917602539e-06
+          ],
+          "hold_final_orientation_wxyz": [
+            0.05785950631706605,
+            0.03885303923145408,
+            0.99754177818742,
+            0.007288322296988796
+          ],
+          "axis_metrics": {
+            "initial_axis_world": [
+              0.9790312539927405,
+              -0.20371009721023306,
+              -2.220446049250313e-16
+            ],
+            "final_axis_world": [
+              0.11600089657741744,
+              0.010044776630583386,
+              -0.9931983157736812
+            ],
+            "axis_direction_change_deg": 83.59692417177384,
+            "axis_elevation_from_table_deg": 83.31360033975537
+          },
+          "table_to_hold_orientation_metrics": {
+            "rotation_vector_world_rad": [
+              0.21938927963467336,
+              1.440578652401771,
+              0.11958492422096124
+            ],
+            "total_rotation_deg": 83.77142747562472,
+            "signed_rotation_about_finger_line_deg": -81.1082701964082,
+            "signed_rotation_about_initial_cylinder_axis_deg": -4.507542383567904,
+            "signed_rotation_about_world_up_deg": 6.851711451252854,
+            "finger_line_world": [
+              0.08822279477289406,
+              -0.9961007672331449,
+              0.0
+            ],
+            "initial_cylinder_axis_world": [
+              0.9790312539927405,
+              -0.20371009721023306,
+              -2.220446049250313e-16
+            ]
+          },
+          "hold_orientation_metrics": {
+            "rotation_vector_world_rad": [
+              -7.078965244970215e-05,
+              -0.00040762035314379294,
+              -0.001054406229587793
+            ],
+            "total_rotation_deg": 0.06489712699699897,
+            "signed_rotation_about_finger_line_deg": 0.022906032490399235,
+            "signed_rotation_about_initial_cylinder_axis_deg": 0.059297027860807164,
+            "signed_rotation_about_world_up_deg": -0.06041302684768264,
+            "finger_line_world": [
+              0.08822279477289406,
+              -0.9961007672331449,
+              0.0
+            ],
+            "initial_cylinder_axis_world": [
+              0.11558534650089768,
+              0.010237179448648891,
+              -0.9932447975354328
+            ]
+          },
+          "hold_final_angular_velocity_rad_s": [
+            0.00030061870347708464,
+            -9.908398351399228e-05,
+            -9.920002048602328e-05
+          ],
+          "hold_final_angular_speed_deg_s": 0.019005441439092073,
+          "hold_final_mimic_residual_m": 0.008028887212276459,
+          "hold_mimic_residual_median_m": 0.00787777453660965,
+          "hold_bilateral_contact_fraction": 1.0,
+          "contact_hold": {
+            "physics_steps": 404,
+            "elapsed_s": 2.0199999548494816,
+            "counts": {
+              "left": {
+                "median_points_per_physics_step": 1.0,
+                "p95_points_per_physics_step": 1.0,
+                "max_points_per_physics_step": 1,
+                "contact_step_fraction": 0.9975247524752475,
+                "impulse_weighted_centroid_cylinder_local_m": [
+                  0.005632484643959893,
+                  0.030384665880878348,
+                  0.12311549627630117
+                ]
+              },
+              "right": {
+                "median_points_per_physics_step": 1.0,
+                "p95_points_per_physics_step": 1.0,
+                "max_points_per_physics_step": 1,
+                "contact_step_fraction": 0.9975247524752475,
+                "impulse_weighted_centroid_cylinder_local_m": [
+                  0.007901447275592001,
+                  -0.02987244454060034,
+                  0.11325511258367145
+                ]
+              },
+              "nonfinger": {
+                "median_points_per_physics_step": 0.0,
+                "p95_points_per_physics_step": 0.0,
+                "max_points_per_physics_step": 0,
+                "contact_step_fraction": 0.0,
+                "impulse_weighted_centroid_cylinder_local_m": null
+              }
+            },
+            "left_right_axial_centroid_mismatch_m": 0.009860383692629718,
+            "active_paths": [
+              {
+                "side": "left",
+                "paths": [
+                  "/World/ALOHA1RemoteBottleSession/Bottle500",
+                  "/World/ALOHA1RemoteBottleSession/Bottle500/HorizontalCylinderBenchmark",
+                  "/World/follower_left/vx300s_left/follower_left_left_finger_link",
+                  "/World/follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh"
+                ]
+              },
+              {
+                "side": "right",
+                "paths": [
+                  "/World/ALOHA1RemoteBottleSession/Bottle500",
+                  "/World/ALOHA1RemoteBottleSession/Bottle500/HorizontalCylinderBenchmark",
+                  "/World/follower_left/vx300s_left/follower_left_right_finger_link",
+                  "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh"
+                ]
+              }
+            ],
+            "collector_errors": []
+          },
+          "contact_station_error_m": {
+            "left": 0.0544488296096345,
+            "right": 0.04458844591700478
+          },
+          "strict_quality_checks": {
+            "lift_height": true,
+            "axis_direction": false,
+            "axis_elevation": false,
+            "final_angular_speed": true,
+            "mimic": false,
+            "bilateral_contact_fraction": true,
+            "axial_contact_centroid": false,
+            "actual_contact_station": false,
+            "total_hold_rotation": true,
+            "finger_line_hold_rotation": true
+          },
+          "strict_quality_pass": false,
+          "inter_trial_recovery": "PASS"
+        },
+        {
+          "trial": 6,
+          "requested_physics_hz": 200,
+          "status": "COMPLETE",
+          "finger_approximation": "convexHull",
+          "initial_component_readback": {
+            "position_m": [
+              -0.30299320816993713,
+              -0.025529859587550163,
+              0.03400000184774399
+            ],
+            "orientation_wxyz": [
+              0.703390228463678,
+              0.07240294539461047,
+              0.703390228463678,
+              -0.07240294539461047
+            ],
+            "physx_tensor_position_error_m": 1.1067332411914758e-08,
+            "physx_tensor_orientation_error_rad": 0.0,
+            "usd_visible_position_m": [
+              -0.30299320816993713,
+              -0.025529859587550163,
+              0.03400000184774399
+            ],
+            "usd_visible_orientation_wxyz": [
+              0.7033902406692505,
+              0.07240294416431019,
+              0.7033902165113854,
+              -0.07240294416431019
+            ],
+            "usd_visible_position_error_m": 1.1067332411914758e-08,
+            "usd_visible_orientation_error_rad": 0.0,
+            "fabric_visible_position_m": [
+              -0.30299320816993713,
+              -0.025529859587550163,
+              0.03400000184774399
+            ],
+            "fabric_visible_orientation_wxyz": [
+              0.7033902406692505,
+              0.07240294416431019,
+              0.7033902165113854,
+              -0.07240294416431019
+            ],
+            "fabric_visible_position_error_m": 1.1067332411914758e-08,
+            "fabric_visible_orientation_error_rad": 0.0
+          },
+          "workflow_status": "PASS",
+          "workflow_error": null,
+          "lift_delta_m": [
+            0.0681314766407013,
+            -0.02419351041316986,
+            0.2660413160920143
+          ],
+          "close_readback": {
+            "target_m": 0.021,
+            "left_actual_m": 0.04797272011637688,
+            "right_actual_m": -0.04860427975654602,
+            "mimic_residual_m": 0.0006315596401691437,
+            "left_contact": true,
+            "right_contact": true,
+            "bilateral_stable_steps": 5,
+            "nonfinger_contact": false,
+            "maximum_arm_joint_change_rad": 0.003497329307720065,
+            "settle_updates": 22,
+            "settled_reason": "stable_bilateral_dynamic_contact"
+          },
+          "post_lift_mimic_residual_m": 0.006931047886610031,
+          "hold_updates": 301,
+          "hold_start_position_m": [
+            -0.2353823482990265,
+            -0.05557079240679741,
+            0.30045872926712036
+          ],
+          "hold_start_orientation_wxyz": [
+            0.05269463031105511,
+            0.03613992810160854,
+            0.9979283295663978,
+            0.0074987053556367445
+          ],
+          "hold_start_finger_line_world": [
+            0.10496300897464385,
+            -0.9944761267858514,
+            0.0
+          ],
+          "hold_final_position_m": [
+            -0.23567330837249756,
+            -0.05624394118785858,
+            0.3004421591758728
+          ],
+          "hold_position_delta_m": [
+            -0.00029096007347106934,
+            -0.0006731487810611725,
+            -1.6570091247558594e-05
+          ],
+          "hold_final_orientation_wxyz": [
+            0.053827813957007496,
+            0.03643209180860877,
+            0.997858261603756,
+            0.007359271715920985
+          ],
+          "axis_metrics": {
+            "initial_axis_world": [
+              0.9790312539927405,
+              -0.20371009721023306,
+              -2.220446049250313e-16
+            ],
+            "final_axis_world": [
+              0.10796128504773767,
+              0.01076490044236039,
+              -0.9940968151288416
+            ],
+            "axis_direction_change_deg": 84.05898568222096,
+            "axis_elevation_from_table_deg": 83.77133896136438
+          },
+          "table_to_hold_orientation_metrics": {
+            "rotation_vector_world_rad": [
+              0.2173722266967721,
+              1.4509549233147039,
+              0.12262293779386742
+            ],
+            "total_rotation_deg": 84.35443518188922,
+            "signed_rotation_about_finger_line_deg": -81.36711097201453,
+            "signed_rotation_about_initial_cylinder_axis_deg": -4.741796695116552,
+            "signed_rotation_about_world_up_deg": 7.025776807083837,
+            "finger_line_world": [
+              0.10496300897464385,
+              -0.9944761267858514,
+              0.0
+            ],
+            "initial_cylinder_axis_world": [
+              0.9790312539927405,
+              -0.20371009721023306,
+              -2.220446049250313e-16
+            ]
+          },
+          "hold_orientation_metrics": {
+            "rotation_vector_world_rad": [
+              -0.00032835423051785897,
+              -0.002254597117782175,
+              -0.0006198711551803989
+            ],
+            "total_rotation_deg": 0.13528678819517698,
+            "signed_rotation_about_finger_line_deg": 0.12649062969564126,
+            "signed_rotation_about_initial_cylinder_axis_deg": 0.03188463622729402,
+            "signed_rotation_about_world_up_deg": -0.035516001033735776,
+            "finger_line_world": [
+              0.10496300897464385,
+              -0.9944761267858514,
+              0.0
+            ],
+            "initial_cylinder_axis_world": [
+              0.10571293415167592,
+              0.011157580717357606,
+              -0.9943340907087408
+            ]
+          },
+          "hold_final_angular_velocity_rad_s": [
+            -0.00021388515597209334,
+            -0.0014187386259436607,
+            0.0009826450841501355
+          ],
+          "hold_final_angular_speed_deg_s": 0.0996379620304066,
+          "hold_final_mimic_residual_m": 0.007997937500476837,
+          "hold_mimic_residual_median_m": 0.007851727306842804,
+          "hold_bilateral_contact_fraction": 1.0,
+          "contact_hold": {
+            "physics_steps": 404,
+            "elapsed_s": 2.0199999548494816,
+            "counts": {
+              "left": {
+                "median_points_per_physics_step": 1.0,
+                "p95_points_per_physics_step": 1.0,
+                "max_points_per_physics_step": 1,
+                "contact_step_fraction": 0.9975247524752475,
+                "impulse_weighted_centroid_cylinder_local_m": [
+                  0.00558851871904532,
+                  0.030399211543529186,
+                  0.12352420915124696
+                ]
+              },
+              "right": {
+                "median_points_per_physics_step": 1.0,
+                "p95_points_per_physics_step": 1.0,
+                "max_points_per_physics_step": 1,
+                "contact_step_fraction": 0.9975247524752475,
+                "impulse_weighted_centroid_cylinder_local_m": [
+                  0.00817998089621134,
+                  -0.02980205809271286,
+                  0.11358604688644391
+                ]
+              },
+              "nonfinger": {
+                "median_points_per_physics_step": 0.0,
+                "p95_points_per_physics_step": 0.0,
+                "max_points_per_physics_step": 0,
+                "contact_step_fraction": 0.0,
+                "impulse_weighted_centroid_cylinder_local_m": null
+              }
+            },
+            "left_right_axial_centroid_mismatch_m": 0.009938162264803041,
+            "active_paths": [
+              {
+                "side": "left",
+                "paths": [
+                  "/World/ALOHA1RemoteBottleSession/Bottle500",
+                  "/World/ALOHA1RemoteBottleSession/Bottle500/HorizontalCylinderBenchmark",
+                  "/World/follower_left/vx300s_left/follower_left_left_finger_link",
+                  "/World/follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh"
+                ]
+              },
+              {
+                "side": "right",
+                "paths": [
+                  "/World/ALOHA1RemoteBottleSession/Bottle500",
+                  "/World/ALOHA1RemoteBottleSession/Bottle500/HorizontalCylinderBenchmark",
+                  "/World/follower_left/vx300s_left/follower_left_right_finger_link",
+                  "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh"
+                ]
+              }
+            ],
+            "collector_errors": []
+          },
+          "contact_station_error_m": {
+            "left": 0.05485754248458029,
+            "right": 0.04491938021977725
+          },
+          "strict_quality_checks": {
+            "lift_height": true,
+            "axis_direction": false,
+            "axis_elevation": false,
+            "final_angular_speed": true,
+            "mimic": false,
+            "bilateral_contact_fraction": true,
+            "axial_contact_centroid": false,
+            "actual_contact_station": false,
+            "total_hold_rotation": true,
+            "finger_line_hold_rotation": true
+          },
+          "strict_quality_pass": false,
+          "inter_trial_recovery": "PASS"
+        },
+        {
+          "trial": 7,
+          "requested_physics_hz": 200,
+          "status": "COMPLETE",
+          "finger_approximation": "convexHull",
+          "initial_component_readback": {
+            "position_m": [
+              -0.30299320816993713,
+              -0.025529859587550163,
+              0.03400000184774399
+            ],
+            "orientation_wxyz": [
+              0.703390228463678,
+              0.07240294539461047,
+              0.703390228463678,
+              -0.07240294539461047
+            ],
+            "physx_tensor_position_error_m": 1.1067332411914758e-08,
+            "physx_tensor_orientation_error_rad": 0.0,
+            "usd_visible_position_m": [
+              -0.30299320816993713,
+              -0.025529859587550163,
+              0.03400000184774399
+            ],
+            "usd_visible_orientation_wxyz": [
+              0.7033902406692505,
+              0.07240294416431019,
+              0.7033902165113854,
+              -0.07240294416431019
+            ],
+            "usd_visible_position_error_m": 1.1067332411914758e-08,
+            "usd_visible_orientation_error_rad": 0.0,
+            "fabric_visible_position_m": [
+              -0.30299320816993713,
+              -0.025529859587550163,
+              0.03400000184774399
+            ],
+            "fabric_visible_orientation_wxyz": [
+              0.7033902406692505,
+              0.07240294416431019,
+              0.7033902165113854,
+              -0.07240294416431019
+            ],
+            "fabric_visible_position_error_m": 1.1067332411914758e-08,
+            "fabric_visible_orientation_error_rad": 0.0
+          },
+          "workflow_status": "PASS",
+          "workflow_error": null,
+          "lift_delta_m": [
+            0.066309854388237,
+            -0.02389691025018692,
+            0.2646997943520546
+          ],
+          "close_readback": {
+            "target_m": 0.021,
+            "left_actual_m": 0.04797268658876419,
+            "right_actual_m": -0.04860416427254677,
+            "mimic_residual_m": 0.0006314776837825775,
+            "left_contact": true,
+            "right_contact": true,
+            "bilateral_stable_steps": 5,
+            "nonfinger_contact": false,
+            "maximum_arm_joint_change_rad": 0.0034972026478499174,
+            "settle_updates": 22,
+            "settled_reason": "stable_bilateral_dynamic_contact"
+          },
+          "post_lift_mimic_residual_m": 0.006944969296455383,
+          "hold_updates": 301,
+          "hold_start_position_m": [
+            -0.23720361292362213,
+            -0.05527544394135475,
+            0.2991132438182831
+          ],
+          "hold_start_orientation_wxyz": [
+            0.05923751482943507,
+            0.038074732558387774,
+            0.9974925113657512,
+            0.007065503993793421
+          ],
+          "hold_start_finger_line_world": [
+            0.08047427767942478,
+            -0.996756685772398,
+            0.0
+          ],
+          "hold_final_position_m": [
+            -0.23717840015888214,
+            -0.05603664740920067,
+            0.29911303520202637
+          ],
+          "hold_position_delta_m": [
+            2.5212764739990234e-05,
+            -0.0007612034678459167,
+            -2.086162567138672e-07
+          ],
+          "hold_final_orientation_wxyz": [
+            0.058954915925118985,
+            0.03866201575608629,
+            0.997486753752704,
+            0.007052837289393406
+          ],
+          "axis_metrics": {
+            "initial_axis_world": [
+              0.9790312539927405,
+              -0.20371009721023306,
+              -2.220446049250313e-16
+            ],
+            "final_axis_world": [
+              0.11815884922063634,
+              0.009511591768294712,
+              -0.992949150748863
+            ],
+            "axis_direction_change_deg": 83.46883692299642,
+            "axis_elevation_from_table_deg": 83.19208924073904
+          },
+          "table_to_hold_orientation_metrics": {
+            "rotation_vector_world_rad": [
+              0.218210604250254,
+              1.4375175632710264,
+              0.11973735118341888
+            ],
+            "total_rotation_deg": 83.58921402083075,
+            "signed_rotation_about_finger_line_deg": -81.09042461354507,
+            "signed_rotation_about_initial_cylinder_axis_deg": -4.53793122135649,
+            "signed_rotation_about_world_up_deg": 6.860444872885675,
+            "finger_line_world": [
+              0.08047427767942478,
+              -0.996756685772398,
+              0.0
+            ],
+            "initial_cylinder_axis_world": [
+              0.9790312539927405,
+              -0.20371009721023306,
+              -2.220446049250313e-16
+            ]
+          },
+          "hold_orientation_metrics": {
+            "rotation_vector_world_rad": [
+              6.590962965043804e-05,
+              0.0005723619550351259,
+              -0.001169566986305594
+            ],
+            "total_rotation_deg": 0.0747008043124638,
+            "signed_rotation_about_finger_line_deg": -0.03238366485171483,
+            "signed_rotation_about_initial_cylinder_axis_deg": 0.06729689677211197,
+            "signed_rotation_about_world_up_deg": -0.06701125217314549,
+            "finger_line_world": [
+              0.08047427767942478,
+              -0.996756685772398,
+              0.0
+            ],
+            "initial_cylinder_axis_world": [
+              0.11871598921846603,
+              0.00958466957655895,
+              -0.9928819909802922
+            ]
+          },
+          "hold_final_angular_velocity_rad_s": [
+            0.00019164664263371378,
+            0.0005038167582824826,
+            7.087229460012168e-05
+          ],
+          "hold_final_angular_speed_deg_s": 0.031150290202415016,
+          "hold_final_mimic_residual_m": 0.00802449882030487,
+          "hold_mimic_residual_median_m": 0.007873166352510452,
+          "hold_bilateral_contact_fraction": 1.0,
+          "contact_hold": {
+            "physics_steps": 404,
+            "elapsed_s": 2.0199999548494816,
+            "counts": {
+              "left": {
+                "median_points_per_physics_step": 1.0,
+                "p95_points_per_physics_step": 1.0,
+                "max_points_per_physics_step": 1,
+                "contact_step_fraction": 0.9975247524752475,
+                "impulse_weighted_centroid_cylinder_local_m": [
+                  0.005569082654474242,
+                  0.030396949233423825,
+                  0.12279112430434207
+                ]
+              },
+              "right": {
+                "median_points_per_physics_step": 1.0,
+                "p95_points_per_physics_step": 1.0,
+                "max_points_per_physics_step": 1,
+                "contact_step_fraction": 0.9975247524752475,
+                "impulse_weighted_centroid_cylinder_local_m": [
+                  0.007898785249500929,
+                  -0.02987376773950896,
+                  0.11306073918490202
+                ]
+              },
+              "nonfinger": {
+                "median_points_per_physics_step": 0.0,
+                "p95_points_per_physics_step": 0.0,
+                "max_points_per_physics_step": 0,
+                "contact_step_fraction": 0.0,
+                "impulse_weighted_centroid_cylinder_local_m": null
+              }
+            },
+            "left_right_axial_centroid_mismatch_m": 0.00973038511944005,
+            "active_paths": [
+              {
+                "side": "left",
+                "paths": [
+                  "/World/ALOHA1RemoteBottleSession/Bottle500",
+                  "/World/ALOHA1RemoteBottleSession/Bottle500/HorizontalCylinderBenchmark",
+                  "/World/follower_left/vx300s_left/follower_left_left_finger_link",
+                  "/World/follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh"
+                ]
+              },
+              {
+                "side": "right",
+                "paths": [
+                  "/World/ALOHA1RemoteBottleSession/Bottle500",
+                  "/World/ALOHA1RemoteBottleSession/Bottle500/HorizontalCylinderBenchmark",
+                  "/World/follower_left/vx300s_left/follower_left_right_finger_link",
+                  "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh"
+                ]
+              }
+            ],
+            "collector_errors": []
+          },
+          "contact_station_error_m": {
+            "left": 0.0541244576376754,
+            "right": 0.04439407251823535
+          },
+          "strict_quality_checks": {
+            "lift_height": true,
+            "axis_direction": false,
+            "axis_elevation": false,
+            "final_angular_speed": true,
+            "mimic": false,
+            "bilateral_contact_fraction": true,
+            "axial_contact_centroid": false,
+            "actual_contact_station": false,
+            "total_hold_rotation": true,
+            "finger_line_hold_rotation": true
+          },
+          "strict_quality_pass": false,
+          "inter_trial_recovery": "PASS"
+        },
+        {
+          "trial": 8,
+          "requested_physics_hz": 200,
+          "status": "RUNNING",
+          "finger_approximation": "convexHull"
+        }
+      ],
+      "finger_approximation": "convexHull",
+      "finger_approximation_readback": [
+        {
+          "path": "/World/follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh",
+          "authored": "convexHull",
+          "readback": "convexHull",
+          "type": "Mesh"
+        },
+        {
+          "path": "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh",
+          "authored": "convexHull",
+          "readback": "convexHull",
+          "type": "Mesh"
+        }
+      ],
+      "aggregate": {
+        "trial_count": 7,
+        "workflow_pass_count": 7,
+        "strict_quality_pass_count": 0,
+        "axis_direction_change_deg": {
+          "mean": 83.54869016030851,
+          "median": 83.56992807089976,
+          "p95": 83.97098164486276,
+          "max": 84.05898568222096
+        },
+        "axis_elevation_from_table_deg": {
+          "mean": 83.2675243705744,
+          "median": 83.28948063647871,
+          "p95": 83.68351823205751,
+          "max": 83.77133896136438
+        },
+        "mimic_residual_m": {
+          "mean": 0.0080229395202228,
+          "median": 0.008026275783777237,
+          "p95": 0.008033716678619384,
+          "max": 0.00803578644990921
+        },
+        "axial_contact_centroid_mismatch_m": {
+          "mean": 0.009862265998497181,
+          "median": 0.009860383692629718,
+          "p95": 0.009981091318218973,
+          "max": 0.009999489483968657
+        },
+        "total_hold_rotation_deg": {
+          "mean": 0.07570874620310859,
+          "median": 0.06489712699699897,
+          "p95": 0.11711099303036299,
+          "max": 0.13528678819517698
+        },
+        "abs_finger_line_hold_rotation_deg": {
+          "mean": 0.028792065873721857,
+          "median": 0.01101776036339645,
+          "p95": 0.09825854024246326,
+          "max": 0.12649062969564126
+        },
+        "bilateral_contact_fraction": {
+          "mean": 1.0,
+          "median": 1.0,
+          "p95": 1.0,
+          "max": 1.0
+        }
+      }
+    }
+  ],
+  "material_before": {
+    "static_friction": 2.0,
+    "dynamic_friction": 1.5,
+    "friction_combine_mode": "maximum",
+    "compliant_contact_acceleration_spring": false,
+    "compliant_contact_stiffness": 0.0,
+    "compliant_contact_damping": 0.0
+  },
+  "benchmark_material": {
+    "static_friction": 2.0,
+    "dynamic_friction": 1.5,
+    "friction_combine_mode": "max",
+    "compliant_contact_acceleration_spring": true,
+    "compliant_contact_stiffness": 1000.0,
+    "compliant_contact_damping": 64.0
+  },
+  "collision_isolation": {
+    "classification": "FINGERTIP_CONTACT_LAYER_NOT_END_TO_END_PATH_VALIDATION",
+    "actual_finger_colliders_enabled": true,
+    "disabled_nonfinger_left_robot_collider_count": 19
+  }
+}

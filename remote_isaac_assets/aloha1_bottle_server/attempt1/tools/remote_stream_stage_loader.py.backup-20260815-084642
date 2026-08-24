@@ -1,0 +1,221 @@
+#!/usr/bin/env python3
+"""Startup loader for an explicitly approved Isaac Sim streaming Stage.
+
+Run only as a Kit ``--exec`` script on the remote streaming server. It opens a
+Stage; it does not edit, save, or promote the Stage.
+"""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+
+
+def sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def initialize_runtime_state(stage):
+    """Realize the requested pose in PhysX and refresh visible link transforms."""
+
+    import numpy as np
+    import omni.kit.app  # type: ignore
+    import omni.timeline  # type: ignore
+    from isaacsim.core.api import World  # type: ignore
+    from isaacsim.core.prims import SingleArticulation  # type: ignore
+    from isaacsim.core.utils.types import ArticulationAction  # type: ignore
+    from pxr import UsdPhysics
+
+    app = omni.kit.app.get_app()
+    for _ in range(20):
+        app.update()
+
+    bottle_root = "/World/ALOHA1RemoteBottleSession/Bottle500"
+    kinematic_paths = []
+    for prim in stage.Traverse():
+        if (
+            str(prim.GetPath()).startswith(f"{bottle_root}/")
+            and prim.HasAPI(UsdPhysics.RigidBodyAPI)
+        ):
+            UsdPhysics.RigidBodyAPI(prim).CreateKinematicEnabledAttr(True).Set(True)
+            kinematic_paths.append(str(prim.GetPath()))
+
+    world = World(
+        stage_units_in_meters=1.0,
+        backend="numpy",
+        device="cpu",
+        physics_dt=1.0 / 50.0,
+        rendering_dt=1.0 / 50.0,
+    )
+    articulations = {
+        "left": SingleArticulation(
+            prim_path="/World/follower_left/vx300s_left/root_joint",
+            name="remote_sleep_left",
+            reset_xform_properties=False,
+        ),
+        "right": SingleArticulation(
+            prim_path="/World/follower_right/vx300s_right/root_joint",
+            name="remote_sleep_right",
+            reset_xform_properties=False,
+        ),
+    }
+    for articulation in articulations.values():
+        world.scene.add(articulation)
+    world.reset()
+
+    expected_dofs = [
+        "waist",
+        "shoulder",
+        "elbow",
+        "forearm_roll",
+        "wrist_angle",
+        "wrist_rotate",
+        "gripper",
+        "left_finger",
+        "right_finger",
+    ]
+    sleep_arm = np.asarray([0.0, -1.8, 1.55, 0.0, -1.57, 0.0], dtype=np.float32)
+    targets = {}
+    for side, articulation in articulations.items():
+        if list(articulation.dof_names) != expected_dofs:
+            raise RuntimeError(
+                f"Unexpected {side} DOF order: {list(articulation.dof_names)}"
+            )
+        target = np.asarray(articulation.get_joint_positions(), dtype=np.float32)
+        target[:6] = sleep_arm
+        zeros = np.zeros_like(target)
+        articulation.set_joints_default_state(positions=target, velocities=zeros)
+        articulation.set_joint_positions(target)
+        articulation.set_joint_velocities(zeros)
+        articulation.get_articulation_controller().apply_action(
+            ArticulationAction(
+                joint_positions=target[:8],
+                joint_indices=np.arange(8, dtype=np.int32),
+            )
+        )
+        targets[side] = target
+
+    timeline = omni.timeline.get_timeline_interface()
+    timeline.play()
+    for _ in range(30):
+        for side, articulation in articulations.items():
+            articulation.get_articulation_controller().apply_action(
+                ArticulationAction(
+                    joint_positions=targets[side][:8],
+                    joint_indices=np.arange(8, dtype=np.int32),
+                )
+            )
+        app.update()
+    timeline.pause()
+    for _ in range(5):
+        app.update()
+
+    readback = {
+        side: np.asarray(articulation.get_joint_positions(), dtype=np.float64)[
+            :6
+        ].tolist()
+        for side, articulation in articulations.items()
+    }
+    maximum_error = max(
+        float(np.max(np.abs(np.asarray(values) - sleep_arm.astype(np.float64))))
+        for values in readback.values()
+    )
+    if maximum_error > 0.02:
+        raise RuntimeError(
+            f"Sleep articulation readback error {maximum_error} exceeds 0.02 rad"
+        )
+    return {
+        "sleep_target_arm_rad": sleep_arm.astype(np.float64).tolist(),
+        "sleep_readback_arm_rad": readback,
+        "maximum_sleep_error_rad": maximum_error,
+        "timeline_paused": not timeline.is_playing(),
+        "bottle_kinematic_prim_paths": kinematic_paths,
+    }
+
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    bundle = Path(
+        os.environ.get(
+            "ALOHA1_REMOTE_BUNDLE",
+            "/home/eii/openpi0.5-rtc-reward-learning/remote_isaac_assets/"
+            "aloha1_bottle_server/attempt1",
+        )
+    )
+    default_stage = bundle / (
+        "remote_stream_grasp_stage.usda"
+    )
+    parser.add_argument("--stage", type=Path, default=default_stage)
+    parser.add_argument(
+        "--expected-sha256",
+        default="a72fcf1dadec594ef9386db0bddab81728fd01a8cf5194c600224fd205342cd4",
+    )
+    parser.add_argument(
+        "--report", type=Path, default=bundle / "remote_stage_loader_report.json"
+    )
+    args = parser.parse_args()
+    stage_path = args.stage.resolve(strict=True)
+    actual = sha256(stage_path)
+    if actual != args.expected_sha256:
+        raise RuntimeError(f"Stage SHA-256 mismatch: {actual} != {args.expected_sha256}")
+
+    import omni.usd  # type: ignore
+    from pxr import UsdGeom
+
+    context = omni.usd.get_context()
+    opened = bool(context.open_stage(str(stage_path)))
+    stage = context.get_stage()
+    runtime_state = initialize_runtime_state(stage) if opened and stage is not None else None
+    required = [
+        "/World",
+        "/World/follower_left/vx300s_left/root_joint",
+        "/World/environment/worldBody/user_confirmed_table",
+        "/World/ALOHA1RemoteBottleSession/Bottle500",
+    ]
+    required_state = {
+        path: bool(stage.GetPrimAtPath(path)) if stage is not None else False
+        for path in required
+    }
+    bottle_mesh_count = sum(
+        1
+        for prim in stage.Traverse()
+        if str(prim.GetPath()).startswith(
+            "/World/ALOHA1RemoteBottleSession/Bottle500/"
+        )
+        and prim.GetTypeName() == "Mesh"
+    ) if stage is not None else 0
+    payload = {
+        "status": "PASS"
+        if opened and stage is not None and all(required_state.values())
+        else "FAIL",
+        "stage": str(stage_path),
+        "stage_sha256": actual,
+        "default_prim": str(stage.GetDefaultPrim().GetPath())
+        if stage is not None and stage.GetDefaultPrim()
+        else None,
+        "up_axis": UsdGeom.GetStageUpAxis(stage) if stage is not None else None,
+        "meters_per_unit": UsdGeom.GetStageMetersPerUnit(stage)
+        if stage is not None
+        else None,
+        "required_prims": required_state,
+        "bottle_mesh_count": bottle_mesh_count,
+        "runtime_state": runtime_state,
+        "source_stage_modified": False,
+        "saved": False,
+    }
+    args.report.parent.mkdir(parents=True, exist_ok=True)
+    args.report.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
+    print(json.dumps(payload, sort_keys=True))
+    return 0 if payload["status"] == "PASS" else 1
+
+
+if __name__ == "__main__":
+    main()

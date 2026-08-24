@@ -1,0 +1,91 @@
+{
+  "status": "PASS",
+  "classification": "RESET_BOTTLE_ASSEMBLY_TO_CANONICAL_STARTUP_POSE",
+  "stage_saved": false,
+  "arm_commanded": false,
+  "gripper_commanded": false,
+  "ros_used": false,
+  "real_robot_touched": false,
+  "canonical_center_world_m": [
+    0.0,
+    0.0,
+    0.034
+  ],
+  "canonical_yaw_deg": 0.0,
+  "component_readback": {
+    "/World/ALOHA1RemoteBottleSession/Bottle500": {
+      "position_m": [
+        -0.10300000011920929,
+        1.5265566588595902e-16,
+        0.03400000184774399
+      ],
+      "orientation_wxyz": [
+        0.7071067811865475,
+        6.687586826001632e-15,
+        0.7071067811865475,
+        5.4676582935845655e-15
+      ],
+      "position_error_m": 1.8515854311430055e-09,
+      "orientation_error_rad": 0.0
+    },
+    "/World/ALOHA1RemoteBottleSession/BottleCap": {
+      "position_m": [
+        0.08500000089406967,
+        -1.665663423949286e-16,
+        0.03400000184774399
+      ],
+      "orientation_wxyz": [
+        0.7071067811865475,
+        6.688088692989165e-15,
+        0.7071067811865475,
+        5.4681614311214335e-15
+      ],
+      "position_error_m": 2.0526856688798757e-09,
+      "orientation_error_rad": 0.0
+    },
+    "/World/ALOHA1RemoteBottleSession/BottleThreadSlider": {
+      "position_m": [
+        0.08500000089406967,
+        -1.6657780380949612e-16,
+        0.034000009298324585
+      ],
+      "orientation_wxyz": [
+        0.7071067811865475,
+        6.687586826001632e-15,
+        0.7071067811865475,
+        5.46765787006812e-15
+      ],
+      "position_error_m": 9.34120982373179e-09,
+      "orientation_error_rad": 0.0
+    }
+  },
+  "maximum_position_error_m": 9.34120982373179e-09,
+  "maximum_orientation_error_rad": 0.0,
+  "threaded_readback": {
+    "thread_state": "THREADED",
+    "bottle_kinematic": false,
+    "cap_kinematic": false,
+    "slider_kinematic": false,
+    "prismatic_enabled": true,
+    "prismatic_limits_m": [
+      0.0,
+      0.0
+    ],
+    "revolute_enabled": true,
+    "revolute_limits_deg": [
+      0.0,
+      0.0
+    ],
+    "coupling_enabled": false,
+    "angular_drive_present": false
+  },
+  "checks": {
+    "all_bodies_dynamic": true,
+    "thread_state_is_threaded": true,
+    "prismatic_locked_zero": true,
+    "revolute_locked_zero": true,
+    "coupling_disabled": true,
+    "no_angular_drive": true,
+    "timeline_paused": true
+  }
+}

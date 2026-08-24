@@ -1,0 +1,831 @@
+{
+  "status": "EXCEPTION",
+  "classification": "SLEEP_HOVER_NEAR10_CLOSE_CONTINUOUS_LIFT_ROTATE_CAP_POSITIVE_Z",
+  "phase_sequence": [
+    "SLEEP_TO_PLAN_HOVER",
+    "PLAN_HOVER_TO_NEAR_PLUS_10_MM",
+    "DYNAMIC_CONTINUOUS_CLOSE",
+    "CONTINUOUS_LIFT_AND_ROTATE_CAP_TO_POSITIVE_Z"
+  ],
+  "stage_saved": false,
+  "ros_used": false,
+  "real_robot_touched": false,
+  "error": "RuntimeError: no continuous loaded Lift+Rotate route passed IK, 0.010 rad joint-step, 150 mm Bottle lift before rotation, Bottle-bottom sweep, and cap +Z gates; diagnostic: /home/eii/project/openpi0.5-rtc-reward-learning/remote_isaac_assets/aloha1_bottle_server/attempt1/reports/lula_joint_diagnostics/vertical_lift_rotate_diagnostic.json",
+  "traceback": [
+    "Traceback (most recent call last):",
+    "  File \"/home/eii/Applications/isaacsim-5.1.0/extsUser/aloha.lula_base_aligned/aloha/lula_base_aligned/extension.py\", line 2285, in _auto_grasp_lift_transaction",
+    "    self._plan_continuous_lift_rotate_cap_up_route(",
+    "  File \"/home/eii/Applications/isaacsim-5.1.0/extsUser/aloha.lula_base_aligned/aloha/lula_base_aligned/extension.py\", line 3872, in _plan_continuous_lift_rotate_cap_up_route",
+    "    raise RuntimeError(",
+    "RuntimeError: no continuous loaded Lift+Rotate route passed IK, 0.010 rad joint-step, 150 mm Bottle lift before rotation, Bottle-bottom sweep, and cap +Z gates; diagnostic: /home/eii/project/openpi0.5-rtc-reward-learning/remote_isaac_assets/aloha1_bottle_server/attempt1/reports/lula_joint_diagnostics/vertical_lift_rotate_diagnostic.json"
+  ],
+  "configured_joint_step_rad": 0.03,
+  "automatic_start_recovery": {
+    "status": "PASS",
+    "park_center_world_m": [
+      0.0,
+      0.0,
+      0.75
+    ],
+    "restored_center_world_m": [
+      0.0,
+      0.0,
+      0.034
+    ],
+    "restored_yaw_deg": 0.0,
+    "restored_source": "CANONICAL_DEFAULT_AFTER_CLEAN_START",
+    "stale_contact_pairs_cleared": true,
+    "robot_reset_to_sleep_after_parking": true
+  },
+  "random_pose": {
+    "center_world_m": [
+      0.0,
+      0.0,
+      0.034
+    ],
+    "yaw_deg": 0.0,
+    "component_readback": {
+      "/World/ALOHA1RemoteBottleSession/Bottle500": {
+        "position_m": [
+          -0.10300000011920929,
+          0.0,
+          0.03400000184774399
+        ],
+        "orientation_wxyz": [
+          0.7071067811865475,
+          0.0,
+          0.7071067811865475,
+          0.0
+        ],
+        "physx_tensor_position_error_m": 1.8515854311429991e-09,
+        "physx_tensor_orientation_error_rad": 0.0,
+        "usd_visible_position_m": [
+          -0.10300000011920929,
+          0.0,
+          0.03400000184774399
+        ],
+        "usd_visible_orientation_wxyz": [
+          0.7071067690849304,
+          0.0,
+          0.7071067932881645,
+          0.0
+        ],
+        "usd_visible_position_error_m": 1.8515854311429991e-09,
+        "usd_visible_orientation_error_rad": 0.0,
+        "fabric_visible_position_m": [
+          -0.10300000011920929,
+          0.0,
+          0.03400000184774399
+        ],
+        "fabric_visible_orientation_wxyz": [
+          0.7071067690849304,
+          0.0,
+          0.7071067932881645,
+          0.0
+        ],
+        "fabric_visible_position_error_m": 1.8515854311429991e-09,
+        "fabric_visible_orientation_error_rad": 0.0
+      },
+      "/World/ALOHA1RemoteBottleSession/BottleCap": {
+        "position_m": [
+          0.08500000089406967,
+          0.0,
+          0.03400000184774399
+        ],
+        "orientation_wxyz": [
+          0.7071067811865475,
+          0.0,
+          0.7071067811865475,
+          0.0
+        ],
+        "physx_tensor_position_error_m": 2.0526856688798686e-09,
+        "physx_tensor_orientation_error_rad": 0.0,
+        "usd_visible_position_m": [
+          0.08500000089406967,
+          0.0,
+          0.03400000184774399
+        ],
+        "usd_visible_orientation_wxyz": [
+          0.7071067690849304,
+          0.0,
+          0.7071067932881645,
+          0.0
+        ],
+        "usd_visible_position_error_m": 2.0526856688798686e-09,
+        "usd_visible_orientation_error_rad": 0.0,
+        "fabric_visible_position_m": [
+          0.08500000089406967,
+          0.0,
+          0.03400000184774399
+        ],
+        "fabric_visible_orientation_wxyz": [
+          0.7071067690849304,
+          0.0,
+          0.7071067932881645,
+          0.0
+        ],
+        "fabric_visible_position_error_m": 2.0526856688798686e-09,
+        "fabric_visible_orientation_error_rad": 0.0
+      },
+      "/World/ALOHA1RemoteBottleSession/BottleThreadSlider": {
+        "position_m": [
+          0.08500000089406967,
+          0.0,
+          0.03400000184774399
+        ],
+        "orientation_wxyz": [
+          0.7071067811865475,
+          0.0,
+          0.7071067811865475,
+          0.0
+        ],
+        "physx_tensor_position_error_m": 2.0526856688798686e-09,
+        "physx_tensor_orientation_error_rad": 0.0,
+        "usd_visible_position_m": [
+          0.08500000089406967,
+          0.0,
+          0.03400000184774399
+        ],
+        "usd_visible_orientation_wxyz": [
+          0.7071067690849304,
+          0.0,
+          0.7071067932881645,
+          0.0
+        ],
+        "usd_visible_position_error_m": 2.0526856688798686e-09,
+        "usd_visible_orientation_error_rad": 0.0,
+        "fabric_visible_position_m": [
+          0.08500000089406967,
+          0.0,
+          0.03400000184774399
+        ],
+        "fabric_visible_orientation_wxyz": [
+          0.7071067690849304,
+          0.0,
+          0.7071067932881645,
+          0.0
+        ],
+        "fabric_visible_position_error_m": 2.0526856688798686e-09,
+        "fabric_visible_orientation_error_rad": 0.0
+      }
+    },
+    "assembly_kinematic": true,
+    "thread_prismatic_enabled": false,
+    "thread_revolute_enabled": false,
+    "thread_coupling_enabled": false,
+    "source": "CANONICAL_DEFAULT_AFTER_CLEAN_START"
+  },
+  "active_waypoint": "AUTO NEAR +10 mm / REACHED",
+  "completed_routes": [
+    {
+      "route_name": "AUTO HOVER",
+      "render_updates": 214,
+      "physics_elapsed_s": 2.400000125169754,
+      "metrics": {
+        "sample_count": 104.0,
+        "chosen_clearance_m": 0.16,
+        "chosen_warm_start": "current",
+        "chosen_axial_fraction_from_bottom": 0.3333333333333333,
+        "chosen_axial_distance_from_bottom_m": 0.06866666666666665,
+        "chosen_target_yaw_deg": 0.0,
+        "minimum_ee_z_m": 0.22423670063952145,
+        "maximum_sampled_ee_step_m": 0.008738065693636976,
+        "final_fk_position_error_m": 3.8398483004853607e-07,
+        "final_fk_orientation_error_rad": 0.0008751459127987396,
+        "visible_target_z_dot_world_z": 1.0,
+        "planned_joint_step_rad": 0.03,
+        "control_hz": 50.0
+      }
+    },
+    {
+      "route_name": "AUTO NEAR +10 mm",
+      "render_updates": 106,
+      "physics_elapsed_s": 1.200000062584877,
+      "metrics": {
+        "route_name": "AUTO NEAR +10 mm",
+        "sample_count": 46.0,
+        "clearance_m": 0.01,
+        "world_position_offset_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "chosen_warm_start": "validated_top_down_1",
+        "maximum_sampled_ee_step_m": 0.0034793831667464066,
+        "maximum_lateral_deviation_m": 0.007569922205053486,
+        "minimum_ee_z_m": 0.0742365967799691,
+        "final_fk_position_error_m": 1.541838531882609e-06,
+        "final_fk_orientation_error_rad": 0.001617133098766856,
+        "visible_target_z_dot_world_z": 1.0,
+        "ik_attempts": [
+          {
+            "warm_start": "current",
+            "success": true,
+            "returned_joints_rad": [
+              0.032813345808003595,
+              0.4096170197618165,
+              0.10375390962597784,
+              -0.0005031091605016437,
+              1.0575990141326685,
+              0.032943515000046324
+            ],
+            "fk_position_error_m": 1.3292278078180016e-07,
+            "fk_orientation_error_rad": 0.00048568483744994257
+          },
+          {
+            "warm_start": "validated_top_down_1",
+            "success": true,
+            "returned_joints_rad": [
+              0.03275850218836332,
+              0.41033831330815107,
+              0.10255362145648443,
+              -0.00034755685039591244,
+              1.05949285373955,
+              0.032939624836917036
+            ],
+            "fk_position_error_m": 1.541838531882609e-06,
+            "fk_orientation_error_rad": 0.001617133098766856
+          },
+          {
+            "warm_start": "validated_top_down_2",
+            "success": true,
+            "returned_joints_rad": [
+              0.03228835539297233,
+              0.4099186369970683,
+              0.10325137978386431,
+              0.0009856179944418319,
+              1.0583976251810232,
+              0.031512018295081906
+            ],
+            "fk_position_error_m": 9.252109199178079e-07,
+            "fk_orientation_error_rad": 0.001190913199367577
+          }
+        ],
+        "planned_joint_step_rad": 0.01,
+        "control_hz": 50.0
+      }
+    }
+  ],
+  "close_readback": {
+    "target_m": 0.021,
+    "left_actual_m": 0.04859548434615135,
+    "right_actual_m": -0.05416445806622505,
+    "mimic_residual_m": 0.0055689737200737,
+    "left_contact": true,
+    "right_contact": true,
+    "bilateral_stable_steps": 9,
+    "nonfinger_contact": false,
+    "maximum_arm_joint_change_rad": 0.001121480920119211,
+    "settle_updates": 16,
+    "settled_reason": "stable_bilateral_dynamic_contact"
+  },
+  "dynamic_continuous_self_center": {
+    "method": "DYNAMIC_CONTINUOUS_SELF_CENTER",
+    "status": "STABLE_BILATERAL_CONTACT",
+    "single_continuous_close_command": true,
+    "gripper_reopen_count": 0,
+    "gripper_lateral_adjustment_count": 0,
+    "dynamic_updates": 16,
+    "dynamic_mimic_residual_gate_m": 0.01,
+    "maximum_dynamic_mimic_residual_m": 0.0055689737200737,
+    "bottle_displacement_during_close_m": [
+      0.003883540630340576,
+      -0.0028828452341258526,
+      0.0017351247370243073
+    ],
+    "bottle_displacement_during_close_norm_m": 0.0051384182706803744,
+    "samples": [
+      {
+        "update": 1,
+        "left_actual_m": 0.05552984029054642,
+        "right_actual_m": -0.05579928308725357,
+        "mimic_residual_m": 0.0002694427967071533,
+        "left_contact": true,
+        "right_contact": false,
+        "bilateral_streak": 0,
+        "bottle_position_m": [
+          -0.10297204554080963,
+          -0.00026273331604897976,
+          0.03401142358779907
+        ],
+        "bottle_orientation_wxyz": [
+          0.7070868109704617,
+          -0.00021108933973154124,
+          0.707126626870347,
+          0.00036161288498359913
+        ]
+      },
+      {
+        "update": 2,
+        "left_actual_m": 0.05552984029054642,
+        "right_actual_m": -0.05579928308725357,
+        "mimic_residual_m": 0.0002694427967071533,
+        "left_contact": true,
+        "right_contact": false,
+        "bilateral_streak": 0,
+        "bottle_position_m": [
+          -0.10297204554080963,
+          -0.00026273331604897976,
+          0.03401142358779907
+        ],
+        "bottle_orientation_wxyz": [
+          0.7070868109704617,
+          -0.00021108933973154124,
+          0.707126626870347,
+          0.00036161288498359913
+        ]
+      },
+      {
+        "update": 3,
+        "left_actual_m": 0.05552984029054642,
+        "right_actual_m": -0.05579928308725357,
+        "mimic_residual_m": 0.0002694427967071533,
+        "left_contact": true,
+        "right_contact": false,
+        "bilateral_streak": 0,
+        "bottle_position_m": [
+          -0.10297204554080963,
+          -0.00026273331604897976,
+          0.03401142358779907
+        ],
+        "bottle_orientation_wxyz": [
+          0.7070868109704617,
+          -0.00021108933973154124,
+          0.707126626870347,
+          0.00036161288498359913
+        ]
+      },
+      {
+        "update": 4,
+        "left_actual_m": 0.05317354202270508,
+        "right_actual_m": -0.053573548793792725,
+        "mimic_residual_m": 0.0004000067710876465,
+        "left_contact": false,
+        "right_contact": false,
+        "bilateral_streak": 0,
+        "bottle_position_m": [
+          -0.10267314314842224,
+          -0.0031511159613728523,
+          0.03407755494117737
+        ],
+        "bottle_orientation_wxyz": [
+          0.706898226728862,
+          -0.0032129201841373557,
+          0.7072983526835932,
+          0.0036897808276711054
+        ]
+      },
+      {
+        "update": 5,
+        "left_actual_m": 0.05317354202270508,
+        "right_actual_m": -0.053573548793792725,
+        "mimic_residual_m": 0.0004000067710876465,
+        "left_contact": false,
+        "right_contact": false,
+        "bilateral_streak": 0,
+        "bottle_position_m": [
+          -0.10267314314842224,
+          -0.0031511159613728523,
+          0.03407755494117737
+        ],
+        "bottle_orientation_wxyz": [
+          0.706898226728862,
+          -0.0032129201841373557,
+          0.7072983526835932,
+          0.0036897808276711054
+        ]
+      },
+      {
+        "update": 6,
+        "left_actual_m": 0.05317354202270508,
+        "right_actual_m": -0.053573548793792725,
+        "mimic_residual_m": 0.0004000067710876465,
+        "left_contact": false,
+        "right_contact": false,
+        "bilateral_streak": 0,
+        "bottle_position_m": [
+          -0.10267314314842224,
+          -0.0031511159613728523,
+          0.03407755494117737
+        ],
+        "bottle_orientation_wxyz": [
+          0.706898226728862,
+          -0.0032129201841373557,
+          0.7072983526835932,
+          0.0036897808276711054
+        ]
+      },
+      {
+        "update": 7,
+        "left_actual_m": 0.05016997829079628,
+        "right_actual_m": -0.051062457263469696,
+        "mimic_residual_m": 0.0008924789726734161,
+        "left_contact": false,
+        "right_contact": true,
+        "bilateral_streak": 0,
+        "bottle_position_m": [
+          -0.10222267359495163,
+          -0.005874514579772949,
+          0.03420157730579376
+        ],
+        "bottle_orientation_wxyz": [
+          0.7065137758151623,
+          -0.006145264138093334,
+          0.7076497807613876,
+          0.005684021502031211
+        ]
+      },
+      {
+        "update": 8,
+        "left_actual_m": 0.05016997829079628,
+        "right_actual_m": -0.051062457263469696,
+        "mimic_residual_m": 0.0008924789726734161,
+        "left_contact": false,
+        "right_contact": true,
+        "bilateral_streak": 0,
+        "bottle_position_m": [
+          -0.10222267359495163,
+          -0.005874514579772949,
+          0.03420157730579376
+        ],
+        "bottle_orientation_wxyz": [
+          0.7065137758151623,
+          -0.006145264138093334,
+          0.7076497807613876,
+          0.005684021502031211
+        ]
+      },
+      {
+        "update": 9,
+        "left_actual_m": 0.05016997829079628,
+        "right_actual_m": -0.051062457263469696,
+        "mimic_residual_m": 0.0008924789726734161,
+        "left_contact": false,
+        "right_contact": true,
+        "bilateral_streak": 0,
+        "bottle_position_m": [
+          -0.10222267359495163,
+          -0.005874514579772949,
+          0.03420157730579376
+        ],
+        "bottle_orientation_wxyz": [
+          0.7065137758151623,
+          -0.006145264138093334,
+          0.7076497807613876,
+          0.005684021502031211
+        ]
+      },
+      {
+        "update": 10,
+        "left_actual_m": 0.04915720224380493,
+        "right_actual_m": -0.05416613444685936,
+        "mimic_residual_m": 0.005008932203054428,
+        "left_contact": false,
+        "right_contact": true,
+        "bilateral_streak": 0,
+        "bottle_position_m": [
+          -0.10126873850822449,
+          -0.00689130462706089,
+          0.034724295139312744
+        ],
+        "bottle_orientation_wxyz": [
+          0.7051722966369202,
+          0.00792843818187631,
+          0.7089896168095349,
+          -0.0017015228698364182
+        ]
+      },
+      {
+        "update": 11,
+        "left_actual_m": 0.04915720224380493,
+        "right_actual_m": -0.05416613444685936,
+        "mimic_residual_m": 0.005008932203054428,
+        "left_contact": false,
+        "right_contact": true,
+        "bilateral_streak": 0,
+        "bottle_position_m": [
+          -0.10126873850822449,
+          -0.00689130462706089,
+          0.034724295139312744
+        ],
+        "bottle_orientation_wxyz": [
+          0.7051722966369202,
+          0.00792843818187631,
+          0.7089896168095349,
+          -0.0017015228698364182
+        ]
+      },
+      {
+        "update": 12,
+        "left_actual_m": 0.04915720224380493,
+        "right_actual_m": -0.05416613444685936,
+        "mimic_residual_m": 0.005008932203054428,
+        "left_contact": false,
+        "right_contact": true,
+        "bilateral_streak": 0,
+        "bottle_position_m": [
+          -0.10126873850822449,
+          -0.00689130462706089,
+          0.034724295139312744
+        ],
+        "bottle_orientation_wxyz": [
+          0.7051722966369202,
+          0.00792843818187631,
+          0.7089896168095349,
+          -0.0017015228698364182
+        ]
+      },
+      {
+        "update": 13,
+        "left_actual_m": 0.048585496842861176,
+        "right_actual_m": -0.05385839566588402,
+        "mimic_residual_m": 0.005272898823022842,
+        "left_contact": true,
+        "right_contact": true,
+        "bilateral_streak": 1,
+        "bottle_position_m": [
+          -0.09980038553476334,
+          -0.0038030105642974377,
+          0.035279739648103714
+        ],
+        "bottle_orientation_wxyz": [
+          0.7034335772529995,
+          0.025260858381637833,
+          0.7101569216173172,
+          -0.014840421351389906
+        ]
+      },
+      {
+        "update": 14,
+        "left_actual_m": 0.048585496842861176,
+        "right_actual_m": -0.05385839566588402,
+        "mimic_residual_m": 0.005272898823022842,
+        "left_contact": true,
+        "right_contact": true,
+        "bilateral_streak": 1,
+        "bottle_position_m": [
+          -0.09980038553476334,
+          -0.0038030105642974377,
+          0.035279739648103714
+        ],
+        "bottle_orientation_wxyz": [
+          0.7034335772529995,
+          0.025260858381637833,
+          0.7101569216173172,
+          -0.014840421351389906
+        ]
+      },
+      {
+        "update": 15,
+        "left_actual_m": 0.048585496842861176,
+        "right_actual_m": -0.05385839566588402,
+        "mimic_residual_m": 0.005272898823022842,
+        "left_contact": true,
+        "right_contact": true,
+        "bilateral_streak": 1,
+        "bottle_position_m": [
+          -0.09980038553476334,
+          -0.0038030105642974377,
+          0.035279739648103714
+        ],
+        "bottle_orientation_wxyz": [
+          0.7034335772529995,
+          0.025260858381637833,
+          0.7101569216173172,
+          -0.014840421351389906
+        ]
+      },
+      {
+        "update": 16,
+        "left_actual_m": 0.04859548434615135,
+        "right_actual_m": -0.05416445806622505,
+        "mimic_residual_m": 0.0055689737200737,
+        "left_contact": true,
+        "right_contact": true,
+        "bilateral_streak": 9,
+        "bottle_position_m": [
+          -0.09911645948886871,
+          -0.0028828452341258526,
+          0.035735126584768295
+        ],
+        "bottle_orientation_wxyz": [
+          0.7019048077946097,
+          0.033265462798277946,
+          0.711228881247078,
+          -0.019404336104544506
+        ]
+      }
+    ],
+    "final_close_readback": {
+      "target_m": 0.021,
+      "left_actual_m": 0.04859548434615135,
+      "right_actual_m": -0.05416445806622505,
+      "mimic_residual_m": 0.0055689737200737,
+      "left_contact": true,
+      "right_contact": true,
+      "bilateral_stable_steps": 9,
+      "nonfinger_contact": false,
+      "maximum_arm_joint_change_rad": 0.001121480920119211,
+      "settle_updates": 16,
+      "settled_reason": "stable_bilateral_dynamic_contact"
+    }
+  },
+  "exception_pose_diagnostic": {
+    "actual_ee_position_m": [
+      -0.03431679398919013,
+      -0.005005824434906084,
+      0.07422734286530408
+    ],
+    "actual_ee_orientation_wxyz": [
+      0.7065814268130164,
+      -0.0003025486877418906,
+      0.707631387053412,
+      -0.0006448286887180259
+    ],
+    "target_ee_position_m": [
+      -0.03433333337306976,
+      -0.004793088883161545,
+      0.07423675805330276
+    ],
+    "target_ee_orientation_wxyz": [
+      0.7071067811865476,
+      0.0,
+      0.7071067811865476,
+      0.0
+    ],
+    "actual_to_target_position_error_m": [
+      1.6539383879632386e-05,
+      -0.0002127355517445393,
+      -9.415187998684793e-06
+    ],
+    "actual_to_target_orientation_error_rad": 0.002057715600225311,
+    "computed_grasp_position_m": [
+      -0.034333333452542594,
+      -0.0047930890647209096,
+      0.06423675561171284
+    ],
+    "left_finger_actual_m": 0.04859548434615135,
+    "right_finger_actual_m": -0.05416445806622505,
+    "mimic_residual_m": 0.0055689737200737
+  },
+  "left_contact": true,
+  "right_contact": true,
+  "nonfinger_contact": false,
+  "active_contact_pairs": [
+    {
+      "paths": [
+        "/World/ALOHA1RemoteBottleSession/Bottle500",
+        "/World/ALOHA1RemoteBottleSession/Bottle500/Collisions/COL_Body_12/COL_Body_12Mesh",
+        "/World/follower_left/vx300s_left/follower_left_right_finger_link",
+        "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh"
+      ],
+      "classification": "right"
+    },
+    {
+      "paths": [
+        "/World/ALOHA1RemoteBottleSession/Bottle500",
+        "/World/ALOHA1RemoteBottleSession/Bottle500/Collisions/COL_Body_11/COL_Body_11Mesh",
+        "/World/follower_left/vx300s_left/follower_left_right_finger_link",
+        "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh"
+      ],
+      "classification": "right"
+    },
+    {
+      "paths": [
+        "/World/ALOHA1RemoteBottleSession/Bottle500",
+        "/World/ALOHA1RemoteBottleSession/Bottle500/Collisions/COL_Body_04/COL_Body_04Mesh",
+        "/World/follower_left/vx300s_left/follower_left_left_finger_link",
+        "/World/follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh"
+      ],
+      "classification": "left"
+    },
+    {
+      "paths": [
+        "/World/ALOHA1RemoteBottleSession/Bottle500",
+        "/World/ALOHA1RemoteBottleSession/Bottle500/Collisions/COL_Body_03/COL_Body_03Mesh",
+        "/World/follower_left/vx300s_left/follower_left_left_finger_link",
+        "/World/follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh"
+      ],
+      "classification": "left"
+    }
+  ],
+  "recent_contact_paths": [
+    [
+      "/World/ALOHA1RemoteBottleSession/Bottle500",
+      "/World/ALOHA1RemoteBottleSession/Bottle500/Collisions/COL_Body_12/COL_Body_12Mesh",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh"
+    ],
+    [
+      "/World/ALOHA1RemoteBottleSession/Bottle500",
+      "/World/ALOHA1RemoteBottleSession/Bottle500/Collisions/COL_Body_11/COL_Body_11Mesh",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh"
+    ],
+    [
+      "/World/ALOHA1RemoteBottleSession/Bottle500",
+      "/World/ALOHA1RemoteBottleSession/Bottle500/Collisions/COL_Body_04/COL_Body_04Mesh",
+      "/World/follower_left/vx300s_left/follower_left_left_finger_link",
+      "/World/follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh"
+    ],
+    [
+      "/World/ALOHA1RemoteBottleSession/Bottle500",
+      "/World/ALOHA1RemoteBottleSession/Bottle500/Collisions/COL_Body_03/COL_Body_03Mesh",
+      "/World/follower_left/vx300s_left/follower_left_left_finger_link",
+      "/World/follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh"
+    ],
+    [
+      "/World/ALOHA1RemoteBottleSession/Bottle500",
+      "/World/ALOHA1RemoteBottleSession/Bottle500/Collisions/COL_Body_12/COL_Body_12Mesh",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh"
+    ],
+    [
+      "/World/ALOHA1RemoteBottleSession/Bottle500",
+      "/World/ALOHA1RemoteBottleSession/Bottle500/Collisions/COL_Body_11/COL_Body_11Mesh",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh"
+    ],
+    [
+      "/World/ALOHA1RemoteBottleSession/Bottle500",
+      "/World/ALOHA1RemoteBottleSession/Bottle500/Collisions/COL_Body_04/COL_Body_04Mesh",
+      "/World/follower_left/vx300s_left/follower_left_left_finger_link",
+      "/World/follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh"
+    ],
+    [
+      "/World/ALOHA1RemoteBottleSession/Bottle500",
+      "/World/ALOHA1RemoteBottleSession/Bottle500/Collisions/COL_Body_03/COL_Body_03Mesh",
+      "/World/follower_left/vx300s_left/follower_left_left_finger_link",
+      "/World/follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh"
+    ],
+    [
+      "/World/ALOHA1RemoteBottleSession/Bottle500",
+      "/World/ALOHA1RemoteBottleSession/Bottle500/Collisions/COL_Shoulder_00/COL_Shoulder_00Mesh",
+      "/World/environment/worldBody/user_confirmed_table"
+    ],
+    [
+      "/World/ALOHA1RemoteBottleSession/Bottle500",
+      "/World/ALOHA1RemoteBottleSession/Bottle500/Collisions/COL_Shoulder_11/COL_Shoulder_11Mesh",
+      "/World/environment/worldBody/user_confirmed_table"
+    ],
+    [
+      "/World/ALOHA1RemoteBottleSession/Bottle500",
+      "/World/ALOHA1RemoteBottleSession/Bottle500/Collisions/COL_Body_12/COL_Body_12Mesh",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh"
+    ],
+    [
+      "/World/ALOHA1RemoteBottleSession/Bottle500",
+      "/World/ALOHA1RemoteBottleSession/Bottle500/Collisions/COL_Body_11/COL_Body_11Mesh",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh"
+    ],
+    [
+      "/World/ALOHA1RemoteBottleSession/Bottle500",
+      "/World/ALOHA1RemoteBottleSession/Bottle500/Collisions/COL_Body_04/COL_Body_04Mesh",
+      "/World/follower_left/vx300s_left/follower_left_left_finger_link",
+      "/World/follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh"
+    ],
+    [
+      "/World/ALOHA1RemoteBottleSession/Bottle500",
+      "/World/ALOHA1RemoteBottleSession/Bottle500/Collisions/COL_Body_03/COL_Body_03Mesh",
+      "/World/follower_left/vx300s_left/follower_left_left_finger_link",
+      "/World/follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh"
+    ],
+    [
+      "/World/ALOHA1RemoteBottleSession/Bottle500",
+      "/World/ALOHA1RemoteBottleSession/Bottle500/Collisions/COL_Body_12/COL_Body_12Mesh",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh"
+    ],
+    [
+      "/World/ALOHA1RemoteBottleSession/Bottle500",
+      "/World/ALOHA1RemoteBottleSession/Bottle500/Collisions/COL_Body_11/COL_Body_11Mesh",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link",
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh"
+    ],
+    [
+      "/World/ALOHA1RemoteBottleSession/Bottle500",
+      "/World/ALOHA1RemoteBottleSession/Bottle500/Collisions/COL_Body_04/COL_Body_04Mesh",
+      "/World/follower_left/vx300s_left/follower_left_left_finger_link",
+      "/World/follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh"
+    ],
+    [
+      "/World/ALOHA1RemoteBottleSession/Bottle500",
+      "/World/ALOHA1RemoteBottleSession/Bottle500/Collisions/COL_Body_03/COL_Body_03Mesh",
+      "/World/follower_left/vx300s_left/follower_left_left_finger_link",
+      "/World/follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh"
+    ],
+    [
+      "/World/ALOHA1RemoteBottleSession/Bottle500",
+      "/World/ALOHA1RemoteBottleSession/Bottle500/Collisions/COL_Shoulder_00/COL_Shoulder_00Mesh",
+      "/World/environment/worldBody/user_confirmed_table"
+    ],
+    [
+      "/World/ALOHA1RemoteBottleSession/Bottle500",
+      "/World/ALOHA1RemoteBottleSession/Bottle500/Collisions/COL_Shoulder_11/COL_Shoulder_11Mesh",
+      "/World/environment/worldBody/user_confirmed_table"
+    ]
+  ],
+  "timeline_paused": true
+}
