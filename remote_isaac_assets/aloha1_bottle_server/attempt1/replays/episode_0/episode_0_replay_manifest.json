@@ -1,0 +1,141 @@
+{
+  "schema": "aloha_episode_replay/v1",
+  "episode": 0,
+  "classification": "KINEMATIC_VISUAL_REPLAY_NOT_PHYSICS_ACCEPTANCE",
+  "source": {
+    "relative_dataset_path": "2026-05-11_twist/episode_0/episode.hdf5",
+    "sha256": "7f2c7fc2010e64982116e8d4417710840672b365563cd8322967f42a7c98628e",
+    "command_dataset": "/action",
+    "readback_dataset": "/observations/qpos"
+  },
+  "payload": {
+    "path": "episode_0_replay_data.npz",
+    "sha256": "fc8ee40adb5129badebf05bad3c53bb162e1fef99f68c349a609f2f34f09bfe3"
+  },
+  "timing": {
+    "frame_count": 918,
+    "frequency_hz": 50.0
+  },
+  "joint_layout": {
+    "left": [
+      "waist",
+      "shoulder",
+      "elbow",
+      "forearm_roll",
+      "wrist_angle",
+      "wrist_rotate",
+      "gripper_normalized"
+    ],
+    "right": [
+      "waist",
+      "shoulder",
+      "elbow",
+      "forearm_roll",
+      "wrist_angle",
+      "wrist_rotate",
+      "gripper_normalized"
+    ],
+    "active_isaac_dofs": [
+      "waist",
+      "shoulder",
+      "elbow",
+      "forearm_roll",
+      "wrist_angle",
+      "wrist_rotate",
+      "left_finger"
+    ]
+  },
+  "gripper_mapping": {
+    "closed_m": 0.044,
+    "open_m": 0.0579,
+    "normalized_closed_threshold": 0.35,
+    "normalized_open_threshold": 0.8
+  },
+  "authoritative_manual_labels": [
+    {
+      "start_frame": 0,
+      "end_frame": 173,
+      "state": "PICK_UP",
+      "label": "Bottle on table, opening faces right: Pick up with left hand"
+    },
+    {
+      "start_frame": 174,
+      "end_frame": 649,
+      "state": "UNSCREW_CAP",
+      "label": "Bottle in left hand and capped: Unscrew cap"
+    },
+    {
+      "start_frame": 650,
+      "end_frame": 799,
+      "state": "DISPOSE",
+      "label": "Bottle in left hand, cap removed, and cap in right hand: Bottle to left trash bin, cap to right trash bin"
+    },
+    {
+      "start_frame": 800,
+      "end_frame": 917,
+      "state": "RETURN",
+      "label": "No bottle on table: Return to initial pose"
+    }
+  ],
+  "derived_closed_runs": {
+    "left": [
+      [
+        0,
+        8
+      ],
+      [
+        113,
+        762
+      ]
+    ],
+    "right": [
+      [
+        0,
+        5
+      ],
+      [
+        217,
+        290
+      ],
+      [
+        391,
+        469
+      ],
+      [
+        583,
+        755
+      ],
+      [
+        904,
+        917
+      ]
+    ]
+  },
+  "object_replay": {
+    "bottle_attach_frame": 174,
+    "bottle_release_frame": 768,
+    "cap_right_grasp_runs": [
+      [
+        217,
+        290
+      ],
+      [
+        391,
+        469
+      ],
+      [
+        583,
+        755
+      ]
+    ],
+    "cap_release_frame": 768,
+    "initial_pose_source": "existing remote_stream_cap_stage.usda",
+    "continuity_rule": "capture relative transform on each attach transition"
+  },
+  "safety": {
+    "uses_ros": false,
+    "touches_real_robot": false,
+    "saves_stage": false,
+    "authors_session_layer_only": true
+  }
+}
