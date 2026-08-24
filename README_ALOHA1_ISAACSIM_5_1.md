@@ -142,6 +142,29 @@ Machine reports:
 
 ## 2026-08-03 synchronized real/simulation bridge readiness
 
+### Current launcher lifecycle change (2026-08-04)
+
+`./tools/launch_aloha1_dual_sleep_gui.sh` now performs the following order:
+
+1. checks/starts only `ros_master` and `aloha_ros_nodes` on
+   `192.168.1.103`;
+2. sends one readback-driven dual-follower startup alignment to the frozen
+   Sleep target from `reports/aloha1_mapping/aloha1_home_sleep_command_manifest.json`;
+3. uses a 50 Hz, 5 s linear trajectory and records per-frame readback;
+4. launches the local Isaac Sim GUI only after the alignment report is
+   `PASS_STARTUP_SLEEP_ALIGNMENT`;
+5. on `Ctrl+C`, stops only the ROS services started by this launcher, verifies
+   that the managed containers are gone, writes a lifecycle log, and then
+   exits.
+
+The startup alignment is a real-robot action and is therefore not run by this
+documentation update. Its isolated runner is inert unless both
+`--execute-real` and `--allow-startup-sleep-align` are present. Set
+`ALOHA1_SKIP_STARTUP_SLEEP_ALIGNMENT=1` only for an explicitly digital-only
+GUI session. The current frozen manifest uses the historically selected
+Sleep target `[0, -1.80, 1.55, 0, -1.57, 0]` rad; this is intentionally not
+silently replaced by a live readback value.
+
 The approved scheme A is implemented as local playback of one frozen 1850
 sample manifest by independent Isaac and ROS1 workers. The network is not used
 to stream 50 Hz commands. Workers bind the same `run_id`, manifest SHA-256,

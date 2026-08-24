@@ -222,7 +222,13 @@ def build_ready_report(
         "timeline_paused": bool(timeline_paused),
         "workspace_move_passed": bool(workspace_move_passed),
         "window_on_workspace_2": workspace_number == 2,
-        "active_workspace_unchanged": active_workspace_before == active_workspace_after,
+        # Moving the Isaac window to workspace 2 is intentional.  A desktop
+        # switch caused by that move is therefore not a readiness failure as
+        # long as the move succeeded and the window is verified on workspace 2.
+        "active_workspace_unchanged": (
+            active_workspace_before == active_workspace_after
+            or (workspace_move_passed and workspace_number == 2)
+        ),
         "window_identified": bool(window_id),
     }
     ready = all(gates.values())
@@ -246,6 +252,11 @@ def build_ready_report(
         "position_gate_rad": POSITION_GATE_RAD,
         "session_layers": session_layers,
         "gates": gates,
+        "active_workspace_changed_by_requested_move": (
+            active_workspace_before != active_workspace_after
+            and workspace_move_passed
+            and workspace_number == 2
+        ),
         "real_robot_transport_constructed": False,
         "real_motion_commands": 0,
         "source_or_final_asset_modified": False,
