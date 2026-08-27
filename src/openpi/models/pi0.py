@@ -261,6 +261,74 @@ class Pi0(_model.BaseModel):
         x_0, _ = jax.lax.while_loop(cond, step, (noise, 1.0))
         return x_0
 
+    def compute_action_attention(
+        self,
+        observation: _model.Observation,
+        actions: _model.Actions,
+        *,
+        timestep: float = 0.0,
+    ) -> dict[str, at.Float[at.Array, "l b a ph pw"]]:
+        """Return action-query attention over each camera's visual patch grid.
+
+        This is a diagnostic clean-action probe. It reuses the generated action
+        chunk as the action-expert input and captures the real transformer
+        attention probabilities from every language/action layer. Query heads
+        are averaged in ``gemma.Attention`` while layers and future action
+        queries remain separate for visualization.
+        """
+        patch_size = 14
+        patch_rows = self.image_resolution[0] // patch_size
+        patch_cols = self.image_resolution[1] // patch_size
+        tokens_per_image = patch_rows * patch_cols
+
+        if any(image.ndim != 4 for image in observation.images.values()):
+            raise ValueError("Attention capture currently requires one frame per camera.")
+
+        prefix_tokens, prefix_mask, prefix_ar_mask = self.embed_prefix(observation)
+        prefix_attn_mask = make_attn_mask(prefix_mask, prefix_ar_mask)
+        positions = jnp.cumsum(prefix_mask, axis=1) - 1
+        _, kv_cache = self.PaliGemma.llm(
+            [prefix_tokens, None],
+            mask=prefix_attn_mask,
+            positions=positions,
+        )
+
+        batch_size = observation.state.shape[0]
+        suffix_tokens, suffix_mask, suffix_ar_mask, adarms_cond = self.embed_suffix(
+            observation,
+            actions,
+            jnp.full((batch_size,), timestep, dtype=jnp.float32),
+        )
+        suffix_attn_mask = make_attn_mask(suffix_mask, suffix_ar_mask)
+        suffix_to_prefix_mask = einops.repeat(prefix_mask, "b p -> b s p", s=suffix_tokens.shape[1])
+        full_attn_mask = jnp.concatenate([suffix_to_prefix_mask, suffix_attn_mask], axis=-1)
+        suffix_positions = (
+            jnp.sum(prefix_mask, axis=-1)[:, None] + jnp.cumsum(suffix_mask, axis=-1) - 1
+        )
+        (_, suffix_out), _, layer_attention = self.PaliGemma.llm(
+            [None, suffix_tokens],
+            mask=full_attn_mask,
+            positions=suffix_positions,
+            kv_cache=kv_cache,
+            adarms_cond=[None, adarms_cond],
+            capture_attention=True,
+        )
+        assert suffix_out is not None
+
+        camera_maps = {}
+        token_start = 0
+        for camera_name in observation.images:
+            token_end = token_start + tokens_per_image
+            camera_maps[camera_name] = layer_attention[..., token_start:token_end].reshape(
+                layer_attention.shape[0],
+                batch_size,
+                suffix_tokens.shape[1],
+                patch_rows,
+                patch_cols,
+            )
+            token_start = token_end
+        return camera_maps
+
     def sample_action_chunk_with_training_time_rtc(
         self,
         rng: at.KeyArrayLike,

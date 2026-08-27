@@ -54,9 +54,16 @@ class Args:
     warmup_subtask: bool = True
     # Number of flow denoising steps to use for policy sampling.
     denoising_steps: int = 10
+    # RTC scheduling parameters. These must match the robot runtime.
+    rtc_replan_start_step: int = 25
+    rtc_handoff_delay_steps: int = 10
     # Override temporal image history used by the training data config at inference time.
     video_memory_num_frames: int = 1
     video_memory_stride_seconds: float = 1.0
+    # Capture action-token attention over the three model camera views.
+    attention_debug: bool = False
+    attention_debug_dir: str = "/app/attention_debug"
+    attention_debug_every_n: int = 1
 
     # Specifies how to load the policy. If not provided, the default policy for the environment will be used.
     policy: Checkpoint | Default = dataclasses.field(default_factory=Default)
@@ -74,6 +81,8 @@ def create_default_policy(
     env: EnvMode,
     *,
     denoising_steps: int = 10,
+    rtc_replan_start_step: int = 25,
+    rtc_handoff_delay_steps: int = 10,
     video_memory_num_frames: int = 1,
     video_memory_stride_seconds: float = 1.0,
 ) -> _policy.Policy:
@@ -87,7 +96,11 @@ def create_default_policy(
                 video_memory_stride_seconds=video_memory_stride_seconds,
             ),
             checkpoint.dir,
-            sample_kwargs={"denoising_steps": denoising_steps},
+            sample_kwargs={
+                "denoising_steps": denoising_steps,
+                "replan_start_step": rtc_replan_start_step,
+                "handoff_delay_steps": rtc_handoff_delay_steps,
+            },
         )
     raise ValueError(f"Unsupported environment mode: {env}")
 
@@ -124,12 +137,18 @@ def create_policy(args: Args) -> _policy.Policy:
                     video_memory_stride_seconds=args.video_memory_stride_seconds,
                 ),
                 args.policy.dir,
-                sample_kwargs={"denoising_steps": args.denoising_steps},
+                sample_kwargs={
+                    "denoising_steps": args.denoising_steps,
+                    "replan_start_step": args.rtc_replan_start_step,
+                    "handoff_delay_steps": args.rtc_handoff_delay_steps,
+                },
             )
         case Default():
             return create_default_policy(
                 args.env,
                 denoising_steps=args.denoising_steps,
+                rtc_replan_start_step=args.rtc_replan_start_step,
+                rtc_handoff_delay_steps=args.rtc_handoff_delay_steps,
                 video_memory_num_frames=args.video_memory_num_frames,
                 video_memory_stride_seconds=args.video_memory_stride_seconds,
             )
@@ -152,10 +171,18 @@ def main(args: Args) -> None:
     dummy_obs = _make_dummy_obs(args.video_memory_num_frames)
     dummy_prev_action = np.random.rand(50, 32)
     dummy_action_prefix = np.zeros_like(dummy_prev_action)
-    dummy_action_prefix[:10] = dummy_prev_action[25:35]
+    rtc_handoff_step = args.rtc_replan_start_step + args.rtc_handoff_delay_steps
+    dummy_action_prefix[: args.rtc_handoff_delay_steps] = dummy_prev_action[
+        args.rtc_replan_start_step : rtc_handoff_step
+    ]
     if args.warmup_rtc:
         policy.infer(dummy_obs, prev_action=dummy_prev_action, chunking_mode="inference_time")
-        policy.infer(dummy_obs, chunking_mode="training_time", action_prefix=dummy_action_prefix, handoff_delay_steps=10)
+        policy.infer(
+            dummy_obs,
+            chunking_mode="training_time",
+            action_prefix=dummy_action_prefix,
+            handoff_delay_steps=args.rtc_handoff_delay_steps,
+        )
     else:
         logging.info("Skipping RTC warmup by request.")
     if args.warmup_non_rtc:
@@ -169,6 +196,12 @@ def main(args: Args) -> None:
             policy.infer_subtask(dummy_obs)
         except (AttributeError, NotImplementedError):
             logging.info("Skipping infer_subtask warmup because the current policy does not support it.")
+    if args.attention_debug:
+        policy.enable_attention_recording(
+            args.attention_debug_dir,
+            every_n=args.attention_debug_every_n,
+        )
+        policy.warmup_attention_recording(dummy_obs)
     # Record the policy's behavior.
     if args.record:
         policy = _policy.PolicyRecorder(policy, "policy_records")

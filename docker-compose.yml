@@ -11,7 +11,7 @@ services:
     command: >-
       python3 /app/scripts/run_aloha_real.py
       --model-dir
-      /app/checkpoints/eii_data_system_without_rinse_cam3_fullft_h200_have_cap_water_return_home_49repo/no_rinse_cam3_fullft_have_cap_water_return_home_49repo_bs256_nw64_fsdp4_20260527/10000
+      /app/checkpoints/eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo/no_rinse_cam3_fullft_return_home_29repo_bs256_nw64_fsdp4_20260520/19000
       --action-quality good
       --chunking-mode inference_time
 
@@ -56,12 +56,15 @@ services:
       - -lc
       - >-
         uv run --no-sync scripts/serve_policy.py --no-warmup-subtask --denoising-steps 10
+        --attention-debug
+        --attention-debug-dir /app/attention_debug
+        --attention-debug-every-n 1
         ${SERVER_ARGS:---video-memory-num-frames 1
         --video-memory-stride-seconds 1.0
         policy:checkpoint
-        --policy.config eii_data_system_without_rinse_cam3_fullft_h200_have_cap_water_return_home_49repo
+        --policy.config eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo
         --policy.dir
-        /app/checkpoints/eii_data_system_without_rinse_cam3_fullft_h200_have_cap_water_return_home_49repo/no_rinse_cam3_fullft_have_cap_water_return_home_49repo_bs256_nw64_fsdp4_20260527/10000}
+        /app/checkpoints/eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo/no_rinse_cam3_fullft_return_home_29repo_bs256_nw64_fsdp4_20260520/19000}
     init: true
     tty: true
     network_mode: host

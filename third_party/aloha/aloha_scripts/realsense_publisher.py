@@ -10,7 +10,7 @@ import rospy
 from aloha.msg import RGBGrayscaleImage
 
 
-TIMEOUT_MS = 100
+TIMEOUT_MS = 1000
 FPS = 60 #30
 
 cv_bridge = CvBridge()

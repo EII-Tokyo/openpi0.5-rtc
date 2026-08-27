@@ -335,9 +335,18 @@ def main(config: _config.TrainConfig):
     if resuming:
         train_state = _checkpoints.restore_state(checkpoint_manager, train_state, data_loader)
 
+    train_batch_sharding = data_sharding
+    if config.gradient_accumulation_steps > 1:
+        # Accumulated batches are stacked as [accumulation, batch, ...]. Keep the
+        # accumulation axis replicated and shard the actual batch axis across devices.
+        train_batch_sharding = jax.sharding.NamedSharding(
+            mesh,
+            jax.sharding.PartitionSpec(None, sharding.DATA_AXIS),
+        )
+
     ptrain_step = jax.jit(
         functools.partial(train_step, config),
-        in_shardings=(replicated_sharding, train_state_sharding, data_sharding),
+        in_shardings=(replicated_sharding, train_state_sharding, train_batch_sharding),
         out_shardings=(train_state_sharding, replicated_sharding),
         donate_argnums=(1,),
     )

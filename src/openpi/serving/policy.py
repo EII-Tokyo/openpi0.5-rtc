@@ -1,6 +1,8 @@
 from collections.abc import Callable, Sequence
 import logging
 import pathlib
+import queue
+import threading
 import time
 from typing import Any, TypeAlias
 
@@ -14,6 +16,7 @@ from typing_extensions import override
 
 from openpi.data import transforms as _transforms
 from openpi.models import model as _model
+from openpi.serving import attention_recorder as _attention_recorder
 from openpi.shared import array_typing as at
 from openpi.shared import nnx_utils
 
@@ -52,6 +55,59 @@ class Policy(BasePolicy):
         self._sample_action_chunk_with_inference_time_rtc = nnx_utils.module_jit(model.sample_action_chunk_with_inference_time_rtc)
         self._sample_action_chunk_with_training_time_rtc = nnx_utils.module_jit(model.sample_action_chunk_with_training_time_rtc)
         self._rng = rng or jax.random.key(0)
+        self._attention_recorder: _attention_recorder.AttentionRecorder | None = None
+        self._compute_action_attention = None
+        self._attention_queue = None
+
+    def enable_attention_recording(self, output_dir: str | pathlib.Path, *, every_n: int = 1) -> None:
+        if not hasattr(self._model, "compute_action_attention"):
+            raise TypeError(f"{type(self._model).__name__} does not support attention capture")
+        self._attention_recorder = _attention_recorder.AttentionRecorder(output_dir, every_n=every_n)
+        self._compute_action_attention = nnx_utils.module_jit(self._model.compute_action_attention)
+        self._attention_queue = queue.Queue(maxsize=1)
+        threading.Thread(
+            target=self._attention_worker,
+            name="attention-recorder",
+            daemon=True,
+        ).start()
+
+    def _attention_worker(self) -> None:
+        assert self._attention_queue is not None
+        assert self._attention_recorder is not None
+        assert self._compute_action_attention is not None
+        while True:
+            raw_images, observation, origin_actions, chunking_mode = self._attention_queue.get()
+            try:
+                attention_start = time.monotonic()
+                camera_maps = self._compute_action_attention(observation, origin_actions)
+                camera_maps = jax.device_get(camera_maps)
+                attention_capture_ms = (time.monotonic() - attention_start) * 1000
+                self._attention_recorder.record(
+                    raw_images,
+                    camera_maps,
+                    chunking_mode=chunking_mode,
+                    capture_ms=attention_capture_ms,
+                )
+            except Exception:
+                logging.exception("Asynchronous attention capture failed.")
+            finally:
+                self._attention_queue.task_done()
+
+    def warmup_attention_recording(self, obs: dict) -> None:
+        """Compile the attention probe before a real robot client connects."""
+        if self._compute_action_attention is None:
+            raise RuntimeError("Attention recording must be enabled before warmup.")
+        inputs = jax.tree.map(lambda x: x, obs)
+        inputs = self._input_transform(inputs)
+        inputs = jax.tree.map(lambda x: jnp.asarray(x)[np.newaxis, ...], inputs)
+        observation = self._observation_transform(_model.Observation.from_dict(inputs))
+        dummy_actions = jnp.zeros(
+            (1, self._model.action_horizon, self._model.action_dim),
+            dtype=jnp.float32,
+        )
+        camera_maps = self._compute_action_attention(observation, dummy_actions)
+        jax.block_until_ready(camera_maps)
+        logging.info("Attention capture warmup complete.")
 
     @override
     def infer(
@@ -64,6 +120,14 @@ class Policy(BasePolicy):
         action_prefix: np.ndarray | None = None,
         handoff_delay_steps: int | None = None,
     ) -> dict:  # type: ignore[misc]
+        record_attention = (
+            self._attention_recorder is not None and self._attention_recorder.should_record()
+        )
+        raw_images = (
+            {name: np.asarray(value).copy() for name, value in obs.get("images", {}).items()}
+            if record_attention
+            else None
+        )
         # Make a copy since transformations may modify the inputs in place.
         inputs = jax.tree.map(lambda x: x, obs)
         inputs = self._input_transform(inputs)
@@ -139,6 +203,18 @@ class Policy(BasePolicy):
                     handoff_delay_steps=handoff_delay_steps,
                     **rtc_kwargs,
                 )
+
+        if record_attention:
+            assert self._attention_recorder is not None
+            assert self._compute_action_attention is not None
+            assert self._attention_queue is not None
+            assert raw_images is not None
+            try:
+                self._attention_queue.put_nowait(
+                    (raw_images, observation, origin_actions, chunking_mode)
+                )
+            except queue.Full:
+                logging.warning("Skipping attention capture because the asynchronous recorder is busy.")
 
         outputs = {
             "state": inputs["state"],
