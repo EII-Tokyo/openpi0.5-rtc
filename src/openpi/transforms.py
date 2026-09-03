@@ -540,14 +540,25 @@ class AppendConveyorInfo(DataTransformFn):
 
 @dataclasses.dataclass(frozen=True)
 class AppendSubtaskInfo(DataTransformFn):
-    """Appends resolved DROID subtask text to the prompt."""
+    """Appends resolved DROID subtask text to the prompt.
+
+    With probability dropout, leaves the prompt unchanged so the model also learns
+    to act without subtask conditioning.
+    """
 
     prefix: str = ", Subtask: "
     skip_labels: tuple[str, ...] = ("unknown",)
+    dropout: float = 0.0
+
+    def __post_init__(self):
+        if not 0.0 <= self.dropout <= 1.0:
+            raise ValueError(f"dropout must be in [0, 1], got {self.dropout}.")
 
     def __call__(self, data: DataDict) -> DataDict:
         subtask = data.pop("subtask", None)
         if subtask is None or "prompt" not in data:
+            return data
+        if self.dropout > 0 and np.random.random() < self.dropout:
             return data
 
         if isinstance(subtask, bytes):

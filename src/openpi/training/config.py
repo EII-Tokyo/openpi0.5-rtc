@@ -481,6 +481,8 @@ class CanonicalLeRobotDROIDConveyorDataConfig(CanonicalLeRobotDROIDDataConfig):
     """
 
     use_subtasks: bool = False
+    # Training-only probability of dropping the subtask suffix from the prompt.
+    subtask_dropout: float = 0.0
 
     @override
     def create(self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig) -> DataConfig:
@@ -508,7 +510,7 @@ class CanonicalLeRobotDROIDConveyorDataConfig(CanonicalLeRobotDROIDDataConfig):
         )
         prompt_metadata_transforms: list[_transforms.DataTransformFn] = []
         if self.use_subtasks:
-            prompt_metadata_transforms.append(_transforms.AppendSubtaskInfo())
+            prompt_metadata_transforms.append(_transforms.AppendSubtaskInfo(dropout=self.subtask_dropout))
         prompt_metadata_transforms.append(_transforms.AppendConveyorInfo(dropout=0.3))
         data_transforms = _transforms.Group(
             inputs=[
@@ -1285,6 +1287,56 @@ _CONFIGS = [
             decay_lr=5e-5,
         ),
         num_train_steps=100_000,
+        batch_size=128,
+    ),
+    TrainConfig(
+        # Full fine-tune with the categorized_boxes_v1 prompt structure (random
+        # language_instruction/language_instruction_2 choice + subtask + conveyor suffixes),
+        # subtask dropout, and the clm1/2/3 canonical exports added to the xxjd mixture.
+        # Sized for an 8x H200 cloud run.
+        name="pi05_droid_conveyor_clm123_8xh200",
+        model=pi0_config.Pi0Config(
+            pi05=True,
+            action_dim=32,
+            action_horizon=16,
+        ),
+        data=CanonicalLeRobotDROIDConveyorDataConfig(
+            use_subtasks=True,
+            subtask_dropout=0.3,
+            repo_ids=[
+                "michios/droid_xxjd_canonical",
+                "michios/droid_xxjd_2_canonical",
+                "michios/droid_xxjd_3_canonical",
+                "michios/droid_xxjd_4_canonical",
+                "michios/droid_xxjd_5_canonical",
+                "michios/droid_xxjd_6_2",
+                "michios/droid_xxjd_7_2",
+                "michios/droid_xxjd_8_2_canonical",
+                "michios/droid_xxjd_20260202",
+                "michios/droid_xxjd_20260421",
+                "michios/droid_xxjd_20260423",
+                "michios/droid_xxjd_20260511_20260512",
+                # clm series (canonical hub exports; subtask labels are "unknown" so
+                # these episodes train without the subtask suffix).
+                "michios/clm1_canonical",
+                "michios/clm2_canonical",
+                "michios/clm3_canonical",
+            ],
+            base_config=DataConfig(prompt_from_task=True),
+            assets=AssetsConfig(
+                assets_dir="gs://openpi-assets/checkpoints/pi05_droid/assets",
+                asset_id="droid",
+            ),
+        ),
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_droid/params"),
+        ema_decay=None,
+        lr_schedule=_optimizer.CosineDecaySchedule(
+            warmup_steps=5_000,
+            peak_lr=5e-5,
+            decay_steps=45_000,
+            decay_lr=5e-5,
+        ),
+        num_train_steps=50_000,
         batch_size=128,
     ),
     TrainConfig(
