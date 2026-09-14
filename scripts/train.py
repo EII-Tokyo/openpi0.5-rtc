@@ -170,18 +170,25 @@ def train_step(
     if config.gradient_accumulation_steps == 1:
         loss, grads = nnx.value_and_grad(loss_fn, argnums=diff_state)(model, train_rng, observation, actions)
     else:
-        grads = None
-        loss = jnp.array(0.0)
-        for micro_step in range(config.gradient_accumulation_steps):
+        def accumulate(carry, micro_step):
+            loss, grads = carry
+            micro_model = nnx.merge(state.model_def, state.params)
+            micro_model.train()
             micro_rng = jax.random.fold_in(train_rng, micro_step)
             micro_observation = jax.tree.map(lambda x, i=micro_step: x[i], observation)
             micro_actions = jax.tree.map(lambda x, i=micro_step: x[i], actions)
             micro_loss, micro_grads = nnx.value_and_grad(loss_fn, argnums=diff_state)(
-                model, micro_rng, micro_observation, micro_actions
+                micro_model, micro_rng, micro_observation, micro_actions
             )
             loss = loss + micro_loss / config.gradient_accumulation_steps
             micro_grads = jax.tree.map(lambda x: x / config.gradient_accumulation_steps, micro_grads)
-            grads = micro_grads if grads is None else jax.tree.map(lambda x, y: x + y, grads, micro_grads)
+            grads = jax.tree.map(lambda x, y: x + y, grads, micro_grads)
+            return (loss, grads), None
+
+        zeros = jax.tree.map(jnp.zeros_like, state.params.filter(config.trainable_filter))
+        (loss, grads), _ = jax.lax.scan(
+            accumulate, (jnp.array(0.0), zeros), jnp.arange(config.gradient_accumulation_steps)
+        )
 
     params = state.params.filter(config.trainable_filter)
     updates, new_opt_state = state.tx.update(grads, state.opt_state, params)

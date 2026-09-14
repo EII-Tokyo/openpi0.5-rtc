@@ -529,6 +529,144 @@ _CONFIGS = [
         ),
     ),
     _make_twist_train_config(
+        "eii_data_system_with_rinse_cam3_fullft_h200_original_59repo",
+        repo_ids=[
+            # Production /console/aloha/rinse snapshot, 2026-09-14.
+            # 46 distinct completed original with-rinse repos; 60 weighted entries.
+            # Preserve baseline weights: turn-over 5x, free-spinning 3x, others 1x.
+            # Generated 2026-09-10T11:36:03.035881+09:00; weight 1x.
+            "lyl472324464/2025-09-15-twist-one-bottle-no-box-in-the-front-with-rinse",
+            # Generated 2026-09-10T13:28:00.661890+09:00; weight 1x.
+            "lyl472324464/2025-12-10-twist-one-bottle-with-rinse",
+            # Generated 2026-09-10T14:15:25.690841+09:00; weight 1x.
+            "lyl472324464/2025-12-23-twist-one-bottle-with-rinse",
+            # Generated 2026-09-10T14:31:29.504728+09:00; weight 1x.
+            "lyl472324464/2026-01-20-twist-one-bottle-with-rinse",
+            # Generated 2026-09-10T15:11:12.445889+09:00; weight 1x.
+            "lyl472324464/2026-01-28-twist-many-bottle-with-rinse",
+            # Generated 2026-09-10T15:42:15.543037+09:00; weight 1x.
+            "lyl472324464/2026-02-03-no-cap-and-direction-with-rinse",
+            # Generated 2026-09-10T16:04:33.950746+09:00; weight 1x.
+            "lyl472324464/2026-03-04-one-direction-with-rinse",
+            # Generated 2026-09-10T16:36:59.305617+09:00; weight 1x.
+            "lyl472324464/2026-03-05-two-direction-with-rinse",
+            # Generated 2026-09-11T05:06:04.330684+09:00; weight 1x.
+            "lyl472324464/2026-03-12-one-havent-cap-direction-with-rinse",
+            # Generated 2026-09-11T05:02:35.366577+09:00; weight 1x.
+            "lyl472324464/2026-03-12-one-havent-cap-with-rinse",
+            # Generated 2026-09-10T17:37:44.282025+09:00; weight 1x.
+            "lyl472324464/2026-04-21_direction_2-with-rinse",
+            # Generated 2026-09-10T17:56:03.625319+09:00; weight 1x.
+            "lyl472324464/2026-04-21_direction_haven-t_cap-with-rinse",
+            # Generated 2026-09-10T18:19:36.632626+09:00; weight 1x.
+            "lyl472324464/2026-04-21_direction_havent_cap_water-with-rinse",
+            # Generated 2026-09-10T17:16:33.942779+09:00; weight 1x.
+            "lyl472324464/2026-04-21_direction-with-rinse",
+            # Generated 2026-09-10T18:32:01.738772+09:00; weight 1x.
+            "lyl472324464/2026-04-23_direction_have_cap_water-with-rinse",
+            # Generated 2026-09-10T19:27:36.904547+09:00; weight 1x.
+            "lyl472324464/2026-04-23_direction_havent_cap_water-with-rinse",
+            # Generated 2026-09-10T19:58:20.475633+09:00; weight 1x.
+            "lyl472324464/2026-04-27_direction_have_cap_water2-with-rinse",
+            # Generated 2026-09-10T20:46:12.048432+09:00; weight 1x.
+            "lyl472324464/2026-04-27direction_have_cap_water-with-rinse",
+            # Generated 2026-09-10T21:23:18.733193+09:00; weight 1x.
+            "lyl472324464/2026-04-28_direction_have_cap_water-with-rinse",
+            # Generated 2026-09-10T21:53:59.078519+09:00; weight 1x.
+            "lyl472324464/2026-04-28_direction_have_cap_water2-with-rinse",
+            # Generated 2026-09-10T21:58:36.900600+09:00; weight 5x.
+            "lyl472324464/2026-05-01_turn_over-with-rinse",
+            "lyl472324464/2026-05-01_turn_over-with-rinse",
+            "lyl472324464/2026-05-01_turn_over-with-rinse",
+            "lyl472324464/2026-05-01_turn_over-with-rinse",
+            "lyl472324464/2026-05-01_turn_over-with-rinse",
+            # Generated 2026-09-10T22:15:11.947129+09:00; weight 1x.
+            "lyl472324464/2026-05-01_water1-with-rinse",
+            # Generated 2026-09-10T22:41:36.120763+09:00; weight 5x.
+            "lyl472324464/2026-05-03_turn_over-with-rinse",
+            "lyl472324464/2026-05-03_turn_over-with-rinse",
+            "lyl472324464/2026-05-03_turn_over-with-rinse",
+            "lyl472324464/2026-05-03_turn_over-with-rinse",
+            "lyl472324464/2026-05-03_turn_over-with-rinse",
+            # Generated 2026-09-10T23:52:27.314844+09:00; weight 1x.
+            "lyl472324464/2026-05-04_direction-twist-water-with-rinse",
+            # Generated 2026-09-10T23:05:55.374378+09:00; weight 1x.
+            "lyl472324464/2026-05-04_direction-with-rinse",
+            # Generated 2026-09-11T00:12:19.091116+09:00; weight 5x.
+            "lyl472324464/2026-05-04_turn_over-with-rinse",
+            "lyl472324464/2026-05-04_turn_over-with-rinse",
+            "lyl472324464/2026-05-04_turn_over-with-rinse",
+            "lyl472324464/2026-05-04_turn_over-with-rinse",
+            "lyl472324464/2026-05-04_turn_over-with-rinse",
+            # Generated 2026-09-11T01:57:44.997938+09:00; weight 1x.
+            "lyl472324464/2026-05-05_direction-water-with-rinse",
+            # Generated 2026-09-11T02:02:40.449965+09:00; weight 1x.
+            "lyl472324464/2026-05-05_water-with-rinse",
+            # Generated 2026-09-11T02:38:42.542022+09:00; weight 1x.
+            "lyl472324464/2026-05-07_water-with-rinse",
+            # Generated 2026-09-11T02:49:08.989975+09:00; weight 1x.
+            "lyl472324464/2026-05-11_cap-with-rinse",
+            # Generated 2026-09-11T03:00:11.582164+09:00; weight 3x.
+            "lyl472324464/2026-05-11_free-spinning-with-rinse",
+            "lyl472324464/2026-05-11_free-spinning-with-rinse",
+            "lyl472324464/2026-05-11_free-spinning-with-rinse",
+            # Generated 2026-09-11T03:23:13.530880+09:00; weight 1x.
+            "lyl472324464/2026-05-11_twist-with-rinse",
+            # Generated 2026-09-11T03:43:20.260625+09:00; weight 1x.
+            "lyl472324464/2026-05-12_insert-to-nozzle_realign-with-rinse",
+            # Generated 2026-09-11T04:15:08.205294+09:00; weight 1x.
+            "lyl472324464/2026-05-12_twist-with-rinse",
+            # Generated 2026-09-11T04:32:53.675625+09:00; weight 1x.
+            "lyl472324464/2026-05-12_twist2-with-rinse",
+            # Generated 2026-09-11T04:39:57.664222+09:00; weight 1x.
+            "lyl472324464/2026-05-13-insert-to-nozzle-no-cap-with-rinse",
+            # Generated 2026-09-11T11:17:28.024695+09:00; weight 1x.
+            "lyl472324464/2026-09-10-01-twist-and-wash-with-rinse",
+            # Generated 2026-09-11T12:32:03.843249+09:00; weight 1x.
+            "lyl472324464/2026-09-10-02-twist-and-wash-with-rinse",
+            # Generated 2026-09-11T14:16:47.410987+09:00; weight 1x.
+            "lyl472324464/2026-09-10-03-twist-and-wash-with-rinse",
+            # Generated 2026-09-11T04:59:51.282723+09:00; weight 1x.
+            "lyl472324464/2026.03.12_one_have_cap_direction-with-rinse",
+            # Generated 2026-09-11T04:49:29.262054+09:00; weight 1x.
+            "lyl472324464/2026.03.12_one_have_cap-with-rinse",
+            # Generated 2026-09-11T05:19:07.327368+09:00; weight 1x.
+            "lyl472324464/2026.03.12_two_have_all_left-with-rinse",
+            # Generated 2026-09-11T05:35:21.155386+09:00; weight 1x.
+            "lyl472324464/2026.03.12_two_have_cap_all_right-with-rinse",
+            # Generated 2026-09-11T05:53:00.511766+09:00; weight 1x.
+            "lyl472324464/2026.03.12_two_have_cap_one_right-with-rinse",
+            # Generated 2026-09-11T06:20:59.581731+09:00; weight 1x.
+            "lyl472324464/2026.03.16_twist_many-with-rinse",
+            # November 2025 datasets remain excluded, matching the baseline policy.
+            # "lyl472324464/2025-11-06-twist-many-bottles-with-rinse",
+            # "lyl472324464/2025-11-14-twist-two-bottles-with-rinse",
+            # "lyl472324464/2025-11-18-twist-two-bottles-with-rinse",
+            # "lyl472324464/2025-11-26-twist-two-bottles-with-rinse",
+            # Completed; included at weight 1x on 2026-09-14.
+            "lyl472324464/2026-09-11-end-with-rinse",
+        ],
+        lora=False,
+        batch_size=128,
+        num_workers=96,
+        fsdp_devices=4,
+        include_low=False,
+        use_good_bad_action_prompt=True,
+        gradient_accumulation_steps=2,
+        image_resolution=(448, 448),
+        exp_name="rinse_cam3_fullft_original_60entries_448_bs128_ga2_scan_nw96_fsdp4_20260914",
+        checkpoint_base_dir="/workspace/openpi0.5-rtc/checkpoints",
+        wandb_enabled=True,
+        overwrite=False,
+        resume=False,
+        num_train_steps=60_000,
+        # Compute rinse-specific norm stats before training; do not reuse no-rinse stats.
+        assets=_transforms.AssetsConfig(
+            assets_dir="assets/eii_data_system_with_rinse_cam3_fullft_h200_original_59repo",
+            asset_id="aloha",
+        ),
+    ),
+    _make_twist_train_config(
         "debug_training_time_rtc_lora",
         repo_ids=["lyl472324464/2026-04-23_direction_have_cap_water-lerobot-without-rinse"],
         lora=True,
