@@ -65,7 +65,7 @@ class ManualInterventionController:
 
         master_bot_left = real_env.master_bot_left
         master_bot_right = real_env.master_bot_right
-        joint_unwrapper = robot_utils.JointPositionUnwrapper()
+        joint_unwrapper = robot_utils.BimanualJointPositionUnwrapper()
         history_actions = list(recent_puppet_actions) or [list(last_action)]
         history_index = len(history_actions) - 1
         policy_hz = 1 / self._policy_step_time if self._policy_step_time > 0 else 1

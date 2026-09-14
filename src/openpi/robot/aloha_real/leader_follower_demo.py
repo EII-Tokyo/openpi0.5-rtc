@@ -47,7 +47,7 @@ class LeaderFollowerDemoController:
             master_bot_right = real_env.master_bot_right
             puppet_bot_left = real_env.puppet_bot_left
             puppet_bot_right = real_env.puppet_bot_right
-            joint_unwrapper = robot_utils.JointPositionUnwrapper()
+            joint_unwrapper = robot_utils.BimanualJointPositionUnwrapper()
 
             reset_position = getattr(real_env, "_reset_position", None)
             if reset_position is None:

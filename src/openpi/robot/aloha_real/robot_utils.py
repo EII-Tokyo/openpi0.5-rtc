@@ -46,6 +46,22 @@ class JointPositionUnwrapper:
         return new_unwrapped.copy()
 
 
+class BimanualJointPositionUnwrapper:
+    """Unwrap left and right arm readings with independent histories.
+
+    The two leaders can legitimately be on opposite sides of the +/-pi
+    boundary.  Sharing one history between them makes that inter-arm
+    difference look like a wrap and can add a spurious full revolution.
+    """
+
+    def __init__(self, continuous_joint_indices=CONTINUOUS_JOINT_INDICES):
+        self.left = JointPositionUnwrapper(continuous_joint_indices)
+        self.right = JointPositionUnwrapper(continuous_joint_indices)
+
+    def unwrap(self, left_joint_positions, right_joint_positions):
+        return self.left.unwrap(left_joint_positions), self.right.unwrap(right_joint_positions)
+
+
 class ImageRecorder:
     def __init__(
         self,

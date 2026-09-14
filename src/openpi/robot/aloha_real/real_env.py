@@ -15,7 +15,7 @@ import logging
 
 # This is the reset position that is used by the standard Aloha runtime.
 DEFAULT_RESET_POSITION = [0, -0.96, 1.16, 0, -0.3, 0]
-_DEFAULT_ACTION_UNWRAPPER = robot_utils.JointPositionUnwrapper()
+_DEFAULT_ACTION_UNWRAPPER = robot_utils.BimanualJointPositionUnwrapper()
 
 
 class RealEnv:
@@ -384,8 +384,7 @@ def get_action(master_bot_left, master_bot_right, *, joint_unwrapper=None, use_c
     right_arm = np.asarray(master_bot_right.dxl.joint_states.position[:6], dtype=float)
     if use_continuous_joints:
         joint_unwrapper = joint_unwrapper or _DEFAULT_ACTION_UNWRAPPER
-        left_arm = joint_unwrapper.unwrap(left_arm)
-        right_arm = joint_unwrapper.unwrap(right_arm)
+        left_arm, right_arm = joint_unwrapper.unwrap(left_arm, right_arm)
     action[:6] = left_arm
     action[7 : 7 + 6] = right_arm
     # Gripper actions
