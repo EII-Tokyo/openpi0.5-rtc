@@ -782,6 +782,42 @@ _CONFIGS = [
     ),
 ]
 
+# Four-camera rinse restart. Dates refer to collection dates in repo names,
+# not the September regeneration timestamps. Preserve the original sampling weights.
+_rinse_april_source = next(
+    cfg for cfg in _CONFIGS if cfg.name == "eii_data_system_with_rinse_cam3_fullft_h200_original_59repo"
+)
+_rinse_april_repos = [
+    repo for repo in _rinse_april_source.data.repo_ids
+    if repo.split("/", 1)[1][:10].replace(".", "-") >= "2026-04-01"
+]
+assert len(set(_rinse_april_repos)) == 30 and len(_rinse_april_repos) == 44
+_CONFIGS.append(
+    _make_twist_train_config(
+        "eii_data_system_with_rinse_cam4_fullft_h200_from_april_original_30repo",
+        repo_ids=_rinse_april_repos,
+        lora=False,
+        batch_size=64,
+        num_workers=96,
+        fsdp_devices=4,
+        include_low=True,
+        use_good_bad_action_prompt=True,
+        gradient_accumulation_steps=4,
+        image_resolution=(448, 448),
+        max_token_len=200,
+        exp_name="rinse_cam4_april_30repo_44entries_448_bs64_ga4_scan_nw96_fsdp4_fd65536_20260915",
+        checkpoint_base_dir="/workspace/openpi0.5-rtc/checkpoints",
+        wandb_enabled=True,
+        overwrite=False,
+        resume=False,
+        num_train_steps=60_000,
+        assets=_transforms.AssetsConfig(
+            assets_dir="assets/eii_data_system_with_rinse_cam4_fullft_h200_from_april_original_30repo",
+            asset_id="aloha",
+        ),
+    )
+)
+
 _CONFIGS[0] = dataclasses.replace(_CONFIGS[0], policy_metadata=_TROSSEN_RESET_POSE)
 
 if len({config.name for config in _CONFIGS}) != len(_CONFIGS):

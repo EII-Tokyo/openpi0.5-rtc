@@ -304,13 +304,16 @@ class Block(nn.Module):
     def __call__(
         self,
         xs,
+        layer_mask,
         kv_cache,
         positions,
         attn_mask,
         adarms_cond,
         deterministic=True,  # noqa: FBT002
         capture_attention=False,  # noqa: FBT002
+        capture_hidden=False,  # noqa: FBT002
     ):
+        block_inputs = xs
         xs = sharding.activation_sharding_constraint(xs)
         drop = nn.Dropout(self.dropout, self.dropout_bdims) if self.dropout else lambda x, _: x
 
@@ -360,8 +363,20 @@ class Block(nn.Module):
         xs = [_gated_residual(x, y, gate) for x, y, gate in zip(xs, out, gates, strict=True)]
         xs = sharding.activation_sharding_constraint(xs)
 
+        # Skipping a residual block means forwarding its input unchanged for
+        # the selected expert. KV tensors are still built for safe reuse by
+        # the action expert during the denoising pass.
+        xs = [
+            None if x is None else jnp.where(layer_mask[i], block_inputs[i], x)
+            for i, x in enumerate(xs)
+        ]
+
+        if capture_attention and capture_hidden:
+            return xs, (kv_cache, attention_summary, xs)
         if capture_attention:
             return xs, (kv_cache, attention_summary)
+        if capture_hidden:
+            return xs, (kv_cache, xs)
         return xs, kv_cache
 
 
@@ -391,7 +406,7 @@ class Module(nn.Module):
         block_cls = nn.remat(
             Block,
             prevent_cse=False,
-            static_argnums=(6, 7),  # 0=self, 6=deterministic, 7=capture_attention
+            static_argnums=(7, 8, 9),  # deterministic, capture_attention, capture_hidden
             policy=jax.checkpoint_policies.nothing_saveable,
         )
         self.layers = nn.scan(
@@ -400,12 +415,14 @@ class Module(nn.Module):
             split_rngs={"params": True, "dropout": True},
             in_axes=(
                 0,
+                0,
                 nn.broadcast,
                 nn.broadcast,
                 nn.broadcast,
                 nn.broadcast,
                 nn.broadcast,
-            ),  # 0=kv_cache, 1=positions, 2=mask, 3=adarms_cond, 4=deterministic
+                nn.broadcast,
+            ),
             length=self.configs[0].depth,
         )(
             configs=self.configs,
@@ -428,25 +445,40 @@ class Module(nn.Module):
         adarms_cond: Sequence[at.Float[at.Array, "..."] | None] | None = None,
         *,
         kv_cache: KVCache | None = None,
+        layer_mask: at.Bool[at.Array, "l e"] | None = None,
         deterministic: bool = True,
         capture_attention: bool = False,
+        capture_hidden: bool = False,
     ):
         embedded = jax.tree.map(lambda e: e.astype(self.embed_dtype), embedded)
         mask = jnp.asarray(mask)[:, None, :, :]
         if adarms_cond is None:
             adarms_cond = [None] * len(self.configs)
+        if layer_mask is None:
+            layer_mask = jnp.zeros((self.configs[0].depth, len(self.configs)), dtype=jnp.bool_)
+        else:
+            layer_mask = jnp.asarray(layer_mask, dtype=jnp.bool_)
+            expected_shape = (self.configs[0].depth, len(self.configs))
+            if layer_mask.shape != expected_shape:
+                raise ValueError(f"layer_mask must have shape {expected_shape}, got {layer_mask.shape}")
 
         layer_result = self.layers(
             embedded,
+            layer_mask,
             kv_cache,
             positions,
             mask,
             adarms_cond,
             deterministic,
             capture_attention,
+            capture_hidden,
         )
-        if capture_attention:
+        if capture_attention and capture_hidden:
+            embedded, (kv_cache, attention_summary, hidden_states) = layer_result
+        elif capture_attention:
             embedded, (kv_cache, attention_summary) = layer_result
+        elif capture_hidden:
+            embedded, (kv_cache, hidden_states) = layer_result
         else:
             embedded, kv_cache = layer_result
 
@@ -455,8 +487,12 @@ class Module(nn.Module):
         outputs = [
             f(e, a)[0] if e is not None else e for f, e, a in zip(self.final_norms, embedded, adarms_cond, strict=True)
         ]
+        if capture_attention and capture_hidden:
+            return outputs, kv_cache, attention_summary, hidden_states
         if capture_attention:
             return outputs, kv_cache, attention_summary
+        if capture_hidden:
+            return outputs, kv_cache, hidden_states
         return outputs, kv_cache
 
     def init(self, use_adarms: Sequence[bool]):

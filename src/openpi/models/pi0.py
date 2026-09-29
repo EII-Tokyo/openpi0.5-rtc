@@ -105,9 +105,14 @@ class Pi0(_model.BaseModel):
         input_mask = []
         ar_mask = []
         tokens = []
+        image_token_shapes = {}
         # embed images
         for name in obs.images:
             image_tokens, _ = self.PaliGemma.img(obs.images[name], train=False)
+            image_token_shapes[name] = {
+                "image_shape": tuple(obs.images[name].shape),
+                "token_shape": tuple(image_tokens.shape),
+            }
 
             tokens.append(image_tokens)
             input_mask.append(
@@ -127,6 +132,13 @@ class Pi0(_model.BaseModel):
             # full attention between image and language inputs
             ar_mask += [False] * tokenized_inputs.shape[1]
         tokens = jnp.concatenate(tokens, axis=1)
+        # Static shapes are logged during JAX tracing, not on every inference.
+        logger.info(
+            "PREFIX_TOKEN_PROBE cameras=%s text_shape=%s prefix_shape=%s",
+            image_token_shapes,
+            None if obs.tokenized_prompt is None else tuple(obs.tokenized_prompt.shape),
+            tuple(tokens.shape),
+        )
         input_mask = jnp.concatenate(input_mask, axis=1)
         ar_mask = jnp.array(ar_mask)
         return tokens, input_mask, ar_mask
@@ -215,6 +227,7 @@ class Pi0(_model.BaseModel):
         *,
         denoising_steps: int | at.Int[at.Array, ""] = 10,
         noise: at.Float[at.Array, "b ah ad"] | None = None,
+        layer_mask: at.Bool[at.Array, "l e"] | None = None,
     ) -> _model.Actions:
         # note that we use the convention more common in diffusion literature, where t=1 is noise and t=0 is the target
         # distribution. yes, this is the opposite of the pi0 paper, and I'm sorry.
@@ -226,7 +239,12 @@ class Pi0(_model.BaseModel):
         prefix_tokens, prefix_mask, prefix_ar_mask = self.embed_prefix(observation)
         prefix_attn_mask = make_attn_mask(prefix_mask, prefix_ar_mask)
         positions = jnp.cumsum(prefix_mask, axis=1) - 1
-        _, kv_cache = self.PaliGemma.llm([prefix_tokens, None], mask=prefix_attn_mask, positions=positions)
+        _, kv_cache = self.PaliGemma.llm(
+            [prefix_tokens, None],
+            mask=prefix_attn_mask,
+            positions=positions,
+            layer_mask=layer_mask,
+        )
 
         def step(carry):
             x_t, time = carry
@@ -249,6 +267,7 @@ class Pi0(_model.BaseModel):
                 positions=positions,
                 kv_cache=kv_cache,
                 adarms_cond=[None, adarms_cond],
+                layer_mask=layer_mask,
             )
             assert prefix_out is None
             v_t = self.action_out_proj(suffix_out[:, -self.action_horizon :])
@@ -328,6 +347,87 @@ class Pi0(_model.BaseModel):
             )
             token_start = token_end
         return camera_maps
+
+    def compute_layer_features(
+        self,
+        observation: _model.Observation,
+        noisy_actions: _model.Actions,
+        *,
+        timestep: float = 1.0,
+        layer_mask: at.Bool[at.Array, "l e"] | None = None,
+    ) -> dict[str, object]:
+        """Capture per-layer residual-stream features for an offline probe.
+
+        Expert 0 is the PaliGemma vision/language stream and expert 1 is the
+        action stream. The method also returns every SigLIP block output.
+        """
+        image_tokens = []
+        image_mask_parts = []
+        prefix_ar_mask = []
+        vision_hidden = {}
+        for name, image in observation.images.items():
+            tokens, intermediates = self.PaliGemma.img(image, train=False)
+            encoder_intermediates = intermediates["encoder"]
+            block_keys = sorted(key for key in encoder_intermediates if key.startswith("block"))
+            vision_hidden[name] = jnp.stack(
+                [encoder_intermediates[key]["+mlp"] for key in block_keys],
+                axis=0,
+            )
+            image_tokens.append(tokens)
+            image_mask_parts.append(
+                einops.repeat(observation.image_masks[name], "b -> b s", s=tokens.shape[1])
+            )
+            prefix_ar_mask += [False] * tokens.shape[1]
+
+        if observation.tokenized_prompt is not None:
+            text_tokens = self.PaliGemma.llm(observation.tokenized_prompt, method="embed")
+            image_tokens.append(text_tokens)
+            image_mask_parts.append(observation.tokenized_prompt_mask)
+            prefix_ar_mask += [False] * text_tokens.shape[1]
+
+        prefix_tokens = jnp.concatenate(image_tokens, axis=1)
+        prefix_mask = jnp.concatenate(image_mask_parts, axis=1)
+        prefix_ar_mask = jnp.asarray(prefix_ar_mask)
+        prefix_attn_mask = make_attn_mask(prefix_mask, prefix_ar_mask)
+        prefix_positions = jnp.cumsum(prefix_mask, axis=1) - 1
+        (_, _), kv_cache, prefix_hidden = self.PaliGemma.llm(
+            [prefix_tokens, None],
+            mask=prefix_attn_mask,
+            positions=prefix_positions,
+            layer_mask=layer_mask,
+            capture_hidden=True,
+        )
+
+        batch_size = observation.state.shape[0]
+        suffix_tokens, suffix_mask, suffix_ar_mask, adarms_cond = self.embed_suffix(
+            observation,
+            noisy_actions,
+            jnp.full((batch_size,), timestep, dtype=jnp.float32),
+        )
+        suffix_attn_mask = make_attn_mask(suffix_mask, suffix_ar_mask)
+        suffix_to_prefix_mask = einops.repeat(prefix_mask, "b p -> b s p", s=suffix_tokens.shape[1])
+        full_attn_mask = jnp.concatenate([suffix_to_prefix_mask, suffix_attn_mask], axis=-1)
+        suffix_positions = (
+            jnp.sum(prefix_mask, axis=-1)[:, None] + jnp.cumsum(suffix_mask, axis=-1) - 1
+        )
+        (_, suffix_out), _, suffix_hidden = self.PaliGemma.llm(
+            [None, suffix_tokens],
+            mask=full_attn_mask,
+            positions=suffix_positions,
+            kv_cache=kv_cache,
+            adarms_cond=[None, adarms_cond],
+            layer_mask=layer_mask,
+            capture_hidden=True,
+        )
+        assert suffix_out is not None
+        return {
+            "vision": vision_hidden,
+            "vlm_input": prefix_tokens,
+            "vlm_layers": prefix_hidden[0],
+            "action_input": suffix_tokens,
+            "action_layers": suffix_hidden[1],
+            "velocity": self.action_out_proj(suffix_out[:, -self.action_horizon :]),
+        }
 
     def sample_action_chunk_with_training_time_rtc(
         self,

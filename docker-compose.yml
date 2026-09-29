@@ -14,6 +14,7 @@ services:
       /app/checkpoints/eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo/no_rinse_cam3_fullft_return_home_29repo_bs256_nw64_fsdp4_20260520/19000/
       --action-quality good
       --chunking-mode inference_time
+      --rtc-handoff-delay-steps 10
 
     init: true
     tty: true
@@ -55,7 +56,7 @@ services:
       - /bin/bash
       - -lc
       - >-
-        uv run --no-sync scripts/serve_policy.py --no-warmup-subtask --denoising-steps 10
+        uv run --no-sync scripts/serve_policy.py --no-warmup-subtask --denoising-steps 10 --rtc-handoff-delay-steps 10
         ${SERVER_ARGS:---video-memory-num-frames 1
         --video-memory-stride-seconds 1.0
         policy:checkpoint

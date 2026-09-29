@@ -30,8 +30,8 @@ class Runtime:
     """The core module orchestrating interactions between key components of the system."""
 
     _TASK_PROMPT_BY_NUM = {
-        "1": "Twist off the bottle cap",
-        "2": "Rinse bottle",
+        "1": os.getenv("ALOHA_TASK_1_PROMPT", "Twist off the bottle cap"),
+        "2": os.getenv("ALOHA_TASK_2_PROMPT", "Rinse bottle"),
     }
 
     def __init__(
