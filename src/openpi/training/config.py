@@ -1440,6 +1440,60 @@ _CONFIGS = [
         num_train_steps=45_000,
         batch_size=32,
     ),
+    TrainConfig(
+        # LoRA conveyor fine-tune on the waseda-style xxjd mixture plus the clm1/2/3
+        # canonical exports.
+        # Same prompt structure / subtask dropout as pi05_droid_conveyor_clm123_8xh200.
+        # Sized for a single RTX 5090 (32GB). 50k steps @ bs32 over ~618k frames ≈ 2.6 epochs,
+        # matching the clm3_direct_grasp LoRA run (30k steps over ~366k frames).
+        name="pi05_droid_lora_clm123_20261008",
+        model=pi0_config.Pi0Config(
+            pi05=True,
+            action_dim=32,
+            action_horizon=16,
+            paligemma_variant="gemma_2b_lora",
+            action_expert_variant="gemma_300m_lora",
+        ),
+        data=CanonicalLeRobotDROIDConveyorDataConfig(
+            use_subtasks=True,
+            subtask_dropout=0.3,
+            repo_ids=[
+                "michios/droid_xxjd_canonical",
+                "michios/droid_xxjd_2_canonical",
+                "michios/droid_xxjd_3_canonical",
+                "michios/droid_xxjd_4_canonical",
+                "michios/droid_xxjd_5_canonical",
+                "michios/droid_xxjd_6_2",
+                "michios/clm3_canonical",
+                "michios/droid_xxjd_20260202",
+                "michios/droid_xxjd_20260421",
+                "michios/clm1_canonical",
+                "michios/clm2_canonical",
+            ],
+            base_config=DataConfig(prompt_from_task=True),
+            assets=AssetsConfig(
+                assets_dir="gs://openpi-assets/checkpoints/pi05_droid/assets",
+                asset_id="droid",
+            ),
+        ),
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_droid/params"),
+        freeze_filter=pi0_config.Pi0Config(
+            pi05=True,
+            action_dim=32,
+            action_horizon=16,
+            paligemma_variant="gemma_2b_lora",
+            action_expert_variant="gemma_300m_lora",
+        ).get_freeze_filter(),
+        ema_decay=None,
+        lr_schedule=_optimizer.CosineDecaySchedule(
+            warmup_steps=5_000,
+            peak_lr=5e-5,
+            decay_steps=45_000,
+            decay_lr=5e-5,
+        ),
+        num_train_steps=50_000,
+        batch_size=32,
+    ),
     #
     # ALOHA Sim configs. This config is used to demonstrate how to train on a simple simulated environment.
     #
