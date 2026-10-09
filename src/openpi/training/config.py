@@ -818,6 +818,47 @@ _CONFIGS.append(
     )
 )
 
+# ALOHA -> Rinse completed with-rinse exports verified on 109.
+# Each new repository occurs once (weight 1); preserve all 44 original entries.
+_rinse_april_new_repos = [
+    "lyl472324464/2026-09-28_insert_01-lerobot-with-rinse",
+    "lyl472324464/2026-09-28_insert_02-lerobot-with-rinse",
+    "lyl472324464/2026-10-05_insert_01-lerobot-with-rinse",
+    "lyl472324464/2026-10-05_insert_02-lerobot-with-rinse",
+    "lyl472324464/2026-10-05_insert_03-lerobot-with-rinse",
+    "lyl472324464/2026-10-05_insert_04-rinse-with-rinse",
+    "lyl472324464/2026-10-07_insert_01-lerobot-with-rinse",
+    "lyl472324464/2026-10-07_insert_02-lerobot-with-rinse",
+]
+assert len(set(_rinse_april_new_repos)) == 8
+assert set(_rinse_april_repos).isdisjoint(_rinse_april_new_repos)
+_rinse_april_extended_repos = [*_rinse_april_repos, *_rinse_april_new_repos]
+assert len(set(_rinse_april_extended_repos)) == 38 and len(_rinse_april_extended_repos) == 52
+# Clone the base template so all model/optimizer/training settings stay identical.
+_rinse_april_base = next(
+    cfg for cfg in _CONFIGS
+    if cfg.name == "eii_data_system_with_rinse_cam4_fullft_h200_from_april_original_30repo"
+)
+_CONFIGS.append(
+    dataclasses.replace(
+        _rinse_april_base,
+        name="eii_with_rinse_cam4_fullft_from_april_original_38repo",
+        exp_name="rinse_cam4_april_38repo_52entries_448_bs64_ga4_scan_nw96_fsdp4_fd65536",
+        data=dataclasses.replace(
+            _rinse_april_base.data,
+            repo_ids=_rinse_april_extended_repos,
+            # Keep new-mixture normalization assets separate from the 30-repo run.
+            transform_pipeline=dataclasses.replace(
+                _rinse_april_base.data.transform_pipeline,
+                assets=_transforms.AssetsConfig(
+                    assets_dir="assets/eii_with_rinse_cam4_fullft_from_april_original_38repo",
+                    asset_id="aloha",
+                ),
+            ),
+        ),
+    )
+)
+
 _CONFIGS[0] = dataclasses.replace(_CONFIGS[0], policy_metadata=_TROSSEN_RESET_POSE)
 
 if len({config.name for config in _CONFIGS}) != len(_CONFIGS):
