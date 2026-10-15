@@ -89,7 +89,41 @@ class Encoder1DBlock(nn.Module):
     dropout: float = 0.0
     dtype_mm: str = "float32"
 
-    @nn.compact
+    def setup(self):
+        # Keep parameter paths compatible with existing image/video checkpoints.
+        self.ln0 = nn.LayerNorm(name="LayerNorm_0", dtype=self.dtype_mm)
+        self.attn = nn.MultiHeadDotProductAttention(
+            num_heads=self.num_heads,
+            kernel_init=nn.initializers.xavier_uniform(),
+            dtype=self.dtype_mm,
+            name="MultiHeadDotProductAttention_0",
+        )
+        self.ln1 = nn.LayerNorm(name="LayerNorm_1", dtype=self.dtype_mm)
+        self.mlp = MlpBlock(
+            mlp_dim=self.mlp_dim,
+            dropout=self.dropout,
+            dtype_mm=self.dtype_mm,
+            name="MlpBlock_0",
+        )
+        self.attention_dropout = nn.Dropout(rate=self.dropout)
+        self.mlp_dropout = nn.Dropout(rate=self.dropout)
+
+    def _apply_attention(self, seq, mask, deterministic):
+        seq = sharding.activation_sharding_constraint(seq)
+        y = self.ln0(seq)
+        y = self.attn(y, y, mask=mask, deterministic=deterministic)
+        y = sharding.activation_sharding_constraint(y)
+        y = self.attention_dropout(y, deterministic=deterministic)
+        return seq + y, y
+
+    def _apply_temporal_attention(self, x, mask, deterministic):
+        batch_size, time_size, seq_len, width = x.shape
+        temporal_x = jnp.swapaxes(x, 1, 2).reshape(batch_size * seq_len, time_size, width)
+        temporal_x, temporal_y = self._apply_attention(temporal_x, mask, deterministic)
+        temporal_x = temporal_x.reshape(batch_size, seq_len, time_size, width).swapaxes(1, 2)
+        temporal_y = temporal_y.reshape(batch_size, seq_len, time_size, width).swapaxes(1, 2)
+        return temporal_x, temporal_y
+
     def __call__(
         self,
         x,
@@ -99,59 +133,44 @@ class Encoder1DBlock(nn.Module):
         temporal_attn_mask=None,
     ):  # noqa: FBT002
         out = {}
-        ln0 = nn.LayerNorm(name="LayerNorm_0", dtype=self.dtype_mm)
-        attn = nn.MultiHeadDotProductAttention(
-            num_heads=self.num_heads,
-            kernel_init=nn.initializers.xavier_uniform(),
-            deterministic=deterministic,
-            dtype=self.dtype_mm,
-            name="MultiHeadDotProductAttention_0",
-        )
-        ln1 = nn.LayerNorm(name="LayerNorm_1", dtype=self.dtype_mm)
-        mlp = MlpBlock(
-            mlp_dim=self.mlp_dim,
-            dropout=self.dropout,
-            dtype_mm=self.dtype_mm,
-            name="MlpBlock_0",
-        )
-
-        def _apply_attention(seq, mask):
-            seq = sharding.activation_sharding_constraint(seq)
-            y = ln0(seq)
-            y = attn(y, y, mask=mask)
-            y = sharding.activation_sharding_constraint(y)
-            y = nn.Dropout(rate=self.dropout)(y, deterministic)
-            return seq + y, y
 
         if x.ndim == 4:
             batch_size, time_size, seq_len, width = x.shape
             if time_size > 1:
-                temporal_x = jnp.swapaxes(x, 1, 2)
-                temporal_x = jnp.reshape(temporal_x, [batch_size * seq_len, time_size, width])
-                temporal_x, temporal_y = _apply_attention(temporal_x, temporal_attn_mask)
-                temporal_x = jnp.reshape(temporal_x, [batch_size, seq_len, time_size, width])
-                temporal_y = jnp.reshape(temporal_y, [batch_size, seq_len, time_size, width])
-                temporal_x = jnp.swapaxes(temporal_x, 1, 2)
-                temporal_y = jnp.swapaxes(temporal_y, 1, 2)
-                temporal_gate = jnp.asarray(temporal_first, dtype=x.dtype).reshape((1, 1, 1, 1))
-                x = x + temporal_gate * (temporal_x - x)
-                out["temporal_sa"] = temporal_gate * temporal_y
+
+                def temporal(block, value):
+                    temporal_x, temporal_y = block._apply_temporal_attention(value, temporal_attn_mask, deterministic)
+                    # Preserve the baseline's BF16 residual operation order.
+                    return value + (temporal_x - value), temporal_y
+
+                def skip_temporal(block, value):
+                    return value, jnp.zeros_like(value)
+
+                if self.is_initializing():
+                    # Both cond branches must see the same parameter tree. Create
+                    # shared attention parameters before entering lifted control flow.
+                    temporal_x, temporal_y = self._apply_temporal_attention(x, temporal_attn_mask, deterministic)
+                    temporal_gate = jnp.asarray(temporal_first, dtype=x.dtype)
+                    x = x + temporal_gate * (temporal_x - x)
+                    out["temporal_sa"] = temporal_gate * temporal_y
+                else:
+                    x, out["temporal_sa"] = nn.cond(temporal_first, temporal, skip_temporal, self, x)
             else:
                 out["temporal_sa"] = jnp.zeros_like(x)
 
             spatial_x = jnp.reshape(x, [batch_size * time_size, seq_len, width])
-            spatial_x, spatial_y = _apply_attention(spatial_x, attn_mask)
+            spatial_x, spatial_y = self._apply_attention(spatial_x, attn_mask, deterministic)
             x = jnp.reshape(spatial_x, [batch_size, time_size, seq_len, width])
             out["sa"] = jnp.reshape(spatial_y, [batch_size, time_size, seq_len, width])
         else:
-            x, sa_y = _apply_attention(x, attn_mask)
+            x, sa_y = self._apply_attention(x, attn_mask, deterministic)
             out["temporal_sa"] = jnp.zeros_like(x)
             out["sa"] = sa_y
 
-        y = ln1(x)
-        y = out["mlp"] = mlp(y, deterministic)
+        y = self.ln1(x)
+        y = out["mlp"] = self.mlp(y, deterministic)
         y = sharding.activation_sharding_constraint(y)
-        y = nn.Dropout(rate=self.dropout)(y, deterministic)
+        y = self.mlp_dropout(y, deterministic=deterministic)
         x = out["+mlp"] = x + y
         x = sharding.activation_sharding_constraint(x)
         return x, out
