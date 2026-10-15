@@ -14,6 +14,7 @@ from collections import deque
 from openpi.robot.aloha_real.leader_follower_demo import LeaderFollowerDemoController
 from openpi.robot.aloha_real.manual_intervention import ManualInterventionController
 from openpi.serving import base_policy as _base_policy
+from openpi.shared.prompt_metadata import INFERENCE_SETTINGS_KEY, INFERENCE_UPDATES_CHANNEL, METADATA_KEYS, normalize_prompt_metadata
 
 # 确保 logging 有 handler（如果主程序没有配置）
 _logger = logging.getLogger(__name__)
@@ -45,14 +46,13 @@ class Runtime:
         redis_port: int = 6379,
         redis_db: int = 0,
         manual_dataset_dir: str | None = None,
-        good_bad_action: str = "normal",
+        good_bad_action: str | None = None,  # Deprecated, accepted for old callers only.
     ) -> None:
         self._environment = environment
         self._policy = policy
         self._subscribers = subscribers
         self._max_hz = max_hz
         self._manual_hz = manual_hz
-        self._good_bad_action = good_bad_action
 
         self._step_time = 1 / self._max_hz if self._max_hz > 0 else 0
         self._manual_step_time = 1 / self._manual_hz if self._manual_hz > 0 else 0
@@ -69,6 +69,7 @@ class Runtime:
         self._redis_running = False
         self._latest_task = None
         self._task_lock = threading.Lock()
+        self._pending_inference_settings = None
         
         # 任务状态管理
         self._current_task = None
@@ -138,7 +139,7 @@ class Runtime:
     def _redis_listener(self) -> None:
         """Redis pub/sub监听线程"""
         pubsub = self._redis_client.pubsub()
-        pubsub.subscribe("aloha_voice_commands")
+        pubsub.subscribe("aloha_voice_commands", INFERENCE_UPDATES_CHANNEL)
         
         logging.info("开始监听Redis pub/sub频道: aloha_voice_commands")
         
@@ -148,6 +149,14 @@ class Runtime:
                 if message and message['type'] == 'message':
                     try:
                         data = json.loads(message['data'])
+                        if data.get('type') == 'inference_settings':
+                            metadata = normalize_prompt_metadata(**{
+                                key: data[key] for key in METADATA_KEYS if key in data
+                            })
+                            with self._task_lock:
+                                self._pending_inference_settings = metadata
+                            logging.info("Inference conditioning update queued: %s", metadata)
+                            continue
                         task_num = data.get('task')
                         task_name = data.get('task_name', '未知任务')
                         timestamp = data.get('timestamp', time.time())
@@ -160,6 +169,7 @@ class Runtime:
                                 'task_name': task_name,
                                 'timestamp': timestamp
                             }
+                            self._latest_task.update({key: data[key] for key in METADATA_KEYS if key in data})
                             
                     except json.JSONDecodeError as e:
                         logging.error(f"Redis消息JSON解析失败: {e}")
@@ -202,6 +212,8 @@ class Runtime:
             "timestamp": time.time(),
             "mode": mode or ("waiting" if self._is_waiting_for_task else "policy"),
             "current_task": current_task,
+            "operator": self._current_task.get("operator") if self._current_task else None,
+            "rating": self._current_task.get("rating") if self._current_task else None,
             "qpos": list(qpos) if qpos is not None else [],
             "latest_action": list(latest_action) if latest_action is not None else [],
         }
@@ -414,6 +426,23 @@ class Runtime:
         logging.info(f"处理语音任务: {task_num} - {task_name}")
         
         if task_num in self._model_task_nums:
+            task_data = dict(task_data)
+            with self._task_lock:
+                self._pending_inference_settings = None
+                if self._redis_client is not None:
+                    raw = self._redis_client.get(INFERENCE_SETTINGS_KEY)
+                    if raw:
+                        stored = json.loads(raw)
+                        for key in METADATA_KEYS:
+                            task_data.pop(key, None)
+                        task_data.update({key: stored[key] for key in METADATA_KEYS if key in stored})
+            metadata = normalize_prompt_metadata(**{
+                key: task_data[key] for key in METADATA_KEYS if key in task_data
+            })
+            for key in METADATA_KEYS:
+                task_data.pop(key, None)
+            task_data.update(metadata)
+            self._policy.reset()
             logging.info(f"开始执行任务: {task_name}")
             for subscriber in self._subscribers:
                 subscriber.on_episode_start()
@@ -467,14 +496,32 @@ class Runtime:
         else:
             logging.warning(f"未知任务编号: {task_num}")
 
+    def _apply_pending_inference_settings(self) -> None:
+        with self._task_lock:
+            metadata = self._pending_inference_settings
+            self._pending_inference_settings = None
+        if metadata is None or self._current_task is None:
+            return
+        current = {key: self._current_task[key] for key in METADATA_KEYS if key in self._current_task}
+        if metadata == current:
+            return
+        # Called by the control thread, never by the Redis listener. Reset waits
+        # for an in-flight RPC, then discards all actions from the old condition.
+        self._policy.reset()
+        self._current_task = {key: value for key, value in self._current_task.items() if key not in METADATA_KEYS}
+        self._current_task.update(metadata)
+        logging.info("Inference conditioning applied live: %s", metadata)
+        self._publish_runtime_state(mode="policy")
+
     def _step(self) -> None:
         """A single step of the runtime loop."""
+        self._apply_pending_inference_settings()
         observation = self._environment.get_observation()
         assert self._current_task is not None, "_current_task must be set before calling _step()"
         observation_with_task = {
             **observation,
             'task': self._current_task.get('task_name'),
-            'subtask': json.dumps({'good_bad_action': self._good_bad_action}),
+            **{key: self._current_task[key] for key in METADATA_KEYS if key in self._current_task},
         }
 
         action = self._policy.infer(observation_with_task)

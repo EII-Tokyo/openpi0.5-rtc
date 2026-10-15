@@ -1,4 +1,3 @@
-import json
 import logging
 import os
 from typing import Any
@@ -11,6 +10,7 @@ from transformers import AutoProcessor
 
 import openpi.models.utils.fsq_tokenizer as fsq_tokenizer
 import openpi.shared.download as download
+from openpi.shared.prompt_metadata import prompt_metadata_suffix
 
 
 class PaligemmaTokenizer:
@@ -22,21 +22,23 @@ class PaligemmaTokenizer:
             self._tokenizer = sentencepiece.SentencePieceProcessor(model_proto=f.read())
 
     def tokenize(
-        self, prompt: str, state: np.ndarray | None = None, subtask: Any | None = None
+        self,
+        prompt: str,
+        state: np.ndarray | None = None,
+        subtask: Any | None = None,
+        *,
+        operator=None,
+        rating=None,
+        rating_is_valid=None,
     ) -> tuple[np.ndarray, np.ndarray]:
         cleaned_text = prompt.strip().replace("_", " ").replace("\n", " ")
+        cleaned_text += prompt_metadata_suffix(operator, rating, rating_is_valid)
         if state is not None:
             # This is the Pi05 format, where the state is part of the discrete language input.
             discretized_state = np.digitize(state, bins=np.linspace(-1, 1, 256 + 1)[:-1]) - 1
             state_str = " ".join(map(str, discretized_state))
-            action_label = get_good_bad_action_label(subtask)
-            if action_label == "bad action":
-                full_prompt = f"Task: {cleaned_text}, State: {state_str};\nGive a bad action: "
-            elif action_label == "good action":
-                full_prompt = f"Task: {cleaned_text}, State: {state_str};\nGive a good action: "
-            else:
-                # full_prompt = f"Task: {cleaned_text}, State: {state_str};\nGive a good action: "
-                full_prompt = f"Task: {cleaned_text}, State: {state_str};\nAction: "
+            # Legacy subtask labels are accepted but ignored; quality is a rating.
+            full_prompt = f"Task: {cleaned_text}, State: {state_str};\nAction: "
             tokens = self._tokenizer.encode(full_prompt, add_bos=True)
         else:
             # This is the Pi0 format, where the state is part of the continuous action expert input.
@@ -57,40 +59,6 @@ class PaligemmaTokenizer:
             mask = [True] * self._max_len
 
         return np.asarray(tokens), np.asarray(mask)
-
-
-def get_good_bad_action_label(subtask: Any | None) -> str:
-    if subtask is None:
-        return "normal"
-
-    if isinstance(subtask, bytes):
-        subtask = subtask.decode("utf-8")
-    elif hasattr(subtask, "item") and not isinstance(subtask, str):
-        try:
-            subtask = subtask.item()
-        except ValueError:
-            pass
-
-    parsed = subtask
-    if isinstance(subtask, str):
-        if not subtask.strip():
-            return "normal"
-        try:
-            parsed = json.loads(subtask)
-        except json.JSONDecodeError:
-            return "normal"
-
-    if not isinstance(parsed, dict):
-        return "normal"
-
-    label = parsed.get("good_bad_action", "normal")
-    if not isinstance(label, str):
-        return "normal"
-
-    normalized = label.strip().lower()
-    if normalized in {"good action", "bad action", "normal"}:
-        return normalized
-    return "normal"
 
 
 class FASTTokenizer:

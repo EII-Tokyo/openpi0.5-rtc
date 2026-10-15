@@ -18,6 +18,7 @@ class Args:
     model_dir: str
     host: str = "0.0.0.0"
     port: int = 8000
+    # Deprecated: ignored. Configure operator/rating in the web interface.
     action_quality: Literal["normal", "good", "bad"] = "normal"
 
     sync_replan_interval: int = 25
@@ -60,17 +61,8 @@ def main(args: Args) -> None:
     from openpi.robot.aloha_real import h5df_saver
     from openpi.robot.aloha_real import real_env as _real_env
 
-    good_bad_action_by_quality = {
-        "normal": "normal",
-        "good": "good action",
-        "bad": "bad action",
-    }
-    good_bad_action = good_bad_action_by_quality[args.action_quality]
-    logging.info(
-        "Using action quality mode: %s (subtask.good_bad_action=%s)",
-        args.action_quality,
-        good_bad_action,
-    )
+    if args.action_quality != "normal":
+        logging.warning("Ignoring deprecated --action-quality; configure rating in the web interface.")
 
     ws_client_policy = _websocket_client_policy.WebsocketClientPolicy(
         host=args.host,
@@ -111,7 +103,6 @@ def main(args: Args) -> None:
         max_hz=args.policy_hz,
         manual_hz=args.manual_hz,
         manual_dataset_dir=args.manual_dataset_dir,
-        good_bad_action=good_bad_action,
     )
 
     def _handle_exit_signal(signum, frame):

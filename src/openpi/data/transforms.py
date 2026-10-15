@@ -93,10 +93,15 @@ class RepackTransform(DataTransformFn):
     """Repacks an input dictionary into a new dictionary using explicit source paths."""
 
     structure: at.PyTree[str]
+    optional_keys: tuple[str, ...] = ()
 
     def __call__(self, data: DataDict) -> DataDict:
         flat_item = flatten_dict(data)
-        return jax.tree.map(lambda key: _lookup_repack_key(flat_item, key), self.structure)
+        result = jax.tree.map(lambda key: _lookup_repack_key(flat_item, key), self.structure)
+        for key in self.optional_keys:
+            if key in flat_item:
+                result[key] = flat_item[key]
+        return result
 
 
 @dataclasses.dataclass(frozen=True)
@@ -263,8 +268,9 @@ class TokenizePrompt(DataTransformFn):
         if not isinstance(prompt, str):
             prompt = prompt.item()
 
-        subtask = data.pop("subtask", None)
-        tokens, token_masks = self.tokenizer.tokenize(prompt, state, subtask)
+        data.pop("subtask", None)  # Ignore historical good/bad action annotations.
+        metadata = {key: data.pop(key) for key in ("operator", "rating", "rating_is_valid") if key in data}
+        tokens, token_masks = self.tokenizer.tokenize(prompt, state, **metadata)
         return {**data, "tokenized_prompt": tokens, "tokenized_prompt_mask": token_masks}
 
 
@@ -331,13 +337,13 @@ class AlohaInputs(DataTransformFn):
 
     adapt_to_pi: bool = True
     image_keys: tuple[str, ...] | None = None
-    use_good_bad_action_prompt: bool = True
+    # Deprecated configuration field retained for old config compatibility.
+    use_good_bad_action_prompt: bool = False
     EXPECTED_CAMERAS: ClassVar[tuple[str, ...]] = ("cam_high", "cam_low", "cam_left_wrist", "cam_right_wrist")
 
     def __call__(self, data: dict) -> dict:
         data = dict(data)
-        if not self.use_good_bad_action_prompt:
-            data.pop("subtask", None)
+        data.pop("subtask", None)
         data = _decode_aloha(data, adapt_to_pi=self.adapt_to_pi)
 
         in_images = data["images"]
@@ -456,9 +462,7 @@ class AlohaTransformPipeline:
         }
         if include_actions:
             structure["actions"] = "action"
-        if self.use_good_bad_action_prompt:
-            structure["subtask"] = "subtask"
-        return RepackTransform(structure)
+        return RepackTransform(structure, optional_keys=("operator", "rating", "rating_is_valid"))
 
     def _model_input_transforms(self) -> list[DataTransformFn]:
         transforms: list[DataTransformFn] = [
@@ -488,7 +492,7 @@ class AlohaTransformPipeline:
             image_keys=self.raw_image_keys,
             require_action=require_action,
             require_task=require_task,
-            require_subtask=self.use_good_bad_action_prompt,
+            require_subtask=False,
         )
 
     def training_input_transforms(self) -> list[DataTransformFn]:

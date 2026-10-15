@@ -40,6 +40,9 @@ class ChunkedPolicy(_base_policy.BasePolicy):
         self._last_origin_actions: np.ndarray | None = None
         self._background_results: Dict[str, np.ndarray] | None = None
         self._background_running: bool = False
+        # Reset may be requested by a live prompt update while an RTC RPC runs.
+        # Normal action playback does not acquire this lock.
+        self._reset_lock = threading.Lock()
 
         self._obs: Dict[str, np.ndarray] | None = None
         if chunking_mode not in {"sync", "inference_time", "training_time"}:
@@ -86,6 +89,15 @@ class ChunkedPolicy(_base_policy.BasePolicy):
 
     def _background_infer(self):
         while True:
+            with self._reset_lock:
+                try:
+                    self._background_infer_once()
+                finally:
+                    self._background_running = False
+            time.sleep(0.01)
+
+    def _background_infer_once(self):
+        if self._last_results is not None:
             if self._cur_step == self._rtc_replan_start_step:
                 total_start = time.monotonic()
                 self._background_running = True
@@ -161,8 +173,6 @@ class ChunkedPolicy(_base_policy.BasePolicy):
                 if prev_total_ms is not None:
                     log_parts.append(f"prev_total_ms={float(prev_total_ms):.1f}")
                 logging.debug(" ".join(log_parts))
-            else:
-                time.sleep(0.01)
 
     @override
     def infer(self, obs: Dict) -> Dict:  # noqa: UP006
@@ -210,6 +220,10 @@ class ChunkedPolicy(_base_policy.BasePolicy):
 
     @override
     def reset(self) -> None:
-        self._policy.reset()
-        self._last_results = None
-        self._cur_step = 0
+        with self._reset_lock:
+            self._policy.reset()
+            self._last_results = None
+            self._last_origin_actions = None
+            self._background_results = None
+            self._obs = None
+            self._cur_step = 0

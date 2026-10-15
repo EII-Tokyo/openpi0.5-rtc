@@ -14,6 +14,10 @@ def attach_episode_metadata(item: dict, metadata) -> dict:
         raise ValueError("Episode metadata index does not match sample")
     result = dict(item)
     operator = episode.get("operator", result.get("operator", ""))
+    if operator is None:
+        operator = result.get("operator")
+    if operator is None:
+        operator = ""
     if not isinstance(operator, str):
         raise ValueError("Episode operator must be a string")
     result["operator"] = operator

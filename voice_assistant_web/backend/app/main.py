@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
 import time
 
@@ -13,8 +14,10 @@ from .config import settings
 from .redis_commands import TASK_MAPPING
 from .redis_commands import create_redis_client
 from .redis_commands import publish_task
+from .redis_commands import INFERENCE_SETTINGS_KEY, read_inference_settings
 from .robot_state_bridge import RobotStateBridge
 from .schemas import HealthResponse, RealtimePayload, RuntimeStatePayload, VoiceRequest, VoiceResponse
+from .schemas import InferenceSettings, OPERATORS
 from .voice_session import VoiceAssistantEngine
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -114,6 +117,21 @@ async def realtime_socket(websocket: WebSocket) -> None:
 @app.post("/api/voice/text", response_model=VoiceResponse)
 async def voice_text(request: VoiceRequest) -> VoiceResponse:
     return await voice_engine.process_text(request.text, language=request.language)
+
+
+@app.get("/api/inference-settings")
+def inference_settings() -> dict:
+    return {**read_inference_settings(redis_client).model_dump(), "operators": OPERATORS}
+
+
+@app.put("/api/inference-settings")
+def update_inference_settings(request: InferenceSettings) -> dict:
+    # Store and notify atomically; this never dispatches a start/home command.
+    transaction = redis_client.pipeline()
+    transaction.set(INFERENCE_SETTINGS_KEY, request.model_dump_json())
+    transaction.publish("aloha_inference_settings_updates", json.dumps({"type": "inference_settings", **request.model_dump()}))
+    transaction.execute()
+    return {**request.model_dump(), "operators": OPERATORS}
 
 
 @app.post("/api/tasks/{task_number}")

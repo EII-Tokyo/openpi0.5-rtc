@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ActionDrawer } from './components/ActionDrawer'
+import { InferenceSettingsPanel } from './InferenceSettingsPanel'
 import { CameraGrid } from './components/CameraGrid'
 import { MotorDrawer } from './components/MotorDrawer'
 import { RobotViewer } from './components/RobotViewer'
@@ -13,6 +14,8 @@ type RealtimeState = {
     timestamp: number | null
     mode: string
     current_task: string | null
+    operator: string | null
+    rating: number | null
     qpos: number[]
     effort: number[]
     joint_effort: Record<string, { names?: string[]; values?: number[] }>
@@ -29,6 +32,8 @@ const initialState: RealtimeState = {
     timestamp: null,
     mode: 'waiting',
     current_task: null,
+    operator: null,
+    rating: null,
     qpos: [],
     effort: [],
     joint_effort: {},
@@ -49,6 +54,7 @@ export default function App() {
   const [cameraView, setCameraView] = useState<'focus' | 'quad'>('quad')
   const [motorDrawerOpen, setMotorDrawerOpen] = useState(false)
   const [actionDrawerOpen, setActionDrawerOpen] = useState(false)
+  const [conditioningDrawerOpen, setConditioningDrawerOpen] = useState(false)
   const t = translations[language]
   const currentTaskLabel = state.robot.current_task ? truncateLabel(state.robot.current_task) : t.noActiveTask
 
@@ -107,6 +113,7 @@ export default function App() {
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
+      if (conditioningDrawerOpen) return
       if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey || event.repeat) return
       const active = document.activeElement
       if (
@@ -123,7 +130,7 @@ export default function App() {
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [t.dispatchFailed])
+  }, [t.dispatchFailed, conditioningDrawerOpen])
 
   return (
     <main className="app-shell">
@@ -142,6 +149,11 @@ export default function App() {
           </button>
           <button className="ghost-button" type="button" onClick={() => setActionDrawerOpen(true)}>
             Actions
+          </button>
+          <button className="ghost-button" type="button" aria-haspopup="dialog"
+            aria-controls="inference-conditioning" aria-expanded={conditioningDrawerOpen}
+            onClick={() => setConditioningDrawerOpen(true)}>
+            Inference conditioning
           </button>
           <label className="language-switch">
             <span>{t.language}</span>
@@ -179,6 +191,8 @@ export default function App() {
           />
         </aside>
       </section>
+      <InferenceSettingsPanel open={conditioningDrawerOpen} onClose={() => setConditioningDrawerOpen(false)}
+        operator={state.robot.operator ?? null} rating={state.robot.rating ?? null} />
       <MotorDrawer
         open={motorDrawerOpen}
         onClose={() => setMotorDrawerOpen(false)}

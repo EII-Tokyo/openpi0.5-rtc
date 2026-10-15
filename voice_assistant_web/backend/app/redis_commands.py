@@ -6,6 +6,14 @@ import time
 import redis
 
 from .config import settings
+from .schemas import InferenceSettings
+
+INFERENCE_SETTINGS_KEY = "aloha_inference_settings"
+
+
+def read_inference_settings(redis_client) -> InferenceSettings:
+    raw = redis_client.get(INFERENCE_SETTINGS_KEY)
+    return InferenceSettings.model_validate_json(raw) if raw else InferenceSettings()
 
 TASK_MAPPING = {
     "1": "Twist off the bottle cap",
@@ -33,5 +41,7 @@ def publish_task(redis_client: redis.Redis, task_num: str) -> dict:
         "task_name": task_name,
         "timestamp": time.time(),
     }
+    if task_num in {"1", "2"}:
+        message.update(read_inference_settings(redis_client).model_dump())
     redis_client.publish(settings.voice_command_channel, json.dumps(message))
     return message

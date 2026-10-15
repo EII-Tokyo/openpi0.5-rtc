@@ -1,8 +1,16 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, StrictInt
+
+
+OPERATORS = ("Jia Long", "Xinzheng He", "Zhaonan Ma")
+
+
+class InferenceSettings(BaseModel):
+    operator: Literal["Jia Long", "Xinzheng He", "Zhaonan Ma"] | None = None
+    rating: StrictInt | None = Field(default=None, ge=1, le=5)
 
 
 class HealthResponse(BaseModel):
@@ -10,6 +18,8 @@ class HealthResponse(BaseModel):
 
 
 class RuntimeStatePayload(BaseModel):
+    operator: str | None = None
+    rating: int | None = None
     timestamp: float | None = None
     mode: str = "waiting"
     current_task: str | None = None
