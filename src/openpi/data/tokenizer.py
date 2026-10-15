@@ -41,7 +41,6 @@ class PaligemmaTokenizer:
             state_str = " ".join(map(str, discretized_state))
             # Legacy subtask labels are accepted but ignored; quality is a rating.
             full_prompt = f"Task: {cleaned_text}, State: {state_str};\nAction: "
-            print(full_prompt, flush=True)  # Temporary probe for live conditioning verification.
             tokens = self._tokenizer.encode(full_prompt, add_bos=True)
         else:
             # This is the Pi0 format, where the state is part of the continuous action expert input.
