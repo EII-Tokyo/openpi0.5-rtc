@@ -213,6 +213,7 @@ class Runtime:
             "mode": mode or ("waiting" if self._is_waiting_for_task else "policy"),
             "current_task": current_task,
             "operator": self._current_task.get("operator") if self._current_task else None,
+            "camera_low_position": self._current_task.get("camera_low_position") if self._current_task else None,
             "rating": self._current_task.get("rating") if self._current_task else None,
             "qpos": list(qpos) if qpos is not None else [],
             "latest_action": list(latest_action) if latest_action is not None else [],

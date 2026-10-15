@@ -1,19 +1,19 @@
 import { useEffect, useRef, useState } from 'react'
 import { apiBase } from './services/api'
 
-type Settings = { operator: string | null; rating: number | null }
+type Settings = { operator: string | null; rating: number | null; camera_low_position: 'front' | 'rear' | null }
 type ResponseSettings = Settings & { operators: string[] }
 
 type Props = Settings & { open: boolean; onClose: () => void }
 
-export function InferenceSettingsPanel({ operator, rating, open, onClose }: Props) {
+export function InferenceSettingsPanel({ operator, rating, camera_low_position, open, onClose }: Props) {
   const dialog = useRef<HTMLDialogElement>(null)
   useEffect(() => {
     const element = dialog.current
     if (open && !element?.open) element?.showModal()
     else if (!open && element?.open) element.close()
   }, [open])
-  const [value, setValue] = useState<Settings>({ operator: null, rating: null })
+  const [value, setValue] = useState<Settings>({ operator: null, rating: null, camera_low_position: null })
   const [saved, setSaved] = useState<Settings | null>(null)
   const [operators, setOperators] = useState<string[]>([])
   const [busy, setBusy] = useState(false)
@@ -21,7 +21,7 @@ export function InferenceSettingsPanel({ operator, rating, open, onClose }: Prop
   const [failed, setFailed] = useState(false)
 
   const accept = (data: ResponseSettings) => {
-    const settings = { operator: data.operator, rating: data.rating }
+    const settings = { operator: data.operator, rating: data.rating, camera_low_position: data.camera_low_position ?? null }
     setOperators(data.operators)
     setValue(settings)
     setSaved(settings)
@@ -65,7 +65,7 @@ export function InferenceSettingsPanel({ operator, rating, open, onClose }: Prop
     }
   }
 
-  const dirty = saved !== null && (saved.operator !== value.operator || saved.rating !== value.rating)
+  const dirty = saved !== null && (saved.operator !== value.operator || saved.rating !== value.rating || saved.camera_low_position !== value.camera_low_position)
   return (
     <dialog ref={dialog} id="inference-conditioning" className="inference-settings-drawer"
       aria-labelledby="inference-conditioning-title" onClose={onClose}
@@ -84,6 +84,25 @@ export function InferenceSettingsPanel({ operator, rating, open, onClose }: Prop
       </div>
       <p className="conditioning-description">Update the current task’s conditions in real time.</p>
       <div className="conditioning-body">
+        <fieldset className="conditioning-fieldset" disabled={!saved || busy}>
+          <legend>Camera low position</legend>
+          <div className="conditioning-operators">
+            {([null, 'front', 'rear'] as const).map(position => (
+              <label className="conditioning-option" key={position ?? 'unset'}>
+                <input className="conditioning-radio" type="radio" name="camera-low-position"
+                  checked={value.camera_low_position === position}
+                  onChange={() => setValue({ ...value, camera_low_position: position })} />
+                <span className="conditioning-person">
+                  <span className="conditioning-person-text">
+                    <strong>{position === 'front' ? 'Near side' : position === 'rear' ? 'Far side' : 'Unspecified'}</strong>
+                    <small>{position ? `${position === 'front' ? 'near' : 'far'} side of the workbench` : 'No camera position override'}</small>
+                  </span>
+                  <span className="conditioning-check" aria-hidden="true" />
+                </span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
         <fieldset className="conditioning-fieldset" disabled={!saved || busy}>
           <legend>Operator</legend>
           <div className="conditioning-operators">
@@ -137,6 +156,7 @@ export function InferenceSettingsPanel({ operator, rating, open, onClose }: Prop
         <div className="conditioning-active">
           <span className="conditioning-eyebrow">ACTIVE TASK</span>
           <span>{operator ?? 'Unspecified operator'} <span aria-hidden="true">·</span> {rating === null ? 'No rating' : `Rating ${rating}`}</span>
+          <span>Camera low: {camera_low_position === 'front' ? 'near side of the workbench' : camera_low_position === 'rear' ? 'far side of the workbench' : 'unspecified'}</span>
         </div>
       </div>
     </dialog>

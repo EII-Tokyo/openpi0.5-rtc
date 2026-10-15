@@ -9,6 +9,7 @@ OPERATORS = ("Jia Long", "Xinzheng He", "Zhaonan Ma")
 
 
 class InferenceSettings(BaseModel):
+    camera_low_position: Literal["front", "rear"] | None = None
     operator: Literal["Jia Long", "Xinzheng He", "Zhaonan Ma"] | None = None
     rating: StrictInt | None = Field(default=None, ge=1, le=5)
 
@@ -18,6 +19,7 @@ class HealthResponse(BaseModel):
 
 
 class RuntimeStatePayload(BaseModel):
+    camera_low_position: Literal["front", "rear"] | None = None
     operator: str | None = None
     rating: int | None = None
     timestamp: float | None = None

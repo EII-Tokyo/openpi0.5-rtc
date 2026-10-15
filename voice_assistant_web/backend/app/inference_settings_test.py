@@ -45,6 +45,7 @@ def test_settings_and_runtime_end_to_end(client):
     assert http.get("/api/inference-settings").json() == {
         "operator": None,
         "rating": None,
+        "camera_low_position": None,
         "operators": ["Jia Long", "Xinzheng He", "Zhaonan Ma"],
     }
     assert http.put("/api/inference-settings", json={"operator": "Jia Long", "rating": 5}).status_code == 200
@@ -87,7 +88,7 @@ def test_settings_and_runtime_end_to_end(client):
 
 
 @pytest.mark.parametrize(
-    "payload", [{"operator": "other"}, {"rating": 0}, {"rating": 6}, {"rating": True}, {"rating": 2.5}, {"rating": "5"}]
+    "payload", [{"operator": "other"}, {"rating": 0}, {"rating": 6}, {"rating": True}, {"rating": 2.5}, {"rating": "5"}, {"camera_low_position": "left"}, {"camera_low_position": True}]
 )
 def test_invalid_settings(client, payload):
     http, redis = client
@@ -123,7 +124,7 @@ def test_live_settings_update_without_restarting_episode(client):
     runtime._subscribers = [Mock()]
     runtime._recent_puppet_actions = deque()
     runtime._publish_runtime_state = Mock()
-    for payload in [{"operator": "Xinzheng He", "rating": 5}, {}]:
+    for payload in [{"operator": "Xinzheng He", "rating": 5, "camera_low_position": "front"}, {"operator": "Xinzheng He", "rating": 5, "camera_low_position": "rear"}, {}]:
         assert http.put("/api/inference-settings", json=payload).status_code == 200
         message = redis.messages[-1]
         assert "task" not in message
@@ -139,8 +140,9 @@ def test_live_settings_update_without_restarting_episode(client):
         observation = runtime._policy.infer.call_args.args[0]
         assert observation.get("operator") == payload.get("operator")
         assert observation.get("rating") == payload.get("rating")
+        assert observation.get("camera_low_position") == payload.get("camera_low_position")
         assert runtime._current_task["task_num"] == "1"
-    assert runtime._policy.reset.call_count == 2
+    assert runtime._policy.reset.call_count == 3
     runtime._environment.stop.assert_not_called()
     runtime._subscribers[0].on_episode_start.assert_not_called()
     runtime._subscribers[0].on_episode_end.assert_not_called()

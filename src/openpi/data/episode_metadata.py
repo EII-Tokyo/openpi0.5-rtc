@@ -3,6 +3,8 @@
 from functools import wraps
 from numbers import Integral
 
+from openpi.shared.prompt_metadata import normalize_prompt_metadata
+
 
 def attach_episode_metadata(item: dict, metadata) -> dict:
     """Join by the sample's local episode ID; encode unrated as zero plus a mask."""
@@ -13,6 +15,11 @@ def attach_episode_metadata(item: dict, metadata) -> dict:
     if int(episode["episode_index"]) != int(episode_index):
         raise ValueError("Episode metadata index does not match sample")
     result = dict(item)
+    # LeRobotDatasetMetadata.info is loaded from this repo's meta/info.json.
+    # Always emit a string so old/new repos collate together; never use frame/task placement.
+    info = getattr(metadata, "info", {})
+    position = normalize_prompt_metadata(camera_low_position=info.get("camera_low_position"))
+    result["camera_low_position"] = position.get("camera_low_position", "")
     operator = episode.get("operator", result.get("operator", ""))
     if operator is None:
         operator = result.get("operator")

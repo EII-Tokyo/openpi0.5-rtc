@@ -15,6 +15,7 @@ type RealtimeState = {
     mode: string
     current_task: string | null
     operator: string | null
+    camera_low_position: 'front' | 'rear' | null
     rating: number | null
     qpos: number[]
     effort: number[]
@@ -33,6 +34,7 @@ const initialState: RealtimeState = {
     mode: 'waiting',
     current_task: null,
     operator: null,
+    camera_low_position: null,
     rating: null,
     qpos: [],
     effort: [],
@@ -192,7 +194,8 @@ export default function App() {
         </aside>
       </section>
       <InferenceSettingsPanel open={conditioningDrawerOpen} onClose={() => setConditioningDrawerOpen(false)}
-        operator={state.robot.operator ?? null} rating={state.robot.rating ?? null} />
+        operator={state.robot.operator ?? null} rating={state.robot.rating ?? null}
+        camera_low_position={state.robot.camera_low_position ?? null} />
       <MotorDrawer
         open={motorDrawerOpen}
         onClose={() => setMotorDrawerOpen(false)}

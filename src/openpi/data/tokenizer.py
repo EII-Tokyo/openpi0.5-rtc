@@ -10,7 +10,7 @@ from transformers import AutoProcessor
 
 import openpi.models.utils.fsq_tokenizer as fsq_tokenizer
 import openpi.shared.download as download
-from openpi.shared.prompt_metadata import prompt_metadata_suffix
+from openpi.shared.prompt_metadata import camera_low_prompt, prompt_metadata_suffix
 
 
 class PaligemmaTokenizer:
@@ -30,8 +30,10 @@ class PaligemmaTokenizer:
         operator=None,
         rating=None,
         rating_is_valid=None,
+        camera_low_position=None,
     ) -> tuple[np.ndarray, np.ndarray]:
         cleaned_text = prompt.strip().replace("_", " ").replace("\n", " ")
+        cleaned_text = camera_low_prompt(cleaned_text, camera_low_position)
         cleaned_text += prompt_metadata_suffix(operator, rating, rating_is_valid)
         if state is not None:
             # This is the Pi05 format, where the state is part of the discrete language input.
@@ -39,6 +41,7 @@ class PaligemmaTokenizer:
             state_str = " ".join(map(str, discretized_state))
             # Legacy subtask labels are accepted but ignored; quality is a rating.
             full_prompt = f"Task: {cleaned_text}, State: {state_str};\nAction: "
+            print(full_prompt, flush=True)  # Temporary probe for live conditioning verification.
             tokens = self._tokenizer.encode(full_prompt, add_bos=True)
         else:
             # This is the Pi0 format, where the state is part of the continuous action expert input.

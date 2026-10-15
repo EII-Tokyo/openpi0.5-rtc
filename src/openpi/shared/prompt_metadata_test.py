@@ -69,6 +69,9 @@ def test_legacy_tokens_are_identical():
         {"rating": 5},
         {"operator": "Xinzheng He", "rating": 4, "rating_is_valid": True},
         {"operator": "", "rating": 0, "rating_is_valid": False},
+        {"operator": "Jia Long", "rating": 5, "camera_low_position": "front"},
+        {"camera_low_position": "rear"},
+        {"camera_low_position": ""},
     ],
 )
 def test_training_and_inference_pipeline_match(metadata):
@@ -101,7 +104,7 @@ def test_training_and_inference_pipeline_match(metadata):
     b = transforms.CompositeTransform(pipe.policy_input_transforms())(infer)
     np.testing.assert_array_equal(a["tokenized_prompt"], b["tokenized_prompt"])
     np.testing.assert_array_equal(a["tokenized_prompt_mask"], b["tokenized_prompt_mask"])
-    assert not any(k in a or k in b for k in ["operator", "rating", "rating_is_valid"])
+    assert not any(k in a or k in b for k in ["operator", "rating", "rating_is_valid", "camera_low_position"])
     tok = tokenizer.PaligemmaTokenizer(200)
     text = tok._tokenizer.decode(a["tokenized_prompt"][a["tokenized_prompt_mask"]].tolist())
     assert text.rstrip().endswith("Action:")

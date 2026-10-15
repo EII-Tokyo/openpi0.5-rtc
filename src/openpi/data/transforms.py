@@ -269,7 +269,7 @@ class TokenizePrompt(DataTransformFn):
             prompt = prompt.item()
 
         data.pop("subtask", None)  # Ignore historical good/bad action annotations.
-        metadata = {key: data.pop(key) for key in ("operator", "rating", "rating_is_valid") if key in data}
+        metadata = {key: data.pop(key) for key in ("operator", "rating", "rating_is_valid", "camera_low_position") if key in data}
         tokens, token_masks = self.tokenizer.tokenize(prompt, state, **metadata)
         return {**data, "tokenized_prompt": tokens, "tokenized_prompt_mask": token_masks}
 
@@ -462,7 +462,7 @@ class AlohaTransformPipeline:
         }
         if include_actions:
             structure["actions"] = "action"
-        return RepackTransform(structure, optional_keys=("operator", "rating", "rating_is_valid"))
+        return RepackTransform(structure, optional_keys=("operator", "rating", "rating_is_valid", "camera_low_position"))
 
     def _model_input_transforms(self) -> list[DataTransformFn]:
         transforms: list[DataTransformFn] = [

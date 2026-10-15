@@ -49,7 +49,8 @@ def test_multi_repo_join_and_idempotence():
     class Single:
         """Minimal single-repo reader preserving an existing action reference."""
         def __init__(self, name, rating):
-            self.meta = SimpleNamespace(episodes=[{"episode_index": 0, "operator": name, "rating": rating}])
+            self.meta = SimpleNamespace(episodes=[{"episode_index": 0, "operator": name, "rating": rating}],
+                                        info={"camera_low_position": "front" if name == "Zhaonan Ma" else "rear"})
 
         def __getitem__(self, index):
             return {"episode_index": 0, "index": index}
@@ -62,6 +63,7 @@ def test_multi_repo_join_and_idempotence():
         def __getitem__(self, index):
             item = self._datasets[index][10]
             item.pop("operator", None)
+            item.pop("camera_low_position", None)
             return {**item, "dataset_index": index}
 
     module = SimpleNamespace(LeRobotDataset=Single, MultiLeRobotDataset=Multi)
@@ -72,3 +74,30 @@ def test_multi_repo_join_and_idempotence():
     data = Multi()
     assert data[0]["operator"] == "Zhaonan Ma" and data[0]["rating"] == 0
     assert data[1]["operator"] == "Jia Long" and data[1]["rating"] == 4
+    assert data[0]["camera_low_position"] == "front"
+    assert data[1]["camera_low_position"] == "rear"
+
+
+@pytest.mark.parametrize("position", [None, "front", "rear"])
+def test_repo_info_overrides_sample_and_episode(position):
+    """Only repo-level info may select placement, not frame or episode fields."""
+    metadata = SimpleNamespace(info={"camera_low_position": position},
+                               episodes=[{"episode_index": 0, "camera_low_position": "rear"}])
+    result = attach_episode_metadata({"episode_index": 0, "camera_low_position": "rear"}, metadata)
+    assert result["camera_low_position"] == (position or "")
+
+
+def test_missing_repo_position_collates_with_new_repo():
+    """Old metadata without this field must collate with newly annotated datasets."""
+    old = SimpleNamespace(info={}, episodes=[{"episode_index": 0}])
+    new = SimpleNamespace(info={"camera_low_position": "front"}, episodes=[{"episode_index": 0}])
+    batch = default_collate([attach_episode_metadata({"episode_index": 0}, meta) for meta in [old, new]])
+    assert batch["camera_low_position"] == ["", "front"]
+
+
+@pytest.mark.parametrize("position", [True, 1, "left", []])
+def test_invalid_repo_position_rejected(position):
+    """Malformed info.json values fail clearly rather than train with a guessed position."""
+    with pytest.raises(ValueError, match="Camera low"):
+        attach_episode_metadata({"episode_index": 0}, SimpleNamespace(
+            info={"camera_low_position": position}, episodes=[{"episode_index": 0}]))
