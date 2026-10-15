@@ -11,6 +11,7 @@ import torch
 
 import openpi.training.config as _config
 from openpi.data import transforms as _transforms
+from openpi.data.episode_metadata import install_episode_metadata_reader
 
 T_co = TypeVar("T_co", covariant=True)
 
@@ -45,6 +46,7 @@ def _patch_lerobot_numpy_bool_compat() -> None:
 
 
 _patch_lerobot_numpy_bool_compat()
+install_episode_metadata_reader()
 
 
 class Dataset(Protocol[T_co]):
