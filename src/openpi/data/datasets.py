@@ -12,6 +12,7 @@ import torch
 import openpi.training.config as _config
 from openpi.data import transforms as _transforms
 from openpi.data.episode_metadata import install_episode_metadata_reader
+from openpi.data.temporal_mosaic import pack_high_history, uint8_hwc
 
 T_co = TypeVar("T_co", covariant=True)
 
@@ -268,6 +269,71 @@ class TemporalFrameStackDataset(Dataset[dict]):
         return None
 
 
+class HighCameraMosaicDataset(TemporalFrameStackDataset):
+    """Only high gets five 2x2 historical mosaics; all current views survive."""
+
+    def __init__(self, dataset, *, fps, settings, trainable_mask=None):
+        super().__init__(dataset, fps=fps, num_frames=settings.history_seconds + 1,
+                         stride_seconds=1.0, trainable_mask=trainable_mask)
+        self.settings = settings
+
+    def history_indices(self, idx):
+        start = idx - int(self._frame_indices[idx])
+        if start < 0 or self._episode_indices[start] != self._episode_indices[idx]:
+            raise AssertionError("Invalid episode start for mosaic history.")
+        timestamps = self._timestamps[start:idx + 1]
+        if np.any(np.diff(timestamps) < 0):
+            raise AssertionError("Episode timestamps must be sorted.")
+        targets = self._timestamps[idx] + self.settings.offsets_seconds
+        right = np.clip(np.searchsorted(timestamps, targets), 0, len(timestamps) - 1)
+        left = np.maximum(right - 1, 0)
+        # Use exact per-target nearest timestamps, avoiding accumulated round(fps/4) drift.
+        nearest = np.where(np.abs(timestamps[left] - targets) <= np.abs(timestamps[right] - targets), left, right)
+        indices = nearest + start
+        if np.any(self._episode_indices[indices] != self._episode_indices[idx]):
+            raise AssertionError("Mosaic history crossed an episode boundary.")
+        if self._dataset_indices is not None and np.any(self._dataset_indices[indices] != self._dataset_indices[idx]):
+            raise AssertionError("Mosaic history crossed a dataset boundary.")
+        return indices
+
+    def _read_high_history(self, idx, indices, current):
+        key = self.IMAGE_PREFIX + self.settings.camera
+        cache = {idx: uint8_hwc(current[key])}
+        missing = sorted(set(map(int, indices)) - {idx})
+        base = self._dataset
+        if isinstance(base, lerobot_dataset.MultiLeRobotDataset):
+            base = base._datasets[int(self._dataset_indices[idx])]
+        if isinstance(base, lerobot_dataset.LeRobotDataset) and missing:
+            if base.image_transforms is not None:
+                raise ValueError("Mosaic history requires unaugmented source video frames.")
+            if key not in base.meta.video_keys:
+                raise ValueError("Mosaic history requires a high-camera video feature.")
+            # One batched query of only cam_high: never decode the other three history videos.
+            frames = base._query_videos({key: self._timestamps[missing].tolist()}, int(self._episode_indices[idx]))[key]
+            if frames.ndim == 3:
+                frames = frames[None]
+            if len(frames) != len(missing):
+                raise AssertionError("Decoded high-history frame count mismatch.")
+            cache.update({i: uint8_hwc(frame) for i, frame in zip(missing, frames, strict=True)})
+        else:
+            for i in missing:
+                cache[i] = uint8_hwc(self._dataset[i][key])
+        return [cache[int(i)] for i in indices]
+
+    def __getitem__(self, index):
+        idx = index.__index__()
+        if idx < 0 or idx >= len(self):
+            raise IndexError(idx)
+        if self._trainable_mask is not None and not self._trainable_mask[idx]:
+            idx = int(self._trainable_indices[torch.randint(len(self._trainable_indices), (1,)).item()])
+        current = self._dataset[idx]
+        key = self.IMAGE_PREFIX + self.settings.camera
+        history = self._read_high_history(idx, self.history_indices(idx), current)
+        result = dict(current)
+        result[key] = pack_high_history(history, current[key], self.settings)
+        return result
+
+
 class IterableTransformedDataset(IterableDataset[T_co]):
     def __init__(
         self,
@@ -313,7 +379,12 @@ def create_torch_dataset(data_config: _config.LeRobotAlohaDataConfig, action_hor
     dataset = lerobot_dataset.MultiLeRobotDataset(repo_ids, delta_timestamps=delta_timestamps)
     trainable_mask = IsForTrainingWrapper._build_trainable_mask(dataset)
     transform_pipeline = data_config.transform_pipeline
-    if transform_pipeline.video_memory_num_frames > 1:
+    if transform_pipeline.high_camera_mosaic is not None:
+        dataset = HighCameraMosaicDataset(
+            dataset, fps=float(fps_meta.fps), settings=transform_pipeline.high_camera_mosaic,
+            trainable_mask=trainable_mask,
+        )
+    elif transform_pipeline.video_memory_num_frames > 1:
         dataset = TemporalFrameStackDataset(
             dataset,
             fps=float(fps_meta.fps),

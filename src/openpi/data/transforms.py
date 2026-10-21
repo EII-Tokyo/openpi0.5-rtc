@@ -13,6 +13,7 @@ import jax.numpy as jnp
 import numpy as np
 
 from openpi.data import tokenizer as _tokenizer
+from openpi.data.temporal_mosaic import HighCameraMosaicConfig
 import openpi.shared.download as _download
 from openpi.shared import array_typing as at
 from openpi.shared import normalize as _normalize_lib
@@ -408,6 +409,7 @@ class AlohaTransformPipeline:
     use_quantile_norm: bool = True
     video_memory_num_frames: int = 1
     video_memory_stride_seconds: float = 1.0
+    high_camera_mosaic: HighCameraMosaicConfig | None = None
     adapt_to_pi: bool = True
     use_delta_joint_actions: bool = True
     action_dim: int = ALOHA_MODEL_ACTION_DIM
@@ -415,6 +417,12 @@ class AlohaTransformPipeline:
     norm_stats_error: FileNotFoundError | None = dataclasses.field(init=False, repr=False, compare=False)
 
     def __post_init__(self) -> None:
+        if self.high_camera_mosaic is not None:
+            mosaic = self.high_camera_mosaic
+            if self.video_memory_num_frames != mosaic.history_seconds + 1 or self.video_memory_stride_seconds != 1.0:
+                raise ValueError("Mosaic output requires one composite per second plus current.")
+            if self.image_resolution != (2 * mosaic.tile_size, 2 * mosaic.tile_size):
+                raise ValueError("Mosaic resolution must equal a 2x2 tile grid.")
         try:
             norm_stats = self._load_norm_stats()
             norm_stats_error = None
