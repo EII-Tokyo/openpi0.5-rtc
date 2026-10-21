@@ -15,6 +15,7 @@
 """A refactored and simplified ViT adoptation for Pi, taken from big_vision."""
 
 from collections.abc import Sequence
+import math
 
 import flax.linen as nn
 import jax
@@ -22,6 +23,33 @@ import jax.numpy as jnp
 import numpy as np
 
 import openpi.training.sharding as sharding
+
+
+def spatial_average_pool_tokens(tokens, grid_shape, target_tokens):
+    """Pool the spatial grid, never the temporal or channel axes, before projection.
+
+    Like Gemma3, divisible grids use a non-overlapping mean with kernel/stride
+    derived from the image patch grid. Other grids use adaptive average bins.
+    """
+    height, width = grid_shape
+    side = math.isqrt(target_tokens)
+    if side * side != target_tokens or side < 1:
+        raise ValueError("image_tokens_per_image must be a positive perfect square")
+    if min(height, width) < side or tokens.shape[-2] != height * width:
+        raise ValueError(f"Cannot average-pool grid {grid_shape} to {side}x{side}")
+    grid = tokens.reshape(*tokens.shape[:-2], height, width, tokens.shape[-1])
+    if height % side == 0 and width % side == 0:
+        grid = grid.reshape(*tokens.shape[:-2], side, height // side, side, width // side, tokens.shape[-1])
+        pooled = grid.mean(axis=(-4, -2))
+    else:
+        def weights(length):
+            starts = np.floor(np.arange(side) * length / side).astype(int)
+            ends = np.ceil((np.arange(side) + 1) * length / side).astype(int)
+            positions = np.arange(length)[None, :]
+            mask = (positions >= starts[:, None]) & (positions < ends[:, None])
+            return jnp.asarray(mask / (ends - starts)[:, None], dtype=tokens.dtype)
+        pooled = jnp.einsum('...hwc,ih,jw->...ijc', grid, weights(height), weights(width))
+    return pooled.reshape(*tokens.shape[:-2], target_tokens, tokens.shape[-1])
 
 
 def posemb_sincos_2d(h, w, width, temperature=10_000.0, dtype=jnp.float32):
@@ -292,6 +320,7 @@ class _Module(nn.Module):
     remat_policy: str = "nothing_saveable"
     dtype_mm: str = "float32"
     temporal_every_n_layers: int = 4
+    image_tokens_per_image: int | None = None
 
     @nn.compact
     def __call__(self, image, *, train=False):
@@ -346,6 +375,12 @@ class _Module(nn.Module):
             name="Transformer",
         )(x, deterministic=not train)
         encoded = out["encoded"] = x[:, -1, :, :]
+        if self.image_tokens_per_image is not None:
+            if self.pool_type != "none":
+                raise ValueError("Spatial token pooling requires pool_type='none'")
+            encoded = spatial_average_pool_tokens(encoded, (h, w), self.image_tokens_per_image)
+            h = w = math.isqrt(self.image_tokens_per_image)
+            out["spatially_pooled"] = encoded
 
         if self.pool_type == "map":
             x = out["head_input"] = MAPHead(

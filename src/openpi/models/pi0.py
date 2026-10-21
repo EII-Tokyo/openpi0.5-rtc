@@ -84,6 +84,7 @@ class Pi0(_model.BaseModel):
                 num_classes=paligemma_config.width,
                 variant="So400m/14",
                 pool_type="none",
+                image_tokens_per_image=config.image_tokens_per_image,
                 scan=True,
                 dtype_mm=config.dtype,
             )
