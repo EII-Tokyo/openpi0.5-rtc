@@ -4,6 +4,7 @@ import { apiBase } from '../services/api'
 
 type Props = {
   mode: string
+  inferencePrompt: string | null
   language: AppLanguage
   dispatchTask: (taskNumber: string) => Promise<void>
   dispatchError: string
@@ -20,14 +21,11 @@ const extensionForAudioType = (mimeType: string) => {
   return 'webm'
 }
 
-export function VoicePanel({ mode, language, dispatchTask, dispatchError }: Props) {
+export function VoicePanel({ mode, inferencePrompt, language, dispatchTask, dispatchError }: Props) {
   const t = translations[language]
   const [status, setStatus] = useState<'idle' | 'recording' | 'thinking' | 'speaking'>('idle')
   const [errorText, setErrorText] = useState('')
-  const [textCommand, setTextCommand] = useState('')
   const [level, setLevel] = useState(0)
-  const [orbStyle, setOrbStyle] = useState<'pulse' | 'halo' | 'ripple'>('pulse')
-  const [latestExchange, setLatestExchange] = useState<{ transcript: string; reply: string } | null>(null)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const chunksRef = useRef<Blob[]>([])
   const audioRef = useRef<HTMLAudioElement | null>(null)
@@ -167,10 +165,6 @@ export function VoicePanel({ mode, language, dispatchTask, dispatchError }: Prop
       throw new Error(`HTTP ${response.status}`)
     }
     const payload = await response.json()
-    setLatestExchange({
-      transcript: payload.transcript || '',
-      reply: payload.reply_text || '',
-    })
     if (payload.audio_base64 && payload.audio_mime_type) {
       setStatus('speaking')
       const audio = new Audio(`data:${payload.audio_mime_type};base64,${payload.audio_base64}`)
@@ -183,25 +177,6 @@ export function VoicePanel({ mode, language, dispatchTask, dispatchError }: Prop
       }
     } else {
       setStatus('idle')
-    }
-  }
-
-  const submitTextCommand = async () => {
-    const transcript = textCommand.trim()
-    if (!transcript) return
-    setErrorText('')
-    setStatus('thinking')
-    try {
-      const response = await fetch(`${apiBase}/api/voice/text`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: transcript, language }),
-      })
-      await handleVoiceResponse(response)
-      setTextCommand('')
-    } catch {
-      setStatus('idle')
-      setErrorText(t.requestFailed)
     }
   }
 
@@ -321,29 +296,6 @@ export function VoicePanel({ mode, language, dispatchTask, dispatchError }: Prop
           <h2>{t.voiceTitle}</h2>
         </div>
         <div className="voice-toolbar">
-          <div className="voice-style-toggle" aria-label={t.voiceStyleLabel}>
-            <button
-              type="button"
-              className={orbStyle === 'pulse' ? 'active' : ''}
-              onClick={() => setOrbStyle('pulse')}
-            >
-              {t.voiceStylePulse}
-            </button>
-            <button
-              type="button"
-              className={orbStyle === 'halo' ? 'active' : ''}
-              onClick={() => setOrbStyle('halo')}
-            >
-              {t.voiceStyleHalo}
-            </button>
-            <button
-              type="button"
-              className={orbStyle === 'ripple' ? 'active' : ''}
-              onClick={() => setOrbStyle('ripple')}
-            >
-              {t.voiceStyleRipple}
-            </button>
-          </div>
           <span className="status-pill mode" title={`${t.runtime}: ${mode}`}>{t.runtime}: {mode}</span>
         </div>
       </div>
@@ -351,7 +303,7 @@ export function VoicePanel({ mode, language, dispatchTask, dispatchError }: Prop
       <div className="voice-console-layout">
         <div className="voice-orb-wrap">
         <button
-          className={`voice-orb ${status} ${orbStyle}`}
+          className={`voice-orb ${status}`}
           onClick={toggleRecording}
           disabled={!canRecord}
           style={{ ['--voice-level' as string]: String(level) }}
@@ -380,28 +332,14 @@ export function VoicePanel({ mode, language, dispatchTask, dispatchError }: Prop
             </div>
             {dispatchError ? <p className="voice-error inline-error">{dispatchError}</p> : null}
           </div>
-          <div className="conversation-card">
-            <div className="conversation-line">
-              <span>{t.you}</span>
-              <p>{latestExchange?.transcript || t.noConversation}</p>
-            </div>
-            <div className="conversation-line reply">
-              <span>{t.aloha}</span>
-              <p>{latestExchange?.reply || t.noReply}</p>
-            </div>
-          </div>
-          <div className="voice-composer">
-            <textarea
-              value={textCommand}
-              onChange={(event) => setTextCommand(event.target.value)}
-              placeholder={t.commandPlaceholder}
-              rows={3}
-            />
-            <button type="button" onClick={() => void submitTextCommand()}>
-              {t.sendCommand}
-            </button>
-          </div>
         </div>
+        <section className="voice-prompt-panel" aria-labelledby="inference-prompt-heading">
+          <div>
+            <p className="eyebrow">Latest model input</p>
+            <h3 id="inference-prompt-heading">Full prompt</h3>
+          </div>
+          <pre className="inference-prompt-text">{inferencePrompt || 'Waiting for the first inference of the task…'}</pre>
+        </section>
       </div>
     </section>
   )

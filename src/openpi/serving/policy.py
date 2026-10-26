@@ -47,6 +47,12 @@ class Policy(BasePolicy):
         """
         self._model = model
         self._input_transform = _transforms.compose(transforms)
+        # Decode the actual non-padding token IDs, including normalized state.
+        # This is display metadata only; model inputs and tokenization stay intact.
+        self._prompt_tokenizer = next(
+            (transform.tokenizer for transform in transforms if isinstance(transform, _transforms.TokenizePrompt)),
+            None,
+        )
         self._output_transform = _transforms.compose(output_transforms)
         self._observation_transform = observation_transform or (lambda observation: observation)
         self._sample_kwargs = sample_kwargs or {}
@@ -131,6 +137,14 @@ class Policy(BasePolicy):
         # Make a copy since transformations may modify the inputs in place.
         inputs = jax.tree.map(lambda x: x, obs)
         inputs = self._input_transform(inputs)
+        inference_prompt = None
+        if self._prompt_tokenizer is not None and "tokenized_prompt" in inputs:
+            try:
+                ids = np.asarray(inputs["tokenized_prompt"])
+                mask = np.asarray(inputs["tokenized_prompt_mask"], dtype=bool)
+                inference_prompt = self._prompt_tokenizer._tokenizer.decode(ids[mask].tolist())
+            except Exception:
+                logging.warning("Could not decode inference prompt for display", exc_info=True)
         inputs = jax.tree.map(lambda x: jnp.asarray(x)[np.newaxis, ...], inputs)
         self._rng, sample_rng = jax.random.split(self._rng)
 
@@ -228,6 +242,7 @@ class Policy(BasePolicy):
         outputs["policy_timing"] = {
             "infer_ms": model_time * 1000,
         }
+        outputs["inference_prompt"] = inference_prompt
         return outputs
 
     @property

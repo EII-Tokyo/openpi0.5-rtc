@@ -35,6 +35,7 @@ class ChunkedPolicy(_base_policy.BasePolicy):
         self._rtc_replan_start_step = rtc_replan_start_step
         self._rtc_handoff_delay_steps = rtc_handoff_delay_steps
         self._cur_step: int = 0
+        self._inference_prompt: str | None = None
 
         self._last_results: Dict[str, np.ndarray] | None = None
         self._last_origin_actions: np.ndarray | None = None
@@ -139,6 +140,7 @@ class ChunkedPolicy(_base_policy.BasePolicy):
                 else:
                     raise RuntimeError("Background inference should only run for RTC chunking modes.")
                 rpc_ms = (time.monotonic() - rpc_start) * 1000.0
+                self._inference_prompt = self._background_results.get("inference_prompt")
                 # break
                 # 将后面18列都设为0
                 # modified_actions = None
@@ -180,6 +182,7 @@ class ChunkedPolicy(_base_policy.BasePolicy):
             # init     
             if self._last_results is None:
                 self._last_results = self._policy.infer(obs, chunking_mode="sync")
+                self._inference_prompt = self._last_results.get("inference_prompt")
                 self._last_origin_actions = self._last_results["origin_actions"]
                 self._last_state = self._last_results["state"]
                 self._last_results = {"actions": self._last_results["actions"]}
@@ -202,6 +205,7 @@ class ChunkedPolicy(_base_policy.BasePolicy):
         else:
             if self._last_results is None:
                 self._last_results = self._policy.infer(obs)
+                self._inference_prompt = self._last_results.get("inference_prompt")
                 self._cur_step = 0
 
             def slicer(x):
@@ -227,3 +231,9 @@ class ChunkedPolicy(_base_policy.BasePolicy):
             self._background_results = None
             self._obs = None
             self._cur_step = 0
+            self._inference_prompt = None
+
+    @property
+    def inference_prompt(self) -> str | None:
+        """Prompt from the latest completed model inference, not the live raw state."""
+        return self._inference_prompt

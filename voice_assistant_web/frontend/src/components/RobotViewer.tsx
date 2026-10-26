@@ -4,7 +4,6 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js'
 import { AppLanguage, translations } from '../i18n'
 import URDFLoader from '../lib/loaders/URDFLoader.js'
-import { truncateLabel } from '../utils/text'
 
 const JOINT_NAMES = ['waist', 'shoulder', 'elbow', 'forearm_roll', 'wrist_angle', 'wrist_rotate', 'left_finger']
 const DEFAULT_LEFT = [0.0, -0.96, 1.16, 1.57, 0.0, -1.57, 0.02239]
@@ -14,20 +13,15 @@ const URDF_URL = 'https://d38qvlnbgujqqd.cloudfront.net/static/urdf/aloha_vx300s
 type Props = {
   latestAction: number[] | null
   qpos: number[] | null
-  mode: string
-  currentTask: string | null
   language: AppLanguage
 }
 
 export function RobotViewer({
   latestAction,
   qpos,
-  mode,
-  currentTask,
   language,
 }: Props) {
   const t = translations[language]
-  const currentTaskLabel = currentTask ? truncateLabel(currentTask) : t.noActiveTask
   const containerRef = useRef<HTMLDivElement | null>(null)
   const leftRobotRef = useRef<any>(null)
   const rightRobotRef = useRef<any>(null)
@@ -119,15 +113,20 @@ export function RobotViewer({
     const onResize = () => {
       if (!containerRef.current) return
       camera.aspect = containerRef.current.clientWidth / containerRef.current.clientHeight
+      // Keep both arms in view when the larger canvas is tall and narrow.
+      camera.zoom = Math.min(1, camera.aspect)
       camera.updateProjectionMatrix()
       renderer.setSize(containerRef.current.clientWidth, containerRef.current.clientHeight)
     }
     window.addEventListener('resize', onResize)
+    const resizeObserver = new ResizeObserver(onResize)
+    resizeObserver.observe(container)
 
     ;(container as any).__applyArm = applyArm
 
     return () => {
       cancelAnimationFrame(frame)
+      resizeObserver.disconnect()
       window.removeEventListener('resize', onResize)
       controls.dispose()
       renderer.dispose()
@@ -155,16 +154,7 @@ export function RobotViewer({
   return (
     <section className="panel robot-panel">
       <div className="panel-header">
-        <div>
-          <p className="eyebrow">{t.robotEyebrow}</p>
-          <h2>{t.robotTitle}</h2>
-        </div>
-        <div className="robot-meta">
-          <span className="status-pill mode">{mode}</span>
-          <span className="robot-task-badge" title={currentTask || t.noActiveTask}>
-            {currentTaskLabel}
-          </span>
-        </div>
+        <h2>{t.robotTitle}</h2>
       </div>
       <div ref={containerRef} className="robot-canvas" />
     </section>

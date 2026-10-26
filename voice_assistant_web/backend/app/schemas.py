@@ -19,6 +19,7 @@ class HealthResponse(BaseModel):
 
 
 class RuntimeStatePayload(BaseModel):
+    inference_prompt: str | None = None
     camera_low_position: Literal["front", "rear"] | None = None
     operator: str | None = None
     rating: int | None = None

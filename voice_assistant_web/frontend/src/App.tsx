@@ -7,13 +7,13 @@ import { RobotViewer } from './components/RobotViewer'
 import { VoicePanel } from './components/VoicePanel'
 import { AppLanguage, translations } from './i18n'
 import { apiBase, wsBase } from './services/api'
-import { truncateLabel } from './utils/text'
 
 type RealtimeState = {
   robot: {
     timestamp: number | null
     mode: string
     current_task: string | null
+    inference_prompt: string | null
     operator: string | null
     camera_low_position: 'front' | 'rear' | null
     rating: number | null
@@ -33,6 +33,7 @@ const initialState: RealtimeState = {
     timestamp: null,
     mode: 'waiting',
     current_task: null,
+    inference_prompt: null,
     operator: null,
     camera_low_position: null,
     rating: null,
@@ -58,7 +59,6 @@ export default function App() {
   const [actionDrawerOpen, setActionDrawerOpen] = useState(false)
   const [conditioningDrawerOpen, setConditioningDrawerOpen] = useState(false)
   const t = translations[language]
-  const currentTaskLabel = state.robot.current_task ? truncateLabel(state.robot.current_task) : t.noActiveTask
 
   useEffect(() => {
     let isActive = true
@@ -143,9 +143,6 @@ export default function App() {
         <div className="header-actions">
           <span className={`status-pill ${state.robot.timestamp ? 'live' : 'offline'}`}>{freshness}</span>
           <span className="status-pill mode">{state.robot.mode}</span>
-          <span className="robot-task-badge" title={state.robot.current_task || t.noActiveTask}>
-            {currentTaskLabel}
-          </span>
           <button className="ghost-button" type="button" onClick={() => setMotorDrawerOpen(true)}>
             Motors
           </button>
@@ -181,12 +178,11 @@ export default function App() {
           <RobotViewer
             latestAction={state.robot.latest_action.length ? state.robot.latest_action : null}
             qpos={state.robot.qpos.length ? state.robot.qpos : null}
-            mode={state.robot.mode}
-            currentTask={state.robot.current_task}
             language={language}
           />
           <VoicePanel
             mode={state.robot.mode}
+            inferencePrompt={state.robot.inference_prompt}
             language={language}
             dispatchTask={dispatchTask}
             dispatchError={dispatchError}

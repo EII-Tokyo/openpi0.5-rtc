@@ -212,6 +212,7 @@ class Runtime:
             "timestamp": time.time(),
             "mode": mode or ("waiting" if self._is_waiting_for_task else "policy"),
             "current_task": current_task,
+            "inference_prompt": getattr(self._policy, "inference_prompt", None) if current_task else None,
             "operator": self._current_task.get("operator") if self._current_task else None,
             "camera_low_position": self._current_task.get("camera_low_position") if self._current_task else None,
             "rating": self._current_task.get("rating") if self._current_task else None,
