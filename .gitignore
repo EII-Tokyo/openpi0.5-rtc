@@ -15,7 +15,7 @@ checkpoints/
 checkpoints
 checkpoints.bak.*/
 docker-compose.yml.bak.*
-data/
+/data/
 wandb/
 tmp/
 attention_outputs/

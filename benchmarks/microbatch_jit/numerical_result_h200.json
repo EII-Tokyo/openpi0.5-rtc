@@ -1,0 +1,45 @@
+{
+  "batch_size": 128,
+  "ga": 2,
+  "effective_batch": 256,
+  "workers": 4,
+  "devices": 2,
+  "real_input": true,
+  "rows": [
+    {
+      "step": 0,
+      "loss_scan": 0.05467789247632027,
+      "loss_microjit": 0.05467789247632027,
+      "grads": {
+        "max_abs": 1.1175870895385742e-08,
+        "relative_l2": 4.963986910411222e-08,
+        "exact_equal": false,
+        "finite": true
+      },
+      "params": {
+        "max_abs": 0.0,
+        "relative_l2": 0.0,
+        "exact_equal": true,
+        "finite": true
+      },
+      "opt_state": {
+        "max_abs": 5.529727786779404e-10,
+        "relative_l2": 3.5317335722595544e-09,
+        "exact_equal": false,
+        "finite": true
+      },
+      "ema": {
+        "max_abs": 0.0,
+        "relative_l2": 0.0,
+        "exact_equal": true,
+        "finite": true
+      },
+      "metrics": {
+        "max_abs": 0.0,
+        "relative_l2": 0.0,
+        "exact_equal": true,
+        "finite": true
+      }
+    }
+  ]
+}

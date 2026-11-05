@@ -1,3 +1,4 @@
+"""Train with one JIT call per microbatch and one optimizer update per group."""
 import dataclasses
 import functools
 import logging
@@ -137,99 +138,6 @@ def init_train_state(
     return train_state, state_sharding
 
 
-@at.typecheck
-def train_step(
-    config: _config.TrainConfig,
-    rng: at.KeyArrayLike,
-    state: training_utils.TrainState,
-    batch: tuple[_model.Observation, _model.Actions],
-) -> tuple[training_utils.TrainState, dict[str, at.Array]]:
-    model = nnx.merge(state.model_def, state.params)
-    model.train()
-
-    @at.typecheck
-    def loss_fn(
-        model: _model.BaseModel, rng: at.KeyArrayLike, observation: _model.Observation, actions: _model.Actions
-    ):
-        preprocess_rng = jax.random.split(rng, 3)[0]
-        observation = _transforms.AlohaTransformPipeline.preprocess_observation(
-            preprocess_rng,
-            observation,
-            train=True,
-            image_resolution=config.model.image_resolution,
-        )
-        chunked_loss = model.compute_loss(rng, observation, actions, train=True)
-        return jnp.mean(chunked_loss)
-
-    train_rng = jax.random.fold_in(rng, state.step)
-    observation, actions = batch
-
-    # Filter out frozen params.
-    diff_state = nnx.DiffState(0, config.trainable_filter)
-
-    if config.gradient_accumulation_steps == 1:
-        loss, grads = nnx.value_and_grad(loss_fn, argnums=diff_state)(model, train_rng, observation, actions)
-    else:
-        def accumulate(carry, micro_step):
-            loss, grads = carry
-            micro_model = nnx.merge(state.model_def, state.params)
-            micro_model.train()
-            micro_rng = jax.random.fold_in(train_rng, micro_step)
-            micro_observation = jax.tree.map(lambda x, i=micro_step: x[i], observation)
-            micro_actions = jax.tree.map(lambda x, i=micro_step: x[i], actions)
-            micro_loss, micro_grads = nnx.value_and_grad(loss_fn, argnums=diff_state)(
-                micro_model, micro_rng, micro_observation, micro_actions
-            )
-            loss = loss + micro_loss / config.gradient_accumulation_steps
-            micro_grads = jax.tree.map(lambda x: x / config.gradient_accumulation_steps, micro_grads)
-            grads = jax.tree.map(lambda x, y: x + y, grads, micro_grads)
-            return (loss, grads), None
-
-        zeros = jax.tree.map(jnp.zeros_like, state.params.filter(config.trainable_filter))
-        (loss, grads), _ = jax.lax.scan(
-            accumulate, (jnp.array(0.0), zeros), jnp.arange(config.gradient_accumulation_steps)
-        )
-
-    params = state.params.filter(config.trainable_filter)
-    updates, new_opt_state = state.tx.update(grads, state.opt_state, params)
-    new_params = optax.apply_updates(params, updates)
-
-    # Update the model in place and return the new full state.
-    nnx.update(model, new_params)
-    new_params = nnx.state(model)
-
-    new_state = dataclasses.replace(state, step=state.step + 1, params=new_params, opt_state=new_opt_state)
-    if state.ema_decay is not None:
-        new_state = dataclasses.replace(
-            new_state,
-            ema_params=jax.tree.map(
-                lambda old, new: state.ema_decay * old + (1 - state.ema_decay) * new, state.ema_params, new_params
-            ),
-        )
-
-    # Filter out params that aren't kernels.
-    kernel_params = nnx.state(
-        model,
-        nnx.All(
-            nnx.Param,
-            nnx.Not(nnx_utils.PathRegex(".*/(bias|scale|pos_embedding|input_embedding)")),
-            lambda _, x: x.value.ndim > 1,
-        ),
-    )
-    info = {
-        "loss": loss,
-        "grad_norm": optax.global_norm(grads),
-        "param_norm": optax.global_norm(kernel_params),
-        "gradient_accumulation_steps": jnp.asarray(config.gradient_accumulation_steps),
-        "effective_batch_size": jnp.asarray(config.batch_size * config.gradient_accumulation_steps),
-    }
-    return new_state, info
-
-
-def _stack_microbatches(microbatches):
-    return jax.tree.map(lambda *xs: jnp.stack(xs), *microbatches)
-
-
 def _timed_next(data_iter):
     start = time.perf_counter()
     batch = next(data_iter)
@@ -342,20 +250,10 @@ def main(config: _config.TrainConfig):
     if resuming:
         train_state = _checkpoints.restore_state(checkpoint_manager, train_state, data_loader)
 
-    train_batch_sharding = data_sharding
-    if config.gradient_accumulation_steps > 1:
-        # Accumulated batches are stacked as [accumulation, batch, ...]. Keep the
-        # accumulation axis replicated and shard the actual batch axis across devices.
-        train_batch_sharding = jax.sharding.NamedSharding(
-            mesh,
-            jax.sharding.PartitionSpec(None, sharding.DATA_AXIS),
-        )
-
-    ptrain_step = jax.jit(
-        functools.partial(train_step, config),
-        in_shardings=(replicated_sharding, train_state_sharding, train_batch_sharding),
-        out_shardings=(train_state_sharding, replicated_sharding),
-        donate_argnums=(1,),
+    from streaming_accumulation import StreamingAccumulator
+    logging.info("Gradient accumulation backend: Python loop, one JIT call per microbatch")
+    streaming_step = StreamingAccumulator(
+        config, train_state_sharding, data_sharding, replicated_sharding,
     )
 
     start_step = int(train_state.step)
@@ -371,26 +269,22 @@ def main(config: _config.TrainConfig):
     train_dispatch_times = []
     train_block_times = []
     train_step_times = []
+    end_to_end_times = []
+    previous_update_finished = None
     for step in pbar:
-        data_wait_time = next_batch_wait_time
-        if config.gradient_accumulation_steps == 1:
-            train_batch = batch
-        else:
-            microbatches = [batch]
-            for _ in range(config.gradient_accumulation_steps - 1):
-                extra_batch, extra_wait_time = _timed_next(data_iter)
-                microbatches.append(extra_batch)
-                data_wait_time += extra_wait_time
-            train_batch = _stack_microbatches(microbatches)
-
-        train_step_start = time.perf_counter()
         with sharding.set_mesh(mesh):
-            train_state, info = ptrain_step(train_rng, train_state, train_batch)
-        train_dispatch_time = time.perf_counter() - train_step_start
-        train_block_start = time.perf_counter()
-        jax.block_until_ready(train_state)
-        train_block_time = time.perf_counter() - train_block_start
-        train_step_time = time.perf_counter() - train_step_start
+            train_state, info, timing = streaming_step.run(
+                train_rng, train_state, batch,
+                lambda: _timed_next(data_iter), next_batch_wait_time,
+            )
+        data_wait_time = timing["data_wait_time"]
+        train_dispatch_time = timing["streaming_dispatch_wall_time"]
+        train_block_time = timing["train_block_time"]
+        train_step_time = timing["streaming_update_wall_time"] + next_batch_wait_time
+        finished = time.perf_counter()
+        if previous_update_finished is not None:
+            end_to_end_times.append(finished - previous_update_finished)
+        previous_update_finished = finished
         infos.append(info)
         data_wait_times.append(data_wait_time)
         train_dispatch_times.append(train_dispatch_time)
@@ -400,9 +294,12 @@ def main(config: _config.TrainConfig):
             stacked_infos = common_utils.stack_forest(infos)
             reduced_info = jax.device_get(jax.tree.map(jnp.mean, stacked_infos))
             reduced_info["data_wait_time"] = float(np.mean(data_wait_times))
-            reduced_info["train_dispatch_time"] = float(np.mean(train_dispatch_times))
+            reduced_info["streaming_dispatch_wall_time"] = float(np.mean(train_dispatch_times))
             reduced_info["train_block_time"] = float(np.mean(train_block_times))
-            reduced_info["train_step_time"] = float(np.mean(train_step_times))
+            reduced_info["streaming_update_wall_time"] = float(np.mean(train_step_times))
+            if end_to_end_times:
+                reduced_info["end_to_end_update_time"] = float(np.mean(end_to_end_times))
+            reduced_info["accumulation_unbundled"] = 1
             info_str = ", ".join(f"{k}={v:.4f}" for k, v in reduced_info.items())
             pbar.write(f"Step {step}: {info_str}")
             wandb.log(reduced_info, step=step)
@@ -411,6 +308,7 @@ def main(config: _config.TrainConfig):
             train_dispatch_times = []
             train_block_times = []
             train_step_times = []
+            end_to_end_times = []
         if step != config.num_train_steps - 1:
             batch, next_batch_wait_time = _timed_next(data_iter)
 
