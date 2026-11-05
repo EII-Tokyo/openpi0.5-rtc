@@ -143,14 +143,26 @@ class TorchDataLoader:
                 except StopIteration:
                     break  # We've exhausted the dataset. Create a new iterator and start over.
                 num_items += 1
-                yield jax.tree.map(lambda x: jax.make_array_from_process_local_data(self._sharding, x), batch)
+                yield jax.tree.map(
+                    lambda x: jax.make_array_from_process_local_data(self._sharding, _as_numpy(x)), batch
+                )
+
+
+def _as_numpy(value):
+    # CPU Tensor.numpy() is a view; it keeps the shared storage alive for JAX.
+    return value.numpy() if isinstance(value, torch.Tensor) else np.asarray(value)
 
 
 def _collate_fn(items):
-    """Collate the batch elements into batched numpy arrays."""
-    # Make sure to convert to numpy arrays before stacking since some of the incoming elements
-    # may be JAX arrays.
-    return jax.tree.map(lambda *xs: np.stack([np.asarray(x) for x in xs], axis=0), *items)
+    """Stack directly into PyTorch shared storage when running in a worker."""
+    def collate_leaf(*values):
+        arrays = [np.asarray(value) for value in values]
+        # torch.as_tensor cannot represent negative strides. Read-only source
+        # views are copied before wrapping, so no writable Tensor aliases them.
+        arrays = [a.copy() if not a.flags.writeable or any(s < 0 for s in a.strides) else a for a in arrays]
+        return torch.utils.data.default_collate(arrays)
+
+    return jax.tree.map(collate_leaf, *items)
 
 
 class _WorkerInitFn:
