@@ -1583,7 +1583,7 @@ _CONFIGS = [
                 video_memory_num_frames=6,
                 video_memory_stride_seconds=1.0,
                 high_camera_mosaic=_transforms.HighCameraMosaicConfig(
-                    camera='cam_high', history_seconds=5, sample_hz=4, tile_size=224,
+                    cameras=('cam_high',), history_seconds=5, sample_hz=4, tile_size=224,
                 ),
                 adapt_to_pi=True,
                 use_delta_joint_actions=True,
@@ -1671,7 +1671,7 @@ _CONFIGS = [
                 video_memory_num_frames=6,
                 video_memory_stride_seconds=1.0,
                 high_camera_mosaic=_transforms.HighCameraMosaicConfig(
-                    camera='cam_high', history_seconds=5, sample_hz=4, tile_size=112,
+                    cameras=('cam_high',), history_seconds=5, sample_hz=4, tile_size=112,
                 ),
                 adapt_to_pi=True,
                 use_delta_joint_actions=True,
@@ -1779,7 +1779,7 @@ _CONFIGS = [
                 video_memory_num_frames=6,
                 video_memory_stride_seconds=1.0,
                 high_camera_mosaic=_transforms.HighCameraMosaicConfig(
-                    camera='cam_high', history_seconds=5, sample_hz=4, tile_size=112,
+                    cameras=('cam_high',), history_seconds=5, sample_hz=4, tile_size=112,
                 ),
                 adapt_to_pi=True,
                 use_delta_joint_actions=True,
@@ -1887,7 +1887,7 @@ _CONFIGS = [
                 video_memory_num_frames=6,
                 video_memory_stride_seconds=1.0,
                 high_camera_mosaic=_transforms.HighCameraMosaicConfig(
-                    camera='cam_high', history_seconds=5, sample_hz=4, tile_size=112,
+                    cameras=('cam_high',), history_seconds=5, sample_hz=4, tile_size=112,
                 ),
                 adapt_to_pi=True,
                 use_delta_joint_actions=True,
@@ -1995,7 +1995,7 @@ _CONFIGS = [
                 video_memory_num_frames=6,
                 video_memory_stride_seconds=1.0,
                 high_camera_mosaic=_transforms.HighCameraMosaicConfig(
-                    camera='cam_high', history_seconds=5, sample_hz=4, tile_size=112,
+                    cameras=('cam_high',), history_seconds=5, sample_hz=4, tile_size=112,
                 ),
                 adapt_to_pi=True,
                 use_delta_joint_actions=True,
@@ -2103,7 +2103,7 @@ _CONFIGS = [
                 video_memory_num_frames=6,
                 video_memory_stride_seconds=1.0,
                 high_camera_mosaic=_transforms.HighCameraMosaicConfig(
-                    camera='cam_high', history_seconds=5, sample_hz=4, tile_size=112,
+                    cameras=('cam_high',), history_seconds=5, sample_hz=4, tile_size=112,
                 ),
                 adapt_to_pi=True,
                 use_delta_joint_actions=True,
@@ -2283,7 +2283,7 @@ _CONFIGS.append(
                 video_memory_num_frames=2,
                 video_memory_stride_seconds=1.0,
                 high_camera_mosaic=_transforms.HighCameraMosaicConfig(
-                    camera='cam_high', history_seconds=1, sample_hz=4, tile_size=224,
+                    history_seconds=1, sample_hz=4, tile_size=224,
                     cameras=('cam_high', 'cam_low', 'cam_left_wrist', 'cam_right_wrist'),
                 ),
                 adapt_to_pi=True,

@@ -30,7 +30,7 @@ class FakeDataset:
 
 
 def test_quadrants_oldest_first_and_current_full_size():
-    settings = HighCameraMosaicConfig(tile_size=4)
+    settings = HighCameraMosaicConfig(cameras=('cam_high',), tile_size=4)
     history = [np.full((8, 8, 3), index, np.uint8) for index in range(20)]
     result = pack_high_history(history, np.full((8, 8, 3), 99, np.uint8), settings)
     assert result.shape == (6, 8, 8, 3)
@@ -41,7 +41,7 @@ def test_quadrants_oldest_first_and_current_full_size():
 
 
 def test_real_tile_resolution_and_chw_float():
-    settings = HighCameraMosaicConfig()
+    settings = HighCameraMosaicConfig(cameras=('cam_high',))
     history = [np.full((3, 32, 48), i / 255, np.float32) for i in range(20)]
     result = pack_high_history(history, np.full((3, 448, 448), .5, np.float32), settings)
     assert result.dtype == np.uint8 and result.shape == (6, 448, 448, 3)
@@ -49,7 +49,7 @@ def test_real_tile_resolution_and_chw_float():
 
 
 def test_individual_timestamp_rounding_does_not_drift():
-    ds = HighCameraMosaicDataset(FakeDataset(), fps=50, settings=HighCameraMosaicConfig(tile_size=4))
+    ds = HighCameraMosaicDataset(FakeDataset(), fps=50, settings=HighCameraMosaicConfig(cameras=('cam_high',), tile_size=4))
     indices = ds.history_indices(300)
     targets = 6 + ds.settings.offsets_seconds
     assert np.max(np.abs(ds._timestamps[indices] - targets)) <= .010001
@@ -61,7 +61,7 @@ def test_individual_timestamp_rounding_does_not_drift():
 @pytest.mark.parametrize('index', [0, 1, 300, 310, 329])
 def test_boundaries_actions_and_three_current_views(index):
     base = FakeDataset()
-    settings = HighCameraMosaicConfig(tile_size=4)
+    settings = HighCameraMosaicConfig(cameras=('cam_high',), tile_size=4)
     ds = HighCameraMosaicDataset(base, fps=50, settings=settings)
     current = base[index]
     sample = ds[index]
@@ -79,7 +79,7 @@ def test_trainable_redirect_keeps_current_actions_consistent():
     base = FakeDataset()
     mask = np.zeros(len(base), bool)
     mask[300] = True
-    ds = HighCameraMosaicDataset(base, fps=50, settings=HighCameraMosaicConfig(tile_size=4), trainable_mask=mask)
+    ds = HighCameraMosaicDataset(base, fps=50, settings=HighCameraMosaicConfig(cameras=('cam_high',), tile_size=4), trainable_mask=mask)
     assert np.all(ds[0]['action'] == 300)
 
 
@@ -147,14 +147,23 @@ def test_fast_video_path_queries_only_high_once():
             return {'observation.images.cam_high': torch.stack(frames)}
 
     base = VideoFake()
-    ds = HighCameraMosaicDataset(base, fps=50, settings=HighCameraMosaicConfig(tile_size=4))
+    ds = HighCameraMosaicDataset(base, fps=50, settings=HighCameraMosaicConfig(cameras=('cam_high',), tile_size=4))
     base.fake.reads.clear()
     sample = ds[300]
     assert base.fake.reads == [300] and len(base.queries) == 1
     assert sample['observation.images.cam_high'].shape == (6, 8, 8, 3)
 
 
-@pytest.mark.parametrize('kwargs', [{'sample_hz':3}, {'history_seconds':0}, {'camera':'cam_low'}])
+@pytest.mark.parametrize(
+    'kwargs',
+    [
+        {'sample_hz': 3},
+        {'history_seconds': 0},
+        {'cameras': ()},
+        {'cameras': ('cam_low', 'cam_low')},
+        {'cameras': ('unknown_camera',)},
+    ],
+)
 def test_invalid_settings_fail(kwargs):
     with pytest.raises(ValueError):
-        HighCameraMosaicConfig(**kwargs)
+        HighCameraMosaicConfig(**({'cameras': ('cam_high',)} | kwargs))

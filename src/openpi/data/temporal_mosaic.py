@@ -7,16 +7,14 @@ from PIL import Image
 
 @dataclasses.dataclass(frozen=True)
 class HighCameraMosaicConfig:
-    camera: str = "cam_high"
+    cameras: tuple[str, ...]
     history_seconds: int = 5
     sample_hz: int = 4
     tile_size: int = 224
-    # Keep the historical high-only behavior unless cameras are explicitly selected.
-    cameras: tuple[str, ...] = ("cam_high",)
 
     def __post_init__(self):
-        if self.camera != "cam_high" or self.sample_hz != 4:
-            raise ValueError("This layout requires cam_high and four samples per second.")
+        if self.sample_hz != 4:
+            raise ValueError("Mosaic history requires four samples per second.")
         if self.history_seconds <= 0 or self.tile_size <= 0:
             raise ValueError("History seconds and tile size must be positive.")
         allowed = {"cam_high", "cam_low", "cam_left_wrist", "cam_right_wrist"}
@@ -58,7 +56,7 @@ def resize_pad(image, size):
 
 def pack_high_history(history, current, settings):
     if len(history) != settings.history_seconds * 4:
-        raise ValueError("Expected exactly four high-camera history images per second.")
+        raise ValueError("Expected exactly four history images per second.")
     mosaics = []
     for start in range(0, len(history), 4):
         tiles = [resize_pad(frame, settings.tile_size) for frame in history[start:start + 4]]
