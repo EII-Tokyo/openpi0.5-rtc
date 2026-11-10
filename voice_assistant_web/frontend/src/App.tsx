@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ActionDrawer } from './components/ActionDrawer'
 import { InferenceSettingsPanel } from './InferenceSettingsPanel'
+import { RecordingPanel } from './RecordingPanel'
 import { CameraGrid } from './components/CameraGrid'
 import { MotorDrawer } from './components/MotorDrawer'
 import { RobotViewer } from './components/RobotViewer'
@@ -58,6 +59,7 @@ export default function App() {
   const [motorDrawerOpen, setMotorDrawerOpen] = useState(false)
   const [actionDrawerOpen, setActionDrawerOpen] = useState(false)
   const [conditioningDrawerOpen, setConditioningDrawerOpen] = useState(false)
+  const [recordingDrawerOpen, setRecordingDrawerOpen] = useState(false)
   const t = translations[language]
 
   useEffect(() => {
@@ -115,7 +117,7 @@ export default function App() {
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (conditioningDrawerOpen) return
+      if (conditioningDrawerOpen || recordingDrawerOpen) return
       if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey || event.repeat) return
       const active = document.activeElement
       if (
@@ -132,7 +134,7 @@ export default function App() {
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [t.dispatchFailed, conditioningDrawerOpen])
+  }, [t.dispatchFailed, conditioningDrawerOpen, recordingDrawerOpen])
 
   return (
     <main className="app-shell">
@@ -154,6 +156,8 @@ export default function App() {
             onClick={() => setConditioningDrawerOpen(true)}>
             Inference conditioning
           </button>
+          <button className="ghost-button" type="button" aria-haspopup="dialog"
+              aria-expanded={recordingDrawerOpen} onClick={() => setRecordingDrawerOpen(true)}>录制 / Recording</button>
           <label className="language-switch">
             <span>{t.language}</span>
             <select value={language} onChange={(event) => setLanguage(event.target.value as AppLanguage)}>
@@ -192,6 +196,7 @@ export default function App() {
       <InferenceSettingsPanel open={conditioningDrawerOpen} onClose={() => setConditioningDrawerOpen(false)}
         operator={state.robot.operator ?? null} rating={state.robot.rating ?? null}
         camera_low_position={state.robot.camera_low_position ?? null} />
+      <RecordingPanel open={recordingDrawerOpen} onClose={() => setRecordingDrawerOpen(false)} />
       <MotorDrawer
         open={motorDrawerOpen}
         onClose={() => setMotorDrawerOpen(false)}

@@ -18,8 +18,23 @@ class HealthResponse(BaseModel):
     status: str = "ok"
 
 
+class RecordingAnnotations(BaseModel):
+    """Outcome labels are independent from requested inference conditioning."""
+    rating: StrictInt | None = Field(default=None, ge=0, le=5)
+    is_error: bool = False
+    note: str = Field(default="", max_length=2000)
+
+
+class RecordingCommand(BaseModel):
+    """Recording does not start a task; resume is an explicit separate action."""
+    action: Literal["start", "stop", "resume"]
+    annotations: RecordingAnnotations = Field(default_factory=RecordingAnnotations)
+    batch_name: str | None = Field(default=None, min_length=1, max_length=96, pattern=r"^\w[\w.-]*$")
+
+
 class RuntimeStatePayload(BaseModel):
     inference_prompt: str | None = None
+    recording: dict[str, Any] = Field(default_factory=dict)
     camera_low_position: Literal["front", "rear"] | None = None
     operator: str | None = None
     rating: int | None = None

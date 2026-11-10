@@ -26,6 +26,7 @@ class Args:
     rtc_handoff_delay_steps: int = 10
 
     chunking_mode: Literal["sync", "inference_time", "training_time"] = "inference_time"
+    latency_diagnostics: bool = False
     policy_hz: float = 50.0
     manual_hz: float = 50.0
     video_memory_num_frames: int = 1
@@ -47,18 +48,11 @@ class Args:
         ]
     )
     gripper_current_limits: list[int] = dataclasses.field(default_factory=lambda: [300, 800])
-    # H5dfSaver 配置
-    dataset_dir: str = "/app/data/aloha_real/policy_episodes"
+    # Episodes are saved only through the explicit recording controls.
     manual_dataset_dir: str = "/app/data/aloha_real/manual_intervention_episodes"
-    compress_images: bool = True
-    is_mobile: bool = False
-    if_save_hdf5: bool = True
-    # Set <= 0 to save the full episode instead of a rolling tail buffer.
-    hdf5_max_buffer_seconds: float = 60.0
 
 
 def main(args: Args) -> None:
-    from openpi.robot.aloha_real import h5df_saver
     from openpi.robot.aloha_real import real_env as _real_env
 
     if args.action_quality != "normal":
@@ -73,14 +67,20 @@ def main(args: Args) -> None:
     adapt_to_pi = bool(server_metadata.get("runtime", {}).get("adapt_to_pi", True))
     logging.info("Using runtime.adapt_to_pi from policy metadata: %s", adapt_to_pi)
 
-    # 创建 H5dfSaver subscriber
-    h5df_saver_instance = h5df_saver.H5dfSaver(
-        dataset_dir=args.dataset_dir,
-        compress_images=args.compress_images,
-        is_mobile=args.is_mobile,
-        fps=args.policy_hz,
-        max_buffer_seconds=args.hdf5_max_buffer_seconds,
-    )
+    # The server publishes the input pipeline of the configuration used to load
+    # these weights. Never infer temporal settings from a model-name substring.
+    from openpi.robot.aloha_real.video_input_config import configure_video_input
+    video_input = configure_video_input(server_metadata, args.model_dir)
+    args.video_memory_num_frames = video_input["num_frames"]
+    args.video_memory_stride_seconds = video_input["stride_seconds"]
+    if video_input["mosaic"] is not None:
+        from openpi.robot.aloha_real import mosaic_runtime
+        mosaic_runtime.install(video_input)
+    logging.info("Using checkpoint video input (overrides CLI history): %s", video_input)
+
+    if args.latency_diagnostics:
+        from openpi.robot.aloha_real import latency_diagnostics
+        latency_diagnostics.install()
 
     runtime = _runtime.Runtime(
         # environment=_real_env.AlohaRealEnvironment(reset_position=metadata.get("reset_pose")),
@@ -99,7 +99,7 @@ def main(args: Args) -> None:
             rtc_replan_start_step=args.rtc_replan_start_step,
             rtc_handoff_delay_steps=args.rtc_handoff_delay_steps,
         ),
-        subscribers=[h5df_saver_instance] if args.if_save_hdf5 else [],
+        subscribers=[],
         max_hz=args.policy_hz,
         manual_hz=args.manual_hz,
         manual_dataset_dir=args.manual_dataset_dir,

@@ -1,3 +1,4 @@
+x-checkpoint-dir: &checkpoint_dir "${OPENPI_CHECKPOINT_DIR:-/app/checkpoints/eii_with_rinse_cam4_fullft_jialong44_h200nvlx4_224_mosaic_pool256_bs128_ga2_nw128_20261104/jialong44_h200nvlx4_bs128_ga2_nw128_20261104/14999}"
 services:
   runtime:
     image: lyl472324464/robot:aloha-ros1.0
@@ -8,21 +9,26 @@ services:
     # build:
     #   context: .
     #   dockerfile: src/openpi/robot/aloha_real/Dockerfile
-    command: >-
-      python3 /app/scripts/run_aloha_real.py
-      --model-dir
-      /app/checkpoints/eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo/no_rinse_cam3_fullft_return_home_29repo_bs256_nw64_fsdp4_20260520/19000/
-      --action-quality good
-      --chunking-mode inference_time
-      --rtc-handoff-delay-steps 10
+    command: ["python3", "/app/scripts/run_aloha_real.py", "--model-dir", *checkpoint_dir, "--host", "127.0.0.1", "--port", "8001", "--policy-hz", "50", "--chunking-mode", "inference_time", "--rtc-handoff-delay-steps", "10"]
 
     init: true
     tty: true
     network_mode: host
     privileged: true
+    # Match collect.sh: expose the NVENC driver libraries to the recording worker.
+    gpus: all
+    environment:
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: compute,utility,video
+      ALOHA_ROLLOUT_DIR: /collection-data
+      # Match the task text in the rinse69 training datasets exactly.
+      ALOHA_TASK_1_PROMPT: twist off the bottle cap and rinse the bottle
+      ALOHA_TASK_2_PROMPT: twist off the bottle cap and rinse the bottle
     volumes:
       - $PWD:/app
-      - /data/openpi0.5-rtc/checkpoints:/app/checkpoints
+      - /home/eii/openpi0.5-rtc/checkpoints:/app/checkpoints:ro
+      # Canonical collector/web browser root; existing recordings are not moved.
+      - /home/eii/aloha-2.0/aloha_data/aloha_stationary:/collection-data
 
   aloha_ros_nodes:
     image: lyl472324464/robot:aloha-ros1.0
@@ -52,23 +58,14 @@ services:
     build:
       context: .
       dockerfile: scripts/docker/serve_policy.Dockerfile
-    command:
-      - /bin/bash
-      - -lc
-      - >-
-        uv run --no-sync scripts/serve_policy.py --no-warmup-subtask --denoising-steps 10 --rtc-handoff-delay-steps 10
-        ${SERVER_ARGS:---video-memory-num-frames 1
-        --video-memory-stride-seconds 1.0
-        policy:checkpoint
-        --policy.config eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo
-        --policy.dir
-        /app/checkpoints/eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo/no_rinse_cam3_fullft_return_home_29repo_bs256_nw64_fsdp4_20260520/19000/}
+    entrypoint: ["/.venv/bin/python3"]
+    command: ["/app/scripts/serve_policy.py", "--model-dir", *checkpoint_dir, "--port", "8001", "--no-warmup-subtask"]
     init: true
     tty: true
     network_mode: host
     volumes:
       - $PWD:/app
-      - /data/openpi0.5-rtc/checkpoints:/app/checkpoints
+      - /home/eii/openpi0.5-rtc/checkpoints:/app/checkpoints:ro
       - ${OPENPI_DATA_HOME:-~/.cache/openpi}:/openpi_assets
     environment:
       - GIT_LFS_SKIP_SMUDGE=1

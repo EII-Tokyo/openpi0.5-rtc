@@ -17,7 +17,7 @@ cv_bridge = CvBridge()
 rospy.init_node('realsense_publisher')
 
 camera_names = ['cam_left_wrist', 'cam_high', 'cam_low', 'cam_right_wrist']
-camera_sns = ['130322272542', '130322270656', '218622270440', '218622278936'] #'218622270083', '127122270166']
+camera_sns = ['130322270656', '130322272542', '218622270440', '218622278936']
 cam_dict = dict(zip(camera_sns,camera_names))
 mean_intensity_set_point_config = { # NOTE these numbers are specific to your lighting setup
     'cam_left_wrist': 500,

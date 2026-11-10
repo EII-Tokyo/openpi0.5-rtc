@@ -13,6 +13,8 @@ from collections import deque
 
 from openpi.robot.aloha_real.leader_follower_demo import LeaderFollowerDemoController
 from openpi.robot.aloha_real.manual_intervention import ManualInterventionController
+from openpi.robot.aloha_real.policy_recording import PolicyRecording
+from openpi.robot.aloha_real.video_memory_preview import VideoMemoryPreview
 from openpi.serving import base_policy as _base_policy
 from openpi.shared.prompt_metadata import INFERENCE_SETTINGS_KEY, INFERENCE_UPDATES_CHANNEL, METADATA_KEYS, normalize_prompt_metadata
 
@@ -51,6 +53,9 @@ class Runtime:
         self._environment = environment
         self._policy = policy
         self._subscribers = subscribers
+        self._control_samples = deque(maxlen=500)
+        self._last_control_tick = None
+        self._next_control_report = 0.0
         self._max_hz = max_hz
         self._manual_hz = manual_hz
 
@@ -70,6 +75,15 @@ class Runtime:
         self._latest_task = None
         self._task_lock = threading.Lock()
         self._pending_inference_settings = None
+        # Recording commands are consumed only by the actuator/control thread.
+        self._recording_commands = deque()
+        self._recording_hold = threading.Event()
+        self._recording_paused = False
+        self._recording_command_id = None
+        self._recording_command_error = None
+        self._recording = PolicyRecording(
+            os.getenv("ALOHA_ROLLOUT_DIR", "/app/data/aloha_real/rollout_episodes"), fps=max_hz or 50.0
+        )
         
         # 任务状态管理
         self._current_task = None
@@ -149,6 +163,14 @@ class Runtime:
                 if message and message['type'] == 'message':
                     try:
                         data = json.loads(message['data'])
+                        if data.get("type") == "recording_control":
+                            # Latch stop before an in-flight inference dispatches its next action.
+                            if data.get("action") == "stop":
+                                self._recording_hold.set()
+                            with self._task_lock:
+                                if len(self._recording_commands) < 16:
+                                    self._recording_commands.append(data)
+                            continue
                         if data.get('type') == 'inference_settings':
                             metadata = normalize_prompt_metadata(**{
                                 key: data[key] for key in METADATA_KEYS if key in data
@@ -218,8 +240,14 @@ class Runtime:
             "rating": self._current_task.get("rating") if self._current_task else None,
             "qpos": list(qpos) if qpos is not None else [],
             "latest_action": list(latest_action) if latest_action is not None else [],
+            "recording": self._recording_status(),
         }
+        if getattr(self, "_recording_paused", False):
+            payload["mode"] = "paused"
         try:
+            self._redis_client.set("aloha_recording_state", json.dumps({
+                **payload["recording"], "timestamp": payload["timestamp"], "mode": payload["mode"]
+            }))
             self._redis_client.publish("aloha_runtime_state", json.dumps(payload))
         except Exception as exc:
             logging.debug("发布运行时状态失败: %s", exc)
@@ -256,10 +284,66 @@ class Runtime:
         finally:
             # 停止Redis监听
             self._stop_redis_listener()
+            self._recording.close()
 
     def stop(self) -> None:
         """Request the runtime loop to stop."""
         self._stop = True
+
+    def _recording_status(self):
+        """Expose file finalization and command acknowledgements independently."""
+        recorder = getattr(self, "_recording", None)
+        state = recorder.snapshot() if recorder is not None else {"status": "idle", "frames": 0}
+        return {**state, "paused": getattr(self, "_recording_paused", False),
+                "command_id": getattr(self, "_recording_command_id", None),
+                "command_error": getattr(self, "_recording_command_error", None)}
+
+    def _pause_recording(self):
+        """Hold the last commanded pose, without home, sleep or torque-off commands."""
+        self._recording_hold.set()
+        self._recording_paused = True
+        self._is_waiting_for_task = True
+        self._recording.finish()
+        self._publish_runtime_state(mode="paused")
+        self._policy.reset()  # Wait for an old background RPC, then discard its chunks.
+
+    def _process_recording_commands(self):
+        """Serialize recording state changes with action execution on the control thread."""
+        with self._task_lock:
+            commands = list(self._recording_commands)
+            self._recording_commands.clear()
+        for command in commands:
+            self._recording_command_id = command.get("command_id")
+            self._recording_command_error = None
+            try:
+                action = command["action"]
+                if action == "start":
+                    if self._is_waiting_for_task or self._recording_paused or self._current_task is None:
+                        raise ValueError("Start the robot task or resume first; recording never starts robot motion")
+                    if self._recording.snapshot()["status"] in {"recording", "saving"}:
+                        raise ValueError("A recording is already active or saving")
+                    self._recording.start({"source": "policy_rollout", "task": dict(self._current_task),
+                                           "annotations": command.get("annotations", {})}, batch_name=command.get("batch_name"))
+                elif action == "stop":
+                    self._recording.finish(command.get("annotations", {}))
+                    self._pause_recording()
+                elif action == "resume":
+                    if not self._recording_paused or self._current_task is None:
+                        raise ValueError("No paused policy task to resume")
+                    if self._recording.snapshot()["status"] in {"recording", "saving", "error"}:
+                        raise ValueError("Wait until recording is saved; resolve any recording error first")
+                    self._policy.reset()
+                    self._recording_paused = False
+                    self._recording_hold.clear()
+                    self._is_waiting_for_task = False
+                else:
+                    raise ValueError("Unknown recording command")
+            except Exception as exc:
+                self._recording_command_error = str(exc)
+                logging.exception("Recording command failed")
+            self._publish_runtime_state()
+        if self._recording.snapshot()["status"] == "error" and not self._recording_paused:
+            self._pause_recording()
 
     def _enter_waiting(self) -> None:
         self._is_waiting_for_task = True
@@ -292,12 +376,14 @@ class Runtime:
 
         try:
             while not self._stop:
+                self._process_recording_commands()
                 task_data = self._poll_task_from_inputs()
                 if task_data:
                     self._handle_task(task_data)
                 
                 if self._is_waiting_for_task:
                     # 等待状态下，短sleep并持续监听键盘/Redis
+                    self._publish_runtime_state()
                     time.sleep(0.05)
                 else:
                     # 有任务时正常执行step
@@ -426,6 +512,17 @@ class Runtime:
         task_name = task_data.get('task_name', '未知任务')
         
         logging.info(f"处理语音任务: {task_num} - {task_name}")
+
+        if getattr(self, "_recording_paused", False) and task_num in {"1", "2", "6"}:
+            self._recording_command_error = "Recording paused the robot; use Resume execution first"
+            self._publish_runtime_state(mode="paused")
+            return
+        recorder = getattr(self, "_recording", None)
+        if recorder is not None and recorder.snapshot()["status"] == "recording":
+            recorder.finish()  # Never mix different robot tasks in the same recording.
+        if task_num in {"3", "4", "5"} and recorder is not None:
+            self._recording_paused = False
+            self._recording_hold.clear()
         
         if task_num in self._model_task_nums:
             task_data = dict(task_data)
@@ -517,8 +614,22 @@ class Runtime:
 
     def _step(self) -> None:
         """A single step of the runtime loop."""
+        hold = getattr(self, "_recording_hold", None)
+        if hold is not None and hold.is_set():
+            return
         self._apply_pending_inference_settings()
+        step_started = time.monotonic()
         observation = self._environment.get_observation()
+        observation_done = time.monotonic()
+        # Inspect the exact pre-model image history without blocking robot control.
+        if not hasattr(self, "_video_memory_preview"):
+            self._video_memory_preview = VideoMemoryPreview()
+        self._video_memory_preview.submit(
+            observation["images"],
+            stride_seconds=self._environment.image_recorder.history_stride_seconds
+            if hasattr(self._environment, "image_recorder")
+            else self._environment._env.image_recorder.history_stride_seconds,
+        )
         assert self._current_task is not None, "_current_task must be set before calling _step()"
         observation_with_task = {
             **observation,
@@ -526,8 +637,23 @@ class Runtime:
             **{key: self._current_task[key] for key in METADATA_KEYS if key in self._current_task},
         }
 
+        infer_started = time.monotonic()
         action = self._policy.infer(observation_with_task)
+        infer_done = time.monotonic()
+        # A stop arriving during inference must not execute the newly returned chunk.
+        if hold is not None and hold.is_set():
+            return
         self._environment.apply_action(action)
+        action_done = time.monotonic()
+        self._report_control_timing(step_started, observation_done, infer_started, infer_done, action_done)
+        recorder = getattr(self, "_recording", None)
+        if recorder is not None:
+            try:
+                recorder.append(observation["origin_observation"], action, dict(self._current_task))
+            except Exception:
+                logging.exception("Recording failed; pausing robot")
+                self._pause_recording()
+                return
         # 存储最后的action（用于task_num==3时移动master）
         self._last_action = action.get("actions") if isinstance(action, dict) and "actions" in action else None
         if self._last_action is not None:
@@ -536,3 +662,30 @@ class Runtime:
 
         for subscriber in self._subscribers:
             subscriber.on_step(observation["origin_observation"], action)
+
+    def _report_control_timing(self, started, observation_done, infer_started, infer_done, action_done):
+        previous = self._last_control_tick
+        self._last_control_tick = started
+        if previous is None or started - previous > 1.0:
+            self._control_samples.clear()
+            self._next_control_report = started + 5.0
+            return
+        self._control_samples.append((started - previous, observation_done - started,
+                                      infer_done - infer_started, action_done - infer_done))
+        if started < self._next_control_report or len(self._control_samples) < 50:
+            return
+        self._next_control_report = started + 5.0
+        samples = list(self._control_samples)
+        count = len(samples)
+        hz = count / sum(row[0] for row in samples)
+        p95 = sorted(row[0] for row in samples)[int((count - 1) * 0.95)] * 1000
+        self._control_health = {"target_hz": self._max_hz, "actual_hz": round(hz, 2),
+            "interval_p95_ms": round(p95, 2), "samples": count,
+            "observation_ms": round(sum(r[1] for r in samples) * 1000 / count, 2),
+            "policy_ms": round(sum(r[2] for r in samples) * 1000 / count, 2),
+            "apply_and_images_ms": round(sum(r[3] for r in samples) * 1000 / count, 2),
+            "timestamp": time.time()}
+        log = logging.warning if hz < self._max_hz * 0.9 else logging.info
+        log("CONTROL_RATE %s", json.dumps(self._control_health))
+        if self._redis_client is not None:
+            self._redis_client.set("aloha_control_health", json.dumps(self._control_health), ex=15)

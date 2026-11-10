@@ -1,8 +1,8 @@
 import dataclasses
 import enum
 import logging
+import json
 import socket
-import dataclasses as dc
 
 import numpy as np
 import tyro
@@ -41,6 +41,11 @@ class Args:
 
     # Environment to serve the policy for. This is only used when serving default policies.
     env: EnvMode = EnvMode.ALOHA
+    # Preferred entrypoint: infer configuration from checkpoint metadata.
+    model_dir: str | None = None
+    config: str | None = None
+    # Validate files, transforms and input shapes without loading weights or serving.
+    check_only: bool = False
 
     # Port to serve the policy on.
     port: int = 8000
@@ -57,7 +62,7 @@ class Args:
     # RTC scheduling parameters. These must match the robot runtime.
     rtc_replan_start_step: int = 25
     rtc_handoff_delay_steps: int = 10
-    # Override temporal image history used by the training data config at inference time.
+    # Legacy arguments; checkpoint training config is authoritative.
     video_memory_num_frames: int = 1
     video_memory_stride_seconds: float = 1.0
     # Capture action-token attention over the three model camera views.
@@ -77,99 +82,66 @@ DEFAULT_CHECKPOINT: dict[EnvMode, Checkpoint] = {
 }
 
 
-def create_default_policy(
-    env: EnvMode,
-    *,
-    denoising_steps: int = 10,
-    rtc_replan_start_step: int = 25,
-    rtc_handoff_delay_steps: int = 10,
-    video_memory_num_frames: int = 1,
-    video_memory_stride_seconds: float = 1.0,
-) -> _policy.Policy:
-    """Create a default policy for the given environment."""
-    if checkpoint := DEFAULT_CHECKPOINT.get(env):
-        train_config = _config.get_config(checkpoint.config)
-        return _policy_config.create_trained_policy(
-            _override_history(
-                train_config,
-                video_memory_num_frames=video_memory_num_frames,
-                video_memory_stride_seconds=video_memory_stride_seconds,
-            ),
-            checkpoint.dir,
-            sample_kwargs={
-                "denoising_steps": denoising_steps,
-                "replan_start_step": rtc_replan_start_step,
-                "handoff_delay_steps": rtc_handoff_delay_steps,
-            },
-        )
-    raise ValueError(f"Unsupported environment mode: {env}")
+def selected_checkpoint(args: Args):
+    if args.model_dir is not None:
+        return args.model_dir, args.config
+    if isinstance(args.policy, Checkpoint):
+        return args.policy.dir, args.policy.config
+    checkpoint = DEFAULT_CHECKPOINT[args.env]
+    return checkpoint.dir, checkpoint.config
 
 
-def _override_history(
-    train_config: _config.TrainConfig,
-    *,
-    video_memory_num_frames: int,
-    video_memory_stride_seconds: float,
-) -> _config.TrainConfig:
-    if train_config.data.transform_pipeline is None:
-        raise ValueError("A transform pipeline is required to override policy video history.")
-    return dc.replace(
-        train_config,
-        data=dc.replace(
-            train_config.data,
-            transform_pipeline=dc.replace(
-                train_config.data.transform_pipeline,
-                video_memory_num_frames=video_memory_num_frames,
-                video_memory_stride_seconds=video_memory_stride_seconds,
-            ),
-        ),
-    )
-
-
-def create_policy(args: Args) -> _policy.Policy:
-    """Create a policy from the given arguments."""
-    match args.policy:
-        case Checkpoint():
-            return _policy_config.create_trained_policy(
-                _override_history(
-                    _config.get_config(args.policy.config),
-                    video_memory_num_frames=args.video_memory_num_frames,
-                    video_memory_stride_seconds=args.video_memory_stride_seconds,
-                ),
-                args.policy.dir,
-                sample_kwargs={
-                    "denoising_steps": args.denoising_steps,
-                    "replan_start_step": args.rtc_replan_start_step,
-                    "handoff_delay_steps": args.rtc_handoff_delay_steps,
-                },
-            )
-        case Default():
-            return create_default_policy(
-                args.env,
-                denoising_steps=args.denoising_steps,
-                rtc_replan_start_step=args.rtc_replan_start_step,
-                rtc_handoff_delay_steps=args.rtc_handoff_delay_steps,
-                video_memory_num_frames=args.video_memory_num_frames,
-                video_memory_stride_seconds=args.video_memory_stride_seconds,
-            )
-
-
-def _make_dummy_obs(num_frames: int) -> dict:
+def _make_dummy_obs(metadata: dict) -> dict:
+    video = metadata["runtime"]["video_input"]
     obs = _transforms.make_aloha_example()
-    if num_frames <= 1:
-        return obs
+    mosaic = video["mosaic"]
+    temporal_cameras = set(mosaic["cameras"]) if mosaic is not None else set(video["camera_keys"])
     obs["images"] = {
-        cam_name: np.stack([img] * num_frames, axis=0)
-        for cam_name, img in obs["images"].items()
+        camera: np.zeros(
+            ((video["num_frames"],) if video["num_frames"] > 1 and camera in temporal_cameras else ())
+            + tuple(video["image_resolution"]) + (3,), dtype=np.uint8)
+        for camera in video["camera_keys"]
     }
     return obs
 
 
+def check_checkpoint(args: Args):
+    from openpi.serving.checkpoint_config import checkpoint_config, runtime_metadata
+    root, config = checkpoint_config(*selected_checkpoint(args))
+    metadata = {"runtime": runtime_metadata(config, root)}
+    obs = _make_dummy_obs(metadata)
+    # Exercise the actual training-config input transforms, including norm stats
+    # and prompt/state tokenization, without loading model parameters.
+    transformed = _transforms.compose(config.data.transform_pipeline.policy_input_transforms())(obs)
+    print(json.dumps({"checkpoint": str(root), "runtime": metadata["runtime"],
+                      "input_shapes": {key: list(value.shape) for key,value in obs["images"].items()},
+                      "token_shape": list(transformed["tokenized_prompt"].shape)}), flush=True)
+    return root, config
+
+
+def create_policy(args: Args) -> _policy.Policy:
+    from openpi.serving.checkpoint_config import checkpoint_config
+    root, config = checkpoint_config(*selected_checkpoint(args), verify=False)
+    # create_trained_policy performs the full verification before loading weights.
+    return _policy_config.create_trained_policy(config, root, sample_kwargs={
+        "denoising_steps": args.denoising_steps,
+        "replan_start_step": args.rtc_replan_start_step,
+        "handoff_delay_steps": args.rtc_handoff_delay_steps,
+    })
+
+
 def main(args: Args) -> None:
+    if args.check_only:
+        check_checkpoint(args)
+        return
     policy = create_policy(args)
     policy_metadata = policy.metadata
-    dummy_obs = _make_dummy_obs(args.video_memory_num_frames)
-    dummy_prev_action = np.random.rand(50, 32)
+    dummy_obs = _make_dummy_obs(policy_metadata)
+    runtime = policy_metadata["runtime"]
+    dummy_prev_action = np.zeros((runtime["action_horizon"], runtime["action_dim"]), dtype=np.float32)
+    if args.rtc_replan_start_step + args.rtc_handoff_delay_steps > runtime["action_horizon"]:
+        raise ValueError("RTC handoff exceeds checkpoint action horizon")
+    logging.info("Warmup input shapes=%s action_shape=%s", {k: v.shape for k, v in dummy_obs["images"].items()}, dummy_prev_action.shape)
     dummy_action_prefix = np.zeros_like(dummy_prev_action)
     rtc_handoff_step = args.rtc_replan_start_step + args.rtc_handoff_delay_steps
     dummy_action_prefix[: args.rtc_handoff_delay_steps] = dummy_prev_action[

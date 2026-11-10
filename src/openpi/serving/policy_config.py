@@ -26,7 +26,8 @@ def create_trained_policy(
         sample_kwargs: The kwargs to pass to the `sample_action_chunk` method. If not provided, the default
             kwargs will be used.
     """
-    checkpoint_dir = download.maybe_download(str(checkpoint_dir))
+    from openpi.serving.checkpoint_config import checkpoint_config, runtime_metadata
+    checkpoint_dir, train_config = checkpoint_config(checkpoint_dir, train_config.name)
 
     logging.info("Loading model...")
     model = train_config.model.load(_model.restore_params(checkpoint_dir / "params", dtype=jnp.bfloat16))
@@ -47,9 +48,10 @@ def create_trained_policy(
     input_transforms = data_config.transform_pipeline.policy_input_transforms()
     logging.info("Filtering policy input images to training camera keys: %s", data_config.transform_pipeline.raw_image_keys)
     metadata = dict(train_config.policy_metadata or {})
-    runtime_metadata = dict(metadata.get("runtime") or {})
-    runtime_metadata["adapt_to_pi"] = bool(data_config.transform_pipeline.adapt_to_pi)
-    metadata["runtime"] = runtime_metadata
+    runtime_settings = dict(metadata.get("runtime") or {})
+    runtime_settings.update(runtime_metadata(train_config, checkpoint_dir))
+    metadata["runtime"] = runtime_settings
+    logging.info("Checkpoint runtime settings: %s", runtime_settings)
 
     return _policy.Policy(
         model,

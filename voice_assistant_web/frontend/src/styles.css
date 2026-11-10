@@ -1458,7 +1458,25 @@ button {
     gap: 8px;
   }
 }
+/* Recording controls reuse the conditioning drawer without changing inference settings. */
+.recording-scores { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; }
+.recording-scores .conditioning-score { font-size: 14px; padding-inline: 2px; }
+.recording-error-label { display: flex; align-items: center; gap: 10px; margin-block: 18px; }
+.recording-note { display: grid; gap: 8px; }
+.recording-note textarea { width: 100%; min-height: 80px; border: 1px solid #c4cdbf; border-radius: 12px; padding: 12px; resize: vertical; box-sizing: border-box; }
+.recording-stop { border: 1px solid #af4c3c; color: #873b30; background: #fff0e9; padding: 14px; border-radius: 14px; font-weight: 600; cursor: pointer; }
+.recording-stop:disabled { opacity: .45; cursor: default; }
+.recording-path { display: grid; gap: 10px; font-size: 13px; }
+.recording-path code { overflow-wrap: anywhere; }
 
+/* Compact recording drawer only; leave inference settings and other panels unchanged. */
+.recording-drawer .conditioning-body { gap: 12px; }
+.recording-drawer .conditioning-description { margin: 0; line-height: 1.45; overflow-wrap: anywhere; }
+.recording-drawer > .conditioning-description { margin: 8px 0 12px; }
+.recording-drawer .conditioning-fieldset legend { margin-bottom: 8px; }
+.recording-drawer .conditioning-fieldset > .conditioning-description { margin-bottom: 8px; }
+.recording-drawer .recording-note { gap: 4px; min-width: 0; font-size: 13px; }
+.recording-drawer .recording-folder-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 8px; }
 
 /* Voice, task shortcuts and the actual model prompt share one control panel. */
 .voice-panel {
@@ -1529,3 +1547,18 @@ button {
     border-top: 1px solid rgba(54, 45, 37, 0.12);
   }
 }
+.recording-drawer .recording-folder-row + .recording-folder-row { margin-top: 10px; }
+.recording-drawer .recording-folder-row input,
+.recording-drawer .recording-folder-row select { width: 100%; min-width: 0; height: 36px; box-sizing: border-box; border: 1px solid #c4cdbf; border-radius: 8px; padding: 6px 8px; background: #fff; color: inherit; font: inherit; }
+.recording-drawer .recording-folder-row button { min-height: 36px; padding: 6px 10px; border: 1px solid #c4cdbf; border-radius: 8px; background: #f0f4ed; color: #355640; font: inherit; font-size: 12px; cursor: pointer; white-space: nowrap; }
+.recording-drawer .recording-folder-row button:disabled { opacity: .5; cursor: default; }
+.recording-drawer .conditioning-active { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; }
+.recording-drawer .recording-error-label { margin-block: 10px; font-size: 13px; }
+.recording-drawer .recording-note textarea { min-height: 60px; padding: 8px; border-radius: 8px; }
+.recording-drawer .conditioning-score { padding-block: 10px; min-height: 0; }
+.recording-drawer .conditioning-save,
+.recording-drawer .recording-stop { padding: 10px 12px; border-radius: 10px; }
+.recording-drawer .recording-path { gap: 4px; }
+.recording-drawer .conditioning-body > a { font-size: 13px; color: #355640; }
+.recording-drawer .conditioning-body > p[role] { margin: 0; }
+

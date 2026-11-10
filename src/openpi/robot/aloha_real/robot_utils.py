@@ -3,6 +3,7 @@
 from collections import deque
 import json
 import math
+import threading
 import time
 
 from aloha.msg import RGBGrayscaleImage
@@ -77,6 +78,8 @@ class ImageRecorder:
         self.history_stride_seconds = max(0.0, history_stride_seconds)
         self.history_window_seconds = max(2.0, self.history_stride_seconds * max(1, self.history_num_frames - 1) + 1.0)
         self.image_histories = {cam_name: deque() for cam_name in self.camera_names}
+        self._image_lock = threading.RLock()
+        self._received_at = {}
 
         if init_node:
             rospy.init_node("image_recorder", anonymous=True)
@@ -98,31 +101,32 @@ class ImageRecorder:
             if self.is_debug:
                 setattr(self, f"{cam_name}_timestamps", deque(maxlen=50))
 
-        self.cam_last_timestamps = {cam_name: 0.0 for cam_name in self.camera_names}
         time.sleep(0.5)
 
     def image_cb(self, cam_name, data):
         rgb_image = self.bridge.imgmsg_to_cv2(data.images[0], desired_encoding="passthrough")
         timestamp = data.header.stamp.secs + data.header.stamp.nsecs * 1e-9
-        setattr(
-            self,
-            f"{cam_name}_rgb_image",
-            rgb_image,
-        )
-        # setattr(
-        #     self,
-        #     f"{cam_name}_depth_image",
-        #     self.bridge.imgmsg_to_cv2(data.images[1], desired_encoding="mono16"),
-        # )
-        setattr(
-            self,
-            f"{cam_name}_timestamp",
-            timestamp,
-        )
-        history = self.image_histories[cam_name]
-        history.append((timestamp, rgb_image))
-        while history and timestamp - history[0][0] > self.history_window_seconds:
-            history.popleft()
+        with self._image_lock:
+            setattr(
+                self,
+                f"{cam_name}_rgb_image",
+                rgb_image,
+            )
+            # setattr(
+            #     self,
+            #     f"{cam_name}_depth_image",
+            #     self.bridge.imgmsg_to_cv2(data.images[1], desired_encoding="mono16"),
+            # )
+            setattr(
+                self,
+                f"{cam_name}_timestamp",
+                timestamp,
+            )
+            history = self.image_histories[cam_name]
+            history.append((timestamp, rgb_image))
+            while history and timestamp - history[0][0] > self.history_window_seconds:
+                history.popleft()
+            self._received_at[cam_name] = time.monotonic()
         # setattr(self, f'{cam_name}_secs', data.images[0].header.stamp.secs)
         # setattr(self, f'{cam_name}_nsecs', data.images[0].header.stamp.nsecs)
         # cv2.imwrite('/home/lucyshi/Desktop/sample.jpg', cv_image)
@@ -164,21 +168,30 @@ class ImageRecorder:
         cam_name = "cam_right_wrist"
         return self.image_cb(cam_name, data)
 
+    def get_latest_images(self):
+        """Read available camera frames without waiting for the next camera tick.
+
+        Callback arrays are replaced, never edited in place. Reject missing or
+        stale streams before another action can be issued.
+        """
+        with self._image_lock:
+            now = time.monotonic()
+            result = {}
+            for name in self.camera_names:
+                frame = getattr(self, f"{name}_rgb_image")
+                if frame is None or now - self._received_at.get(name, 0.0) > 0.5:
+                    raise RuntimeError(f"Camera {name} has no fresh image (limit 0.5s)")
+                result[name] = frame
+                result[f"{name}_depth"] = getattr(self, f"{name}_depth_image")
+            return result
+
     def get_images(self):
-        image_dict = {}
-        for cam_name in self.camera_names:
-            while getattr(self, f"{cam_name}_timestamp") <= self.cam_last_timestamps[cam_name]:
-                time.sleep(0.00001)
-            rgb_image = getattr(self, f"{cam_name}_rgb_image")
-            depth_image = getattr(self, f"{cam_name}_depth_image")
-            self.cam_last_timestamps[cam_name] = getattr(self, f"{cam_name}_timestamp")
-            if self.history_num_frames > 1:
-                history_frames = self._select_history_frames(cam_name)
-                image_dict[cam_name] = history_frames if history_frames is not None else rgb_image
-            else:
-                image_dict[cam_name] = rgb_image
-            image_dict[f"{cam_name}_depth"] = depth_image
-        return image_dict
+        result = self.get_latest_images()
+        if self.history_num_frames > 1:
+            with self._image_lock:
+                for name in self.camera_names:
+                    result[name] = self._select_history_frames(name)
+        return result
 
     def print_diagnostics(self):
         def dt_helper(l):

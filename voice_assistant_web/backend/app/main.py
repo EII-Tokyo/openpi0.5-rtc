@@ -4,6 +4,7 @@ import asyncio
 import json
 import logging
 import time
+import uuid
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
@@ -18,11 +19,15 @@ from .redis_commands import INFERENCE_SETTINGS_KEY, read_inference_settings
 from .robot_state_bridge import RobotStateBridge
 from .schemas import HealthResponse, RealtimePayload, RuntimeStatePayload, VoiceRequest, VoiceResponse
 from .schemas import InferenceSettings, OPERATORS
+from .schemas import RecordingCommand
 from .voice_session import VoiceAssistantEngine
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 
+from .recording_folders import router as recording_folders_router
+
 app = FastAPI(title="Aloha Voice Assistant Web")
+app.include_router(recording_folders_router)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.allow_origins if settings.allow_origins != ["*"] else ["*"],
@@ -144,6 +149,38 @@ def dispatch_task(task_number: str) -> dict[str, str]:
         "task_number": task_number,
         "task_name": TASK_MAPPING[task_number],
     }
+
+
+@app.get("/api/recording")
+def recording_status() -> dict:
+    """Report runtime acknowledgements and disk completion, including stale/offline state."""
+    raw = redis_client.get("aloha_recording_state")
+    state = json.loads(raw) if raw else {"status": "idle", "frames": 0, "paused": False}
+    state["online"] = time.time() - state.get("timestamp", 0) < 3
+    return state
+
+
+@app.post("/api/recording")
+def control_recording(request: RecordingCommand) -> dict:
+    """Publish intent only; the UI waits for the control-thread acknowledgement."""
+    if request.action == "start" and not request.batch_name:
+        raise HTTPException(422, "Set a batch name before recording")
+    state = recording_status()
+    if not state["online"]:
+        raise HTTPException(503, "Robot runtime is offline; no recording command sent")
+    if request.action == "start" and (state.get("mode") != "policy" or state.get("status") in {"recording", "saving"}):
+        raise HTTPException(409, "Recording requires an active policy task and no pending save")
+    if request.action == "resume" and (not state.get("paused") or state.get("status") != "saved"):
+        raise HTTPException(409, "Resume requires a paused robot and a successfully saved recording")
+    if request.action == "stop" and state.get("status") not in {"recording", "saving"}:
+        raise HTTPException(409, "There is no active recording to finish")
+    command_id = str(uuid.uuid4())
+    listeners = redis_client.publish("aloha_voice_commands", json.dumps({
+        "type": "recording_control", "command_id": command_id, **request.model_dump()
+    }))
+    if not listeners:
+        raise HTTPException(503, "Robot runtime did not receive the recording command")
+    return {"status": "queued", "command_id": command_id}
 
 
 @app.post("/api/voice/audio", response_model=VoiceResponse)
