@@ -21,7 +21,7 @@ def pending_checkpoints(root: Path, uploaded: set[int], interval: int, final_ste
             if path.is_dir()
             and path.name.isdecimal()
             and int(path.name) not in uploaded
-            and (int(path.name) == final_step or int(path.name) > 0 and int(path.name) % interval == 0)
+            and (int(path.name) == final_step or (int(path.name) > 0 and int(path.name) % interval == 0))
             and all((path / name).is_dir() for name in ("params", "assets", "train_state"))
         ),
         key=lambda path: int(path.name),
