@@ -15,11 +15,11 @@ absolute pose/gripper values, with XYZ restored using the input state.
 The stored trajectory alignment is retained (the inspected episode has
 `action[t] == state[t]`, so the first predicted target is the current pose).
 
-Defaults: global batch 32, 16-frame horizon (0.8 seconds at 20 Hz), 10,000
+Defaults: global batch 32, 16-frame horizon (0.8 seconds at 20 Hz), 30,000
 steps, learning rate 2.5e-5 with 500 warmup steps and cosine decay to 2.5e-6,
-EMA 0.999. This is about 35 passes through the data; evaluate intermediate
+EMA 0.999. This is about 106 passes through the data; evaluate intermediate
 checkpoints for overfitting. Checkpoints are saved and retained every 1,000
-steps, plus the final step (`9999`). Allow substantial disk space for full
+steps, plus the final step (`29999`). Allow substantial disk space for full
 model/optimizer checkpoints; adjust `--keep-period` if retention is too costly.
 
 ## Remote GPU commands
@@ -88,9 +88,38 @@ Serve the final checkpoint with:
 ```bash
 uv run scripts/serve_policy.py policy:checkpoint \
   --policy.config=pi05_fastumi_pick_fan_full \
-  --policy.dir=checkpoints/pi05_fastumi_pick_fan_full/fan_full_s42/9999
+  --policy.dir=checkpoints/pi05_fastumi_pick_fan_full/fan_full_s42/29999
 ```
 
 Inference requests need `observation/image` (RGB), `observation/state`
 (seven XYZ/RPY/gripper values in the dataset's convention), and `prompt`
 (use `fan` to match training). These are pose outputs, not DROID joint velocities.
+
+## Hugging Face backup
+
+Run this watcher in a separate persistent terminal after authenticating with a
+write-capable HF token. It creates a private model repo, uploads inference
+parameters and normalization assets at steps 10,000 and 20,000, and uploads the
+complete final checkpoint at 29,999, including training state for resumption.
+All 1,000-step checkpoints remain on the training machine. Uploads only start
+after Orbax finalizes a checkpoint; failures retry and completed uploads are
+recorded locally. The watcher exits after the final upload succeeds.
+
+```bash
+uv run python examples/fastumi/upload_checkpoints.py \
+  --checkpoint-dir=checkpoints/pi05_fastumi_pick_fan_full/fan_full_s42 \
+  --repo-id=michios/pi05-fastumi-pick-fan-full
+```
+
+Remote files are under `fan_full_s42/<step>/`. To download the final checkpoint
+for inference or resumption:
+
+```bash
+uv run huggingface-cli download michios/pi05-fastumi-pick-fan-full \
+  --include 'fan_full_s42/29999/**' \
+  --local-dir checkpoints/pi05_fastumi_pick_fan_full
+```
+
+For resumption, use the same config/run name and `--no-wandb-enabled --resume`.
+Normalization assets are included in the checkpoint; the training data and
+config normalization path must also be prepared on the new machine.
