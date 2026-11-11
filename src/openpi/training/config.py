@@ -371,6 +371,9 @@ class LeRobotLiberoDataConfig(DataConfigFactory):
 class LeRobotFastUMIDataConfig(DataConfigFactory):
     """Single front camera and absolute XYZ/RPY/gripper trajectories."""
 
+    # This recipe uses one dataset. Do not inherit the required mixture CLI argument.
+    repo_ids: tyro.conf.Suppress[list[str] | None] = None
+
     @override
     def create(self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig) -> DataConfig:
         # Only translate XYZ relative to the current state. Euler angles and the

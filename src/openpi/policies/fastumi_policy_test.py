@@ -1,9 +1,33 @@
+import sys
+
 import numpy as np
 import pytest
 
 from openpi import transforms
 from openpi.policies import fastumi_policy
 from openpi.training import config
+
+
+def test_single_dataset_training_cli(monkeypatch):
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "train.py",
+            "pi05_fastumi_pick_fan_full",
+            "--exp-name=fan_full_30k_s42",
+            "--batch-size=32",
+            "--fsdp-devices=2",
+            "--num-train-steps=30000",
+            "--no-wandb-enabled",
+        ],
+    )
+    parsed = config.cli()
+    assert parsed.data.repo_id == "michios/fastumi_pick_fan"
+    assert parsed.data.repo_ids is None
+    assert parsed.num_train_steps == parsed.lr_schedule.decay_steps == 30000
+    assert parsed.fsdp_devices == 2
+    assert not parsed.wandb_enabled
 
 
 @pytest.mark.parametrize("channels_first", [True, False])
