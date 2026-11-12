@@ -139,21 +139,31 @@ uv run scripts/serve_policy.py --port=8000 policy:checkpoint \
   --policy.dir=/mnt/data/checkpoints/pi05_fastumi_pick_fan_relative/umi_pi05_run2_relative_pose/29999
 ```
 
-The existing `buildup_fastumi.py` client uses the required wrist-image/gripper
-request and relative 10D output format. When ready for a physical rollout:
+The `buildup_fastumi_pi05.py` wrapper checks the server action contract before
+initializing the robot, then delegates to the existing `buildup_fastumi.py`.
+The standard openpi server already reverses normalization using checkpoint
+assets: do not supply `--norm-stats` for that server. The wrapper rejects
+missing/incorrect action metadata and prevents double de-normalization.
+Append `--check-only` to check server metadata without camera or robot access.
+When ready for a physical rollout:
 
 ```bash
 docker exec -it droid-setup-1pc-robot_control_client-1 \
   /root/miniconda3/bin/conda run --no-capture-output -n robot \
-  python /app/droid/scripts/buildup_fastumi.py \
-  --host=127.0.0.1 --port=8000 --camera-device=0 \
+  python /app/droid/scripts/buildup_fastumi_pi05.py \
+  --remote-host=127.0.0.1 --remote-port=8000 --camera-device=0 \
   --open-loop-horizon=8 --translation-lead-gain=1.0 --gripper-lead=0
 ```
 
 This executes eight actions before replanning, with RTC disabled. Gain 1 and
 gripper lead 0 avoid the older client's default 2x translation extrapolation
 and six-frame gripper anticipation. Its existing motion limits remain active.
-No physical rollout is run by the setup procedure.
+No physical rollout is run by the setup procedure. For a custom server that
+explicitly declares `actions_normalized=true` and `action_normalization=quantile`,
+pass `--norm-stats=/path/inside/container/norm_stats.json` from that exact
+checkpoint. The wrapper applies the same inverse quantile transform as openpi.
+The current Docker container does not mount the checkpoint directory by default;
+copy or mount the statistics file only if using that custom normalized server.
 
 Run 1 remains accessible under config `pi05_fastumi_pick_fan_full`; its 7D
 absolute output and normalization are incompatible with this relative client.

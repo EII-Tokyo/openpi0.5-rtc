@@ -959,6 +959,8 @@ _CONFIGS = [
             "action_horizon": 16,
             "action_dim": 10,
             "control_space": "tcp_relative_pose_rot6d",
+            # create_trained_policy reverses normalization before websocket output.
+            "actions_normalized": False,
             "state": "gripper_only",
             "prompt": "put the fan in the box",
             "fps": 20,
