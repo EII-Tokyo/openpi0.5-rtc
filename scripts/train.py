@@ -2,6 +2,7 @@ import dataclasses
 import functools
 import logging
 import platform
+import time
 from typing import Any
 
 import etils.epath as epath
@@ -286,6 +287,8 @@ def main(config: _config.TrainConfig):
     _profiling = False
 
     infos = []
+    log_start = time.monotonic()
+    learning_rate = config.lr_schedule.create()
     try:
       for step in pbar:
         if step == _PROFILE_START:
@@ -308,7 +311,12 @@ def main(config: _config.TrainConfig):
             reduced_info = jax.device_get(jax.tree.map(jnp.mean, stacked_infos))
             info_str = ", ".join(f"{k}={v:.4f}" for k, v in reduced_info.items())
             pbar.write(f"Step {step}: {info_str}")
+            elapsed = time.monotonic() - log_start
+            reduced_info["learning_rate"] = float(learning_rate(step))
+            reduced_info["steps_per_second"] = len(infos) / elapsed
+            reduced_info["examples_per_second"] = len(infos) * config.batch_size / elapsed
             wandb.log(reduced_info, step=step)
+            log_start = time.monotonic()
             infos = []
         batch = next(data_iter)
 

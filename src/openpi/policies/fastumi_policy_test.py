@@ -1,11 +1,14 @@
 import sys
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
+from scipy.spatial.transform import Rotation
 
 from openpi import transforms
 from openpi.policies import fastumi_policy
 from openpi.training import config
+from openpi.training import data_loader
 
 
 def test_single_dataset_training_cli(monkeypatch):
@@ -82,3 +85,74 @@ def test_rejects_wrong_state_dimension():
         fastumi_policy.FastUMIInputs()(
             {"observation/image": np.zeros((8, 10, 3), dtype=np.uint8), "observation/state": np.zeros(8)}
         )
+
+
+def test_relative_pose_matches_act_and_is_world_frame_invariant():
+    rng = np.random.default_rng(42)
+    poses = rng.normal(size=(17, 7))
+    poses[:, 6] = rng.uniform(size=17)
+    sample = {
+        "observation/image": np.zeros((8, 10, 3), np.uint8),
+        "observation/state": poses[0],
+        "actions": poses[1:],
+        "prompt": "fan",
+    }
+    adapter = fastumi_policy.FastUMIRelativeInputs()
+    result = adapter(sample)
+    mats = np.tile(np.eye(4), (17, 1, 1))
+    mats[:, :3, :3] = Rotation.from_euler("xyz", poses[:, 3:6]).as_matrix()
+    mats[:, :3, 3] = poses[:, :3]
+    relative = np.linalg.inv(mats[0]) @ mats[1:]
+    expected = np.concatenate(
+        [relative[:, :3, 3], relative[:, :3, :2].transpose(0, 2, 1).reshape(16, 6), poses[1:, 6:7]], axis=-1
+    )
+    np.testing.assert_allclose(result["actions"], expected, atol=1e-6)
+    world_transform = np.eye(4)
+    world_transform[:3, :3] = Rotation.from_euler("xyz", [1.2, -0.6, 2.1]).as_matrix()
+    world_transform[:3, 3] = [3, -7, 2]
+    moved = world_transform @ mats
+    moved_poses = np.concatenate(
+        [moved[:, :3, 3], Rotation.from_matrix(moved[:, :3, :3]).as_euler("xyz"), poses[:, 6:7]], axis=-1
+    )
+    moved_result = adapter({**sample, "observation/state": moved_poses[0], "actions": moved_poses[1:]})
+    np.testing.assert_allclose(moved_result["actions"], result["actions"], atol=1e-6)
+    np.testing.assert_array_equal(moved_result["state"], result["state"])
+    assert result["state"].shape == (1,)
+    assert result["prompt"] == "put the fan in the box"
+    assert result["image_mask"] == {"base_0_rgb": False, "left_wrist_0_rgb": True, "right_wrist_0_rgb": False}
+    inference = adapter(
+        {
+            "observation/wrist_image": sample["observation/image"],
+            "observation/gripper_position": poses[0, 6],
+            "prompt": "wrong",
+        }
+    )
+    np.testing.assert_array_equal(inference["state"], result["state"])
+    assert inference["prompt"] == result["prompt"]
+    np.testing.assert_array_equal(
+        fastumi_policy.FastUMIRelativeOutputs()(transforms.PadStatesAndActions(32)(result))["actions"],
+        result["actions"][:, :10],
+    )
+
+
+def test_relative_config_cli_and_future_timestamps(monkeypatch, tmp_path):
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["train.py", "pi05_fastumi_pick_fan_relative", "--exp-name=umi_pi05_run2_relative_pose", "--fsdp-devices=2"],
+    )
+    parsed = config.cli()
+    assert parsed.wandb_enabled
+    assert parsed.num_train_steps == 30000
+    assert parsed.freeze_filter is config.nnx.Nothing
+    monkeypatch.setattr(config.ModelTransformFactory, "__call__", lambda *_: transforms.Group())
+    data_config = parsed.data.create(tmp_path, parsed.model)
+    assert data_config.repo_ids is None
+    assert data_config.action_sequence_offset == 1
+    monkeypatch.setattr(data_loader.lerobot_dataset, "LeRobotDatasetMetadata", lambda _: SimpleNamespace(fps=20))
+    calls = []
+    monkeypatch.setattr(data_loader, "SchemaRemappingLeRobotDataset", lambda *a, **kw: calls.append((a, kw)))
+    data_loader.create_torch_dataset(data_config, 16, parsed.model)
+    assert calls[0][0] == ("michios/fastumi_pick_fan",)
+    np.testing.assert_allclose(calls[0][1]["delta_timestamps"]["action"], np.arange(1, 17) / 20)
+    assert "episodes" not in calls[0][1]  # No episode holdout.

@@ -88,6 +88,8 @@ class DataConfig:
     # sequence is defined by the `action_horizon` field in the model config. This should be adjusted if your
     # LeRobot dataset is using different keys to represent the action.
     action_sequence_keys: Sequence[str] = ("actions",)
+    # First target offset in frames; 1 predicts t+1 through t+horizon.
+    action_sequence_offset: int = 0
 
     # If true, will use the LeRobot dataset task to define the prompt.
     prompt_from_task: bool = False
@@ -399,6 +401,34 @@ class LeRobotFastUMIDataConfig(DataConfigFactory):
             ),
             model_transforms=ModelTransformFactory()(model_config),
             action_sequence_keys=("action",),
+        )
+
+
+@dataclasses.dataclass(frozen=True)
+class LeRobotFastUMIRelativeDataConfig(DataConfigFactory):
+    """All episodes, TCP-relative pose targets, and gripper-only model state."""
+
+    repo_ids: tyro.conf.Suppress[list[str] | None] = None
+    prompt: str = "put the fan in the box"
+
+    @override
+    def create(self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig) -> DataConfig:
+        return dataclasses.replace(
+            self.create_base_config(assets_dirs, model_config),
+            repack_transforms=_transforms.Group(
+                inputs=[_transforms.RepackTransform({
+                    "observation/image": "observation.images.front",
+                    "observation/state": "observation.state",
+                    "actions": "action",
+                })],
+            ),
+            data_transforms=_transforms.Group(
+                inputs=[fastumi_policy.FastUMIRelativeInputs(prompt=self.prompt)],
+                outputs=[fastumi_policy.FastUMIRelativeOutputs()],
+            ),
+            model_transforms=ModelTransformFactory()(model_config),
+            action_sequence_keys=("action",),
+            action_sequence_offset=1,
         )
 
 
@@ -904,6 +934,35 @@ _CONFIGS = [
         ema_decay=0.999,
         save_interval=1000,
         keep_period=1000,
+    ),
+    TrainConfig(
+        name="pi05_fastumi_pick_fan_relative",
+        model=pi0_config.Pi0Config(pi05=True, action_horizon=16),
+        data=LeRobotFastUMIRelativeDataConfig(repo_id="michios/fastumi_pick_fan"),
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_base/params"),
+        freeze_filter=nnx.Nothing,
+        batch_size=32,
+        num_workers=4,
+        num_train_steps=30_000,
+        lr_schedule=_optimizer.CosineDecaySchedule(
+            warmup_steps=500,
+            peak_lr=2.5e-5,
+            decay_steps=30_000,
+            decay_lr=2.5e-6,
+        ),
+        optimizer=_optimizer.AdamW(clip_gradient_norm=1.0),
+        ema_decay=0.999,
+        save_interval=1000,
+        keep_period=1000,
+        wandb_enabled=True,
+        policy_metadata={
+            "action_horizon": 16,
+            "action_dim": 10,
+            "control_space": "tcp_relative_pose_rot6d",
+            "state": "gripper_only",
+            "prompt": "put the fan in the box",
+            "fps": 20,
+        },
     ),
     TrainConfig(
         name="pi05_libero",

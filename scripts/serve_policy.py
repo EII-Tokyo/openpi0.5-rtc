@@ -3,8 +3,8 @@ import enum
 import logging
 import socket
 
-import tyro
 import numpy as np
+import tyro
 
 from openpi.policies import aloha_policy as _aloha_policy
 from openpi.policies import droid_policy as _droid_policy
@@ -111,12 +111,20 @@ def main(args: Args) -> None:
     policy = create_policy(args)
     policy_metadata = policy.metadata
     config_name = args.policy.config if isinstance(args.policy, Checkpoint) else None
-    if (config_name and "droid" in config_name.lower()) or args.env == EnvMode.DROID:
+    if config_name == "pi05_fastumi_pick_fan_relative":
+        dummy_obs = {
+            "observation/wrist_image": np.zeros((224, 224, 3), dtype=np.uint8),
+            "observation/gripper_position": np.array([1.0], dtype=np.float32),
+        }
+    elif (config_name and "droid" in config_name.lower()) or args.env == EnvMode.DROID:
         dummy_obs = _droid_policy.make_droid_example()
     else:
         dummy_obs = _aloha_policy.make_aloha_example()
     dummy_prev_action = np.random.rand(16, 32)
-    policy.infer(dummy_obs, dummy_prev_action, use_rtc=True)
+    if config_name == "pi05_fastumi_pick_fan_relative":
+        policy.infer(dummy_obs, use_rtc=False)
+    else:
+        policy.infer(dummy_obs, dummy_prev_action, use_rtc=True)
     # policy.infer(dummy_obs, dummy_prev_action, use_rtc=False)
     # Record the policy's behavior.
     if args.record:

@@ -452,7 +452,7 @@ def create_torch_dataset(
 
         # Create delta_timestamps for actions
         delta_timestamps = {
-            key: [t / first_dataset_meta.fps for t in range(action_horizon)]
+            key: [(t + data_config.action_sequence_offset) / first_dataset_meta.fps for t in range(action_horizon)]
             for key in data_config.action_sequence_keys
         }
 
@@ -554,7 +554,7 @@ def create_torch_dataset(
         dataset = SchemaRemappingLeRobotDataset(
             data_config.repo_id,
             delta_timestamps={
-                key: [t / dataset_meta.fps for t in range(action_horizon)] for key in data_config.action_sequence_keys
+                key: [(t + data_config.action_sequence_offset) / dataset_meta.fps for t in range(action_horizon)] for key in data_config.action_sequence_keys
             },
         )
     # print(data_config)
