@@ -79,7 +79,7 @@ JAX_PLATFORMS=cpu uv run python examples/fastumi/prepare_mixture.py
 
 # Only after all three datasets are ready:
 JAX_PLATFORMS=cpu uv run scripts/compute_norm_stats.py \
-  --config-name pi05_fastumi_pick_fan_relative_mix
+  --config-name pi05_fastumi_pick_fan_relative_mix --num-workers=16
 ```
 
 Statistics go to

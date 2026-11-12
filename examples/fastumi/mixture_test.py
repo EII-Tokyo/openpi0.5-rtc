@@ -140,3 +140,18 @@ def test_server_warmup_uses_relative_policy_contract(config_name, monkeypatch):
     assert len(calls) == 1
     assert calls[0][1] == {"use_rtc": False}
     assert set(calls[0][0]) == {"observation/wrist_image", "observation/gripper_position"}
+
+
+def test_norm_stats_main_saves_under_mixture_asset_id(tmp_path, monkeypatch):
+    from openpi.shared import normalize  # noqa: PLC0415
+
+    cfg = dataclasses.replace(config.get_config("pi05_fastumi_pick_fan_relative_mix"), assets_base_dir=str(tmp_path))
+    monkeypatch.setattr(config.ModelTransformFactory, "__call__", lambda *_: transforms.Group())
+    monkeypatch.setattr(compute_norm_stats._config, "get_config", lambda _: cfg)  # noqa: SLF001
+    batch = {"state": np.array([[0.2], [0.8]]), "actions": np.arange(320).reshape(2, 16, 10).astype(np.float32)}
+    monkeypatch.setattr(compute_norm_stats, "create_torch_dataloader", lambda *_: ([batch], 1))
+    compute_norm_stats.main(cfg.name, num_workers=2)
+    stats = normalize.load(cfg.assets_dirs / "fastumi_pick_fan_run3")
+    assert stats["state"].mean.shape == (1,)
+    assert stats["actions"].mean.shape == (10,)
+    np.testing.assert_allclose(stats["state"].mean, [0.5])
