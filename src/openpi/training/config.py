@@ -998,11 +998,11 @@ _CONFIGS = [
         freeze_filter=nnx.Nothing,
         batch_size=32,
         num_workers=4,
-        num_train_steps=30_000,
+        num_train_steps=50_000,
         lr_schedule=_optimizer.CosineDecaySchedule(
             warmup_steps=500,
             peak_lr=2.5e-5,
-            decay_steps=30_000,
+            decay_steps=50_000,
             decay_lr=2.5e-6,
         ),
         optimizer=_optimizer.AdamW(clip_gradient_norm=1.0),

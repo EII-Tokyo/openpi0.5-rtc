@@ -26,7 +26,7 @@ def test_mixture_cli_and_shapes_at_dataset_boundary(tmp_path, monkeypatch):
     )
     cfg = config.cli()
     assert cfg.wandb_enabled
-    assert cfg.num_train_steps == 30000
+    assert cfg.num_train_steps == 50000
     assert cfg.data.repo_id is None
     assert len(cfg.data.repo_ids) == 3
     assert cfg.data.assets.asset_id == "fastumi_pick_fan_run3"

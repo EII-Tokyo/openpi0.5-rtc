@@ -3,8 +3,9 @@
 Branch: `train/pi05-fastumi-pick-fan-mixture`.
 Config: `pi05_fastumi_pick_fan_relative_mix`.
 Experiment: `umi_pi05_run3_relative_pose`.
-All uploads are now pinned and audited. Do not launch until the user confirms
-the reviewed configuration. Run 2 continues in its existing checkout and cache.
+All uploads are pinned and audited. The user authorized automatic launch after
+preparation and selected 50k steps for a conservative finish before 09:00 JST
+on November 13. Run 2 is complete and remains in its separate checkout and cache.
 
 ## Sources and sampling
 
@@ -40,16 +41,17 @@ independent datasets after LeRobot resolves the per-episode action chunk.
 - Gripper-only input state; wrist RGB in the left-wrist slot; color jitter only.
 - TCP-relative XYZ + rotation6D + absolute gripper opening fraction, horizon
   16 at 20 Hz, next-frame first target. Model action dimension remains padded 32.
-- 30,000 steps, batch 32, two GPUs/FSDP=2, seed 42, four data workers.
-- AdamW, 500-step warmup, peak LR 2.5e-5, cosine decay to 2.5e-6, EMA 0.999.
+- 50,000 steps, batch 32, two GPUs/FSDP=2, seed 42, four data workers.
+- AdamW, 500-step warmup, peak LR 2.5e-5, cosine decay over 50k steps to 2.5e-6, EMA 0.999.
 - Online W&B under project `openpi`.
-- Local full checkpoints every 1,000 steps, approximately 1.3 TB if all kept.
-- S3 inference backups at 10k/20k and full final checkpoint 29999, under
+- Local full checkpoints every 1,000 steps, approximately 2.2 TB if all kept.
+- S3 inference backups at 10k/20k/30k/40k and full final checkpoint 49999, under
   `s3://openpi-tokyo/checkpoints/umi_pi05_run3_relative_pose/`.
 - No Hugging Face uploads. HF is only the dataset source.
 
-30k steps at batch 32 corresponds to approximately 28.8 dataset passes. Expected
-training time on the same two H100s is about 7 hours, plus backup time. The larger
+50k steps at batch 32 corresponds to approximately 47.9 dataset passes. Run 2
+took about 6h44m for 30k steps; 50k projects to about 11h15m, plus backup
+time. Starting around 18:20 JST leaves over three hours before 09:00 JST. The larger
 mixture keeps the action representation and DROID wrapper contract. The extra
 closing rule (DROID closure >0.5 becomes 1.0) remains deployment postprocessing;
 training targets retain measured continuous gripper widths.
@@ -106,7 +108,8 @@ uv run scripts/train.py pi05_fastumi_pick_fan_relative_mix \
 ```bash
 uv run python examples/fastumi/upload_s3_checkpoints.py \
   --checkpoint-dir=checkpoints/pi05_fastumi_pick_fan_relative_mix/umi_pi05_run3_relative_pose \
-  --destination=s3://openpi-tokyo/checkpoints/umi_pi05_run3_relative_pose
+  --destination=s3://openpi-tokyo/checkpoints/umi_pi05_run3_relative_pose \
+  --final-step=49999
 ```
 
 Use `--policy.config=pi05_fastumi_pick_fan_relative_mix` when serving a run 3
