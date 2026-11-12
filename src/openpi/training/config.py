@@ -90,6 +90,8 @@ class DataConfig:
     action_sequence_keys: Sequence[str] = ("actions",)
     # First target offset in frames; 1 predicts t+1 through t+horizon.
     action_sequence_offset: int = 0
+    # Concatenate independent LeRobot datasets without stacking current observations.
+    concatenate_datasets: bool = False
 
     # If true, will use the LeRobot dataset task to define the prompt.
     prompt_from_task: bool = False
@@ -430,6 +432,21 @@ class LeRobotFastUMIRelativeDataConfig(DataConfigFactory):
             action_sequence_keys=("action",),
             action_sequence_offset=1,
         )
+
+
+@dataclasses.dataclass(frozen=True)
+class LeRobotFastUMIRelativeMixtureDataConfig(LeRobotFastUMIRelativeDataConfig):
+    """Uniform sampling over all frames in a pinned FastUMI dataset mixture."""
+
+    repo_ids: list[str] = dataclasses.field(default_factory=list)
+
+    @override
+    def create(self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig) -> DataConfig:
+        if not self.repo_ids or len(set(self.repo_ids)) != len(self.repo_ids):
+            raise ValueError("Provide a nonempty list of distinct dataset repo IDs")
+        if self.repo_id is not None or self.assets.asset_id is None:
+            raise ValueError("A mixture needs repo_id=None and a dedicated normalization asset_id")
+        return dataclasses.replace(super().create(assets_dirs, model_config), concatenate_datasets=True)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -939,6 +956,44 @@ _CONFIGS = [
         name="pi05_fastumi_pick_fan_relative",
         model=pi0_config.Pi0Config(pi05=True, action_horizon=16),
         data=LeRobotFastUMIRelativeDataConfig(repo_id="michios/fastumi_pick_fan"),
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_base/params"),
+        freeze_filter=nnx.Nothing,
+        batch_size=32,
+        num_workers=4,
+        num_train_steps=30_000,
+        lr_schedule=_optimizer.CosineDecaySchedule(
+            warmup_steps=500,
+            peak_lr=2.5e-5,
+            decay_steps=30_000,
+            decay_lr=2.5e-6,
+        ),
+        optimizer=_optimizer.AdamW(clip_gradient_norm=1.0),
+        ema_decay=0.999,
+        save_interval=1000,
+        keep_period=1000,
+        wandb_enabled=True,
+        policy_metadata={
+            "action_horizon": 16,
+            "action_dim": 10,
+            "control_space": "tcp_relative_pose_rot6d",
+            # create_trained_policy reverses normalization before websocket output.
+            "actions_normalized": False,
+            "state": "gripper_only",
+            "prompt": "put the fan in the box",
+            "fps": 20,
+        },
+    ),
+    TrainConfig(
+        name="pi05_fastumi_pick_fan_relative_mix",
+        model=pi0_config.Pi0Config(pi05=True, action_horizon=16),
+        data=LeRobotFastUMIRelativeMixtureDataConfig(
+            repo_ids=[
+                "michios/fastumi_pick_fan",
+                "michios/fastumi_pick_fan_1112_overlay_rescue",
+                "michios/fastumi_pick_fan_1112",
+            ],
+            assets=AssetsConfig(asset_id="fastumi_pick_fan_run3"),
+        ),
         weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_base/params"),
         freeze_filter=nnx.Nothing,
         batch_size=32,

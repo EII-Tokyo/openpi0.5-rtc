@@ -1,0 +1,10 @@
+{
+  "config_name": "pi05_fastumi_pick_fan_relative_mix",
+  "run_name": "umi_pi05_run3_relative_pose",
+  "s3_destination": "s3://openpi-tokyo/checkpoints/umi_pi05_run3_relative_pose",
+  "datasets": [
+    {"repo_id": "michios/fastumi_pick_fan", "revision": "fcca932d1000767e442ccbd0a7ca74a063a82766"},
+    {"repo_id": "michios/fastumi_pick_fan_1112_overlay_rescue", "revision": "c603e67221a069a6647650fce2bc08a2f80e7c40"},
+    {"repo_id": "michios/fastumi_pick_fan_1112", "revision": null}
+  ]
+}

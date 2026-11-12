@@ -111,7 +111,7 @@ def main(args: Args) -> None:
     policy = create_policy(args)
     policy_metadata = policy.metadata
     config_name = args.policy.config if isinstance(args.policy, Checkpoint) else None
-    if config_name == "pi05_fastumi_pick_fan_relative":
+    if config_name in ("pi05_fastumi_pick_fan_relative", "pi05_fastumi_pick_fan_relative_mix"):
         dummy_obs = {
             "observation/wrist_image": np.zeros((224, 224, 3), dtype=np.uint8),
             "observation/gripper_position": np.array([1.0], dtype=np.float32),
@@ -121,7 +121,7 @@ def main(args: Args) -> None:
     else:
         dummy_obs = _aloha_policy.make_aloha_example()
     dummy_prev_action = np.random.rand(16, 32)
-    if config_name == "pi05_fastumi_pick_fan_relative":
+    if config_name in ("pi05_fastumi_pick_fan_relative", "pi05_fastumi_pick_fan_relative_mix"):
         policy.infer(dummy_obs, use_rtc=False)
     else:
         policy.infer(dummy_obs, dummy_prev_action, use_rtc=True)

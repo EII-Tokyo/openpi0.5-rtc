@@ -94,6 +94,11 @@ def _extract_lerobot_sample_context(dataset, index: int) -> dict[str, typing.Any
     if hasattr(dataset, "get_sample_context"):
         return dataset.get_sample_context(index)
 
+    if isinstance(dataset, torch.utils.data.ConcatDataset):
+        dataset_idx = int(np.searchsorted(dataset.cumulative_sizes, index, side="right"))
+        start_idx = 0 if dataset_idx == 0 else dataset.cumulative_sizes[dataset_idx - 1]
+        return _extract_lerobot_sample_context(dataset.datasets[dataset_idx], index - start_idx)
+
     if hasattr(dataset, "_datasets") and hasattr(dataset, "_cumulative_len"):
         dataset_idx = int(np.searchsorted(dataset._cumulative_len, index, side="right") - 1)
         start_idx = int(dataset._cumulative_len[dataset_idx])
@@ -446,6 +451,26 @@ def create_torch_dataset(
         raise ValueError("Repo ID or repo IDs is not set. Cannot create dataset.")
     if repo_id == "fake":
         return FakeDataset(model_config, num_samples=1024)
+    if repo_ids is not None and data_config.concatenate_datasets:
+        if not repo_ids or len(set(repo_ids)) != len(repo_ids):
+            raise ValueError("Provide a nonempty list of distinct dataset repo IDs")
+        datasets = []
+        for dataset_id in repo_ids:
+            meta = lerobot_dataset.LeRobotDatasetMetadata(dataset_id)
+            if meta.fps != 20:
+                raise ValueError(f"FastUMI mixture requires 20 Hz, got {meta.fps} for {dataset_id}")
+            # Only actions get a time axis. Current state/image must retain the
+            # single-dataset shapes (7,) and (C,H,W), not (1,7)/(1,C,H,W).
+            datasets.append(
+                SchemaRemappingLeRobotDataset(
+                    dataset_id,
+                    delta_timestamps={
+                        key: [(t + data_config.action_sequence_offset) / meta.fps for t in range(action_horizon)]
+                        for key in data_config.action_sequence_keys
+                    },
+                )
+            )
+        return torch.utils.data.ConcatDataset(datasets)
     if repo_ids is not None:
         # Get FPS from first dataset (assume all datasets in multi-dataset have same FPS)
         first_dataset_meta = lerobot_dataset.LeRobotDatasetMetadata(repo_ids[0])
