@@ -3,24 +3,25 @@
 Branch: `train/pi05-fastumi-pick-fan-mixture`.
 Config: `pi05_fastumi_pick_fan_relative_mix`.
 Experiment: `umi_pi05_run3_relative_pose`.
-Preparation only: do not launch until the new upload is complete and the user
-asks to start. Run 2 continues in its existing checkout and cache.
+All uploads are now pinned and audited. Do not launch until the user confirms
+the reviewed configuration. Run 2 continues in its existing checkout and cache.
 
 ## Sources and sampling
 
 The exact source revisions are recorded in `run3_datasets.json`.
 
-| Dataset | Episodes | Frames | Status |
-| --- | ---: | ---: | --- |
-| `michios/fastumi_pick_fan` | 105 | 9,076 | Pinned and audited |
-| `michios/fastumi_pick_fan_1112_overlay_rescue` | 54 | 4,362 | Pinned and audited |
-| `michios/fastumi_pick_fan_1112` | Pending | Pending | Upload pending; revision must be pinned |
+| Dataset | Episodes | Frames | Sampling share |
+| --- | ---: | ---: | ---: |
+| `michios/fastumi_pick_fan` | 105 | 9,076 | 27.2% |
+| `michios/fastumi_pick_fan_1112_overlay_rescue` | 54 | 4,362 | 13.1% |
+| `michios/fastumi_pick_fan_1112` | 244 | 19,930 | 59.7% |
 
-The first two sources have 159 episodes / 13,438 frames in total. All their
-pose/action entries are finite, `action[t] == state[t]`, and no exact pose
-trajectory or pose frame in the rescue set duplicates the original set. This
-exact-match check does not establish that there are no visually similar or
-near-duplicate demonstrations. The third dataset still needs the same checks.
+The complete mixture has 403 episodes / 33,368 frames. All pose/action entries
+are finite and `action[t] == state[t]`. No exact pose trajectories or pose frames
+overlap across the three sources. This exact-match check does not rule out
+visually similar or near-duplicate demonstrations. Numerical audit results and
+source revisions are saved in `run3_data_audit.json`. Real-image smoke checks
+passed at all dataset boundaries.
 
 Sample uniformly over all frames across all three datasets, rather than giving
 equal weight to datasets of different lengths. Dataset probability is its frame
@@ -47,9 +48,11 @@ independent datasets after LeRobot resolves the per-episode action chunk.
   `s3://openpi-tokyo/checkpoints/umi_pi05_run3_relative_pose/`.
 - No Hugging Face uploads. HF is only the dataset source.
 
-Final frame counts, dataset sampling proportions, and effective dataset passes
-at 30k steps must be updated when the third upload is complete. The larger
-mixture does not change the action representation or DROID wrapper contract.
+30k steps at batch 32 corresponds to approximately 28.8 dataset passes. Expected
+training time on the same two H100s is about 7 hours, plus backup time. The larger
+mixture keeps the action representation and DROID wrapper contract. The extra
+closing rule (DROID closure >0.5 becomes 1.0) remains deployment postprocessing;
+training targets retain measured continuous gripper widths.
 
 ## Preparation
 
@@ -64,12 +67,10 @@ export CUDA_VISIBLE_DEVICES=0,1
 export XLA_PYTHON_CLIENT_MEM_FRACTION=0.9
 export WANDB_MODE=online
 
-# Optional now: prepare only the two pinned sources. This reports ready=false.
-JAX_PLATFORMS=cpu uv run python examples/fastumi/prepare_mixture.py --allow-pending
 ```
 
-After the upload is complete, inspect the final repository metadata/file list,
-set its immutable SHA in `run3_datasets.json`, and run:
+All three source revisions are pinned in `run3_datasets.json`. Prepare and audit
+them using the same manifest on every machine:
 
 ```bash
 # Refuses missing revisions or incomplete uploads. Validates schema, counts,
@@ -88,9 +89,10 @@ The preparation report lives at
 `ready: true` with all three pinned datasets before training. A partial report
 is deliberately not a ready-to-train mixture.
 
-Available sources are already prepared locally under
-`/mnt/data/fastumi_run3/lerobot`, including real-image and dataset-boundary smoke
-checks. Use that same `HF_LEROBOT_HOME` to continue local preparation.
+All three sources are prepared locally under `/mnt/data/fastumi_run3/lerobot`,
+including real-image and dataset-boundary smoke checks. The isolated remote
+checkout is `/home/ubuntu/openpi-fastumi-run3`; its environment script is
+`/home/ubuntu/fastumi-run3-env.sh`. Preparation runs without launching training.
 
 ## Launch only after user approval
 

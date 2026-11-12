@@ -1,0 +1,94 @@
+{
+  "total_episodes": 403,
+  "total_frames": 33368,
+  "passes_at_30000_steps_batch32": 28.770079117717575,
+  "datasets": [
+    {
+      "repo_id": "michios/fastumi_pick_fan",
+      "revision": "fcca932d1000767e442ccbd0a7ca74a063a82766",
+      "episodes": 105,
+      "frames": 9076,
+      "episode_length_range": [
+        25,
+        243
+      ],
+      "action_state_max_difference": 0.0,
+      "gripper_range": [
+        0.1260458379983902,
+        1.0
+      ],
+      "translation_step_m_p50_p99_max": [
+        0.01403507650560964,
+        0.05411302042926823,
+        0.07450075541861341
+      ],
+      "rotation_step_deg_p50_p99_max": [
+        2.4241105482844634,
+        8.191224551406362,
+        17.55003240714125
+      ],
+      "exact_duplicate_episodes_against_earlier_sources": [],
+      "exact_overlap_frames_against_earlier_sources": 0,
+      "padded_target_fraction": 0.09833627148523578,
+      "sampling_fraction": 0.2719971229920882
+    },
+    {
+      "repo_id": "michios/fastumi_pick_fan_1112_overlay_rescue",
+      "revision": "c603e67221a069a6647650fce2bc08a2f80e7c40",
+      "episodes": 54,
+      "frames": 4362,
+      "episode_length_range": [
+        53,
+        128
+      ],
+      "action_state_max_difference": 0.0,
+      "gripper_range": [
+        0.19811320304870605,
+        0.9204851984977722
+      ],
+      "translation_step_m_p50_p99_max": [
+        0.01454351961010094,
+        0.04595226587702508,
+        0.07417072859717402
+      ],
+      "rotation_step_deg_p50_p99_max": [
+        1.921087580659513,
+        6.73094557890912,
+        13.495023360080637
+      ],
+      "exact_duplicate_episodes_against_earlier_sources": [],
+      "exact_overlap_frames_against_earlier_sources": 0,
+      "padded_target_fraction": 0.10522696011004126,
+      "sampling_fraction": 0.13072404699112922
+    },
+    {
+      "repo_id": "michios/fastumi_pick_fan_1112",
+      "revision": "25403db6e0586963d07fe3fd9ccdba1f21d2210e",
+      "episodes": 244,
+      "frames": 19930,
+      "episode_length_range": [
+        43,
+        181
+      ],
+      "action_state_max_difference": 0.0,
+      "gripper_range": [
+        0.10984055697917938,
+        1.0
+      ],
+      "translation_step_m_p50_p99_max": [
+        0.014475956394801568,
+        0.05122723129607244,
+        0.07324431626384971
+      ],
+      "rotation_step_deg_p50_p99_max": [
+        2.002953714990466,
+        7.040348970786277,
+        11.178683580075568
+      ],
+      "exact_duplicate_episodes_against_earlier_sources": [],
+      "exact_overlap_frames_against_earlier_sources": 0,
+      "padded_target_fraction": 0.10406422478675363,
+      "sampling_fraction": 0.5972788300167825
+    }
+  ]
+}
