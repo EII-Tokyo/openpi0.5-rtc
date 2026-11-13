@@ -8,7 +8,9 @@ JAX_PLATFORMS=cpu .venv/bin/python -m pytest -q \
   examples/fastumi/mid_post_loader_test.py examples/fastumi/two_phase_test.py \
   examples/fastumi/mixture_test.py src/openpi/policies/fastumi_policy_test.py \
   examples/fastumi/upload_s3_checkpoints_test.py
-JAX_PLATFORMS=cpu .venv/bin/python examples/fastumi/compute_mid_post_norm.py --root="$FASTUMI_TWO_PHASE_ROOT"
+if [[ ! -f assets/pi05_fastumi_midtrain/fastumi_mid_post/provenance.json ]]; then
+  JAX_PLATFORMS=cpu .venv/bin/python examples/fastumi/compute_mid_post_norm.py --root="$FASTUMI_TWO_PHASE_ROOT"
+fi
 JAX_PLATFORMS=cpu .venv/bin/python examples/fastumi/verify_mid_post_ready.py --root="$FASTUMI_TWO_PHASE_ROOT"
 .venv/bin/python - <<'PY'
 import jax,wandb
@@ -18,7 +20,9 @@ print('Two GPUs and W&B authentication verified', flush=True)
 PY
 aws s3api list-objects-v2 --bucket openpi-tokyo --prefix checkpoints/umi_pi05_run4_midtrain/ --max-keys 1 --no-cli-pager > /dev/null
 for phase in midtrain posttrain; do
-  tmux new-session -d -s "fastumi-run4-upload-$phase" "bash /home/ubuntu/fastumi-run4-upload-$phase.sh > /home/ubuntu/fastumi-run4-upload-$phase.log 2>&1"
+  if ! tmux has-session -t "fastumi-run4-upload-$phase" 2>/dev/null; then
+    tmux new-session -d -s "fastumi-run4-upload-$phase" "bash /home/ubuntu/fastumi-run4-upload-$phase.sh > /home/ubuntu/fastumi-run4-upload-$phase.log 2>&1"
+  fi
 done
 .venv/bin/python scripts/train.py pi05_fastumi_midtrain \
   --exp-name=umi_pi05_run4_midtrain --fsdp-devices=2 2>&1 | tee /home/ubuntu/fastumi-run4-midtrain.log

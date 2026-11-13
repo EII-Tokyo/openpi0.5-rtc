@@ -454,6 +454,7 @@ class LeRobotFastUMIRelativeMixtureDataConfig(LeRobotFastUMIRelativeDataConfig):
 
 @dataclasses.dataclass(frozen=True)
 class FastUMITwoPhaseDataConfig(DataConfigFactory):
+    repo_ids: tyro.conf.Suppress[list[str] | None] = None
     phase: str = "midtrain"
     root: str | None = None
     fan_fraction: float = 0.1

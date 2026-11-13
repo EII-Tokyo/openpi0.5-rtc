@@ -159,3 +159,17 @@ def test_norm_does_not_read_posttraining_public_samples(tmp_path):
     (root / "2.npz").unlink()  # Midtraining stats must not open reserved public data at all.
     compute_norm(root, samples=1024, output=tmp_path / "second")
     assert (tmp_path / "first/norm_stats.json").read_bytes() == (tmp_path / "second/norm_stats.json").read_bytes()
+
+
+@pytest.mark.parametrize("phase", ["midtrain", "posttrain"])
+def test_actual_phase_launch_cli_requires_no_unused_dataset_ids(monkeypatch, phase):
+    import sys  # noqa: PLC0415
+    from openpi.training import config  # noqa: PLC0415
+
+    monkeypatch.setattr(
+        sys, "argv", ["train.py", f"pi05_fastumi_{phase}", f"--exp-name=umi_pi05_run4_{phase}", "--fsdp-devices=2"]
+    )
+    cfg = config.cli()
+    assert cfg.data.repo_ids is None
+    assert cfg.data.phase == phase
+    assert cfg.fsdp_devices == 2
