@@ -38,7 +38,13 @@ def validate_task(task: dict) -> None:
         raise ValueError(f"Episode instructions absent from task metadata: {task['path']}")
 
 
-def partition(inventory: dict, posttrain_public_episodes: int, seed: int = 42) -> dict:
+def partition(
+    inventory: dict,
+    posttrain_public_episodes: int,
+    seed: int = 42,
+    *,
+    excluded_episodes: set[tuple[str, int]] | None = None,
+) -> dict:
     """Sample complete episodes without replacement, independently of file ordering."""
     revision = inventory["revision"]
     if len(revision) != 40 or any(c not in "0123456789abcdef" for c in revision):
@@ -51,6 +57,10 @@ def partition(inventory: dict, posttrain_public_episodes: int, seed: int = 42) -
             raise ValueError("This adapter supports single-arm tasks only")
         validate_task(task)
     identities = [(task["path"], e["episode_index"]) for task in tasks for e in task["episodes"]]
+    excluded = excluded_episodes or set()
+    if not excluded.issubset(set(identities)):
+        raise ValueError("Exclusions contain unknown public episode IDs")
+    identities = [identity for identity in identities if identity not in excluded]
     if not 0 < posttrain_public_episodes < len(identities):
         raise ValueError("Reserve a positive count smaller than the public episode total")
 
@@ -66,7 +76,8 @@ def partition(inventory: dict, posttrain_public_episodes: int, seed: int = 42) -
                 (
                     e
                     for e in task["episodes"]
-                    if ((task["path"], e["episode_index"]) in reserved) == (phase == "posttrain")
+                    if (task["path"], e["episode_index"]) not in excluded
+                    and ((task["path"], e["episode_index"]) in reserved) == (phase == "posttrain")
                 ),
                 key=lambda e: e["episode_index"],
             )
@@ -98,6 +109,7 @@ def partition(inventory: dict, posttrain_public_episodes: int, seed: int = 42) -
             phase: {"episodes": sum(s["episodes"] for s in sources), "frames": sum(s["frames"] for s in sources)}
             for phase, sources in phases.items()
         },
+        "excluded_episodes": [{"path": path, "episode_index": episode} for path, episode in sorted(excluded)],
         "public_episode_overlap": 0,
         "full_pose_audit_required": True,
     }
@@ -142,11 +154,18 @@ def main(
     revision: str = "4cf7cca8fdc15d6f71ee0055553ce8a5e78aa9a0",
     seed: int = 42,
     inventory_path: Path | None = None,
+    availability: Path | None = None,
 ):
     inventory = json.loads(inventory_path.read_text()) if inventory_path else fetch_inventory(revision)
     if inventory["repo_id"] != PUBLIC_REPO or inventory["revision"] != revision:
         raise ValueError("Inventory does not match requested pinned source")
-    result = partition(inventory, posttrain_public_episodes, seed)
+    excluded = set()
+    if availability is not None:
+        report = json.loads(availability.read_text())
+        if (report["repo_id"], report["revision"]) != (PUBLIC_REPO, revision):
+            raise ValueError("Availability report belongs to another source revision")
+        excluded = {(item["path"], item["episode_index"]) for item in report["excluded_episodes"]}
+    result = partition(inventory, posttrain_public_episodes, seed, excluded_episodes=excluded)
     serialized = json.dumps(result, indent=2) + "\n"
     if output.exists() and output.read_text() != serialized:
         raise FileExistsError("Refusing to overwrite a different split; choose a new output path")

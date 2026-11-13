@@ -72,3 +72,20 @@ def test_partition_rejects_bad_metadata():
     source["tasks"][0]["episodes"][0]["tasks"] = ["wrong instruction"]
     with pytest.raises(ValueError, match="instructions"):
         partition(source, 7)
+
+
+def test_incomplete_reserved_episodes_are_replaced_before_training():
+    source = inventory()
+    initial = partition(source, 7)
+    original_post = {(s["path"], e) for s in initial["public_phases"]["posttrain"] for e in s["episode_indices"]}
+    excluded = set(sorted(original_post)[:2]) | {("single_arm/task_0", 0)}
+    repaired = partition(source, 7, excluded_episodes=excluded)
+    mid = {(s["path"], e) for s in repaired["public_phases"]["midtrain"] for e in s["episode_indices"]}
+    post = {(s["path"], e) for s in repaired["public_phases"]["posttrain"] for e in s["episode_indices"]}
+    assert len(post) == 7
+    assert not mid & post
+    assert not excluded & (mid | post)
+    assert len(mid | post) == 24 - len(excluded)
+    assert original_post - excluded <= post
+    with pytest.raises(ValueError, match="unknown"):
+        partition(source, 7, excluded_episodes={("single_arm/task_9", 999)})

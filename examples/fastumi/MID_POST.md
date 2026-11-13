@@ -26,10 +26,16 @@ Episode identity includes the task path because episode indices restart per task
 
 | Phase | Fan episodes | Public episodes | Public frames |
 | --- | ---: | ---: | ---: |
-| Midtrain | 403 | 41,596 | 14,278,432 |
-| Posttrain | 403 | 403 | 139,876 |
+| Midtrain | 403 | 39,000 | 13,263,105 |
+| Posttrain | 403 | 403 | 137,530 |
 
-The public partitions are disjoint and exhaustive. Reserve the entire episode,
+The public partitions are disjoint and exhaustive over complete episodes.
+A full file inventory found 2,596 incomplete microwave episodes; these are
+explicitly listed in `mid_post_availability.json` and excluded before sampling.
+There are 39,403 complete public episodes. The 403 reserved episodes were
+regenerated with the same seed/ranking, retaining all originally reserved
+complete episodes and replacing 33 incomplete ones. No training occurred
+before this correction. Reserve the entire episode,
 including all frames and action chunks. Public posttraining episodes must be
 excluded from midtraining samples **and normalization statistics**. This is a
 phase split, not a validation split: posttraining trains on its reserved episodes.
@@ -89,6 +95,7 @@ labels, and refuses to overwrite a different existing split:
 .venv/bin/python examples/fastumi/prepare_two_phase.py \
   --posttrain-public-episodes=403 \
   --seed=42 \
+  --availability=examples/fastumi/mid_post_availability.json \
   --output=examples/fastumi/mid_post_public_split.proposed.json
 
 .venv/bin/python -m pytest -q examples/fastumi/two_phase_test.py

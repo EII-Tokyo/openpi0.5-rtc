@@ -47,6 +47,8 @@ class Downloader:
                         print(f"Retrying HTTP {response.status_code}: {relative} in {pause}s", flush=True)
                         time.sleep(pause)
                         continue
+                    if response.status_code == 404:
+                        raise FileNotFoundError(f"Pinned source file is absent: {relative}")
                     response.raise_for_status()
                     digest = hashlib.sha256()
                     size = 0
@@ -105,6 +107,9 @@ def main(
                 if key in assignments:
                     raise ValueError("Public episode appears in both phases")
                 assignments[key] = phase
+    excluded = {(e["path"], e["episode_index"]) for e in spec.get("excluded_episodes", [])}
+    if excluded & set(assignments):
+        raise ValueError("An excluded episode appears in a training phase")
     jobs = []
     for task_path in sorted({p for p, _ in assignments}):
         meta = {}
@@ -117,10 +122,14 @@ def main(
             )
         info, episodes, tasks = meta["info.json"], meta["episodes.jsonl"], meta["tasks.jsonl"]
         validate_task({"path": task_path, "info": info, "episodes": episodes, "tasks": tasks})
-        if {e["episode_index"] for e in episodes} != {e for p, e in assignments if p == task_path}:
+        selected_ids = {e for p, e in assignments if p == task_path}
+        excluded_ids = {e for p, e in excluded if p == task_path}
+        if {e["episode_index"] for e in episodes} != selected_ids | excluded_ids:
             raise ValueError("Split does not cover the pinned source")
         for episode in episodes:
-            jobs.append(  # noqa: PERF401
+            if episode["episode_index"] in excluded_ids:
+                continue
+            jobs.append(
                 {
                     "source": task_path,
                     "episode": episode["episode_index"],
