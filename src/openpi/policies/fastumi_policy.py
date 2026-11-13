@@ -58,7 +58,7 @@ class FastUMIOutputs(transforms.DataTransformFn):
 class FastUMIRelativeInputs(transforms.DataTransformFn):
     """Wrist RGB + gripper only; training poses are used solely to form targets."""
 
-    prompt: str = "put the fan in the box"
+    prompt: str | None = "put the fan in the box"
 
     def __call__(self, data: dict) -> dict:
         # Training provides the full pose; inference needs no robot/world pose.
@@ -81,8 +81,8 @@ class FastUMIRelativeInputs(transforms.DataTransformFn):
         inputs["image"]["left_wrist_0_rgb"] = rgb
         inputs["image_mask"].update(base_0_rgb=np.False_, left_wrist_0_rgb=np.True_)
         inputs["state"] = gripper.astype(np.float32)
-        # Deliberately override dataset task text and caller-supplied prompts.
-        inputs["prompt"] = self.prompt
+        # Single-task recipes remain fixed; multi-task recipes preserve source instructions.
+        inputs["prompt"] = self.prompt if self.prompt is not None else data.get("prompt", "put the fan in the box")
         if "actions" in data:
             if pose is None:
                 raise ValueError("Training targets require the current anchor pose")

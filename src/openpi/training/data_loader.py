@@ -17,6 +17,8 @@ import torch
 
 import openpi.models.model as _model
 import openpi.training.config as _config
+from openpi.training.fastumi_two_phase import FastUMIEpisodes
+from openpi.training.fastumi_two_phase import GroupSampler
 from openpi.training.droid_rlds_dataset import DroidRldsDataset
 import openpi.transforms as _transforms
 
@@ -445,6 +447,8 @@ def create_torch_dataset(
     data_config: _config.DataConfig, action_horizon: int, model_config: _model.BaseModelConfig
 ) -> Dataset:
     """Create a dataset for training."""
+    if data_config.fastumi_phase is not None:
+        return FastUMIEpisodes(data_config.fastumi_root, data_config.fastumi_phase, action_horizon)
     repo_id = data_config.repo_id
     repo_ids = data_config.repo_ids
     if repo_id is None and repo_ids is None:
@@ -757,6 +761,7 @@ def create_torch_data_loader(
         seed: The seed to use for shuffling the data.
     """
     dataset = create_torch_dataset(data_config, action_horizon, model_config)
+    raw_dataset = dataset
     dataset = transform_dataset(dataset, data_config, skip_norm_stats=skip_norm_stats)
 
     # Use TorchDataLoader for both frameworks
@@ -777,6 +782,12 @@ def create_torch_data_loader(
             local_batch_size = batch_size
     else:
         local_batch_size = batch_size // jax.process_count()
+
+    if data_config.fastumi_phase is not None:
+        if sampler is not None or jax.process_count() != 1:
+            raise ValueError("FastUMI balanced sampling supports one process with multiple GPUs")
+        sampler = GroupSampler(raw_dataset.fan_frames, raw_dataset.public_frames, local_batch_size,
+                               data_config.fan_fraction, seed=seed)
 
     logging.info(f"dataset length: {len(dataset)}")
     logging.info(f"local_batch_size: {local_batch_size}")

@@ -92,6 +92,9 @@ class DataConfig:
     action_sequence_offset: int = 0
     # Concatenate independent LeRobot datasets without stacking current observations.
     concatenate_datasets: bool = False
+    fastumi_phase: str | None = None
+    fastumi_root: str | None = None
+    fan_fraction: float = 0.5
 
     # If true, will use the LeRobot dataset task to define the prompt.
     prompt_from_task: bool = False
@@ -447,6 +450,26 @@ class LeRobotFastUMIRelativeMixtureDataConfig(LeRobotFastUMIRelativeDataConfig):
         if self.repo_id is not None or self.assets.asset_id is None:
             raise ValueError("A mixture needs repo_id=None and a dedicated normalization asset_id")
         return dataclasses.replace(super().create(assets_dirs, model_config), concatenate_datasets=True)
+
+
+@dataclasses.dataclass(frozen=True)
+class FastUMITwoPhaseDataConfig(DataConfigFactory):
+    phase: str = "midtrain"
+    root: str | None = None
+    fan_fraction: float = 0.1
+
+    def create(self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig) -> DataConfig:
+        if self.phase not in ("midtrain", "posttrain") or not 0 < self.fan_fraction < 1:
+            raise ValueError("Invalid FastUMI phase or sampling fraction")
+        return dataclasses.replace(
+            self.create_base_config(assets_dirs, model_config),
+            fastumi_phase=self.phase, fastumi_root=self.root, fan_fraction=self.fan_fraction,
+            data_transforms=_transforms.Group(
+                inputs=[fastumi_policy.FastUMIRelativeInputs(prompt=None)],
+                outputs=[fastumi_policy.FastUMIRelativeOutputs()],
+            ),
+            model_transforms=ModelTransformFactory()(model_config),
+        )
 
 
 @dataclasses.dataclass(frozen=True)
@@ -1019,6 +1042,48 @@ _CONFIGS = [
             "state": "gripper_only",
             "prompt": "put the fan in the box",
             "fps": 20,
+        },
+    ),
+    TrainConfig(
+        name="pi05_fastumi_midtrain",
+        model=pi0_config.Pi0Config(pi05=True, action_horizon=16),
+        data=FastUMITwoPhaseDataConfig(
+            repo_id="fastumi/two_phase", phase="midtrain", fan_fraction=0.1,
+            assets=AssetsConfig(assets_dir="assets/pi05_fastumi_midtrain", asset_id="fastumi_mid_post"),
+        ),
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_base/params"),
+        freeze_filter=nnx.Nothing,
+        batch_size=32, num_workers=8, num_train_steps=200000,
+        lr_schedule=_optimizer.CosineDecaySchedule(
+            warmup_steps=1000, peak_lr=2.5e-5, decay_steps=200000, decay_lr=2.5e-6,
+        ),
+        optimizer=_optimizer.AdamW(clip_gradient_norm=1.0), ema_decay=0.999,
+        save_interval=5000, keep_period=50000, wandb_enabled=True,
+        policy_metadata={
+            "action_horizon": 16, "action_dim": 10, "control_space": "tcp_relative_pose_rot6d",
+            "actions_normalized": False, "state": "gripper_only", "fps": 20,
+            "prompt": "put the fan in the box", "multitask": True,
+        },
+    ),
+    TrainConfig(
+        name="pi05_fastumi_posttrain",
+        model=pi0_config.Pi0Config(pi05=True, action_horizon=16),
+        data=FastUMITwoPhaseDataConfig(
+            repo_id="fastumi/two_phase", phase="posttrain", fan_fraction=0.5,
+            assets=AssetsConfig(assets_dir="assets/pi05_fastumi_midtrain", asset_id="fastumi_mid_post"),
+        ),
+        weight_loader=weight_loaders.CheckpointWeightLoader("checkpoints/pi05_fastumi_midtrain/umi_pi05_run4_midtrain/199999/params"),
+        freeze_filter=nnx.Nothing,
+        batch_size=32, num_workers=8, num_train_steps=100000,
+        lr_schedule=_optimizer.CosineDecaySchedule(
+            warmup_steps=1000, peak_lr=1e-5, decay_steps=100000, decay_lr=1e-6,
+        ),
+        optimizer=_optimizer.AdamW(clip_gradient_norm=1.0), ema_decay=0.999,
+        save_interval=5000, keep_period=25000, wandb_enabled=True,
+        policy_metadata={
+            "action_horizon": 16, "action_dim": 10, "control_space": "tcp_relative_pose_rot6d",
+            "actions_normalized": False, "state": "gripper_only", "fps": 20,
+            "prompt": "put the fan in the box", "multitask": True,
         },
     ),
     TrainConfig(
