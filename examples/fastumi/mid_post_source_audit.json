@@ -1,0 +1,455 @@
+{
+  "repo_id": "IPEC-COMMUNITY/FastUMI_100k_lerobot",
+  "revision": "4cf7cca8fdc15d6f71ee0055553ce8a5e78aa9a0",
+  "audit_scope": "Metadata for all 12 single-arm tasks; pose arrays from episode 0 of each task. Full selected-episode pose audit still required before training.",
+  "episodes": 41999,
+  "frames": 14418308,
+  "tasks": [
+    {
+      "path": "single_arm/Prepare_tableware",
+      "episodes": 3368,
+      "frames": 1000937,
+      "instructions": [
+        {
+          "task_index": 0,
+          "task": "Put the chopsticks and spoon from the left-hand tray into the right-hand bowl."
+        }
+      ]
+    },
+    {
+      "path": "single_arm/Store_Shoes_in_Shoe_Cabinet",
+      "episodes": 3343,
+      "frames": 1382693,
+      "instructions": [
+        {
+          "task_index": 0,
+          "task": "Open the shoe cabinet door, grab the shoes and put them into the shoe cabinet, then close the shoe cabinet door."
+        }
+      ]
+    },
+    {
+      "path": "single_arm/get_plate_and_spoon_from_dish_rack",
+      "episodes": 3611,
+      "frames": 1009393,
+      "instructions": [
+        {
+          "task_index": 0,
+          "task": "Take the plate from the dish rack, then take the spoon from the basket and place it into the plate."
+        }
+      ]
+    },
+    {
+      "path": "single_arm/heat_food_in_microwave",
+      "episodes": 3156,
+      "frames": 1248699,
+      "instructions": [
+        {
+          "task_index": 0,
+          "task": "Open the microwave, put the food inside, and close the microwave door."
+        }
+      ]
+    },
+    {
+      "path": "single_arm/heat_food_in_toaster_oven",
+      "episodes": 4036,
+      "frames": 1329594,
+      "instructions": [
+        {
+          "task_index": 0,
+          "task": "Open the toaster oven, put the food inside, and close the toaster oven door."
+        }
+      ]
+    },
+    {
+      "path": "single_arm/iron_clothes",
+      "episodes": 2541,
+      "frames": 876749,
+      "instructions": [
+        {
+          "task_index": 0,
+          "task": "Iron the clothes twice with a garment steamer, once on the left side and once on the right side."
+        }
+      ]
+    },
+    {
+      "path": "single_arm/make_sandwich",
+      "episodes": 3104,
+      "frames": 911170,
+      "instructions": [
+        {
+          "task_index": 0,
+          "task": "pick up the leafy greens from the right-hand tray and place them on the bread. Then, take the top slice of bread from the bread box and cover the greens with it."
+        }
+      ]
+    },
+    {
+      "path": "single_arm/open_toilet_lid",
+      "episodes": 2869,
+      "frames": 782929,
+      "instructions": [
+        {
+          "task_index": 0,
+          "task": "Open the toilet lid."
+        }
+      ]
+    },
+    {
+      "path": "single_arm/pour_water_into_cup",
+      "episodes": 4206,
+      "frames": 1539304,
+      "instructions": [
+        {
+          "task_index": 0,
+          "task": "take the bottle from table, then pour the juice into the cup, finally place the bottle on the coaster"
+        }
+      ]
+    },
+    {
+      "path": "single_arm/put_shoes_into_storage_box",
+      "episodes": 4384,
+      "frames": 1705275,
+      "instructions": [
+        {
+          "task_index": 0,
+          "task": "Open the storage box then place both shoes into the box .Put the left shoe in first, then the right shoe, with the right side of both shoes facing outward in a uniform manner."
+        }
+      ]
+    },
+    {
+      "path": "single_arm/take_items_out_of_drawer",
+      "episodes": 4137,
+      "frames": 1509302,
+      "instructions": [
+        {
+          "task_index": 0,
+          "task": "Pull open the drawer, take out the items inside it, and place them on the countertop above the cabinet."
+        }
+      ]
+    },
+    {
+      "path": "single_arm/wash_clothes",
+      "episodes": 3244,
+      "frames": 1122263,
+      "instructions": [
+        {
+          "task_index": 0,
+          "task": "Put the clothes into the washing machine and then close the washing machine lid."
+        }
+      ]
+    }
+  ],
+  "sample_audit": [
+    {
+      "task": "single_arm/Prepare_tableware",
+      "episode": 0,
+      "frames": 291,
+      "state_action_equal": false,
+      "finite": true,
+      "gripper_range": [
+        0.0513024739921093,
+        0.937348484992981
+      ],
+      "max_translation_step_m": 0.02175883340076379,
+      "first_pose": [
+        0.0,
+        3.469446951953614e-18,
+        0.0,
+        8.827487035889312e-18,
+        0.0,
+        -1.321523847103602e-17,
+        0.9346811771392822
+      ],
+      "camera_keys": [
+        "observation.images.camera_rgb_image"
+      ],
+      "action_matches_next_state_exactly": true,
+      "final_action_matches_final_state_exactly": true
+    },
+    {
+      "task": "single_arm/Store_Shoes_in_Shoe_Cabinet",
+      "episode": 0,
+      "frames": 390,
+      "state_action_equal": false,
+      "finite": true,
+      "gripper_range": [
+        0.038869258016347885,
+        1.0
+      ],
+      "max_translation_step_m": 0.02622254129189652,
+      "first_pose": [
+        0.0,
+        0.0,
+        0.0,
+        -4.083932597348139e-19,
+        0.0,
+        -1.8416986086952274e-18,
+        0.997373640537262
+      ],
+      "camera_keys": [
+        "observation.images.camera_rgb_image"
+      ],
+      "action_matches_next_state_exactly": true,
+      "final_action_matches_final_state_exactly": true
+    },
+    {
+      "task": "single_arm/get_plate_and_spoon_from_dish_rack",
+      "episode": 0,
+      "frames": 251,
+      "state_action_equal": false,
+      "finite": true,
+      "gripper_range": [
+        0.025776946917176247,
+        0.9886344075202942
+      ],
+      "max_translation_step_m": 0.022776880735390227,
+      "first_pose": [
+        2.7755575615628914e-17,
+        0.0,
+        0.0,
+        -4.158952036943622e-18,
+        0.0,
+        -6.644556158590953e-18,
+        0.971767783164978
+      ],
+      "camera_keys": [
+        "observation.images.camera_rgb_image"
+      ],
+      "action_matches_next_state_exactly": true,
+      "final_action_matches_final_state_exactly": true
+    },
+    {
+      "task": "single_arm/heat_food_in_microwave",
+      "episode": 0,
+      "frames": 341,
+      "state_action_equal": false,
+      "finite": true,
+      "gripper_range": [
+        0.06983597576618195,
+        0.985068142414093
+      ],
+      "max_translation_step_m": 0.01585988455436393,
+      "first_pose": [
+        6.938893903907228e-18,
+        -5.551115123125783e-17,
+        0.0,
+        -6.979737601013259e-18,
+        0.0,
+        5.433774259279215e-19,
+        0.9824181795120239
+      ],
+      "camera_keys": [
+        "observation.images.camera_rgb_image"
+      ],
+      "action_matches_next_state_exactly": true,
+      "final_action_matches_final_state_exactly": true
+    },
+    {
+      "task": "single_arm/heat_food_in_toaster_oven",
+      "episode": 0,
+      "frames": 283,
+      "state_action_equal": false,
+      "finite": true,
+      "gripper_range": [
+        0.6538536548614502,
+        1.0
+      ],
+      "max_translation_step_m": 0.025478552711426183,
+      "first_pose": [
+        -2.7755575615628914e-17,
+        2.7755575615628914e-17,
+        0.0,
+        -9.114943879280065e-18,
+        0.0,
+        1.2761890349002605e-18,
+        1.0
+      ],
+      "camera_keys": [
+        "observation.images.camera_rgb_image"
+      ],
+      "action_matches_next_state_exactly": true,
+      "final_action_matches_final_state_exactly": true
+    },
+    {
+      "task": "single_arm/iron_clothes",
+      "episode": 0,
+      "frames": 251,
+      "state_action_equal": false,
+      "finite": true,
+      "gripper_range": [
+        0.3189070224761963,
+        1.0
+      ],
+      "max_translation_step_m": 0.02544667053934754,
+      "first_pose": [
+        0.0,
+        0.0,
+        5.551115123125783e-17,
+        1.0328068560881706e-18,
+        0.0,
+        -2.597592796058435e-18,
+        1.0
+      ],
+      "camera_keys": [
+        "observation.images.camera_rgb_image"
+      ],
+      "action_matches_next_state_exactly": true,
+      "final_action_matches_final_state_exactly": true
+    },
+    {
+      "task": "single_arm/make_sandwich",
+      "episode": 0,
+      "frames": 279,
+      "state_action_equal": false,
+      "finite": true,
+      "gripper_range": [
+        0.00017094696522690356,
+        0.9602776765823364
+      ],
+      "max_translation_step_m": 0.03297687584055533,
+      "first_pose": [
+        0.0,
+        -1.307530598117165e-18,
+        0.0,
+        2.966164986568881e-19,
+        0.0,
+        -5.617433832428854e-17,
+        0.9549837708473206
+      ],
+      "camera_keys": [
+        "observation.images.camera_rgb_image"
+      ],
+      "action_matches_next_state_exactly": true,
+      "final_action_matches_final_state_exactly": true
+    },
+    {
+      "task": "single_arm/open_toilet_lid",
+      "episode": 0,
+      "frames": 252,
+      "state_action_equal": false,
+      "finite": true,
+      "gripper_range": [
+        0.03803800418972969,
+        1.0
+      ],
+      "max_translation_step_m": 0.02307364731999981,
+      "first_pose": [
+        1.3877787807814457e-17,
+        0.0,
+        1.3877787807814457e-17,
+        -6.881723315870626e-18,
+        0.0,
+        1.0561868059092522e-18,
+        1.0
+      ],
+      "camera_keys": [
+        "observation.images.camera_rgb_image"
+      ],
+      "action_matches_next_state_exactly": true,
+      "final_action_matches_final_state_exactly": true
+    },
+    {
+      "task": "single_arm/pour_water_into_cup",
+      "episode": 0,
+      "frames": 356,
+      "state_action_equal": false,
+      "finite": true,
+      "gripper_range": [
+        0.7121224999427795,
+        0.9876683950424194
+      ],
+      "max_translation_step_m": 0.01594695097863285,
+      "first_pose": [
+        0.0,
+        0.0,
+        0.0,
+        -1.2234666106076619e-18,
+        0.0,
+        9.333894658314942e-19,
+        0.9806013703346252
+      ],
+      "camera_keys": [
+        "observation.images.camera_rgb_image"
+      ],
+      "action_matches_next_state_exactly": true,
+      "final_action_matches_final_state_exactly": true
+    },
+    {
+      "task": "single_arm/put_shoes_into_storage_box",
+      "episode": 0,
+      "frames": 283,
+      "state_action_equal": false,
+      "finite": true,
+      "gripper_range": [
+        0.03710673376917839,
+        0.9992015957832336
+      ],
+      "max_translation_step_m": 0.0326297396728602,
+      "first_pose": [
+        -2.7755575615628914e-17,
+        0.0,
+        0.0,
+        -2.7882225652807214e-18,
+        0.0,
+        3.481962504814271e-19,
+        0.9956682324409485
+      ],
+      "camera_keys": [
+        "observation.images.camera_rgb_image"
+      ],
+      "action_matches_next_state_exactly": true,
+      "final_action_matches_final_state_exactly": true
+    },
+    {
+      "task": "single_arm/take_items_out_of_drawer",
+      "episode": 0,
+      "frames": 332,
+      "state_action_equal": false,
+      "finite": true,
+      "gripper_range": [
+        0.34540635347366333,
+        1.0
+      ],
+      "max_translation_step_m": 0.020760119259183057,
+      "first_pose": [
+        -1.3877787807814457e-17,
+        -5.551115123125783e-17,
+        0.0,
+        8.957518173821423e-18,
+        0.0,
+        -1.1484369839275057e-21,
+        0.9876514673233032
+      ],
+      "camera_keys": [
+        "observation.images.camera_rgb_image"
+      ],
+      "action_matches_next_state_exactly": true,
+      "final_action_matches_final_state_exactly": true
+    },
+    {
+      "task": "single_arm/wash_clothes",
+      "episode": 0,
+      "frames": 301,
+      "state_action_equal": false,
+      "finite": true,
+      "gripper_range": [
+        0.0726570188999176,
+        1.0
+      ],
+      "max_translation_step_m": 0.028478754607924706,
+      "first_pose": [
+        0.0,
+        -5.551115123125783e-17,
+        5.551115123125783e-17,
+        -1.841421296394869e-18,
+        0.0,
+        3.4095818230716202e-18,
+        0.9869495630264282
+      ],
+      "camera_keys": [
+        "observation.images.camera_rgb_image"
+      ],
+      "action_matches_next_state_exactly": true,
+      "final_action_matches_final_state_exactly": true
+    }
+  ]
+}
