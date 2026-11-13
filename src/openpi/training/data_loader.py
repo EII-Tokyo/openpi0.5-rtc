@@ -631,20 +631,21 @@ def transform_dataset(dataset: Dataset, data_config: _config.DataConfig, *, skip
 
     tracker = SkippedItemTracker() if data_config.repo_id != "fake" else None
 
-    return RetryOnErrorDataset(
-        TransformedDataset(
-            dataset,
-            [
-                *prompt_transforms,
-                *data_config.repack_transforms.inputs,
-                *training_only_transforms,
-                *data_config.data_transforms.inputs,
-                _transforms.Normalize(norm_stats, use_quantiles=data_config.use_quantile_norm),
-                *data_config.model_transforms.inputs,
-            ],
-        ),
-        tracker=tracker,
+    transformed = TransformedDataset(
+        dataset,
+        [
+            *prompt_transforms,
+            *data_config.repack_transforms.inputs,
+            *training_only_transforms,
+            *data_config.data_transforms.inputs,
+            _transforms.Normalize(norm_stats, use_quantiles=data_config.use_quantile_norm),
+            *data_config.model_transforms.inputs,
+        ],
     )
+    # A retry at a group boundary could silently change the requested mixture.
+    if data_config.fastumi_phase is not None:
+        return transformed
+    return RetryOnErrorDataset(transformed, tracker=tracker)
 
 
 def transform_iterable_dataset(

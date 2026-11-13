@@ -1,0 +1,17 @@
+export PATH=/home/ubuntu/.local/bin:$PATH
+cd /home/ubuntu/openpi-fastumi-run4
+source /home/ubuntu/.config/fastumi-run2/secrets.env
+export PYTHONPATH="$PWD:$PWD/src"
+export FASTUMI_TWO_PHASE_ROOT="$PWD/.cache/fastumi-mid-post"
+export OPENPI_DATA_HOME=/home/ubuntu/openpi-fastumi/.cache/openpi
+export CUDA_VISIBLE_DEVICES=0,1
+export XLA_PYTHON_CLIENT_MEM_FRACTION=0.9
+export JAX_COMPILATION_CACHE_DIR="$PWD/.cache/jax"
+export HF_HUB_DISABLE_PROGRESS_BARS=1
+export PYTHONUNBUFFERED=1
+export MPLCONFIGDIR="$PWD/.cache/matplotlib"
+export WANDB_MODE=online
+export AWS_SHARED_CREDENTIALS_FILE=/home/ubuntu/.config/fastumi-run4/aws-credentials
+export AWS_DEFAULT_REGION=ap-northeast-1
+export OMP_NUM_THREADS=1
+export OPENBLAS_NUM_THREADS=1

@@ -110,4 +110,5 @@ class FastUMIEpisodes:
             "observation/state": data["state"][frame],
             "actions": data["action"][targets],
             "prompt": episode["tasks"][str(int(data["task_index"][frame]))],
+            "task": episode["tasks"][str(int(data["task_index"][frame]))],
         }

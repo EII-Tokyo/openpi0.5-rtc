@@ -1,12 +1,13 @@
 # FastUMI midtraining and posttraining preparation
 
 Branch: `train/pi05-fastumi-mid-post`.
-Status: metadata inspected and a proposed public episode split generated. This
-is not a runnable training recipe yet. No training or bulk video download has
-started. The user approved single-arm scope, the proposed split and sampling weights,
-and initialization from the original pi05 base. Phase budgets await a decision.
+Status: the user authorized 200k midtraining steps followed by 100k posttraining
+steps from the original pi05 base, with single-arm data only and the proposed
+sampling ratios. The remote pipeline downloads/audits all sources, computes
+midtraining-only normalization, runs prelaunch checks, and starts both phases
+in sequence. Training remains gated on successful data preparation.
 
-## Proposed sources and split
+## Approved sources and split
 
 Public source: <https://huggingface.co/datasets/IPEC-COMMUNITY/FastUMI_100k_lerobot>,
 pinned to `4cf7cca8fdc15d6f71ee0055553ce8a5e78aa9a0`.
@@ -18,7 +19,7 @@ of eligible single-arm episodes in this pinned revision.
 Fan sources are exactly the three immutable revisions in `run3_datasets.json`:
 403 episodes and 33,368 frames. Include every fan episode in both phases.
 
-`mid_post_public_split.proposed.json` records a draft selection of 403 public
+`mid_post_public_split.proposed.json` records the approved selection of 403 public
 episodes, sampled uniformly without replacement using seed 42. A seeded SHA256
 ranking makes selection independent of filesystem enumeration and NumPy versions.
 Episode identity includes the task path because episode indices restart per task.
@@ -93,17 +94,16 @@ labels, and refuses to overwrite a different existing split:
 .venv/bin/python -m pytest -q examples/fastumi/two_phase_test.py
 ```
 
-Before training, implement and test source-specific camera/prompt/timing adapters,
-episode filtering, exact group-balanced sampling, phase checkpoint handoff, and
-normalization provenance. Audit all selected pose files and the video/task
-alignment. Check remote storage before downloading: the complete public repo is
-approximately 1.4 TB, and conversion can retain both source and converted copies.
-Do not download the full repository onto the local evaluation disk.
+The implemented reader uses audited original episode files and compact numeric
+arrays, avoiding a second copy of videos during conversion. Preparation audits
+every selected pose file, task index, video frame count, and exact trajectory/video
+duplicates across public phases. Real decoded samples and the full model transform
+are checked before launch. Public videos are downloaded only on the GPU server.
 
-## Budget recommendation (not yet authorized)
+## Authorized budget
 
 The user reports run 3's 50k checkpoint outperformed 40k in robot evaluation.
-Recommend an initial budget of 200k midtraining steps and 100k posttraining
+The approved budget is 200k midtraining steps and 100k posttraining
 steps at global batch 32. This is an experimental budget, not an estimated
 optimum. At 50% fan sampling, 100k posttraining steps provide 1.6 million fan
 examples, matching the exposure of run 3's 50k fan-only steps. Midtraining adds
@@ -117,3 +117,41 @@ overhead, plus initial download/audit/normalization time. Re-estimate using
 measured throughput once the larger loader runs. Evaluate posttraining
 checkpoints at 50k, 75k, and 100k on the robot; loss alone does not determine
 which checkpoint is best.
+
+## Learning rates and execution
+
+| Phase | Steps | Warmup | Peak LR | Final LR |
+| --- | ---: | ---: | ---: | ---: |
+| Midtrain | 200,000 | 1,000 | 2.5e-5 | 2.5e-6 |
+| Posttrain | 100,000 | 1,000 | 1e-5 | 1e-6 |
+
+Each phase uses its own cosine schedule and fresh AdamW state. Posttraining loads
+the final midtraining EMA weights at step 199999. Both phases use full finetuning,
+global batch 32, FSDP over two H100 GPUs, eight data workers, clip norm 1, EMA .999.
+The reduced posttraining peak is an experimental choice, not a claimed optimum.
+
+Normalization uses 1,048,576 seeded samples from the 10/90 midtraining mixture,
+without decoding images or accessing reserved public episodes. Its provenance
+records the source-index hash, sample count, seed, and resulting statistics hash.
+Posttraining reuses these statistics exactly.
+
+Remote checkout: `/home/ubuntu/openpi-fastumi-run4`. Environment:
+`/home/ubuntu/fastumi-run4-env.sh`. Persistent sessions:
+`fastumi-run4-prepare`, `fastumi-run4-pipeline`, and per-phase upload watchers.
+Copies of the launch scripts are checked in as `run4_*.sh`; `run4_plan.json`
+records the phase configuration and destinations.
+
+W&B project: `eii-inc/openpi`, separate experiment names `umi_pi05_run4_midtrain`
+and `umi_pi05_run4_posttrain`. S3 destinations use these same names under
+`s3://openpi-tokyo/checkpoints/`. Full local checkpoints are saved every 5k steps;
+retain midtraining 50k multiples and posttraining 25k multiples plus the latest.
+Upload retained milestones for inference, and each final checkpoint with full
+optimizer state. This limits new retained training checkpoints to roughly 350 GB.
+
+A local detached process renews 36-hour temporary S3 credentials every six hours
+for up to seven days, stopping when both phases and backups finish. It logs to
+`/tmp/fastumi-run4-credentials.log`; PID is in
+`/tmp/fastumi-run4-credentials.pid`. The local workstation must remain running
+for credential refresh. If it goes offline longer than credential validity,
+training continues remotely and the S3 watcher retries until credentials return.
+No permanent AWS keys are copied to the GPU server.

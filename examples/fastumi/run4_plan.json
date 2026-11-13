@@ -1,0 +1,39 @@
+{
+  "run": "umi_pi05_run4",
+  "authorized": true,
+  "initial_weights": "gs://openpi-assets/checkpoints/pi05_base/params",
+  "single_arm_only": true,
+  "batch_size": 32,
+  "fsdp_devices": 2,
+  "phase_handoff": "final midtraining EMA weights, fresh posttraining optimizer, identical midtraining normalization",
+  "phases": {
+    "midtrain": {
+      "config": "pi05_fastumi_midtrain",
+      "exp_name": "umi_pi05_run4_midtrain",
+      "steps": 200000,
+      "fan_fraction": 0.1,
+      "warmup_steps": 1000,
+      "peak_lr": 2.5e-05,
+      "final_lr": 2.5e-06,
+      "save_interval": 5000,
+      "keep_period": 50000,
+      "s3_interval": 50000,
+      "final_checkpoint": 199999,
+      "s3_destination": "s3://openpi-tokyo/checkpoints/umi_pi05_run4_midtrain"
+    },
+    "posttrain": {
+      "config": "pi05_fastumi_posttrain",
+      "exp_name": "umi_pi05_run4_posttrain",
+      "steps": 100000,
+      "fan_fraction": 0.5,
+      "warmup_steps": 1000,
+      "peak_lr": 1e-05,
+      "final_lr": 1e-06,
+      "save_interval": 5000,
+      "keep_period": 25000,
+      "s3_interval": 25000,
+      "final_checkpoint": 99999,
+      "s3_destination": "s3://openpi-tokyo/checkpoints/umi_pi05_run4_posttrain"
+    }
+  }
+}

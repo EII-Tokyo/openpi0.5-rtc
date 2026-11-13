@@ -121,7 +121,7 @@ def test_source_requires_all_episode_files():
         prepare_mixture.validate_source(info, names)
 
 
-@pytest.mark.parametrize("config_name", ["pi05_fastumi_pick_fan_relative", "pi05_fastumi_pick_fan_relative_mix"])
+@pytest.mark.parametrize("config_name", ["pi05_fastumi_pick_fan_relative", "pi05_fastumi_pick_fan_relative_mix", "pi05_fastumi_midtrain", "pi05_fastumi_posttrain"])
 def test_server_warmup_uses_relative_policy_contract(config_name, monkeypatch):
     from scripts import serve_policy  # noqa: PLC0415
 
