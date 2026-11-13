@@ -1,0 +1,67 @@
+{
+  "mode": "cond",
+  "parameters": 411468912,
+  "max_abs": 3.0517578125e-05,
+  "relative_l2": 0.001611672712720772,
+  "equal_fraction": 0.6693254313220144,
+  "forward_max_abs": 0.0,
+  "forward_relative_l2": 0.0,
+  "worst_leaves": [
+    {
+      "path": "(DictKey(key='params'), DictKey(key='encoderblock'), DictKey(key='MultiHeadDotProductAttention_0'), DictKey(key='key'), DictKey(key='bias'))",
+      "max_abs": 2.421438694000244e-07,
+      "relative_l2": 0.73976294788466,
+      "equal": 4075,
+      "size": 31104
+    },
+    {
+      "path": "(DictKey(key='params'), DictKey(key='encoderblock'), DictKey(key='MultiHeadDotProductAttention_0'), DictKey(key='query'), DictKey(key='kernel'))",
+      "max_abs": 4.76837158203125e-07,
+      "relative_l2": 0.0058516122068227585,
+      "equal": 12228045,
+      "size": 35831808
+    },
+    {
+      "path": "(DictKey(key='params'), DictKey(key='encoderblock'), DictKey(key='MultiHeadDotProductAttention_0'), DictKey(key='key'), DictKey(key='kernel'))",
+      "max_abs": 4.76837158203125e-07,
+      "relative_l2": 0.005806341992870497,
+      "equal": 11875612,
+      "size": 35831808
+    },
+    {
+      "path": "(DictKey(key='params'), DictKey(key='encoderblock'), DictKey(key='MultiHeadDotProductAttention_0'), DictKey(key='query'), DictKey(key='bias'))",
+      "max_abs": 9.5367431640625e-07,
+      "relative_l2": 0.004071268000839224,
+      "equal": 12957,
+      "size": 31104
+    },
+    {
+      "path": "(DictKey(key='params'), DictKey(key='encoderblock'), DictKey(key='MlpBlock_0'), DictKey(key='Dense_1'), DictKey(key='bias'))",
+      "max_abs": 1.52587890625e-05,
+      "relative_l2": 0.0029736844648058174,
+      "equal": 22481,
+      "size": 31104
+    },
+    {
+      "path": "(DictKey(key='params'), DictKey(key='encoderblock'), DictKey(key='MultiHeadDotProductAttention_0'), DictKey(key='out'), DictKey(key='bias'))",
+      "max_abs": 3.0517578125e-05,
+      "relative_l2": 0.0029051005727960323,
+      "equal": 21318,
+      "size": 31104
+    },
+    {
+      "path": "(DictKey(key='params'), DictKey(key='encoderblock'), DictKey(key='MlpBlock_0'), DictKey(key='Dense_0'), DictKey(key='bias'))",
+      "max_abs": 7.62939453125e-06,
+      "relative_l2": 0.002874138628954891,
+      "equal": 81770,
+      "size": 116208
+    },
+    {
+      "path": "(DictKey(key='params'), DictKey(key='encoderblock'), DictKey(key='MultiHeadDotProductAttention_0'), DictKey(key='value'), DictKey(key='bias'))",
+      "max_abs": 1.52587890625e-05,
+      "relative_l2": 0.002107372626692748,
+      "equal": 24105,
+      "size": 31104
+    }
+  ]
+}
