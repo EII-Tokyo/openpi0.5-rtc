@@ -330,3 +330,11 @@ cython_debug/
 /src/openpi/training/config.py.before-rinse38-1791434858478019259.bak
 /src/openpi/training/config.py.codex-backup-20260807-repo-flatten
 /third_party/aloha/launch/aloha1_home_sleep_puppet_left_only_candidate.launch
+
+# Generated diagnostics and local rollback/download receipts are not source code.
+/artifacts/video_memory_preview.jpg
+/backups/
+/training-backups/
+/src/openpi/training/config.py.before-*
+/benchmarks/operator_rating_20261015/
+/benchmarks/temporal_cond_20261015/**/*.npy

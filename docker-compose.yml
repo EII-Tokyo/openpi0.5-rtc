@@ -12,6 +12,7 @@ services:
     command: ["python3", "/app/scripts/run_aloha_real.py", "--model-dir", *checkpoint_dir, "--host", "127.0.0.1", "--port", "8001", "--policy-hz", "50", "--chunking-mode", "inference_time", "--rtc-handoff-delay-steps", "10"]
 
     init: true
+    stdin_open: true
     tty: true
     network_mode: host
     privileged: true
@@ -21,11 +22,13 @@ services:
       NVIDIA_VISIBLE_DEVICES: all
       NVIDIA_DRIVER_CAPABILITIES: compute,utility,video
       ALOHA_ROLLOUT_DIR: /collection-data
+      ALOHA_FOOT_SWITCH: /dev/input/by-id/usb-PCsensor_FootSwitch-event-kbd
       # Match the task text in the rinse69 training datasets exactly.
       ALOHA_TASK_1_PROMPT: twist off the bottle cap and rinse the bottle
       ALOHA_TASK_2_PROMPT: twist off the bottle cap and rinse the bottle
     volumes:
       - $PWD:/app
+      - /dev/input:/dev/input:ro
       - /home/eii/openpi0.5-rtc/checkpoints:/app/checkpoints:ro
       # Canonical collector/web browser root; existing recordings are not moved.
       - /home/eii/aloha-2.0/aloha_data/aloha_stationary:/collection-data

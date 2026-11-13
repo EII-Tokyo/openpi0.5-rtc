@@ -10,6 +10,7 @@ import termios
 import tty
 import select
 from collections import deque
+from openpi.robot.aloha_real.foot_switch import FootSwitch
 
 from openpi.robot.aloha_real.leader_follower_demo import LeaderFollowerDemoController
 from openpi.robot.aloha_real.manual_intervention import ManualInterventionController
@@ -364,6 +365,7 @@ class Runtime:
         self._publish_runtime_state(mode="waiting")
         fd = None
         old_settings = None
+        self._foot_switch = FootSwitch(os.getenv("ALOHA_FOOT_SWITCH"))
         if sys.stdin.isatty():
             fd = sys.stdin.fileno()
             old_settings = termios.tcgetattr(fd)
@@ -397,11 +399,14 @@ class Runtime:
                     else:
                         last_step_time = now
         finally:
+            self._foot_switch.close()
             if fd is not None and old_settings is not None:
                 termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
 
     def _poll_single_key(self, timeout: float = 0.0) -> str | None:
         """非阻塞读取单个按键，支持方向键。"""
+        if self._foot_switch.poll() == "b":
+            return "b"
         if not sys.stdin.isatty():
             return None
 
@@ -429,6 +434,8 @@ class Runtime:
         log_invalid: bool = True,
     ):
         """将单个键盘输入解析成统一 task_data。"""
+        if key in ("\n", "\r"):
+            logging.info("快捷键：1/2 模型任务，3 人工接管，b 接管准备时开始/采集中结束保存，4 回home，5 回sleep并退出，6 遥操作体验")
         if key is None or key in ("\n", "\r"):
             return None
 

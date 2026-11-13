@@ -1,0 +1,4 @@
+# Use with docker-compose.yml. This override prepares only the policy server.
+services:
+  openpi_server:
+    command: ["/app/scripts/serve_policy.py", "--model-dir", "/app/checkpoints/eii_with_rinse_cam4_fullft_jialong_44repo_h200nvlx4_224_high_mem5s4hz_mosaic2x2_pool256_bs256_ga1_nw200_20261102/no_cap_to_rinse_high5s_h200x2_20261112/5000", "--port", "8001", "--no-warmup-subtask"]

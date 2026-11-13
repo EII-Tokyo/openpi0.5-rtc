@@ -1,0 +1,17 @@
+services:
+  openpi_server:
+    entrypoint: ["/.venv/bin/python3"]
+    command: ["/app/scripts/serve_rinse_22000.py"]
+    volumes:
+      - /data/openpi0.5-rtc/checkpoints/eii_with_rinse_cam4_fullft_from_april_original_38repo:/data/openpi0.5-rtc/checkpoints/eii_with_rinse_cam4_fullft_from_april_original_38repo:ro
+  runtime:
+    command: >-
+      python3 /app/scripts/run_aloha_real.py
+      --model-dir /app/checkpoints/eii_with_rinse_cam4_fullft_from_april_original_38repo/6beba2e5-e00a-431f-b8a8-b95bf48ac168/22000
+      --chunking-mode inference_time
+      --rtc-handoff-delay-steps 10
+    environment:
+      ALOHA_TASK_1_PROMPT: twist off the bottle cap and rinse the bottle
+      ALOHA_TASK_2_PROMPT: twist off the bottle cap and rinse the bottle
+    volumes:
+      - /data/openpi0.5-rtc/checkpoints/eii_with_rinse_cam4_fullft_from_april_original_38repo:/data/openpi0.5-rtc/checkpoints/eii_with_rinse_cam4_fullft_from_april_original_38repo:ro

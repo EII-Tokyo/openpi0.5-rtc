@@ -7,12 +7,16 @@ from PIL import Image
 
 @dataclasses.dataclass(frozen=True)
 class HighCameraMosaicConfig:
-    cameras: tuple[str, ...]
+    cameras: tuple[str, ...] = ("cam_high",)
     history_seconds: int = 5
     sample_hz: int = 4
     tile_size: int = 224
+    # Older checkpoint config snapshots pass this high-camera-only selector.
+    camera: dataclasses.InitVar[str | None] = None
 
-    def __post_init__(self):
+    def __post_init__(self, camera):
+        if camera is not None and camera != "cam_high":
+            raise ValueError("Legacy camera selector must be cam_high; use cameras for explicit selection.")
         if self.sample_hz != 4:
             raise ValueError("Mosaic history requires four samples per second.")
         if self.history_seconds <= 0 or self.tile_size <= 0:

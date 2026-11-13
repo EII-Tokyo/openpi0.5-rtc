@@ -1,0 +1,10 @@
+# Four ALOHA cameras for the USB diagnostic script.
+camera_instances:
+  - name: camera_high
+    serial_no: "130322272542"
+  - name: camera_low
+    serial_no: "218622270440"
+  - name: camera_wrist_right
+    serial_no: "218622278936"
+  - name: camera_wrist_left
+    serial_no: "130322270656"

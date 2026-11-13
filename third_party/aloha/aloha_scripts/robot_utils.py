@@ -3,10 +3,7 @@ import time
 from aloha.msg import RGBGrayscaleImage
 from constants import DT
 from interbotix_xs_msgs.msg import JointSingleCommand
-import IPython
 import numpy as np
-
-e = IPython.embed
 
 
 class ImageRecorder:
