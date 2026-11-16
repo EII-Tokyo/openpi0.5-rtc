@@ -20,3 +20,10 @@ Applies to all platform users and to launches performed by Codex or manually.
 - Pause cooperatively at an optimizer-update boundary, save a complete checkpoint, then release resources. Honor intentional stops. Never overwrite/delete checkpoints to make resume succeed.
 - Verify selected GPUs are idle (including non-platform processes), enforce 1–2 H200s, at most 64 CPU per instance/account, 96 GiB per GPU and 200 GiB total per account. Do not start an extra test training on GPUs already in use.
 - Existing historical jobs may retain their old runtime until stopped; do not pretend their launch.py overrides are literal config.py values. Do not interrupt an active job just to migrate it.
+
+## Robot deployment
+
+- Always use the root `docker-compose.yml` for robot deployment. Do not create model-specific Compose files or deployment wrappers.
+- Select weights with `OPENPI_CHECKPOINT_DIR` (container path under `/app/checkpoints`). Both policy server and runtime use this same value.
+- Read camera, resolution, video memory and mosaic settings from the checkpoint training metadata through the generic entrypoints. Preserve training configurations.
+- Set `ALOHA_TASK_1_PROMPT` and `ALOHA_TASK_2_PROMPT` to the selected model's training prompts when needed; do not introduce a Compose overlay.

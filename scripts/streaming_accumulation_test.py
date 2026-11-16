@@ -2,7 +2,6 @@
 
 Run with JAX_PLATFORMS=cpu and a four-device CPU backend for sharding checks.
 The scan reference is extracted unchanged from the pre-microbatch trainer.
-See benchmarks/microbatch_jit/README.md for CPU and full-model GPU commands.
 """
 import ast
 import dataclasses

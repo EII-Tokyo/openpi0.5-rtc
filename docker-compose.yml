@@ -23,9 +23,9 @@ services:
       NVIDIA_DRIVER_CAPABILITIES: compute,utility,video
       ALOHA_ROLLOUT_DIR: /collection-data
       ALOHA_FOOT_SWITCH: /dev/input/by-id/usb-PCsensor_FootSwitch-event-kbd
-      # Match the task text in the rinse69 training datasets exactly.
-      ALOHA_TASK_1_PROMPT: twist off the bottle cap and rinse the bottle
-      ALOHA_TASK_2_PROMPT: twist off the bottle cap and rinse the bottle
+      # Override these task prompts for the selected checkpoint when needed.
+      ALOHA_TASK_1_PROMPT: "${ALOHA_TASK_1_PROMPT:-twist off the bottle cap and rinse the bottle}"
+      ALOHA_TASK_2_PROMPT: "${ALOHA_TASK_2_PROMPT:-twist off the bottle cap and rinse the bottle}"
     volumes:
       - $PWD:/app
       - /dev/input:/dev/input:ro
