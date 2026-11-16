@@ -1,4 +1,0 @@
-services:
-  openpi_server:
-    mem_limit: 40g
-    memswap_limit: 40g
