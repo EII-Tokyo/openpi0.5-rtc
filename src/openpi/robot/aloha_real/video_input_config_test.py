@@ -24,14 +24,20 @@ def contract(tile_size=112, seconds=5, cameras=('cam_high',)):
 
 
 class VideoInputTest(unittest.TestCase):
-    def test_legacy_high_camera_snapshot_remains_serializable(self):
-        legacy = HighCameraMosaicConfig(camera='cam_high')
-        self.assertEqual(legacy.cameras, ('cam_high',))
-        self.assertNotIn('camera', dataclasses.asdict(legacy))
+    def test_camera_selection_is_required_and_old_keyword_is_rejected(self):
+        with self.assertRaises(TypeError):
+            HighCameraMosaicConfig()
+        with self.assertRaises(TypeError):
+            HighCameraMosaicConfig(camera='cam_high')
+        with self.assertRaises(TypeError):
+            HighCameraMosaicConfig(cameras=('cam_high',), camera='cam_high')
         explicit = HighCameraMosaicConfig(cameras=tuple(CAMERAS), history_seconds=1)
         self.assertEqual(dataclasses.asdict(explicit)['cameras'], tuple(CAMERAS))
-        with self.assertRaises(ValueError):
-            HighCameraMosaicConfig(camera='cam_low')
+        self.assertNotIn('camera', dataclasses.asdict(explicit))
+        value = contract()
+        value['mosaic']['camera'] = 'cam_high'
+        with self.assertRaises(TypeError):
+            configure_video_input({'runtime': {'video_input': value}}, '/missing/14999')
 
     def setUp(self):
         fake = types.ModuleType('openpi.robot.aloha_real.robot_utils')

@@ -34,3 +34,31 @@ The removed step-6000 entrypoint is replaced by the generic `--model-dir` comman
 its exported configuration loads 224-pixel, six-frame input directly. The old
 step-14000 entrypoint depended on that separate checkpoint's metadata and is no
 longer used by the model overlays.
+
+## Explicit mosaic cameras (2026-11-16)
+
+`HighCameraMosaicConfig` requires `cameras`, for example
+`HighCameraMosaicConfig(cameras=("cam_high",), history_seconds=5)`.
+The old `camera` keyword and omitted camera selection both raise `TypeError`.
+The loader has no automatic compatibility fallback.
+
+Old exported configuration snapshots must be migrated explicitly before loading:
+
+```sh
+python3 scripts/migrate_checkpoint_mosaic_cameras.py --checkpoint-root checkpoints
+python3 scripts/migrate_checkpoint_mosaic_cameras.py --checkpoint-root checkpoints \
+  --apply --backup-dir /path/outside/checkpoints/unique-backup-directory
+```
+
+This standalone tool only rewrites mosaic constructor arguments and the matching
+config entry in each local manifest (including size, SHA256 and total bytes).
+It preserves explicit multi-camera selections and refuses ambiguous positional,
+unpacked or unsupported old selectors. It backs up original metadata and rolls
+back published metadata if a write fails. It never changes params, train_state,
+norm stats, historical training-code archives or training-source provenance hashes.
+Those provenance records continue to describe the original training export.
+
+On 103, nine snapshots (52 constructors) were migrated. All 12 exported checkpoint
+configs were loaded before and after migration; their runtime input contracts and
+model settings matched exactly. Originals and before/after SHA256 records are in
+`/data/openpi0.5-rtc/code-archives/explicit-cameras-20261116/`.
