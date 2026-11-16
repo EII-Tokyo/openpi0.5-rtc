@@ -2,6 +2,7 @@
 import dataclasses
 import functools
 import logging
+import json  # Mirror scalar events without patching W&B or checkpoint handlers.
 import os
 import platform
 import time
@@ -303,12 +304,24 @@ def main(config: _config.TrainConfig):
             info_str = ", ".join(f"{k}={v:.4f}" for k, v in reduced_info.items())
             pbar.write(f"Step {step}: {info_str}")
             wandb.log(reduced_info, step=step)
+            # Optional platform output paths affect reporting and pause control only.
+            metrics_file = os.environ.get("OPENPI_METRICS_FILE")
+            if metrics_file:
+                with open(metrics_file, "a", encoding="utf-8") as stream:
+                    stream.write(json.dumps({"step": step, "values": {key: float(value) for key, value in reduced_info.items()}}) + "\n")
             infos = []
             data_wait_times = []
             train_dispatch_times = []
             train_block_times = []
             train_step_times = []
             end_to_end_times = []
+        # A pause saves the completed optimizer update before releasing resources.
+        pause_file = os.environ.get("OPENPI_PAUSE_FILE")
+        pause_requested = bool(pause_file and os.path.isfile(pause_file))
+        if pause_requested:
+            _checkpoints.save_state(checkpoint_manager, train_state, data_loader, step)
+            checkpoint_manager.wait_until_finished()
+            return "PAUSED"
         if step != config.num_train_steps - 1:
             batch, next_batch_wait_time = _timed_next(data_iter)
 
@@ -317,7 +330,17 @@ def main(config: _config.TrainConfig):
 
     logging.info("Waiting for checkpoint manager to finish")
     checkpoint_manager.wait_until_finished()
+    return "COMPLETED"
 
 
 if __name__ == "__main__":
-    main(_config.cli())
+    # Load the named TrainConfig directly; never apply hidden launch-time overrides.
+    final_state = "FAILED"
+    try:
+        final_state = main(_config.cli()) or "COMPLETED"
+    finally:
+        status_file = os.environ.get("OPENPI_STATUS_FILE")
+        if status_file:
+            with open(status_file + ".next", "w", encoding="utf-8") as stream:
+                json.dump({"state": final_state}, stream)
+            os.replace(status_file + ".next", status_file)
