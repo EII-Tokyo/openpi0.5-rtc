@@ -89,6 +89,7 @@ def main(args: Args) -> None:
             gripper_current_limits=args.gripper_current_limits,
             video_memory_num_frames=args.video_memory_num_frames,
             video_memory_stride_seconds=args.video_memory_stride_seconds,
+            joint_position_history=server_metadata.get("runtime", {}).get("joint_position_history"),
         ),
         policy=chunked_policy.ChunkedPolicy(
             policy=ws_client_policy,

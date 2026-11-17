@@ -31,6 +31,8 @@ class PaligemmaTokenizer:
         rating=None,
         rating_is_valid=None,
         camera_low_position=None,
+        joint_position_history=None,
+        joint_history_settings=None,
     ) -> tuple[np.ndarray, np.ndarray]:
         cleaned_text = prompt.strip().replace("_", " ").replace("\n", " ")
         cleaned_text = camera_low_prompt(cleaned_text, camera_low_position)
@@ -46,6 +48,20 @@ class PaligemmaTokenizer:
             # This is the Pi0 format, where the state is part of the continuous action expert input.
             # tokenize "\n" separately as the "start of answer" token
             tokens = self._tokenizer.encode(cleaned_text, add_bos=True) + self._tokenizer.encode("\n")
+        if joint_position_history is not None:
+            from openpi.data.joint_position_history import encode_positions
+            if joint_history_settings is None or state is None:
+                raise ValueError("Joint history requires settings and discrete current state")
+            history_tokens = encode_positions(joint_position_history, joint_history_settings)
+            # Map official FAST IDs into reserved VLM vocabulary slots, retaining one token per ID.
+            mapped = self._tokenizer.vocab_size() - 1 - 128 - history_tokens
+            if np.any(mapped < 0):
+                raise ValueError("FAST token outside VLM vocabulary")
+            header = f"Task: {cleaned_text}, State: {state_str};\nPosition history {joint_history_settings.seconds}s {joint_history_settings.sample_hz}Hz: "
+            tokens = (self._tokenizer.encode(header, add_bos=True) + mapped.tolist()
+                      + self._tokenizer.encode(";\nAction: "))
+            if len(tokens) > self._max_len:
+                raise ValueError(f"Joint history prompt needs {len(tokens)} tokens, exceeds {self._max_len}")
         tokens_len = len(tokens)
         if tokens_len < self._max_len:
             padding = [False] * (self._max_len - tokens_len)

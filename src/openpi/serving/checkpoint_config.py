@@ -72,6 +72,7 @@ def runtime_metadata(config, root):
         'adapt_to_pi': bool(pipeline.adapt_to_pi),
         'action_horizon': config.model.action_horizon,
         'action_dim': config.model.action_dim,
+        'joint_position_history': dataclasses.asdict(pipeline.joint_position_history) if pipeline.joint_position_history is not None else None,
         'video_input': {
             'config_name': config.name, 'checkpoint_step': root.name,
             'camera_keys': list(pipeline.raw_image_keys),

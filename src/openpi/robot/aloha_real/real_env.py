@@ -328,7 +328,11 @@ class AlohaRealEnvironment:
         video_memory_num_frames: int = 1,
         video_memory_stride_seconds: float = 1.0,
         continuous_roll_joints: bool = True,
+        joint_position_history: dict | None = None,
     ) -> None:
+        from openpi.data.joint_position_history import JointPositionHistoryConfig, PositionHistoryBuffer
+        self._joint_history = (PositionHistoryBuffer(JointPositionHistoryConfig(**joint_position_history))
+                               if joint_position_history is not None else None)
         self._env = make_real_env(
             init_node=True,
             reset_position=reset_position,
@@ -343,7 +347,15 @@ class AlohaRealEnvironment:
         self._ts = None
 
     def reset(self) -> None:
+        if self._joint_history is not None:
+            self._joint_history.reset()
         self._ts = self._env.reset()
+        self._capture_joint_position()
+
+    def _capture_joint_position(self):
+        """Capture actual measured positions at control rate, never commanded actions."""
+        if self._joint_history is not None:
+            self._joint_history.append(time.monotonic(), self._ts.observation["qpos"])
 
     def is_episode_complete(self) -> bool:
         return False
@@ -364,10 +376,12 @@ class AlohaRealEnvironment:
             "effort": obs["effort"],
             "images": obs["images"],
             "origin_observation": origin_observation,
+            **({"joint_position_history": self._joint_history.sample()} if self._joint_history is not None else {}),
         }
 
     def apply_action(self, action: dict) -> None:
         self._ts = self._env.step(action["actions"])
+        self._capture_joint_position()
 
     def stop(self) -> None:
         """Stop the environment."""

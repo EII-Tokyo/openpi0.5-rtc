@@ -340,6 +340,47 @@ class HighCameraMosaicDataset(TemporalFrameStackDataset):
         return result
 
 
+class JointPositionHistoryDataset(Dataset[dict]):
+    """Attach measured qpos without invoking old-frame __getitem__ or decoding videos."""
+
+    def __init__(self, dataset, *, raw_dataset, settings, trainable_mask):
+        self._dataset = dataset
+        self.settings = settings
+        self._valid = np.asarray(trainable_mask, dtype=bool)
+        self._trainable_indices = np.flatnonzero(self._valid)
+        if not len(self._trainable_indices):
+            raise ValueError("No trainable samples for joint history")
+        self._episodes, self._frames, self._timestamps, self._datasets = TemporalFrameStackDataset._load_temporal_metadata(raw_dataset)
+        def positions(base):
+            # Read only the compact state column; never trigger historical action/video queries.
+            if isinstance(base, lerobot_dataset.MultiLeRobotDataset):
+                return np.concatenate([positions(ds) for ds in base._datasets])
+            if isinstance(base, lerobot_dataset.LeRobotDataset):
+                return np.asarray(base.hf_dataset["observation.state"], dtype=np.float32)
+            return np.asarray([base[i]["observation.state"] for i in range(len(base))], dtype=np.float32)
+        self._positions = positions(raw_dataset)
+        if self._positions.shape != (len(dataset), 14):
+            raise ValueError("Joint history requires 14 measured ALOHA positions")
+
+    def __len__(self):
+        return len(self._dataset)
+
+    def __getitem__(self, index):
+        from openpi.data.joint_position_history import sample_positions
+        idx = index.__index__()
+        if idx < 0 or idx >= len(self):
+            raise IndexError(idx)
+        if not self._valid[idx]:
+            idx = int(self._trainable_indices[torch.randint(len(self._trainable_indices), (1,)).item()])
+        start = idx - int(self._frames[idx])
+        if (start < 0 or np.any(self._episodes[start:idx+1] != self._episodes[idx])
+                or (self._datasets is not None and np.any(self._datasets[start:idx+1] != self._datasets[idx]))):
+            raise ValueError("Joint position history crossed an episode or dataset boundary")
+        history = sample_positions(self._timestamps[start:idx+1], self._positions[start:idx+1],
+                                   self._timestamps[idx], self.settings)
+        return {**self._dataset[idx], "joint_position_history": history}
+
+
 class IterableTransformedDataset(IterableDataset[T_co]):
     def __init__(
         self,
@@ -383,6 +424,7 @@ def create_torch_dataset(data_config: _config.LeRobotAlohaDataConfig, action_hor
     fps_meta = lerobot_dataset.LeRobotDatasetMetadata(repo_ids[0], force_cache_sync=False)
     delta_timestamps = {"action": [t / fps_meta.fps for t in range(action_horizon)]}
     dataset = lerobot_dataset.MultiLeRobotDataset(repo_ids, delta_timestamps=delta_timestamps)
+    raw_dataset = dataset
     trainable_mask = IsForTrainingWrapper._build_trainable_mask(dataset)
     transform_pipeline = data_config.transform_pipeline
     if transform_pipeline.high_camera_mosaic is not None:
@@ -401,6 +443,9 @@ def create_torch_dataset(data_config: _config.LeRobotAlohaDataConfig, action_hor
     else:
         dataset = IsForTrainingWrapper(dataset)
 
+    if transform_pipeline.joint_position_history is not None:
+        dataset = JointPositionHistoryDataset(dataset, raw_dataset=raw_dataset,
+            settings=transform_pipeline.joint_position_history, trainable_mask=trainable_mask)
     return dataset
 
 

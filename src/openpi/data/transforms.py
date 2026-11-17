@@ -14,6 +14,7 @@ import numpy as np
 
 from openpi.data import tokenizer as _tokenizer
 from openpi.data.temporal_mosaic import HighCameraMosaicConfig
+from openpi.data.joint_position_history import JointPositionHistoryConfig
 import openpi.shared.download as _download
 from openpi.shared import array_typing as at
 from openpi.shared import normalize as _normalize_lib
@@ -252,9 +253,32 @@ class AbsoluteActions(DataTransformFn):
 
 
 @dataclasses.dataclass(frozen=True)
+class PrepareJointPositionHistory(DataTransformFn):
+    """Normalize measured positions using checkpoint state quantiles, then pad 14 to 32."""
+
+    settings: JointPositionHistoryConfig
+    norm_stats: dict
+    adapt_to_pi: bool
+
+    def __call__(self, data):
+        """Training and serving both consume the same raw, timestamp-selected positions."""
+        values = np.asarray(data.get("joint_position_history"), dtype=np.float32)
+        if values.shape != (self.settings.num_samples, 14) or not np.isfinite(values).all():
+            raise ValueError("Missing or invalid joint position history")
+        values = _decode_state(values, adapt_to_pi=self.adapt_to_pi)
+        stats = self.norm_stats["state"]
+        if stats.q01 is None or stats.q99 is None:
+            raise ValueError("FAST position history requires checkpoint state quantiles")
+        values = (values - stats.q01[..., :14]) / (stats.q99[..., :14] - stats.q01[..., :14] + 1e-6) * 2 - 1
+        values = pad_to_dim(np.clip(values, -1, 1), self.settings.model_dim)
+        return {**data, "joint_position_history": values.astype(np.float32)}
+
+
+@dataclasses.dataclass(frozen=True)
 class TokenizePrompt(DataTransformFn):
     tokenizer: _tokenizer.PaligemmaTokenizer
     discrete_state_input: bool = False
+    joint_position_history: JointPositionHistoryConfig | None = None
 
     def __call__(self, data: DataDict) -> DataDict:
         if (prompt := data.pop("prompt", None)) is None:
@@ -271,6 +295,11 @@ class TokenizePrompt(DataTransformFn):
 
         data.pop("subtask", None)  # Ignore historical good/bad action annotations.
         metadata = {key: data.pop(key) for key in ("operator", "rating", "rating_is_valid", "camera_low_position") if key in data}
+        history = data.pop("joint_position_history", None)
+        if self.joint_position_history is not None:
+            if history is None:
+                raise ValueError("Checkpoint requires joint position history")
+            metadata.update(joint_position_history=history, joint_history_settings=self.joint_position_history)
         tokens, token_masks = self.tokenizer.tokenize(prompt, state, **metadata)
         return {**data, "tokenized_prompt": tokens, "tokenized_prompt_mask": token_masks}
 
@@ -410,6 +439,7 @@ class AlohaTransformPipeline:
     video_memory_num_frames: int = 1
     video_memory_stride_seconds: float = 1.0
     high_camera_mosaic: HighCameraMosaicConfig | None = None
+    joint_position_history: JointPositionHistoryConfig | None = None
     adapt_to_pi: bool = True
     use_delta_joint_actions: bool = True
     action_dim: int = ALOHA_MODEL_ACTION_DIM
@@ -417,6 +447,8 @@ class AlohaTransformPipeline:
     norm_stats_error: FileNotFoundError | None = dataclasses.field(init=False, repr=False, compare=False)
 
     def __post_init__(self) -> None:
+        if self.joint_position_history is not None and self.max_token_len < self.joint_position_history.max_tokens + 128:
+            raise ValueError("Prompt budget must reserve 128 text tokens beyond joint history budget")
         if self.high_camera_mosaic is not None:
             mosaic = self.high_camera_mosaic
             if self.video_memory_num_frames != mosaic.history_seconds + 1 or self.video_memory_stride_seconds != 1.0:
@@ -470,7 +502,7 @@ class AlohaTransformPipeline:
         }
         if include_actions:
             structure["actions"] = "action"
-        return RepackTransform(structure, optional_keys=("operator", "rating", "rating_is_valid", "camera_low_position"))
+        return RepackTransform(structure, optional_keys=("operator", "rating", "rating_is_valid", "camera_low_position", "joint_position_history"))
 
     def _model_input_transforms(self) -> list[DataTransformFn]:
         transforms: list[DataTransformFn] = [
@@ -482,6 +514,8 @@ class AlohaTransformPipeline:
         ]
         if self.use_delta_joint_actions:
             transforms.append(DeltaActions(ALOHA_DELTA_ACTION_MASK))
+        if self.joint_position_history is not None:
+            transforms.append(PrepareJointPositionHistory(self.joint_position_history, self._require_norm_stats(), self.adapt_to_pi))
         transforms.extend(
             [
                 Normalize(self._require_norm_stats(), use_quantiles=self.use_quantile_norm),
@@ -489,6 +523,7 @@ class AlohaTransformPipeline:
                 TokenizePrompt(
                     _tokenizer.PaligemmaTokenizer(self.max_token_len),
                     discrete_state_input=self.discrete_state_input,
+                    joint_position_history=self.joint_position_history,
                 ),
                 PadStatesAndActions(self.action_dim),
             ]
