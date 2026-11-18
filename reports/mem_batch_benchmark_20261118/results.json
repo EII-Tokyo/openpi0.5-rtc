@@ -1,0 +1,35 @@
+{
+  "date": "2026-11-18",
+  "instance_id": 61149764,
+  "hardware": "2x H200 NVL",
+  "resolution": [
+    448,
+    448
+  ],
+  "effective_batch": 256,
+  "baseline_seconds_per_update": 32.01136140832532,
+  "no_mem_bs128": {
+    "completed_updates": 12,
+    "timed_steps": [
+      2,
+      11
+    ],
+    "timed_updates": 10,
+    "mean_seconds": 13.188566091004759,
+    "min_seconds": 13.106350513000507,
+    "max_seconds": 13.23803460696945,
+    "samples_per_second": 19.410753089724015,
+    "speedup": 2.4272055951676674,
+    "hours_8000_updates": 29.307924646677243
+  },
+  "low_mem_bs128": {
+    "result": "OOM before first update",
+    "failed_allocation_bytes": 114956628176
+  },
+  "no_mem_bs256": {
+    "result": "OOM before first update",
+    "failed_allocation_bytes": 101738802176
+  },
+  "training_state": "production paused at checkpoint 48; benchmarks completed; GPUs idle",
+  "config_sha256": "122b2b55a06ae1213579ebdec3955bc2f7804d9bf4adc04f1175b3653bbc5128"
+}
