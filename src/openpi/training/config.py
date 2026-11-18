@@ -2496,6 +2496,105 @@ _CONFIGS.append(
 )
 
 
+# HXZ restart on Vast instance 61149764, 2026-11-18.
+# Batch 64 x accumulation 4 was validated on 2x H200; save every 100 steps.
+# Vast.ai runtime: HF_LEROBOT_HOME=/workspace/datasets
+_CONFIGS.append(
+    TrainConfig(
+        name='eii_hxz_15repo_cam4_fullft_h200x2_448_low_right_mem5s_nearw4_20261118',
+        project_name='openpi',
+        exp_name='hxz15_h200x2_448_low_right_mem5s_nearw4_bs64_ga4_nw16_20261118',
+        model=pi0_config.Pi0Config(
+            image_keys=('cam_high', 'cam_low', 'cam_left_wrist', 'cam_right_wrist'),
+            action_horizon=50,
+            image_resolution=(448, 448),
+            image_tokens_per_image=256,
+            max_token_len=200,
+            training_time_rtc=False,
+            rtc_max_delay=10,
+        ),
+        weight_loader=weight_loaders.CheckpointWeightLoader(
+            'gs://openpi-assets/checkpoints/pi05_base/params',
+        ),
+        lr_schedule=_optimizer.CosineDecaySchedule(
+            warmup_steps=1000,
+            peak_lr=2.5e-05,
+            decay_steps=15000,
+            decay_lr=2.5e-06,
+        ),
+        optimizer=_optimizer.AdamW(),
+        ema_decay=0.99,
+        freeze_filter=nnx.Nothing(),
+        data=LeRobotAlohaDataConfig(
+            repo_ids=[
+                # 2026-11-02_home
+                'lyl472324464/rinse__hxz__home__2026-11-02_home__lerobot__without-rinse',
+                # insert_camera_near: each repo appears four times for 4x sampling weight
+                'lyl472324464/rinse__hxz__insert-camera-near__2026-11-17_camera_near_insert_01__lerobot__with-rinse',
+                'lyl472324464/rinse__hxz__insert-camera-near__2026-11-17_camera_near_insert_01__lerobot__with-rinse',
+                'lyl472324464/rinse__hxz__insert-camera-near__2026-11-17_camera_near_insert_01__lerobot__with-rinse',
+                'lyl472324464/rinse__hxz__insert-camera-near__2026-11-17_camera_near_insert_01__lerobot__with-rinse',
+                'lyl472324464/rinse__hxz__insert-camera-near__2026-11-17_camera_near_insert_02__lerobot__with-rinse',
+                'lyl472324464/rinse__hxz__insert-camera-near__2026-11-17_camera_near_insert_02__lerobot__with-rinse',
+                'lyl472324464/rinse__hxz__insert-camera-near__2026-11-17_camera_near_insert_02__lerobot__with-rinse',
+                'lyl472324464/rinse__hxz__insert-camera-near__2026-11-17_camera_near_insert_02__lerobot__with-rinse',
+                # no_cap
+                'lyl472324464/2026-11-04_no_cap_insert_01-lerobot-with-rinse',
+                'lyl472324464/2026-11-04_no_cap_insert_02-lerobot-with-rinse',
+                # release_grasp
+                'lyl472324464/rinse__hxz__release-grasp__2026-11-09_release_grasper_01__lerobot__with-rinse',
+                'lyl472324464/rinse__hxz__release-grasp__2026-11-09_release_grasper_02__lerobot__with-rinse',
+                # reverse_bottle
+                'lyl472324464/rinse__hxz__reverse-bottle__2026-11-17_reverse_bottle_01__lerobot__with-rinse',
+                'lyl472324464/rinse__hxz__reverse-bottle__2026-11-17_reverse_bottle_02__lerobot__with-rinse',
+                # twist
+                'lyl472324464/rinse__hxz__twist__2026-10-23_twist_01__lerobot__with-rinse',
+                'lyl472324464/rinse__hxz__twist__2026-10-23_twist_02__lerobot__with-rinse',
+                'lyl472324464/rinse__hxz__twist__2026-10-27_twist_01__lerobot__with-rinse',
+                'lyl472324464/rinse__hxz__twist__2026-10-27_twist_02__lerobot__with-rinse',
+                'lyl472324464/rinse__hxz__twist__2026-10-27_twist_03__lerobot__with-rinse',
+                'lyl472324464/rinse-hxz-twist-2026-10-27_twist_04-lerobot-with-rinse-with-rinse',
+            ],
+            transform_pipeline=_transforms.AlohaTransformPipeline(
+                include_low=True,
+                use_good_bad_action_prompt=False,
+                image_resolution=(448, 448),
+                max_token_len=200,
+                discrete_state_input=True,
+                assets=_transforms.AssetsConfig(
+                    assets_dir='assets/eii_hxz_15repo_cam4_fullft_h200x2_448_low_right_mem5s_nearw4_20261117',
+                    asset_id='aloha',
+                ),
+                use_quantile_norm=True,
+                video_memory_num_frames=6,
+                video_memory_stride_seconds=1.0,
+                high_camera_mosaic=_transforms.HighCameraMosaicConfig(
+                    cameras=('cam_low', 'cam_right_wrist'), history_seconds=5, sample_hz=4, tile_size=224,
+                ),
+                adapt_to_pi=True,
+                use_delta_joint_actions=True,
+                action_dim=32,
+            ),
+        ),
+        checkpoint_base_dir='/workspace/checkpoints',
+        seed=42,
+        batch_size=64,
+        gradient_accumulation_steps=4,
+        num_workers=16,
+        num_train_steps=15000,
+        log_interval=10,
+        save_interval=100,
+        keep_period=5000,
+        overwrite=False,
+        resume=False,
+        wandb_enabled=True,
+        wandb_entity='yonglianglu2',
+        policy_metadata={'training_manifest': 'src/openpi/training/manifests/eii_hxz_15repo_cam4_fullft_h200x2_448_low_right_mem5s_nearw4_20261118/dataset_manifest.json'},
+        fsdp_devices=2,
+    )
+)
+
+
 if len({config.name for config in _CONFIGS}) != len(_CONFIGS):
     raise ValueError("Config names must be unique.")
 
