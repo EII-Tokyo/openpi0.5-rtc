@@ -468,10 +468,10 @@
   "normalization_sha256": "99f3044b28f40189801409ee63613c51916fcb88d7bd161112d7287d0df3ace4",
   "checkpoint_save_interval": 100,
   "restart_reason": "New no-MEM run from pi05_base; preserve previous MEM checkpoint 48.",
-  "backup_retention": "Every 5 minutes, select newest retained 1000-step milestone or final 4999; checksum-verify copy on host103, then upload full checkpoint to S3 with SHA256 and completion manifest. Keep latest two local copies; no S3 deletion.",
+  "backup_retention": "Inference-only params, assets and config; every 1000 steps and final 4999. Host103 checksum verification, then S3 SHA256 upload with completion manifest. No optimizer/train_state upload.",
   "batch_size": 128,
   "gradient_accumulation_steps": 2,
   "num_train_steps": 5000,
   "keep_period": 1000,
-  "s3_archive_uri": "s3://openpi-tokyo/checkpoints/eii_hxz_15repo_cam4_fullft_h200x2_448_no_mem_nearw4_5k_20261118/hxz15_h200x2_448_no_mem_bs128_ga2_5k_20261118/"
+  "s3_archive_uri": "s3://openpi-tokyo/inference/eii_hxz_15repo_cam4_fullft_h200x2_448_no_mem_nearw4_5k_20261118/hxz15_h200x2_448_no_mem_bs128_ga2_5k_20261118/"
 }
