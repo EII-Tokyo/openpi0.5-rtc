@@ -1,0 +1,6 @@
+[Unit]
+Description=Stop Vast 61149764 only after completed training and verified final inference S3 upload
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /home/eii/openpi0.5-rtc/scripts/ops/monitor_vast_5k_completion.py
+TimeoutStartSec=300
