@@ -52,7 +52,7 @@ def main(a):
         if local_index in cached:return cached[local_index]
         paths={};folder=a.output/'frames'/str(local_index);folder.mkdir(parents=True,exist_ok=True)
         for camera in cameras:
-            image=Image.fromarray(image_uint8(raw['observation.images.'+camera]));image.thumbnail((384,384))
+            image=Image.fromarray(image_uint8(raw['observation.images.'+camera]));image.thumbnail((640,640))
             p=folder/(camera+'.jpg');image.save(p,quality=88);paths[camera]=str(p.relative_to(a.output))
         cached[local_index]=paths;return paths
     class NativeAuditSubset:

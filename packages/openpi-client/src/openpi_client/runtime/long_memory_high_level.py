@@ -49,7 +49,7 @@ def image_uint8(image):
 
 def jpeg_url(image):
     image = Image.fromarray(image_uint8(image))
-    image.thumbnail((512, 512))
+    image.thumbnail((640,640))
     buffer = io.BytesIO(); image.save(buffer, "JPEG", quality=85)
     return "data:image/jpeg;base64," + base64.b64encode(buffer.getvalue()).decode("ascii")
 
