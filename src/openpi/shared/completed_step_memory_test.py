@@ -41,5 +41,11 @@ def test_return_context_and_condition_prefixes_are_explicit():
     assert normalize_subtask('Return to initial pose',return_context='empty_table')==HOME_EMPTY
     assert normalize_subtask('Return to initial pose',return_context='bottles_remain')==HOME_RESET
     with pytest.raises(ValueError,match='verified'):normalize_subtask('Return to initial pose')
-    assert normalize_subtask('Bottle to left trash bin').startswith('The bottle has no cap.')
+    assert normalize_subtask('Bottle to left trash bin').startswith('The bottle neck has no cap, and the cap is not in the right gripper.')
     assert normalize_subtask('Release gripper').startswith('The bottle is held upside down.')
+
+
+def test_source_qualified_return_labels_are_unambiguous_without_scene_fields():
+    from openpi.shared.completed_step_memory import normalize_subtask,HOME_RESET,HOME_EMPTY
+    assert normalize_subtask('One bottle has been processed: Return to initial pose')==HOME_RESET
+    assert normalize_subtask('No bottle on table: Return to initial pose')==HOME_EMPTY

@@ -2,8 +2,7 @@
 COMPLETED_FACTS = {'pickup': 'I adjusted the bottle position and picked up the bottle with my left gripper.',
  'uncap': 'I removed the cap from the bottle.',
  'bottle_bin': 'I placed and released the bottle in the left trash bin.',
- 'no_cap_bottle_bin': 'The bottle had no cap. I placed and released the bottle in the left trash '
-                      'bin.',
+ 'no_cap_bottle_bin': 'The bottle neck had no cap, and the cap was not in my right gripper. I placed and released the bottle in the left trash bin.',
  'release': 'The bottle was held upside down. I opened the gripper and released the bottle.',
  'cap_bin': 'I placed and released the cap in the right trash bin.',
  'joint_reset': 'I reset the robot joints to the initial pose while bottles remained on the table.'}
@@ -23,22 +22,22 @@ SUBTASKS = [{'id': 'pickup',
   'completion_evidence': 'The cap is physically separated from the bottle neck.',
   'memory_en': 'I removed the cap from the bottle.'},
  {'id': 'both_bins',
-  'zh': '分别丢弃瓶子和瓶盖',
-  'current_task': 'Bottle to left trash bin, cap to right trash bin',
-  'aliases': [],
+  'zh': '瓶口已无盖、瓶盖在右爪：丢弃瓶子和瓶盖',
+  'current_task': 'The bottle neck has no cap, and the cap is in the right gripper. Bottle to left trash bin, cap to right trash bin.',
+  'aliases': ['Bottle to left trash bin, cap to right trash bin'],
   'completed_facts': ['bottle_bin', 'cap_bin'],
   'completion_evidence': 'Both objects have been released into their designated bins; this is one '
                          'compound task record.',
   'memory_en': 'I placed and released the bottle in the left trash bin. I placed and released the '
                'cap in the right trash bin.'},
  {'id': 'bottle_bin',
-  'zh': '瓶子无盖：丢弃瓶子',
-  'current_task': 'The bottle has no cap. Bottle to left trash bin.',
-  'aliases': ['Bottle to left trash bin'],
+  'zh': '瓶口已无盖、瓶盖不在右爪：丢弃瓶子',
+  'current_task': 'The bottle neck has no cap, and the cap is not in the right gripper. Bottle to left trash bin.',
+  'aliases': ['Bottle to left trash bin', 'The bottle has no cap. Bottle to left trash bin.'],
   'completed_facts': ['no_cap_bottle_bin'],
   'completion_evidence': 'Cap absence is established and the bottle has been released into the '
                          'left bin.',
-  'memory_en': 'The bottle had no cap. I placed and released the bottle in the left trash bin.'},
+  'memory_en': 'The bottle neck had no cap, and the cap was not in my right gripper. I placed and released the bottle in the left trash bin.'},
  {'id': 'release',
   'zh': '瓶子拿反：松开夹爪',
   'current_task': 'The bottle is held upside down. Release gripper.',
@@ -77,6 +76,8 @@ HOME_RESET=next(s['current_task'] for s in SUBTASKS if s['id']=='joint_reset')
 
 
 def normalize_subtask(task, *, return_context=None):
+    if task=='One bottle has been processed: Return to initial pose':return HOME_RESET
+    if task=='No bottle on table: Return to initial pose':return HOME_EMPTY
     if task in ('Return to initial pose','return to home position'):
         if return_context=='empty_table':return HOME_EMPTY
         if return_context=='bottles_remain':return HOME_RESET

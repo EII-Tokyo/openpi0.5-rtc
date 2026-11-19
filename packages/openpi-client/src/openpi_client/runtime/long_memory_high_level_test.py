@@ -4,13 +4,13 @@ import json
 import numpy as np
 import pytest
 from openpi.shared.long_memory import MemoryState,encode_memory
-from openpi.shared.completed_step_memory import HOME_EMPTY,HOME_RESET,COMPLETED_FACTS
+from openpi.shared.completed_step_memory import HOME_EMPTY,HOME_RESET,COMPLETED_FACTS,CURRENT_TASKS
 from openpi_client.runtime.long_memory_high_level import MemoryUpdate,MemorySupervisor,parse_update,image_uint8
 
 
 def test_structured_output_is_one_summary_not_a_task_transcript():
-    x=parse_update({'bottle_description':'green bottle','memory':'I removed the cap from the bottle.','current_task':'Bottle to left trash bin, cap to right trash bin','cycle_complete':False})
-    assert x.state==MemoryState('green bottle','I removed the cap from the bottle.','Bottle to left trash bin, cap to right trash bin')
+    x=parse_update({'bottle_description':'green bottle','memory':'I removed the cap from the bottle.','current_task':CURRENT_TASKS[2],'cycle_complete':False})
+    assert x.state==MemoryState('green bottle','I removed the cap from the bottle.',CURRENT_TASKS[2])
     with pytest.raises(ValueError):parse_update({'events':[],'cycle_complete':False})
     with pytest.raises(ValueError):parse_update({'bottle_description':'old','memory':'old','current_task':'return','cycle_complete':True})
 
