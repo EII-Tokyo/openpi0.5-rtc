@@ -70,6 +70,9 @@ def main(a):
                     'actual_training_memory':json.loads(raw['long_memory']),
                     'before_augmentation':json.loads(raw['long_memory_before_augmentation']),
                     'augmentation':raw['memory_augmentation']}
+            from openpi.shared.completed_step_memory import normalize_subtask
+            record['annotation']['raw_current_task']=record['annotation']['current_task']
+            record['annotation']['current_task']=normalize_subtask(record['annotation']['current_task'],return_context=native.timelines[(dataset_index,episode)].context_at(now))
             before=transform({**raw,'long_memory':raw['long_memory_before_augmentation']})
             output=transform(dict(raw))
             np.testing.assert_array_equal(before['state'],output['state'])

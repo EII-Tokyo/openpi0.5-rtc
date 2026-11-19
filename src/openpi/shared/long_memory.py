@@ -83,6 +83,10 @@ class MemoryTimeline:
         i=bisect.bisect_right(self.times,time_s)-1
         return MemoryState() if i<0 else MemoryState(**self.updates[i]['state'])
 
+    def context_at(self,time_s):
+        i=bisect.bisect_right(self.times,time_s)-1
+        return None if i<0 else self.updates[i].get('return_context')
+
     def records_at(self,time_s):
         i=bisect.bisect_right(self.times,time_s)-1
         if i<0:return []

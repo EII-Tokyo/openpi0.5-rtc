@@ -1,8 +1,89 @@
-"""Dataset-derived subtask catalog and append-only completed-progress memory."""
-import json
-COMPLETED_FACTS = {'adjust': 'I adjusted the bottle into a graspable position.', 'pickup': 'I picked up the bottle with my left gripper.', 'uncap': 'I removed the cap from the bottle.', 'bottle_bin': 'I placed and released the bottle in the left trash bin.', 'release': 'I opened the gripper and released the inverted bottle.', 'cap_bin': 'I placed and released the cap in the right trash bin.'}
-SUBTASKS = [{'id': 'pickup', 'zh': '调整位置并用左手拿起', 'current_task': 'Adjust bottle position and pick up with left hand', 'aliases': ['Adjust bottle position', 'Pick up with left hand'], 'completed_facts': ['adjust', 'pickup'], 'completion_evidence': 'The bottle is actually secured and lifted by the left gripper; reaching or touching is not enough. For a split adjustment task, record only adjustment until pickup succeeds.', 'memory_zh': '我已调整好瓶子的位置，并用左手将瓶子拿起。'}, {'id': 'uncap', 'zh': '拧下瓶盖', 'current_task': 'Unscrew cap', 'aliases': [], 'completed_facts': ['uncap'], 'completion_evidence': 'The cap is physically separated from the bottle neck. Seeing a cap in the right wrist camera is NOT evidence that it remains attached to the bottle.', 'memory_zh': '我已将瓶盖从瓶口拧下。'}, {'id': 'both_bins', 'zh': '瓶子和瓶盖分别丢入两侧垃圾桶', 'current_task': 'Bottle to left trash bin, cap to right trash bin', 'aliases': [], 'completed_facts': ['bottle_bin', 'cap_bin'], 'completion_evidence': 'Bottle and cap have both been released into their respective bins. If only one is confirmed, append only that completed component.', 'memory_zh': '我已把瓶子放入左侧垃圾桶，把瓶盖放入右侧垃圾桶，并松开夹爪。'}, {'id': 'bottle_bin', 'zh': '只处理瓶子', 'current_task': 'Bottle to left trash bin', 'aliases': [], 'completed_facts': ['bottle_bin'], 'completion_evidence': 'The bottle has actually been released into the left bin; merely moving it above the bin is insufficient.', 'memory_zh': '我已将瓶子放入左侧垃圾桶并松开夹爪。'}, {'id': 'release', 'zh': '倒置瓶子分支：松开夹爪', 'current_task': 'Release gripper', 'aliases': [], 'completed_facts': ['release'], 'completion_evidence': 'The requested gripper has actually opened and released the inverted bottle. Do not infer disposal into a bin from this task alone.', 'memory_zh': '我已松开夹爪，释放倒置的瓶子。'}, {'id': 'cap_bin', 'zh': '拾起落在桌上的瓶盖并丢弃', 'current_task': 'Pick up cap and place into right trash bin', 'aliases': [], 'completed_facts': ['cap_bin'], 'completion_evidence': 'The cap has actually been picked up and released into the right bin. Reaching toward it does not count.', 'memory_zh': '我已拾起瓶盖并将它放入右侧垃圾桶。'}, {'id': 'home', 'zh': '返回初始姿态', 'current_task': 'Return to initial pose', 'aliases': ['return to home position'], 'completed_facts': [], 'completion_evidence': 'Both grippers are empty and have actually reached the initial parked pose; a return-home instruction or an empty table is not enough.', 'memory_zh': '我已空手完成归位。此时整个周期结束，立即清空 memory，下一瓶从空记忆开始。'}]
-CURRENT_TASKS=tuple(dict.fromkeys([s['current_task'] for s in SUBTASKS]+[a for s in SUBTASKS for a in s['aliases']]))
+"""Canonical tasks and whole-stage completed-memory records; raw labels are normalized."""
+COMPLETED_FACTS = {'pickup': 'I adjusted the bottle position and picked up the bottle with my left gripper.',
+ 'uncap': 'I removed the cap from the bottle.',
+ 'bottle_bin': 'I placed and released the bottle in the left trash bin.',
+ 'no_cap_bottle_bin': 'The bottle had no cap. I placed and released the bottle in the left trash '
+                      'bin.',
+ 'release': 'The bottle was held upside down. I opened the gripper and released the bottle.',
+ 'cap_bin': 'I placed and released the cap in the right trash bin.',
+ 'joint_reset': 'I reset the robot joints to the initial pose while bottles remained on the table.'}
+SUBTASKS = [{'id': 'pickup',
+  'zh': '调整并拿起瓶子',
+  'current_task': 'Adjust bottle position and pick up with left hand',
+  'aliases': ['Adjust bottle position', 'Pick up with left hand'],
+  'completed_facts': ['pickup'],
+  'completion_evidence': 'Record completion only after the merged adjustment-and-pickup stage '
+                         'finishes.',
+  'memory_en': 'I adjusted the bottle position and picked up the bottle with my left gripper.'},
+ {'id': 'uncap',
+  'zh': '拧下瓶盖',
+  'current_task': 'Unscrew cap',
+  'aliases': [],
+  'completed_facts': ['uncap'],
+  'completion_evidence': 'The cap is physically separated from the bottle neck.',
+  'memory_en': 'I removed the cap from the bottle.'},
+ {'id': 'both_bins',
+  'zh': '分别丢弃瓶子和瓶盖',
+  'current_task': 'Bottle to left trash bin, cap to right trash bin',
+  'aliases': [],
+  'completed_facts': ['bottle_bin', 'cap_bin'],
+  'completion_evidence': 'Both objects have been released into their designated bins; this is one '
+                         'compound task record.',
+  'memory_en': 'I placed and released the bottle in the left trash bin. I placed and released the '
+               'cap in the right trash bin.'},
+ {'id': 'bottle_bin',
+  'zh': '瓶子无盖：丢弃瓶子',
+  'current_task': 'The bottle has no cap. Bottle to left trash bin.',
+  'aliases': ['Bottle to left trash bin'],
+  'completed_facts': ['no_cap_bottle_bin'],
+  'completion_evidence': 'Cap absence is established and the bottle has been released into the '
+                         'left bin.',
+  'memory_en': 'The bottle had no cap. I placed and released the bottle in the left trash bin.'},
+ {'id': 'release',
+  'zh': '瓶子拿反：松开夹爪',
+  'current_task': 'The bottle is held upside down. Release gripper.',
+  'aliases': ['Release gripper'],
+  'completed_facts': ['release'],
+  'completion_evidence': 'The inverted bottle has actually been released.',
+  'memory_en': 'The bottle was held upside down. I opened the gripper and released the bottle.'},
+ {'id': 'cap_bin',
+  'zh': '拾起并丢弃瓶盖',
+  'current_task': 'Pick up cap and place into right trash bin',
+  'aliases': [],
+  'completed_facts': ['cap_bin'],
+  'completion_evidence': 'The cap has been picked up and released into the right bin.',
+  'memory_en': 'I placed and released the cap in the right trash bin.'},
+ {'id': 'home_empty',
+  'zh': '桌面无瓶：结束归位',
+  'current_task': 'There are no bottles left on the table. Return to initial pose.',
+  'aliases': [],
+  'completed_facts': [],
+  'completion_evidence': 'Confirm no bottles remain on the work surface and both empty grippers '
+                         'have reached the initial pose; only then end the task and clear memory.',
+  'memory_en': ''},
+ {'id': 'joint_reset',
+  'zh': '桌面有瓶：关节复位',
+  'current_task': 'There are still bottles on the table. Reset the robot joints to the initial '
+                  'pose.',
+  'aliases': [],
+  'completed_facts': ['joint_reset'],
+  'completion_evidence': 'Confirm the joints have reached the initial pose. This is not task '
+                         'completion; preserve memory and continue processing the remaining '
+                         'bottles.',
+  'memory_en': 'I reset the robot joints to the initial pose while bottles remained on the table.'}]
+CURRENT_TASKS=tuple(s['current_task'] for s in SUBTASKS)
+HOME_EMPTY=next(s['current_task'] for s in SUBTASKS if s['id']=='home_empty')
+HOME_RESET=next(s['current_task'] for s in SUBTASKS if s['id']=='joint_reset')
+
+
+def normalize_subtask(task, *, return_context=None):
+    if task in ('Return to initial pose','return to home position'):
+        if return_context=='empty_table':return HOME_EMPTY
+        if return_context=='bottles_remain':return HOME_RESET
+        raise ValueError('Return task needs verified table-occupancy context; do not guess')
+    for stage in SUBTASKS:
+        if task==stage['current_task'] or task in stage['aliases']:return stage['current_task']
+    raise ValueError('Unmapped human subtask: '+task)
 
 
 def parse_completed_memory(text):
@@ -25,10 +106,8 @@ def validate_completed_progress(previous,new,*,cycle_complete=False):
     if current[:len(old)]!=old:raise ValueError('Completed progress cannot shrink or reorder before cycle completion')
 
 
-def completed_record_for_task(task):
-    """One labeled stage becomes one completed record, including compound stages."""
-    if task=='Adjust bottle position':return COMPLETED_FACTS['adjust']
-    if task=='Pick up with left hand':return COMPLETED_FACTS['pickup']
-    stage=next((s for s in SUBTASKS if task==s['current_task'] or task in s['aliases']),None)
-    if stage is None:raise ValueError('Unmapped human subtask: '+task)
-    return ' '.join(COMPLETED_FACTS[key] for key in stage['completed_facts'])
+
+def completed_record_for_task(task, *, return_context=None):
+    task=normalize_subtask(task,return_context=return_context)
+    stage=next(s for s in SUBTASKS if task==s['current_task'])
+    return stage['memory_en']

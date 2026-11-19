@@ -17,6 +17,8 @@ class LongMemoryDataset:
         self.timelines = {}
         cache=json.loads(Path(settings.summary_cache_path).read_text())
         if cache.get('schema_version')!=2:raise ValueError('Summary cache v2 required')
+        if cache.get('task_catalog_version')!='merged_pickup_conditional_return_v2':
+            raise ValueError('Regenerate memory cache with merged pickup and verified return contexts')
         self.summary_cache=cache['episodes']
         masks = []
         seen=set()
@@ -68,7 +70,9 @@ class LongMemoryDataset:
         # The instruction is this frame's actual annotation, independent of memory corruption.
         fields=parse_annotation(sample['subtask'])
         if fields is None:raise ValueError('Sample has no annotated current task')
-        clean=dataclasses.replace(clean,bottle_description=fields[0] or clean.bottle_description,current_task=fields[1])
+        from openpi.shared.completed_step_memory import normalize_subtask
+        task=normalize_subtask(fields[1],return_context=self.timelines[key].context_at(time_s))
+        clean=dataclasses.replace(clean,bottle_description=fields[0] or clean.bottle_description,current_task=task)
         clean,memory,augmentation=memory_augmentation(self.timelines[key],time_s,self.settings,training=True,rng=random,clean=clean)
         sample['long_memory_before_augmentation']=encode_memory(clean)
         sample['memory_augmentation']=augmentation

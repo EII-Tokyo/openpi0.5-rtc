@@ -2,8 +2,10 @@ import pytest
 from openpi.shared.completed_step_memory import COMPLETED_FACTS,parse_completed_memory,validate_completed_progress,CURRENT_TASKS,SUBTASKS
 
 
-def test_seven_dataset_classes_have_ten_raw_spellings():
-    assert len(SUBTASKS)==7 and len(CURRENT_TASKS)==10
+def test_eight_canonical_tasks_do_not_expose_raw_split_pickup_labels():
+    assert len(SUBTASKS)==8 and len(CURRENT_TASKS)==8
+    assert "Adjust bottle position" not in CURRENT_TASKS
+    assert "Pick up with left hand" not in CURRENT_TASKS
 
 
 def test_memory_accumulates_completed_actions_without_forgetting():
@@ -24,9 +26,20 @@ def test_complete_cycle_can_clear_optional_branch_history():
     with pytest.raises(ValueError):validate_completed_progress(COMPLETED_FACTS['bottle_bin'],'')
 
 
-def test_compound_stage_is_one_record_and_split_tasks_stay_exact():
+def test_compound_stage_is_one_record_and_split_pickup_tasks_are_merged():
     from openpi.shared.completed_step_memory import completed_record_for_task
     assert completed_record_for_task('Bottle to left trash bin, cap to right trash bin')==COMPLETED_FACTS['bottle_bin']+' '+COMPLETED_FACTS['cap_bin']
-    assert completed_record_for_task('Adjust bottle position')==COMPLETED_FACTS['adjust']
+    assert completed_record_for_task('Adjust bottle position')==COMPLETED_FACTS['pickup']
     assert completed_record_for_task('Pick up with left hand')==COMPLETED_FACTS['pickup']
-    assert completed_record_for_task('Return to initial pose')==''
+    with pytest.raises(ValueError):completed_record_for_task('Return to initial pose')
+    assert completed_record_for_task('Return to initial pose',return_context='empty_table')==''
+    assert completed_record_for_task('Return to initial pose',return_context='bottles_remain')==COMPLETED_FACTS['joint_reset']
+
+
+def test_return_context_and_condition_prefixes_are_explicit():
+    from openpi.shared.completed_step_memory import normalize_subtask,HOME_EMPTY,HOME_RESET
+    assert normalize_subtask('Return to initial pose',return_context='empty_table')==HOME_EMPTY
+    assert normalize_subtask('Return to initial pose',return_context='bottles_remain')==HOME_RESET
+    with pytest.raises(ValueError,match='verified'):normalize_subtask('Return to initial pose')
+    assert normalize_subtask('Bottle to left trash bin').startswith('The bottle has no cap.')
+    assert normalize_subtask('Release gripper').startswith('The bottle is held upside down.')
