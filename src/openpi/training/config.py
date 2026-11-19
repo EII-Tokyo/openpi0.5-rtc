@@ -3051,9 +3051,9 @@ _CONFIGS.append(
 # Native long-memory pilot; source repo multiplicities preserved verbatim.
 _CONFIGS.append(
     TrainConfig(
-        name='eii_twist_cam3_fullft_25repo_h100x2_224_summarymem3s_drop_bs16ga16_5k_20261119',
+        name='eii_twist_cam3_fullft_25repo_h100x2_224_completedmem3s_drop_bs16ga16_5k_20261119',
         project_name='openpi',
-        exp_name='twist_summarymem3s_missing_stale_seed42_pilot_20261119',
+        exp_name='twist_completedmem3s_missing_stale_seed42_pilot_20261119',
         model=pi0_config.Pi0Config(
             image_resolution=(224, 224),
             max_token_len=1024,
@@ -3157,7 +3157,7 @@ _CONFIGS.append(
         overwrite=False,
         resume=False,
         wandb_enabled=True,
-        policy_metadata={'conditioning': 'compact_summary_memory_v2', 'task_scope': 'twist_only', 'source_config': 'eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo'},
+        policy_metadata={'conditioning': 'completed_step_memory_v3', 'task_scope': 'twist_only', 'source_config': 'eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo'},
         fsdp_devices=2,
     )
 )
@@ -3166,9 +3166,9 @@ _CONFIGS.append(
 # Bounded first-stage pilot: one final checkpoint; source repo multiplicities preserved verbatim.
 _CONFIGS.append(
     TrainConfig(
-        name='eii_twist_cam3_fullft_25repo_h100x2_224_summarymem3s_drop_bs16ga16_500step_pilot_20261119',
+        name='eii_twist_cam3_fullft_25repo_h100x2_224_completedmem3s_drop_bs16ga16_500step_pilot_20261119',
         project_name='openpi',
-        exp_name='twist_summarymem3s_missing_stale_seed42_stage1_500_20261119',
+        exp_name='twist_completedmem3s_missing_stale_seed42_stage1_500_20261119',
         model=pi0_config.Pi0Config(
             image_resolution=(224, 224),
             max_token_len=1024,
@@ -3272,7 +3272,7 @@ _CONFIGS.append(
         overwrite=False,
         resume=False,
         wandb_enabled=True,
-        policy_metadata={'conditioning': 'compact_summary_memory_v2', 'task_scope': 'twist_only', 'source_config': 'eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo'},
+        policy_metadata={'conditioning': 'completed_step_memory_v3', 'task_scope': 'twist_only', 'source_config': 'eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo'},
         fsdp_devices=2,
     )
 )

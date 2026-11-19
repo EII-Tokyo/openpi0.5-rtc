@@ -1,0 +1,13 @@
+Completed-step accumulating memory v3
+
+Requested semantics: memory starts empty, appends a fixed past-tense completion claim only when the action has actually succeeded, retains all earlier completed claims, and clears after the whole bottle cycle finishes with both empty grippers parked home. It is one text paragraph, not an event JSON. Current task is a separate exact dataset instruction.
+
+Dataset verification: the exact29repo-named config resolves to25unique repos and51weighted entries. Eligible data contains10raw task spellings, normalized into7core task classes. They include alternative branches; every bottle need not execute all seven. The source default subtask catalog also has an eighth stuck-bottle recovery instruction, but that label is absent from this selected dataset and is not silently added.
+
+Combined pickup contributes adjustment and successful pickup claims when confirmed. Combined two-bin disposal contributes separate successful bottle/cap disposal facts; already completed components are not repeated by later cleanup. A split instruction to adjust or pick only records that part. Cap absence can skip unscrewing; failed attempts never count as completions. Return-home onset does not clear memory. The final home completion is a cycle boundary and immediately clears fields.
+
+Prompt and parser enforce a fixed completion vocabulary and non-shrinking prefix inside the cycle. The low-level still receives independent Bottle description, Memory and Current task fields without time or a stale-memory reminder. Training memory dropout may intentionally omit completed facts; this does not alter the accumulated online source memory.
+
+This is an isolated candidate branch. No new100-frame evaluation or training has been run forv3. The previous summary100page contains v2 outputs, not v3 claims. The active Vast training source is untouched. Thev3 summary cache path is separate and unprepared, so missing labels block use. Prepare full causal completed-step labels before training.
+
+Cap audit evidence: the measured100-frame APIs received384x288JPEGs from640x480source videos; the standalone online helper's512pixel cap was not used by those requests. Previous65explicit cap labels consist of62capped and3uncapped; predictions were58capped-correct,4capped→uncapped,3uncapped→capped. The reported89.2%aggregate is misleading for testing cap absence. In summary-v2sample84(time26.46), the model still says attached although human labels say detached and the right wrist holds the separated green cap. Resolution alone is not established as the cause; stale-state anchoring, occlusion, blur and cross-view object association remain confounds.

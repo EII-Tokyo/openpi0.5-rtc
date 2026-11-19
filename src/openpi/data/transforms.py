@@ -302,7 +302,9 @@ class TokenizePrompt(DataTransformFn):
             if memory is None:
                 raise ValueError("This checkpoint requires explicit long_memory, including an empty memory at reset")
             from openpi.shared.long_memory import decode_memory
-            decode_memory(str(memory), max_chars=self.long_memory.max_memory_chars)
+            from openpi.shared.completed_step_memory import parse_completed_memory
+            parsed_memory = decode_memory(str(memory), max_chars=self.long_memory.max_memory_chars)
+            parse_completed_memory(parsed_memory.memory)
             metadata["long_memory"] = str(memory)
         history = data.pop("joint_position_history", None)
         if self.joint_position_history is not None:

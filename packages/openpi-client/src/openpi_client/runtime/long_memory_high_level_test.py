@@ -8,15 +8,15 @@ from openpi_client.runtime.long_memory_high_level import MemoryUpdate,MemorySupe
 
 
 def test_structured_output_is_one_summary_not_a_task_transcript():
-    x=parse_update({'bottle_description':'green bottle','memory':'The cap has been removed.','current_task':'Dispose of bottle and cap','cycle_complete':False})
-    assert x.state==MemoryState('green bottle','The cap has been removed.','Dispose of bottle and cap')
+    x=parse_update({'bottle_description':'green bottle','memory':'I removed the cap from the bottle.','current_task':'Bottle to left trash bin, cap to right trash bin','cycle_complete':False})
+    assert x.state==MemoryState('green bottle','I removed the cap from the bottle.','Bottle to left trash bin, cap to right trash bin')
     with pytest.raises(ValueError):parse_update({'events':[],'cycle_complete':False})
     with pytest.raises(ValueError):parse_update({'bottle_description':'old','memory':'old','current_task':'return','cycle_complete':True})
 
 
 def test_home_completion_clears_all_fields_and_old_video():
     s=MemorySupervisor(lambda **kw:MemoryUpdate(MemoryState()),cameras=('cam_high',))
-    s.memory=MemoryState('old bottle','Cap removed.','Return home');s.waiting_next_bottle=False;s.last_request=10
+    s.memory=MemoryState('old bottle','I removed the cap from the bottle.','Return home');s.waiting_next_bottle=False;s.last_request=10
     s.frames=deque([(1,{'cam_high':np.zeros((4,4,3),np.uint8)})])
     s.future=Future();s.future.set_result((s.generation,2,MemoryUpdate(MemoryState(),True),.1))
     s._poll()
@@ -32,7 +32,7 @@ def test_late_reply_cannot_cross_episode_reset():
 
 def test_idle_reply_does_not_resurrect_previous_bottle():
     s=MemorySupervisor(lambda **kw:None,cameras=('cam_high',))
-    s.future=Future();s.future.set_result((s.generation,2,MemoryUpdate(MemoryState('old','Cap removed.','Return home')),.1));s._poll()
+    s.future=Future();s.future.set_result((s.generation,2,MemoryUpdate(MemoryState('old','I removed the cap from the bottle.','Return home')),.1));s._poll()
     assert s.memory==MemoryState();s.close()
 
 

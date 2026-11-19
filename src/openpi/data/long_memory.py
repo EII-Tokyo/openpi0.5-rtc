@@ -64,5 +64,7 @@ class LongMemoryDataset:
         if key not in self.timelines:
             raise ValueError('This EP has no verified summary labels; prepare its cache before training')
         memory = condition_at(self.timelines[key], time_s, self.settings, training=True, rng=random)
+        from openpi.shared.completed_step_memory import parse_completed_memory
+        parse_completed_memory(memory.memory)
         sample["long_memory"] = encode_memory(memory)
         return sample
