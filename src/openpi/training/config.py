@@ -3430,7 +3430,7 @@ _CONFIGS.append(
         save_interval=1000,
         keep_period=10000,
         overwrite=False,
-        resume=False,
+        resume=True,
         wandb_enabled=True,
         policy_metadata={'conditioning': 'completed_memory_latestdrop20_currenttaskdrop20', 'source_config': 'eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo', 'dataset_mixture': 'free-spinning5_plus_aug20_aug24_aug25', 'source103_base': 'ca82780', 'native_config': True, 'image_history': False, 'joint_position_history': False},
         fsdp_devices=2,
