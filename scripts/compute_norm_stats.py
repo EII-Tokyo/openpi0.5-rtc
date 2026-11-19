@@ -75,6 +75,14 @@ def _load_repo_arrays(repo_id: str) -> tuple[lerobot_dataset.LeRobotDatasetMetad
     return meta, arrays
 
 
+def _load_training_arrays(repo_id, data_config):
+    from openpi.data.episode_split import training_episode_mask
+
+    meta, arrays = _load_repo_arrays(repo_id)
+    mask = training_episode_mask(repo_id, arrays["episode_index"], data_config.train_episode_indices)
+    return meta, {key: value[mask] for key, value in arrays.items()}
+
+
 def _episode_bounds(episode_index: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     starts = np.empty_like(episode_index)
     ends = np.empty_like(episode_index)
@@ -139,7 +147,7 @@ def compute_parquet_norm_stats(
     total_frames = 0
     repo_lengths: list[int] = []
     for repo_id in repo_ids:
-        _, arrays = _load_repo_arrays(repo_id)
+        _, arrays = _load_training_arrays(repo_id, data_config)
         repo_len = len(arrays["state"])
         repo_lengths.append(repo_len)
         total_frames += repo_len
@@ -152,7 +160,7 @@ def compute_parquet_norm_stats(
         if remaining <= 0:
             break
 
-        meta, arrays = _load_repo_arrays(repo_id)
+        meta, arrays = _load_training_arrays(repo_id, data_config)
         repo_fps = float(meta.fps)
         delta_indices = np.asarray([round((t / base_fps) * repo_fps) for t in range(action_horizon)], dtype=np.int64)
         episode_start, episode_end = _episode_bounds(arrays["episode_index"])

@@ -6,7 +6,7 @@
   "training_started": false,
   "source": "Pinned original LeRobot releases relabeled from approved host 200 episode/slice annotations; all published metadata, data and video hashes verified after HF download and archived to S3.",
   "duration_definition": "Frames divided by FPS on the trajectory timeline; cameras and sampling repeats are not multiplied. Trainable frames have is_for_training=true.",
-  "normalization_status": "Reused existing normalization only after all published state/action values and training-start flags were proven identical to the original pinned datasets.",
+  "normalization_status": "Recomputed using only the 145 selected training episodes from verified published snapshots; held-out episodes excluded before state/action chunk statistics.",
   "summary": {
     "episodes": 150,
     "export_frames": 124049,
@@ -478,7 +478,12 @@
           "sha256": "7bf237d3a03e5d0b1b7601e6895d1f9a3136e4c34ef15573148806a7d45bf70e"
         }
       ],
-      "video_files_verified": 17
+      "video_files_verified": 17,
+      "effective_local_split": {
+        "train": 48,
+        "test": 2
+      },
+      "splits_scope": "Published immutable HF metadata; effective local training selection is recorded separately."
     },
     {
       "project_id": "6afd6beace1afaaf079e0f00",
@@ -962,7 +967,12 @@
           "sha256": "a0f281dd97e4440ac879bda6c120b92fc58e7c19dd851143557240cdc6e5d38c"
         }
       ],
-      "video_files_verified": 21
+      "video_files_verified": 21,
+      "effective_local_split": {
+        "train": 48,
+        "test": 2
+      },
+      "splits_scope": "Published immutable HF metadata; effective local training selection is recorded separately."
     },
     {
       "project_id": "6afd6c04ce1afaaf079e0f01",
@@ -1456,7 +1466,12 @@
           "sha256": "1b47ba2844bddf9a2e6244b89666affcf3f58b056f54f8f33f4e10e2da7c0f2e"
         }
       ],
-      "video_files_verified": 23
+      "video_files_verified": 23,
+      "effective_local_split": {
+        "train": 49,
+        "test": 1
+      },
+      "splits_scope": "Published immutable HF metadata; effective local training selection is recorded separately."
     }
   ],
   "config_sha256": "5c02e3a1adeae0b5975548b967fdd92b671692acc02b4942e0b6d9879f172bcc",
@@ -1482,9 +1497,9 @@
     "initial_weights": "gs://openpi-assets/checkpoints/pi05_base/params",
     "training_time_rtc": false
   },
-  "normalization_file": "assets/eii_hxz_exp_insert_3repo_cam4_fullft_h200x2_448_no_mem_5k_20261119/aloha/norm_stats.json",
-  "normalization_sha256": "ad1cc9de09bc0acb991933a3d9ad296c6931e2a121bb470b0c560d2fcf50404e",
-  "data_split_policy": "All 150 episodes assigned to train by owner request; no validation or test set.",
+  "normalization_file": "assets/eii_hxz_exp_insert_3repo_cam4_fullft_h200x2_448_no_mem_5k_20261119_train145/aloha/norm_stats.json",
+  "normalization_sha256": "419a98d47f62807a4cd58bf856b6c71e8cbe65cabfc7092c6931c4dc77d3a6b1",
+  "data_split_policy": "145 whole episodes for training; 5 fixed held-out test episodes; no validation set. Native TrainConfig.train_episode_indices overrides the immutable published dataset_split=train field. See episode_split.json for source/exported IDs.",
   "language_source": "subtask_instruction",
   "annotation_revision": "exp_insert_subtask_instruction_v1",
   "tail_policy": "All frames retained in export; existing last-50-frame exclusion applies only to training starts. No stage-boundary truncation or masking added.",
@@ -1821,5 +1836,17 @@
       "src/openpi/data/transforms.py": "fd89efb5e4f43d50d1cb941e302b655261ad4fcf4834c430b7701b9e346c4beb",
       "src/openpi/training/config.py": "5c02e3a1adeae0b5975548b967fdd92b671692acc02b4942e0b6d9879f172bcc"
     }
+  },
+  "local_training_split": {
+    "manifest": "src/openpi/training/manifests/eii_hxz_exp_insert_3repo_cam4_fullft_h200x2_448_no_mem_5k_20261119/episode_split.json",
+    "train_episodes": 145,
+    "test_episodes": 5,
+    "train_frames": 119737,
+    "test_frames": 4312,
+    "train_seconds": 2394.74,
+    "test_seconds": 86.24,
+    "trainable_start_frames": 112487,
+    "excluded_training_tail_frames": 7250,
+    "verified_at": "2026-11-19T08:27:47.906864+00:00"
   }
 }
