@@ -23,7 +23,7 @@ def episode_updates(rows, *, generic_return_context=None):
             evidence.append('New human-labeled pickup/target; home arrival not independently established')
         elif last_task and task!=last_task and last_task not in (HOME_EMPTY,HOME_RESET):
             record=completed_record_for_task(last_task)
-            if record and record not in records:
+            if record:
                 records.append(record);evidence.append('Previous human-labeled stage ended: '+last_task)
         if desc:description=desc
         state={'bottle_description':description,'memory':' '.join(records),'current_task':task}

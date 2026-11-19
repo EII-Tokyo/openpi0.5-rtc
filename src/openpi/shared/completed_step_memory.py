@@ -93,7 +93,7 @@ def parse_completed_memory(text):
     remaining=text.strip();seen=[]
     while remaining:
         match=next((key for key,sentence in COMPLETED_FACTS.items() if remaining.startswith(sentence)),None)
-        if match is None or match in seen:raise ValueError('Unknown or repeated completion claim')
+        if match is None:raise ValueError('Unknown completion claim')
         seen.append(match);remaining=remaining[len(COMPLETED_FACTS[match]):].lstrip()
     return tuple(seen)
 

@@ -25,3 +25,8 @@ def test_missing_task_is_exposed_and_generic_return_requires_review():
  updates,missing=episode_updates([row(0,''),row(1,'Unscrew cap')]);assert missing==[0]
  with pytest.raises(ValueError):episode_updates([row(0,'Return to initial pose')])
  updates,_=episode_updates([row(0,'Return to initial pose')],generic_return_context='empty_table');assert updates[0]['state']['current_task']==CURRENT_TASKS[6]
+
+
+def test_repeated_cap_disposal_after_compound_stage_keeps_whole_human_stage_records():
+ updates,_=episode_updates([row(0,'Bottle to left trash bin, cap to right trash bin'),row(1,'Pick up cap and place into right trash bin'),row(2,'No bottle on table: Return to initial pose')])
+ assert updates[-1]['completed_records']==[COMPLETED_FACTS['bottle_bin']+' '+COMPLETED_FACTS['cap_bin'],COMPLETED_FACTS['cap_bin']]

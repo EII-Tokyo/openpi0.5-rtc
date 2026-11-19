@@ -16,9 +16,9 @@ def test_memory_accumulates_completed_actions_without_forgetting():
     with pytest.raises(ValueError):validate_completed_progress(b,COMPLETED_FACTS['uncap']+' '+a)
 
 
-def test_intentions_and_repeated_attempts_are_not_completed_memory():
+def test_intentions_are_not_completed_memory_and_repeated_completed_stages_are_representable():
     with pytest.raises(ValueError):parse_completed_memory('I am trying to unscrew the cap.')
-    with pytest.raises(ValueError):parse_completed_memory(COMPLETED_FACTS['pickup']+' '+COMPLETED_FACTS['pickup'])
+    assert parse_completed_memory(COMPLETED_FACTS['cap_bin']+' '+COMPLETED_FACTS['cap_bin'])==('cap_bin','cap_bin')
 
 
 def test_complete_cycle_can_clear_optional_branch_history():
