@@ -3320,25 +3320,6 @@ _CONFIGS.append(TrainConfig(
     batch_size=1,num_workers=0,wandb_enabled=False,
     policy_metadata={'purpose':'CPU native DataLoader audit only; no GPU training'}))
 
-if len({config.name for config in _CONFIGS}) != len(_CONFIGS):
-    raise ValueError("Config names must be unique.")
-
-_CONFIGS_DICT = {config.name: config for config in _CONFIGS}
-
-
-def cli() -> TrainConfig:
-    return tyro.extras.overridable_config_cli({k: (k, v) for k, v in _CONFIGS_DICT.items()})
-
-
-def get_config(config_name: str) -> TrainConfig:
-    """Get a config by name."""
-    if config_name not in _CONFIGS_DICT:
-        closest = difflib.get_close_matches(config_name, _CONFIGS_DICT.keys(), n=1, cutoff=0.0)
-        closest_str = f" Did you mean '{closest[0]}'? " if closest else ""
-        raise ValueError(f"Config '{config_name}' not found.{closest_str}")
-    return _CONFIGS_DICT[config_name]
-
-
 # Native 20k full-parameter run: three current cameras, no image/joint history.
 _CONFIGS.append(
     TrainConfig(
@@ -3461,3 +3442,22 @@ _CONFIGS.append(
 _CONFIGS.append(
 TrainConfig(name='eii_twist_platform_ep2_cam3_448_rtc_completed_memory_report_20261119', project_name='openpi', exp_name='fixed_platform_ep2_prompt_report_only', model=pi0_config.Pi0Config(image_resolution=(448, 448), max_token_len=1024, training_time_rtc=True, rtc_max_delay=10, image_keys=('cam_high', 'cam_left_wrist', 'cam_right_wrist')), weight_loader=weight_loaders.CheckpointWeightLoader('gs://openpi-assets/checkpoints/pi05_base/params'), lr_schedule=_optimizer.CosineDecaySchedule(warmup_steps=2000, peak_lr=2.5e-05, decay_steps=20000, decay_lr=2.5e-06), optimizer=_optimizer.AdamW(), ema_decay=0.99, freeze_filter=nnx.Nothing(), data=LeRobotAlohaDataConfig(repo_ids=['lyl472324464/2026.03.16_twist_many-without-rinse'], transform_pipeline=_transforms.AlohaTransformPipeline(include_low=False, use_good_bad_action_prompt=False, image_resolution=(448, 448), max_token_len=1024, discrete_state_input=True, assets=_transforms.AssetsConfig(assets_dir='assets/eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo', asset_id='trossen'), use_quantile_norm=True, video_memory_num_frames=1, video_memory_stride_seconds=1.0, long_memory=_transforms.LongMemoryConfig(update_seconds=3.0, video_seconds=3.0, video_hz=2.0, max_memory_chars=1200, memory_dropout_probability=0.2, subtask_dropout_probability=0.2, split_seed=20261119, summary_cache_path='/home/eii/long-memory-hierarchy-20261119/artifacts/native448-prompts/teacher.json'), adapt_to_pi=True, use_delta_joint_actions=True, action_dim=32)), checkpoint_base_dir='/workspace/training-users/lyl/runs/long-memory-twist-448-20261119/checkpoints', seed=42, batch_size=8, gradient_accumulation_steps=32, num_workers=16, num_train_steps=20000, log_interval=10, save_interval=1000, keep_period=10000, overwrite=False, resume=False, wandb_enabled=True, policy_metadata={'conditioning': 'completed_memory_latestdrop20_currenttaskdrop20', 'source_config': 'eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo', 'dataset_mixture': 'free-spinning5_plus_aug20_aug24_aug25', 'source103_base': 'ca82780', 'native_config': True, 'image_history': False, 'joint_position_history': False}, fsdp_devices=2)
 )
+
+
+if len({config.name for config in _CONFIGS}) != len(_CONFIGS):
+    raise ValueError("Config names must be unique.")
+
+_CONFIGS_DICT = {config.name: config for config in _CONFIGS}
+
+
+def cli() -> TrainConfig:
+    return tyro.extras.overridable_config_cli({k: (k, v) for k, v in _CONFIGS_DICT.items()})
+
+
+def get_config(config_name: str) -> TrainConfig:
+    """Get a config by name."""
+    if config_name not in _CONFIGS_DICT:
+        closest = difflib.get_close_matches(config_name, _CONFIGS_DICT.keys(), n=1, cutoff=0.0)
+        closest_str = f" Did you mean '{closest[0]}'? " if closest else ""
+        raise ValueError(f"Config '{config_name}' not found.{closest_str}")
+    return _CONFIGS_DICT[config_name]

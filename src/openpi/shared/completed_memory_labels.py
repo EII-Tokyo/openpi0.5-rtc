@@ -27,7 +27,8 @@ def episode_updates(rows, *, generic_return_context=None):
                 records.append(record);evidence.append('Previous human-labeled stage ended: '+last_task)
         if desc:description=desc
         state={'bottle_description':description,'memory':' '.join(records),'current_task':task}
-        parse_completed_memory(state['memory'])
+        try:parse_completed_memory(state['memory'])
+        except ValueError as exc:raise ValueError(f'Invalid completed memory at frame{row["frame_index"]}: task={task!r}; records={records!r}') from exc
         if not updates or state!=updates[-1]['state'] or records!=updates[-1]['completed_records'] or context!=updates[-1]['return_context']:
             now=float(row['timestamp']);updates.append({'observed_through_s':now,'source_max_time_s':now,'source_frame_index':int(row['frame_index']),'completed_records':list(records),'cycle':cycle,'return_context':context,'state':state,'evidence':evidence})
         last_task=task
