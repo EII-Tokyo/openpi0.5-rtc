@@ -1,5 +1,5 @@
 import dataclasses
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 import flax.nnx as nnx
 import jax
@@ -29,11 +29,15 @@ class Pi0Config(_model.BaseModelConfig):
     discrete_state_input: bool = None  # type: ignore
     image_resolution: tuple[int, int] = (224, 224)
     image_tokens_per_image: int | None = None
+    # Opt-in vision inference only; training always retains native attention.
+    vision_attention_backend: Literal["native", "cudnn"] = "native"
     image_keys: tuple[str, ...] = ("cam_high", "cam_low", "cam_left_wrist", "cam_right_wrist")
     training_time_rtc: bool = False
     rtc_max_delay: int = 10
 
     def __post_init__(self):
+        if self.vision_attention_backend not in ("native", "cudnn"):
+            raise ValueError(f"Unknown vision attention backend: {self.vision_attention_backend}")
         if self.max_token_len is None:
             object.__setattr__(self, "max_token_len", 200)
         if self.discrete_state_input is None:

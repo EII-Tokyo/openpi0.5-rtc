@@ -85,6 +85,7 @@ class Pi0(_model.BaseModel):
                 variant="So400m/14",
                 pool_type="none",
                 image_tokens_per_image=config.image_tokens_per_image,
+                attention_backend=config.vision_attention_backend,
                 scan=True,
                 dtype_mm=config.dtype,
             )
@@ -101,7 +102,7 @@ class Pi0(_model.BaseModel):
 
     @at.typecheck
     def embed_prefix(
-        self, obs: _model.Observation
+        self, obs: _model.Observation, *, use_fused_attention: bool = True
     ) -> tuple[at.Float[at.Array, "b s emb"], at.Bool[at.Array, "b s"], at.Bool[at.Array, " s"]]:
         input_mask = []
         ar_mask = []
@@ -109,7 +110,7 @@ class Pi0(_model.BaseModel):
         image_token_shapes = {}
         # embed images
         for name in obs.images:
-            image_tokens, _ = self.PaliGemma.img(obs.images[name], train=False)
+            image_tokens, _ = self.PaliGemma.img(obs.images[name], train=False, use_fused_attention=use_fused_attention)
             image_token_shapes[name] = {
                 "image_shape": tuple(obs.images[name].shape),
                 "token_shape": tuple(image_tokens.shape),
@@ -204,7 +205,7 @@ class Pi0(_model.BaseModel):
             timestep = time
 
         # one big forward pass of prefix + suffix at once
-        prefix_tokens, prefix_mask, prefix_ar_mask = self.embed_prefix(observation)
+        prefix_tokens, prefix_mask, prefix_ar_mask = self.embed_prefix(observation, use_fused_attention=False)
         suffix_tokens, suffix_mask, suffix_ar_mask, adarms_cond = self.embed_suffix(observation, x_t, timestep)
         input_mask = jnp.concatenate([prefix_mask, suffix_mask], axis=1)
         ar_mask = jnp.concatenate([prefix_ar_mask, suffix_ar_mask], axis=0)

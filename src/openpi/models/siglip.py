@@ -23,6 +23,7 @@ import jax.numpy as jnp
 import numpy as np
 
 import openpi.training.sharding as sharding
+from openpi.models import cudnn_attention
 
 
 def spatial_average_pool_tokens(tokens, grid_shape, target_tokens):
@@ -42,13 +43,15 @@ def spatial_average_pool_tokens(tokens, grid_shape, target_tokens):
         grid = grid.reshape(*tokens.shape[:-2], side, height // side, side, width // side, tokens.shape[-1])
         pooled = grid.mean(axis=(-4, -2))
     else:
+
         def weights(length):
             starts = np.floor(np.arange(side) * length / side).astype(int)
             ends = np.ceil((np.arange(side) + 1) * length / side).astype(int)
             positions = np.arange(length)[None, :]
             mask = (positions >= starts[:, None]) & (positions < ends[:, None])
             return jnp.asarray(mask / (ends - starts)[:, None], dtype=tokens.dtype)
-        pooled = jnp.einsum('...hwc,ih,jw->...ijc', grid, weights(height), weights(width))
+
+        pooled = jnp.einsum("...hwc,ih,jw->...ijc", grid, weights(height), weights(width))
     return pooled.reshape(*tokens.shape[:-2], target_tokens, tokens.shape[-1])
 
 
@@ -116,8 +119,11 @@ class Encoder1DBlock(nn.Module):
     num_heads: int = 12
     dropout: float = 0.0
     dtype_mm: str = "float32"
+    attention_backend: str = "native"
 
     def setup(self):
+        if self.attention_backend not in ("native", "cudnn"):
+            raise ValueError(f"Unknown vision attention backend: {self.attention_backend}")
         # Keep parameter paths compatible with existing image/video checkpoints.
         self.ln0 = nn.LayerNorm(name="LayerNorm_0", dtype=self.dtype_mm)
         self.attn = nn.MultiHeadDotProductAttention(
@@ -125,6 +131,9 @@ class Encoder1DBlock(nn.Module):
             kernel_init=nn.initializers.xavier_uniform(),
             dtype=self.dtype_mm,
             name="MultiHeadDotProductAttention_0",
+            attention_fn=(
+                cudnn_attention.dot_product_attention if self.attention_backend == "cudnn" else nn.dot_product_attention
+            ),
         )
         self.ln1 = nn.LayerNorm(name="LayerNorm_1", dtype=self.dtype_mm)
         self.mlp = MlpBlock(
@@ -214,6 +223,7 @@ class Encoder(nn.Module):
     scan: bool = False
     remat_policy: str = "nothing_saveable"
     dtype_mm: str = "float32"
+    attention_backend: str = "native"
     temporal_every_n_layers: int = 4
 
     @nn.compact
@@ -243,6 +253,7 @@ class Encoder(nn.Module):
                 length=self.depth,
             )(
                 name="encoderblock",
+                attention_backend=self.attention_backend,
                 dtype_mm=self.dtype_mm,
                 mlp_dim=self.mlp_dim,
                 num_heads=self.num_heads,
@@ -254,6 +265,7 @@ class Encoder(nn.Module):
             for lyr in range(self.depth):
                 block_cur = Encoder1DBlock(
                     name=f"encoderblock_{lyr}",
+                    attention_backend=self.attention_backend,
                     dtype_mm=self.dtype_mm,
                     mlp_dim=self.mlp_dim,
                     num_heads=self.num_heads,
@@ -319,11 +331,12 @@ class _Module(nn.Module):
     scan: bool = False
     remat_policy: str = "nothing_saveable"
     dtype_mm: str = "float32"
+    attention_backend: str = "native"
     temporal_every_n_layers: int = 4
     image_tokens_per_image: int | None = None
 
     @nn.compact
-    def __call__(self, image, *, train=False):
+    def __call__(self, image, *, train=False, use_fused_attention=True):
         out = {}
         image = jnp.asarray(image, jnp.float32)
 
@@ -372,6 +385,8 @@ class _Module(nn.Module):
             remat_policy=self.remat_policy,
             dtype_mm=self.dtype_mm,
             temporal_every_n_layers=self.temporal_every_n_layers,
+            # The inference setting never changes training arithmetic.
+            attention_backend=self.attention_backend if use_fused_attention and not train else "native",
             name="Transformer",
         )(x, deterministic=not train)
         encoded = out["encoded"] = x[:, -1, :, :]
