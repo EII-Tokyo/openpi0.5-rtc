@@ -30,3 +30,11 @@ Applies to all platform users and to launches performed by Codex or manually.
 - Select weights with `OPENPI_CHECKPOINT_DIR` (container path under `/app/checkpoints`). Both policy server and runtime use this same value.
 - Read camera, resolution, video memory and mosaic settings from the checkpoint training metadata through the generic entrypoints. Preserve training configurations.
 - Set `ALOHA_TASK_1_PROMPT` and `ALOHA_TASK_2_PROMPT` to the selected model's training prompts when needed; do not introduce a Compose overlay.
+
+## Reviewed nine-task long-memory continuation (2026-11-19)
+
+- The user superseded merged adjustment/pickup with two distinct tasks. The authoritative nine-task catalog is `src/openpi/shared/completed_step_memory.py`; high-level indices1–9 map directly to its order. Adjustment explicitly requires the bottle opening to point left. Never guess the split for historical merged labels; restore exact source-frame annotations first.
+- Cap cleanup is allowed only when no bottles remain on the work surface and only caps remain. Empty-table final return requires neither bottles nor caps. Compound bottle-and-cap disposal remains one completed memory record.
+- Memory drops only the latest whole completion record with20% probability; current task independently drops with20%. No simulated latency and no bottle_state inputs. Adjustment-to-pickup does not start a new bottle cycle.
+- Before each dataset publication/start/resume, ensure `main`, the `v3.0` tag, and any existing `v3.0` branch resolve to the same verified commit. Verify every selected metadata/data/video file against that pinned commit. Retain separate branch/tag receipts; do not collapse same-name refs and hide a mismatch.
+- This continuation uses the user's explicitly authorized Vast H100 instance, native Python and a literal TrainConfig. The host200-specific shared-source rules still apply to launches on200. Pause/save before changing any running source or dataset.

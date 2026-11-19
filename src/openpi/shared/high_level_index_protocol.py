@@ -11,7 +11,7 @@ INDEX_MEMORY_SCHEMA = {
     'properties':{
         'bottle_description':{'type':'string','maxLength':1200},
         'memory':{'type':'string','maxLength':1200},
-        'current_task_index':{'type':'integer','enum':list(range(1,9))},
+        'current_task_index':{'type':'integer','enum':list(range(1,len(CURRENT_TASKS)+1))},
     },
     'required':['bottle_description','memory','current_task_index'],
     'additionalProperties':False,
@@ -22,8 +22,8 @@ def decode_index_prediction(payload):
     if not isinstance(payload,dict) or set(payload)!=set(INDEX_MEMORY_SCHEMA['required']):
         raise ValueError('Expected bottle_description, memory and current_task_index only')
     index=payload['current_task_index']
-    if type(index) is not int or not 1<=index<=8:
-        raise ValueError('Task index must be an integer from1 through8')
+    if type(index) is not int or not 1<=index<=len(CURRENT_TASKS):
+        raise ValueError('Task index must be an integer from1 through9')
     state=decode_memory(json.dumps({
         'bottle_description':payload['bottle_description'],
         'memory':payload['memory'],

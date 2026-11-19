@@ -19,7 +19,7 @@ class LongMemoryDataset:
         if cache.get('schema_version')!=2:raise ValueError('Summary cache v2 required')
         from openpi.shared.completed_memory_labels import TASK_CATALOG_VERSION
         if cache.get('task_catalog_version')!=TASK_CATALOG_VERSION:
-            raise ValueError('Regenerate memory cache with merged pickup and verified return contexts')
+            raise ValueError('Regenerate memory cache with nine separate tasks and verified return contexts')
         self.summary_cache=cache['episodes']
         masks = []
         seen=set()

@@ -1,7 +1,7 @@
 """Causal completed-stage targets from human task boundaries, without scene-state fields."""
 from openpi.shared.long_memory import parse_annotation
 from openpi.shared.completed_step_memory import CURRENT_TASKS,HOME_EMPTY,HOME_RESET,normalize_subtask,completed_record_for_task,parse_completed_memory
-TASK_CATALOG_VERSION='cap_location_completed_memory_v3'
+TASK_CATALOG_VERSION='nine_tasks_left_opening_cap_cleanup_v4'
 
 
 def episode_updates(rows, *, generic_return_context=None):
@@ -14,9 +14,12 @@ def episode_updates(rows, *, generic_return_context=None):
         task=normalize_subtask(raw_task,return_context=generic_return_context)
         context='bottles_remain' if task==HOME_RESET else 'empty_table' if task==HOME_EMPTY else None
         # A newly human-labeled pickup starts a new target; it does not prove home arrival.
-        new_target=task==CURRENT_TASKS[0] and bool(last_task) and (
-            last_task in (HOME_EMPTY,HOME_RESET,CURRENT_TASKS[2],CURRENT_TASKS[3],CURRENT_TASKS[4],CURRENT_TASKS[5])
-            or bool(desc and description and desc!=description))
+        starter_tasks={CURRENT_TASKS[0],CURRENT_TASKS[1]}
+        terminal_tasks={HOME_EMPTY,HOME_RESET,CURRENT_TASKS[3],CURRENT_TASKS[4],CURRENT_TASKS[5],CURRENT_TASKS[6]}
+        # An adjustment-to-pickup boundary is within the same bottle cycle.
+        new_target=task in starter_tasks and bool(last_task) and (
+            last_task in terminal_tasks or
+            (last_task not in starter_tasks and bool(desc and description and desc!=description)))
         evidence=[]
         if new_target:
             records=[];description='';cycle+=1
