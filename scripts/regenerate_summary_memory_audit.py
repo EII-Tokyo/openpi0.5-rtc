@@ -5,14 +5,11 @@ previous predicted state and native-loader images. These sources never mix.
 """
 import argparse,base64,copy,dataclasses,json,math,pathlib,time,urllib.request
 from openpi.shared.long_memory import MemoryState,encode_memory,decode_memory,parse_annotation
+from openpi.shared.completed_step_memory import validate_completed_progress
 from openpi_client.runtime.long_memory_high_level import SYSTEM_PROMPT,MEMORY_SCHEMA,parse_update
 
-TEACHER_PROMPT='''Produce ONE short natural-language memory summary from the previous summary and newly observed human annotations, following the language-memory principle in MEM section III-B.
-Only retain facts useful for the rest of this bottle cycle. Rewrite, compress and remove obsolete information; do not concatenate subtask instructions and do not output events or timestamps.
-The current subtask is supplied separately: it is an intention, not evidence of success. Never infer success of grasping, unscrewing, placing, or returning home from an instruction alone.
-Use explicit annotated bottle state as factual evidence. "No bottle on table" says nothing about gripper emptiness or bin placement. "good_bad_action=normal" is not a success indicator. No success/failure labels are available unless explicitly stated.
-A later explicit state overrides an earlier incompatible state. A hidden/unspecified fact need not erase a previously established relevant fact. Do not add specific hand, cap, placement or completion facts absent from evidence. Failed/repeated instructions do not accumulate as memory. Bottle identity and the current task are separate fields, so do not repeat their full text in memory.
-Use concise English sentences. Output only {"memory":"one compact paragraph"}.'''
+from openpi.shared.completed_step_memory import COMPLETED_FACTS
+TEACHER_PROMPT="Maintain accumulating COMPLETED-action memory using only the previous completed memory and the newly observed human annotation evidence. Keep earlier confirmed completion sentences unchanged and append only newly confirmed successes. Never rewrite this as a current-state summary or discard completed actions before cycle completion. Do not infer success from an intention, a normal/good action rating, a later instruction, an empty table, or an EP ending. Explicit state 'Bottle in left hand' supports successful pickup; 'cap removed' supports successful uncapping. Bin placement and home completion require explicit confirming evidence; if those flags are absent, do not invent them. Use only the fixed completion sentences below, in completion order, concatenated as ONE paragraph, with no duplicates. Bottle description and current task are supplied separately. No events or timestamps. Output only a JSON object with the memory string.\n"+'\n'.join(COMPLETED_FACTS.values())
 
 
 def key_from(path):
@@ -56,6 +53,7 @@ def teacher(args):
                  'current_task':fields[2],'outcome_labels':'No explicit success/failure flag is available.'}
         result,metrics=call(key,TEACHER_PROMPT,[{'type':'input_text','text':json.dumps(payload,ensure_ascii=False)}],
                 {'type':'object','properties':{'memory':{'type':'string','maxLength':1200}},'required':['memory'],'additionalProperties':False},args.output/'teacher-raw'/f'{n}.json')
+        validate_completed_progress(previous,result['memory'])
         previous=result['memory'];description=fields[0] or (updates[-1]['state']['bottle_description'] if updates else '')
         state=MemoryState(description,previous,fields[2]);decode_memory(encode_memory(state))
         updates.append({'observed_through_s':t,'source_max_time_s':float(current['timestamp']),'source_frame_index':current['frame_index'],
@@ -85,7 +83,10 @@ def visual(args):
                 'image_count':sum(len(f['images']) for f in frames),'video_timestamps':[f['time_s'] for f in frames]}
         try:
             payload,metrics=call(key,SYSTEM_PROMPT,user,MEMORY_SCHEMA,args.output/'visual-raw'/f"{row['number']}.json")
-            update=parse_update(payload);record.update(status='completed',prediction=payload,**metrics)
+            record.update(status='returned',prediction=payload,**metrics)
+            update=parse_update(payload)
+            validate_completed_progress(state.memory,update.state.memory,cycle_complete=update.cycle_complete)
+            record['status']='completed'
             if update.cycle_complete:
                 state=MemoryState();waiting=True;cutoff=row['time_s']
             elif waiting and (not update.state.bottle_description or any(x in update.state.current_task.lower() for x in ('return home','return to initial','wait for','remain idle'))):state=MemoryState()
@@ -93,12 +94,14 @@ def visual(args):
                 state=update.state
                 if state.bottle_description:waiting=False
             record['accepted_state']=dataclasses.asdict(state)
-        except Exception as exc:record.update(status='error',error_type=type(exc).__name__)
+        except Exception as exc:
+            record.update(status='invalid_memory' if 'prediction' in record else 'error',error_type=type(exc).__name__)
+            record['accepted_state']=dataclasses.asdict(state)
         with dest.open('a') as f:f.write(json.dumps(record,ensure_ascii=False)+'\n')
         reports.append(record);print('VISUAL',row['number'],record['status'],record.get('prediction',{}).get('current_task'),flush=True)
-    good=[r for r in reports if r['status']=='completed'];lat=sorted(r['latency_seconds'] for r in good)
-    result={'schema_version':2,'model':'gpt-6-luna','system_prompt':SYSTEM_PROMPT,'output_schema':MEMORY_SCHEMA,
-            'samples':len(rows),'completed':len(good),'errors':len(rows)-len(good),'cost_usd':sum(r['cost_usd'] for r in good),
+    good=[r for r in reports if r['status']=='completed'];returned=[r for r in reports if 'usage' in r];lat=sorted(r['latency_seconds'] for r in returned)
+    result={'schema_version':3,'model':'gpt-6-luna','system_prompt':SYSTEM_PROMPT,'output_schema':MEMORY_SCHEMA,
+            'samples':len(rows),'completed':len(good),'responses_returned':len(returned),'errors':len(rows)-len(good),'cost_usd':sum(r['cost_usd'] for r in returned),
             'latency_seconds':{'p50':lat[len(lat)//2],'p95':lat[math.ceil(.95*len(lat))-1]},
             'limitations':'Same single EP and same 100 frames as v1. This is an independent visual prediction audit, not a general accuracy estimate or fixed-3-second closed-loop evaluation. Annotation teacher labels are NOT supplied to visual API calls.'}
     (args.output/'summary.json').write_text(json.dumps(result,indent=2,ensure_ascii=False))
