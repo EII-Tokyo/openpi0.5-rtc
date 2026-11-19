@@ -111,3 +111,84 @@ This task involves opening a tupperware filled with food and pouring the content
     We provide the [pi0_aloha_pen_uncap config](../../src/openpi/training/config.py) as an example. You should refer to the root [README](../../README.md) for how to run training with the new config.
 
 IMPORTANT: Our base checkpoint includes normalization stats from various common robot configurations. When fine-tuning a base checkpoint with a custom dataset from one of these configurations, we recommend using the corresponding normalization stats provided in the base checkpoint. In the example, this is done by specifying the trossen asset_id and a path to the pretrained checkpoint’s asset directory within the AssetsConfig.
+
+## exp_insert: queue the next bottle while returning home
+
+Use the root `docker-compose.yml` and select weights with `OPENPI_CHECKPOINT_DIR`.
+Task controls come from the loaded policy's `runtime.task_control` metadata,
+not an independently configured web/runtime environment variable. No task-control
+metadata means legacy behavior. An automatic bottle policy must declare
+`{"mode": "exp_insert", "phase_field": "task_phase"}` and return the actual
+predicted stage in `task_phase` alongside each action chunk. RTC playback carries
+the stage of the chunk being executed, never that of a future background result.
+
+The current exp_insert training config is still low-level only and explicitly
+records `phase_field: null`. The runtime rejects automatic-cycle startup for it
+before constructing the robot environment. Do not change that flag alone to
+bypass the check: the high-level stage predictor still needs to be implemented
+and trained. Missing/invalid phase output also pauses before applying the action.
+
+- Terminal keys **1 / 2 / 3** select bottles. **H** is manual takeover;
+  **4** returns home and cancels the queued task; **5** sleeps/exits; **6** remains
+  the leader/follower demo. Redis task `3` still means manual takeover; bottle
+  commands use distinct IDs `bottle_1`, `bottle_2`, `bottle_3`.
+- On the focused web page, hidden **A / B / C** shortcuts select bottles **1 / 2 / 3**
+  when runtime reports `exp_insert` mode. Upper/lowercase both work. They are ignored
+  in text inputs, open settings/recording drawers, on key repeat, or with Ctrl/Alt/Meta.
+  No new bottle buttons, pending-task panel, or takeover labels are displayed;
+  the existing page layout and numeric shortcuts remain unchanged. Existing
+  task routes 1/2 remain available for legacy models; an incompatible active model
+  returns a clear HTTP 409 rather than deleting the route or reinterpreting the task.
+  The web backend reads short-lived runtime capabilities from Redis; no matching
+  environment setting or web restart is needed when the policy changes.
+- Voice/text selections such as `3号`, `三号瓶子`, or `bottle 3` use the same IDs.
+  They do not need an LLM for task classification (audio transcription still uses
+  the existing voice service). Runtime replaces supplied text with the approved
+  bottle-specific global instruction from the exp_insert annotations.
+- While running, a selection only replaces the **single pending task**. It does
+  not reset policy caches, change the current prompt, or end a recording. Commands
+  can be entered before or during return_home. The pending task remains internal;
+  the web page does not display it.
+- After final `return_home` and stable physical arrival, finish the cycle and clear
+  old action/async caches. The next control tick refreshes camera/joint observations,
+  drains newer inputs, then atomically activates the latest pending selection.
+  A selection received while cache reset is blocking replaces the old selection;
+  stop/manual controls have priority. If there is none, wait indefinitely.
+  Stop/manual takeover/pause clear the pending task. Message IDs suppress duplicate
+  delivery within the latest 256 commands of the running process.
+
+### What counts as home in this implementation
+
+Completion requires the policy's explicit `return_home` phase **and** measured
+physical arrival. Returning near home during `pick` or another phase cannot latch
+the hold controller or finish the task. The gate captures measured home after
+startup reset and checks the 12 arm joints (not grippers), requiring departure
+followed by a stable return. This verifies the completion protocol, not visual
+insertion success: the high-level model's phase accuracy still requires evaluation.
+
+| Variable | Default | Meaning |
+| --- | --- | --- |
+| `ALOHA_HOME_POSITION_TOLERANCE` | 0.05 rad | Maximum per-arm-joint home error |
+| `ALOHA_HOME_DEPARTURE_TOLERANCE` | 0.15 rad | At least one arm joint must first leave home |
+| `ALOHA_HOME_VELOCITY_TOLERANCE` | 0.1 rad/s | Maximum arm-joint velocity for settling |
+| `ALOHA_HOME_STABLE_SECONDS` | 0.3 s | Continuous stable feedback before switching |
+
+These are initial configurable thresholds, not calibrated hardware results.
+Verify the runtime reset pose matches the demonstrations' home before enabling
+this mode. A fast pass through home does not finish a cycle. During final
+`return_home`, once slow and near
+home, policy playback stops and the normal actuator loop holds the home arm pose,
+keeping the measured gripper positions, until stable. Starting a new cycle away
+from home does not execute; use the explicit home command and then select the
+bottle again (home cancels pending selections). This avoids treating
+initial home as task completion and gives the operator an unlimited input window.
+
+Offline checks (no ROS or robot required):
+
+```bash
+PYTHONPATH=src:. python -m pytest \
+  src/openpi/robot/aloha_real/task_cycle_test.py \
+  src/openpi/robot/aloha_real/chunked_reset_test.py \
+  voice_assistant_web/backend/app/bottle_commands_test.py \
+  voice_assistant_web/backend/app/inference_settings_test.py
+```

@@ -23,6 +23,8 @@ _PI05_BASE_PARAMS = "gs://openpi-assets/checkpoints/pi05_base/params"
 class LeRobotAlohaDataConfig:
     repo_ids: list[str]
     transform_pipeline: _transforms.AlohaTransformPipeline
+    # None preserves the published dataset; explicit lists select whole training episodes.
+    train_episode_indices: dict[str, list[int]] | None = None
 
 
 @dataclasses.dataclass(frozen=True)
@@ -3005,19 +3007,38 @@ _CONFIGS.append(
         ema_decay=0.99,
         freeze_filter=nnx.Nothing(),
         data=LeRobotAlohaDataConfig(
+            train_episode_indices={
+                'lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_01__lerobot__with-rinse__hierarchical-v1': [
+                    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
+                    16, 17, 18, 19, 20, 21, 23, 24, 25, 26, 28, 29, 30, 31, 32, 33,
+                    34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49,
+                ],
+                'lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_02__lerobot__with-rinse__hierarchical-v1': [
+                    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
+                    16, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32,
+                    33, 34, 35, 36, 37, 38, 39, 41, 42, 43, 44, 45, 46, 47, 48, 49,
+                ],
+                'lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_03__lerobot__with-rinse__hierarchical-v1': [
+                    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15, 16,
+                    17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32,
+                    33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48,
+                    49,
+                ],
+            },
             repo_ids=[
-                'lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_01__lerobot__with-rinse',
-                'lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_02__lerobot__with-rinse',
-                'lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_03__lerobot__with-rinse',
+                'lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_01__lerobot__with-rinse__hierarchical-v1',
+                'lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_02__lerobot__with-rinse__hierarchical-v1',
+                'lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_03__lerobot__with-rinse__hierarchical-v1',
             ],
             transform_pipeline=_transforms.AlohaTransformPipeline(
+                language_source="subtask_instruction",
                 include_low=True,
                 use_good_bad_action_prompt=False,
                 image_resolution=(448, 448),
                 max_token_len=200,
                 discrete_state_input=True,
                 assets=_transforms.AssetsConfig(
-                    assets_dir='assets/eii_hxz_exp_insert_3repo_cam4_fullft_h200x2_448_no_mem_5k_20261119',
+                    assets_dir='assets/eii_hxz_exp_insert_3repo_cam4_fullft_h200x2_448_no_mem_5k_20261119_train145',
                     asset_id='aloha',
                 ),
                 use_quantile_norm=True,
@@ -3042,7 +3063,11 @@ _CONFIGS.append(
         resume=False,
         wandb_enabled=True,
         wandb_entity='yonglianglu2',
-        policy_metadata={'training_manifest': 'src/openpi/training/manifests/eii_hxz_exp_insert_3repo_cam4_fullft_h200x2_448_no_mem_5k_20261119/dataset_manifest.json'},
+        policy_metadata={
+            'training_manifest': 'src/openpi/training/manifests/eii_hxz_exp_insert_3repo_cam4_fullft_h200x2_448_no_mem_5k_20261119/dataset_manifest.json',
+            # This lower-level config does not yet produce a high-level stage signal.
+            'runtime': {'task_control': {'mode': 'exp_insert', 'phase_field': None}},
+        },
         fsdp_devices=2,
     )
 )

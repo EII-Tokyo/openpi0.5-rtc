@@ -11,6 +11,8 @@ import tty
 import select
 from collections import deque
 from openpi.robot.aloha_real.foot_switch import FootSwitch
+from openpi.robot.aloha_real.task_cycle import HomeReturnGate
+from openpi.robot.aloha_real.task_contract import task_contract
 
 from openpi.robot.aloha_real.leader_follower_demo import LeaderFollowerDemoController
 from openpi.robot.aloha_real.manual_intervention import ManualInterventionController
@@ -38,6 +40,12 @@ class Runtime:
         "2": os.getenv("ALOHA_TASK_2_PROMPT", "Rinse bottle"),
     }
 
+    _BOTTLE_PROMPTS = {
+        'bottle_1': 'Use the left arm to pick up bottle 1, the clear unlabeled plastic bottle, insert its opening onto the pipe, pull it off the pipe, place it back on the table, open the gripper to release it, and return the left arm to the home position.',
+        'bottle_2': 'Use the left arm to pick up bottle 2, the dark-green-labeled bottle, insert its opening onto the pipe, pull it off the pipe, place it back on the table, open the gripper to release it, and return the left arm to the home position.',
+        'bottle_3': 'Use the left arm to pick up bottle 3, the pale yellow-green-labeled bottle, insert its opening onto the pipe, pull it off the pipe, place it back on the table, open the gripper to release it, and return the left arm to the home position.',
+    }
+
     def __init__(
         self,
         environment,
@@ -49,6 +57,7 @@ class Runtime:
         redis_port: int = 6379,
         redis_db: int = 0,
         manual_dataset_dir: str | None = None,
+        policy_metadata: dict | None = None,
         good_bad_action: str | None = None,  # Deprecated, accepted for old callers only.
     ) -> None:
         self._environment = environment
@@ -89,6 +98,15 @@ class Runtime:
         # 任务状态管理
         self._current_task = None
         self._is_waiting_for_task = False
+        mode = task_contract(policy_metadata or {})
+        self._task_cycle = HomeReturnGate(
+            position_tolerance=float(os.getenv("ALOHA_HOME_POSITION_TOLERANCE", "0.05")),
+            departure_tolerance=float(os.getenv("ALOHA_HOME_DEPARTURE_TOLERANCE", "0.15")),
+            velocity_tolerance=float(os.getenv("ALOHA_HOME_VELOCITY_TOLERANCE", "0.1")),
+            stable_seconds=float(os.getenv("ALOHA_HOME_STABLE_SECONDS", "0.3")),
+        ) if mode == "exp_insert" else None
+        self._pending_task = None
+        self._seen_command_ids = deque(maxlen=256)
         
         # 存储最后的action（用于task_num==3时移动master）
         self._last_action = None
@@ -106,6 +124,11 @@ class Runtime:
             "6": "Leader follower demo",
         }
         self._model_task_nums = {"1", "2"}
+        if self._task_cycle is not None:
+            self._TASK_PROMPT_BY_NUM = dict(self._BOTTLE_PROMPTS)
+            self._model_task_nums = set(self._BOTTLE_PROMPTS)
+            self._keyboard_task_mapping.update({str(i): self._BOTTLE_PROMPTS[f"bottle_{i}"] for i in (1, 2, 3)})
+            self._keyboard_task_mapping["h"] = "Stop and human hand control"
         self._stop_task_nums = {"4", "5"}
         self._manual_intervention = ManualInterventionController(
             environment=self._environment,
@@ -190,7 +213,8 @@ class Runtime:
                             self._latest_task = {
                                 'task_num': task_num,
                                 'task_name': task_name,
-                                'timestamp': timestamp
+                                'timestamp': timestamp,
+                                'command_id': data.get('command_id'),
                             }
                             self._latest_task.update({key: data[key] for key in METADATA_KEYS if key in data})
                             
@@ -235,6 +259,9 @@ class Runtime:
             "timestamp": time.time(),
             "mode": mode or ("waiting" if self._is_waiting_for_task else "policy"),
             "current_task": current_task,
+            "pending_task": getattr(self, "_pending_task", None),
+            "task_mode": "exp_insert" if getattr(self, "_task_cycle", None) is not None else "legacy",
+            "home_settling": bool(getattr(self, "_task_cycle", None) and self._task_cycle.settling),
             "inference_prompt": getattr(self._policy, "inference_prompt", None) if current_task else None,
             "operator": self._current_task.get("operator") if self._current_task else None,
             "camera_low_position": self._current_task.get("camera_low_position") if self._current_task else None,
@@ -246,6 +273,9 @@ class Runtime:
         if getattr(self, "_recording_paused", False):
             payload["mode"] = "paused"
         try:
+            self._redis_client.set("aloha_task_capabilities", json.dumps({
+                "mode": payload["task_mode"], "task_ids": sorted(self._model_task_nums | {"3", "4", "5", "6"}),
+            }), ex=15)
             self._redis_client.set("aloha_recording_state", json.dumps({
                 **payload["recording"], "timestamp": payload["timestamp"], "mode": payload["mode"]
             }))
@@ -302,6 +332,9 @@ class Runtime:
     def _pause_recording(self):
         """Hold the last commanded pose, without home, sleep or torque-off commands."""
         self._recording_hold.set()
+        self._pending_task = None
+        if getattr(self, "_task_cycle", None) is not None:
+            self._task_cycle.stable_since = None
         self._recording_paused = True
         self._is_waiting_for_task = True
         self._recording.finish()
@@ -347,6 +380,9 @@ class Runtime:
             self._pause_recording()
 
     def _enter_waiting(self) -> None:
+        self._pending_task = None
+        if getattr(self, "_task_cycle", None) is not None:
+            self._task_cycle.reset()
         self._is_waiting_for_task = True
         self._current_task = None
         self._publish_runtime_state(mode="waiting")
@@ -356,6 +392,9 @@ class Runtime:
         logging.info("Starting episode...")
         self._environment.reset()
         self._policy.reset()
+        if self._task_cycle is not None:
+            self._task_cycle.set_home(self._environment.get_joint_feedback()["qpos"])
+            logging.info("exp_insert: 1/2/3 select bottles, h manual takeover, 4 home, 5 sleep; next task waits for home")
         
         last_step_time = time.time()
         
@@ -371,6 +410,7 @@ class Runtime:
             old_settings = termios.tcgetattr(fd)
             tty.setcbreak(fd)
             logging.info(
+                "exp_insert：1/2/3 选瓶，h 人工接管，4 回 home，5 退出，6 遥操作" if self._task_cycle is not None else
                 "键盘快捷键已启用：1 拧瓶盖任务，2 冲洗瓶子，3 人工接管，4 回 home 并保存，5 回 sleep 并退出，6 遥操作体验"
             )
         else:
@@ -383,6 +423,7 @@ class Runtime:
                 if task_data:
                     self._handle_task(task_data)
                 
+                self._activate_pending_task()
                 if self._is_waiting_for_task:
                     # 等待状态下，短sleep并持续监听键盘/Redis
                     self._publish_runtime_state()
@@ -435,7 +476,7 @@ class Runtime:
     ):
         """将单个键盘输入解析成统一 task_data。"""
         if key in ("\n", "\r"):
-            logging.info("快捷键：1/2 模型任务，3 人工接管，b 接管准备时开始/采集中结束保存，4 回home，5 回sleep并退出，6 遥操作体验")
+            logging.info("快捷键：1/2/3 选瓶，h 人工接管，4 回home，5 回sleep，6 遥操作" if getattr(self, "_task_cycle", None) is not None else "快捷键：1/2 模型任务，3 人工接管，b 采集，4 回home，5 回sleep，6 遥操作")
         if key is None or key in ("\n", "\r"):
             return None
 
@@ -445,15 +486,18 @@ class Runtime:
                 valid_keys = "/".join(sorted(allowed_task_nums or set(self._keyboard_task_mapping)))
                 logging.info("忽略键盘输入 %r；可用快捷键: %s", key, valid_keys)
             return None
-        if allowed_task_nums is not None and key not in allowed_task_nums:
-            return None
 
+        task_num = key
+        if getattr(self, "_task_cycle", None) is not None:
+            task_num = f"bottle_{key}" if key in {"1", "2", "3"} else ("3" if key == "h" else key)
+        if allowed_task_nums is not None and task_num not in allowed_task_nums:
+            return None
         task_data = {
-            "task_num": key,
+            "task_num": task_num,
             "task_name": task_name,
             "timestamp": time.time(),
         }
-        if key == "3" and prompt_for_manual_dataset:
+        if task_num == "3" and prompt_for_manual_dataset:
             while True:
                 dataset_subdir = self._read_line_from_keyboard(
                     "请输入人工接管数据保存子目录名，然后回车: "
@@ -515,15 +559,34 @@ class Runtime:
 
     def _handle_task(self, task_data) -> None:
         """处理来自键盘或 Redis 的任务。"""
-        task_num = task_data.get('task_num')
+        task_data = self._normalize_task_data(task_data)
+        task_num = str(task_data.get('task_num'))
         task_name = task_data.get('task_name', '未知任务')
         
         logging.info(f"处理语音任务: {task_num} - {task_name}")
+        if task_num not in (self._model_task_nums | {"3", "4", "5", "6"}):
+            logging.warning("Unknown task for the current runtime mode: %s", task_num)
+            return
 
-        if getattr(self, "_recording_paused", False) and task_num in {"1", "2", "6"}:
+        if getattr(self, "_recording_paused", False) and task_num in (self._model_task_nums | {"6"}):
             self._recording_command_error = "Recording paused the robot; use Resume execution first"
             self._publish_runtime_state(mode="paused")
             return
+        cycle = getattr(self, "_task_cycle", None)
+        if cycle is not None:
+            if task_num in self._model_task_nums:
+                command_id = task_data.get("command_id")
+                if command_id:
+                    if command_id in self._seen_command_ids:
+                        return
+                    self._seen_command_ids.append(command_id)
+                self._pending_task = dict(task_data)
+                logging.info("Bottle selection queued; current task unchanged: %s", task_name)
+                self._publish_runtime_state()
+                return
+            elif task_num in {"3", "4", "5", "6"}:
+                self._pending_task = None
+                cycle.reset()
         recorder = getattr(self, "_recording", None)
         if recorder is not None and recorder.snapshot()["status"] == "recording":
             recorder.finish()  # Never mix different robot tasks in the same recording.
@@ -619,6 +682,91 @@ class Runtime:
         logging.info("Inference conditioning applied live: %s", metadata)
         self._publish_runtime_state(mode="policy")
 
+    def _activate_pending_task(self):
+        """Finish blocking work before atomically choosing the latest bottle selection."""
+        if (getattr(self, "_task_cycle", None) is None or not self._is_waiting_for_task
+                or self._current_task is not None or self._pending_task is None or self._recording_hold.is_set()):
+            return
+        self._policy.reset()
+        metadata = {}
+        if self._redis_client is not None:
+            raw = self._redis_client.get(INFERENCE_SETTINGS_KEY)
+            if raw:
+                metadata = normalize_prompt_metadata(**{k: v for k, v in json.loads(raw).items() if k in METADATA_KEYS})
+        # Waiting may last minutes; update both the camera scene and measured state.
+        observation = self._environment.refresh_observation()
+        if not self._task_cycle.at_home(observation["qpos"]):
+            logging.warning("Bottle task remains pending: use home before starting")
+            return
+        with self._task_lock:
+            if self._recording_hold.is_set():
+                return
+            latest = self._latest_task
+            if latest is not None:
+                if str(latest.get("task_num")) not in self._model_task_nums:
+                    return  # Control commands take priority; the main loop handles them next.
+                self._latest_task = None
+                command_id = latest.get("command_id")
+                if not command_id or command_id not in self._seen_command_ids:
+                    self._pending_task = self._normalize_task_data(latest)
+                    if command_id:
+                        self._seen_command_ids.append(command_id)
+            selected = dict(self._pending_task)
+            selected.update(metadata)
+            self._pending_task = None
+            self._pending_inference_settings = None
+            self._task_cycle.reset()
+            self._current_task = selected
+            self._is_waiting_for_task = False
+        for subscriber in self._subscribers:
+            subscriber.on_episode_start()
+        self._publish_runtime_state(mode="policy")
+
+    def _advance_home_cycle(self, observation) -> bool:
+        """Consume the control tick while holding/finishing home; never run old policy actions."""
+        cycle = getattr(self, "_task_cycle", None)
+        if cycle is None or not self._current_task or self._current_task.get("task_num") not in self._model_task_nums:
+            return False
+        status = cycle.update(observation["qpos"], observation["qvel"], time.monotonic())
+        if status == "running":
+            return False
+        # Refresh measured feedback through the normal actuator step while holding home.
+        # Grippers retain their measured position; do not replay an old gripper command.
+        action = cycle.hold_action(observation["qpos"])
+        if self._recording_hold.is_set():
+            return True
+        self._environment.apply_action(action)
+        self._last_action = action["actions"]
+        self._recent_puppet_actions.append(list(self._last_action))
+        recorder = getattr(self, "_recording", None)
+        if recorder is not None and recorder.snapshot()["status"] == "recording":
+            try:
+                recorder.append(observation["origin_observation"], action, dict(self._current_task))
+            except Exception:
+                logging.exception("Recording home hold failed; pausing robot")
+                self._pause_recording()
+                return True
+        for subscriber in self._subscribers:
+            subscriber.on_step(observation.get("origin_observation", observation), action)
+        if status == "settling":
+            self._publish_runtime_state(mode="home_settling", latest_action=self._last_action)
+            return True
+        pending = self._pending_task
+        self._enter_waiting()
+        self._pending_task = pending
+        self._policy.reset()  # Discard old actions before the next control tick selects a task.
+        with self._task_lock:
+            interrupt = self._latest_task is not None and str(self._latest_task.get("task_num")) in {"3", "4", "5", "6"}
+            if self._recording_hold.is_set() or interrupt:
+                self._pending_task = None
+        recorder = getattr(self, "_recording", None)
+        if recorder is not None and recorder.snapshot()["status"] == "recording":
+            recorder.finish()
+        for subscriber in self._subscribers:
+            subscriber.on_episode_end()
+        logging.info("Final return_home completed; waiting for next task activation")
+        return True
+
     def _step(self) -> None:
         """A single step of the runtime loop."""
         hold = getattr(self, "_recording_hold", None)
@@ -627,6 +775,8 @@ class Runtime:
         self._apply_pending_inference_settings()
         step_started = time.monotonic()
         observation = self._environment.get_observation()
+        if self._advance_home_cycle(observation):
+            return
         observation_done = time.monotonic()
         # Inspect the exact pre-model image history without blocking robot control.
         if not hasattr(self, "_video_memory_preview"):
@@ -646,6 +796,13 @@ class Runtime:
 
         infer_started = time.monotonic()
         action = self._policy.infer(observation_with_task)
+        if getattr(self, "_task_cycle", None) is not None:
+            try:
+                self._task_cycle.observe_phase(action.get("task_phase"))
+            except ValueError:
+                self._pause_recording()
+                logging.exception("Policy omitted/invalidated task_phase; stopped before applying its action")
+                return
         infer_done = time.monotonic()
         # A stop arriving during inference must not execute the newly returned chunk.
         if hold is not None and hold.is_set():

@@ -64,6 +64,8 @@ def main(args: Args) -> None:
     )
     server_metadata = ws_client_policy.get_server_metadata()
     logging.info(f"Server metadata: {server_metadata}")
+    from openpi.robot.aloha_real.task_contract import task_contract
+    task_contract(server_metadata)  # Validate before constructing/resetting the physical environment.
     adapt_to_pi = bool(server_metadata.get("runtime", {}).get("adapt_to_pi", True))
     logging.info("Using runtime.adapt_to_pi from policy metadata: %s", adapt_to_pi)
 
@@ -101,6 +103,7 @@ def main(args: Args) -> None:
             rtc_handoff_delay_steps=args.rtc_handoff_delay_steps,
         ),
         subscribers=[],
+        policy_metadata=server_metadata,
         max_hz=args.policy_hz,
         manual_hz=args.manual_hz,
         manual_dataset_dir=args.manual_dataset_dir,

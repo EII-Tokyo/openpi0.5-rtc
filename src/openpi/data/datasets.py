@@ -12,6 +12,7 @@ import torch
 import openpi.training.config as _config
 from openpi.data import transforms as _transforms
 from openpi.data.episode_metadata import install_episode_metadata_reader
+from openpi.data.episode_split import training_episode_mask
 from openpi.data.temporal_mosaic import pack_high_history, uint8_hwc
 
 T_co = TypeVar("T_co", covariant=True)
@@ -85,9 +86,9 @@ class TransformedDataset(Dataset[T_co]):
 class IsForTrainingWrapper(Dataset[T_co]):
     """Redirect indices marked as not-for-training to random trainable samples."""
 
-    def __init__(self, dataset: Dataset):
+    def __init__(self, dataset: Dataset, trainable_mask=None):
         self._dataset = dataset
-        self._trainable_mask = self._build_trainable_mask(dataset)
+        self._trainable_mask = self._build_trainable_mask(dataset) if trainable_mask is None else trainable_mask
         self._trainable_indices = np.flatnonzero(self._trainable_mask)
         if len(self._trainable_indices) == 0:
             raise ValueError("Dataset has no samples with is_for_training=true.")
@@ -426,6 +427,12 @@ def create_torch_dataset(data_config: _config.LeRobotAlohaDataConfig, action_hor
     dataset = lerobot_dataset.MultiLeRobotDataset(repo_ids, delta_timestamps=delta_timestamps)
     raw_dataset = dataset
     trainable_mask = IsForTrainingWrapper._build_trainable_mask(dataset)
+    if data_config.train_episode_indices is not None:
+        episode_mask = np.concatenate([
+            training_episode_mask(ds.repo_id, ds.hf_dataset["episode_index"], data_config.train_episode_indices)
+            for ds in raw_dataset._datasets
+        ])
+        trainable_mask &= episode_mask
     transform_pipeline = data_config.transform_pipeline
     if transform_pipeline.high_camera_mosaic is not None:
         dataset = HighCameraMosaicDataset(
@@ -441,7 +448,7 @@ def create_torch_dataset(data_config: _config.LeRobotAlohaDataConfig, action_hor
             trainable_mask=trainable_mask,
         )
     else:
-        dataset = IsForTrainingWrapper(dataset)
+        dataset = IsForTrainingWrapper(dataset, trainable_mask=trainable_mask)
 
     if transform_pipeline.joint_position_history is not None:
         dataset = JointPositionHistoryDataset(dataset, raw_dataset=raw_dataset,
@@ -449,6 +456,9 @@ def create_torch_dataset(data_config: _config.LeRobotAlohaDataConfig, action_hor
     if transform_pipeline.long_memory is not None:
         from openpi.data.long_memory import LongMemoryDataset
         dataset = LongMemoryDataset(dataset, raw_dataset=raw_dataset, settings=transform_pipeline.long_memory)
+    if data_config.train_episode_indices is not None:
+        # Preserve original indices inside temporal/history wrappers; expose only eligible training starts.
+        dataset = torch.utils.data.Subset(dataset, np.flatnonzero(trainable_mask).tolist())
     return dataset
 
 

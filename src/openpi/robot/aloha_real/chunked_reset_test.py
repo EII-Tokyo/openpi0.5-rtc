@@ -54,3 +54,27 @@ def test_reset_waits_for_inflight_rpc_and_discards_old_chunk():
     action = policy.infer({"rating": 5, "state": np.zeros(14)})
     np.testing.assert_array_equal(action["actions"], np.full(14, 5))
     assert seen == [1, 5]
+
+
+def test_phase_belongs_to_played_chunk_not_background_chunk():
+    client = Mock()
+    client.infer.return_value = {
+        'actions': np.zeros((50, 14)), 'origin_actions': np.zeros((50, 32)),
+        'state': np.zeros(14), 'task_phase': 'pick',
+    }
+    policy = ChunkedPolicy(client, sync_replan_interval=25, chunking_mode='sync',
+                           rtc_replan_start_step=1, rtc_handoff_delay_steps=0)
+    # No background thread/network: provide a completed future chunk before handoff.
+    policy._chunking_mode = 'inference_time'
+    policy._background_results = {
+        'actions': np.ones((50, 14)), 'origin_actions': np.ones((50, 32)),
+        'state': np.zeros(14), 'task_phase': 'return_home',
+    }
+    first = policy.infer({'state': np.zeros(14)})
+    assert first['task_phase'] == 'pick'
+    np.testing.assert_array_equal(first['actions'], np.zeros(14))
+    second = policy.infer({'state': np.zeros(14)})
+    assert second['task_phase'] == 'return_home'
+    np.testing.assert_array_equal(second['actions'], np.ones(14))
+    policy.reset()
+    assert policy._task_phase is None

@@ -357,8 +357,20 @@ class AlohaRealEnvironment:
         if self._joint_history is not None:
             self._joint_history.append(time.monotonic(), self._ts.observation["qpos"])
 
+    def get_joint_feedback(self) -> dict:
+        """Read current subscriber feedback even while no policy steps are running."""
+        return {"qpos": self._env.get_qpos(), "qvel": self._env.get_qvel()}
+
     def is_episode_complete(self) -> bool:
         return False
+
+    def refresh_observation(self) -> dict:
+        """Capture current cameras and joints without issuing a motor command."""
+        if self._ts is None:
+            raise RuntimeError("Call reset before refreshing observation")
+        self._ts = self._ts._replace(observation=self._env.get_observation())
+        self._capture_joint_position()
+        return self.get_observation()
 
     def get_observation(self) -> dict:
         if self._ts is None:

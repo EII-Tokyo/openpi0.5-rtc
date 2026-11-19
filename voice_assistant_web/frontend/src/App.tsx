@@ -13,6 +13,7 @@ type RealtimeState = {
   robot: {
     timestamp: number | null
     mode: string
+    task_mode?: string
     current_task: string | null
     inference_prompt: string | null
     operator: string | null
@@ -118,7 +119,7 @@ export default function App() {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (conditioningDrawerOpen || recordingDrawerOpen) return
-      if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey || event.repeat) return
+      if (event.metaKey || event.ctrlKey || event.altKey || event.repeat) return
       const active = document.activeElement
       if (
         active instanceof HTMLInputElement ||
@@ -128,13 +129,23 @@ export default function App() {
       ) {
         return
       }
+      // Hidden exp_insert shortcuts; keep the existing page and numeric controls unchanged.
+      if (state.robot.task_mode === 'exp_insert') {
+        const bottle = { a: '1', b: '2', c: '3' }[event.key.toLowerCase()]
+        if (bottle) {
+          event.preventDefault()
+          void dispatchTask(`bottle_${bottle}`)
+          return
+        }
+      }
+      if (event.shiftKey) return
       if (TASK_NUMBERS.includes(event.key as (typeof TASK_NUMBERS)[number])) {
         void dispatchTask(event.key)
       }
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [t.dispatchFailed, conditioningDrawerOpen, recordingDrawerOpen])
+  }, [t.dispatchFailed, conditioningDrawerOpen, recordingDrawerOpen, state.robot.task_mode])
 
   return (
     <main className="app-shell">

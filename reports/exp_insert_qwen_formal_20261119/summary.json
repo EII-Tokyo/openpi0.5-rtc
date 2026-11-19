@@ -1,0 +1,113 @@
+{
+  "run_id": "exp-insert-qwen38max-20261119-v1",
+  "model": "qwen3.8-max",
+  "episode_count": 150,
+  "total_frames": 124049,
+  "fps": 50,
+  "sampling_fps": 5,
+  "bottle_counts": {
+    "3": 48,
+    "1": 51,
+    "2": 51
+  },
+  "annotation_status": {
+    "human_reviewed": 4,
+    "auto_validated": 146
+  },
+  "unassigned_frames": 0,
+  "phase_counts": {
+    "pick": 150,
+    "align": 150,
+    "insert": 150,
+    "withdraw": 150,
+    "place": 150,
+    "release": 150,
+    "return_home": 150
+  },
+  "pricing": {
+    "currency": "CNY",
+    "region": "international Singapore",
+    "input_per_million": 14.988,
+    "cached_input_per_million": 1.874,
+    "output_per_million": 44.965,
+    "source": "https://help.aliyun.com/zh/model-studio/qwen3-8-max",
+    "checked_at": "2026-11-19",
+    "basis": "published list price, not invoice"
+  },
+  "charge_unknown_requests": 9,
+  "validated_at": "2026-11-19T03:42:43.681954+00:00",
+  "requires_lerobot_reexport": true,
+  "models": {
+    "qwen3.8-max": 149,
+    "codex_visual_review": 1
+  },
+  "identity_reviewed_count": 150,
+  "identity_corrections": [
+    {
+      "episode_index": 60,
+      "original_bottle_id": 3,
+      "reviewer": "Codex visual inspection",
+      "method": "Codex visual inspection of left-wrist image at the midpoint of align; dark green label with yellow top is bottle 2; pale yellow-green/white label is bottle 3; clear unlabeled is bottle 1. Brand text alone is not an ID cue.",
+      "reviewed_at": "2026-11-19T02:49:40.365921+00:00",
+      "verified_bottle_id": 2,
+      "corrected": true
+    },
+    {
+      "episode_index": 66,
+      "original_bottle_id": 3,
+      "reviewer": "Codex visual inspection",
+      "method": "Codex visual inspection of left-wrist image at the midpoint of align; dark green label with yellow top is bottle 2; pale yellow-green/white label is bottle 3; clear unlabeled is bottle 1. Brand text alone is not an ID cue.",
+      "reviewed_at": "2026-11-19T02:49:40.507190+00:00",
+      "verified_bottle_id": 2,
+      "corrected": true
+    },
+    {
+      "episode_index": 72,
+      "original_bottle_id": 3,
+      "reviewer": "Codex visual inspection",
+      "method": "Codex visual inspection of left-wrist image at the midpoint of align; dark green label with yellow top is bottle 2; pale yellow-green/white label is bottle 3; clear unlabeled is bottle 1. Brand text alone is not an ID cue.",
+      "reviewed_at": "2026-11-19T02:49:40.649156+00:00",
+      "verified_bottle_id": 2,
+      "corrected": true
+    }
+  ],
+  "boundary_corrections": [
+    {
+      "episode_index": 66,
+      "reviewed_at": "2026-11-19T02:51:24.746273+00:00",
+      "reviewer": "Codex video and joint-state inspection",
+      "change": "pick starts at frame 0 instead of 20; remove initial unassigned interval [0,20)",
+      "evidence": "Frames 0,10,20,30 show initiation of approach; state delta frame10->20 includes shoulder +0.09357 rad and wrist +0.1488 rad. Pick includes approach/preparation, not only contact. Original API response is retained."
+    },
+    {
+      "episode_index": 162,
+      "reviewed_at": "2026-11-19T02:58:24.920306+00:00",
+      "reviewer": "Codex video and joint-state inspection",
+      "change": "pick starts at frame 0 instead of 20; remove initial unassigned interval [0,20)",
+      "evidence": "Frames 0,10,20,30 show initiation of approach; state delta frame10->20 includes shoulder +0.04755 rad and wrist +0.07977 rad. Pick includes approach/preparation, not only contact. Original API response is retained."
+    }
+  ],
+  "needs_review": [],
+  "previous_3_trials": {
+    "input_tokens": 155598,
+    "output_tokens": 2183,
+    "cached_input_tokens": 0,
+    "estimated_cny": 2.4302614190000003,
+    "usage_receipts": 3
+  },
+  "new_147": {
+    "input_tokens": 8294831,
+    "output_tokens": 106683,
+    "cached_input_tokens": 0,
+    "estimated_cny": 129.119928123,
+    "usage_receipts": 146
+  },
+  "total": {
+    "input_tokens": 8450429,
+    "output_tokens": 108866,
+    "cached_input_tokens": 0,
+    "estimated_cny": 131.550189542,
+    "usage_receipts": 149
+  },
+  "s3_prefix": "s3://eii-robot-data/annotations/exp_insert/exp-insert-qwen38max-20261119-v1/"
+}

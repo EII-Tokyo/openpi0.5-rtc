@@ -11,7 +11,7 @@ from fastapi import HTTPException, UploadFile
 from openai import BadRequestError, OpenAI
 
 from .config import settings
-from .redis_commands import TASK_MAPPING, publish_task
+from .redis_commands import TASK_MAPPING, publish_task, bottle_task_from_text, runtime_supports_bottles
 from .schemas import VoiceResponse
 
 _SUPPORTED_AUDIO_SUFFIXES = {".flac", ".m4a", ".mp3", ".mp4", ".mpeg", ".mpga", ".oga", ".ogg", ".wav", ".webm"}
@@ -159,6 +159,19 @@ class VoiceAssistantEngine:
                 ),
                 task_number=None,
                 task_name=None,
+            )
+
+        bottle_task = bottle_task_from_text(transcript) if runtime_supports_bottles(self._redis) else None
+        if bottle_task is not None:
+            publish_task(self._redis, bottle_task)
+            return VoiceResponse(
+                transcript=transcript,
+                reply_text=self._localized_text(
+                    language, en=f"Bottle {bottle_task[-1]} requested. During execution it waits until home.",
+                    ja=f"ボトル{bottle_task[-1]}を指定しました。実行中はホームに戻るまで待機します。",
+                    zh=f"已发送瓶子 {bottle_task[-1]} 指令；执行中会暂存，回到 home 后生效。",
+                ),
+                task_number=bottle_task, task_name=TASK_MAPPING[bottle_task],
             )
 
         if self._openai is None:
