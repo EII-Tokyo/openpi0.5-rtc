@@ -1,7 +1,7 @@
 from collections.abc import Callable, Mapping, Sequence
 import dataclasses
 import logging
-from typing import ClassVar, Protocol, TypeAlias, TypeVar, runtime_checkable
+from typing import ClassVar, Literal, Protocol, TypeAlias, TypeVar, runtime_checkable
 
 from PIL import Image
 
@@ -319,6 +319,22 @@ class PromptFromLeRobotTask(DataTransformFn):
 
 
 @dataclasses.dataclass(frozen=True)
+class PromptFromSubtaskInstruction(DataTransformFn):
+    """Use the annotated stage instruction; never fall back to the global task."""
+
+    def __call__(self, data: DataDict) -> DataDict:
+        data = dict(data)
+        instruction = data.pop("subtask_instruction", None)
+        if isinstance(instruction, np.ndarray) and instruction.size == 1:
+            instruction = instruction.item()
+        if not isinstance(instruction, str) or not instruction.strip():
+            raise ValueError("A non-empty subtask_instruction is required for low-level training")
+        data.pop("task", None)
+        data["prompt"] = instruction.strip()
+        return data
+
+
+@dataclasses.dataclass(frozen=True)
 class ValidateAlohaSample(DataTransformFn):
     """Fail early when a raw ALOHA sample is missing fields required by this pipeline."""
 
@@ -443,10 +459,13 @@ class AlohaTransformPipeline:
     adapt_to_pi: bool = True
     use_delta_joint_actions: bool = True
     action_dim: int = ALOHA_MODEL_ACTION_DIM
+    language_source: Literal["task", "subtask_instruction"] = "task"
     norm_stats: dict[str, NormStats] | None = dataclasses.field(init=False, repr=False, compare=False)
     norm_stats_error: FileNotFoundError | None = dataclasses.field(init=False, repr=False, compare=False)
 
     def __post_init__(self) -> None:
+        if self.language_source not in ("task", "subtask_instruction"):
+            raise ValueError(f"Unsupported language_source: {self.language_source}")
         if self.joint_position_history is not None and self.max_token_len < self.joint_position_history.max_tokens + 128:
             raise ValueError("Prompt budget must reserve 128 text tokens beyond joint history budget")
         if self.high_camera_mosaic is not None:
@@ -494,7 +513,7 @@ class AlohaTransformPipeline:
             raise FileNotFoundError("Normalization stats were not loaded.")
         return self.norm_stats
 
-    def training_repack_transform(self, *, include_actions: bool = True) -> RepackTransform:
+    def training_repack_transform(self, *, include_actions: bool = True, include_language: bool = True) -> RepackTransform:
         structure = {
             "images": self._image_structure("observation.images"),
             "state": "observation.state",
@@ -502,6 +521,8 @@ class AlohaTransformPipeline:
         }
         if include_actions:
             structure["actions"] = "action"
+        if include_language and self.language_source == "subtask_instruction":
+            structure["subtask_instruction"] = "subtask_instruction"
         return RepackTransform(structure, optional_keys=("operator", "rating", "rating_is_valid", "camera_low_position", "joint_position_history"))
 
     def _model_input_transforms(self) -> list[DataTransformFn]:
@@ -545,7 +566,7 @@ class AlohaTransformPipeline:
                 require_task=True,
             ),
             self.training_repack_transform(include_actions=True),
-            PromptFromLeRobotTask(),
+            PromptFromSubtaskInstruction() if self.language_source == "subtask_instruction" else PromptFromLeRobotTask(),
             *self._model_input_transforms(),
         ]
 
@@ -560,7 +581,7 @@ class AlohaTransformPipeline:
 
     def raw_state_action_transforms(self) -> list[DataTransformFn]:
         transforms: list[DataTransformFn] = [
-            self.training_repack_transform(include_actions=True),
+            self.training_repack_transform(include_actions=True, include_language=False),
             AlohaInputs(
                 adapt_to_pi=self.adapt_to_pi,
                 image_keys=self.raw_image_keys,

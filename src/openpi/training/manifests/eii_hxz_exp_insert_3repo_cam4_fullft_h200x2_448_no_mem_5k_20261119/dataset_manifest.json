@@ -1,12 +1,12 @@
 {
   "config_name": "eii_hxz_exp_insert_3repo_cam4_fullft_h200x2_448_no_mem_5k_20261119",
-  "prepared_at": "2026-11-19T00:52:31.083131+00:00",
+  "prepared_at": "2026-11-19T07:12:58.908253+00:00",
   "account_username": "Xinzheng He",
   "directory": "exp_insert",
   "training_started": false,
-  "source": "Host 200 project export counters cross-checked against latest published HF metadata and all data parquet rows; dataset revisions rechecked after download.",
+  "source": "Pinned original LeRobot releases relabeled from approved host 200 episode/slice annotations; all published metadata, data and video hashes verified after HF download and archived to S3.",
   "duration_definition": "Frames divided by FPS on the trajectory timeline; cameras and sampling repeats are not multiplied. Trainable frames have is_for_training=true.",
-  "normalization_status": "Computed with scripts/compute_norm_stats.py on all three datasets, seed 0, action horizon 50; train-excluded indices resampled according to existing loader semantics.",
+  "normalization_status": "Reused existing normalization only after all published state/action values and training-start flags were proven identical to the original pinned datasets.",
   "summary": {
     "episodes": 150,
     "export_frames": 124049,
@@ -19,8 +19,8 @@
     {
       "project_id": "6afd6bcbce1afaaf079e0eff",
       "project_name": "2026-11-18_only_insert_exp_01",
-      "repo_id": "lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_01__lerobot__with-rinse",
-      "revision": "a5ca7d69366062b3137acab09c07829f590dad58",
+      "repo_id": "lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_01__lerobot__with-rinse__hierarchical-v1",
+      "revision": "290e2d127e42f5bdb88d7fe246353655463f4ea4",
       "weight": 1,
       "fps": 50,
       "episodes": 50,
@@ -29,7 +29,6 @@
       "export_seconds": 693.7,
       "trainable_seconds": 643.7,
       "excluded_frames": 2500,
-      "task": "twist off the bottle cap and rinse the bottle",
       "features": {
         "observation.state": {
           "dtype": "float32",
@@ -267,17 +266,225 @@
             1
           ],
           "names": null
+        },
+        "global_instruction": {
+          "dtype": "string",
+          "shape": [
+            1
+          ],
+          "names": null
+        },
+        "subtask_instruction": {
+          "dtype": "string",
+          "shape": [
+            1
+          ],
+          "names": null
+        },
+        "source_episode_id": {
+          "dtype": "string",
+          "shape": [
+            1
+          ],
+          "names": null
+        },
+        "dataset_split": {
+          "dtype": "string",
+          "shape": [
+            1
+          ],
+          "names": null
+        },
+        "target_bottle_id": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "names": null
+        },
+        "segment_id": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "names": null
+        },
+        "source_frame_index": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "names": null
         }
       },
       "parquet_sha256": {
-        "data/chunk-000/file-000.parquet": "665197c6e7eebb7c22bba00344ad00852c4a96303420ca7901a47c481ae12f25"
-      }
+        "data/chunk-000/file-000.parquet": "8a32499f2214093152bbc2071451d64576a0fcb2658c39b5a51cf5021494eeab"
+      },
+      "verified_at": "2026-11-19T07:10:37.944412+00:00",
+      "splits": {
+        "train": 50
+      },
+      "s3_prefix": "s3://eii-robot-data/lerobot/hxz_hierarchical_v1/6afd6bcbce1afaaf079e0eff/290e2d127e42f5bdb88d7fe246353655463f4ea4/",
+      "numeric_reference_check": {
+        "repo_id": "lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_01__lerobot__with-rinse",
+        "revision": "a5ca7d69366062b3137acab09c07829f590dad58",
+        "equal_columns": [
+          "observation.state",
+          "action",
+          "is_for_training",
+          "episode_index",
+          "frame_index"
+        ]
+      },
+      "tasks": [
+        {
+          "index": "Use the left arm to pick up bottle 1, the clear unlabeled plastic bottle, insert its opening onto the pipe, pull it off the pipe, place it back on the table, open the gripper to release it, and return the left arm to the home position.",
+          "task_index": 0
+        },
+        {
+          "index": "Use the left arm to pick up bottle 2, the dark-green-labeled bottle, insert its opening onto the pipe, pull it off the pipe, place it back on the table, open the gripper to release it, and return the left arm to the home position.",
+          "task_index": 1
+        },
+        {
+          "index": "Use the left arm to pick up bottle 3, the pale yellow-green-labeled bottle, insert its opening onto the pipe, pull it off the pipe, place it back on the table, open the gripper to release it, and return the left arm to the home position.",
+          "task_index": 2
+        }
+      ],
+      "task_source": "per-episode global_instruction; low-level prompt uses per-frame subtask_instruction",
+      "files": [
+        {
+          "path": ".gitattributes",
+          "size": 2504,
+          "sha256": "9e75dd981de037ec3769f24f790e126bc5a160b6871f510214e68dc70649aeeb"
+        },
+        {
+          "path": "README.md",
+          "size": 9346,
+          "sha256": "21abce5393d5424fdc23830cfb6480b9e1e3453e6e91cf84170656935fc7909c"
+        },
+        {
+          "path": "data/chunk-000/file-000.parquet",
+          "size": 2785813,
+          "sha256": "8a32499f2214093152bbc2071451d64576a0fcb2658c39b5a51cf5021494eeab"
+        },
+        {
+          "path": "meta/episodes/chunk-000/file-000.parquet",
+          "size": 330563,
+          "sha256": "95aac4ecaaf53d41399f10ccbe6dc6932c42631f399dc0ce0aa18f163c05f77c"
+        },
+        {
+          "path": "meta/hierarchical_annotations.json",
+          "size": 119233,
+          "sha256": "4acb435b50f54c9b9a49b815c9228b006b5e26c0212c6a714f4bcaf5e149ebcc"
+        },
+        {
+          "path": "meta/info.json",
+          "size": 6661,
+          "sha256": "93a7e8fcae7bbc45daa524f067dd2256c47f56c35c1b2b12f5950a7053732c1d"
+        },
+        {
+          "path": "meta/stats.json",
+          "size": 24646,
+          "sha256": "4e4d4723a3a7877d3c89dc3b667359587718b6fdf018e76348635a6da8714362"
+        },
+        {
+          "path": "meta/tasks.parquet",
+          "size": 3326,
+          "sha256": "5e7116dc22578a193d2a5b653ba14fbe9e76a6fdf7c6498d874c89480fbdb839"
+        },
+        {
+          "path": "videos/observation.images.cam_high/chunk-000/file-000.mp4",
+          "size": 201511280,
+          "sha256": "82f074df2547cf99687f9e8b42b4ef98678d514156800dd501b34973f4d394bc"
+        },
+        {
+          "path": "videos/observation.images.cam_high/chunk-000/file-001.mp4",
+          "size": 194467748,
+          "sha256": "5535f5bc266503faff799c1ad31eb4cd25223ca7a25a0a0791d962c730aab7a8"
+        },
+        {
+          "path": "videos/observation.images.cam_high/chunk-000/file-002.mp4",
+          "size": 206556099,
+          "sha256": "5380f839deb59689f3056d16fe08ff057b90a298b50fc3e3272ba4bd14d37e1c"
+        },
+        {
+          "path": "videos/observation.images.cam_high/chunk-000/file-003.mp4",
+          "size": 199969430,
+          "sha256": "a57b1d39edcd14e73d4e045fec1a2c10b95a9a2ae6c5d43fd55ef6a6ab4d458f"
+        },
+        {
+          "path": "videos/observation.images.cam_left_wrist/chunk-000/file-000.mp4",
+          "size": 205370660,
+          "sha256": "e03ff2b649a0cbb8914113ed045f8f6fed9d68623766033f51ba2abf0b17b2ee"
+        },
+        {
+          "path": "videos/observation.images.cam_left_wrist/chunk-000/file-001.mp4",
+          "size": 197688650,
+          "sha256": "df23df430204dcbde526dee38eda365a608c1de153f2c9232485a7fda94b4516"
+        },
+        {
+          "path": "videos/observation.images.cam_left_wrist/chunk-000/file-002.mp4",
+          "size": 201352875,
+          "sha256": "015fc03db7f435cc7ac77c21d560a080ab46cc938efe9764b94d851fce55526a"
+        },
+        {
+          "path": "videos/observation.images.cam_left_wrist/chunk-000/file-003.mp4",
+          "size": 33532092,
+          "sha256": "6c8121436fa1fe17a7a1958ad3c508e58169aa864428ea21c7344b61b55ee5f4"
+        },
+        {
+          "path": "videos/observation.images.cam_low/chunk-000/file-000.mp4",
+          "size": 198243533,
+          "sha256": "76372577977e18074080c125e9b0a04658e1fa5e721738cf1d141d6de9db1404"
+        },
+        {
+          "path": "videos/observation.images.cam_low/chunk-000/file-001.mp4",
+          "size": 203067542,
+          "sha256": "02556cf6d6d1631b141e34b0e434b48aae283988d326054ddad9ba9087925752"
+        },
+        {
+          "path": "videos/observation.images.cam_low/chunk-000/file-002.mp4",
+          "size": 205488858,
+          "sha256": "fa8569e8a65cee08b68c71642127404cdfff88290853869bb61c2ad9b0324e3f"
+        },
+        {
+          "path": "videos/observation.images.cam_low/chunk-000/file-003.mp4",
+          "size": 187700946,
+          "sha256": "7745d89603ccb35b82505c3a4df2aa86214ff6a08bc7001380fc03245a5a8e97"
+        },
+        {
+          "path": "videos/observation.images.cam_right_wrist/chunk-000/file-000.mp4",
+          "size": 200253425,
+          "sha256": "355e448ff9157855c8cec2441f25409283c1c5c93b793e110088b669274fd0c0"
+        },
+        {
+          "path": "videos/observation.images.cam_right_wrist/chunk-000/file-001.mp4",
+          "size": 208774634,
+          "sha256": "5bc120f5e0e38f492f764dac814a28427468f480dcb5fcc6d1cf9fff6cb0ece4"
+        },
+        {
+          "path": "videos/observation.images.cam_right_wrist/chunk-000/file-002.mp4",
+          "size": 203570459,
+          "sha256": "e8e940940fe71e7765eb0f0744f063d10525b9ab376967f1f1bd4d073d8af672"
+        },
+        {
+          "path": "videos/observation.images.cam_right_wrist/chunk-000/file-003.mp4",
+          "size": 207145120,
+          "sha256": "5d5a89f5636ea4f85d4c37fae7d19ccc908d2ba0f704f9f1de474fa6d1b0f719"
+        },
+        {
+          "path": "videos/observation.images.cam_right_wrist/chunk-000/file-004.mp4",
+          "size": 43932589,
+          "sha256": "7bf237d3a03e5d0b1b7601e6895d1f9a3136e4c34ef15573148806a7d45bf70e"
+        }
+      ],
+      "video_files_verified": 17
     },
     {
       "project_id": "6afd6beace1afaaf079e0f00",
       "project_name": "2026-11-18_only_insert_exp_02",
-      "repo_id": "lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_02__lerobot__with-rinse",
-      "revision": "76f417fd777ea1ac114fb9ecfb79513e69bf1e9c",
+      "repo_id": "lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_02__lerobot__with-rinse__hierarchical-v1",
+      "revision": "96d8a7de1d63ed77b45da0fda54375c274dda7ff",
       "weight": 1,
       "fps": 50,
       "episodes": 50,
@@ -286,7 +493,6 @@
       "export_seconds": 857.92,
       "trainable_seconds": 807.92,
       "excluded_frames": 2500,
-      "task": "twist off the bottle cap and rinse the bottle",
       "features": {
         "observation.state": {
           "dtype": "float32",
@@ -524,17 +730,245 @@
             1
           ],
           "names": null
+        },
+        "global_instruction": {
+          "dtype": "string",
+          "shape": [
+            1
+          ],
+          "names": null
+        },
+        "subtask_instruction": {
+          "dtype": "string",
+          "shape": [
+            1
+          ],
+          "names": null
+        },
+        "source_episode_id": {
+          "dtype": "string",
+          "shape": [
+            1
+          ],
+          "names": null
+        },
+        "dataset_split": {
+          "dtype": "string",
+          "shape": [
+            1
+          ],
+          "names": null
+        },
+        "target_bottle_id": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "names": null
+        },
+        "segment_id": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "names": null
+        },
+        "source_frame_index": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "names": null
         }
       },
       "parquet_sha256": {
-        "data/chunk-000/file-000.parquet": "9e417e1ba89c906a11d9df63ed223f8a34b348703d67ee7a3a2f46c6342cf7b0"
-      }
+        "data/chunk-000/file-000.parquet": "5a4291ba9b43537bf9c0c1f9e22e731e82b24f249791944d25ca8c5751829685"
+      },
+      "verified_at": "2026-11-19T07:11:17.637149+00:00",
+      "splits": {
+        "train": 50
+      },
+      "s3_prefix": "s3://eii-robot-data/lerobot/hxz_hierarchical_v1/6afd6beace1afaaf079e0f00/96d8a7de1d63ed77b45da0fda54375c274dda7ff/",
+      "numeric_reference_check": {
+        "repo_id": "lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_02__lerobot__with-rinse",
+        "revision": "76f417fd777ea1ac114fb9ecfb79513e69bf1e9c",
+        "equal_columns": [
+          "observation.state",
+          "action",
+          "is_for_training",
+          "episode_index",
+          "frame_index"
+        ]
+      },
+      "tasks": [
+        {
+          "index": "Use the left arm to pick up bottle 1, the clear unlabeled plastic bottle, insert its opening onto the pipe, pull it off the pipe, place it back on the table, open the gripper to release it, and return the left arm to the home position.",
+          "task_index": 0
+        },
+        {
+          "index": "Use the left arm to pick up bottle 2, the dark-green-labeled bottle, insert its opening onto the pipe, pull it off the pipe, place it back on the table, open the gripper to release it, and return the left arm to the home position.",
+          "task_index": 1
+        },
+        {
+          "index": "Use the left arm to pick up bottle 3, the pale yellow-green-labeled bottle, insert its opening onto the pipe, pull it off the pipe, place it back on the table, open the gripper to release it, and return the left arm to the home position.",
+          "task_index": 2
+        }
+      ],
+      "task_source": "per-episode global_instruction; low-level prompt uses per-frame subtask_instruction",
+      "files": [
+        {
+          "path": ".gitattributes",
+          "size": 2504,
+          "sha256": "9e75dd981de037ec3769f24f790e126bc5a160b6871f510214e68dc70649aeeb"
+        },
+        {
+          "path": "README.md",
+          "size": 9346,
+          "sha256": "27734bc3c5926b94883b2b81ac24107ba891cb2be5dd3ec924a46e5f4ff14612"
+        },
+        {
+          "path": "data/chunk-000/file-000.parquet",
+          "size": 3266037,
+          "sha256": "5a4291ba9b43537bf9c0c1f9e22e731e82b24f249791944d25ca8c5751829685"
+        },
+        {
+          "path": "meta/episodes/chunk-000/file-000.parquet",
+          "size": 331188,
+          "sha256": "d9aae1847451ddd621c6aef378dab9770c7fba1f5fd7b86bc34643f3cd7d5750"
+        },
+        {
+          "path": "meta/hierarchical_annotations.json",
+          "size": 119277,
+          "sha256": "9843458e2e442e2f7fa94027eaf3d418293367eae57a1cf16041f8038a860360"
+        },
+        {
+          "path": "meta/info.json",
+          "size": 6661,
+          "sha256": "b6bc7ad79a3e0e5cc916d9c634efd34b1370dbaec1d352f8c1a30b3d9b08cf1d"
+        },
+        {
+          "path": "meta/stats.json",
+          "size": 24599,
+          "sha256": "8a398091bc16d3e7f95afcb7218504b41864419c6385dec253a5c47fceb287ec"
+        },
+        {
+          "path": "meta/tasks.parquet",
+          "size": 3326,
+          "sha256": "5e7116dc22578a193d2a5b653ba14fbe9e76a6fdf7c6498d874c89480fbdb839"
+        },
+        {
+          "path": "videos/observation.images.cam_high/chunk-000/file-000.mp4",
+          "size": 203150161,
+          "sha256": "6ea3a66e78f0981d5d9bf1e12e86c216ec6f1f4ee169f124ee1114740deb9697"
+        },
+        {
+          "path": "videos/observation.images.cam_high/chunk-000/file-001.mp4",
+          "size": 200953432,
+          "sha256": "cbfa70a1d36104186694614e5a9551e66fabb53b0ddd36cf11123f7ab19585fd"
+        },
+        {
+          "path": "videos/observation.images.cam_high/chunk-000/file-002.mp4",
+          "size": 190797943,
+          "sha256": "3a0f8d8b8b1a95994dbb2e690648fae2dd49a5f902506c262776e1cb3e6f5979"
+        },
+        {
+          "path": "videos/observation.images.cam_high/chunk-000/file-003.mp4",
+          "size": 194655720,
+          "sha256": "dd6e41b23bf2ae34699038b10f607b4e978d12c1109ccdb48ff613770a335ce4"
+        },
+        {
+          "path": "videos/observation.images.cam_high/chunk-000/file-004.mp4",
+          "size": 196685613,
+          "sha256": "8bad1f49acb23a2c01be87d751d2b99480258be806249d4269005d7194e2ebd6"
+        },
+        {
+          "path": "videos/observation.images.cam_left_wrist/chunk-000/file-000.mp4",
+          "size": 206207280,
+          "sha256": "413c2c8ea2dfd8ad75a855153e08326b67822ba198ce2cf13755d216354ef9dc"
+        },
+        {
+          "path": "videos/observation.images.cam_left_wrist/chunk-000/file-001.mp4",
+          "size": 200230477,
+          "sha256": "2fc3c2cbd08cb831648949126f29872b936bdaabdf163d2dc4e98640a4d7c5c1"
+        },
+        {
+          "path": "videos/observation.images.cam_left_wrist/chunk-000/file-002.mp4",
+          "size": 205340098,
+          "sha256": "e771ffa00bbb05e77c1546161a020fccd7cfcaca06d4797b746f489a863415f7"
+        },
+        {
+          "path": "videos/observation.images.cam_left_wrist/chunk-000/file-003.mp4",
+          "size": 184583694,
+          "sha256": "e3143c9c40109a6f7f4c3f3286ff110cd2f0faefbb7c9ace04f1aedec9748e54"
+        },
+        {
+          "path": "videos/observation.images.cam_low/chunk-000/file-000.mp4",
+          "size": 190750077,
+          "sha256": "9b6846d983c23272ad2fc70e46bc657341322e223f760eeb3eb20fcd2027398e"
+        },
+        {
+          "path": "videos/observation.images.cam_low/chunk-000/file-001.mp4",
+          "size": 205349543,
+          "sha256": "4eb08f329aa74196f6feb351da50665f25443a302f8db1b5245a08ff069b488c"
+        },
+        {
+          "path": "videos/observation.images.cam_low/chunk-000/file-002.mp4",
+          "size": 192978973,
+          "sha256": "368522bc47682bce624b2c76179d615b3cd50ea80fefd00102d02592a7ec9119"
+        },
+        {
+          "path": "videos/observation.images.cam_low/chunk-000/file-003.mp4",
+          "size": 196849232,
+          "sha256": "3b92d57c7c56b10e2b9308c2d277d2521d2bf0f915481e7344ae2e45927fb1e0"
+        },
+        {
+          "path": "videos/observation.images.cam_low/chunk-000/file-004.mp4",
+          "size": 207148259,
+          "sha256": "342368dec5af3d565653acb1682cca53fe927d046c801515ed51bd5104bedca0"
+        },
+        {
+          "path": "videos/observation.images.cam_low/chunk-000/file-005.mp4",
+          "size": 22371357,
+          "sha256": "7c30963f5c8fd2bba128e81b0338be6cfe9b9a97b7212ac05e38e7366c76a183"
+        },
+        {
+          "path": "videos/observation.images.cam_right_wrist/chunk-000/file-000.mp4",
+          "size": 198262050,
+          "sha256": "a5fdf887ac4b372fca7b22825fc33bb2de81f7098c7c968253fdebbbdbdf897b"
+        },
+        {
+          "path": "videos/observation.images.cam_right_wrist/chunk-000/file-001.mp4",
+          "size": 195462744,
+          "sha256": "d9b72b70cc2f393080adb5838f56b780e2ea0e6bb24250ee2e31aed17c1292b4"
+        },
+        {
+          "path": "videos/observation.images.cam_right_wrist/chunk-000/file-002.mp4",
+          "size": 187645858,
+          "sha256": "6e7e8c53328dbeb7999faa6fa4aa6afc3e07ce4e5acc59d1cbfbc16ea992eff7"
+        },
+        {
+          "path": "videos/observation.images.cam_right_wrist/chunk-000/file-003.mp4",
+          "size": 206370120,
+          "sha256": "833baed12aa9709d7a16cabe5748308bf4eb2f033e51b939377c7c5edd70e852"
+        },
+        {
+          "path": "videos/observation.images.cam_right_wrist/chunk-000/file-004.mp4",
+          "size": 209568410,
+          "sha256": "766a137c599fdd5ea51846e52fc9e6dad31f97460b82d4f483fd0207a6852ab4"
+        },
+        {
+          "path": "videos/observation.images.cam_right_wrist/chunk-000/file-005.mp4",
+          "size": 46563408,
+          "sha256": "a0f281dd97e4440ac879bda6c120b92fc58e7c19dd851143557240cdc6e5d38c"
+        }
+      ],
+      "video_files_verified": 21
     },
     {
       "project_id": "6afd6c04ce1afaaf079e0f01",
       "project_name": "2026-11-18_only_insert_exp_03",
-      "repo_id": "lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_03__lerobot__with-rinse",
-      "revision": "fe620d64d299704d43c24b1c796c167a395d598f",
+      "repo_id": "lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_03__lerobot__with-rinse__hierarchical-v1",
+      "revision": "915d2b507947813201a09b3b55710871994d1e9e",
       "weight": 1,
       "fps": 50,
       "episodes": 50,
@@ -543,7 +977,6 @@
       "export_seconds": 929.36,
       "trainable_seconds": 879.36,
       "excluded_frames": 2500,
-      "task": "twist off the bottle cap and rinse the bottle",
       "features": {
         "observation.state": {
           "dtype": "float32",
@@ -781,16 +1214,254 @@
             1
           ],
           "names": null
+        },
+        "global_instruction": {
+          "dtype": "string",
+          "shape": [
+            1
+          ],
+          "names": null
+        },
+        "subtask_instruction": {
+          "dtype": "string",
+          "shape": [
+            1
+          ],
+          "names": null
+        },
+        "source_episode_id": {
+          "dtype": "string",
+          "shape": [
+            1
+          ],
+          "names": null
+        },
+        "dataset_split": {
+          "dtype": "string",
+          "shape": [
+            1
+          ],
+          "names": null
+        },
+        "target_bottle_id": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "names": null
+        },
+        "segment_id": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "names": null
+        },
+        "source_frame_index": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "names": null
         }
       },
       "parquet_sha256": {
-        "data/chunk-000/file-000.parquet": "e3ffcefb485fbe97c419124638593bb48bdc4ea450488c373c008930cb38a2fa"
-      }
+        "data/chunk-000/file-000.parquet": "36115bf75605e3fc988927fa4a821251ef209ec09d401bc55f52ea273b049b13"
+      },
+      "verified_at": "2026-11-19T07:11:37.411374+00:00",
+      "splits": {
+        "train": 50
+      },
+      "s3_prefix": "s3://eii-robot-data/lerobot/hxz_hierarchical_v1/6afd6c04ce1afaaf079e0f01/915d2b507947813201a09b3b55710871994d1e9e/",
+      "numeric_reference_check": {
+        "repo_id": "lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_03__lerobot__with-rinse",
+        "revision": "fe620d64d299704d43c24b1c796c167a395d598f",
+        "equal_columns": [
+          "observation.state",
+          "action",
+          "is_for_training",
+          "episode_index",
+          "frame_index"
+        ]
+      },
+      "tasks": [
+        {
+          "index": "Use the left arm to pick up bottle 1, the clear unlabeled plastic bottle, insert its opening onto the pipe, pull it off the pipe, place it back on the table, open the gripper to release it, and return the left arm to the home position.",
+          "task_index": 0
+        },
+        {
+          "index": "Use the left arm to pick up bottle 2, the dark-green-labeled bottle, insert its opening onto the pipe, pull it off the pipe, place it back on the table, open the gripper to release it, and return the left arm to the home position.",
+          "task_index": 1
+        },
+        {
+          "index": "Use the left arm to pick up bottle 3, the pale yellow-green-labeled bottle, insert its opening onto the pipe, pull it off the pipe, place it back on the table, open the gripper to release it, and return the left arm to the home position.",
+          "task_index": 2
+        }
+      ],
+      "task_source": "per-episode global_instruction; low-level prompt uses per-frame subtask_instruction",
+      "files": [
+        {
+          "path": ".gitattributes",
+          "size": 2504,
+          "sha256": "9e75dd981de037ec3769f24f790e126bc5a160b6871f510214e68dc70649aeeb"
+        },
+        {
+          "path": "README.md",
+          "size": 9346,
+          "sha256": "b67cb8d7c915d8ba0dbf847acdacedb9df20d919f71008cf5b624d8a01fb0226"
+        },
+        {
+          "path": "data/chunk-000/file-000.parquet",
+          "size": 3458618,
+          "sha256": "36115bf75605e3fc988927fa4a821251ef209ec09d401bc55f52ea273b049b13"
+        },
+        {
+          "path": "meta/episodes/chunk-000/file-000.parquet",
+          "size": 330871,
+          "sha256": "50db30991b3bd92a12fbbddfc43ff4e1c74f02f3ac676f3f7be6eab94779bc70"
+        },
+        {
+          "path": "meta/hierarchical_annotations.json",
+          "size": 119291,
+          "sha256": "18be51a5dbf1233ecbebd5b5db73570443b7abbe788d5ca30cef20f0471201ed"
+        },
+        {
+          "path": "meta/info.json",
+          "size": 6661,
+          "sha256": "11dabb1f9072238ef794bd34e8f5d84c63d1c0d58a4126197843fdee3cbaf2e0"
+        },
+        {
+          "path": "meta/stats.json",
+          "size": 24643,
+          "sha256": "63f661e902b1e8a323a28a015b062edc09ced0a318ed529c103010f58f3d764e"
+        },
+        {
+          "path": "meta/tasks.parquet",
+          "size": 3326,
+          "sha256": "5e7116dc22578a193d2a5b653ba14fbe9e76a6fdf7c6498d874c89480fbdb839"
+        },
+        {
+          "path": "videos/observation.images.cam_high/chunk-000/file-000.mp4",
+          "size": 189433401,
+          "sha256": "f13b11ec85e3987e85322c8d3f2045f55546f6d040432cb833aabb38b01c4e50"
+        },
+        {
+          "path": "videos/observation.images.cam_high/chunk-000/file-001.mp4",
+          "size": 201152490,
+          "sha256": "da14dd5e05b698751a5ec810f064837cf591d4baa299f1998ef9ae99f5716412"
+        },
+        {
+          "path": "videos/observation.images.cam_high/chunk-000/file-002.mp4",
+          "size": 203436493,
+          "sha256": "c9aafe1d0ec1bdafbd5ed4d14e3d5070af92450c52feba1d84a8ff33131f432e"
+        },
+        {
+          "path": "videos/observation.images.cam_high/chunk-000/file-003.mp4",
+          "size": 195825635,
+          "sha256": "180d27718bc50037b2db49b40b3e5e25e9557102033af68a390594b3df39fc43"
+        },
+        {
+          "path": "videos/observation.images.cam_high/chunk-000/file-004.mp4",
+          "size": 209445541,
+          "sha256": "f7af475d0a14606601ec6da48350ba51fd1e83f695e201f64192d816573e22a3"
+        },
+        {
+          "path": "videos/observation.images.cam_high/chunk-000/file-005.mp4",
+          "size": 62392883,
+          "sha256": "3e6eadaf2b61e1b7fdd143c82c85df4ee28a877064be451c259dcff13790e9ea"
+        },
+        {
+          "path": "videos/observation.images.cam_left_wrist/chunk-000/file-000.mp4",
+          "size": 191946225,
+          "sha256": "2db71060e925ee6370713b1d865960e46f26505f67192754d0c292457da6b33c"
+        },
+        {
+          "path": "videos/observation.images.cam_left_wrist/chunk-000/file-001.mp4",
+          "size": 204960028,
+          "sha256": "942a8191f43f2ef0880ef7fdee24ef4c26521995b6c827c6abd7d079b25430a1"
+        },
+        {
+          "path": "videos/observation.images.cam_left_wrist/chunk-000/file-002.mp4",
+          "size": 205067054,
+          "sha256": "8666a8e50b88b9a8c1106a88a0b5ddfa3992cebe5098d78d0fba54bc9403ca6e"
+        },
+        {
+          "path": "videos/observation.images.cam_left_wrist/chunk-000/file-003.mp4",
+          "size": 199787323,
+          "sha256": "83e4c3960f91c17e2c1967a382a4543f0b647db76123d8f2067744921ec9d24c"
+        },
+        {
+          "path": "videos/observation.images.cam_left_wrist/chunk-000/file-004.mp4",
+          "size": 87303487,
+          "sha256": "43782654ab9dea198b0df44286fcc36cfccac9598e44c2f9c1a333f768c1e66c"
+        },
+        {
+          "path": "videos/observation.images.cam_low/chunk-000/file-000.mp4",
+          "size": 191729691,
+          "sha256": "37bd36426ef578a348b9c1d47877afea5a684b7d8f025ff74b5cf6898b601866"
+        },
+        {
+          "path": "videos/observation.images.cam_low/chunk-000/file-001.mp4",
+          "size": 208342477,
+          "sha256": "142f4a37871a212b4dbacadd92f0b05e186d5a7b7971474141d39c64f9dba836"
+        },
+        {
+          "path": "videos/observation.images.cam_low/chunk-000/file-002.mp4",
+          "size": 205693187,
+          "sha256": "2edfc45e4dbbcbe5c4e25668ec627daaf71e067bc6480bb8e02b0663e348043f"
+        },
+        {
+          "path": "videos/observation.images.cam_low/chunk-000/file-003.mp4",
+          "size": 205639433,
+          "sha256": "eca7abcd8bfc3c5a2d02f5f411fb2282449fa7d50962b341f704a12fac1f3c09"
+        },
+        {
+          "path": "videos/observation.images.cam_low/chunk-000/file-004.mp4",
+          "size": 194789974,
+          "sha256": "df1b2372e57b89e1a88f8d85543766834ed94f876a7f4f1dbb195e716279b514"
+        },
+        {
+          "path": "videos/observation.images.cam_low/chunk-000/file-005.mp4",
+          "size": 80640379,
+          "sha256": "62e9f471907eb48a5585322512cd5c702312cc62d2e76f2279ffd25844f97bea"
+        },
+        {
+          "path": "videos/observation.images.cam_right_wrist/chunk-000/file-000.mp4",
+          "size": 199446618,
+          "sha256": "49a51dc549a1b285dc4552d8a9a77133a62c6cd5c486d106a6a1acd2cb85b5c0"
+        },
+        {
+          "path": "videos/observation.images.cam_right_wrist/chunk-000/file-001.mp4",
+          "size": 195211930,
+          "sha256": "b2e75c654c747d1666decde6e06bba839838432efe36c431313e0182bcac215f"
+        },
+        {
+          "path": "videos/observation.images.cam_right_wrist/chunk-000/file-002.mp4",
+          "size": 206725045,
+          "sha256": "29503fdb357f4a86d5483a7e18651dad34d9278dcd0d876d5746b64ca033aaf3"
+        },
+        {
+          "path": "videos/observation.images.cam_right_wrist/chunk-000/file-003.mp4",
+          "size": 205052500,
+          "sha256": "aff610f64699030cdf6fb22f1ebde450b1aefc59b83c627aab154dd5545180c7"
+        },
+        {
+          "path": "videos/observation.images.cam_right_wrist/chunk-000/file-004.mp4",
+          "size": 204043639,
+          "sha256": "686239ed94e84e00cc21ed82c6fc8e12b86f348b0df8092c487f4753dc08dfd0"
+        },
+        {
+          "path": "videos/observation.images.cam_right_wrist/chunk-000/file-005.mp4",
+          "size": 109066651,
+          "sha256": "1b47ba2844bddf9a2e6244b89666affcf3f58b056f54f8f33f4e10e2da7c0f2e"
+        }
+      ],
+      "video_files_verified": 23
     }
   ],
-  "config_sha256": "607167b61c631e00d4aa343a6ec02b73b89e29e9829664199af4f57718b74ca5",
+  "config_sha256": "5c02e3a1adeae0b5975548b967fdd92b671692acc02b4942e0b6d9879f172bcc",
   "launch_requirements": [
-    "Before launch, reverify latest dataset revisions and all metadata/data/video file hashes; no video download or GPU training performed during configuration preparation."
+    "Before any launch, reverify current dataset heads and all metadata/data/video hashes, pin the verified revisions, and comply with the target host training contract. No GPU training was started during preparation."
   ],
   "hyperparameters": {
     "image_resolution": [
@@ -808,8 +1479,347 @@
     "keep_period": 1000,
     "wandb_entity": "yonglianglu2",
     "project_name": "openpi",
-    "initial_weights": "gs://openpi-assets/checkpoints/pi05_base/params"
+    "initial_weights": "gs://openpi-assets/checkpoints/pi05_base/params",
+    "training_time_rtc": false
   },
   "normalization_file": "assets/eii_hxz_exp_insert_3repo_cam4_fullft_h200x2_448_no_mem_5k_20261119/aloha/norm_stats.json",
-  "normalization_sha256": "ad1cc9de09bc0acb991933a3d9ad296c6931e2a121bb470b0c560d2fcf50404e"
+  "normalization_sha256": "ad1cc9de09bc0acb991933a3d9ad296c6931e2a121bb470b0c560d2fcf50404e",
+  "data_split_policy": "All 150 episodes assigned to train by owner request; no validation or test set.",
+  "language_source": "subtask_instruction",
+  "annotation_revision": "exp_insert_subtask_instruction_v1",
+  "tail_policy": "All frames retained in export; existing last-50-frame exclusion applies only to training starts. No stage-boundary truncation or masking added.",
+  "validation": {
+    "cpu_input_smoke": {
+      "cpu_only": true,
+      "model_training_started": false,
+      "sample_count": 21,
+      "checks": [
+        {
+          "repo_id": "lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_01__lerobot__with-rinse__hierarchical-v1",
+          "phase": "pick",
+          "index": 0,
+          "instruction": "Pick up bottle 3, the pale yellow-green-labeled bottle, with the left arm.",
+          "action_shape": [
+            50,
+            32
+          ],
+          "image_shape": [
+            448,
+            448,
+            3
+          ]
+        },
+        {
+          "repo_id": "lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_01__lerobot__with-rinse__hierarchical-v1",
+          "phase": "align",
+          "index": 110,
+          "instruction": "Align the opening of bottle 3, the pale yellow-green-labeled bottle, with the pipe using the left arm.",
+          "action_shape": [
+            50,
+            32
+          ],
+          "image_shape": [
+            448,
+            448,
+            3
+          ]
+        },
+        {
+          "repo_id": "lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_01__lerobot__with-rinse__hierarchical-v1",
+          "phase": "insert",
+          "index": 200,
+          "instruction": "Insert the opening of bottle 3, the pale yellow-green-labeled bottle, onto the pipe using the left arm.",
+          "action_shape": [
+            50,
+            32
+          ],
+          "image_shape": [
+            448,
+            448,
+            3
+          ]
+        },
+        {
+          "repo_id": "lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_01__lerobot__with-rinse__hierarchical-v1",
+          "phase": "withdraw",
+          "index": 310,
+          "instruction": "Pull bottle 3, the pale yellow-green-labeled bottle, off the pipe using the left arm.",
+          "action_shape": [
+            50,
+            32
+          ],
+          "image_shape": [
+            448,
+            448,
+            3
+          ]
+        },
+        {
+          "repo_id": "lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_01__lerobot__with-rinse__hierarchical-v1",
+          "phase": "place",
+          "index": 350,
+          "instruction": "Place bottle 3, the pale yellow-green-labeled bottle, back on the table using the left arm.",
+          "action_shape": [
+            50,
+            32
+          ],
+          "image_shape": [
+            448,
+            448,
+            3
+          ]
+        },
+        {
+          "repo_id": "lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_01__lerobot__with-rinse__hierarchical-v1",
+          "phase": "release",
+          "index": 430,
+          "instruction": "Open the left gripper to release bottle 3, the pale yellow-green-labeled bottle.",
+          "action_shape": [
+            50,
+            32
+          ],
+          "image_shape": [
+            448,
+            448,
+            3
+          ]
+        },
+        {
+          "repo_id": "lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_01__lerobot__with-rinse__hierarchical-v1",
+          "phase": "return_home",
+          "index": 460,
+          "instruction": "Return the left arm to the home position.",
+          "action_shape": [
+            50,
+            32
+          ],
+          "image_shape": [
+            448,
+            448,
+            3
+          ]
+        },
+        {
+          "repo_id": "lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_02__lerobot__with-rinse__hierarchical-v1",
+          "phase": "pick",
+          "index": 0,
+          "instruction": "Pick up bottle 1, the clear unlabeled plastic bottle, with the left arm.",
+          "action_shape": [
+            50,
+            32
+          ],
+          "image_shape": [
+            448,
+            448,
+            3
+          ]
+        },
+        {
+          "repo_id": "lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_02__lerobot__with-rinse__hierarchical-v1",
+          "phase": "align",
+          "index": 180,
+          "instruction": "Align the opening of bottle 1, the clear unlabeled plastic bottle, with the pipe using the left arm.",
+          "action_shape": [
+            50,
+            32
+          ],
+          "image_shape": [
+            448,
+            448,
+            3
+          ]
+        },
+        {
+          "repo_id": "lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_02__lerobot__with-rinse__hierarchical-v1",
+          "phase": "insert",
+          "index": 340,
+          "instruction": "Insert the opening of bottle 1, the clear unlabeled plastic bottle, onto the pipe using the left arm.",
+          "action_shape": [
+            50,
+            32
+          ],
+          "image_shape": [
+            448,
+            448,
+            3
+          ]
+        },
+        {
+          "repo_id": "lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_02__lerobot__with-rinse__hierarchical-v1",
+          "phase": "withdraw",
+          "index": 560,
+          "instruction": "Pull bottle 1, the clear unlabeled plastic bottle, off the pipe using the left arm.",
+          "action_shape": [
+            50,
+            32
+          ],
+          "image_shape": [
+            448,
+            448,
+            3
+          ]
+        },
+        {
+          "repo_id": "lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_02__lerobot__with-rinse__hierarchical-v1",
+          "phase": "place",
+          "index": 620,
+          "instruction": "Place bottle 1, the clear unlabeled plastic bottle, back on the table using the left arm.",
+          "action_shape": [
+            50,
+            32
+          ],
+          "image_shape": [
+            448,
+            448,
+            3
+          ]
+        },
+        {
+          "repo_id": "lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_02__lerobot__with-rinse__hierarchical-v1",
+          "phase": "release",
+          "index": 740,
+          "instruction": "Open the left gripper to release bottle 1, the clear unlabeled plastic bottle.",
+          "action_shape": [
+            50,
+            32
+          ],
+          "image_shape": [
+            448,
+            448,
+            3
+          ]
+        },
+        {
+          "repo_id": "lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_02__lerobot__with-rinse__hierarchical-v1",
+          "phase": "return_home",
+          "index": 780,
+          "instruction": "Return the left arm to the home position.",
+          "action_shape": [
+            50,
+            32
+          ],
+          "image_shape": [
+            448,
+            448,
+            3
+          ]
+        },
+        {
+          "repo_id": "lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_03__lerobot__with-rinse__hierarchical-v1",
+          "phase": "pick",
+          "index": 0,
+          "instruction": "Pick up bottle 3, the pale yellow-green-labeled bottle, with the left arm.",
+          "action_shape": [
+            50,
+            32
+          ],
+          "image_shape": [
+            448,
+            448,
+            3
+          ]
+        },
+        {
+          "repo_id": "lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_03__lerobot__with-rinse__hierarchical-v1",
+          "phase": "align",
+          "index": 130,
+          "instruction": "Align the opening of bottle 3, the pale yellow-green-labeled bottle, with the pipe using the left arm.",
+          "action_shape": [
+            50,
+            32
+          ],
+          "image_shape": [
+            448,
+            448,
+            3
+          ]
+        },
+        {
+          "repo_id": "lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_03__lerobot__with-rinse__hierarchical-v1",
+          "phase": "insert",
+          "index": 280,
+          "instruction": "Insert the opening of bottle 3, the pale yellow-green-labeled bottle, onto the pipe using the left arm.",
+          "action_shape": [
+            50,
+            32
+          ],
+          "image_shape": [
+            448,
+            448,
+            3
+          ]
+        },
+        {
+          "repo_id": "lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_03__lerobot__with-rinse__hierarchical-v1",
+          "phase": "withdraw",
+          "index": 560,
+          "instruction": "Pull bottle 3, the pale yellow-green-labeled bottle, off the pipe using the left arm.",
+          "action_shape": [
+            50,
+            32
+          ],
+          "image_shape": [
+            448,
+            448,
+            3
+          ]
+        },
+        {
+          "repo_id": "lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_03__lerobot__with-rinse__hierarchical-v1",
+          "phase": "place",
+          "index": 670,
+          "instruction": "Place bottle 3, the pale yellow-green-labeled bottle, back on the table using the left arm.",
+          "action_shape": [
+            50,
+            32
+          ],
+          "image_shape": [
+            448,
+            448,
+            3
+          ]
+        },
+        {
+          "repo_id": "lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_03__lerobot__with-rinse__hierarchical-v1",
+          "phase": "release",
+          "index": 760,
+          "instruction": "Open the left gripper to release bottle 3, the pale yellow-green-labeled bottle.",
+          "action_shape": [
+            50,
+            32
+          ],
+          "image_shape": [
+            448,
+            448,
+            3
+          ]
+        },
+        {
+          "repo_id": "lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_03__lerobot__with-rinse__hierarchical-v1",
+          "phase": "return_home",
+          "index": 800,
+          "instruction": "Return the left arm to the home position.",
+          "action_shape": [
+            50,
+            32
+          ],
+          "image_shape": [
+            448,
+            448,
+            3
+          ]
+        }
+      ]
+    },
+    "training_unit_tests_passed": 12,
+    "platform_annotation_tests_passed": 9,
+    "platform_regression_tests_passed": 33,
+    "platform_build_passed": true,
+    "platform_desktop_mobile_page_errors": 0,
+    "platform_backend_commit": "2039d5d6",
+    "training_source_sha256": {
+      "src/openpi/data/transforms.py": "fd89efb5e4f43d50d1cb941e302b655261ad4fcf4834c430b7701b9e346c4beb",
+      "src/openpi/training/config.py": "5c02e3a1adeae0b5975548b967fdd92b671692acc02b4942e0b6d9879f172bcc"
+    }
+  }
 }

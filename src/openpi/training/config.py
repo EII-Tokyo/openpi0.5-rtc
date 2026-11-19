@@ -3006,11 +3006,12 @@ _CONFIGS.append(
         freeze_filter=nnx.Nothing(),
         data=LeRobotAlohaDataConfig(
             repo_ids=[
-                'lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_01__lerobot__with-rinse',
-                'lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_02__lerobot__with-rinse',
-                'lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_03__lerobot__with-rinse',
+                'lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_01__lerobot__with-rinse__hierarchical-v1',
+                'lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_02__lerobot__with-rinse__hierarchical-v1',
+                'lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_03__lerobot__with-rinse__hierarchical-v1',
             ],
             transform_pipeline=_transforms.AlohaTransformPipeline(
+                language_source="subtask_instruction",
                 include_low=True,
                 use_good_bad_action_prompt=False,
                 image_resolution=(448, 448),
