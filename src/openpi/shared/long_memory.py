@@ -20,7 +20,7 @@ class LongMemoryConfig:
     max_stale_seconds:float=9.0
     reset_on_home:bool=True
     split_seed:int=20261119
-    summary_cache_path:str='/workspace/long-memory-hierarchy-20261119/completed-step-audit/teacher.json'
+    summary_cache_path:str='/workspace/long-memory-hierarchy-20261119/completed-step-dropout-audit/teacher.json'
 
     def __post_init__(self):
         if min(self.update_seconds,self.video_seconds,self.video_hz,self.max_memory_chars)<=0:
@@ -87,13 +87,25 @@ class MemoryTimeline:
         return MemoryState() if i<0 else MemoryState(**self.updates[i]['state'])
 
 
+def memory_augmentation(timeline,time_s,settings,*,training,rng=None,clean=None):
+    """Delay/drop only memory. Identity and the current task are never corrupted."""
+    clean=timeline.at(time_s) if clean is None else clean
+    if not training:return clean,clean,{'delay_seconds':0.0,'memory_source_time_s':time_s,'dropout_applied':False}
+    if rng is None:raise ValueError('Training corruption requires an RNG')
+    source=math.floor(time_s/settings.update_seconds)*settings.update_seconds
+    extra=0.0
+    if rng.random()<settings.stale_probability:
+        extra=rng.uniform(0,settings.max_stale_seconds)
+        source-=extra
+    source=max(0.0,source)  # Never query before EP start or blank the current instruction.
+    delayed=dataclasses.replace(clean,memory=timeline.at(source).memory)
+    augmented=drop_memory(delayed,rng,empty_probability=settings.empty_probability,partial_probability=settings.partial_probability)
+    assert augmented.current_task==clean.current_task and augmented.bottle_description==clean.bottle_description
+    return delayed,augmented,{'delay_seconds':max(0.0,time_s-source),'extra_delay_seconds':extra,'memory_source_time_s':source,'dropout_applied':augmented.memory!=delayed.memory}
+
+
 def condition_at(timeline,time_s,settings,*,training,rng=None):
-    query=math.floor(time_s/settings.update_seconds)*settings.update_seconds
-    if training:
-        if rng is None:raise ValueError('Training corruption requires an RNG')
-        if rng.random()<settings.stale_probability:query-=rng.uniform(0,settings.max_stale_seconds)
-    state=timeline.at(query)
-    return drop_memory(state,rng,empty_probability=settings.empty_probability,partial_probability=settings.partial_probability) if training else state
+    return memory_augmentation(timeline,time_s,settings,training=training,rng=rng)[1]
 
 
 def parse_annotation(raw) -> tuple[str, str, str] | None:

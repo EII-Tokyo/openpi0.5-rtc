@@ -67,8 +67,15 @@ def main(a):
                     'episode_index':episode,'time_s':now,'task':raw['task'],'current_images':current,
                     'annotation':dict(zip(('bottle_description','memory_annotation','current_task'),parse_annotation(raw['subtask']) or ('','',''))),
                     'teacher_state':json.loads(encode_memory(native.timelines[(dataset_index,episode)].at(now))),
-                    'actual_training_memory':json.loads(raw['long_memory'])}
-            output=transform(raw)
+                    'actual_training_memory':json.loads(raw['long_memory']),
+                    'before_augmentation':json.loads(raw['long_memory_before_augmentation']),
+                    'before_dropout':json.loads(raw['long_memory_before_dropout']),
+                    'augmentation':raw['memory_augmentation']}
+            before=transform({**raw,'long_memory':raw['long_memory_before_augmentation']})
+            output=transform(dict(raw))
+            assert record['before_augmentation']['current_task']==record['actual_training_memory']['current_task']==record['annotation']['current_task']
+            assert record['before_augmentation']['bottle_description']==record['actual_training_memory']['bottle_description']
+            record['model_prompt_before_augmentation']=tokenizer._tokenizer.decode(before['tokenized_prompt'][before['tokenized_prompt_mask']].tolist())
             tokens=output['tokenized_prompt'];mask=output['tokenized_prompt_mask']
             record['model_prompt']=tokenizer._tokenizer.decode(tokens[mask].tolist());record['model_token_count']=int(mask.sum())
             assert all(x not in record['model_prompt'] for x in ('Current time:', 'incomplete or stale', '\"events\"', '\"intent\"', '\"observation\"'))
@@ -81,9 +88,11 @@ def main(a):
                 window.append({'time_s':float(timestamps[j]),'images':images(history,li) if history is not None else current})
             record['video_frames']=window;records.append(record)
             print('CAPTURE',i+1,'frame',record['frame_index'],'tokens',record['model_token_count'],flush=True)
-            return output
+            return {"before":before,"after":output}
     loader=TorchDataLoader(NativeAuditSubset(),local_batch_size=1,shuffle=False,num_workers=0,num_batches=100,seed=seed)
-    for batch in loader:assert batch['tokenized_prompt'].shape==(1,1024)
+    for batch in loader:
+        assert batch['before']['tokenized_prompt'].shape==(1,1024)
+        assert batch['after']['tokenized_prompt'].shape==(1,1024)
     assert len(records)==100 and len({r['frame_index'] for r in records})==100
     (a.output/'samples.jsonl').write_text(''.join(json.dumps(r,ensure_ascii=False)+'\n' for r in records))
     (a.output/'summary.json').write_text(json.dumps({'chosen':chosen,'samples':len(records),'native_loader':'openpi.data.dataloaders.TorchDataLoader',

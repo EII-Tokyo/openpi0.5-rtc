@@ -1,12 +1,13 @@
 """Join annotation-derived causal memory to the ACTUAL returned LeRobot sample."""
 
 import random
+import dataclasses
 import json
 from pathlib import Path
 
 import numpy as np
 
-from openpi.shared.long_memory import MemoryTimeline, condition_at, encode_memory, episode_split
+from openpi.shared.long_memory import MemoryTimeline, condition_at, encode_memory, episode_split, parse_annotation, memory_augmentation
 
 
 class LongMemoryDataset:
@@ -63,7 +64,15 @@ class LongMemoryDataset:
         time_s = float(sample["timestamp"])
         if key not in self.timelines:
             raise ValueError('This EP has no verified summary labels; prepare its cache before training')
-        memory = condition_at(self.timelines[key], time_s, self.settings, training=True, rng=random)
+        clean=self.timelines[key].at(time_s)
+        # The instruction is this frame's actual annotation, independent of memory corruption.
+        fields=parse_annotation(sample['subtask'])
+        if fields is None:raise ValueError('Sample has no annotated current task')
+        clean=dataclasses.replace(clean,bottle_description=fields[0] or clean.bottle_description,current_task=fields[2])
+        delayed,memory,augmentation=memory_augmentation(self.timelines[key],time_s,self.settings,training=True,rng=random,clean=clean)
+        sample['long_memory_before_augmentation']=encode_memory(clean)
+        sample['long_memory_before_dropout']=encode_memory(delayed)
+        sample['memory_augmentation']=augmentation
         from openpi.shared.completed_step_memory import parse_completed_memory
         parse_completed_memory(memory.memory)
         sample["long_memory"] = encode_memory(memory)

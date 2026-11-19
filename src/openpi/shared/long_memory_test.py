@@ -36,12 +36,12 @@ def test_dropout_removes_arbitrary_summary_sentences_without_changing_task_or_id
     assert .18<sum(not x.memory for x in draws)/len(draws)<.23
 
 
-def test_lag_keeps_old_summary_and_old_task_as_one_consistent_update():
+def test_lag_changes_only_memory_not_identity_or_current_task():
     a=MemoryState('b','The bottle is on the table.','Pick up')
     b=MemoryState('b','The bottle is held and capped.','Unscrew')
     t=MemoryTimeline([{'observed_through_s':0,'state':dataclasses.asdict(a)},{'observed_through_s':3,'state':dataclasses.asdict(b)}])
     settings=LongMemoryConfig(empty_probability=0,partial_probability=0,stale_probability=1,max_stale_seconds=3)
-    assert condition_at(t,4,settings,training=True,rng=random.Random(1))==a
+    assert condition_at(t,4,settings,training=True,rng=random.Random(1))==dataclasses.replace(b,memory=a.memory)
     assert condition_at(t,4,settings,training=False)==b
 
 
@@ -49,3 +49,11 @@ def test_video_selection_is_causal_and_episode_local():
     times=[0,.2,.6,1.1,2.2,3.1,3.8]
     assert all(times[i]<=3.5 for i in video_indices(times,3.5))
     assert video_indices([0,.02],0)==(0,)
+
+
+def test_start_of_episode_lag_and_full_dropout_never_blank_current_task():
+    state=MemoryState('b','I picked up the bottle with my left gripper.','Adjust bottle position and pick up with left hand')
+    t=MemoryTimeline([{'observed_through_s':0,'state':dataclasses.asdict(state)}])
+    settings=LongMemoryConfig(empty_probability=1,partial_probability=0,stale_probability=1,max_stale_seconds=9)
+    after=condition_at(t,1,settings,training=True,rng=random.Random(4))
+    assert after.memory=='' and after.current_task==state.current_task and after.bottle_description=='b'

@@ -1,0 +1,11 @@
+Current-task and input-audit correction
+
+The earlier screenshot had two distinct defects. First, the report labeled the raw human bottle_state as Memory. That field is a scene-state reference, not accumulated completed progress; the label is now explicit. Second, simulated memory lag could query before EP time zero and return a completely empty MemoryState, blanking the current task. That was not memory dropout.
+
+The native dataset now derives the current task from the actual current-frame annotation. Bottle identity and current task are preserved through augmentation. Delay is clamped to EP start and affects memory only. Dropout affects memory only. Each raw sample retains clean state, delayed/pre-dropout state, augmented state and augmentation provenance. The audit sends clean and augmented branches through the same native transforms and actual TorchDataLoader collation, and retains both decoded prompts.
+
+Same100frame indices,100pairednativebatches verified. Current tasks match each other and the actual current-frame annotation in all100rows. Robot state text is unchanged in all100pairs. All1605current/historyimagebytes match the previous same-frame audit. The opening sample has empty Memory and Current task='Adjust bottle position and pick up with left hand' both before and after augmentation. Accumulated labels now update at the exact explicit annotation-state boundaries, independently of simulated memory update delay. Missing success evidence is never invented.
+
+The corrected100frame report is artifacts/completed100-dropout/review.html. It reuses the unchanged same-image prior visual GPT replies and clearly labels that reuse; no new100-call API run was made for this DataLoader/report-only correction.
+
+Independent cap diagnostic:20distinctEPs across16repos,10attached and10not_attached. Four synchronized current-camera source frames per request,640x480decodedRGBsavedaslosslessPNG. No resize,crop,mosaic,JPEGre-encoding,history,memory or label leakage. GPT6Luna, reasoningnone, detailhigh. Attached9/10; not_attached5/10; overall14/20=70%; oneunknown countedincorrect; nofailedsamples.20returnedresponses with knownusagecost$0.0046435. Results are relative to human labels and remain a small diagnostic, not a general accuracy guarantee. Review: artifacts/cap20-fourcam-original/review.html.
