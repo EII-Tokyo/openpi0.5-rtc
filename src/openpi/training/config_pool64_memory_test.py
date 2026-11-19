@@ -12,3 +12,5 @@ def test_literal_pool64_configuration_is_registered_and_keeps_effective_batch():
  assert ast.literal_eval(kw['resume']) and not ast.literal_eval(kw['overwrite'])
  assert node.lineno < source[:source.index('_CONFIGS_DICT =')].count('\n')+1
  assert 'max_token_len=384' in ast.get_source_segment(source,kw['data'])
+
+ assert 'bottle_description_dropout_probability=0.2' in ast.get_source_segment(source,kw['data'])

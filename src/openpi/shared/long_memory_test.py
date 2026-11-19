@@ -44,9 +44,9 @@ def test_no_old_timestamp_lookup_and_empty_memory_keeps_task_unless_task_dropout
     a=MemoryState('b','','Pick up')
     b=MemoryState('b','I picked up the bottle with my left gripper.','Unscrew')
     t=MemoryTimeline([{'observed_through_s':0,'state':dataclasses.asdict(a),'completed_records':[]}, {'observed_through_s':3.17,'state':dataclasses.asdict(b),'completed_records':[b.memory]}])
-    settings=LongMemoryConfig(memory_dropout_probability=0,subtask_dropout_probability=0)
+    settings=LongMemoryConfig(memory_dropout_probability=0,subtask_dropout_probability=0,bottle_description_dropout_probability=0)
     assert condition_at(t,3.18,settings,training=True,rng=random.Random(2))==b
-    settings=LongMemoryConfig(memory_dropout_probability=1,subtask_dropout_probability=0)
+    settings=LongMemoryConfig(memory_dropout_probability=1,subtask_dropout_probability=0,bottle_description_dropout_probability=0)
     assert condition_at(t,0,settings,training=True,rng=random.Random(2))==a
 
 
@@ -77,3 +77,27 @@ def test_annotation_reads_only_identity_and_subtask():
     assert parse_annotation({'bottle_description':['Bottle A'],'subtask':'Unscrew cap','unrelated':object()})==('Bottle A','Unscrew cap')
     assert parse_annotation({'bottle_description':'Bottle A','subtask':''}) is None
     assert parse_annotation({'subtask':'Return to initial pose'})==('','Return to initial pose')
+
+
+@pytest.mark.parametrize('md,td,bd',[(m,t,b) for m in (0,1) for t in (0,1) for b in (0,1)])
+def test_three_independent_dropout_controls_preserve_other_fields(md,td,bd):
+    from openpi.shared.long_memory import memory_augmentation
+    records=['completed first stage','completed second stage']
+    state=MemoryState('green bottle',' '.join(records),'next task')
+    timeline=MemoryTimeline([{'observed_through_s':0,'state':dataclasses.asdict(state),'completed_records':records}])
+    settings=LongMemoryConfig(memory_dropout_probability=md,subtask_dropout_probability=td,bottle_description_dropout_probability=bd)
+    clean,after,audit=memory_augmentation(timeline,0,settings,training=True,rng=random.Random(42))
+    assert clean==state
+    assert after.memory==(records[0] if md else state.memory)
+    assert after.current_task==('' if td else state.current_task)
+    assert after.bottle_description==('' if bd else state.bottle_description)
+    assert audit['bottle_description_dropout_applied']==bool(bd)
+    assert audit['bottle_description_after']==after.bottle_description
+    assert condition_at(timeline,0,settings,training=False)==state
+
+def test_empty_description_is_not_falsely_counted_as_a_removed_description():
+    from openpi.shared.long_memory import memory_augmentation
+    state=MemoryState('','','next task');timeline=MemoryTimeline([{'observed_through_s':0,'state':dataclasses.asdict(state),'completed_records':[]}])
+    _,after,audit=memory_augmentation(timeline,0,LongMemoryConfig(bottle_description_dropout_probability=1),training=True,rng=random.Random(1))
+    assert audit['bottle_description_dropout_draw'] and not audit['bottle_description_dropout_applied']
+    assert after.bottle_description==''

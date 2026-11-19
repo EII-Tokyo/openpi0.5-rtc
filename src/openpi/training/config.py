@@ -3540,6 +3540,7 @@ _CONFIGS.append(
                     max_memory_chars=1200,
                     memory_dropout_probability=0.2,
                     subtask_dropout_probability=0.2,
+                    bottle_description_dropout_probability=0.2,
                     split_seed=20261119,
                     summary_cache_path='/workspace/long-memory-twist-448-20261119/artifacts/teacher.json',
                 ),
@@ -3560,7 +3561,7 @@ _CONFIGS.append(
         overwrite=False,
         resume=True,
         wandb_enabled=True,
-        policy_metadata={'conditioning': 'nine_tasks_left_opening_cap_cleanup_v4_latestdrop20_currenttaskdrop20', 'source_config': 'eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo', 'dataset_mixture': 'free-spinning5_plus_aug20_aug24_aug25', 'source103_base': 'ca82780', 'native_config': True, 'image_history': False, 'joint_position_history': False},
+        policy_metadata={'conditioning': 'nine_tasks_left_opening_cap_cleanup_v4_latestdrop20_currenttaskdrop20_descriptiondrop20', 'source_config': 'eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo', 'dataset_mixture': 'free-spinning5_plus_aug20_aug24_aug25', 'source103_base': 'ca82780', 'native_config': True, 'image_history': False, 'joint_position_history': False},
         fsdp_devices=2,
     )
 )

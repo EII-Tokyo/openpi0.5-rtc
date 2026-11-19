@@ -16,6 +16,7 @@ class LongMemoryConfig:
     max_memory_chars:int=1200
     memory_dropout_probability:float=.2
     subtask_dropout_probability:float=.2
+    bottle_description_dropout_probability:float=.2
     reset_on_home:bool=True
     split_seed:int=20261119
     summary_cache_path:str='/workspace/long-memory-hierarchy-20261119/completed-step-dropout-audit/teacher.json'
@@ -23,7 +24,7 @@ class LongMemoryConfig:
     def __post_init__(self):
         if min(self.update_seconds,self.video_seconds,self.video_hz,self.max_memory_chars)<=0:
             raise ValueError('Invalid summary/video budget')
-        if any(not 0 <= p <= 1 for p in (self.memory_dropout_probability, self.subtask_dropout_probability)):
+        if any(not 0 <= p <= 1 for p in (self.memory_dropout_probability, self.subtask_dropout_probability, self.bottle_description_dropout_probability)):
             raise ValueError('Invalid dropout probability')
 
 @dataclasses.dataclass(frozen=True)
@@ -55,13 +56,14 @@ def memory_prompt(state:MemoryState)->str:
     return f'Bottle description: {state.bottle_description}\nMemory: {state.memory}\nCurrent task: {state.current_task}'
 
 
-def drop_memory(state:MemoryState, records, *, memory_drop=False, subtask_drop=False)->MemoryState:
+def drop_memory(state:MemoryState, records, *, memory_drop=False, subtask_drop=False, bottle_description_drop=False)->MemoryState:
     """Remove ONLY the latest completed record; independently blank the current task."""
     if ' '.join(records) != state.memory:
         raise ValueError('Completed records must reconstruct the exact clean memory')
     return dataclasses.replace(state,
         memory=' '.join(records[:-1]) if memory_drop and records else state.memory,
-        current_task='' if subtask_drop else state.current_task)
+        current_task='' if subtask_drop else state.current_task,
+        bottle_description='' if bottle_description_drop else state.bottle_description)
 
 
 class MemoryTimeline:
@@ -104,10 +106,16 @@ def memory_augmentation(timeline,time_s,settings,*,training,rng=None,clean=None)
     if training and rng is None:raise ValueError('Training dropout requires an RNG')
     md=training and rng.random()<settings.memory_dropout_probability
     td=training and rng.random()<settings.subtask_dropout_probability
-    augmented=drop_memory(clean,records,memory_drop=md,subtask_drop=td)
+    bd=training and rng.random()<settings.bottle_description_dropout_probability
+    augmented=drop_memory(clean,records,memory_drop=md,subtask_drop=td,bottle_description_drop=bd)
     return clean,augmented,{
         'memory_dropout_probability':settings.memory_dropout_probability,
         'subtask_dropout_probability':settings.subtask_dropout_probability,
+        'bottle_description_dropout_probability':settings.bottle_description_dropout_probability,
+        'bottle_description_dropout_draw':bool(bd),
+        'bottle_description_dropout_applied':bool(bd and clean.bottle_description),
+        'bottle_description_before':clean.bottle_description,
+        'bottle_description_after':augmented.bottle_description,
         'memory_dropout_draw':bool(md),'subtask_dropout_draw':bool(td),
         'memory_dropout_applied':bool(md and records),
         'subtask_dropout_applied':bool(td and clean.current_task),
