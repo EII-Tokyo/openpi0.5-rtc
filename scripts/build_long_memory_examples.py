@@ -10,7 +10,8 @@ from openpi.shared.long_memory import LongMemoryConfig,MemoryTimeline,condition_
 
 def build(repo_list,root,cache_path,output):
     cache=json.loads(cache_path.read_text());assert cache['schema_version']==2
-    if cache.get('task_catalog_version')!='merged_pickup_conditional_return_v2':raise ValueError('Regenerate canonical task caches before building examples')
+    from openpi.shared.completed_memory_labels import TASK_CATALOG_VERSION
+    if cache.get('task_catalog_version')!=TASK_CATALOG_VERSION:raise ValueError('Regenerate canonical task caches before building examples')
     weights=collections.Counter(repo_list);episodes=[];missing=[]
     for repo,weight in weights.items():
         grouped=collections.defaultdict(list)

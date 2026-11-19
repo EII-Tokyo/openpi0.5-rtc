@@ -17,7 +17,8 @@ class LongMemoryDataset:
         self.timelines = {}
         cache=json.loads(Path(settings.summary_cache_path).read_text())
         if cache.get('schema_version')!=2:raise ValueError('Summary cache v2 required')
-        if cache.get('task_catalog_version')!='merged_pickup_conditional_return_v2':
+        from openpi.shared.completed_memory_labels import TASK_CATALOG_VERSION
+        if cache.get('task_catalog_version')!=TASK_CATALOG_VERSION:
             raise ValueError('Regenerate memory cache with merged pickup and verified return contexts')
         self.summary_cache=cache['episodes']
         masks = []
@@ -30,7 +31,7 @@ class LongMemoryDataset:
             times = np.asarray(table["timestamp"], dtype=float)
             labels = list(table["subtask"])
             eligible = np.asarray(table["is_for_training"], dtype=bool) if "is_for_training" in table.column_names else np.ones(len(episodes), bool)
-            mask = eligible.copy()
+            mask = eligible & np.asarray([parse_annotation(label) is not None for label in labels], dtype=bool)
             # Consecutive runs, not episode ID alone, protect against malformed concatenations.
             boundaries = np.r_[0, np.flatnonzero(np.diff(episodes)) + 1, len(episodes)]
             for start, end in zip(boundaries[:-1], boundaries[1:], strict=True):
