@@ -3051,9 +3051,9 @@ _CONFIGS.append(
 # Native long-memory pilot; source repo multiplicities preserved verbatim.
 _CONFIGS.append(
     TrainConfig(
-        name='eii_twist_cam3_fullft_25repo_h100x2_224_longmem3s_drop_bs16ga16_5k_20261119',
+        name='eii_twist_cam3_fullft_25repo_h100x2_224_summarymem3s_drop_bs16ga16_5k_20261119',
         project_name='openpi',
-        exp_name='twist_longmem3s_missing_stale_seed42_pilot_20261119',
+        exp_name='twist_summarymem3s_missing_stale_seed42_pilot_20261119',
         model=pi0_config.Pi0Config(
             image_resolution=(224, 224),
             max_token_len=1024,
@@ -3139,7 +3139,7 @@ _CONFIGS.append(
                 use_quantile_norm=True,
                 video_memory_num_frames=1,
                 video_memory_stride_seconds=1.0,
-                long_memory=_transforms.LongMemoryConfig(update_seconds=3.0, video_seconds=3.0, video_hz=2.0, max_entries=6, empty_probability=0.2, partial_probability=0.3, stale_probability=0.2, max_stale_seconds=9.0, split_seed=20261119),
+                long_memory=_transforms.LongMemoryConfig(update_seconds=3.0, video_seconds=3.0, video_hz=2.0, max_memory_chars=1200, empty_probability=0.2, partial_probability=0.3, stale_probability=0.2, max_stale_seconds=9.0, split_seed=20261119),
                 adapt_to_pi=True,
                 use_delta_joint_actions=True,
                 action_dim=32,
@@ -3157,7 +3157,7 @@ _CONFIGS.append(
         overwrite=False,
         resume=False,
         wandb_enabled=True,
-        policy_metadata={'conditioning': 'causal_long_memory_v1', 'task_scope': 'twist_only', 'source_config': 'eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo'},
+        policy_metadata={'conditioning': 'compact_summary_memory_v2', 'task_scope': 'twist_only', 'source_config': 'eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo'},
         fsdp_devices=2,
     )
 )
@@ -3166,9 +3166,9 @@ _CONFIGS.append(
 # Bounded first-stage pilot: one final checkpoint; source repo multiplicities preserved verbatim.
 _CONFIGS.append(
     TrainConfig(
-        name='eii_twist_cam3_fullft_25repo_h100x2_224_longmem3s_drop_bs16ga16_500step_pilot_20261119',
+        name='eii_twist_cam3_fullft_25repo_h100x2_224_summarymem3s_drop_bs16ga16_500step_pilot_20261119',
         project_name='openpi',
-        exp_name='twist_longmem3s_missing_stale_seed42_stage1_500_20261119',
+        exp_name='twist_summarymem3s_missing_stale_seed42_stage1_500_20261119',
         model=pi0_config.Pi0Config(
             image_resolution=(224, 224),
             max_token_len=1024,
@@ -3254,7 +3254,7 @@ _CONFIGS.append(
                 use_quantile_norm=True,
                 video_memory_num_frames=1,
                 video_memory_stride_seconds=1.0,
-                long_memory=_transforms.LongMemoryConfig(update_seconds=3.0, video_seconds=3.0, video_hz=2.0, max_entries=6, empty_probability=0.2, partial_probability=0.3, stale_probability=0.2, max_stale_seconds=9.0, split_seed=20261119),
+                long_memory=_transforms.LongMemoryConfig(update_seconds=3.0, video_seconds=3.0, video_hz=2.0, max_memory_chars=1200, empty_probability=0.2, partial_probability=0.3, stale_probability=0.2, max_stale_seconds=9.0, split_seed=20261119),
                 adapt_to_pi=True,
                 use_delta_joint_actions=True,
                 action_dim=32,
@@ -3272,7 +3272,7 @@ _CONFIGS.append(
         overwrite=False,
         resume=False,
         wandb_enabled=True,
-        policy_metadata={'conditioning': 'causal_long_memory_v1', 'task_scope': 'twist_only', 'source_config': 'eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo'},
+        policy_metadata={'conditioning': 'compact_summary_memory_v2', 'task_scope': 'twist_only', 'source_config': 'eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo'},
         fsdp_devices=2,
     )
 )

@@ -1,0 +1,16 @@
+Compact summary memory v2 — review candidate, not an active training migration
+
+Reference: https://www.pi.website/download/Mem.pdf, sections III-A/III-B and IV-A.
+The language memory is a rewritten and compressed natural-language summary, updated recurrently from previous summary and current evidence. The current subtask is separate. Repeated instructions or attempts are not accumulated as completed progress.
+
+Policy input has three separate strings: bottle_description, memory, current_task. Current time, event lists, per-event timestamps and the incomplete/stale reminder are absent. The overall Task and native robot State remain. Our deliberate extension passes the summary to the low level too, as requested; the paper's factorization primarily passes the generated subtask plus the short observation window to the low level. The paper's video encoder is not implemented here.
+
+Annotation teacher and visual predictor are independent. Teacher labels use only human evidence at or before the update, plus the previous summary. The visual model receives only recent images, the global goal and its own previous output. No human labels are included in visual API requests.
+
+Dropout now removes semantic sentences from the one summary, not serialized event objects: 50% unchanged, 30% partial removal (when two or more sentences exist), 20% empty. Identity and current task stay separate. Periodic3-second updates and additional20% 0–9s lag can yield stale summaries/tasks. This is our robustness design, not a dropout recipe claimed from MEM.
+
+Cycle completion is not implied by an instruction to return home, an episode boundary, good_bad_action=normal or an empty table. The visual supervisor clears all fields and the old video after observing empty grippers parked home. Each external EP reset independently clears state. A label-only teacher does not invent home completion where annotations lack that flag.
+
+The review cache contains only the original selected EP. Full training requires prepared/verified summaries for every selected EP. Missing labels fail visibly; the all-repo high-level manifest builder checks completeness before writing. The active Vast event-format source and its ongoing training were not changed. Do not resume that checkpoint and claim it was trained with this new prompt format. The new100-frame capture uses nativeTorchDataLoader on CPU, no monkeypatches or GPU test training.
+
+Old measurement scripts are archived under reports/legacy_event_memory_v1 and belong to the previous source revision. Use scripts/regenerate_summary_memory_audit.py and scripts/build_summary_memory_review.py for this version.

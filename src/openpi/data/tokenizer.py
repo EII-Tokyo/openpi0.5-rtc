@@ -32,7 +32,6 @@ class PaligemmaTokenizer:
         rating_is_valid=None,
         camera_low_position=None,
         long_memory: str | None = None,
-        memory_time_s: float | None = None,
         joint_position_history=None,
         joint_history_settings=None,
     ) -> tuple[np.ndarray, np.ndarray]:
@@ -40,9 +39,8 @@ class PaligemmaTokenizer:
         cleaned_text = camera_low_prompt(cleaned_text, camera_low_position)
         cleaned_text += prompt_metadata_suffix(operator, rating, rating_is_valid)
         if long_memory is not None:
-            if memory_time_s is None:
-                raise ValueError("Long memory requires an episode-relative current time")
-            cleaned_text += f"; Current time: {memory_time_s:.3f}s; Long memory (incomplete or stale; verify visually): {long_memory}"
+            from openpi.shared.long_memory import decode_memory, memory_prompt
+            cleaned_text += "\n" + memory_prompt(decode_memory(long_memory))
         if state is not None:
             # This is the Pi05 format, where the state is part of the discrete language input.
             discretized_state = np.digitize(state, bins=np.linspace(-1, 1, 256 + 1)[:-1]) - 1

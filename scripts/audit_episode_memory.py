@@ -16,9 +16,9 @@ def main(a):
     from openpi.data.datasets import create_torch_dataset
     from openpi.data.transforms import compose
     from openpi.data.dataloaders import TorchDataLoader
-    from openpi.shared.long_memory import encode_memory,parse_annotation,video_indices
+    from openpi.shared.long_memory import encode_memory,parse_annotation,video_indices,memory_prompt
     from openpi_client.runtime.long_memory_high_level import image_uint8
-    prior=a.output/'chosen-episode.json'
+    prior=a.chosen if a.chosen is not None else a.output/'chosen-episode.json'
     seed=a.seed if a.seed is not None else (json.loads(prior.read_text())['seed'] if prior.exists() else secrets.randbits(48))
     rng=random.Random(seed);random.seed(seed);np.random.seed(seed%2**32)
     a.output.mkdir(parents=True,exist_ok=True)
@@ -37,6 +37,7 @@ def main(a):
     ep_ids=np.asarray(base.hf_dataset['episode_index'],dtype=int);local_ep=np.flatnonzero(ep_ids==episode)
     timestamps=np.asarray(base.hf_dataset['timestamp'],dtype=float)[local_ep]
     cameras=('cam_high','cam_left_wrist','cam_right_wrist')
+    assert not prior.exists() or (json.loads(prior.read_text())['repo_id']==base.repo_id and json.loads(prior.read_text())['frame_indices']==[int(base.hf_dataset[i]['frame_index']) for i in selected]),'The review must use exactly the original selected EP and frames'
     chosen={'seed':seed,'repo_id':base.repo_id,'episode_index':episode,'eligible_frames':len(eligible),
             'local_indices':selected,'frame_indices':[int(base.hf_dataset[i]['frame_index']) for i in selected],'local_episode_start':int(local_ep[0]),'global_indices':global_indices,
             'config':config.name,'code_directory':str(a.source),'dataset_directory':str(a.datasets),
@@ -64,12 +65,14 @@ def main(a):
             now=float(raw['timestamp']);current=images(raw,local)
             record={'number':i+1,'global_index':global_indices[i],'local_index':local,'frame_index':int(raw['frame_index']),
                     'episode_index':episode,'time_s':now,'task':raw['task'],'current_images':current,
-                    'annotation':dict(zip(('bottle','observation','intent'),parse_annotation(raw['subtask']) or ('','',''))),
-                    'full_annotation_memory':json.loads(encode_memory(native.timelines[(dataset_index,episode)].at(now))),
+                    'annotation':dict(zip(('bottle_description','memory_annotation','current_task'),parse_annotation(raw['subtask']) or ('','',''))),
+                    'teacher_state':json.loads(encode_memory(native.timelines[(dataset_index,episode)].at(now))),
                     'actual_training_memory':json.loads(raw['long_memory'])}
             output=transform(raw)
             tokens=output['tokenized_prompt'];mask=output['tokenized_prompt_mask']
             record['model_prompt']=tokenizer._tokenizer.decode(tokens[mask].tolist());record['model_token_count']=int(mask.sum())
+            assert all(x not in record['model_prompt'] for x in ('Current time:', 'incomplete or stale', '\"events\"', '\"intent\"', '\"observation\"'))
+            assert all(x in record['model_prompt'] for x in ('Bottle description:', 'Memory:', 'Current task:'))
             window=[]
             for j in video_indices(timestamps.tolist(),now,seconds=3,hz=2):
                 li=int(local_ep[j]);history=base[li] if li!=local else None
@@ -84,9 +87,9 @@ def main(a):
     assert len(records)==100 and len({r['frame_index'] for r in records})==100
     (a.output/'samples.jsonl').write_text(''.join(json.dumps(r,ensure_ascii=False)+'\n' for r in records))
     (a.output/'summary.json').write_text(json.dumps({'chosen':chosen,'samples':len(records),'native_loader':'openpi.data.dataloaders.TorchDataLoader',
-      'same_episode_verified':True,'past_only_history_verified':True,'phase_counts':dict(collections.Counter(r['annotation']['intent'] for r in records)),
+      'same_episode_verified':True,'past_only_history_verified':True,'phase_counts':dict(collections.Counter(r['annotation']['current_task'] for r in records)),
       'source_hashes':{str(p.relative_to(a.source)):hashlib.sha256(p.read_bytes()).hexdigest() for p in [a.source/'src/openpi/data/dataloaders.py',a.source/'src/openpi/data/long_memory.py',a.source/'src/openpi/training/config.py']}},indent=2))
 
 if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('--source',type=pathlib.Path,required=True);p.add_argument('--datasets',type=pathlib.Path,required=True)
-    p.add_argument('--config',required=True);p.add_argument('--output',type=pathlib.Path,required=True);p.add_argument('--seed',type=int);main(p.parse_args())
+    p.add_argument('--chosen',type=pathlib.Path);p.add_argument('--config',required=True);p.add_argument('--output',type=pathlib.Path,required=True);p.add_argument('--seed',type=int);main(p.parse_args())

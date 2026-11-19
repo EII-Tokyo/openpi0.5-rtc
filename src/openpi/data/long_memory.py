@@ -1,6 +1,8 @@
 """Join annotation-derived causal memory to the ACTUAL returned LeRobot sample."""
 
 import random
+import json
+from pathlib import Path
 
 import numpy as np
 
@@ -12,7 +14,11 @@ class LongMemoryDataset:
         self._dataset = dataset
         self.settings = settings
         self.timelines = {}
+        cache=json.loads(Path(settings.summary_cache_path).read_text())
+        if cache.get('schema_version')!=2:raise ValueError('Summary cache v2 required')
+        self.summary_cache=cache['episodes']
         masks = []
+        seen=set()
         bases = getattr(raw_dataset, "_datasets", [raw_dataset])
         self.repo_ids = [base.repo_id for base in bases]
         for dataset_index, base in enumerate(bases):
@@ -26,9 +32,11 @@ class LongMemoryDataset:
             boundaries = np.r_[0, np.flatnonzero(np.diff(episodes)) + 1, len(episodes)]
             for start, end in zip(boundaries[:-1], boundaries[1:], strict=True):
                 key = (dataset_index, int(episodes[start]))
-                if key in self.timelines:
+                if key in seen:
                     raise ValueError("An episode appears in disjoint blocks")
-                self.timelines[key] = MemoryTimeline(times[start:end], labels[start:end], eligible[start:end], reset_on_home=settings.reset_on_home)
+                seen.add(key)
+                updates=self.summary_cache.get(base.repo_id,{}).get(str(key[1]))
+                if updates is not None:self.timelines[key]=MemoryTimeline(updates)
                 if episode_split(base.repo_id, key[1], settings.split_seed) != "train":
                     mask[start:end] = False
             masks.append(mask)
@@ -53,7 +61,8 @@ class LongMemoryDataset:
         if episode_split(self.repo_ids[key[0]], key[1], self.settings.split_seed) != "train":
             raise ValueError("Underlying wrapper returned an evaluation episode during training")
         time_s = float(sample["timestamp"])
+        if key not in self.timelines:
+            raise ValueError('This EP has no verified summary labels; prepare its cache before training')
         memory = condition_at(self.timelines[key], time_s, self.settings, training=True, rng=random)
         sample["long_memory"] = encode_memory(memory)
-        sample["memory_time_s"] = time_s
         return sample

@@ -298,16 +298,12 @@ class TokenizePrompt(DataTransformFn):
         data.pop("subtask", None)  # Ignore historical good/bad action annotations.
         metadata = {key: data.pop(key) for key in ("operator", "rating", "rating_is_valid", "camera_low_position") if key in data}
         memory = data.pop("long_memory", None)
-        memory_time = data.pop("memory_time_s", None)
         if self.long_memory is not None:
             if memory is None:
                 raise ValueError("This checkpoint requires explicit long_memory, including an empty memory at reset")
             from openpi.shared.long_memory import decode_memory
-            if memory_time is None or not np.isfinite(float(memory_time)) or float(memory_time) < 0:
-                raise ValueError("Long-memory conditioning requires a finite episode-relative memory_time_s")
-            decode_memory(str(memory), now_s=float(memory_time), max_entries=self.long_memory.max_entries)
+            decode_memory(str(memory), max_chars=self.long_memory.max_memory_chars)
             metadata["long_memory"] = str(memory)
-            metadata["memory_time_s"] = float(memory_time)
         history = data.pop("joint_position_history", None)
         if self.joint_position_history is not None:
             if history is None:
@@ -516,7 +512,7 @@ class AlohaTransformPipeline:
         }
         if include_actions:
             structure["actions"] = "action"
-        return RepackTransform(structure, optional_keys=("operator", "rating", "rating_is_valid", "camera_low_position", "joint_position_history", "long_memory", "memory_time_s"))
+        return RepackTransform(structure, optional_keys=("operator", "rating", "rating_is_valid", "camera_low_position", "joint_position_history", "long_memory"))
 
     def _model_input_transforms(self) -> list[DataTransformFn]:
         transforms: list[DataTransformFn] = [
