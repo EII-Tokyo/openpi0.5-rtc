@@ -3063,7 +3063,11 @@ _CONFIGS.append(
         resume=False,
         wandb_enabled=True,
         wandb_entity='yonglianglu2',
-        policy_metadata={'training_manifest': 'src/openpi/training/manifests/eii_hxz_exp_insert_3repo_cam4_fullft_h200x2_448_no_mem_5k_20261119/dataset_manifest.json'},
+        policy_metadata={
+            'training_manifest': 'src/openpi/training/manifests/eii_hxz_exp_insert_3repo_cam4_fullft_h200x2_448_no_mem_5k_20261119/dataset_manifest.json',
+            # This lower-level config does not yet produce a high-level stage signal.
+            'runtime': {'task_control': {'mode': 'exp_insert', 'phase_field': None}},
+        },
         fsdp_devices=2,
     )
 )

@@ -11,7 +11,7 @@ from fastapi import HTTPException, UploadFile
 from openai import BadRequestError, OpenAI
 
 from .config import settings
-from .redis_commands import TASK_MAPPING, publish_task, bottle_task_from_text
+from .redis_commands import TASK_MAPPING, publish_task, bottle_task_from_text, runtime_supports_bottles
 from .schemas import VoiceResponse
 
 _SUPPORTED_AUDIO_SUFFIXES = {".flac", ".m4a", ".mp3", ".mp4", ".mpeg", ".mpga", ".oga", ".ogg", ".wav", ".webm"}
@@ -161,7 +161,7 @@ class VoiceAssistantEngine:
                 task_name=None,
             )
 
-        bottle_task = bottle_task_from_text(transcript)
+        bottle_task = bottle_task_from_text(transcript) if runtime_supports_bottles(self._redis) else None
         if bottle_task is not None:
             publish_task(self._redis, bottle_task)
             return VoiceResponse(

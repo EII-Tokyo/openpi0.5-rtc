@@ -33,6 +33,7 @@ class HomeReturnGate:
         self.departed = False
         self.settling = False
         self.stable_since = None
+        self.phase = None
 
     def at_home(self, qpos):
         if self.home is None:
@@ -40,11 +41,20 @@ class HomeReturnGate:
         error = np.max(np.abs((self.vector(qpos) - self.home)[self.ARM_INDICES]))
         return error <= self.position_tolerance
 
+    def observe_phase(self, phase):
+        if not isinstance(phase, str) or phase not in {"pick", "align", "insert", "withdraw", "place", "release", "return_home"}:
+            raise ValueError("Automatic bottle cycles require a valid policy task_phase on each action chunk")
+        self.phase = phase
+
     def update(self, qpos, qvel, now):
         qpos, qvel = self.vector(qpos), self.vector(qvel)
         near = self.at_home(qpos)
         if not self.departed:
             self.departed = np.max(np.abs((qpos - self.home)[self.ARM_INDICES])) > self.departure_tolerance
+            return "running"
+        if self.phase != "return_home":
+            self.stable_since = None
+            self.settling = False
             return "running"
         slow = np.max(np.abs(qvel[self.ARM_INDICES])) <= self.velocity_tolerance
         # A fast pass through home is not completion. Once settled, stop policy playback.

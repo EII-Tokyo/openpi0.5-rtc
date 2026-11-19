@@ -36,6 +36,7 @@ class ChunkedPolicy(_base_policy.BasePolicy):
         self._rtc_handoff_delay_steps = rtc_handoff_delay_steps
         self._cur_step: int = 0
         self._inference_prompt: str | None = None
+        self._task_phase: str | None = None
 
         self._last_results: Dict[str, np.ndarray] | None = None
         self._last_origin_actions: np.ndarray | None = None
@@ -183,12 +184,15 @@ class ChunkedPolicy(_base_policy.BasePolicy):
             if self._last_results is None:
                 self._last_results = self._policy.infer(obs, chunking_mode="sync")
                 self._inference_prompt = self._last_results.get("inference_prompt")
+                self._task_phase = self._last_results.get("task_phase")
                 self._last_origin_actions = self._last_results["origin_actions"]
                 self._last_state = self._last_results["state"]
                 self._last_results = {"actions": self._last_results["actions"]}
                 self._cur_step = 0
 
             results = tree.map_structure(lambda x: x[self._cur_step, ...], self._last_results)
+            if self._task_phase is not None:
+                results["task_phase"] = self._task_phase
             self._obs = obs
             self._cur_step += 1
 
@@ -196,6 +200,7 @@ class ChunkedPolicy(_base_policy.BasePolicy):
             if self._cur_step == self._rtc_replan_start_step + self._rtc_handoff_delay_steps:
                 while self._background_running:
                     time.sleep(0.01)
+                self._task_phase = self._background_results.get("task_phase")
                 self._last_origin_actions = self._background_results["origin_actions"]
                 self._last_state = self._background_results["state"]
                 self._last_results = {"actions": self._background_results["actions"]}
@@ -232,6 +237,7 @@ class ChunkedPolicy(_base_policy.BasePolicy):
             self._obs = None
             self._cur_step = 0
             self._inference_prompt = None
+            self._task_phase = None
 
     @property
     def inference_prompt(self) -> str | None:

@@ -12,6 +12,7 @@ import select
 from collections import deque
 from openpi.robot.aloha_real.foot_switch import FootSwitch
 from openpi.robot.aloha_real.task_cycle import HomeReturnGate
+from openpi.robot.aloha_real.task_contract import task_contract
 
 from openpi.robot.aloha_real.leader_follower_demo import LeaderFollowerDemoController
 from openpi.robot.aloha_real.manual_intervention import ManualInterventionController
@@ -56,6 +57,7 @@ class Runtime:
         redis_port: int = 6379,
         redis_db: int = 0,
         manual_dataset_dir: str | None = None,
+        policy_metadata: dict | None = None,
         good_bad_action: str | None = None,  # Deprecated, accepted for old callers only.
     ) -> None:
         self._environment = environment
@@ -96,9 +98,7 @@ class Runtime:
         # 任务状态管理
         self._current_task = None
         self._is_waiting_for_task = False
-        mode = os.getenv("ALOHA_TASK_MODE", "legacy")
-        if mode not in {"legacy", "exp_insert"}:
-            raise ValueError(f"Unknown ALOHA_TASK_MODE: {mode}")
+        mode = task_contract(policy_metadata or {})
         self._task_cycle = HomeReturnGate(
             position_tolerance=float(os.getenv("ALOHA_HOME_POSITION_TOLERANCE", "0.05")),
             departure_tolerance=float(os.getenv("ALOHA_HOME_DEPARTURE_TOLERANCE", "0.15")),
@@ -273,6 +273,9 @@ class Runtime:
         if getattr(self, "_recording_paused", False):
             payload["mode"] = "paused"
         try:
+            self._redis_client.set("aloha_task_capabilities", json.dumps({
+                "mode": payload["task_mode"], "task_ids": sorted(self._model_task_nums | {"3", "4", "5", "6"}),
+            }), ex=15)
             self._redis_client.set("aloha_recording_state", json.dumps({
                 **payload["recording"], "timestamp": payload["timestamp"], "mode": payload["mode"]
             }))
@@ -420,6 +423,7 @@ class Runtime:
                 if task_data:
                     self._handle_task(task_data)
                 
+                self._activate_pending_task()
                 if self._is_waiting_for_task:
                     # 等待状态下，短sleep并持续监听键盘/Redis
                     self._publish_runtime_state()
@@ -553,7 +557,7 @@ class Runtime:
             sys.stdout.flush()
         
 
-    def _handle_task(self, task_data, *, from_pending=False) -> None:
+    def _handle_task(self, task_data) -> None:
         """处理来自键盘或 Redis 的任务。"""
         task_data = self._normalize_task_data(task_data)
         task_num = str(task_data.get('task_num'))
@@ -572,19 +576,14 @@ class Runtime:
         if cycle is not None:
             if task_num in self._model_task_nums:
                 command_id = task_data.get("command_id")
-                if command_id and not from_pending:
+                if command_id:
                     if command_id in self._seen_command_ids:
                         return
                     self._seen_command_ids.append(command_id)
-                if self._current_task is not None and self._current_task.get("task_num") in self._model_task_nums:
-                    self._pending_task = dict(task_data)
-                    logging.info("Next task queued (current task unchanged): %s", task_name)
-                    self._publish_runtime_state()
-                    return
-                if not cycle.at_home(self._environment.get_joint_feedback()["qpos"]):
-                    logging.warning("Task rejected: return to home with key 4 before starting a bottle cycle")
-                    return
-                cycle.reset()
+                self._pending_task = dict(task_data)
+                logging.info("Bottle selection queued; current task unchanged: %s", task_name)
+                self._publish_runtime_state()
+                return
             elif task_num in {"3", "4", "5", "6"}:
                 self._pending_task = None
                 cycle.reset()
@@ -683,6 +682,46 @@ class Runtime:
         logging.info("Inference conditioning applied live: %s", metadata)
         self._publish_runtime_state(mode="policy")
 
+    def _activate_pending_task(self):
+        """Finish blocking work before atomically choosing the latest bottle selection."""
+        if (getattr(self, "_task_cycle", None) is None or not self._is_waiting_for_task
+                or self._current_task is not None or self._pending_task is None or self._recording_hold.is_set()):
+            return
+        self._policy.reset()
+        metadata = {}
+        if self._redis_client is not None:
+            raw = self._redis_client.get(INFERENCE_SETTINGS_KEY)
+            if raw:
+                metadata = normalize_prompt_metadata(**{k: v for k, v in json.loads(raw).items() if k in METADATA_KEYS})
+        # Waiting may last minutes; update both the camera scene and measured state.
+        observation = self._environment.refresh_observation()
+        if not self._task_cycle.at_home(observation["qpos"]):
+            logging.warning("Bottle task remains pending: use home before starting")
+            return
+        with self._task_lock:
+            if self._recording_hold.is_set():
+                return
+            latest = self._latest_task
+            if latest is not None:
+                if str(latest.get("task_num")) not in self._model_task_nums:
+                    return  # Control commands take priority; the main loop handles them next.
+                self._latest_task = None
+                command_id = latest.get("command_id")
+                if not command_id or command_id not in self._seen_command_ids:
+                    self._pending_task = self._normalize_task_data(latest)
+                    if command_id:
+                        self._seen_command_ids.append(command_id)
+            selected = dict(self._pending_task)
+            selected.update(metadata)
+            self._pending_task = None
+            self._pending_inference_settings = None
+            self._task_cycle.reset()
+            self._current_task = selected
+            self._is_waiting_for_task = False
+        for subscriber in self._subscribers:
+            subscriber.on_episode_start()
+        self._publish_runtime_state(mode="policy")
+
     def _advance_home_cycle(self, observation) -> bool:
         """Consume the control tick while holding/finishing home; never run old policy actions."""
         cycle = getattr(self, "_task_cycle", None)
@@ -714,18 +753,18 @@ class Runtime:
             return True
         pending = self._pending_task
         self._enter_waiting()
-        self._policy.reset()  # Wait for/discard any old asynchronous result before the next task.
+        self._pending_task = pending
+        self._policy.reset()  # Discard old actions before the next control tick selects a task.
+        with self._task_lock:
+            interrupt = self._latest_task is not None and str(self._latest_task.get("task_num")) in {"3", "4", "5", "6"}
+            if self._recording_hold.is_set() or interrupt:
+                self._pending_task = None
         recorder = getattr(self, "_recording", None)
         if recorder is not None and recorder.snapshot()["status"] == "recording":
             recorder.finish()
         for subscriber in self._subscribers:
             subscriber.on_episode_end()
-        logging.info("Home reached; %s", "starting queued task" if pending else "waiting for a new instruction")
-        # A recording stop arriving while reset waited must prevent automatic restart.
-        with self._task_lock:
-            interrupt_pending = self._latest_task is not None and str(self._latest_task.get("task_num")) in {"3", "4", "5", "6"}
-        if pending is not None and not self._recording_hold.is_set() and not interrupt_pending:
-            self._handle_task(pending, from_pending=True)
+        logging.info("Final return_home completed; waiting for next task activation")
         return True
 
     def _step(self) -> None:
@@ -757,6 +796,13 @@ class Runtime:
 
         infer_started = time.monotonic()
         action = self._policy.infer(observation_with_task)
+        if getattr(self, "_task_cycle", None) is not None:
+            try:
+                self._task_cycle.observe_phase(action.get("task_phase"))
+            except ValueError:
+                self._pause_recording()
+                logging.exception("Policy omitted/invalidated task_phase; stopped before applying its action")
+                return
         infer_done = time.monotonic()
         # A stop arriving during inference must not execute the newly returned chunk.
         if hold is not None and hold.is_set():

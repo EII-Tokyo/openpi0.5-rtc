@@ -16,10 +16,9 @@ def pose(x=0):
 
 @pytest.fixture
 def runtime(monkeypatch):
-    monkeypatch.setenv('ALOHA_TASK_MODE', 'exp_insert')
     with patch('openpi.robot.aloha_real.runtime.PolicyRecording'):
-        r = Runtime(Mock(), Mock(), [], max_hz=50)
-    r._environment.get_joint_feedback.return_value = {'qpos': pose(), 'qvel': pose()}
+        r = Runtime(Mock(), Mock(), [], max_hz=50, policy_metadata={"runtime": {"task_control": {"mode": "exp_insert", "phase_field": "task_phase"}}})
+    r._environment.refresh_observation.return_value = {'qpos': pose(), 'qvel': pose()}
     r._task_cycle.set_home(pose())
     r._publish_runtime_state = Mock()
     r._recording.snapshot.return_value = {'status': 'idle'}
@@ -31,9 +30,19 @@ def task(number, command_id=None):
     return {'task_num': f'bottle_{number}', 'task_name': 'untrusted input', 'command_id': command_id}
 
 
+def start(runtime, command):
+    runtime._handle_task(command)
+    runtime._activate_pending_task()
+
+
+def returning(runtime):
+    runtime._task_cycle.observe_phase('return_home')
+
+
 def test_initial_home_never_completes_and_fast_crossing_does_not_complete():
     g = HomeReturnGate()
     g.set_home(pose())
+    g.observe_phase("return_home")
     for t in range(10):
         assert g.update(pose(), pose(), t) == 'running'
     assert g.update(pose(.3), pose(), 10) == 'running'
@@ -64,7 +73,7 @@ def test_hold_preserves_grippers_and_uses_home_arm_reference():
 
 def test_queue_replace_keeps_current_prompt_and_does_not_reset_or_finish_recording(runtime):
     r = runtime
-    r._handle_task(task(1, 'first'))
+    start(r, task(1, 'first'))
     r._policy.reset.reset_mock()
     r._recording.snapshot.return_value = {'status': 'recording'}
     r._handle_task(task(2, 'second'))
@@ -80,9 +89,10 @@ def test_queue_replace_keeps_current_prompt_and_does_not_reset_or_finish_recordi
 @pytest.mark.parametrize('queued', [False, True])
 def test_completion_waits_or_starts_next_only_after_reset(runtime, queued):
     r = runtime
-    r._handle_task(task(1, 'first'))
+    start(r, task(1, 'first'))
     if queued:
         r._handle_task(task(2, 'second'))
+    returning(r)
     r._task_cycle.update(pose(.3), pose(), 0)
     calls = []
     r._policy.reset.side_effect = lambda: calls.append('reset')
@@ -93,6 +103,7 @@ def test_completion_waits_or_starts_next_only_after_reset(runtime, queued):
         assert r._advance_home_cycle({'qpos': pose(), 'qvel': pose()})
         assert r._current_task['task_num'] == 'bottle_1'
         assert r._advance_home_cycle({'qpos': pose(), 'qvel': pose()})
+    r._activate_pending_task()
     r._policy.infer.assert_not_called()
     assert r._pending_task is None
     sub.on_episode_end.assert_called_once()
@@ -107,7 +118,7 @@ def test_completion_waits_or_starts_next_only_after_reset(runtime, queued):
 
 def test_stop_drops_next_task_and_repeated_command_cannot_restart(runtime):
     r = runtime
-    r._handle_task(task(1, 'first'))
+    start(r, task(1, 'first'))
     r._handle_task(task(2, 'second'))
     r._handle_task({'task_num': '4'})
     assert r._pending_task is None and r._current_task is None
@@ -118,8 +129,9 @@ def test_stop_drops_next_task_and_repeated_command_cannot_restart(runtime):
 
 def test_pause_arriving_during_reset_blocks_next_task(runtime):
     r = runtime
-    r._handle_task(task(1))
+    start(r, task(1))
     r._handle_task(task(2))
+    returning(r)
     r._task_cycle.update(pose(.3), pose(), 0)
     r._task_cycle.update(pose(), pose(), 1)
     r._policy.reset.side_effect = r._recording_hold.set
@@ -137,10 +149,10 @@ def test_keyboard_three_is_bottle_and_h_is_manual(runtime):
 
 def test_start_away_from_home_is_rejected(runtime):
     r = runtime
-    r._environment.get_joint_feedback.return_value = {'qpos': pose(.3)}
-    r._handle_task(task(1))
+    r._environment.refresh_observation.return_value = {'qpos': pose(.3)}
+    start(r, task(1))
     assert r._current_task is None
-    r._policy.reset.assert_not_called()
+    r._policy.infer.assert_not_called()
 
 
 def test_legacy_mode_still_switches_immediately(monkeypatch):
@@ -155,8 +167,9 @@ def test_legacy_mode_still_switches_immediately(monkeypatch):
 
 def test_stop_received_during_reset_prevents_queued_start(runtime):
     r = runtime
-    r._handle_task(task(1))
+    start(r, task(1))
     r._handle_task(task(2))
+    returning(r)
     r._task_cycle.update(pose(.3), pose(), 0)
     r._task_cycle.update(pose(), pose(), 1)
     r._policy.reset.side_effect = lambda: setattr(r, '_latest_task', {'task_num': '4'})
@@ -167,8 +180,9 @@ def test_stop_received_during_reset_prevents_queued_start(runtime):
 
 def test_home_hold_is_recorded_before_episode_finishes(runtime):
     r = runtime
-    r._handle_task(task(1))
+    start(r, task(1))
     r._recording.snapshot.return_value = {'status': 'recording'}
+    returning(r)
     r._task_cycle.update(pose(.3), pose(), 0)
     r._task_cycle.update(pose(), pose(), 1)
     with patch('openpi.robot.aloha_real.runtime.time.monotonic', return_value=2):
@@ -179,7 +193,8 @@ def test_home_hold_is_recorded_before_episode_finishes(runtime):
 
 def test_step_uses_hold_without_consuming_policy_chunk(runtime):
     r = runtime
-    r._handle_task(task(1))
+    start(r, task(1))
+    returning(r)
     r._task_cycle.update(pose(.3), pose(), 0)
     r._environment.get_observation.return_value = {'qpos': pose(), 'qvel': pose()}
     with patch('openpi.robot.aloha_real.runtime.time.monotonic', return_value=1):
@@ -195,3 +210,104 @@ def test_prompts_match_approved_dataset():
     annotations = Path(__file__).parents[4] / 'reports/exp_insert_qwen_formal_20261119/global_instructions.json'
     approved = json.loads(annotations.read_text())['instructions']
     assert Runtime._BOTTLE_PROMPTS == {f'bottle_{i}': text for i, text in approved.items()}
+
+
+def test_home_without_final_phase_cannot_finish_or_take_over_actions():
+    g = HomeReturnGate()
+    g.set_home(pose())
+    g.observe_phase('pick')
+    g.update(pose(.3), pose(), 0)
+    assert g.update(pose(), pose(), 1) == 'running'
+    assert g.update(pose(), pose(), 10) == 'running'
+    assert not g.settling
+    g.observe_phase('return_home')
+    assert g.update(pose(), pose(), 11) == 'settling'
+    assert g.update(pose(), pose(), 11.31) == 'complete'
+
+
+def test_latest_selection_during_cache_reset_wins(runtime):
+    r = runtime
+    start(r, task(1))
+    r._handle_task(task(2))
+    returning(r)
+    r._task_cycle.update(pose(.3), pose(), 0)
+    r._task_cycle.update(pose(), pose(), 1)
+    r._policy.reset.side_effect = lambda: setattr(r, '_latest_task', task(3, 'latest-c'))
+    with patch('openpi.robot.aloha_real.runtime.time.monotonic', return_value=2):
+        r._advance_home_cycle({'qpos': pose(), 'qvel': pose()})
+    assert r._current_task is None  # Boundary is not a task-start decision.
+    r._activate_pending_task()
+    assert r._current_task['task_num'] == 'bottle_3'
+    assert r._pending_task is None and r._latest_task is None
+
+
+def test_missing_phase_stops_before_motor_command(runtime):
+    r = runtime
+    start(r, task(1))
+    r._environment.get_observation.return_value = {'qpos': pose(), 'qvel': pose(), 'images': {}}
+    r._video_memory_preview = Mock()
+    r._policy.infer.return_value = {'actions': pose()}
+    r._step()
+    r._environment.apply_action.assert_not_called()
+    assert r._recording_hold.is_set() and r._recording_paused
+
+
+def test_policy_metadata_controls_mode_and_low_level_checkpoint_is_rejected(monkeypatch):
+    from openpi.robot.aloha_real.task_contract import task_contract
+    monkeypatch.setenv('ALOHA_TASK_MODE', 'exp_insert')
+    assert task_contract({}) == 'legacy'  # Process environment cannot mislabel a loaded model.
+    assert task_contract({'runtime': {'task_control': {'mode': 'exp_insert', 'phase_field': 'task_phase'}}}) == 'exp_insert'
+    with pytest.raises(ValueError, match='low-level only'):
+        task_contract({'runtime': {'task_control': {'mode': 'exp_insert', 'phase_field': None}}})
+
+
+def test_first_policy_input_after_wait_uses_refreshed_scene(runtime):
+    # Execute the actual environment methods without importing ROS/hardware drivers.
+    import ast
+    import copy
+    from pathlib import Path
+    from types import SimpleNamespace, MethodType
+    from collections import namedtuple
+    source = ast.parse(Path(__file__).with_name('real_env.py').read_text())
+    cls = next(node for node in source.body if isinstance(node, ast.ClassDef) and node.name == 'AlohaRealEnvironment')
+    methods = [node for node in cls.body if isinstance(node, ast.FunctionDef) and node.name in {'refresh_observation', 'get_observation'}]
+    namespace = {'copy': copy}
+    exec(compile(ast.Module(body=methods, type_ignores=[]), '<actual environment methods>', 'exec'), namespace)
+    old = {'qpos': pose(), 'qvel': pose(), 'effort': pose(), 'images': {'cam_high': 'old scene'}}
+    fresh = {**old, 'images': {'cam_high': 'new scene'}}
+    hardware = Mock()
+    hardware.get_observation.return_value = fresh
+    env = SimpleNamespace(_ts=namedtuple('TimeStep', 'observation')(old), _env=hardware,
+                          _joint_history=None, _capture_joint_position=Mock(), apply_action=Mock(), image_recorder=Mock())
+    for name, method in namespace.items():
+        if name in {'refresh_observation', 'get_observation'}:
+            setattr(env, name, MethodType(method, env))
+    r = runtime
+    r._environment = env
+    r._video_memory_preview = Mock()
+    r._policy.infer.return_value = {'actions': pose(), 'task_phase': 'pick'}
+    start(r, task(1))
+    hardware.step.assert_not_called()
+    env.apply_action.assert_not_called()
+    r._step()
+    assert r._policy.infer.call_args.args[0]['images']['cam_high'] == 'new scene'
+
+
+def test_current_training_config_does_not_claim_high_level_support():
+    import ast
+    from pathlib import Path
+    from openpi.robot.aloha_real.task_contract import task_contract
+    root = Path(__file__).parents[4]
+    tree = ast.parse((root / 'src/openpi/training/config.py').read_text())
+    for call in ast.walk(tree):
+        if not isinstance(call, ast.Call):
+            continue
+        fields = {kw.arg: kw.value for kw in call.keywords}
+        name = fields.get('name')
+        if isinstance(name, ast.Constant) and name.value == 'eii_hxz_exp_insert_3repo_cam4_fullft_h200x2_448_no_mem_5k_20261119':
+            metadata = ast.literal_eval(fields['policy_metadata'])
+            with pytest.raises(ValueError, match='low-level only'):
+                task_contract(metadata)
+            break
+    else:
+        pytest.fail('Training config not found')

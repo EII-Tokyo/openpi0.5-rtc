@@ -364,6 +364,14 @@ class AlohaRealEnvironment:
     def is_episode_complete(self) -> bool:
         return False
 
+    def refresh_observation(self) -> dict:
+        """Capture current cameras and joints without issuing a motor command."""
+        if self._ts is None:
+            raise RuntimeError("Call reset before refreshing observation")
+        self._ts = self._ts._replace(observation=self._env.get_observation())
+        self._capture_joint_position()
+        return self.get_observation()
+
     def get_observation(self) -> dict:
         if self._ts is None:
             raise RuntimeError("Timestep is not set. Call reset() first.")

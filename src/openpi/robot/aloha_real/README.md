@@ -114,10 +114,19 @@ IMPORTANT: Our base checkpoint includes normalization stats from various common 
 
 ## exp_insert: queue the next bottle while returning home
 
-Use the root `docker-compose.yml` and set `ALOHA_TASK_MODE=exp_insert` for both
-runtime and voice backend. The default is `legacy`, so loading an existing rinse
-checkpoint does not change its controls. Select suitable weights using the usual
-`OPENPI_CHECKPOINT_DIR`; this mode does not add high-level prediction to a checkpoint.
+Use the root `docker-compose.yml` and select weights with `OPENPI_CHECKPOINT_DIR`.
+Task controls come from the loaded policy's `runtime.task_control` metadata,
+not an independently configured web/runtime environment variable. No task-control
+metadata means legacy behavior. An automatic bottle policy must declare
+`{"mode": "exp_insert", "phase_field": "task_phase"}` and return the actual
+predicted stage in `task_phase` alongside each action chunk. RTC playback carries
+the stage of the chunk being executed, never that of a future background result.
+
+The current exp_insert training config is still low-level only and explicitly
+records `phase_field: null`. The runtime rejects automatic-cycle startup for it
+before constructing the robot environment. Do not change that flag alone to
+bypass the check: the high-level stage predictor still needs to be implemented
+and trained. Missing/invalid phase output also pauses before applying the action.
 
 - Terminal keys **1 / 2 / 3** select bottles. **H** is manual takeover;
   **4** returns home and cancels the queued task; **5** sleeps/exits; **6** remains
@@ -127,7 +136,11 @@ checkpoint does not change its controls. Select suitable weights using the usual
   when runtime reports `exp_insert` mode. Upper/lowercase both work. They are ignored
   in text inputs, open settings/recording drawers, on key repeat, or with Ctrl/Alt/Meta.
   No new bottle buttons, pending-task panel, or takeover labels are displayed;
-  the existing page layout and numeric shortcuts remain unchanged.
+  the existing page layout and numeric shortcuts remain unchanged. Existing
+  task routes 1/2 remain available for legacy models; an incompatible active model
+  returns a clear HTTP 409 rather than deleting the route or reinterpreting the task.
+  The web backend reads short-lived runtime capabilities from Redis; no matching
+  environment setting or web restart is needed when the policy changes.
 - Voice/text selections such as `3号`, `三号瓶子`, or `bottle 3` use the same IDs.
   They do not need an LLM for task classification (audio transcription still uses
   the existing voice service). Runtime replaces supplied text with the approved
@@ -136,19 +149,22 @@ checkpoint does not change its controls. Select suitable weights using the usual
   not reset policy caches, change the current prompt, or end a recording. Commands
   can be entered before or during return_home. The pending task remains internal;
   the web page does not display it.
-- At home, finish the current cycle, clear the old action/async inference caches,
-  and activate the pending task. If there is none, remain waiting indefinitely.
+- After final `return_home` and stable physical arrival, finish the cycle and clear
+  old action/async caches. The next control tick refreshes camera/joint observations,
+  drains newer inputs, then atomically activates the latest pending selection.
+  A selection received while cache reset is blocking replaces the old selection;
+  stop/manual controls have priority. If there is none, wait indefinitely.
   Stop/manual takeover/pause clear the pending task. Message IDs suppress duplicate
   delivery within the latest 256 commands of the running process.
 
 ### What counts as home in this implementation
 
-The current policy has no runtime stage output. This gate detects a **physical
-return**, not insertion success or a learned `done`. It captures the measured
-14-DOF home pose after startup reset, checks the 12 arm joints (not grippers), and
-requires departure followed by a stable return. It cannot distinguish a completed
-cycle from a failed attempt that returns to home. A future high-level phase output
-can additionally gate completion on `return_home`; it is not fabricated here.
+Completion requires the policy's explicit `return_home` phase **and** measured
+physical arrival. Returning near home during `pick` or another phase cannot latch
+the hold controller or finish the task. The gate captures measured home after
+startup reset and checks the 12 arm joints (not grippers), requiring departure
+followed by a stable return. This verifies the completion protocol, not visual
+insertion success: the high-level model's phase accuracy still requires evaluation.
 
 | Variable | Default | Meaning |
 | --- | --- | --- |
@@ -159,10 +175,12 @@ can additionally gate completion on `return_home`; it is not fabricated here.
 
 These are initial configurable thresholds, not calibrated hardware results.
 Verify the runtime reset pose matches the demonstrations' home before enabling
-this mode. A fast pass through home does not finish a cycle. Once slow and near
+this mode. A fast pass through home does not finish a cycle. During final
+`return_home`, once slow and near
 home, policy playback stops and the normal actuator loop holds the home arm pose,
 keeping the measured gripper positions, until stable. Starting a new cycle away
-from home is rejected; use the explicit home command first. This avoids treating
+from home does not execute; use the explicit home command and then select the
+bottle again (home cancels pending selections). This avoids treating
 initial home as task completion and gives the operator an unlimited input window.
 
 Offline checks (no ROS or robot required):
