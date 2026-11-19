@@ -2977,6 +2977,77 @@ _CONFIGS.append(
 )
 
 
+# Xinzheng He exp_insert 01–03: same HXZ training settings, equal dataset weights.
+_CONFIGS.append(
+    TrainConfig(
+        name='eii_hxz_exp_insert_3repo_cam4_fullft_h200x2_448_no_mem_5k_20261119',
+        project_name='openpi',
+        exp_name='hxz_exp_insert3_h200x2_448_no_mem_bs128_ga2_5k_20261119',
+        model=pi0_config.Pi0Config(
+            image_keys=('cam_high', 'cam_low', 'cam_left_wrist', 'cam_right_wrist'),
+            action_horizon=50,
+            image_resolution=(448, 448),
+            image_tokens_per_image=256,
+            max_token_len=200,
+            training_time_rtc=False,
+            rtc_max_delay=10,
+        ),
+        weight_loader=weight_loaders.CheckpointWeightLoader(
+            'gs://openpi-assets/checkpoints/pi05_base/params',
+        ),
+        lr_schedule=_optimizer.CosineDecaySchedule(
+            warmup_steps=1000,
+            peak_lr=2.5e-05,
+            decay_steps=5000,
+            decay_lr=2.5e-06,
+        ),
+        optimizer=_optimizer.AdamW(),
+        ema_decay=0.99,
+        freeze_filter=nnx.Nothing(),
+        data=LeRobotAlohaDataConfig(
+            repo_ids=[
+                'lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_01__lerobot__with-rinse',
+                'lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_02__lerobot__with-rinse',
+                'lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_03__lerobot__with-rinse',
+            ],
+            transform_pipeline=_transforms.AlohaTransformPipeline(
+                include_low=True,
+                use_good_bad_action_prompt=False,
+                image_resolution=(448, 448),
+                max_token_len=200,
+                discrete_state_input=True,
+                assets=_transforms.AssetsConfig(
+                    assets_dir='assets/eii_hxz_exp_insert_3repo_cam4_fullft_h200x2_448_no_mem_5k_20261119',
+                    asset_id='aloha',
+                ),
+                use_quantile_norm=True,
+                video_memory_num_frames=1,
+                video_memory_stride_seconds=1.0,
+                high_camera_mosaic=None,
+                adapt_to_pi=True,
+                use_delta_joint_actions=True,
+                action_dim=32,
+            ),
+        ),
+        checkpoint_base_dir='/workspace/checkpoints',
+        seed=42,
+        batch_size=128,
+        gradient_accumulation_steps=2,
+        num_workers=16,
+        num_train_steps=5000,
+        log_interval=10,
+        save_interval=100,
+        keep_period=1000,
+        overwrite=False,
+        resume=False,
+        wandb_enabled=True,
+        wandb_entity='yonglianglu2',
+        policy_metadata={'training_manifest': 'src/openpi/training/manifests/eii_hxz_exp_insert_3repo_cam4_fullft_h200x2_448_no_mem_5k_20261119/dataset_manifest.json'},
+        fsdp_devices=2,
+    )
+)
+
+
 if len({config.name for config in _CONFIGS}) != len(_CONFIGS):
     raise ValueError("Config names must be unique.")
 

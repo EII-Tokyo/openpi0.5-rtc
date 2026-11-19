@@ -1,0 +1,815 @@
+{
+  "config_name": "eii_hxz_exp_insert_3repo_cam4_fullft_h200x2_448_no_mem_5k_20261119",
+  "prepared_at": "2026-11-19T00:52:31.083131+00:00",
+  "account_username": "Xinzheng He",
+  "directory": "exp_insert",
+  "training_started": false,
+  "source": "Host 200 project export counters cross-checked against latest published HF metadata and all data parquet rows; dataset revisions rechecked after download.",
+  "duration_definition": "Frames divided by FPS on the trajectory timeline; cameras and sampling repeats are not multiplied. Trainable frames have is_for_training=true.",
+  "normalization_status": "Computed with scripts/compute_norm_stats.py on all three datasets, seed 0, action horizon 50; train-excluded indices resampled according to existing loader semantics.",
+  "summary": {
+    "episodes": 150,
+    "export_frames": 124049,
+    "trainable_frames": 116549,
+    "excluded_frames": 7500,
+    "export_seconds": 2480.98,
+    "trainable_seconds": 2330.98
+  },
+  "datasets": [
+    {
+      "project_id": "6afd6bcbce1afaaf079e0eff",
+      "project_name": "2026-11-18_only_insert_exp_01",
+      "repo_id": "lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_01__lerobot__with-rinse",
+      "revision": "a5ca7d69366062b3137acab09c07829f590dad58",
+      "weight": 1,
+      "fps": 50,
+      "episodes": 50,
+      "export_frames": 34685,
+      "trainable_frames": 32185,
+      "export_seconds": 693.7,
+      "trainable_seconds": 643.7,
+      "excluded_frames": 2500,
+      "task": "twist off the bottle cap and rinse the bottle",
+      "features": {
+        "observation.state": {
+          "dtype": "float32",
+          "shape": [
+            14
+          ],
+          "names": [
+            [
+              "left_waist",
+              "left_shoulder",
+              "left_elbow",
+              "left_forearm_roll",
+              "left_wrist_angle",
+              "left_wrist_rotate",
+              "left_gripper",
+              "right_waist",
+              "right_shoulder",
+              "right_elbow",
+              "right_forearm_roll",
+              "right_wrist_angle",
+              "right_wrist_rotate",
+              "right_gripper"
+            ]
+          ]
+        },
+        "action": {
+          "dtype": "float32",
+          "shape": [
+            14
+          ],
+          "names": [
+            [
+              "left_waist",
+              "left_shoulder",
+              "left_elbow",
+              "left_forearm_roll",
+              "left_wrist_angle",
+              "left_wrist_rotate",
+              "left_gripper",
+              "right_waist",
+              "right_shoulder",
+              "right_elbow",
+              "right_forearm_roll",
+              "right_wrist_angle",
+              "right_wrist_rotate",
+              "right_gripper"
+            ]
+          ]
+        },
+        "observation.velocity": {
+          "dtype": "float32",
+          "shape": [
+            14
+          ],
+          "names": [
+            [
+              "left_waist",
+              "left_shoulder",
+              "left_elbow",
+              "left_forearm_roll",
+              "left_wrist_angle",
+              "left_wrist_rotate",
+              "left_gripper",
+              "right_waist",
+              "right_shoulder",
+              "right_elbow",
+              "right_forearm_roll",
+              "right_wrist_angle",
+              "right_wrist_rotate",
+              "right_gripper"
+            ]
+          ]
+        },
+        "observation.effort": {
+          "dtype": "float32",
+          "shape": [
+            14
+          ],
+          "names": [
+            [
+              "left_waist",
+              "left_shoulder",
+              "left_elbow",
+              "left_forearm_roll",
+              "left_wrist_angle",
+              "left_wrist_rotate",
+              "left_gripper",
+              "right_waist",
+              "right_shoulder",
+              "right_elbow",
+              "right_forearm_roll",
+              "right_wrist_angle",
+              "right_wrist_rotate",
+              "right_gripper"
+            ]
+          ]
+        },
+        "observation.images.cam_high": {
+          "dtype": "video",
+          "shape": [
+            3,
+            480,
+            640
+          ],
+          "names": [
+            "channels",
+            "height",
+            "width"
+          ],
+          "info": {
+            "video.height": 480,
+            "video.width": 640,
+            "video.codec": "av1",
+            "video.pix_fmt": "yuv420p",
+            "video.is_depth_map": false,
+            "video.fps": 50,
+            "video.channels": 3,
+            "has_audio": false
+          }
+        },
+        "observation.images.cam_low": {
+          "dtype": "video",
+          "shape": [
+            3,
+            480,
+            640
+          ],
+          "names": [
+            "channels",
+            "height",
+            "width"
+          ],
+          "info": {
+            "video.height": 480,
+            "video.width": 640,
+            "video.codec": "av1",
+            "video.pix_fmt": "yuv420p",
+            "video.is_depth_map": false,
+            "video.fps": 50,
+            "video.channels": 3,
+            "has_audio": false
+          }
+        },
+        "observation.images.cam_left_wrist": {
+          "dtype": "video",
+          "shape": [
+            3,
+            480,
+            640
+          ],
+          "names": [
+            "channels",
+            "height",
+            "width"
+          ],
+          "info": {
+            "video.height": 480,
+            "video.width": 640,
+            "video.codec": "av1",
+            "video.pix_fmt": "yuv420p",
+            "video.is_depth_map": false,
+            "video.fps": 50,
+            "video.channels": 3,
+            "has_audio": false
+          }
+        },
+        "observation.images.cam_right_wrist": {
+          "dtype": "video",
+          "shape": [
+            3,
+            480,
+            640
+          ],
+          "names": [
+            "channels",
+            "height",
+            "width"
+          ],
+          "info": {
+            "video.height": 480,
+            "video.width": 640,
+            "video.codec": "av1",
+            "video.pix_fmt": "yuv420p",
+            "video.is_depth_map": false,
+            "video.fps": 50,
+            "video.channels": 3,
+            "has_audio": false
+          }
+        },
+        "task_index": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "names": null
+        },
+        "subtask": {
+          "dtype": "string",
+          "shape": [
+            1
+          ],
+          "names": null
+        },
+        "is_for_training": {
+          "dtype": "bool",
+          "shape": [
+            1
+          ],
+          "names": null
+        },
+        "timestamp": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "names": null
+        },
+        "frame_index": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "names": null
+        },
+        "episode_index": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "names": null
+        },
+        "index": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "names": null
+        }
+      },
+      "parquet_sha256": {
+        "data/chunk-000/file-000.parquet": "665197c6e7eebb7c22bba00344ad00852c4a96303420ca7901a47c481ae12f25"
+      }
+    },
+    {
+      "project_id": "6afd6beace1afaaf079e0f00",
+      "project_name": "2026-11-18_only_insert_exp_02",
+      "repo_id": "lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_02__lerobot__with-rinse",
+      "revision": "76f417fd777ea1ac114fb9ecfb79513e69bf1e9c",
+      "weight": 1,
+      "fps": 50,
+      "episodes": 50,
+      "export_frames": 42896,
+      "trainable_frames": 40396,
+      "export_seconds": 857.92,
+      "trainable_seconds": 807.92,
+      "excluded_frames": 2500,
+      "task": "twist off the bottle cap and rinse the bottle",
+      "features": {
+        "observation.state": {
+          "dtype": "float32",
+          "shape": [
+            14
+          ],
+          "names": [
+            [
+              "left_waist",
+              "left_shoulder",
+              "left_elbow",
+              "left_forearm_roll",
+              "left_wrist_angle",
+              "left_wrist_rotate",
+              "left_gripper",
+              "right_waist",
+              "right_shoulder",
+              "right_elbow",
+              "right_forearm_roll",
+              "right_wrist_angle",
+              "right_wrist_rotate",
+              "right_gripper"
+            ]
+          ]
+        },
+        "action": {
+          "dtype": "float32",
+          "shape": [
+            14
+          ],
+          "names": [
+            [
+              "left_waist",
+              "left_shoulder",
+              "left_elbow",
+              "left_forearm_roll",
+              "left_wrist_angle",
+              "left_wrist_rotate",
+              "left_gripper",
+              "right_waist",
+              "right_shoulder",
+              "right_elbow",
+              "right_forearm_roll",
+              "right_wrist_angle",
+              "right_wrist_rotate",
+              "right_gripper"
+            ]
+          ]
+        },
+        "observation.velocity": {
+          "dtype": "float32",
+          "shape": [
+            14
+          ],
+          "names": [
+            [
+              "left_waist",
+              "left_shoulder",
+              "left_elbow",
+              "left_forearm_roll",
+              "left_wrist_angle",
+              "left_wrist_rotate",
+              "left_gripper",
+              "right_waist",
+              "right_shoulder",
+              "right_elbow",
+              "right_forearm_roll",
+              "right_wrist_angle",
+              "right_wrist_rotate",
+              "right_gripper"
+            ]
+          ]
+        },
+        "observation.effort": {
+          "dtype": "float32",
+          "shape": [
+            14
+          ],
+          "names": [
+            [
+              "left_waist",
+              "left_shoulder",
+              "left_elbow",
+              "left_forearm_roll",
+              "left_wrist_angle",
+              "left_wrist_rotate",
+              "left_gripper",
+              "right_waist",
+              "right_shoulder",
+              "right_elbow",
+              "right_forearm_roll",
+              "right_wrist_angle",
+              "right_wrist_rotate",
+              "right_gripper"
+            ]
+          ]
+        },
+        "observation.images.cam_high": {
+          "dtype": "video",
+          "shape": [
+            3,
+            480,
+            640
+          ],
+          "names": [
+            "channels",
+            "height",
+            "width"
+          ],
+          "info": {
+            "video.height": 480,
+            "video.width": 640,
+            "video.codec": "av1",
+            "video.pix_fmt": "yuv420p",
+            "video.is_depth_map": false,
+            "video.fps": 50,
+            "video.channels": 3,
+            "has_audio": false
+          }
+        },
+        "observation.images.cam_low": {
+          "dtype": "video",
+          "shape": [
+            3,
+            480,
+            640
+          ],
+          "names": [
+            "channels",
+            "height",
+            "width"
+          ],
+          "info": {
+            "video.height": 480,
+            "video.width": 640,
+            "video.codec": "av1",
+            "video.pix_fmt": "yuv420p",
+            "video.is_depth_map": false,
+            "video.fps": 50,
+            "video.channels": 3,
+            "has_audio": false
+          }
+        },
+        "observation.images.cam_left_wrist": {
+          "dtype": "video",
+          "shape": [
+            3,
+            480,
+            640
+          ],
+          "names": [
+            "channels",
+            "height",
+            "width"
+          ],
+          "info": {
+            "video.height": 480,
+            "video.width": 640,
+            "video.codec": "av1",
+            "video.pix_fmt": "yuv420p",
+            "video.is_depth_map": false,
+            "video.fps": 50,
+            "video.channels": 3,
+            "has_audio": false
+          }
+        },
+        "observation.images.cam_right_wrist": {
+          "dtype": "video",
+          "shape": [
+            3,
+            480,
+            640
+          ],
+          "names": [
+            "channels",
+            "height",
+            "width"
+          ],
+          "info": {
+            "video.height": 480,
+            "video.width": 640,
+            "video.codec": "av1",
+            "video.pix_fmt": "yuv420p",
+            "video.is_depth_map": false,
+            "video.fps": 50,
+            "video.channels": 3,
+            "has_audio": false
+          }
+        },
+        "task_index": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "names": null
+        },
+        "subtask": {
+          "dtype": "string",
+          "shape": [
+            1
+          ],
+          "names": null
+        },
+        "is_for_training": {
+          "dtype": "bool",
+          "shape": [
+            1
+          ],
+          "names": null
+        },
+        "timestamp": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "names": null
+        },
+        "frame_index": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "names": null
+        },
+        "episode_index": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "names": null
+        },
+        "index": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "names": null
+        }
+      },
+      "parquet_sha256": {
+        "data/chunk-000/file-000.parquet": "9e417e1ba89c906a11d9df63ed223f8a34b348703d67ee7a3a2f46c6342cf7b0"
+      }
+    },
+    {
+      "project_id": "6afd6c04ce1afaaf079e0f01",
+      "project_name": "2026-11-18_only_insert_exp_03",
+      "repo_id": "lyl472324464/rinse__hxz__exp-insert__2026-11-18_only_insert_exp_03__lerobot__with-rinse",
+      "revision": "fe620d64d299704d43c24b1c796c167a395d598f",
+      "weight": 1,
+      "fps": 50,
+      "episodes": 50,
+      "export_frames": 46468,
+      "trainable_frames": 43968,
+      "export_seconds": 929.36,
+      "trainable_seconds": 879.36,
+      "excluded_frames": 2500,
+      "task": "twist off the bottle cap and rinse the bottle",
+      "features": {
+        "observation.state": {
+          "dtype": "float32",
+          "shape": [
+            14
+          ],
+          "names": [
+            [
+              "left_waist",
+              "left_shoulder",
+              "left_elbow",
+              "left_forearm_roll",
+              "left_wrist_angle",
+              "left_wrist_rotate",
+              "left_gripper",
+              "right_waist",
+              "right_shoulder",
+              "right_elbow",
+              "right_forearm_roll",
+              "right_wrist_angle",
+              "right_wrist_rotate",
+              "right_gripper"
+            ]
+          ]
+        },
+        "action": {
+          "dtype": "float32",
+          "shape": [
+            14
+          ],
+          "names": [
+            [
+              "left_waist",
+              "left_shoulder",
+              "left_elbow",
+              "left_forearm_roll",
+              "left_wrist_angle",
+              "left_wrist_rotate",
+              "left_gripper",
+              "right_waist",
+              "right_shoulder",
+              "right_elbow",
+              "right_forearm_roll",
+              "right_wrist_angle",
+              "right_wrist_rotate",
+              "right_gripper"
+            ]
+          ]
+        },
+        "observation.velocity": {
+          "dtype": "float32",
+          "shape": [
+            14
+          ],
+          "names": [
+            [
+              "left_waist",
+              "left_shoulder",
+              "left_elbow",
+              "left_forearm_roll",
+              "left_wrist_angle",
+              "left_wrist_rotate",
+              "left_gripper",
+              "right_waist",
+              "right_shoulder",
+              "right_elbow",
+              "right_forearm_roll",
+              "right_wrist_angle",
+              "right_wrist_rotate",
+              "right_gripper"
+            ]
+          ]
+        },
+        "observation.effort": {
+          "dtype": "float32",
+          "shape": [
+            14
+          ],
+          "names": [
+            [
+              "left_waist",
+              "left_shoulder",
+              "left_elbow",
+              "left_forearm_roll",
+              "left_wrist_angle",
+              "left_wrist_rotate",
+              "left_gripper",
+              "right_waist",
+              "right_shoulder",
+              "right_elbow",
+              "right_forearm_roll",
+              "right_wrist_angle",
+              "right_wrist_rotate",
+              "right_gripper"
+            ]
+          ]
+        },
+        "observation.images.cam_high": {
+          "dtype": "video",
+          "shape": [
+            3,
+            480,
+            640
+          ],
+          "names": [
+            "channels",
+            "height",
+            "width"
+          ],
+          "info": {
+            "video.height": 480,
+            "video.width": 640,
+            "video.codec": "av1",
+            "video.pix_fmt": "yuv420p",
+            "video.is_depth_map": false,
+            "video.fps": 50,
+            "video.channels": 3,
+            "has_audio": false
+          }
+        },
+        "observation.images.cam_low": {
+          "dtype": "video",
+          "shape": [
+            3,
+            480,
+            640
+          ],
+          "names": [
+            "channels",
+            "height",
+            "width"
+          ],
+          "info": {
+            "video.height": 480,
+            "video.width": 640,
+            "video.codec": "av1",
+            "video.pix_fmt": "yuv420p",
+            "video.is_depth_map": false,
+            "video.fps": 50,
+            "video.channels": 3,
+            "has_audio": false
+          }
+        },
+        "observation.images.cam_left_wrist": {
+          "dtype": "video",
+          "shape": [
+            3,
+            480,
+            640
+          ],
+          "names": [
+            "channels",
+            "height",
+            "width"
+          ],
+          "info": {
+            "video.height": 480,
+            "video.width": 640,
+            "video.codec": "av1",
+            "video.pix_fmt": "yuv420p",
+            "video.is_depth_map": false,
+            "video.fps": 50,
+            "video.channels": 3,
+            "has_audio": false
+          }
+        },
+        "observation.images.cam_right_wrist": {
+          "dtype": "video",
+          "shape": [
+            3,
+            480,
+            640
+          ],
+          "names": [
+            "channels",
+            "height",
+            "width"
+          ],
+          "info": {
+            "video.height": 480,
+            "video.width": 640,
+            "video.codec": "av1",
+            "video.pix_fmt": "yuv420p",
+            "video.is_depth_map": false,
+            "video.fps": 50,
+            "video.channels": 3,
+            "has_audio": false
+          }
+        },
+        "task_index": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "names": null
+        },
+        "subtask": {
+          "dtype": "string",
+          "shape": [
+            1
+          ],
+          "names": null
+        },
+        "is_for_training": {
+          "dtype": "bool",
+          "shape": [
+            1
+          ],
+          "names": null
+        },
+        "timestamp": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "names": null
+        },
+        "frame_index": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "names": null
+        },
+        "episode_index": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "names": null
+        },
+        "index": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "names": null
+        }
+      },
+      "parquet_sha256": {
+        "data/chunk-000/file-000.parquet": "e3ffcefb485fbe97c419124638593bb48bdc4ea450488c373c008930cb38a2fa"
+      }
+    }
+  ],
+  "config_sha256": "607167b61c631e00d4aa343a6ec02b73b89e29e9829664199af4f57718b74ca5",
+  "launch_requirements": [
+    "Before launch, reverify latest dataset revisions and all metadata/data/video file hashes; no video download or GPU training performed during configuration preparation."
+  ],
+  "hyperparameters": {
+    "image_resolution": [
+      448,
+      448
+    ],
+    "memory_enabled": false,
+    "camera_count": 4,
+    "batch_size": 128,
+    "gradient_accumulation_steps": 2,
+    "effective_batch_size": 256,
+    "num_train_steps": 5000,
+    "fsdp_devices": 2,
+    "save_interval": 100,
+    "keep_period": 1000,
+    "wandb_entity": "yonglianglu2",
+    "project_name": "openpi",
+    "initial_weights": "gs://openpi-assets/checkpoints/pi05_base/params"
+  },
+  "normalization_file": "assets/eii_hxz_exp_insert_3repo_cam4_fullft_h200x2_448_no_mem_5k_20261119/aloha/norm_stats.json",
+  "normalization_sha256": "ad1cc9de09bc0acb991933a3d9ad296c6931e2a121bb470b0c560d2fcf50404e"
+}
