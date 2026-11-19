@@ -270,7 +270,7 @@ class PrepareJointPositionHistory(DataTransformFn):
         if stats.q01 is None or stats.q99 is None:
             raise ValueError("FAST position history requires checkpoint state quantiles")
         values = (values - stats.q01[..., :14]) / (stats.q99[..., :14] - stats.q01[..., :14] + 1e-6) * 2 - 1
-        values = pad_to_dim(np.clip(values, -1, 1), self.settings.model_dim)
+        values = pad_to_dim(values, self.settings.model_dim)
         return {**data, "joint_position_history": values.astype(np.float32)}
 
 
