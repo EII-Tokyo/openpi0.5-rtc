@@ -119,17 +119,23 @@ runtime and voice backend. The default is `legacy`, so loading an existing rinse
 checkpoint does not change its controls. Select suitable weights using the usual
 `OPENPI_CHECKPOINT_DIR`; this mode does not add high-level prediction to a checkpoint.
 
-- Terminal/browser keys **1 / 2 / 3** select bottles. **H** is manual takeover;
+- Terminal keys **1 / 2 / 3** select bottles. **H** is manual takeover;
   **4** returns home and cancels the queued task; **5** sleeps/exits; **6** remains
   the leader/follower demo. Redis task `3` still means manual takeover; bottle
   commands use distinct IDs `bottle_1`, `bottle_2`, `bottle_3`.
+- On the focused web page, hidden **A / B / C** shortcuts select bottles **1 / 2 / 3**
+  when runtime reports `exp_insert` mode. Upper/lowercase both work. They are ignored
+  in text inputs, open settings/recording drawers, on key repeat, or with Ctrl/Alt/Meta.
+  No new bottle buttons, pending-task panel, or takeover labels are displayed;
+  the existing page layout and numeric shortcuts remain unchanged.
 - Voice/text selections such as `3号`, `三号瓶子`, or `bottle 3` use the same IDs.
   They do not need an LLM for task classification (audio transcription still uses
   the existing voice service). Runtime replaces supplied text with the approved
   bottle-specific global instruction from the exp_insert annotations.
 - While running, a selection only replaces the **single pending task**. It does
   not reset policy caches, change the current prompt, or end a recording. Commands
-  can be entered before or during return_home. The web page shows the pending ID.
+  can be entered before or during return_home. The pending task remains internal;
+  the web page does not display it.
 - At home, finish the current cycle, clear the old action/async inference caches,
   and activate the pending task. If there is none, remain waiting indefinitely.
   Stop/manual takeover/pause clear the pending task. Message IDs suppress duplicate
