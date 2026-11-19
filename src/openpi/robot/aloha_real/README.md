@@ -111,3 +111,60 @@ This task involves opening a tupperware filled with food and pouring the content
     We provide the [pi0_aloha_pen_uncap config](../../src/openpi/training/config.py) as an example. You should refer to the root [README](../../README.md) for how to run training with the new config.
 
 IMPORTANT: Our base checkpoint includes normalization stats from various common robot configurations. When fine-tuning a base checkpoint with a custom dataset from one of these configurations, we recommend using the corresponding normalization stats provided in the base checkpoint. In the example, this is done by specifying the trossen asset_id and a path to the pretrained checkpoint’s asset directory within the AssetsConfig.
+
+## exp_insert: queue the next bottle while returning home
+
+Use the root `docker-compose.yml` and set `ALOHA_TASK_MODE=exp_insert` for both
+runtime and voice backend. The default is `legacy`, so loading an existing rinse
+checkpoint does not change its controls. Select suitable weights using the usual
+`OPENPI_CHECKPOINT_DIR`; this mode does not add high-level prediction to a checkpoint.
+
+- Terminal/browser keys **1 / 2 / 3** select bottles. **H** is manual takeover;
+  **4** returns home and cancels the queued task; **5** sleeps/exits; **6** remains
+  the leader/follower demo. Redis task `3` still means manual takeover; bottle
+  commands use distinct IDs `bottle_1`, `bottle_2`, `bottle_3`.
+- Voice/text selections such as `3号`, `三号瓶子`, or `bottle 3` use the same IDs.
+  They do not need an LLM for task classification (audio transcription still uses
+  the existing voice service). Runtime replaces supplied text with the approved
+  bottle-specific global instruction from the exp_insert annotations.
+- While running, a selection only replaces the **single pending task**. It does
+  not reset policy caches, change the current prompt, or end a recording. Commands
+  can be entered before or during return_home. The web page shows the pending ID.
+- At home, finish the current cycle, clear the old action/async inference caches,
+  and activate the pending task. If there is none, remain waiting indefinitely.
+  Stop/manual takeover/pause clear the pending task. Message IDs suppress duplicate
+  delivery within the latest 256 commands of the running process.
+
+### What counts as home in this implementation
+
+The current policy has no runtime stage output. This gate detects a **physical
+return**, not insertion success or a learned `done`. It captures the measured
+14-DOF home pose after startup reset, checks the 12 arm joints (not grippers), and
+requires departure followed by a stable return. It cannot distinguish a completed
+cycle from a failed attempt that returns to home. A future high-level phase output
+can additionally gate completion on `return_home`; it is not fabricated here.
+
+| Variable | Default | Meaning |
+| --- | --- | --- |
+| `ALOHA_HOME_POSITION_TOLERANCE` | 0.05 rad | Maximum per-arm-joint home error |
+| `ALOHA_HOME_DEPARTURE_TOLERANCE` | 0.15 rad | At least one arm joint must first leave home |
+| `ALOHA_HOME_VELOCITY_TOLERANCE` | 0.1 rad/s | Maximum arm-joint velocity for settling |
+| `ALOHA_HOME_STABLE_SECONDS` | 0.3 s | Continuous stable feedback before switching |
+
+These are initial configurable thresholds, not calibrated hardware results.
+Verify the runtime reset pose matches the demonstrations' home before enabling
+this mode. A fast pass through home does not finish a cycle. Once slow and near
+home, policy playback stops and the normal actuator loop holds the home arm pose,
+keeping the measured gripper positions, until stable. Starting a new cycle away
+from home is rejected; use the explicit home command first. This avoids treating
+initial home as task completion and gives the operator an unlimited input window.
+
+Offline checks (no ROS or robot required):
+
+```bash
+PYTHONPATH=src:. python -m pytest \
+  src/openpi/robot/aloha_real/task_cycle_test.py \
+  src/openpi/robot/aloha_real/chunked_reset_test.py \
+  voice_assistant_web/backend/app/bottle_commands_test.py \
+  voice_assistant_web/backend/app/inference_settings_test.py
+```

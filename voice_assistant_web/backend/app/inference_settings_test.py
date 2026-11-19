@@ -71,8 +71,10 @@ def test_settings_and_runtime_end_to_end(client):
     runtime._policy = Mock()
     runtime._publish_runtime_state = Mock()
     runtime._handle_task(runtime._latest_task)
+    runtime._report_control_timing = Mock()
+    runtime._video_memory_preview = Mock()
     runtime._environment = Mock()
-    runtime._environment.get_observation.return_value = {}
+    runtime._environment.get_observation.return_value = {"images": {}, "origin_observation": {}}
     runtime._policy.infer.return_value = {}
     runtime._recent_puppet_actions = deque()
     runtime._step()
@@ -119,8 +121,10 @@ def test_live_settings_update_without_restarting_episode(client):
     runtime._current_task = {"task_num": "1", "task_name": "rinse bottle", "operator": "Jia Long", "rating": 1}
     runtime._policy = Mock()
     runtime._policy.infer.return_value = {}
+    runtime._report_control_timing = Mock()
+    runtime._video_memory_preview = Mock()
     runtime._environment = Mock()
-    runtime._environment.get_observation.return_value = {'origin_observation': {}}
+    runtime._environment.get_observation.return_value = {'images': {}, 'origin_observation': {}}
     runtime._subscribers = [Mock()]
     runtime._recent_puppet_actions = deque()
     runtime._publish_runtime_state = Mock()

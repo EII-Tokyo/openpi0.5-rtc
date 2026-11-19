@@ -21,6 +21,12 @@ services:
     environment:
       NVIDIA_VISIBLE_DEVICES: all
       NVIDIA_DRIVER_CAPABILITIES: compute,utility,video
+      # Enable only for an exp_insert policy; legacy checkpoints keep their existing controls.
+      ALOHA_TASK_MODE: "${ALOHA_TASK_MODE:-legacy}"
+      ALOHA_HOME_POSITION_TOLERANCE: "${ALOHA_HOME_POSITION_TOLERANCE:-0.05}"
+      ALOHA_HOME_DEPARTURE_TOLERANCE: "${ALOHA_HOME_DEPARTURE_TOLERANCE:-0.15}"
+      ALOHA_HOME_VELOCITY_TOLERANCE: "${ALOHA_HOME_VELOCITY_TOLERANCE:-0.1}"
+      ALOHA_HOME_STABLE_SECONDS: "${ALOHA_HOME_STABLE_SECONDS:-0.3}"
       ALOHA_ROLLOUT_DIR: /collection-data
       ALOHA_FOOT_SWITCH: /dev/input/by-id/usb-PCsensor_FootSwitch-event-kbd
       # Override these task prompts for the selected checkpoint when needed.
@@ -113,6 +119,7 @@ services:
     env_file:
       - ./voice_assistant_web/.env
     environment:
+      - ALOHA_TASK_MODE=${ALOHA_TASK_MODE:-legacy}
       - REDIS_HOST=${REDIS_HOST:-localhost}
       - REDIS_PORT=${REDIS_PORT:-6379}
       - REDIS_DB=${REDIS_DB:-0}

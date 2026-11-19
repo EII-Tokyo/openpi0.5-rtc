@@ -357,6 +357,10 @@ class AlohaRealEnvironment:
         if self._joint_history is not None:
             self._joint_history.append(time.monotonic(), self._ts.observation["qpos"])
 
+    def get_joint_feedback(self) -> dict:
+        """Read current subscriber feedback even while no policy steps are running."""
+        return {"qpos": self._env.get_qpos(), "qvel": self._env.get_qvel()}
+
     def is_episode_complete(self) -> bool:
         return False
 

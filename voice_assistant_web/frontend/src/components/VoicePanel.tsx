@@ -4,6 +4,7 @@ import { apiBase } from '../services/api'
 
 type Props = {
   mode: string
+  taskMode?: string
   inferencePrompt: string | null
   language: AppLanguage
   dispatchTask: (taskNumber: string) => Promise<void>
@@ -21,7 +22,7 @@ const extensionForAudioType = (mimeType: string) => {
   return 'webm'
 }
 
-export function VoicePanel({ mode, inferencePrompt, language, dispatchTask, dispatchError }: Props) {
+export function VoicePanel({ mode, taskMode, inferencePrompt, language, dispatchTask, dispatchError }: Props) {
   const t = translations[language]
   const [status, setStatus] = useState<'idle' | 'recording' | 'thinking' | 'speaking'>('idle')
   const [errorText, setErrorText] = useState('')
@@ -317,7 +318,14 @@ export function VoicePanel({ mode, inferencePrompt, language, dispatchTask, disp
         <div className="voice-transcript-panel">
           <div className="voice-shortcuts">
             <div className="task-grid compact">
-              {TASK_NUMBERS.map((taskNumber) => (
+              {taskMode === 'exp_insert' && [1, 2, 3].map((number) => (
+                <button key={`bottle_${number}`} type="button" className="task-card compact"
+                  onClick={() => void dispatchTask(`bottle_${number}`)}>
+                  <span className="task-key">{number}</span>
+                  <strong>{language === 'ja' ? 'ボトル' : 'Bottle'} {number}</strong>
+                </button>
+              ))}
+              {TASK_NUMBERS.filter(number => taskMode !== 'exp_insert' || !['1', '2'].includes(number)).map((taskNumber) => (
                 <button
                   key={taskNumber}
                   type="button"
@@ -325,7 +333,7 @@ export function VoicePanel({ mode, inferencePrompt, language, dispatchTask, disp
                   onClick={() => void dispatchTask(taskNumber)}
                   title={t.taskDescriptions[taskNumber]}
                 >
-                  <span className="task-key">{t.taskKey(taskNumber)}</span>
+                  <span className="task-key">{taskMode === 'exp_insert' && taskNumber === '3' ? 'H' : t.taskKey(taskNumber)}</span>
                   <strong>{t.taskShortLabels[taskNumber]}</strong>
                 </button>
               ))}

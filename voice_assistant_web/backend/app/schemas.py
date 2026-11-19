@@ -33,6 +33,9 @@ class RecordingCommand(BaseModel):
 
 
 class RuntimeStatePayload(BaseModel):
+    pending_task: dict[str, Any] | None = None
+    task_mode: str = "legacy"
+    home_settling: bool = False
     inference_prompt: str | None = None
     recording: dict[str, Any] = Field(default_factory=dict)
     camera_low_position: Literal["front", "rear"] | None = None

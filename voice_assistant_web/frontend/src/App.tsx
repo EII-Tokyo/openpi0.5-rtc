@@ -15,6 +15,9 @@ type RealtimeState = {
     mode: string
     current_task: string | null
     inference_prompt: string | null
+    pending_task?: { task_name: string; task_num: string } | null
+    task_mode?: string
+    home_settling?: boolean
     operator: string | null
     camera_low_position: 'front' | 'rear' | null
     rating: number | null
@@ -128,13 +131,19 @@ export default function App() {
       ) {
         return
       }
+      if (state.robot.task_mode === 'exp_insert' && event.key.toLowerCase() === 'h') {
+        if (!event.repeat) void dispatchTask('3')
+        return
+      }
       if (TASK_NUMBERS.includes(event.key as (typeof TASK_NUMBERS)[number])) {
-        void dispatchTask(event.key)
+        const task = state.robot.task_mode === 'exp_insert' && ['1', '2', '3'].includes(event.key)
+          ? `bottle_${event.key}` : event.key
+        if (!event.repeat) void dispatchTask(task)
       }
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [t.dispatchFailed, conditioningDrawerOpen, recordingDrawerOpen])
+  }, [t.dispatchFailed, conditioningDrawerOpen, recordingDrawerOpen, state.robot.task_mode])
 
   return (
     <main className="app-shell">
@@ -184,8 +193,20 @@ export default function App() {
             qpos={state.robot.qpos.length ? state.robot.qpos : null}
             language={language}
           />
+          {state.robot.task_mode === 'exp_insert' && (
+            <div role="status" aria-live="polite">
+              {language === 'ja' ? '次のタスク：' : 'Next task: '}
+              {state.robot.pending_task?.task_num?.replace('bottle_', '#') || '—'}
+              <div>{state.robot.home_settling
+                ? (language === 'ja' ? 'ホームで安定を確認中' : 'Settling at home')
+                : state.robot.mode === 'waiting'
+                  ? (language === 'ja' ? 'ボトル 1 / 2 / 3 を指定してください' : 'Waiting: select bottle 1 / 2 / 3')
+                  : (language === 'ja' ? '実行中：次の指示はホームに戻ってから開始' : 'Running: next instruction starts after home')}</div>
+            </div>
+          )}
           <VoicePanel
             mode={state.robot.mode}
+            taskMode={state.robot.task_mode}
             inferencePrompt={state.robot.inference_prompt}
             language={language}
             dispatchTask={dispatchTask}
