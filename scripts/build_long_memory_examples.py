@@ -27,20 +27,20 @@ def build(repo_list,root,cache_path,output):
     try:
         for repo,weight,ep,rows,timeline in episodes:
             ts=[float(r['timestamp']) for r in rows];split=episode_split(repo,ep,settings.split_seed);rng=random.Random(f'{repo}/{ep}/summary-v2')
-            # Include ordinary in-phase samples and delayed transition observations.
+            # Include ordinary samples and additional current-state samples near transitions.
             candidates={min(range(len(ts)),key=lambda j:abs(ts[j]-t)) for t in range(int(ts[-1])+1)}
             previous=None
             for row in rows:
                 value=parse_annotation(row['subtask'])
                 if value!=previous:
                     previous=value
-                    for delay in (0,.5,1.5,3,6):
-                        target=float(row['timestamp'])+delay
+                    for offset in (0,.5,1.5,3,6):
+                        target=float(row['timestamp'])+offset
                         if target<=ts[-1]:candidates.add(min(range(len(ts)),key=lambda j:abs(ts[j]-target)))
             for i in sorted(candidates):
                 if not rows[i].get('is_for_training',True):continue
                 now=ts[i];target=timeline.at(now)
-                prior=condition_at(timeline,max(0,now-settings.update_seconds),settings,training=True,rng=rng)
+                prior=condition_at(timeline,now,settings,training=True,rng=rng)
                 vi=video_indices(ts,now,seconds=settings.video_seconds,hz=settings.video_hz)
                 sample={'repo_id':repo,'episode_index':ep,'frame_index':rows[i]['frame_index'],'time_s':now,'split':split,'repo_weight':weight,
                         'previous_state':json.loads(encode_memory(prior)),'target_state':json.loads(encode_memory(target)),

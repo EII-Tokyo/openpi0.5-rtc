@@ -5,7 +5,7 @@ policy prompts. Annotation-derived teacher summaries and online VLM summaries
 share exactly the same three-string interface.
 """
 from __future__ import annotations
-import bisect,dataclasses,hashlib,json,math,random,re
+import bisect,dataclasses,hashlib,json,random
 from pathlib import Path
 
 @dataclasses.dataclass(frozen=True)
@@ -14,10 +14,8 @@ class LongMemoryConfig:
     video_seconds:float=3.0
     video_hz:float=2.0
     max_memory_chars:int=1200
-    empty_probability:float=.2
-    partial_probability:float=.3
-    stale_probability:float=.2
-    max_stale_seconds:float=9.0
+    memory_dropout_probability:float=.2
+    subtask_dropout_probability:float=.2
     reset_on_home:bool=True
     split_seed:int=20261119
     summary_cache_path:str='/workspace/long-memory-hierarchy-20261119/completed-step-dropout-audit/teacher.json'
@@ -25,10 +23,8 @@ class LongMemoryConfig:
     def __post_init__(self):
         if min(self.update_seconds,self.video_seconds,self.video_hz,self.max_memory_chars)<=0:
             raise ValueError('Invalid summary/video budget')
-        if not 0<=self.empty_probability<=1 or not 0<=self.partial_probability<=1 or self.empty_probability+self.partial_probability>1:
-            raise ValueError('Invalid memory dropout probabilities')
-        if not 0<=self.stale_probability<=1 or self.max_stale_seconds<0:
-            raise ValueError('Invalid memory lag')
+        if any(not 0 <= p <= 1 for p in (self.memory_dropout_probability, self.subtask_dropout_probability)):
+            raise ValueError('Invalid dropout probability')
 
 @dataclasses.dataclass(frozen=True)
 class MemoryState:
@@ -59,15 +55,13 @@ def memory_prompt(state:MemoryState)->str:
     return f'Bottle description: {state.bottle_description}\nMemory: {state.memory}\nCurrent task: {state.current_task}'
 
 
-def drop_memory(state:MemoryState,rng:random.Random,*,empty_probability=.2,partial_probability=.3)->MemoryState:
-    """Drop semantic sentences from the single summary; keep task and identity separate."""
-    sentences=[s.strip() for s in re.split(r'(?<=[.!?])\s+',state.memory) if s.strip()]
-    draw=rng.random()
-    if draw<empty_probability:return dataclasses.replace(state,memory='')
-    if draw>=empty_probability+partial_probability or len(sentences)<2:return state
-    count=rng.randint(1,len(sentences)-1)
-    keep=sorted(rng.sample(range(len(sentences)),count))
-    return dataclasses.replace(state,memory=' '.join(sentences[i] for i in keep))
+def drop_memory(state:MemoryState, records, *, memory_drop=False, subtask_drop=False)->MemoryState:
+    """Remove ONLY the latest completed record; independently blank the current task."""
+    if ' '.join(records) != state.memory:
+        raise ValueError('Completed records must reconstruct the exact clean memory')
+    return dataclasses.replace(state,
+        memory=' '.join(records[:-1]) if memory_drop and records else state.memory,
+        current_task='' if subtask_drop else state.current_task)
 
 
 class MemoryTimeline:
@@ -81,27 +75,42 @@ class MemoryTimeline:
             if x.get('source_max_time_s',x['observed_through_s'])>x['observed_through_s']+1e-6:
                 raise ValueError('Teacher summary used future annotation')
             decode_memory(encode_memory(MemoryState(**x['state'])))
+            records=x.get('completed_records')
+            if not isinstance(records,list) or ' '.join(records)!=x['state']['memory']:
+                raise ValueError('Explicit completed-record boundaries required; regenerate old caches')
 
     def at(self,time_s):
         i=bisect.bisect_right(self.times,time_s)-1
         return MemoryState() if i<0 else MemoryState(**self.updates[i]['state'])
 
+    def records_at(self,time_s):
+        i=bisect.bisect_right(self.times,time_s)-1
+        if i<0:return []
+        update=self.updates[i]
+        records=update['completed_records']
+        if not all(isinstance(x,str) and x for x in records) or ' '.join(records)!=update['state']['memory']:
+            raise ValueError('Invalid completed-record boundaries')
+        return list(records)
+
 
 def memory_augmentation(timeline,time_s,settings,*,training,rng=None,clean=None):
-    """Delay/drop only memory. Identity and the current task are never corrupted."""
+    """Use the current state directly. No timestamp shifting or old-state lookup."""
     clean=timeline.at(time_s) if clean is None else clean
-    if not training:return clean,clean,{'delay_seconds':0.0,'memory_source_time_s':time_s,'dropout_applied':False}
-    if rng is None:raise ValueError('Training corruption requires an RNG')
-    source=math.floor(time_s/settings.update_seconds)*settings.update_seconds
-    extra=0.0
-    if rng.random()<settings.stale_probability:
-        extra=rng.uniform(0,settings.max_stale_seconds)
-        source-=extra
-    source=max(0.0,source)  # Never query before EP start or blank the current instruction.
-    delayed=dataclasses.replace(clean,memory=timeline.at(source).memory)
-    augmented=drop_memory(delayed,rng,empty_probability=settings.empty_probability,partial_probability=settings.partial_probability)
-    assert augmented.current_task==clean.current_task and augmented.bottle_description==clean.bottle_description
-    return delayed,augmented,{'delay_seconds':max(0.0,time_s-source),'extra_delay_seconds':extra,'memory_source_time_s':source,'dropout_applied':augmented.memory!=delayed.memory}
+    records=timeline.records_at(time_s)
+    if training and rng is None:raise ValueError('Training dropout requires an RNG')
+    md=training and rng.random()<settings.memory_dropout_probability
+    td=training and rng.random()<settings.subtask_dropout_probability
+    augmented=drop_memory(clean,records,memory_drop=md,subtask_drop=td)
+    return clean,augmented,{
+        'memory_dropout_probability':settings.memory_dropout_probability,
+        'subtask_dropout_probability':settings.subtask_dropout_probability,
+        'memory_dropout_draw':bool(md),'subtask_dropout_draw':bool(td),
+        'memory_dropout_applied':bool(md and records),
+        'subtask_dropout_applied':bool(td and clean.current_task),
+        'removed_latest_record':records[-1] if md and records else '',
+        'completed_records_before':records,
+        'completed_records_after':records[:-1] if md and records else records,
+    }
 
 
 def condition_at(timeline,time_s,settings,*,training,rng=None):

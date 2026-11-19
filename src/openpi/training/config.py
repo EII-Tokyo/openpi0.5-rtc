@@ -3053,7 +3053,7 @@ _CONFIGS.append(
     TrainConfig(
         name='eii_twist_cam3_fullft_25repo_h100x2_224_completedmem3s_drop_bs16ga16_5k_20261119',
         project_name='openpi',
-        exp_name='twist_completedmem3s_missing_stale_seed42_pilot_20261119',
+        exp_name='twist_completedmem_latestdrop20_taskdrop20_seed42_pilot_20261119',
         model=pi0_config.Pi0Config(
             image_resolution=(224, 224),
             max_token_len=1024,
@@ -3139,7 +3139,7 @@ _CONFIGS.append(
                 use_quantile_norm=True,
                 video_memory_num_frames=1,
                 video_memory_stride_seconds=1.0,
-                long_memory=_transforms.LongMemoryConfig(update_seconds=3.0, video_seconds=3.0, video_hz=2.0, max_memory_chars=1200, empty_probability=0.2, partial_probability=0.3, stale_probability=0.2, max_stale_seconds=9.0, split_seed=20261119),
+                long_memory=_transforms.LongMemoryConfig(update_seconds=3.0, video_seconds=3.0, video_hz=2.0, max_memory_chars=1200, memory_dropout_probability=0.2, subtask_dropout_probability=0.2, split_seed=20261119),
                 adapt_to_pi=True,
                 use_delta_joint_actions=True,
                 action_dim=32,
@@ -3157,7 +3157,7 @@ _CONFIGS.append(
         overwrite=False,
         resume=False,
         wandb_enabled=True,
-        policy_metadata={'conditioning': 'completed_step_memory_v3', 'task_scope': 'twist_only', 'source_config': 'eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo'},
+        policy_metadata={'conditioning': 'completed_step_memory_latestdrop20_taskdrop20_v4', 'task_scope': 'twist_only', 'source_config': 'eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo'},
         fsdp_devices=2,
     )
 )
@@ -3168,7 +3168,7 @@ _CONFIGS.append(
     TrainConfig(
         name='eii_twist_cam3_fullft_25repo_h100x2_224_completedmem3s_drop_bs16ga16_500step_pilot_20261119',
         project_name='openpi',
-        exp_name='twist_completedmem3s_missing_stale_seed42_stage1_500_20261119',
+        exp_name='twist_completedmem_latestdrop20_taskdrop20_seed42_stage1_500_20261119',
         model=pi0_config.Pi0Config(
             image_resolution=(224, 224),
             max_token_len=1024,
@@ -3254,7 +3254,7 @@ _CONFIGS.append(
                 use_quantile_norm=True,
                 video_memory_num_frames=1,
                 video_memory_stride_seconds=1.0,
-                long_memory=_transforms.LongMemoryConfig(update_seconds=3.0, video_seconds=3.0, video_hz=2.0, max_memory_chars=1200, empty_probability=0.2, partial_probability=0.3, stale_probability=0.2, max_stale_seconds=9.0, split_seed=20261119),
+                long_memory=_transforms.LongMemoryConfig(update_seconds=3.0, video_seconds=3.0, video_hz=2.0, max_memory_chars=1200, memory_dropout_probability=0.2, subtask_dropout_probability=0.2, split_seed=20261119),
                 adapt_to_pi=True,
                 use_delta_joint_actions=True,
                 action_dim=32,
@@ -3272,11 +3272,28 @@ _CONFIGS.append(
         overwrite=False,
         resume=False,
         wandb_enabled=True,
-        policy_metadata={'conditioning': 'completed_step_memory_v3', 'task_scope': 'twist_only', 'source_config': 'eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo'},
+        policy_metadata={'conditioning': 'completed_step_memory_latestdrop20_taskdrop20_v4', 'task_scope': 'twist_only', 'source_config': 'eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo'},
         fsdp_devices=2,
     )
 )
 
+
+# CPU-only report fixture. This does not modify any production training mixture.
+_CONFIGS.append(TrainConfig(
+    name='eii_twist_many_platform_ep2_memory_latestdrop20_taskdrop20_report_20261119',
+    model=pi0_config.Pi0Config(image_resolution=(224,224),max_token_len=1024,training_time_rtc=False,rtc_max_delay=10),
+    data=LeRobotAlohaDataConfig(
+        repo_ids=['lyl472324464/2026.03.16_twist_many-without-rinse'],
+        transform_pipeline=_transforms.AlohaTransformPipeline(
+            include_low=False,use_good_bad_action_prompt=False,image_resolution=(224,224),
+            max_token_len=1024,discrete_state_input=True,
+            assets=_transforms.AssetsConfig(assets_dir='assets/eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo',asset_id='trossen'),
+            use_quantile_norm=True,video_memory_num_frames=1,
+            long_memory=_transforms.LongMemoryConfig(memory_dropout_probability=.2,subtask_dropout_probability=.2,
+                summary_cache_path='/home/eii/long-memory-hierarchy-20261119/artifacts/project-ep2-report/teacher.json'),
+            adapt_to_pi=True,use_delta_joint_actions=True,action_dim=32)),
+    batch_size=1,num_workers=0,wandb_enabled=False,
+    policy_metadata={'purpose':'CPU native DataLoader audit only; no GPU training'}))
 
 if len({config.name for config in _CONFIGS}) != len(_CONFIGS):
     raise ValueError("Config names must be unique.")

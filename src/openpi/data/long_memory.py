@@ -69,9 +69,8 @@ class LongMemoryDataset:
         fields=parse_annotation(sample['subtask'])
         if fields is None:raise ValueError('Sample has no annotated current task')
         clean=dataclasses.replace(clean,bottle_description=fields[0] or clean.bottle_description,current_task=fields[2])
-        delayed,memory,augmentation=memory_augmentation(self.timelines[key],time_s,self.settings,training=True,rng=random,clean=clean)
+        clean,memory,augmentation=memory_augmentation(self.timelines[key],time_s,self.settings,training=True,rng=random,clean=clean)
         sample['long_memory_before_augmentation']=encode_memory(clean)
-        sample['long_memory_before_dropout']=encode_memory(delayed)
         sample['memory_augmentation']=augmentation
         from openpi.shared.completed_step_memory import parse_completed_memory
         parse_completed_memory(memory.memory)

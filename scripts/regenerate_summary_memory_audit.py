@@ -1,16 +1,12 @@
 """Paper-inspired compact-summary labels and independent visual high-level audit.
 
-Teacher labels use only causal human annotations. Visual predictions use only
+Visual predictions use only
 previous predicted state and native-loader images. These sources never mix.
 """
 import argparse,base64,copy,dataclasses,json,math,pathlib,time,urllib.request
 from openpi.shared.long_memory import MemoryState,encode_memory,decode_memory,parse_annotation
 from openpi.shared.completed_step_memory import validate_completed_progress
 from openpi_client.runtime.long_memory_high_level import SYSTEM_PROMPT,MEMORY_SCHEMA,parse_update
-
-from openpi.shared.completed_step_memory import COMPLETED_FACTS
-TEACHER_PROMPT="Maintain accumulating COMPLETED-action memory using only the previous completed memory and the newly observed human annotation evidence. Keep earlier confirmed completion sentences unchanged and append only newly confirmed successes. Never rewrite this as a current-state summary or discard completed actions before cycle completion. Do not infer success from an intention, a normal/good action rating, a later instruction, an empty table, or an EP ending. Explicit state 'Bottle in left hand' supports successful pickup; 'cap removed' supports successful uncapping. Bin placement and home completion require explicit confirming evidence; if those flags are absent, do not invent them. Use only the fixed completion sentences below, in completion order, concatenated as ONE paragraph, with no duplicates. Bottle description and current task are supplied separately. No events or timestamps. Output only a JSON object with the memory string.\n"+'\n'.join(COMPLETED_FACTS.values())
-
 
 def key_from(path):
     for line in path.read_text().splitlines():
@@ -34,36 +30,6 @@ def call(key,system,user,schema,raw_path):
     usage=raw['usage'];details=usage.get('input_tokens_details',{});cached=details.get('cached_tokens',0);write=details.get('cache_write_tokens',0)
     cost=((usage['input_tokens']-cached-write)*.1+cached*.01+write*.125+usage['output_tokens']*.5)/1e6
     return payload,{'latency_seconds':elapsed,'usage':usage,'cost_usd':cost,'response_id':raw['id'],'actual_model':raw['model']}
-
-
-def teacher(args):
-    key=key_from(args.credentials);data=json.loads(args.labels.read_text());rows=data['rows'];updates=[]
-    times=[float(r['timestamp']) for r in rows];last=float(times[-1]);previous='';consumed=0
-    for n,t in enumerate([float(x) for x in range(0,math.floor(last)+1,3)]):
-        eligible=[r for r in rows if float(r['timestamp'])<=t+1e-7]
-        current=eligible[-1];fields=parse_annotation(current['subtask']);evidence=[]
-        for r in eligible[consumed:]:
-            f=parse_annotation(r['subtask'])
-            if f is not None:
-                item={'bottle_description':f[0],'annotated_state':f[1],'current_task':f[2]}
-                if not evidence or item!=evidence[-1]:evidence.append(item)
-        consumed=len(eligible)
-        payload={'overall_goal':'Twist off the bottle cap and dispose of the bottle and cap into their designated bins, then return home.',
-                 'previous_memory':previous,'new_annotation_evidence':evidence,'current_annotated_state':fields[1],
-                 'current_task':fields[2],'outcome_labels':'No explicit success/failure flag is available.'}
-        result,metrics=call(key,TEACHER_PROMPT,[{'type':'input_text','text':json.dumps(payload,ensure_ascii=False)}],
-                {'type':'object','properties':{'memory':{'type':'string','maxLength':1200}},'required':['memory'],'additionalProperties':False},args.output/'teacher-raw'/f'{n}.json')
-        validate_completed_progress(previous,result['memory'])
-        previous=result['memory'];description=fields[0] or (updates[-1]['state']['bottle_description'] if updates else '')
-        state=MemoryState(description,previous,fields[2]);decode_memory(encode_memory(state))
-        updates.append({'observed_through_s':t,'source_max_time_s':float(current['timestamp']),'source_frame_index':current['frame_index'],
-                        'state':dataclasses.asdict(state),'annotation_evidence':evidence,**metrics})
-        print('TEACHER',t,state.memory,flush=True)
-    c=data['chosen'];result={'schema_version':2,'model':'gpt-6-luna','system_prompt':TEACHER_PROMPT,'source_files':data['files'],
-        'episodes':{c['repo_id']:{str(c['episode_index']):updates}},
-        'coverage':'ONE EP AUDIT ONLY. This cache is not prepared for general training.',
-        'home_completion':'No annotation-only assumption of home completion. Online visual model must confirm empty parked grippers; every new EP resets state.'}
-    (args.output/'teacher.json').write_text(json.dumps(result,indent=2,ensure_ascii=False))
 
 
 def visual(args):
@@ -108,5 +74,5 @@ def visual(args):
 
 
 if __name__=='__main__':
-    p=argparse.ArgumentParser();p.add_argument('mode',choices=['teacher','visual']);p.add_argument('--labels',type=pathlib.Path);p.add_argument('--samples',type=pathlib.Path);p.add_argument('--output',type=pathlib.Path,required=True);p.add_argument('--credentials',type=pathlib.Path,default=pathlib.Path('/home/eii/openpi0.5-rtc/.env'))
-    a=p.parse_args();a.output.mkdir(parents=True,exist_ok=True);teacher(a) if a.mode=='teacher' else visual(a)
+    p=argparse.ArgumentParser();p.add_argument('mode',choices=['visual']);p.add_argument('--labels',type=pathlib.Path);p.add_argument('--samples',type=pathlib.Path);p.add_argument('--output',type=pathlib.Path,required=True);p.add_argument('--credentials',type=pathlib.Path,default=pathlib.Path('/home/eii/openpi0.5-rtc/.env'))
+    a=p.parse_args();a.output.mkdir(parents=True,exist_ok=True);visual(a)
