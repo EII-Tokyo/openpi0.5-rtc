@@ -22,3 +22,11 @@ def test_intentions_and_repeated_attempts_are_not_completed_memory():
 def test_complete_cycle_can_clear_optional_branch_history():
     validate_completed_progress(COMPLETED_FACTS['bottle_bin'],'',cycle_complete=True)
     with pytest.raises(ValueError):validate_completed_progress(COMPLETED_FACTS['bottle_bin'],'')
+
+
+def test_compound_stage_is_one_record_and_split_tasks_stay_exact():
+    from openpi.shared.completed_step_memory import completed_record_for_task
+    assert completed_record_for_task('Bottle to left trash bin, cap to right trash bin')==COMPLETED_FACTS['bottle_bin']+' '+COMPLETED_FACTS['cap_bin']
+    assert completed_record_for_task('Adjust bottle position')==COMPLETED_FACTS['adjust']
+    assert completed_record_for_task('Pick up with left hand')==COMPLETED_FACTS['pickup']
+    assert completed_record_for_task('Return to initial pose')==''

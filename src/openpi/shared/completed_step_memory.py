@@ -23,3 +23,12 @@ def validate_completed_progress(previous,new,*,cycle_complete=False):
         if new:raise ValueError('Completed cycle must clear its memory')
         return
     if current[:len(old)]!=old:raise ValueError('Completed progress cannot shrink or reorder before cycle completion')
+
+
+def completed_record_for_task(task):
+    """One labeled stage becomes one completed record, including compound stages."""
+    if task=='Adjust bottle position':return COMPLETED_FACTS['adjust']
+    if task=='Pick up with left hand':return COMPLETED_FACTS['pickup']
+    stage=next((s for s in SUBTASKS if task==s['current_task'] or task in s['aliases']),None)
+    if stage is None:raise ValueError('Unmapped human subtask: '+task)
+    return ' '.join(COMPLETED_FACTS[key] for key in stage['completed_facts'])

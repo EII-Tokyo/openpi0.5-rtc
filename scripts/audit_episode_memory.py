@@ -65,7 +65,7 @@ def main(a):
             now=float(raw['timestamp']);current=images(raw,local)
             record={'number':i+1,'global_index':global_indices[i],'local_index':local,'frame_index':int(raw['frame_index']),
                     'episode_index':episode,'time_s':now,'task':raw['task'],'current_images':current,
-                    'annotation':dict(zip(('bottle_description','annotated_bottle_state','current_task'),parse_annotation(raw['subtask']) or ('','',''))),
+                    'annotation':dict(zip(('bottle_description','current_task'),parse_annotation(raw['subtask']) or ('',''))),
                     'teacher_state':json.loads(encode_memory(native.timelines[(dataset_index,episode)].at(now))),
                     'actual_training_memory':json.loads(raw['long_memory']),
                     'before_augmentation':json.loads(raw['long_memory_before_augmentation']),

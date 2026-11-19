@@ -117,22 +117,19 @@ def condition_at(timeline,time_s,settings,*,training,rng=None):
     return memory_augmentation(timeline,time_s,settings,training=training,rng=rng)[1]
 
 
-def parse_annotation(raw) -> tuple[str, str, str] | None:
-    """Keep actual labeled descriptions/states; never infer completion from a future label."""
-    obj = json.loads(raw) if isinstance(raw, str) else raw
-    if not isinstance(obj, dict):
-        raise ValueError("Expected structured bottle annotation")
-    description = obj.get("bottle_description")
-    if isinstance(description, list):
-        description = next((x.strip() for x in description if isinstance(x, str) and x.strip()), "")
-    if description is None:
-        description = ""
-    observation, intent = obj.get("bottle_state") or "", obj.get("subtask") or ""
-    if not all(isinstance(x, str) for x in (description, observation, intent)):
-        raise ValueError("Malformed annotation fields")
-    if not observation.strip() and not intent.strip():
-        return None  # An explicitly empty label supplies no new evidence.
-    return description.strip(), observation.strip() or "Unknown (not annotated)", intent.strip() or "Unknown (not annotated)"
+def parse_annotation(raw) -> tuple[str, str] | None:
+    """Read only bottle identity and the human-labeled current subtask."""
+    obj=json.loads(raw) if isinstance(raw,str) else raw
+    if not isinstance(obj,dict):raise ValueError('Expected structured bottle annotation')
+    description=obj.get('bottle_description')
+    if isinstance(description,list):
+        description=next((x.strip() for x in description if isinstance(x,str) and x.strip()),'')
+    description='' if description is None else description
+    task=obj.get('subtask') or ''
+    if not isinstance(description,str) or not isinstance(task,str):
+        raise ValueError('Malformed annotation fields')
+    if not task.strip():return None
+    return description.strip(),task.strip()
 
 
 def episode_split(repo_id: str, episode_index: int, seed: int = 20261119) -> str:

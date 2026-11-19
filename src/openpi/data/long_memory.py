@@ -68,7 +68,7 @@ class LongMemoryDataset:
         # The instruction is this frame's actual annotation, independent of memory corruption.
         fields=parse_annotation(sample['subtask'])
         if fields is None:raise ValueError('Sample has no annotated current task')
-        clean=dataclasses.replace(clean,bottle_description=fields[0] or clean.bottle_description,current_task=fields[2])
+        clean=dataclasses.replace(clean,bottle_description=fields[0] or clean.bottle_description,current_task=fields[1])
         clean,memory,augmentation=memory_augmentation(self.timelines[key],time_s,self.settings,training=True,rng=random,clean=clean)
         sample['long_memory_before_augmentation']=encode_memory(clean)
         sample['memory_augmentation']=augmentation

@@ -70,3 +70,10 @@ def test_record_boundaries_are_required_instead_of_guessing_sentence_boundaries(
     s=dataclasses.asdict(MemoryState('b','I picked up the bottle with my left gripper.','Unscrew cap'))
     with pytest.raises(ValueError,match='boundaries'):
         MemoryTimeline([{'observed_through_s':0,'state':s}])
+
+
+def test_annotation_reads_only_identity_and_subtask():
+    from openpi.shared.long_memory import parse_annotation
+    assert parse_annotation({'bottle_description':['Bottle A'],'subtask':'Unscrew cap','unrelated':object()})==('Bottle A','Unscrew cap')
+    assert parse_annotation({'bottle_description':'Bottle A','subtask':''}) is None
+    assert parse_annotation({'subtask':'Return to initial pose'})==('','Return to initial pose')
