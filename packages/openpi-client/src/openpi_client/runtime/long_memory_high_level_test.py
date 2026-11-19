@@ -50,3 +50,14 @@ def test_joint_reset_keeps_memory_and_does_not_finish_task():
     s.future=Future();s.future.set_result((s.generation,2,parsed,.1));s._poll()
     assert s.memory==state and s.completed_cycles==0 and s.frames
     s.close()
+
+
+def test_gpt_output_has_exactly_eight_task_options_and_never_empty():
+    from openpi_client.runtime.long_memory_high_level import MEMORY_SCHEMA
+    from openpi.shared.completed_step_memory import CURRENT_TASKS
+    assert MEMORY_SCHEMA['properties']['current_task']['enum']==list(CURRENT_TASKS)
+    assert len(CURRENT_TASKS)==8
+    for complete in (False,True):
+        with pytest.raises(ValueError):parse_update({'bottle_description':'','memory':'','current_task':'','cycle_complete':complete})
+    x=parse_update({'bottle_description':'','memory':'','current_task':HOME_EMPTY,'cycle_complete':True})
+    assert x.cycle_complete and x.state.current_task==HOME_EMPTY
