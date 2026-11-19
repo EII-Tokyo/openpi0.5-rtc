@@ -28,7 +28,7 @@ class LongMemoryDataset:
                 key = (dataset_index, int(episodes[start]))
                 if key in self.timelines:
                     raise ValueError("An episode appears in disjoint blocks")
-                self.timelines[key] = MemoryTimeline(times[start:end], labels[start:end], eligible[start:end])
+                self.timelines[key] = MemoryTimeline(times[start:end], labels[start:end], eligible[start:end], reset_on_home=settings.reset_on_home)
                 if episode_split(base.repo_id, key[1], settings.split_seed) != "train":
                     mask[start:end] = False
             masks.append(mask)

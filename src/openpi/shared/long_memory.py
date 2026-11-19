@@ -24,6 +24,7 @@ class LongMemoryConfig:
     partial_probability: float = 0.3
     stale_probability: float = 0.2
     max_stale_seconds: float = 9.0
+    reset_on_home: bool = True
     split_seed: int = 20261119
 
     def __post_init__(self):
@@ -73,12 +74,21 @@ def episode_split(repo_id: str, episode_index: int, seed: int = 20261119) -> str
     return "test" if value < .1 else "validation" if value < .2 else "train"
 
 
+def is_return_home(intent: str) -> bool:
+    """Recognize annotated returning intent, never equate its start with completion."""
+    intent = intent.lower().replace("_", " ")
+    return "return" in intent and ("home" in intent or "initial" in intent)
+
+
 class MemoryTimeline:
-    def __init__(self, timestamps, annotations, eligible=None):
+    def __init__(self, timestamps, annotations, eligible=None, *, reset_on_home=False):
         if len(timestamps) != len(annotations) or not len(timestamps):
             raise ValueError("Memory timeline must contain one aligned episode")
         self.events = []
+        self.cycle_starts = []
+        self.terminal_home_complete_at = None
         previous = None
+        previous_was_home = False
         last_time = -1.0
         for i, (timestamp, annotation) in enumerate(zip(timestamps, annotations, strict=True)):
             timestamp = float(timestamp)
@@ -90,14 +100,27 @@ class MemoryTimeline:
             fields = parse_annotation(annotation)
             if fields is None:
                 continue
+            returning_home = is_return_home(fields[2])
+            if reset_on_home and previous_was_home and not returning_home:
+                # Only a newly observed next phase establishes this within-EP boundary.
+                self.cycle_starts.append(timestamp)
+                previous = None
+            previous_was_home = returning_home
             if fields != previous:
                 self.events.append(MemoryEntry(timestamp, *fields))
                 previous = fields
         self.times = [entry.time_s for entry in self.events]
+        if reset_on_home and previous_was_home:
+            # EP end is an explicit trajectory boundary, not the beginning of return-home intent.
+            self.terminal_home_complete_at = last_time
 
     def at(self, time_s: float, max_entries: int = 6) -> tuple[MemoryEntry, ...]:
+        if self.terminal_home_complete_at is not None and time_s >= self.terminal_home_complete_at:
+            return ()
         end = bisect.bisect_right(self.times, time_s)
-        return tuple(self.events[max(0, end - max_entries):end])
+        boundary = bisect.bisect_right(self.cycle_starts, time_s)
+        start = bisect.bisect_left(self.times, self.cycle_starts[boundary-1]) if boundary else 0
+        return tuple(self.events[max(start, end - max_entries):end])
 
 
 def drop_memory(entries, rng: random.Random, *, empty_probability=0.2, partial_probability=0.3):

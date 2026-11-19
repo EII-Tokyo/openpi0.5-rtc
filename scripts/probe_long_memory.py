@@ -43,7 +43,9 @@ def main(a):
     initial=held=None
     with a.manifest.open() as f:
         for line in f:
-            row=json.loads(line);last=row['memory_target']['events'][-1]
+            row=json.loads(line)
+            if not row['memory_target']['events']:continue
+            last=row['memory_target']['events'][-1]
             if row['time_s']==0 and initial is None:initial=row
             if 'left hand and capped' in last['observation'].lower() and row['time_s']>=6 and held is None:held=row
             if initial and held:break
@@ -65,7 +67,7 @@ def main(a):
             started=time.monotonic()
             try:
                 memory=backend(task='Twist off bottle caps and dispose of bottles/caps into their designated bins.',memory=(),frames=frames,now_s=sample['time_s'])
-                record.update(status='completed',memory_output=json.loads(encode_memory(memory)),latency_seconds=time.monotonic()-started)
+                record.update(status='completed',memory_output=json.loads(encode_memory(getattr(memory,"events",memory))),latency_seconds=time.monotonic()-started)
             except urllib.error.HTTPError as exc:
                 record.update(status='api_error',http_status=exc.code)
             except Exception as exc:

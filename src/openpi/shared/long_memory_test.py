@@ -84,3 +84,21 @@ def test_dropout_mixture_is_not_uniform_count_overdropping():
 def test_serialized_memory_time_never_rounds_into_the_future():
     event = MemoryEntry(1.2346, "b", "held", "unscrew")
     assert decode_memory(encode_memory([event]), now_s=1.2346)[0].time_s <= 1.2346
+
+
+def test_home_intent_is_not_completion_and_next_bottle_starts_clean():
+    t = MemoryTimeline([0,1,2,3,4], [label('held bottle A','unscrew'),label('empty hands','Return to initial pose'),
+        label('empty hands','Return to initial pose'),label('bottle B on table','pick up'),label('bottle B held','unscrew')],reset_on_home=True)
+    assert t.at(1)[-1].intent == 'Return to initial pose'
+    assert len(t.at(2)) == 2
+    assert len(t.at(3)) == 1 and t.at(3)[0].time_s == 3
+    assert all(e.time_s >= 3 for e in t.at(4))
+
+
+def test_terminal_home_and_new_episode_have_no_old_memory():
+    t = MemoryTimeline([0,1,2],[label('held','unscrew'),label('empty','return home'),label('empty','return home')],reset_on_home=True)
+    assert t.at(1)
+    assert t.at(2) == ()
+    assert t.at(10) == ()
+    new = MemoryTimeline([0],[label('new bottle','pick up')],reset_on_home=True)
+    assert len(new.at(0)) == 1 and new.at(0)[0].observation == 'new bottle'
