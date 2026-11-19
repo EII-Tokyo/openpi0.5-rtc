@@ -446,6 +446,9 @@ def create_torch_dataset(data_config: _config.LeRobotAlohaDataConfig, action_hor
     if transform_pipeline.joint_position_history is not None:
         dataset = JointPositionHistoryDataset(dataset, raw_dataset=raw_dataset,
             settings=transform_pipeline.joint_position_history, trainable_mask=trainable_mask)
+    if transform_pipeline.long_memory is not None:
+        from openpi.data.long_memory import LongMemoryDataset
+        dataset = LongMemoryDataset(dataset, raw_dataset=raw_dataset, settings=transform_pipeline.long_memory)
     return dataset
 
 

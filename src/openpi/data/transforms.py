@@ -15,6 +15,7 @@ import numpy as np
 from openpi.data import tokenizer as _tokenizer
 from openpi.data.temporal_mosaic import HighCameraMosaicConfig
 from openpi.data.joint_position_history import JointPositionHistoryConfig
+from openpi.shared.long_memory import LongMemoryConfig
 import openpi.shared.download as _download
 from openpi.shared import array_typing as at
 from openpi.shared import normalize as _normalize_lib
@@ -270,7 +271,7 @@ class PrepareJointPositionHistory(DataTransformFn):
         if stats.q01 is None or stats.q99 is None:
             raise ValueError("FAST position history requires checkpoint state quantiles")
         values = (values - stats.q01[..., :14]) / (stats.q99[..., :14] - stats.q01[..., :14] + 1e-6) * 2 - 1
-        values = pad_to_dim(np.clip(values, -1, 1), self.settings.model_dim)
+        values = pad_to_dim(values, self.settings.model_dim)
         return {**data, "joint_position_history": values.astype(np.float32)}
 
 
@@ -279,6 +280,7 @@ class TokenizePrompt(DataTransformFn):
     tokenizer: _tokenizer.PaligemmaTokenizer
     discrete_state_input: bool = False
     joint_position_history: JointPositionHistoryConfig | None = None
+    long_memory: LongMemoryConfig | None = None
 
     def __call__(self, data: DataDict) -> DataDict:
         if (prompt := data.pop("prompt", None)) is None:
@@ -295,6 +297,17 @@ class TokenizePrompt(DataTransformFn):
 
         data.pop("subtask", None)  # Ignore historical good/bad action annotations.
         metadata = {key: data.pop(key) for key in ("operator", "rating", "rating_is_valid", "camera_low_position") if key in data}
+        memory = data.pop("long_memory", None)
+        memory_time = data.pop("memory_time_s", None)
+        if self.long_memory is not None:
+            if memory is None:
+                raise ValueError("This checkpoint requires explicit long_memory, including an empty memory at reset")
+            from openpi.shared.long_memory import decode_memory
+            if memory_time is None or not np.isfinite(float(memory_time)) or float(memory_time) < 0:
+                raise ValueError("Long-memory conditioning requires a finite episode-relative memory_time_s")
+            decode_memory(str(memory), now_s=float(memory_time), max_entries=self.long_memory.max_entries)
+            metadata["long_memory"] = str(memory)
+            metadata["memory_time_s"] = float(memory_time)
         history = data.pop("joint_position_history", None)
         if self.joint_position_history is not None:
             if history is None:
@@ -440,6 +453,7 @@ class AlohaTransformPipeline:
     video_memory_stride_seconds: float = 1.0
     high_camera_mosaic: HighCameraMosaicConfig | None = None
     joint_position_history: JointPositionHistoryConfig | None = None
+    long_memory: LongMemoryConfig | None = None
     adapt_to_pi: bool = True
     use_delta_joint_actions: bool = True
     action_dim: int = ALOHA_MODEL_ACTION_DIM
@@ -502,7 +516,7 @@ class AlohaTransformPipeline:
         }
         if include_actions:
             structure["actions"] = "action"
-        return RepackTransform(structure, optional_keys=("operator", "rating", "rating_is_valid", "camera_low_position", "joint_position_history"))
+        return RepackTransform(structure, optional_keys=("operator", "rating", "rating_is_valid", "camera_low_position", "joint_position_history", "long_memory", "memory_time_s"))
 
     def _model_input_transforms(self) -> list[DataTransformFn]:
         transforms: list[DataTransformFn] = [
@@ -524,6 +538,7 @@ class AlohaTransformPipeline:
                     _tokenizer.PaligemmaTokenizer(self.max_token_len),
                     discrete_state_input=self.discrete_state_input,
                     joint_position_history=self.joint_position_history,
+                    long_memory=self.long_memory,
                 ),
                 PadStatesAndActions(self.action_dim),
             ]
