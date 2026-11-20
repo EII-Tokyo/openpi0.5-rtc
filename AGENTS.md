@@ -40,3 +40,6 @@ Applies to all platform users and to launches performed by Codex or manually.
 - This continuation uses the user's explicitly authorized Vast H100 instance, native Python and a literal TrainConfig. The host200-specific shared-source rules still apply to launches on200. Pause/save before changing any running source or dataset.
 
 - Latest user update: bottle description also drops independently with20% probability in training. Memory latest-record20%, current_task20%, description20%; global task stays intact, evaluation/inference applies none. All three draws is0.8%. Record description draw, actual removal, before/after description. This overrides the earlier instruction to keep description intact.
+
+## User override 2026-11-21 — isolated 34-repo branch
+For the new 34-repo config only, merge adjustment and pickup into one conditional task because of high-level latency. Preserve platform/source labels and the old active training source. Regenerate causal completion caches: no memory append or bottle-cycle reset at the raw adjustment→pickup boundary; adjustment-only intervals must not claim pickup completion. Catalog version eight_tasks_merged_adjust_pickup_v5_20261121 supersedes nine-task separation within this branch.

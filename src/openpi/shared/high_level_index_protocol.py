@@ -23,7 +23,7 @@ def decode_index_prediction(payload):
         raise ValueError('Expected bottle_description, memory and current_task_index only')
     index=payload['current_task_index']
     if type(index) is not int or not 1<=index<=len(CURRENT_TASKS):
-        raise ValueError('Task index must be an integer from1 through9')
+        raise ValueError(f'Task index must be an integer from1 through{len(CURRENT_TASKS)}')
     state=decode_memory(json.dumps({
         'bottle_description':payload['bottle_description'],
         'memory':payload['memory'],
