@@ -88,7 +88,8 @@ class LongMemoryDataset:
             quality = annotation.get('good_bad_action', 'normal')
             if quality not in ('normal', 'good action', 'bad action', None, ''):
                 raise ValueError(f'Invalid insertion action quality: {quality!r}')
-            sample['insert_action_quality'] = 'bad' if quality == 'bad action' else 'good'
+            if quality in ('good action', 'bad action'):
+                sample['insert_action_quality'] = quality.removesuffix(' action')
         sample['long_memory_before_augmentation']=encode_memory(clean)
         sample['memory_augmentation']=augmentation
         validate_rinse_memory(task, memory.memory)

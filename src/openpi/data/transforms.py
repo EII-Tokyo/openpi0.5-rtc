@@ -351,12 +351,10 @@ class TokenizePrompt(DataTransformFn):
             parsed_memory = decode_memory(str(memory), max_chars=self.long_memory.max_memory_chars)
             validate_rinse_memory(parsed_memory.current_task, parsed_memory.memory)
             metadata["long_memory"] = str(memory)
-            if self.insert_action_quality_prompt:
-                if parsed_memory.current_task == INSERT_AND_RINSE:
-                    metadata["insert_action_quality"] = action_quality or "good"
-                elif not parsed_memory.current_task and action_quality is not None:
-                    # Only the dataset supplies this marker when Insert is hidden by task dropout.
-                    metadata["insert_action_quality"] = action_quality
+            if (self.insert_action_quality_prompt and action_quality is not None
+                    and parsed_memory.current_task in ("", INSERT_AND_RINSE)):
+                # Explicit quality survives current-task dropout for Insert.
+                metadata["insert_action_quality"] = action_quality
         history = data.pop("joint_position_history", None)
         if self.joint_position_history is not None:
             if history is None:

@@ -3689,9 +3689,9 @@ _CONFIGS.append(
 
 # Candidate run. Platform verifies all dataset revisions before launch.
 _CONFIGS = (*_CONFIGS, TrainConfig(
-        name='eii_rinse_cam4_fullft_35repo_h200x2_448_pool256_rtc_insert_quality_allep_bs64ga4_20k_20261121',
+        name='eii_rinse_cam4_fullft_35repo_h200x2_448_pool256_rtc_explicit_insert_quality_allep_bs64ga4_20k_20261121',
         project_name='openpi',
-        exp_name='2fcd0d35b96746a3ae147ca8ec91fa21',
+        exp_name='9e96cd55a5654fc6508d452f5ac4df50',
         model=pi0_config.Pi0Config(
             image_resolution=(448, 448),
             image_tokens_per_image=256,
@@ -3784,7 +3784,7 @@ _CONFIGS = (*_CONFIGS, TrainConfig(
                     memory_dropout_probability=0.2,
                     subtask_dropout_probability=0.2,
                     bottle_description_dropout_probability=0.2,
-                    summary_cache_path='/data/eii-platform/training-users/lyl/runs/2fcd0d35b96746a3ae147ca8ec91fa21/conditioning/memory.json',
+                    summary_cache_path='/data/eii-platform/training-users/lyl/runs/9e96cd55a5654fc6508d452f5ac4df50/conditioning/memory.json',
                     use_all_episodes=True,
                 ),
                 nozzle_conditioning=True,
@@ -3794,7 +3794,7 @@ _CONFIGS = (*_CONFIGS, TrainConfig(
                 action_dim=32,
             ),
         ),
-        checkpoint_base_dir='/data/eii-platform/training-users/lyl/runs/2fcd0d35b96746a3ae147ca8ec91fa21/runs/2fcd0d35b96746a3ae147ca8ec91fa21/checkpoints',
+        checkpoint_base_dir='/data/eii-platform/training-users/lyl/runs/9e96cd55a5654fc6508d452f5ac4df50/runs/9e96cd55a5654fc6508d452f5ac4df50/checkpoints',
         seed=42,
         batch_size=64,
         gradient_accumulation_steps=4,
