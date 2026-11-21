@@ -352,9 +352,10 @@ class TokenizePrompt(DataTransformFn):
             validate_rinse_memory(parsed_memory.current_task, parsed_memory.memory)
             metadata["long_memory"] = str(memory)
             if self.insert_action_quality_prompt:
-                if action_quality is None and parsed_memory.current_task == INSERT_AND_RINSE:
-                    action_quality = "good"
-                if action_quality is not None:
+                if parsed_memory.current_task == INSERT_AND_RINSE:
+                    metadata["insert_action_quality"] = action_quality or "good"
+                elif not parsed_memory.current_task and action_quality is not None:
+                    # Only the dataset supplies this marker when Insert is hidden by task dropout.
                     metadata["insert_action_quality"] = action_quality
         history = data.pop("joint_position_history", None)
         if self.joint_position_history is not None:
@@ -530,6 +531,8 @@ class AlohaTransformPipeline:
     insert_action_quality_prompt: bool = False
 
     def __post_init__(self) -> None:
+        if self.insert_action_quality_prompt and (self.long_memory is None or not self.discrete_state_input):
+            raise ValueError("Insertion action quality requires long memory and a discrete-state prompt")
         if self.language_source not in ("task", "subtask_instruction"):
             raise ValueError(f"Unsupported language_source: {self.language_source}")
         if not 0 <= self.nozzle_dropout_probability <= 1:
