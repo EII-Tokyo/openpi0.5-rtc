@@ -3572,7 +3572,7 @@ _CONFIGS.append(
 TrainConfig(
         name='eii_twist_cam3_fullft_34repo_h100x2_448_pool256_rtc_mergedmem_drop20_bs64ga4_20k_20261121',
         project_name='openpi',
-        exp_name='twist34_448_pool256_rtc_mergedmem_drop20_bs64ga4_20k_20261121',
+        exp_name='twist34_448_pool256_rtc_mergedmem_drop20_bs64ga4_20k_20261121_attempt02',
         model=pi0_config.Pi0Config(
             image_resolution=(448, 448),
             image_tokens_per_image=256,
