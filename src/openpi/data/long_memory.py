@@ -7,7 +7,8 @@ from pathlib import Path
 
 import numpy as np
 
-from openpi.shared.long_memory import MemoryTimeline, condition_at, encode_memory, episode_split, parse_annotation, memory_augmentation
+from openpi.shared.completed_step_memory import RETIRED_SUBTASKS, normalize_subtask, validate_rinse_memory
+from openpi.shared.long_memory import MemoryTimeline, encode_memory, episode_split, parse_annotation, memory_augmentation
 
 
 class LongMemoryDataset:
@@ -19,7 +20,7 @@ class LongMemoryDataset:
         if cache.get('schema_version')!=2:raise ValueError('Summary cache v2 required')
         from openpi.shared.completed_memory_labels import TASK_CATALOG_VERSION
         if cache.get('task_catalog_version')!=TASK_CATALOG_VERSION:
-            raise ValueError('Regenerate memory cache with nine separate tasks and verified return contexts')
+            raise ValueError('Regenerate the memory cache for the current rinse task catalog')
         self.summary_cache=cache['episodes']
         masks = []
         seen=set()
@@ -31,7 +32,10 @@ class LongMemoryDataset:
             times = np.asarray(table["timestamp"], dtype=float)
             labels = list(table["subtask"])
             eligible = np.asarray(table["is_for_training"], dtype=bool) if "is_for_training" in table.column_names else np.ones(len(episodes), bool)
-            mask = eligible & np.asarray([parse_annotation(label) is not None for label in labels], dtype=bool)
+            mask = eligible & np.asarray([
+                fields is not None and fields[1] not in RETIRED_SUBTASKS
+                for fields in map(parse_annotation, labels)
+            ], dtype=bool)
             # Consecutive runs, not episode ID alone, protect against malformed concatenations.
             boundaries = np.r_[0, np.flatnonzero(np.diff(episodes)) + 1, len(episodes)]
             for start, end in zip(boundaries[:-1], boundaries[1:], strict=True):
@@ -70,14 +74,12 @@ class LongMemoryDataset:
         clean=self.timelines[key].at(time_s)
         # The instruction is this frame's actual annotation, independent of memory corruption.
         fields=parse_annotation(sample['subtask'])
-        if fields is None:raise ValueError('Sample has no annotated current task')
-        from openpi.shared.completed_step_memory import normalize_subtask
+        if fields is None or fields[1] in RETIRED_SUBTASKS:raise ValueError('Sample has no annotated current task')
         task=normalize_subtask(fields[1],return_context=self.timelines[key].context_at(time_s))
         clean=dataclasses.replace(clean,bottle_description=fields[0] or clean.bottle_description,current_task=task)
         clean,memory,augmentation=memory_augmentation(self.timelines[key],time_s,self.settings,training=True,rng=random,clean=clean)
         sample['long_memory_before_augmentation']=encode_memory(clean)
         sample['memory_augmentation']=augmentation
-        from openpi.shared.completed_step_memory import parse_completed_memory
-        parse_completed_memory(memory.memory)
+        validate_rinse_memory(task, memory.memory)
         sample["long_memory"] = encode_memory(memory)
         return sample

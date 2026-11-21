@@ -32,12 +32,17 @@ class PaligemmaTokenizer:
         rating_is_valid=None,
         camera_low_position=None,
         long_memory: str | None = None,
+        nozzle_tip_pixels: tuple[tuple[int, int], tuple[int, int]] | None = None,
         joint_position_history=None,
         joint_history_settings=None,
     ) -> tuple[np.ndarray, np.ndarray]:
         cleaned_text = prompt.strip().replace("_", " ").replace("\n", " ")
         cleaned_text = camera_low_prompt(cleaned_text, camera_low_position)
         cleaned_text += prompt_metadata_suffix(operator, rating, rating_is_valid)
+        if nozzle_tip_pixels is not None:
+            (high_x, high_y), (low_x, low_y) = nozzle_tip_pixels
+            cleaned_text += "\nI marked the nozzle tip with a circle in both camera images."
+            cleaned_text += f"\nNozzle tip pixels (448x448): cam_high {high_x} {high_y}; cam_low {low_x} {low_y}."
         if long_memory is not None:
             from openpi.shared.long_memory import decode_memory, memory_prompt
             cleaned_text += "\n" + memory_prompt(decode_memory(long_memory))
@@ -66,8 +71,8 @@ class PaligemmaTokenizer:
                       + self._tokenizer.encode(";\nAction: "))
             if len(tokens) > self._max_len:
                 raise ValueError(f"Joint history prompt needs {len(tokens)} tokens, exceeds {self._max_len}")
-        if long_memory is not None and len(tokens) > self._max_len:
-            raise ValueError(f"Long-memory prompt needs {len(tokens)} tokens, exceeds {self._max_len}; never truncate memory silently")
+        if (long_memory is not None or nozzle_tip_pixels is not None) and len(tokens) > self._max_len:
+            raise ValueError(f"Conditioned prompt needs {len(tokens)} tokens, exceeds {self._max_len}")
         tokens_len = len(tokens)
         if tokens_len < self._max_len:
             padding = [False] * (self._max_len - tokens_len)

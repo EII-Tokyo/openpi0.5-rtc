@@ -107,7 +107,12 @@ def memory_augmentation(timeline,time_s,settings,*,training,rng=None,clean=None)
     md=training and rng.random()<settings.memory_dropout_probability
     td=training and rng.random()<settings.subtask_dropout_probability
     bd=training and rng.random()<settings.bottle_description_dropout_probability
-    augmented=drop_memory(clean,records,memory_drop=md,subtask_drop=td,bottle_description_drop=bd)
+    from openpi.shared.completed_step_memory import INSERT_AND_RINSE, WITHDRAW_BOTTLE, validate_rinse_memory
+    if clean.current_task == WITHDRAW_BOTTLE:
+        validate_rinse_memory(clean.current_task, clean.memory)
+    protected = clean.current_task in (INSERT_AND_RINSE, WITHDRAW_BOTTLE)
+    remove_latest = bool(md and records and not protected)
+    augmented=drop_memory(clean,records,memory_drop=remove_latest,subtask_drop=td,bottle_description_drop=bd)
     return clean,augmented,{
         'memory_dropout_probability':settings.memory_dropout_probability,
         'subtask_dropout_probability':settings.subtask_dropout_probability,
@@ -117,11 +122,12 @@ def memory_augmentation(timeline,time_s,settings,*,training,rng=None,clean=None)
         'bottle_description_before':clean.bottle_description,
         'bottle_description_after':augmented.bottle_description,
         'memory_dropout_draw':bool(md),'subtask_dropout_draw':bool(td),
-        'memory_dropout_applied':bool(md and records),
+        'memory_dropout_protected':protected,
+        'memory_dropout_applied':remove_latest,
         'subtask_dropout_applied':bool(td and clean.current_task),
-        'removed_latest_record':records[-1] if md and records else '',
+        'removed_latest_record':records[-1] if remove_latest else '',
         'completed_records_before':records,
-        'completed_records_after':records[:-1] if md and records else records,
+        'completed_records_after':records[:-1] if remove_latest else records,
     }
 
 

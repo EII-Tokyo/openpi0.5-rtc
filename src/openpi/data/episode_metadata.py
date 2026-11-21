@@ -20,6 +20,15 @@ def attach_episode_metadata(item: dict, metadata) -> dict:
     info = getattr(metadata, "info", {})
     position = normalize_prompt_metadata(camera_low_position=info.get("camera_low_position"))
     result["camera_low_position"] = position.get("camera_low_position", "")
+    coordinates = [episode.get(key) for key in (
+        "nozzle_high_x", "nozzle_high_y", "nozzle_x", "nozzle_y",
+    )]
+    if all(value is not None for value in coordinates):
+        if info.get("nozzle_high_position_coordinate_space") != "normalized_cam_high_image_top_left" or (
+            info.get("nozzle_position_coordinate_space") != "normalized_cam_low_image_top_left"
+        ):
+            raise ValueError("Unexpected coordinate space in stereo nozzle annotations")
+        result["nozzle_tips"] = [coordinates[:2], coordinates[2:]]
     operator = episode.get("operator", result.get("operator", ""))
     if operator is None:
         operator = result.get("operator")

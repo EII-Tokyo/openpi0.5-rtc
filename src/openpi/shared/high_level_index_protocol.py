@@ -3,7 +3,7 @@
 The wire carries an index; low-level conditioning always receives canonical text.
 """
 import json
-from openpi.shared.completed_step_memory import CURRENT_TASKS, parse_completed_memory
+from openpi.shared.completed_step_memory import SUBTASKS_BY_INDEX, validate_rinse_memory
 from openpi.shared.long_memory import decode_memory
 
 INDEX_MEMORY_SCHEMA = {
@@ -11,7 +11,7 @@ INDEX_MEMORY_SCHEMA = {
     'properties':{
         'bottle_description':{'type':'string','maxLength':1200},
         'memory':{'type':'string','maxLength':1200},
-        'current_task_index':{'type':'integer','enum':list(range(1,len(CURRENT_TASKS)+1))},
+        'current_task_index':{'type':'integer','enum':list(SUBTASKS_BY_INDEX)},
     },
     'required':['bottle_description','memory','current_task_index'],
     'additionalProperties':False,
@@ -22,12 +22,12 @@ def decode_index_prediction(payload):
     if not isinstance(payload,dict) or set(payload)!=set(INDEX_MEMORY_SCHEMA['required']):
         raise ValueError('Expected bottle_description, memory and current_task_index only')
     index=payload['current_task_index']
-    if type(index) is not int or not 1<=index<=len(CURRENT_TASKS):
-        raise ValueError('Task index must be an integer from1 through9')
+    if type(index) is not int or index not in SUBTASKS_BY_INDEX:
+        raise ValueError(f'Task index must be one of {list(SUBTASKS_BY_INDEX)}')
     state=decode_memory(json.dumps({
         'bottle_description':payload['bottle_description'],
         'memory':payload['memory'],
-        'current_task':CURRENT_TASKS[index-1],
+        'current_task':SUBTASKS_BY_INDEX[index]['current_task'],
     }))
-    parse_completed_memory(state.memory)
+    validate_rinse_memory(state.current_task, state.memory)
     return state

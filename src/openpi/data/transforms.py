@@ -1,9 +1,10 @@
 from collections.abc import Callable, Mapping, Sequence
 import dataclasses
 import logging
+import random
 from typing import ClassVar, Literal, Protocol, TypeAlias, TypeVar, runtime_checkable
 
-from PIL import Image
+from PIL import Image, ImageDraw
 
 import augmax
 import einops
@@ -15,7 +16,8 @@ import numpy as np
 from openpi.data import tokenizer as _tokenizer
 from openpi.data.temporal_mosaic import HighCameraMosaicConfig
 from openpi.data.joint_position_history import JointPositionHistoryConfig
-from openpi.shared.long_memory import LongMemoryConfig
+from openpi.shared.completed_step_memory import INSERT_AND_RINSE
+from openpi.shared.long_memory import LongMemoryConfig, decode_memory
 import openpi.shared.download as _download
 from openpi.shared import array_typing as at
 from openpi.shared import normalize as _normalize_lib
@@ -45,17 +47,22 @@ def _resize_with_pad_pil(image: Image.Image, height: int, width: int, method: in
     if cur_width == width and cur_height == height:
         return image
 
-    ratio = max(cur_width / width, cur_height / height)
-    resized_height = int(cur_height / ratio)
-    resized_width = int(cur_width / ratio)
+    resized_height, resized_width, pad_height, pad_width = _resize_with_pad_geometry(
+        cur_height, cur_width, height, width
+    )
     resized_image = image.resize((resized_width, resized_height), resample=method)
 
     padded_image = Image.new(resized_image.mode, (width, height), 0)
-    pad_height = max(0, int((height - resized_height) / 2))
-    pad_width = max(0, int((width - resized_width) / 2))
     padded_image.paste(resized_image, (pad_width, pad_height))
     assert padded_image.size == (width, height)
     return padded_image
+
+
+def _resize_with_pad_geometry(source_height, source_width, height, width):
+    ratio = max(source_width / width, source_height / height)
+    resized_height = int(source_height / ratio)
+    resized_width = int(source_width / ratio)
+    return resized_height, resized_width, (height - resized_height) // 2, (width - resized_width) // 2
 
 
 @runtime_checkable
@@ -205,9 +212,44 @@ class Unnormalize(DataTransformFn):
 class ResizeImages(DataTransformFn):
     height: int
     width: int
+    nozzle_conditioning: bool = False
+    nozzle_dropout_probability: float = 0.0
 
     def __call__(self, data: DataDict) -> DataDict:
-        data["image"] = {k: resize_with_pad(v, self.height, self.width) for k, v in data["image"].items()}
+        images = data["image"]
+        resized_images = {key: resize_with_pad(image, self.height, self.width) for key, image in images.items()}
+        tips = data.pop("nozzle_tips", None)
+        if self.nozzle_conditioning and tips is not None:
+            memory = decode_memory(str(data["long_memory"]))
+            if memory.current_task != INSERT_AND_RINSE or (
+                self.nozzle_dropout_probability > 0 and random.random() < self.nozzle_dropout_probability
+            ):
+                data["image"] = resized_images
+                return data
+            points = np.asarray(tips, dtype=np.float64)
+            if points.shape != (2, 2) or not np.all(np.isfinite(points) & (points >= 0) & (points <= 1)):
+                raise ValueError("nozzle_tips must contain two normalized [x, y] pairs")
+            pixels = []
+            for camera, (x, y) in zip(("cam_high", "cam_low"), points, strict=True):
+                image = images[camera]
+                src_h, src_w = image.shape[-3:-1]
+                resized_h, resized_w, pad_y, pad_x = _resize_with_pad_geometry(src_h, src_w, self.height, self.width)
+                # PIL maps pixel centers. Keep edge labels inside the resized image.
+                xy = np.rint([
+                    (min(x * src_w, src_w - 1) + 0.5) * resized_w / src_w - 0.5,
+                    (min(y * src_h, src_h - 1) + 0.5) * resized_h / src_h - 0.5,
+                ]).astype(int)
+                pixel = tuple(np.clip(xy, 0, [resized_w - 1, resized_h - 1]) + [pad_x, pad_y])
+                pixels.append(pixel)
+                # Draw at the exact pixel included in the prompt, with an open center.
+                marked = Image.fromarray(resized_images[camera])
+                draw = ImageDraw.Draw(marked)
+                px, py = pixel
+                draw.ellipse((px - 9, py - 9, px + 9, py + 9), outline="#181818", width=5)
+                draw.ellipse((px - 8, py - 8, px + 8, py + 8), outline="#ffcd44", width=3)
+                resized_images[camera] = np.asarray(marked)
+            data["nozzle_tip_pixels"] = pixels
+        data["image"] = resized_images
         return data
 
 
@@ -297,14 +339,15 @@ class TokenizePrompt(DataTransformFn):
 
         data.pop("subtask", None)  # Ignore historical good/bad action annotations.
         metadata = {key: data.pop(key) for key in ("operator", "rating", "rating_is_valid", "camera_low_position") if key in data}
+        if "nozzle_tip_pixels" in data:
+            metadata["nozzle_tip_pixels"] = data.pop("nozzle_tip_pixels")
         memory = data.pop("long_memory", None)
         if self.long_memory is not None:
             if memory is None:
                 raise ValueError("This checkpoint requires explicit long_memory, including an empty memory at reset")
-            from openpi.shared.long_memory import decode_memory
-            from openpi.shared.completed_step_memory import parse_completed_memory
+            from openpi.shared.completed_step_memory import validate_rinse_memory
             parsed_memory = decode_memory(str(memory), max_chars=self.long_memory.max_memory_chars)
-            parse_completed_memory(parsed_memory.memory)
+            validate_rinse_memory(parsed_memory.current_task, parsed_memory.memory)
             metadata["long_memory"] = str(memory)
         history = data.pop("joint_position_history", None)
         if self.joint_position_history is not None:
@@ -468,6 +511,8 @@ class AlohaTransformPipeline:
     high_camera_mosaic: HighCameraMosaicConfig | None = None
     joint_position_history: JointPositionHistoryConfig | None = None
     long_memory: LongMemoryConfig | None = None
+    nozzle_conditioning: bool = False
+    nozzle_dropout_probability: float = 0.2
     adapt_to_pi: bool = True
     use_delta_joint_actions: bool = True
     action_dim: int = ALOHA_MODEL_ACTION_DIM
@@ -478,6 +523,13 @@ class AlohaTransformPipeline:
     def __post_init__(self) -> None:
         if self.language_source not in ("task", "subtask_instruction"):
             raise ValueError(f"Unsupported language_source: {self.language_source}")
+        if not 0 <= self.nozzle_dropout_probability <= 1:
+            raise ValueError("Invalid nozzle dropout probability")
+        if self.nozzle_conditioning and (
+            self.long_memory is None or not self.include_low or self.image_resolution != (448, 448)
+            or self.high_camera_mosaic is not None or self.video_memory_num_frames != 1
+        ):
+            raise ValueError("Stereo nozzle conditioning requires long memory and original high and low frames at 448×448")
         if self.joint_position_history is not None and self.max_token_len < self.joint_position_history.max_tokens + 128:
             raise ValueError("Prompt budget must reserve 128 text tokens beyond joint history budget")
         if self.high_camera_mosaic is not None:
@@ -535,9 +587,12 @@ class AlohaTransformPipeline:
             structure["actions"] = "action"
         if include_language and self.language_source == "subtask_instruction":
             structure["subtask_instruction"] = "subtask_instruction"
-        return RepackTransform(structure, optional_keys=("operator", "rating", "rating_is_valid", "camera_low_position", "joint_position_history", "long_memory"))
+        optional_keys = ("operator", "rating", "rating_is_valid", "camera_low_position", "joint_position_history", "long_memory")
+        if self.nozzle_conditioning:
+            optional_keys += ("nozzle_tips",)
+        return RepackTransform(structure, optional_keys=optional_keys)
 
-    def _model_input_transforms(self) -> list[DataTransformFn]:
+    def _model_input_transforms(self, *, training: bool = False) -> list[DataTransformFn]:
         transforms: list[DataTransformFn] = [
             AlohaInputs(
                 adapt_to_pi=self.adapt_to_pi,
@@ -552,7 +607,11 @@ class AlohaTransformPipeline:
         transforms.extend(
             [
                 Normalize(self._require_norm_stats(), use_quantiles=self.use_quantile_norm),
-                ResizeImages(*self.image_resolution),
+                ResizeImages(
+                    *self.image_resolution,
+                    nozzle_conditioning=self.nozzle_conditioning,
+                    nozzle_dropout_probability=self.nozzle_dropout_probability if training else 0.0,
+                ),
                 TokenizePrompt(
                     _tokenizer.PaligemmaTokenizer(self.max_token_len),
                     discrete_state_input=self.discrete_state_input,
@@ -580,7 +639,7 @@ class AlohaTransformPipeline:
             ),
             self.training_repack_transform(include_actions=True),
             PromptFromSubtaskInstruction() if self.language_source == "subtask_instruction" else PromptFromLeRobotTask(),
-            *self._model_input_transforms(),
+            *self._model_input_transforms(training=True),
         ]
 
     def stats_input_transforms(self) -> list[DataTransformFn]:
@@ -633,6 +692,7 @@ class AlohaTransformPipeline:
         train: bool = False,
         image_keys: Sequence[str] | None = None,
         image_resolution: tuple[int, int] = (224, 224),
+        nozzle_conditioning: bool = False,
     ):
         """Preprocess images and masks before model execution."""
 
@@ -662,7 +722,8 @@ class AlohaTransformPipeline:
                 flat_image = flat_image / 2.0 + 0.5
 
                 image_transforms = []
-                if "wrist" not in key:
+                # A crop or rotation would move the point after its coordinates were tokenized.
+                if "wrist" not in key and not (nozzle_conditioning and key in ("cam_high", "cam_low")):
                     height, width = flat_image.shape[1:3]
                     image_transforms += [
                         augmax.RandomCrop(int(width * 0.95), int(height * 0.95)),
