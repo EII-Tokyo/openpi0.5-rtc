@@ -455,7 +455,10 @@ def create_torch_dataset(data_config: _config.LeRobotAlohaDataConfig, action_hor
             settings=transform_pipeline.joint_position_history, trainable_mask=trainable_mask)
     if transform_pipeline.long_memory is not None:
         from openpi.data.long_memory import LongMemoryDataset
-        dataset = LongMemoryDataset(dataset, raw_dataset=raw_dataset, settings=transform_pipeline.long_memory)
+        dataset = LongMemoryDataset(
+            dataset, raw_dataset=raw_dataset, settings=transform_pipeline.long_memory,
+            insert_action_quality_prompt=transform_pipeline.insert_action_quality_prompt,
+        )
     if data_config.train_episode_indices is not None:
         # Preserve original indices inside temporal/history wrappers; expose only eligible training starts.
         dataset = torch.utils.data.Subset(dataset, np.flatnonzero(trainable_mask).tolist())

@@ -35,6 +35,7 @@ class PaligemmaTokenizer:
         nozzle_tip_pixels: tuple[tuple[int, int], tuple[int, int]] | None = None,
         joint_position_history=None,
         joint_history_settings=None,
+        insert_action_quality: str | None = None,
     ) -> tuple[np.ndarray, np.ndarray]:
         cleaned_text = prompt.strip().replace("_", " ").replace("\n", " ")
         cleaned_text = camera_low_prompt(cleaned_text, camera_low_position)
@@ -46,12 +47,15 @@ class PaligemmaTokenizer:
         if long_memory is not None:
             from openpi.shared.long_memory import decode_memory, memory_prompt
             cleaned_text += "\n" + memory_prompt(decode_memory(long_memory))
+        if insert_action_quality not in (None, "good", "bad"):
+            raise ValueError(f"Invalid insertion action quality: {insert_action_quality!r}")
+        action_prefix = "Action: " if insert_action_quality is None else f"Give me a {insert_action_quality} action: "
         if state is not None:
             # This is the Pi05 format, where the state is part of the discrete language input.
             discretized_state = np.digitize(state, bins=np.linspace(-1, 1, 256 + 1)[:-1]) - 1
             state_str = " ".join(map(str, discretized_state))
             # Legacy subtask labels are accepted but ignored; quality is a rating.
-            full_prompt = f"Task: {cleaned_text}, State: {state_str};\nAction: "
+            full_prompt = f"Task: {cleaned_text}, State: {state_str};\n{action_prefix}"
             tokens = self._tokenizer.encode(full_prompt, add_bos=True)
         else:
             # This is the Pi0 format, where the state is part of the continuous action expert input.
@@ -68,7 +72,7 @@ class PaligemmaTokenizer:
                 raise ValueError("FAST token outside VLM vocabulary")
             header = f"Task: {cleaned_text}, State: {state_str};\nPosition history {joint_history_settings.seconds}s {joint_history_settings.sample_hz}Hz: "
             tokens = (self._tokenizer.encode(header, add_bos=True) + mapped.tolist()
-                      + self._tokenizer.encode(";\nAction: "))
+                      + self._tokenizer.encode(";\n" + action_prefix))
             if len(tokens) > self._max_len:
                 raise ValueError(f"Joint history prompt needs {len(tokens)} tokens, exceeds {self._max_len}")
         if (long_memory is not None or nozzle_tip_pixels is not None) and len(tokens) > self._max_len:

@@ -323,6 +323,7 @@ class TokenizePrompt(DataTransformFn):
     discrete_state_input: bool = False
     joint_position_history: JointPositionHistoryConfig | None = None
     long_memory: LongMemoryConfig | None = None
+    insert_action_quality_prompt: bool = False
 
     def __call__(self, data: DataDict) -> DataDict:
         if (prompt := data.pop("prompt", None)) is None:
@@ -342,13 +343,19 @@ class TokenizePrompt(DataTransformFn):
         if "nozzle_tip_pixels" in data:
             metadata["nozzle_tip_pixels"] = data.pop("nozzle_tip_pixels")
         memory = data.pop("long_memory", None)
+        action_quality = data.pop("insert_action_quality", None)
         if self.long_memory is not None:
             if memory is None:
                 raise ValueError("This checkpoint requires explicit long_memory, including an empty memory at reset")
-            from openpi.shared.completed_step_memory import validate_rinse_memory
+            from openpi.shared.completed_step_memory import INSERT_AND_RINSE, validate_rinse_memory
             parsed_memory = decode_memory(str(memory), max_chars=self.long_memory.max_memory_chars)
             validate_rinse_memory(parsed_memory.current_task, parsed_memory.memory)
             metadata["long_memory"] = str(memory)
+            if self.insert_action_quality_prompt:
+                if action_quality is None and parsed_memory.current_task == INSERT_AND_RINSE:
+                    action_quality = "good"
+                if action_quality is not None:
+                    metadata["insert_action_quality"] = action_quality
         history = data.pop("joint_position_history", None)
         if self.joint_position_history is not None:
             if history is None:
@@ -520,6 +527,8 @@ class AlohaTransformPipeline:
     norm_stats: dict[str, NormStats] | None = dataclasses.field(init=False, repr=False, compare=False)
     norm_stats_error: FileNotFoundError | None = dataclasses.field(init=False, repr=False, compare=False)
 
+    insert_action_quality_prompt: bool = False
+
     def __post_init__(self) -> None:
         if self.language_source not in ("task", "subtask_instruction"):
             raise ValueError(f"Unsupported language_source: {self.language_source}")
@@ -590,6 +599,8 @@ class AlohaTransformPipeline:
         optional_keys = ("operator", "rating", "rating_is_valid", "camera_low_position", "joint_position_history", "long_memory")
         if self.nozzle_conditioning:
             optional_keys += ("nozzle_tips",)
+        if self.insert_action_quality_prompt:
+            optional_keys += ("insert_action_quality",)
         return RepackTransform(structure, optional_keys=optional_keys)
 
     def _model_input_transforms(self, *, training: bool = False) -> list[DataTransformFn]:
@@ -617,6 +628,7 @@ class AlohaTransformPipeline:
                     discrete_state_input=self.discrete_state_input,
                     joint_position_history=self.joint_position_history,
                     long_memory=self.long_memory,
+                    insert_action_quality_prompt=self.insert_action_quality_prompt,
                 ),
                 PadStatesAndActions(self.action_dim),
             ]

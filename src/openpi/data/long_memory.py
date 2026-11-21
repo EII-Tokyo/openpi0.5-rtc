@@ -7,14 +7,15 @@ from pathlib import Path
 
 import numpy as np
 
-from openpi.shared.completed_step_memory import RETIRED_SUBTASKS, normalize_subtask, validate_rinse_memory
+from openpi.shared.completed_step_memory import INSERT_AND_RINSE, RETIRED_SUBTASKS, normalize_subtask, validate_rinse_memory
 from openpi.shared.long_memory import MemoryTimeline, encode_memory, episode_split, parse_annotation, memory_augmentation
 
 
 class LongMemoryDataset:
-    def __init__(self, dataset, *, raw_dataset, settings):
+    def __init__(self, dataset, *, raw_dataset, settings, insert_action_quality_prompt=False):
         self._dataset = dataset
         self.settings = settings
+        self.insert_action_quality_prompt = insert_action_quality_prompt
         self.timelines = {}
         cache=json.loads(Path(settings.summary_cache_path).read_text())
         if cache.get('schema_version')!=2:raise ValueError('Summary cache v2 required')
@@ -78,6 +79,13 @@ class LongMemoryDataset:
         task=normalize_subtask(fields[1],return_context=self.timelines[key].context_at(time_s))
         clean=dataclasses.replace(clean,bottle_description=fields[0] or clean.bottle_description,current_task=task)
         clean,memory,augmentation=memory_augmentation(self.timelines[key],time_s,self.settings,training=True,rng=random,clean=clean)
+        if self.insert_action_quality_prompt and task == INSERT_AND_RINSE:
+            annotation = sample['subtask']
+            annotation = json.loads(annotation) if isinstance(annotation, str) else annotation
+            quality = annotation.get('good_bad_action', 'normal')
+            if quality not in ('normal', 'good action', 'bad action', None, ''):
+                raise ValueError(f'Invalid insertion action quality: {quality!r}')
+            sample['insert_action_quality'] = 'bad' if quality == 'bad action' else 'good'
         sample['long_memory_before_augmentation']=encode_memory(clean)
         sample['memory_augmentation']=augmentation
         validate_rinse_memory(task, memory.memory)
