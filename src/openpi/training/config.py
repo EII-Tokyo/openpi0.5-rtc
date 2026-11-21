@@ -3684,7 +3684,7 @@ TrainConfig(
         keep_period=10000,
         overwrite=False,
         resume=False,
-        wandb_enabled=True,
+        wandb_enabled=False,
         policy_metadata={'conditioning': 'eight_tasks_merged_adjust_pickup_v5_20261121', 'source_config': 'eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo', 'dataset_mixture': 'preserved_28repo_weights_plus_six_longjia_turnover', 'source103_base': 'ca82780', 'native_config': True, 'image_history': False, 'joint_position_history': False},
         fsdp_devices=2,
     )
