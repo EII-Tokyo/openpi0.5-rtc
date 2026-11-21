@@ -93,4 +93,8 @@ class WebsocketClientPolicy(_base_policy.BasePolicy):
 
     @override
     def reset(self) -> None:
-        pass
+        if self._server_metadata.get("runtime", {}).get("high_level", {}).get("reset_protocol"):
+            self._ws.send(self._packer.pack({"type": "reset"}))
+            response = self._ws.recv()
+            if isinstance(response, str) or msgpack_numpy.unpackb(response) != {"reset": True}:
+                raise RuntimeError("Policy server did not acknowledge high-level episode reset")

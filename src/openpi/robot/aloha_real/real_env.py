@@ -229,7 +229,14 @@ class RealEnv:
         obs["qpos"] = self.get_qpos()
         obs["qvel"] = self.get_qvel()
         obs["effort"] = self.get_effort()
-        obs["images"] = self.get_images()
+        # Keep exact images and their ROS header timestamps in the same recorder snapshot.
+        with self.image_recorder._image_lock:
+            obs["images"] = self.get_images()
+            obs["camera_timestamps"] = {
+                camera: getattr(self.image_recorder, f"{camera}_timestamp")
+                for camera in self.image_recorder.camera_names
+            }
+            obs["camera_timestamp_domain"] = "ros_header_seconds"
         return obs
 
     def get_reward(self):
@@ -387,6 +394,8 @@ class AlohaRealEnvironment:
             "qvel": obs["qvel"],
             "effort": obs["effort"],
             "images": obs["images"],
+            "camera_timestamps": obs.get("camera_timestamps"),
+            "camera_timestamp_domain": obs.get("camera_timestamp_domain"),
             "origin_observation": origin_observation,
             **({"joint_position_history": self._joint_history.sample()} if self._joint_history is not None else {}),
         }

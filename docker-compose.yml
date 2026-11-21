@@ -75,11 +75,15 @@ services:
       - $PWD:/app
       - /home/eii/openpi0.5-rtc/checkpoints:/app/checkpoints:ro
       - ${OPENPI_DATA_HOME:-~/.cache/openpi}:/openpi_assets
+      - /home/eii/high-level-datasets:/high-level-data
     environment:
       - GIT_LFS_SKIP_SMUDGE=1
       - XLA_PYTHON_CLIENT_PREALLOCATE=false
       - XLA_PYTHON_CLIENT_MEM_FRACTION=0.9
       - SERVER_ARGS
+      - OPENAI_API_KEY
+      - OPENPI_SOL_HIGH_LEVEL=${OPENPI_SOL_HIGH_LEVEL:-false}
+      - OPENPI_HIGH_LEVEL_DATASET_DIR=/high-level-data
       - OPENPI_DATA_HOME=/openpi_assets
       - IS_DOCKER=true
       - NVIDIA_VISIBLE_DEVICES=all
@@ -88,7 +92,7 @@ services:
       - VIRTUAL_ENV=/.venv
       - UV_NO_SYNC=1
       - UV_NO_DEV=1
-      - PYTHONPATH=/app/src
+      - PYTHONPATH=/app/src:/app/packages/openpi-client/src
     gpus: all
 
   redis:

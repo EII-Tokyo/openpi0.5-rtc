@@ -55,6 +55,13 @@ class WebsocketPolicyServer:
         while True:
             try:
                 data = msgpack_numpy.unpackb(await websocket.recv())
+                if data.get("type") == "reset":
+                    if not self._metadata.get("runtime", {}).get("high_level", {}).get("reset_protocol"):
+                        raise ValueError("Policy does not advertise reset protocol")
+                    self._policy.reset()
+                    await websocket.send(packer.pack({"reset": True}))
+                    prev_total_time = None
+                    continue
                 start_time = time.monotonic()
 
                 obs = data.get("obs", None)
