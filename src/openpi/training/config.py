@@ -3689,7 +3689,7 @@ _CONFIGS.append(
 
 # Candidate run. Platform verifies all dataset revisions before launch.
 _CONFIGS = (*_CONFIGS, TrainConfig(
-        name='eii_rinse_cam4_fullft_35repo_h200x2_448_pool256_rtc_insert_quality_bs64ga4_20k_20261121',
+        name='eii_rinse_cam4_fullft_35repo_h200x2_448_pool256_rtc_insert_quality_allep_bs64ga4_20k_20261121',
         project_name='openpi',
         exp_name='2fcd0d35b96746a3ae147ca8ec91fa21',
         model=pi0_config.Pi0Config(
@@ -3785,6 +3785,7 @@ _CONFIGS = (*_CONFIGS, TrainConfig(
                     subtask_dropout_probability=0.2,
                     bottle_description_dropout_probability=0.2,
                     summary_cache_path='/data/eii-platform/training-users/lyl/runs/2fcd0d35b96746a3ae147ca8ec91fa21/conditioning/memory.json',
+                    use_all_episodes=True,
                 ),
                 nozzle_conditioning=True,
                 nozzle_dropout_probability=0.2,

@@ -20,6 +20,7 @@ class LongMemoryConfig:
     reset_on_home:bool=True
     split_seed:int=20261119
     summary_cache_path:str='/workspace/long-memory-hierarchy-20261119/completed-step-dropout-audit/teacher.json'
+    use_all_episodes: bool = False
 
     def __post_init__(self):
         if min(self.update_seconds,self.video_seconds,self.video_hz,self.max_memory_chars)<=0:

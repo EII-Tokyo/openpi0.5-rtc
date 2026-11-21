@@ -46,13 +46,16 @@ class LongMemoryDataset:
                 seen.add(key)
                 updates=self.summary_cache.get(base.repo_id,{}).get(str(key[1]))
                 if updates is not None:self.timelines[key]=MemoryTimeline(updates)
-                if episode_split(base.repo_id, key[1], settings.split_seed) != "train":
+                if not self._includes_episode(base.repo_id, key[1]):
                     mask[start:end] = False
             masks.append(mask)
         self.train_mask = np.concatenate(masks)
         self.train_indices = np.flatnonzero(self.train_mask)
         if not len(self.train_indices):
             raise ValueError("No eligible training episodes remain after the shared episode split")
+
+    def _includes_episode(self, repo_id, episode_index):
+        return self.settings.use_all_episodes or episode_split(repo_id, episode_index, self.settings.split_seed) == "train"
 
     def __len__(self):
         return len(self._dataset)
@@ -67,7 +70,7 @@ class LongMemoryDataset:
             index = int(self.train_indices[random.randrange(len(self.train_indices))])
         sample = dict(self._dataset[index])
         key = (int(sample.get("dataset_index", 0)), int(sample["episode_index"]))
-        if episode_split(self.repo_ids[key[0]], key[1], self.settings.split_seed) != "train":
+        if not self._includes_episode(self.repo_ids[key[0]], key[1]):
             raise ValueError("Underlying wrapper returned an evaluation episode during training")
         time_s = float(sample["timestamp"])
         if key not in self.timelines:
