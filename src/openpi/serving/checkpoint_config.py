@@ -70,6 +70,8 @@ def runtime_metadata(config, root):
     pipeline = config.data.transform_pipeline
     return {
         'adapt_to_pi': bool(pipeline.adapt_to_pi),
+        'long_memory': dataclasses.asdict(pipeline.long_memory) if getattr(pipeline, "long_memory", None) is not None else None,
+        'task_catalog_version': (getattr(config, 'policy_metadata', None) or {}).get('conditioning', ''),
         'action_horizon': config.model.action_horizon,
         'action_dim': config.model.action_dim,
         'joint_position_history': dataclasses.asdict(pipeline.joint_position_history) if pipeline.joint_position_history is not None else None,

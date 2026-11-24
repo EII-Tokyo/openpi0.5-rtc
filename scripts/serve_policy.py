@@ -3,6 +3,7 @@ import enum
 import logging
 import json
 import socket
+import os
 
 import numpy as np
 import tyro
@@ -51,6 +52,8 @@ class Args:
     port: int = 8000
     # Record the policy's behavior for debugging.
     record: bool = False
+    # Explicit opt-in; dummy warmup never calls the high-level API.
+    sol_high_level: bool = os.environ.get("OPENPI_SOL_HIGH_LEVEL", "false").lower() == "true"
     # Warm up the RTC low-level path.
     warmup_rtc: bool = True
     # Warm up the non-RTC low-level path.
@@ -102,6 +105,9 @@ def _make_dummy_obs(metadata: dict) -> dict:
             + tuple(video["image_resolution"]) + (3,), dtype=np.uint8)
         for camera in video["camera_keys"]
     }
+    if metadata["runtime"].get("long_memory") is not None:
+        from openpi.shared.long_memory import MemoryState, encode_memory
+        obs["long_memory"] = encode_memory(MemoryState())
     return obs
 
 
@@ -174,6 +180,10 @@ def main(args: Args) -> None:
             every_n=args.attention_debug_every_n,
         )
         policy.warmup_attention_recording(dummy_obs)
+    # Install after all dummy warmup: startup never dispatches a paid Sol request.
+    if args.sol_high_level:
+        from openpi.serving.sol_index_policy import install
+        policy = install(policy, policy_metadata)
     # Record the policy's behavior.
     if args.record:
         policy = _policy.PolicyRecorder(policy, "policy_records")

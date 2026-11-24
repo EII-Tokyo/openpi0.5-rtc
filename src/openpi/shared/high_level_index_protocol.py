@@ -3,7 +3,7 @@
 The wire carries an index; low-level conditioning always receives canonical text.
 """
 import json
-from openpi.shared.completed_step_memory import CURRENT_TASKS, parse_completed_memory
+from openpi.shared.completed_step_memory import CURRENT_TASKS, SUBTASKS, parse_completed_memory
 from openpi.shared.long_memory import decode_memory
 
 INDEX_MEMORY_SCHEMA = {
@@ -30,4 +30,18 @@ def decode_index_prediction(payload):
         'current_task':CURRENT_TASKS[index-1],
     }))
     parse_completed_memory(state.memory)
+    # Only whole approved records: no adjustment-only fact or half a two-bin disposal.
+    remaining = state.memory.strip()
+    records = [s['memory_en'] for s in SUBTASKS if s['memory_en']]
+    completed = []
+    while remaining:
+        record = next((r for r in records if remaining.startswith(r)), None)
+        if record is None:
+            raise ValueError('Memory must contain whole eight-task completion records')
+        if record in completed:
+            raise ValueError('Duplicate completed record')
+        completed.append(record)
+        remaining = remaining[len(record):].lstrip()
+    if ' '.join(completed) != state.memory:
+        raise ValueError('Completed records must use canonical spacing')
     return state
