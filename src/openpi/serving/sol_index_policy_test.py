@@ -104,3 +104,28 @@ def test_standard_serve_entry_wraps_only_after_all_dummy_warmup(tmp_path, monkey
         assert low.infer.call_count == 3 and not dispatch.called
         server.serve_forever.assert_called_once()
     finally:wrapped.supervisor.close()
+
+
+def test_reset_reconnects_after_inference_failure_and_sends_only_reset():
+    from websockets.exceptions import WebSocketException
+    client=WebsocketClientPolicy.__new__(WebsocketClientPolicy)
+    client._server_metadata={'runtime':{'high_level':{'reset_protocol':True}}}
+    client._packer=msgpack_numpy.Packer();old=Mock();client._ws=old
+    old.send.side_effect=WebSocketException('closed after previous inference')
+    new=Mock();new.recv.return_value=client._packer.pack({'reset':True})
+    client._wait_for_server=Mock(return_value=(new,client._server_metadata))
+    client.reset()
+    old.close.assert_called_once();client._wait_for_server.assert_called_once()
+    new.send.assert_called_once()
+    assert msgpack_numpy.unpackb(new.send.call_args.args[0])=={'type':'reset'}
+
+
+def test_reset_reconnect_rejects_server_without_required_protocol():
+    from websockets.exceptions import WebSocketException
+    client=WebsocketClientPolicy.__new__(WebsocketClientPolicy)
+    client._server_metadata={'runtime':{'high_level':{'reset_protocol':True}}}
+    client._packer=msgpack_numpy.Packer();client._ws=Mock()
+    client._ws.recv.side_effect=WebSocketException('closed before acknowledgment')
+    new=Mock();client._wait_for_server=Mock(return_value=(new,{}))
+    with pytest.raises(RuntimeError,match='no longer supports'):client.reset()
+    new.send.assert_not_called()

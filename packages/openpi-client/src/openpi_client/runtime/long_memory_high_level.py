@@ -8,6 +8,7 @@ from dataclasses import dataclass
 import io
 import json
 import math
+import logging
 import os
 import threading
 import time
@@ -58,7 +59,7 @@ def png_url(image):
 class GptMemoryBackend:
     """Archive exact request/images before dispatch; no hidden retries or paid startup test."""
     def __init__(self, *, model='gpt-6.2-sol', api_key=None, base_url='https://api.openai.com/v1',
-                 timeout=45, reasoning_effort='low', archive_root=None, cost_from_usage=None):
+                 timeout=45, reasoning_effort='low', archive_root=None, cost_from_usage=None, status_publisher=None):
         self.model, self.key = model, api_key or os.environ.get('OPENAI_API_KEY')
         if not self.key:
             raise ValueError('OPENAI_API_KEY is not configured')
@@ -69,7 +70,16 @@ class GptMemoryBackend:
         self.url = base_url.rstrip('/') + '/responses'
         self.timeout, self.reasoning_effort = timeout, reasoning_effort
         self.cost_from_usage = cost_from_usage
+        self.status_publisher = status_publisher
         self.sequence, self.sequence_lock = 0, threading.Lock()
+
+    def notify(self, kind, record, directory=None):
+        if self.status_publisher is not None:
+            try:self.status_publisher.event(kind, record, directory)
+            except Exception:logging.warning('High-level display publication failed')
+
+    def reset_status(self, epoch):
+        self.notify('reset', {'epoch': epoch})
 
     def __call__(self, *, task, memory, frames, now_s=None, epoch=0, seq=1,
                  camera_timestamps=None, camera_timestamp_domain=None):
@@ -106,6 +116,7 @@ class GptMemoryBackend:
                   'image_count': 4, 'image_history_seconds': 0,
                   'known_cost_usd': None, 'cost_status': 'not_configured'}
         directory = self.archive.prepare(body, record)  # Must succeed before urlopen.
+        self.notify('submitted', record, directory)
         raw = None
         started = time.monotonic()
         try:
@@ -140,19 +151,20 @@ class GptMemoryBackend:
         finally:
             record.update(returned_unix=time.time(), latency_seconds=time.monotonic() - started)
             self.archive.finish(directory, record, raw)
+            self.notify('finished', record, directory)
         return MemoryUpdate(update.state, directory)
 
     def record_outcome(self, update, *, applied, reason):
         if update.archive_directory:
             self.archive.outcome(update.archive_directory, {'applied': applied, 'reason': reason,
                                                            'decided_unix': time.time()})
+            self.notify('outcome', {'applied': applied, 'reason': reason}, update.archive_directory)
 
 
 class MemorySupervisor:
     """GPT returns the complete next state. Never append, infer or clear bottle memory locally."""
-    def __init__(self, backend, *, settings=LongMemoryConfig(), cameras=CAMERAS, max_age=8.):
+    def __init__(self, backend, *, settings=LongMemoryConfig(), cameras=CAMERAS):
         self.backend, self.settings, self.cameras = backend, settings, cameras
-        self.max_age = max_age
         self.lock = threading.RLock()
         self.executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix='visual-summary')
         self.future, self.seq, self.closed = None, 0, False
@@ -185,6 +197,7 @@ class MemorySupervisor:
             self.frame_timestamps, self.frame_timestamp_domain = None, None
             self.last_capture = self.last_request = self.last_observed = -math.inf
             self.error = None
+            if hasattr(self.backend, 'reset_status'):self.backend.reset_status(self.generation)
 
     def _poll(self):
         with self.lock:
@@ -200,16 +213,12 @@ class MemorySupervisor:
                 state = parse_update({'bottle_description': update.state.bottle_description,
                                       'memory': update.state.memory, 'current_task_index': index},
                                      max_chars=self.settings.max_memory_chars).state
-                age = max(elapsed, time.monotonic() - getattr(self, 'future_started', time.monotonic()))
-                fresh = age <= self.max_age
-                apply = generation == self.generation and not self.closed and fresh
-                self._outcome(update, apply, 'applied' if apply else 'late_or_reset')
+                apply = generation == self.generation and not self.closed
+                self._outcome(update, apply, 'applied' if apply else 'episode_reset_or_closed')
                 if apply:
                     # Index already decoded to the exact training text, fields still separate.
                     self.memory = state
                     self.last_observed, self.latency_seconds, self.error = observed, elapsed, None
-                elif generation == self.generation:
-                    self.error = 'HighLevelReplyTooOld'
             except Exception as error:
                 self.error = type(error).__name__
 
@@ -234,14 +243,13 @@ class MemorySupervisor:
                 selected, submitted = list(self.frames), time.monotonic()
                 timestamps, timestamp_domain = self.frame_timestamps, self.frame_timestamp_domain
                 def update():
-                    if generation != self.generation or self.closed or time.monotonic() - submitted > self.max_age:
+                    if generation != self.generation or self.closed:
                         raise CancelledError()
                     value = self.backend(task=task, memory=previous, frames=selected,
                                          now_s=now_s, epoch=generation, seq=seq,
                                          camera_timestamps=timestamps, camera_timestamp_domain=timestamp_domain)
                     return generation, now_s, value, time.monotonic() - submitted
                 self.last_request = now_s
-                self.future_started = submitted
                 self.future = self.executor.submit(update)
             return encode_memory(self.memory)
 
@@ -249,8 +257,8 @@ class MemorySupervisor:
         self._poll()
         if self.error or self.archive_error:
             raise RuntimeError("High-level result failed: " + str(self.error or self.archive_error))
-        if not self.memory.current_task or now_s - self.last_observed > self.max_age:
-            raise RuntimeError('High-level result unavailable or stale; no action generated')
+        if not self.memory.current_task:
+            raise RuntimeError('High-level result unavailable; no action generated')
         return encode_memory(self.memory)
 
     def close(self):
@@ -284,13 +292,33 @@ class LongMemoryPolicy:
                                 camera_timestamps=observation.get('camera_timestamps'),
                                 camera_timestamp_domain=observation.get('camera_timestamp_domain'))
         deadline = time.monotonic() + self.first_result_timeout
-        while not self.supervisor.memory.current_task and time.monotonic() < deadline:
+        waiting_published = False
+        while True:
             self.supervisor._poll()
-            if self.supervisor.error:
-                raise RuntimeError('High-level request failed: ' + self.supervisor.error)
+            error = self.supervisor.archive_error or self.supervisor.error
+            notify = getattr(self.supervisor.backend, 'notify', lambda *args: None)
+            if error:
+                notify('error', {'error': str(error)})
+                raise RuntimeError('High-level request failed: ' + str(error))
+            now_s = time.monotonic() - self.started
+            if self.supervisor.memory.current_task:
+                memory = self.supervisor.ready_memory(now_s=now_s)
+                break
+            # Wait only for the first result after an explicit reset. A completed
+            # current-episode state remains usable while the next request runs.
+            if time.monotonic() >= deadline:
+                notify('error', {'error': 'Initial high-level result timed out; no action generated'})
+                raise RuntimeError('Initial high-level result timed out; no action generated')
+            if not waiting_published:
+                notify('waiting', {})
+                waiting_published = True
             time.sleep(.005)
-        memory = self.supervisor.ready_memory(now_s=time.monotonic() - self.started)
-        return self.low_level_policy.infer({**observation, 'long_memory': memory}, *args, **kwargs)
+        # Camera timing is high-level archive provenance, never a model feature.
+        # Preserve the original observation for the supervisor and its archive.
+        low_level_observation = {key: value for key, value in observation.items()
+                                 if key not in ('camera_timestamps', 'camera_timestamp_domain', 'origin_observation')}
+        low_level_observation['long_memory'] = memory
+        return self.low_level_policy.infer(low_level_observation, *args, **kwargs)
 
     def __getattr__(self, name):
         return getattr(self.low_level_policy, name)

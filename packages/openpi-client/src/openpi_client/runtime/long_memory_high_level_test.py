@@ -120,7 +120,6 @@ def test_invalid_wire_response_is_saved_but_never_accepted(tmp_path, monkeypatch
 
 
 def set_reply(supervisor, value, *, generation=None, age=.1):
-    supervisor.future_started = time.monotonic()
     supervisor.future = Future()
     supervisor.future.set_result((supervisor.generation if generation is None else generation,
                                  1., parse_update(value), age))
@@ -147,13 +146,16 @@ def test_box_reset_preserves_provided_memory_and_final_return_keeps_task7():
     finally:s.close()
 
 
-def test_late_reply_or_explicit_episode_reset_cannot_resurrect_old_target():
+def test_slow_current_episode_reply_is_accepted_but_reset_cannot_resurrect_old_target():
     backend = Mock();s = MemorySupervisor(backend)
     try:
         old_generation = s.generation;s.reset()
         set_reply(s, payload(), generation=old_generation);s._poll();assert s.memory == MemoryState()
-        set_reply(s, payload(), age=9.);s._poll();assert s.memory == MemoryState()
-        backend.record_outcome.assert_called_with(parse_update(payload()), applied=False, reason='late_or_reset')
+        backend.record_outcome.assert_called_with(parse_update(payload()), applied=False, reason='episode_reset_or_closed')
+        set_reply(s, payload(), age=40.);s._poll();assert s.memory.current_task == CURRENT_TASKS[1]
+        assert s.error is None
+        backend.record_outcome.assert_called_with(parse_update(payload()), applied=True, reason='applied')
+        s.reset()
         s.future = Future();pending = s.future;s.reset()
         # Simulate a request already in flight, which cannot be cancelled.
         pending2 = Future();pending2.set_running_or_notify_cancel();s.future = pending2;s.reset()
@@ -165,18 +167,33 @@ def test_late_reply_or_explicit_episode_reset_cannot_resurrect_old_target():
 
 def test_real_backend_to_low_level_preserves_separate_fields_and_training_text(tmp_path, monkeypatch):
     fake_dispatch(monkeypatch, payload())
-    backend = GptMemoryBackend(api_key='mock', archive_root=tmp_path)
+    from openpi.serving.high_level_status import RedisHighLevelStatus
+    client=Mock();client.get.return_value=None
+    publisher=RedisHighLevelStatus(client,model='gpt-6.2-sol',checkpoint_step='15000')
+    backend = GptMemoryBackend(api_key='mock', archive_root=tmp_path,status_publisher=publisher)
     s = MemorySupervisor(backend);low = Mock();low.infer.return_value = {'actions': np.zeros((2, 14))}
     p = LongMemoryPolicy(low, s, first_result_timeout=2)
     obs = {'prompt': 'twist and dispose', 'images': images(), 'state': np.zeros(14), **STAMP}
+    obs['origin_observation'] = {'images': images(), 'qpos': np.zeros(14), **STAMP}
     try:
         p.infer(obs, chunking_mode='training_time', action_prefix=np.zeros((2, 14)))
         args, kwargs = low.infer.call_args;state = decode_memory(args[0]['long_memory'])
         assert state.memory == COMPLETED_FACTS['pickup'] and state.current_task == CURRENT_TASKS[1]
         assert args[0]['prompt'] == obs['prompt'] and kwargs['chunking_mode'] == 'training_time'
+        assert 'camera_timestamps' not in args[0] and 'camera_timestamp_domain' not in args[0]
+        assert 'origin_observation' not in args[0]
+        assert obs['origin_observation']['camera_timestamp_domain'] == STAMP['camera_timestamp_domain']
+        assert obs['camera_timestamps'] == STAMP['camera_timestamps']
+        assert obs['camera_timestamp_domain'] == STAMP['camera_timestamp_domain']
+        archived = json.loads(next(tmp_path.rglob('result.json')).read_text())
+        assert archived['camera_timestamps'] == obs['camera_timestamps']
+        assert archived['timestamp_domain'] == obs['camera_timestamp_domain']
         assert memory_prompt(state) == ('Bottle description: green bottle\nMemory: I picked up the bottle with my left gripper.\nCurrent task: Unscrew the bottle cap.')
         assert 'current_task_index' not in json.loads(args[0]['long_memory'])
         assert json.loads(next(tmp_path.rglob('application.json')).read_text())['applied']
+        shown=json.loads(client.set.call_args.args[1])
+        assert shown['current_task']==CURRENT_TASKS[1] and shown['memory']==COMPLETED_FACTS['pickup']
+        assert shown['applied'] is True and shown['inflight']==0 and shown['completed']==1
     finally:s.close()
 
 
@@ -213,3 +230,32 @@ def test_missing_or_misaligned_camera_timestamps_block_dispatch(tmp_path, monkey
     stamps={**STAMP['camera_timestamps'],'cam_low':3.}
     with pytest.raises(ValueError, match='alignment'):backend(task='goal',memory=MemoryState(),frames=[(0,images())],camera_timestamps=stamps,camera_timestamp_domain='unix_seconds')
     assert not calls
+
+
+def test_current_episode_memory_keeps_driving_while_next_reply_is_inflight(monkeypatch):
+    import openpi_client.runtime.long_memory_high_level as module
+    clock=[1000.];monkeypatch.setattr(module.time,'monotonic',lambda:clock[0])
+    s=MemorySupervisor(Mock());low=Mock();low.infer.return_value={'actions':np.zeros((2,14))}
+    s.memory=MemoryState('current bottle','',CURRENT_TASKS[0]);s.last_observed=0.
+    pending=Future();s.future=pending
+    monkeypatch.setattr(s,'observe',lambda *args,**kwargs:None)
+    monkeypatch.setattr(module.time,'sleep',lambda _:pytest.fail('Known current-episode memory must not wait or expire'))
+    p=LongMemoryPolicy(low,s,first_result_timeout=1);p.started=0.
+    try:
+        p.infer({'task':'goal','images':images(),**STAMP},chunking_mode='training_time')
+        low.infer.assert_called_once()
+        assert decode_memory(low.infer.call_args.args[0]['long_memory'])==s.memory
+        assert not pending.done()
+    finally:s.close()
+
+
+def test_initial_result_timeout_never_generates_actions_without_a_task(monkeypatch):
+    import openpi_client.runtime.long_memory_high_level as module
+    clock=[9.];monkeypatch.setattr(module.time,'monotonic',lambda:clock[0])
+    monkeypatch.setattr(module.time,'sleep',lambda _:clock.__setitem__(0,clock[0]+.1))
+    s=MemorySupervisor(Mock())
+    monkeypatch.setattr(s,'observe',lambda *args,**kwargs:None);low=Mock();p=LongMemoryPolicy(low,s,first_result_timeout=.2);p.started=0.
+    try:
+        with pytest.raises(RuntimeError,match='Initial high-level result timed out'):p.infer({'task':'goal','images':images(),**STAMP})
+        low.infer.assert_not_called()
+    finally:s.close()

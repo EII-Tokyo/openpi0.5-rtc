@@ -774,7 +774,8 @@ class Runtime:
             return
         self._apply_pending_inference_settings()
         step_started = time.monotonic()
-        observation = self._environment.get_observation()
+        # Refresh after idle and at every tick without issuing a motor command.
+        observation = self._environment.refresh_observation()
         if self._advance_home_cycle(observation):
             return
         observation_done = time.monotonic()
