@@ -169,12 +169,15 @@ def test_real_backend_to_low_level_preserves_separate_fields_and_training_text(t
     s = MemorySupervisor(backend);low = Mock();low.infer.return_value = {'actions': np.zeros((2, 14))}
     p = LongMemoryPolicy(low, s, first_result_timeout=2)
     obs = {'prompt': 'twist and dispose', 'images': images(), 'state': np.zeros(14), **STAMP}
+    obs['origin_observation'] = {'images': images(), 'qpos': np.zeros(14), **STAMP}
     try:
         p.infer(obs, chunking_mode='training_time', action_prefix=np.zeros((2, 14)))
         args, kwargs = low.infer.call_args;state = decode_memory(args[0]['long_memory'])
         assert state.memory == COMPLETED_FACTS['pickup'] and state.current_task == CURRENT_TASKS[1]
         assert args[0]['prompt'] == obs['prompt'] and kwargs['chunking_mode'] == 'training_time'
         assert 'camera_timestamps' not in args[0] and 'camera_timestamp_domain' not in args[0]
+        assert 'origin_observation' not in args[0]
+        assert obs['origin_observation']['camera_timestamp_domain'] == STAMP['camera_timestamp_domain']
         assert obs['camera_timestamps'] == STAMP['camera_timestamps']
         assert obs['camera_timestamp_domain'] == STAMP['camera_timestamp_domain']
         archived = json.loads(next(tmp_path.rglob('result.json')).read_text())

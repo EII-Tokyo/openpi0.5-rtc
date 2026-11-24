@@ -293,7 +293,7 @@ class LongMemoryPolicy:
         # Camera timing is high-level archive provenance, never a model feature.
         # Preserve the original observation for the supervisor and its archive.
         low_level_observation = {key: value for key, value in observation.items()
-                                 if key not in ('camera_timestamps', 'camera_timestamp_domain')}
+                                 if key not in ('camera_timestamps', 'camera_timestamp_domain', 'origin_observation')}
         low_level_observation['long_memory'] = memory
         return self.low_level_policy.infer(low_level_observation, *args, **kwargs)
 
