@@ -165,7 +165,10 @@ def test_late_reply_or_explicit_episode_reset_cannot_resurrect_old_target():
 
 def test_real_backend_to_low_level_preserves_separate_fields_and_training_text(tmp_path, monkeypatch):
     fake_dispatch(monkeypatch, payload())
-    backend = GptMemoryBackend(api_key='mock', archive_root=tmp_path)
+    from openpi.serving.high_level_status import RedisHighLevelStatus
+    client=Mock();client.get.return_value=None
+    publisher=RedisHighLevelStatus(client,model='gpt-6.2-sol',checkpoint_step='15000')
+    backend = GptMemoryBackend(api_key='mock', archive_root=tmp_path,status_publisher=publisher)
     s = MemorySupervisor(backend);low = Mock();low.infer.return_value = {'actions': np.zeros((2, 14))}
     p = LongMemoryPolicy(low, s, first_result_timeout=2)
     obs = {'prompt': 'twist and dispose', 'images': images(), 'state': np.zeros(14), **STAMP}
@@ -186,6 +189,9 @@ def test_real_backend_to_low_level_preserves_separate_fields_and_training_text(t
         assert memory_prompt(state) == ('Bottle description: green bottle\nMemory: I picked up the bottle with my left gripper.\nCurrent task: Unscrew the bottle cap.')
         assert 'current_task_index' not in json.loads(args[0]['long_memory'])
         assert json.loads(next(tmp_path.rglob('application.json')).read_text())['applied']
+        shown=json.loads(client.set.call_args.args[1])
+        assert shown['current_task']==CURRENT_TASKS[1] and shown['memory']==COMPLETED_FACTS['pickup']
+        assert shown['applied'] is True and shown['inflight']==0 and shown['completed']==1
     finally:s.close()
 
 
