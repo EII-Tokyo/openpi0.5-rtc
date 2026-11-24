@@ -11,7 +11,14 @@ def install(policy, metadata):
         raise ValueError('Sol eight-task inference requires an eight-task completed-memory checkpoint')
     if runtime['video_input']['num_frames'] != 1 or runtime['video_input']['mosaic'] is not None:
         raise ValueError('Sol current-four-view inference requires single-frame camera observations')
-    backend = GptMemoryBackend(archive_root=os.environ.get('OPENPI_HIGH_LEVEL_DATASET_DIR'))
+    publisher = None
+    if os.environ.get('OPENPI_HIGH_LEVEL_STATUS_REDIS', 'false').lower() == 'true':
+        from openpi.serving.high_level_status import RedisHighLevelStatus
+        publisher = RedisHighLevelStatus.from_environment(
+            model='gpt-6.2-sol', checkpoint_step=runtime['video_input'].get('checkpoint_step'),
+            interval_seconds=settings['update_seconds'])
+    backend = GptMemoryBackend(archive_root=os.environ.get('OPENPI_HIGH_LEVEL_DATASET_DIR'),
+                               status_publisher=publisher)
     supervisor = MemorySupervisor(backend, settings=LongMemoryConfig(**settings))
     runtime['high_level'] = {'enabled': True, 'reset_protocol': True, 'model': backend.model,
                              'wire_protocol': 'bottle_description_memory_current_task_index_1_to_8',

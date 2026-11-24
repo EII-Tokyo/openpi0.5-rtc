@@ -222,3 +222,34 @@ def test_missing_or_misaligned_camera_timestamps_block_dispatch(tmp_path, monkey
     stamps={**STAMP['camera_timestamps'],'cam_low':3.}
     with pytest.raises(ValueError, match='alignment'):backend(task='goal',memory=MemoryState(),frames=[(0,images())],camera_timestamps=stamps,camera_timestamp_domain='unix_seconds')
     assert not calls
+
+
+def test_stale_cached_memory_waits_for_inflight_fresh_reply_without_actions(monkeypatch):
+    import openpi_client.runtime.long_memory_high_level as module
+    clock=[9.];monkeypatch.setattr(module.time,'monotonic',lambda:clock[0])
+    backend=Mock();s=MemorySupervisor(backend);low=Mock();low.infer.return_value={'actions':np.zeros((2,14))}
+    s.memory=MemoryState('old bottle','',CURRENT_TASKS[0]);s.last_observed=0.
+    pending=Future();s.future=pending;s.future_started=9.
+    monkeypatch.setattr(s,'observe',lambda *args,**kwargs:None)
+    def tick(_):
+        low.infer.assert_not_called();clock[0]=9.1
+        if not pending.done():pending.set_result((s.generation,9.,parse_update(payload()),.1))
+    monkeypatch.setattr(module.time,'sleep',tick)
+    p=LongMemoryPolicy(low,s,first_result_timeout=1);p.started=0.
+    try:
+        p.infer({'task':'goal','images':images(),**STAMP},chunking_mode='training_time')
+        low.infer.assert_called_once();assert decode_memory(low.infer.call_args.args[0]['long_memory']).current_task==CURRENT_TASKS[1]
+        assert s.max_age==8. and s.last_observed==9.
+    finally:s.close()
+
+
+def test_fresh_result_timeout_never_uses_expired_memory(monkeypatch):
+    import openpi_client.runtime.long_memory_high_level as module
+    clock=[9.];monkeypatch.setattr(module.time,'monotonic',lambda:clock[0])
+    monkeypatch.setattr(module.time,'sleep',lambda _:clock.__setitem__(0,clock[0]+.1))
+    s=MemorySupervisor(Mock());s.memory=MemoryState('old','',CURRENT_TASKS[0]);s.last_observed=0.
+    monkeypatch.setattr(s,'observe',lambda *args,**kwargs:None);low=Mock();p=LongMemoryPolicy(low,s,first_result_timeout=.2);p.started=0.
+    try:
+        with pytest.raises(RuntimeError,match='timed out'):p.infer({'task':'goal','images':images(),**STAMP})
+        low.infer.assert_not_called()
+    finally:s.close()
