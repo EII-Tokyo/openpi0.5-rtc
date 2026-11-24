@@ -290,7 +290,12 @@ class LongMemoryPolicy:
                 raise RuntimeError('High-level request failed: ' + self.supervisor.error)
             time.sleep(.005)
         memory = self.supervisor.ready_memory(now_s=time.monotonic() - self.started)
-        return self.low_level_policy.infer({**observation, 'long_memory': memory}, *args, **kwargs)
+        # Camera timing is high-level archive provenance, never a model feature.
+        # Preserve the original observation for the supervisor and its archive.
+        low_level_observation = {key: value for key, value in observation.items()
+                                 if key not in ('camera_timestamps', 'camera_timestamp_domain')}
+        low_level_observation['long_memory'] = memory
+        return self.low_level_policy.infer(low_level_observation, *args, **kwargs)
 
     def __getattr__(self, name):
         return getattr(self.low_level_policy, name)

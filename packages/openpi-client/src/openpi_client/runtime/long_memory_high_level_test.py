@@ -174,6 +174,12 @@ def test_real_backend_to_low_level_preserves_separate_fields_and_training_text(t
         args, kwargs = low.infer.call_args;state = decode_memory(args[0]['long_memory'])
         assert state.memory == COMPLETED_FACTS['pickup'] and state.current_task == CURRENT_TASKS[1]
         assert args[0]['prompt'] == obs['prompt'] and kwargs['chunking_mode'] == 'training_time'
+        assert 'camera_timestamps' not in args[0] and 'camera_timestamp_domain' not in args[0]
+        assert obs['camera_timestamps'] == STAMP['camera_timestamps']
+        assert obs['camera_timestamp_domain'] == STAMP['camera_timestamp_domain']
+        archived = json.loads(next(tmp_path.rglob('result.json')).read_text())
+        assert archived['camera_timestamps'] == obs['camera_timestamps']
+        assert archived['timestamp_domain'] == obs['camera_timestamp_domain']
         assert memory_prompt(state) == ('Bottle description: green bottle\nMemory: I picked up the bottle with my left gripper.\nCurrent task: Unscrew the bottle cap.')
         assert 'current_task_index' not in json.loads(args[0]['long_memory'])
         assert json.loads(next(tmp_path.rglob('application.json')).read_text())['applied']
