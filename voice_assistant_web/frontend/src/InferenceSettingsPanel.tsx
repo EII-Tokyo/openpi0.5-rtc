@@ -3,6 +3,10 @@ import { apiBase } from './services/api'
 
 type Settings = { operator: string | null; rating: number | null; camera_low_position: 'front' | 'rear' | null }
 type ResponseSettings = Settings & { operators: string[] }
+type PromptContract = {
+  version: string; sent_language: string; system_prompt_en: string; system_prompt_zh: string
+  response_schema: unknown; user_text_template: unknown; camera_keys: string[]
+}
 
 type Props = Settings & { open: boolean; onClose: () => void }
 
@@ -19,6 +23,26 @@ export function InferenceSettingsPanel({ operator, rating, camera_low_position, 
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('Loading inference settings…')
   const [failed, setFailed] = useState(false)
+  const [prompt, setPrompt] = useState<PromptContract | null>(null)
+  const [promptError, setPromptError] = useState(false)
+  const [promptLanguage, setPromptLanguage] = useState<'en' | 'zh'>('en')
+
+  useEffect(() => {
+    if (!open) return
+    const controller = new AbortController()
+    void (async () => {
+      try {
+        const response = await fetch(`${apiBase}/api/high-level/status`, { signal: controller.signal })
+        if (!response.ok) throw new Error(`HTTP ${response.status}`)
+        const data = await response.json()
+        if (!data.prompt_contract?.system_prompt_en) throw new Error('Prompt unavailable')
+        if (!controller.signal.aborted) { setPrompt(data.prompt_contract); setPromptError(false) }
+      } catch {
+        if (!controller.signal.aborted) { setPrompt(null); setPromptError(true) }
+      }
+    })()
+    return () => controller.abort()
+  }, [open])
 
   const accept = (data: ResponseSettings) => {
     const settings = { operator: data.operator, rating: data.rating, camera_low_position: data.camera_low_position ?? null }
@@ -84,6 +108,26 @@ export function InferenceSettingsPanel({ operator, rating, camera_low_position, 
       </div>
       <p className="conditioning-description">Update the current task’s conditions in real time.</p>
       <div className="conditioning-body">
+        <section className="conditioning-prompt" aria-labelledby="sol-prompt-title">
+          <h3 id="sol-prompt-title">Sol prompt · eight tasks</h3>
+          {prompt ? <>
+            <p className="conditioning-prompt-version">{prompt.version}</p>
+            <p className="conditioning-description">Active policy prompt. Sent in English; Chinese is the reviewed translation. No time-based reply expiry.</p>
+            <div className="conditioning-prompt-languages" role="group" aria-label="Prompt language">
+              <button type="button" aria-pressed={promptLanguage === 'en'} onClick={() => setPromptLanguage('en')}>English · sent to Sol</button>
+              <button type="button" aria-pressed={promptLanguage === 'zh'} onClick={() => setPromptLanguage('zh')}>中文对照</button>
+            </div>
+            <pre className="conditioning-prompt-text" aria-label={promptLanguage === 'en' ? 'Active English system prompt' : 'Chinese prompt translation'}>{promptLanguage === 'en' ? prompt.system_prompt_en : prompt.system_prompt_zh}</pre>
+            <details className="conditioning-prompt-protocol">
+              <summary>Input and output protocol</summary>
+              <p>Four current images: {prompt.camera_keys.join(', ')}. Each call receives the previous complete state and returns the new complete state. Memory and current task stay separate.</p>
+              <h4>User text template</h4>
+              <pre>{JSON.stringify(prompt.user_text_template, null, 2)}</pre>
+              <h4>Exact output schema</h4>
+              <pre>{JSON.stringify(prompt.response_schema, null, 2)}</pre>
+            </details>
+          </> : <p role="status">{promptError ? 'Active prompt is unavailable. Reopen after the policy server is ready.' : 'Loading active prompt…'}</p>}
+        </section>
         <fieldset className="conditioning-fieldset" disabled={!saved || busy}>
           <legend>Camera low position</legend>
           <div className="conditioning-operators">

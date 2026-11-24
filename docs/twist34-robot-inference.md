@@ -1,0 +1,15 @@
+# Twist34 robot inference and web preview
+
+Use the existing branch `codex/twist34-merged-adjust-pickup-20261121` and the canonical root `docker-compose.yml`. Checkpoint selection remains `OPENPI_CHECKPOINT_DIR`; policy and runtime must use the same path. Both 10000 and 15000 were loaded and health-checked on103. Training/model/data definitions remain identical to the original branch.
+
+For this RTC checkpoint set `OPENPI_CHUNKING_MODE=training_time`, `OPENPI_SOL_HIGH_LEVEL=true`, and `OPENPI_HIGH_LEVEL_STATUS_REDIS=true`. Optional `OPENPI_POLICY_SOURCE_DIR` and `OPENPI_RUNTIME_SOURCE_DIR` bind a verified existing source worktree; defaults remain the project root. Load the existing API credential securely through the environment. Never commit credentials or expanded Compose configuration. No model-specific Compose overlay is needed.
+
+The reviewed `sol62-twist34-merged-eight-task-v1-20261121` prompt reads the old complete memory and returns the new complete memory plus the task index. English/Chinese prompt and schema appear in Inference conditioning. Camera timing/recording metadata stays outside low-level tensor inputs. There is no time-based reply expiry. Explicit episode reset still invalidates pending earlier-episode replies. Reset reconnects once and requires an acknowledgment if its old WebSocket closed. Every real request/image and application decision is retained under the persistent high-level archive.
+
+High-level results show the latest20 request durations, actual return times, success/error and application status. An in-flight request displays elapsed time. Complete request records stay in the archive.
+
+Web preview uses four original640x480 lossless PNG images over `/ws/cameras`. The independent low-priority CPU encoder targets10Hz and keeps one latest packet; each viewer acknowledges drawing before the next packet is sent. Slow viewers skip frames instead of building a backlog. `/ws/realtime` carries robot state separately. Inference camera input and GPU model execution do not use the preview encoder. Legacy JPEG snapshot endpoints remain on demand. `/api/cameras/preview-metrics` exposes encoder/clock diagnostics without credentials.
+
+Preview overlays show measured drawing frame rate and approximate backend-frame-receipt-to-canvas-draw latency with clock alignment. This excludes sensor exposure and monitor scanout. On the measured local network, four-camera PNG preview drew about9.98fps, median136–137ms/P95about153ms; one stream used about158Mbps versus19Mbps for the previous JPEG preview. These are environment-specific measurements, not performance guarantees.
+
+Verification: native inference/reset/archive/status tests, PNG pixel-exact roundtrip and resolution checks, TypeScript/Vite build, actual10000/15000 model loading and health checks. Preview deployment leaves policy/control/camera-driver processes running; runtime restarts are separate explicit user actions. No automatic physical task or paid startup test is needed to verify deployment.

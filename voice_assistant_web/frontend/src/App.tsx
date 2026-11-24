@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { ActionDrawer } from './components/ActionDrawer'
 import { InferenceSettingsPanel } from './InferenceSettingsPanel'
 import { RecordingPanel } from './RecordingPanel'
+import { HighLevelPanel } from './HighLevelPanel'
 import { CameraGrid } from './components/CameraGrid'
 import { MotorDrawer } from './components/MotorDrawer'
 import { RobotViewer } from './components/RobotViewer'
@@ -183,7 +184,6 @@ export default function App() {
         <CameraGrid
           cameraStatus={state.camera_status}
           cameraTimestamps={state.camera_timestamps}
-          cameraFrames={state.camera_jpeg_b64}
           language={language}
           currentTask={state.robot.current_task}
           cameraView={cameraView}
@@ -202,6 +202,7 @@ export default function App() {
             dispatchTask={dispatchTask}
             dispatchError={dispatchError}
           />
+          <HighLevelPanel language={language} />
         </aside>
       </section>
       <InferenceSettingsPanel open={conditioningDrawerOpen} onClose={() => setConditioningDrawerOpen(false)}

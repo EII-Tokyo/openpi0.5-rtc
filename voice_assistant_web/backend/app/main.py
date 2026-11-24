@@ -99,23 +99,51 @@ def stream_camera(camera_name: str) -> StreamingResponse:
 async def realtime_socket(websocket: WebSocket) -> None:
     await websocket.accept()
     interval = 1.0 / settings.realtime_hz if settings.realtime_hz > 0 else 0.1
-    last_camera_push = 0.0
     try:
         while True:
-            now = time.time()
-            camera_jpeg_b64: dict[str, str] = {}
-            if last_camera_push == 0.0 or now - last_camera_push >= 0.1:
-                camera_jpeg_b64 = camera_bridge.snapshot_jpeg_b64_all()
-                last_camera_push = now
             payload = RealtimePayload(
                 robot=RuntimeStatePayload(**robot_state_bridge.snapshot()),
                 camera_status=camera_bridge.get_camera_status(),
                 camera_timestamps=camera_bridge.get_camera_timestamps(),
-                camera_jpeg_b64=camera_jpeg_b64,
+                camera_jpeg_b64={},  # Camera pixels use a separate bounded binary PNG connection.
             )
             await websocket.send_json(payload.model_dump())
             await asyncio.sleep(interval)
     except WebSocketDisconnect:
+        return
+
+
+@app.get('/api/cameras/preview-metrics')
+def preview_metrics():
+    return camera_bridge.get_preview_metrics()
+
+
+@app.get('/api/cameras/{camera_name}/latest.png')
+def latest_camera_png(camera_name: str):
+    image = camera_bridge.get_latest_png(camera_name)
+    if image is None:
+        raise HTTPException(503, 'Lossless preview is not ready')
+    return Response(content=image, media_type='image/png', headers={'Cache-Control': 'no-store'})
+
+
+@app.websocket('/ws/cameras')
+async def lossless_camera_socket(websocket: WebSocket):
+    await websocket.accept()
+    previous = None
+    try:
+        while True:
+            sequence, packet = camera_bridge.get_preview()
+            if packet is None or sequence == previous:
+                await asyncio.sleep(.005)
+                continue
+            await websocket.send_bytes(packet)
+            # At most one undrawn packet per viewer. Slow clients skip to latest.
+            acknowledgment = await asyncio.wait_for(websocket.receive_json(), timeout=5.)
+            if acknowledgment != {'type': 'ack', 'sequence': sequence}:
+                await websocket.close(code=1008)
+                return
+            previous = sequence
+    except (WebSocketDisconnect, asyncio.TimeoutError):
         return
 
 
@@ -127,6 +155,24 @@ async def voice_text(request: VoiceRequest) -> VoiceResponse:
 @app.get("/api/inference-settings")
 def inference_settings() -> dict:
     return {**read_inference_settings(redis_client).model_dump(), "operators": OPERATORS}
+
+
+@app.get('/api/high-level/status')
+def high_level_status() -> dict:
+    raw = redis_client.get('aloha:sol_high_level:status')
+    if not raw:
+        return {'enabled': False, 'status': 'not_configured'}
+    value = json.loads(raw)
+    value['status_age_seconds'] = max(0., time.time() - value.get('updated_unix', time.time()))
+    return value
+
+
+@app.get('/api/high-level/observation')
+def high_level_observation() -> dict:
+    value = camera_bridge.snapshot_for_high_level()
+    if set(value['camera_png_b64']) != set(camera_bridge.camera_names):
+        raise HTTPException(503, 'All four current cameras are required for high-level inference')
+    return value
 
 
 @app.put("/api/inference-settings")
