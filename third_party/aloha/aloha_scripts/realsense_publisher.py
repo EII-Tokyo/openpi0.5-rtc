@@ -8,6 +8,8 @@ import pyrealsense2 as rs         # Intel RealSense cross-platform open-source A
 import rospy
 
 from aloha.msg import RGBGrayscaleImage
+from std_msgs.msg import String
+from camera_frame_metadata import ExposureMetadataPublisher
 
 
 TIMEOUT_MS = 1000
@@ -129,6 +131,8 @@ for _ in range(3):
             raise Exception
 
 publishers = [rospy.Publisher(cam_name, RGBGrayscaleImage, queue_size=1) for cam_name in camera_names]
+exposure_metadata = ExposureMetadataPublisher(
+    rospy.Publisher('/camera_exposure_metadata', String, queue_size=1), rs.frame_metadata_value)
 
 # i = 0
 
@@ -149,7 +153,8 @@ while not rospy.is_shutdown():
             [pipe.stop() for pipe in pipes]
             break
 
-        color_frame = np.array(frameset.get_color_frame().get_data())
+        sdk_color_frame = frameset.get_color_frame()
+        color_frame = np.array(sdk_color_frame.get_data())
         # Conver to RGB
         color_frame = color_frame[..., ::-1]
         # depth_frame = np.array(frameset.get_depth_frame().get_data())
@@ -159,6 +164,7 @@ while not rospy.is_shutdown():
 
         msg = RGBGrayscaleImage()
         msg.header.stamp = rospy.Time.now()
+        exposure_metadata.capture(cam_name, sdk_color_frame, msg.header.stamp.to_sec())
         msg.images.append(cv_bridge.cv2_to_imgmsg(color_frame, encoding="bgr8"))
         # msg.images.append(cv_bridge.cv2_to_imgmsg(depth_frame, encoding="mono16"))
         msgs.append(msg)
@@ -171,3 +177,4 @@ while not rospy.is_shutdown():
 
     for pub, msg in zip(publishers, msgs):
         pub.publish(msg)
+    exposure_metadata.publish_latest()

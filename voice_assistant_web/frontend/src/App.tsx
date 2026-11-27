@@ -191,7 +191,6 @@ export default function App() {
         <CameraGrid
           cameraStatus={state.camera_status}
           cameraTimestamps={state.camera_timestamps}
-          cameraFrames={state.camera_jpeg_b64}
           language={language}
           currentTask={state.robot.current_task}
           cameraView={cameraView}

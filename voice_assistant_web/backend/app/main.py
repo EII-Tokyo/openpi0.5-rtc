@@ -11,6 +11,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response, StreamingResponse
 
 from .camera_bridge import CameraBridge
+from .camera_exposure import router as camera_exposure_router
+from .nozzle_calibration import NozzleCalibration
 from .config import settings
 from .redis_commands import TASK_MAPPING
 from .redis_commands import create_redis_client
@@ -28,6 +30,7 @@ from .recording_folders import router as recording_folders_router
 
 app = FastAPI(title="Aloha Voice Assistant Web")
 app.include_router(recording_folders_router)
+app.include_router(camera_exposure_router)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.allow_origins if settings.allow_origins != ["*"] else ["*"],
@@ -99,23 +102,56 @@ def stream_camera(camera_name: str) -> StreamingResponse:
 async def realtime_socket(websocket: WebSocket) -> None:
     await websocket.accept()
     interval = 1.0 / settings.realtime_hz if settings.realtime_hz > 0 else 0.1
-    last_camera_push = 0.0
     try:
         while True:
-            now = time.time()
-            camera_jpeg_b64: dict[str, str] = {}
-            if last_camera_push == 0.0 or now - last_camera_push >= 0.1:
-                camera_jpeg_b64 = camera_bridge.snapshot_jpeg_b64_all()
-                last_camera_push = now
             payload = RealtimePayload(
                 robot=RuntimeStatePayload(**robot_state_bridge.snapshot()),
                 camera_status=camera_bridge.get_camera_status(),
                 camera_timestamps=camera_bridge.get_camera_timestamps(),
-                camera_jpeg_b64=camera_jpeg_b64,
+                camera_jpeg_b64={},
             )
             await websocket.send_json(payload.model_dump())
             await asyncio.sleep(interval)
     except WebSocketDisconnect:
+        return
+
+
+@app.get('/api/cameras/preview-metrics')
+def preview_metrics():
+    return camera_bridge.get_preview_metrics()
+
+
+@app.get('/api/cameras/exposure/actual')
+def actual_camera_exposure():
+    return camera_bridge.frame_exposure.snapshot()
+
+
+@app.get('/api/cameras/{camera_name}/latest.png')
+def latest_camera_png(camera_name: str):
+    image = camera_bridge.get_latest_png(camera_name)
+    if image is None:
+        raise HTTPException(503, 'Lossless preview is not ready')
+    return Response(content=image, media_type='image/png', headers={'Cache-Control': 'no-store'})
+
+
+@app.websocket('/ws/cameras')
+async def lossless_camera_socket(websocket: WebSocket):
+    await websocket.accept()
+    previous = None
+    try:
+        while True:
+            sequence, packet = camera_bridge.get_preview()
+            if packet is None or sequence == previous:
+                await asyncio.sleep(.005)
+                continue
+            await websocket.send_bytes(packet)
+            # At most one undrawn packet per viewer. Slow clients skip to latest.
+            acknowledgment = await asyncio.wait_for(websocket.receive_json(), timeout=5.)
+            if acknowledgment != {'type': 'ack', 'sequence': sequence}:
+                await websocket.close(code=1008)
+                return
+            previous = sequence
+    except (WebSocketDisconnect, asyncio.TimeoutError):
         return
 
 
@@ -173,6 +209,24 @@ def update_inference_settings(request: InferenceSettings) -> dict:
     transaction.publish("aloha_inference_settings_updates", json.dumps({"type": "inference_settings", **request.model_dump()}))
     transaction.execute()
     return {**request.model_dump(), "operators": OPERATORS}
+
+
+@app.get("/api/nozzle-calibration")
+def read_nozzle_calibration():
+    from .nozzle_calibration import calibration_status
+
+    return calibration_status(redis_client)
+
+
+@app.put("/api/nozzle-calibration")
+def write_nozzle_calibration(request: NozzleCalibration):
+    from .nozzle_calibration import save_calibration
+
+    raw = redis_client.get("aloha_recording_state")
+    state = json.loads(raw) if raw else {}
+    if state.get("mode") not in ("waiting", "paused") or time.time() - state.get("timestamp", 0) > 3:
+        raise HTTPException(409, "Calibrate while the robot is waiting")
+    return save_calibration(redis_client, camera_bridge, request.model_dump())
 
 
 @app.post("/api/sol-rinse/start")

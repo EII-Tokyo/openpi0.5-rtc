@@ -235,9 +235,11 @@ button {
 
 .camera-panel-header {
   display: flex;
+  flex-wrap: nowrap;
   align-items: center;
   justify-content: flex-end;
   gap: 12px;
+  overflow-x: auto;
 }
 
 .camera-controls {
@@ -245,8 +247,41 @@ button {
   align-items: center;
   justify-content: flex-end;
   gap: 8px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  flex: 0 0 auto;
+  order: 2;
 }
+
+.camera-controls .ghost-button { padding: 7px 12px; }
+
+.exposure-control {
+  flex: 1 1 0;
+  min-width: 510px;
+  padding: 0;
+  color: #39372f;
+}
+
+.sol-fast-control { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin: 10px 0; }
+.sol-fast-control small { font-size: 12px; color: #68655f; }
+.sol-fast-control button[aria-checked="true"] { background: #dfebdd; border-color: #6e946b; color: #244a27; }
+
+.exposure-inputs {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.exposure-inputs label { font-size: 13px; font-weight: 600; white-space: nowrap; }
+.exposure-auto { display: inline-flex; align-items: center; gap: 5px; cursor: pointer; }
+.exposure-auto input { width: 16px; height: 16px; margin: 0; accent-color: #477556; }
+.exposure-inputs input[type="range"]:disabled { opacity: 0.5; cursor: default; }
+.exposure-inputs select { padding: 5px 8px; max-width: 160px; border: 1px solid #c9c5bb; border-radius: 6px; background: white; color: #39372f; }
+.exposure-inputs input[type="range"] { flex: 1 1 130px; min-width: 70px; max-width: 320px; accent-color: #477556; cursor: pointer; padding: 0; }
+.exposure-value { min-width: 53px; white-space: nowrap; font-variant-numeric: tabular-nums; font-weight: 650; }
+.exposure-status { font-size: 12px; color: #52624f; }
+.exposure-control small { display: block; margin-top: 6px; font-size: 11px; line-height: 1.5; color: #65645c; }
+.exposure-control .exposure-error { color: #a72d25; overflow-wrap: anywhere; }
 
 .camera-stage-frame {
   position: relative;
@@ -289,36 +324,16 @@ button {
   z-index: 2;
 }
 
-.camera-overlay-chip {
-  display: inline-grid;
-  gap: 4px;
-  max-width: min(260px, 100%);
-  padding: 8px 10px;
-  border-radius: 14px;
-  background: rgba(26, 20, 15, 0.48);
-  border: 1px solid rgba(255, 248, 239, 0.14);
-  backdrop-filter: blur(10px);
+.camera-name-label {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(26, 20, 15, 0.42);
   color: #fff7ec;
-}
-
-.camera-overlay-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
   font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.camera-overlay-meta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  font-size: 11px;
-  color: rgba(255, 247, 236, 0.82);
+  font-weight: 600;
+  line-height: 1.3;
+  pointer-events: none;
 }
 
 .camera-stage-overlay {
@@ -782,6 +797,19 @@ button {
   display: grid;
   gap: 28px;
 }
+
+.conditioning-prompt { min-width: 0; }
+.conditioning-prompt h3 { margin: 0 0 8px; font-size: 15px; }
+.conditioning-prompt-version { margin: 0; overflow-wrap: anywhere; color: #52604e; font-size: 12px; }
+.conditioning-prompt .conditioning-description { margin: 10px 0 12px; line-height: 1.5; }
+.conditioning-prompt-languages { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+.conditioning-prompt-languages button { border: 1px solid #d5dccf; border-radius: 8px; padding: 7px 10px; color: #3f503b; background: #fffefa; cursor: pointer; font-size: 12px; }
+.conditioning-prompt-languages button[aria-pressed="true"] { background: #e7f1df; border-color: #9aaf8f; }
+.conditioning-prompt pre { white-space: pre-wrap; overflow-wrap: anywhere; font: 12px/1.65 ui-monospace, monospace; padding: 12px; border: 1px solid #dde1d7; border-radius: 10px; background: #f4f6ee; }
+.conditioning-prompt-text { max-height: 340px; overflow-y: auto; margin: 0 0 12px; }
+.conditioning-prompt-protocol { font-size: 12px; line-height: 1.6; }
+.conditioning-prompt-protocol summary { cursor: pointer; color: #4b6043; }
+.conditioning-prompt-protocol h4 { margin: 12px 0 4px; }
 
 .conditioning-fieldset {
   min-width: 0;
@@ -1562,3 +1590,36 @@ button {
 .recording-drawer .conditioning-body > a { font-size: 13px; color: #355640; }
 .recording-drawer .conditioning-body > p[role] { margin: 0; }
 
+
+/* Compact camera toolbar: balanced control and readout sizes. */
+.camera-panel-header { gap: 16px; padding: 2px 0; }
+.exposure-control { min-width: 0; }
+.exposure-inputs { gap: 10px; }
+.exposure-inputs > label:first-child { font-size: 11px; color: #787265; font-weight: 600; }
+.exposure-inputs select { width: 128px; max-width: 128px; font-size: 12px; padding: 6px 8px; border-radius: 8px; }
+.exposure-inputs .exposure-auto { font-size: 12px; gap: 6px; }
+.exposure-inputs input[type="range"] { flex: 1 1 100px; min-width: 65px; max-width: 160px; }
+.exposure-value { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; }
+.exposure-reading { display: inline-flex; align-items: center; gap: 5px; padding: 6px 7px; border: 1px solid #e6e0d6; background: #f4f1e9; border-radius: 7px; }
+.exposure-camera-name { font-size: 10px; color: #817867; font-weight: 600; }
+.exposure-reading strong { font-weight: 600; font-size: 11px; }
+.camera-controls .ghost-button { padding: 7px 11px; font-size: 12px; }
+@media(max-width: 900px) { .exposure-control { min-width: 580px; } }
+
+.camera-panel-header { flex-wrap: wrap; justify-content: flex-start; gap: 8px 12px; }
+.camera-panel-header .exposure-control { flex: 1 1 420px; min-width: 0; }
+.camera-panel-header .exposure-inputs { flex-wrap: wrap; }
+.contrast-control { flex: 1 1 100%; }
+.contrast-inputs { max-width: 640px; }
+.contrast-inputs output { min-width: 3ch; font-variant-numeric: tabular-nums; }
+.nozzle-overlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.nozzle-dialog { width: min(1040px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); box-sizing: border-box; border: 1px solid #ddd5c7; border-radius: 18px; padding: 20px; }
+.nozzle-dialog::backdrop { background: rgba(20, 19, 15, .53); }
+.nozzle-dialog header, .nozzle-dialog footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.nozzle-dialog h2 { margin: 0; }
+.nozzle-dialog footer { justify-content: flex-end; margin-top: 16px; }
+.nozzle-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.nozzle-grid section { display: grid; gap: 8px; justify-items: start; }
+.nozzle-reference { position: relative; width: 100%; aspect-ratio: 4 / 3; background: #181818; }
+.nozzle-reference img { width: 100%; height: 100%; display: block; cursor: crosshair; }
+@media (max-width: 650px) { .nozzle-grid { grid-template-columns: 1fr; } }

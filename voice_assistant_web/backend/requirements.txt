@@ -5,3 +5,5 @@ redis==5.2.1
 openai==1.68.2
 opencv-python-headless==4.11.0.86
 numpy==2.2.3
+
+pyrealsense2==2.55.1.6486

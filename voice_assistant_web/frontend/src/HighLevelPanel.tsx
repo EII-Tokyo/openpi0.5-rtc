@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { apiBase } from './services/api'
 import './high-level.css'
-import type { NozzleTips } from './components/CameraGrid'
+import type { NozzleTips } from './components/NozzleCalibration'
 
 type Result = { status?: string; error?: string; requested_unix?: number | null; returned_unix?: number | null; id?: string; seq: number; applied: boolean | null; current_task: string; bottle_description: string; memory: string; latency_seconds: number; observation_unix: number | null }
 type Snapshot = { nozzle_tips?: NozzleTips | null; dwell_token?: string | null; request_started_unix?: number | null; active_request_seq?: number | null; result_from_previous_episode?: boolean; applied?: boolean | null; request_interval_seconds?: number; enabled?: boolean; status?: string; model?: string; service_tier?: string; checkpoint_step?: number | string; current_task_index?: number | null; current_task?: string; bottle_description?: string; memory?: string; observation_unix?: number | null; latency_seconds?: number | null; submitted?: number; completed?: number; inflight?: number; discarded?: number; error?: string | null; recent_results?: Result[]; updated_unix?: number; status_age_seconds?: number }
