@@ -228,3 +228,4 @@ cython_debug/
 
 # Host-local ALOHA runtime parameter snapshot
 /voice_assistant_web/frontend/public/runtime-parameters.json
+/voice_assistant_web/frontend/public/runtime-state/

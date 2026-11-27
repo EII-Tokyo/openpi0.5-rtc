@@ -1,5 +1,7 @@
 import dataclasses
 import logging
+import os
+from pathlib import Path
 import signal
 import sys
 import threading
@@ -10,6 +12,8 @@ from openpi.robot.aloha_real import chunked_policy
 from openpi.robot.client import websocket_client_policy as _websocket_client_policy
 from openpi.robot.aloha_real import runtime as _runtime
 import tyro
+
+import runtime_launch_parameters
 
 
 
@@ -53,6 +57,11 @@ class Args:
 
 
 def main(args: Args) -> None:
+    started_at = runtime_launch_parameters.utc_now()
+    snapshot_file = os.environ.get("OPENPI_RUNTIME_PARAMETERS_FILE")
+    snapshot_path = Path(snapshot_file) if snapshot_file else None
+    runtime_launch_parameters.clear_snapshot(snapshot_path)
+
     from openpi.robot.aloha_real import real_env as _real_env
 
     if args.action_quality != "normal":
@@ -117,7 +126,11 @@ def main(args: Args) -> None:
     signal.signal(signal.SIGINT, _handle_exit_signal)
     signal.signal(signal.SIGTERM, _handle_exit_signal)
 
-    runtime.run()
+    runtime_launch_parameters.publish_snapshot(snapshot_path, args, started_at, server_metadata, video_input)
+    try:
+        runtime.run()
+    finally:
+        runtime_launch_parameters.clear_snapshot(snapshot_path)
 
 
 def _start_logging_stdout_guard(interval: float = 1.0) -> None:

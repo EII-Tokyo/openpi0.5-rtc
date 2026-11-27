@@ -212,7 +212,6 @@ XLA_PYTHON_CLIENT_PREALLOCATE=false   OPENBLAS_NUM_THREADS=4   OMP_NUM_THREADS=4
       "lyl472324464/2026.03.30_twist-and-water_two_have_cap-with-rinse"
     ]'     --batch-size 256     --num-workers 32     --prefetch-factor 2     --timed-batches 100     --warmup-batches 1     --video-memory-num-frames 6     --video-memory-stride-seconds 5.0     --assets-base-dir /workspace/openpi0.5-rtc/assets     --checkpoint-base-dir /workspace/openpi0.5-rtc/checkpoints
 
-On the robot host, run `python3 scripts/export_runtime_parameters.py` after
-the runtime and policy containers have started. The web **Runtime parameters**
-drawer reads the generated snapshot. Run the exporter again after restarting
-either container to refresh the displayed launch parameters.
+The web **Runtime parameters** drawer reads the startup record that the runtime
+publishes automatically after it has loaded the policy configuration. The robot
+Compose mounts the frontend's `public/runtime-state` directory for this record.

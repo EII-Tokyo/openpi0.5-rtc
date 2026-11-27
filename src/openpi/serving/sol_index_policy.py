@@ -36,8 +36,11 @@ def install(policy, metadata):
                              'camera_keys': list(CAMERAS), 'image_history_seconds': 0,
                              'low_level_format': 'Bottle description / Memory / Current task',
                              'archive_required': True}
-    if periodic:
-        runtime['high_level'].update(request_interval_seconds=interval, reply_expiry_seconds=DEADLINE)
+    runtime['high_level'].update(
+        request_interval_seconds=interval if periodic else settings['update_seconds'],
+        reply_expiry_seconds=DEADLINE if periodic else None,
+        request_schedule='periodic_parallel' if periodic else 'single_inflight_on_policy_observations',
+    )
     return LongMemoryPolicy(policy, supervisor)
 
 

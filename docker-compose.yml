@@ -27,6 +27,7 @@ services:
       ALOHA_HOME_VELOCITY_TOLERANCE: "${ALOHA_HOME_VELOCITY_TOLERANCE:-0.1}"
       ALOHA_HOME_STABLE_SECONDS: "${ALOHA_HOME_STABLE_SECONDS:-0.3}"
       ALOHA_ROLLOUT_DIR: /collection-data
+      OPENPI_RUNTIME_PARAMETERS_FILE: /runtime-state/startup.json
       ALOHA_FOOT_SWITCH: /dev/input/by-id/usb-PCsensor_FootSwitch-event-kbd
       # Override these task prompts for the selected checkpoint when needed.
       ALOHA_TASK_1_PROMPT: "${ALOHA_TASK_1_PROMPT:-twist off the bottle cap and rinse the bottle}"
@@ -34,6 +35,7 @@ services:
     volumes:
       - ${OPENPI_RUNTIME_SOURCE_DIR:-$PWD}:/app
       - /dev/input:/dev/input:ro
+      - ./voice_assistant_web/frontend/public/runtime-state:/runtime-state
       - /home/eii/openpi0.5-rtc/checkpoints:/app/checkpoints:ro
       # Canonical collector/web browser root; existing recordings are not moved.
       - /home/eii/aloha-2.0/aloha_data/aloha_stationary:/collection-data

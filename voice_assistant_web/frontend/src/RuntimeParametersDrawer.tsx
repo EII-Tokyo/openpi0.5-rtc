@@ -5,13 +5,13 @@ type Parameters = Record<string, unknown>
 type Snapshot = {
   captured_at: string
   runtime_started_at: string
-  server_started_at: string
+  server_started_at: string | null
   runtime: Parameters
   policy_server: Parameters
   checkpoint: Parameters
   sol: Parameters
   runtime_environment: Parameters
-  code: Parameters
+  code?: Parameters
 }
 type SolStatus = {
   checkpoint_step?: string | number
@@ -55,15 +55,26 @@ export function RuntimeParametersDrawer({ open, onClose, language }: {
       if (!response.ok) throw new Error(`HTTP ${response.status}`)
       return response.json()
     }
-    void read(`${import.meta.env.BASE_URL}runtime-parameters.json`).then((data: Snapshot) => {
-      if (!controller.signal.aborted) setSnapshot(data)
-    }).catch(() => {
-      if (!controller.signal.aborted) setError(true)
-    })
-    void read(`${apiBase}/api/high-level/status`).then((data: SolStatus) => {
-      if (!controller.signal.aborted) setLiveSol(data)
-    }).catch(() => {})
-    return () => controller.abort()
+    let timer: number | undefined
+    const refresh = async () => {
+      try {
+        const [startup, status] = await Promise.allSettled([
+          read(`${import.meta.env.BASE_URL}runtime-state/startup.json`),
+          read(`${apiBase}/api/high-level/status`),
+        ])
+        if (controller.signal.aborted) return
+        setSnapshot(startup.status === 'fulfilled' ? startup.value : null)
+        setError(startup.status === 'rejected')
+        setLiveSol(status.status === 'fulfilled' ? status.value : null)
+      } finally {
+        if (!controller.signal.aborted) timer = window.setTimeout(refresh, 5000)
+      }
+    }
+    void refresh()
+    return () => {
+      controller.abort()
+      window.clearTimeout(timer)
+    }
   }, [open])
 
   const matching = snapshot && liveSol?.checkpoint_step != null &&
@@ -71,7 +82,7 @@ export function RuntimeParametersDrawer({ open, onClose, language }: {
   const stale = snapshot && liveSol?.checkpoint_step != null && !matching
   const sol = snapshot && {
     ...snapshot.sol,
-    ...(matching ? {
+    ...(matching && snapshot.sol.enabled !== false ? {
       request_interval_seconds: liveSol?.request_interval_seconds ?? snapshot.sol.request_interval_seconds,
       reply_expiry_seconds: liveSol?.prompt_contract?.reply_expiry === undefined
         ? snapshot.sol.reply_expiry_seconds : liveSol.prompt_contract.reply_expiry,
@@ -84,7 +95,7 @@ export function RuntimeParametersDrawer({ open, onClose, language }: {
     ['Runtime', snapshot.runtime],
     [ja ? '推論サーバー' : 'Policy server', snapshot.policy_server],
     [ja ? '実行時の環境変数' : 'Runtime environment', snapshot.runtime_environment],
-    [ja ? 'コード' : 'Code checkouts', snapshot.code],
+    ...(snapshot.code ? [[ja ? 'コード' : 'Code checkouts', snapshot.code] as [string, Parameters]] : []),
   ] : []
 
   const launchTime = (iso: string) => new Intl.DateTimeFormat(ja ? 'ja-JP' : 'en-GB', {
@@ -111,7 +122,7 @@ export function RuntimeParametersDrawer({ open, onClose, language }: {
       {snapshot && <>
         <div className="runtime-parameters-meta">
           <p>{ja ? 'Runtime 起動' : 'Runtime started'} · {launchTime(snapshot.runtime_started_at)} JST</p>
-          <p>{ja ? '推論サーバー起動' : 'Policy server started'} · {launchTime(snapshot.server_started_at)} JST</p>
+          {snapshot.server_started_at && <p>{ja ? '推論サーバー起動' : 'Policy server started'} · {launchTime(snapshot.server_started_at)} JST</p>}
           <p>{ja ? '取得時刻' : 'Snapshot captured'} · {launchTime(snapshot.captured_at)} JST</p>
         </div>
         {stale && <p role="alert">{ja ? '現在のチェックポイントと起動時の記録が異なります。' : 'The live checkpoint differs from this startup snapshot.'}</p>}

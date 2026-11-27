@@ -18,10 +18,11 @@ ENV_KEYS = (
 PARSE_ARGS = """
 from dataclasses import asdict
 from enum import Enum
-import importlib.util, json, sys
+import importlib.util, json, os, sys
 import tyro
 
 script, *arguments = sys.argv[1:]
+sys.path.insert(0, os.path.dirname(script))
 spec = importlib.util.spec_from_file_location('runtime_parameter_inspection', script)
 module = importlib.util.module_from_spec(spec)
 sys.modules[spec.name] = module

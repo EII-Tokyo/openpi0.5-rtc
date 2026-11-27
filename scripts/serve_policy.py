@@ -14,6 +14,8 @@ from openpi.serving import policy_config as _policy_config
 from openpi.serving import websocket_policy_server
 from openpi.training import config as _config
 
+import runtime_launch_parameters
+
 
 class EnvMode(enum.Enum):
     """Supported environments."""
@@ -137,6 +139,7 @@ def create_policy(args: Args) -> _policy.Policy:
 
 
 def main(args: Args) -> None:
+    started_at = runtime_launch_parameters.utc_now()
     if args.check_only:
         check_checkpoint(args)
         return
@@ -192,6 +195,12 @@ def main(args: Args) -> None:
     local_ip = socket.gethostbyname(hostname)
     logging.info("Creating server (host: %s, ip: %s)", hostname, local_ip)
 
+    parameters = runtime_launch_parameters.arguments(args)
+    parameters.update(
+        video_memory_num_frames=runtime["video_input"]["num_frames"],
+        video_memory_stride_seconds=runtime["video_input"]["stride_seconds"],
+    )
+    policy_metadata["policy_launch"] = {"started_at": started_at, "parameters": parameters}
     server = websocket_policy_server.WebsocketPolicyServer(
         policy=policy,
         host="0.0.0.0",
