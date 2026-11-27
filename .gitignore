@@ -225,3 +225,6 @@ cython_debug/
 /backups/
 /training-backups/
 /src/openpi/training/config.py.before-*
+
+# Host-local ALOHA runtime parameter snapshot
+/voice_assistant_web/frontend/public/runtime-parameters.json

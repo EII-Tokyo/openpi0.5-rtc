@@ -1575,3 +1575,23 @@ button {
 .recording-drawer .conditioning-body > a { font-size: 13px; color: #355640; }
 .recording-drawer .conditioning-body > p[role] { margin: 0; }
 
+.runtime-parameters-drawer { width: min(660px, 96vw); }
+.runtime-parameters-meta { margin: 12px 0 20px; color: #5c5148; font-size: .85rem; }
+.runtime-parameters-meta p { margin: 3px 0; }
+.runtime-parameters-section { margin-bottom: 20px; }
+.runtime-parameters-section h3 { margin: 0 0 8px; font-size: .95rem; }
+.runtime-parameters-section dl { margin: 0; }
+.runtime-parameters-section dl > div {
+  display: grid;
+  grid-template-columns: minmax(0, 42fr) minmax(0, 58fr);
+  gap: 12px;
+  padding: 7px 0;
+  border-top: 1px solid #e8dfd5;
+}
+.runtime-parameters-section dt, .runtime-parameters-section dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-family: ui-monospace, monospace;
+  font-size: .78rem;
+}
+.runtime-parameters-section dt { color: #65574c; }
