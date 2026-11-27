@@ -1,22 +1,16 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { apiBase } from './services/api'
 
 type Settings = { operator: string | null; rating: number | null; camera_low_position: 'front' | 'rear' | null }
 type ResponseSettings = Settings & { operators: string[] }
 type PromptContract = {
   version: string; sent_language: string; system_prompt_en: string; system_prompt_zh: string
-  response_schema: unknown; user_text_template: unknown; camera_keys: string[]
+  response_schema: unknown; user_text_template: unknown; camera_keys: string[]; reply_expiry?: number | null
 }
 
-type Props = Settings & { open: boolean; onClose: () => void }
+type Props = Settings & { open: boolean }
 
-export function InferenceSettingsPanel({ operator, rating, camera_low_position, open, onClose }: Props) {
-  const dialog = useRef<HTMLDialogElement>(null)
-  useEffect(() => {
-    const element = dialog.current
-    if (open && !element?.open) element?.showModal()
-    else if (!open && element?.open) element.close()
-  }, [open])
+export function InferenceSettingsPanel({ operator, rating, camera_low_position, open }: Props) {
   const [value, setValue] = useState<Settings>({ operator: null, rating: null, camera_low_position: null })
   const [saved, setSaved] = useState<Settings | null>(null)
   const [operators, setOperators] = useState<string[]>([])
@@ -91,43 +85,9 @@ export function InferenceSettingsPanel({ operator, rating, camera_low_position, 
 
   const dirty = saved !== null && (saved.operator !== value.operator || saved.rating !== value.rating || saved.camera_low_position !== value.camera_low_position)
   return (
-    <dialog ref={dialog} id="inference-conditioning" className="inference-settings-drawer"
-      aria-labelledby="inference-conditioning-title" onClose={onClose}
-      onCancel={event => { event.preventDefault(); onClose() }}
-      onClick={event => {
-        if (event.target !== event.currentTarget) return
-        const rect = event.currentTarget.getBoundingClientRect()
-        if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) onClose()
-      }}>
-      <div className="motor-drawer-header">
-        <div>
-          <p className="conditioning-eyebrow">MODEL INPUT</p>
-          <h2 id="inference-conditioning-title">Inference conditioning</h2>
-        </div>
-        <button className="conditioning-close" type="button" aria-label="Close inference conditioning" onClick={onClose}>×</button>
-      </div>
+    <section aria-label="Inference conditions">
       <p className="conditioning-description">Update the current task’s conditions in real time.</p>
       <div className="conditioning-body">
-        <section className="conditioning-prompt" aria-labelledby="sol-prompt-title">
-          <h3 id="sol-prompt-title">Sol prompt · eight tasks</h3>
-          {prompt ? <>
-            <p className="conditioning-prompt-version">{prompt.version}</p>
-            <p className="conditioning-description">Active policy prompt. Sent in English; Chinese is the reviewed translation. No time-based reply expiry.</p>
-            <div className="conditioning-prompt-languages" role="group" aria-label="Prompt language">
-              <button type="button" aria-pressed={promptLanguage === 'en'} onClick={() => setPromptLanguage('en')}>English · sent to Sol</button>
-              <button type="button" aria-pressed={promptLanguage === 'zh'} onClick={() => setPromptLanguage('zh')}>中文对照</button>
-            </div>
-            <pre className="conditioning-prompt-text" aria-label={promptLanguage === 'en' ? 'Active English system prompt' : 'Chinese prompt translation'}>{promptLanguage === 'en' ? prompt.system_prompt_en : prompt.system_prompt_zh}</pre>
-            <details className="conditioning-prompt-protocol">
-              <summary>Input and output protocol</summary>
-              <p>Four current images: {prompt.camera_keys.join(', ')}. Each call receives the previous complete state and returns the new complete state. Memory and current task stay separate.</p>
-              <h4>User text template</h4>
-              <pre>{JSON.stringify(prompt.user_text_template, null, 2)}</pre>
-              <h4>Exact output schema</h4>
-              <pre>{JSON.stringify(prompt.response_schema, null, 2)}</pre>
-            </details>
-          </> : <p role="status">{promptError ? 'Active prompt is unavailable. Reopen after the policy server is ready.' : 'Loading active prompt…'}</p>}
-        </section>
         <fieldset className="conditioning-fieldset" disabled={!saved || busy}>
           <legend>Camera low position</legend>
           <div className="conditioning-operators">
@@ -203,6 +163,26 @@ export function InferenceSettingsPanel({ operator, rating, camera_low_position, 
           <span>Camera low: {camera_low_position === 'front' ? 'near side of the workbench' : camera_low_position === 'rear' ? 'far side of the workbench' : 'unspecified'}</span>
         </div>
       </div>
-    </dialog>
+        <details className="conditioning-prompt">
+          <summary>Sol prompt · eight tasks</summary>
+          {prompt ? <>
+            <p className="conditioning-prompt-version">{prompt.version}</p>
+            <p className="conditioning-description">Active policy prompt. Sent in English; Chinese is the reviewed translation. {typeof prompt.reply_expiry === 'number' ? `Replies expire after ${prompt.reply_expiry} s.` : prompt.reply_expiry === null ? 'No time-based reply expiry.' : ''}</p>
+            <div className="conditioning-prompt-languages" role="group" aria-label="Prompt language">
+              <button type="button" aria-pressed={promptLanguage === 'en'} onClick={() => setPromptLanguage('en')}>English · sent to Sol</button>
+              <button type="button" aria-pressed={promptLanguage === 'zh'} onClick={() => setPromptLanguage('zh')}>中文对照</button>
+            </div>
+            <pre className="conditioning-prompt-text" aria-label={promptLanguage === 'en' ? 'Active English system prompt' : 'Chinese prompt translation'}>{promptLanguage === 'en' ? prompt.system_prompt_en : prompt.system_prompt_zh}</pre>
+            <details className="conditioning-prompt-protocol">
+              <summary>Input and output protocol</summary>
+              <p>Four current images: {prompt.camera_keys.join(', ')}. Each call receives the previous complete state and returns the new complete state. Memory and current task stay separate.</p>
+              <h4>User text template</h4>
+              <pre>{JSON.stringify(prompt.user_text_template, null, 2)}</pre>
+              <h4>Exact output schema</h4>
+              <pre>{JSON.stringify(prompt.response_schema, null, 2)}</pre>
+            </details>
+          </> : <p role="status">{promptError ? 'Active prompt is unavailable. Reopen after the policy server is ready.' : 'Loading active prompt…'}</p>}
+        </details>
+    </section>
   )
 }

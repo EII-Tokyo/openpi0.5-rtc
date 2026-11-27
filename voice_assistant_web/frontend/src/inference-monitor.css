@@ -1,0 +1,7 @@
+.inference-settings-drawer.inference-monitor-drawer { width: min(760px, 100vw); }
+.inference-monitor-views { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 20px; }
+.inference-monitor-views button[aria-pressed="true"] { background: #e7f1df; border-color: #9aaf8f; color: #3f503b; }
+.inference-monitor-drawer .conditioning-prompt { margin-top: 20px; }
+.inference-monitor-drawer .conditioning-prompt > summary { cursor: pointer; font-size: 15px; font-weight: 600; }
+.inference-monitor-drawer .high-level-low-prompt { border-top: 1px solid #ded8cd; margin-top: 18px; padding-top: 16px; }
+.inference-monitor-drawer .high-level-low-prompt pre { margin: 0; padding: 12px; max-height: 340px; overflow: auto; background: #f0eee7; border-radius: 10px; white-space: pre-wrap; overflow-wrap: anywhere; }

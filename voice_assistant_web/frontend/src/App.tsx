@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ActionDrawer } from './components/ActionDrawer'
-import { InferenceSettingsPanel } from './InferenceSettingsPanel'
+import { InferenceMonitorDrawer, inferenceMonitorTitle } from './InferenceMonitorDrawer'
 import { RecordingPanel } from './RecordingPanel'
-import { HighLevelPanel } from './HighLevelPanel'
 import { RuntimeParametersDrawer } from './RuntimeParametersDrawer'
 import { CameraGrid } from './components/CameraGrid'
 import { MotorDrawer } from './components/MotorDrawer'
@@ -166,9 +165,9 @@ export default function App() {
             Actions
           </button>
           <button className="ghost-button" type="button" aria-haspopup="dialog"
-            aria-controls="inference-conditioning" aria-expanded={conditioningDrawerOpen}
+            aria-controls="inference-monitor" aria-expanded={conditioningDrawerOpen}
             onClick={() => setConditioningDrawerOpen(true)}>
-            Inference conditioning
+            {inferenceMonitorTitle(language)}
           </button>
           <button className="ghost-button" type="button" aria-haspopup="dialog"
               aria-expanded={recordingDrawerOpen} onClick={() => setRecordingDrawerOpen(true)}>录制 / Recording</button>
@@ -208,11 +207,11 @@ export default function App() {
             dispatchTask={dispatchTask}
             dispatchError={dispatchError}
           />
-          <HighLevelPanel language={language} />
         </aside>
       </section>
       <RuntimeParametersDrawer language={language} open={runtimeParametersOpen} onClose={() => setRuntimeParametersOpen(false)} />
-      <InferenceSettingsPanel open={conditioningDrawerOpen} onClose={() => setConditioningDrawerOpen(false)}
+      <InferenceMonitorDrawer language={language} inferencePrompt={state.robot.inference_prompt} runtimeMode={state.robot.mode}
+        open={conditioningDrawerOpen} onClose={() => setConditioningDrawerOpen(false)}
         operator={state.robot.operator ?? null} rating={state.robot.rating ?? null}
         camera_low_position={state.robot.camera_low_position ?? null} />
       <RecordingPanel open={recordingDrawerOpen} onClose={() => setRecordingDrawerOpen(false)} />
