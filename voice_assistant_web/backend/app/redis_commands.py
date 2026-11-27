@@ -60,7 +60,7 @@ def create_redis_client() -> redis.Redis:
     )
 
 
-def publish_task(redis_client: redis.Redis, task_num: str) -> dict:
+def publish_task(redis_client: redis.Redis, task_num: str, *, authorize_sol: bool = False) -> dict:
     # Stop/home/manual controls never depend on optional model capability state.
     capabilities = runtime_capabilities(redis_client) if task_num not in {"3", "4", "5", "6"} else None
     if capabilities is not None and task_num not in capabilities.get("task_ids", []):
@@ -76,5 +76,19 @@ def publish_task(redis_client: redis.Redis, task_num: str) -> dict:
     }
     if task_num in {"1", "2"} or task_num.startswith("bottle_"):
         message.update(read_inference_settings(redis_client).model_dump())
-    redis_client.publish(settings.voice_command_channel, json.dumps(message))
+    if authorize_sol:
+        from openpi.shared import sol_run_grant
+
+        grant = message["command_id"]
+        message["sol_run_grant"] = grant
+        with redis_client.pipeline() as transaction:
+            transaction.set(sol_run_grant.KEY, grant, ex=sol_run_grant.TTL_SECONDS)
+            transaction.delete(sol_run_grant.CALIBRATION_KEY)
+            transaction.publish(settings.voice_command_channel, json.dumps(message))
+            _, _, listeners = transaction.execute()
+        if not listeners:
+            sol_run_grant.revoke(redis_client, grant)
+            raise HTTPException(503, "Robot control service is offline")
+    else:
+        redis_client.publish(settings.voice_command_channel, json.dumps(message))
     return message

@@ -89,8 +89,22 @@ class WebsocketClientPolicy(_base_policy.BasePolicy):
         if isinstance(response, str):
             # we're expecting bytes; if the server sends a string, it's an error.
             raise RuntimeError(f"Error in inference server:\n{response}")
-        return msgpack_numpy.unpackb(response)
+        result = msgpack_numpy.unpackb(response)
+        if result.get("policy_waiting") == "fresh_high_level":
+            raise _base_policy.PolicyWaitingForObservation("Waiting for fresh Sol conditioning")
+        return result
 
     @override
     def reset(self) -> None:
-        pass
+        if self._server_metadata.get("runtime", {}).get("high_level", {}).get("reset_protocol"):
+            request = self._packer.pack({"type": "reset"})
+            try:
+                self._ws.send(request)
+                response = self._ws.recv()
+            except WebSocketException:
+                logging.warning("Policy connection dropped during reset. Reconnecting.")
+                self._ws, self._server_metadata = self._wait_for_server()
+                self._ws.send(request)
+                response = self._ws.recv()
+            if isinstance(response, str) or msgpack_numpy.unpackb(response) != {"reset": True}:
+                raise RuntimeError("Policy server did not acknowledge high-level episode reset")

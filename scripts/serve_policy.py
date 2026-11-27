@@ -1,6 +1,7 @@
 import dataclasses
 import enum
 import logging
+import os
 import json
 import socket
 
@@ -102,6 +103,9 @@ def _make_dummy_obs(metadata: dict) -> dict:
             + tuple(video["image_resolution"]) + (3,), dtype=np.uint8)
         for camera in video["camera_keys"]
     }
+    if metadata["runtime"].get("long_memory") is not None:
+        from openpi.shared.long_memory import MemoryState, encode_memory
+        obs["long_memory"] = encode_memory(MemoryState())
     return obs
 
 
@@ -181,6 +185,10 @@ def main(args: Args) -> None:
     hostname = socket.gethostname()
     local_ip = socket.gethostbyname(hostname)
     logging.info("Creating server (host: %s, ip: %s)", hostname, local_ip)
+
+    if os.environ.get("OPENPI_SOL_RINSE_FAST") == "1":
+        from openpi.serving.sol_rinse_fast import install
+        policy = install(policy, policy_metadata)
 
     server = websocket_policy_server.WebsocketPolicyServer(
         policy=policy,

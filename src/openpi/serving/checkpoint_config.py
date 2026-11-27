@@ -74,6 +74,8 @@ def runtime_metadata(config, root):
         'action_dim': config.model.action_dim,
         'joint_position_history': dataclasses.asdict(pipeline.joint_position_history) if pipeline.joint_position_history is not None else None,
         'nozzle_conditioning': pipeline.nozzle_conditioning,
+        'long_memory': dataclasses.asdict(pipeline.long_memory) if pipeline.long_memory else None,
+        'training_time_rtc': config.model.training_time_rtc,
         'video_input': {
             'config_name': config.name, 'checkpoint_step': root.name,
             'camera_keys': list(pipeline.raw_image_keys),

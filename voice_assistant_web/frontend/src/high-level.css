@@ -1,0 +1,32 @@
+.panel.high-level-panel { min-width: 0; overflow-y: auto; }
+.high-level-panel .panel-header { flex-wrap: wrap; gap: 10px; }
+.high-level-note { font-size: 12px; opacity: .75; margin: 8px 0 14px; }
+.high-level-fields { display: grid; gap: 12px; margin: 0; }
+.high-level-fields dt { font-size: 12px; opacity: .7; }
+.high-level-fields dd { margin: 4px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.high-level-metrics { display: flex; flex-wrap: wrap; gap: 8px 16px; margin: 14px 0; font-size: 12px; opacity: .8; }
+.high-level-history { margin-top: 10px; display: grid; gap: 10px; }
+.high-level-history p { white-space: pre-wrap; overflow-wrap: anywhere; }
+
+.sol-request-latencies { border-top: 1px solid #dddcd4; padding-top: 14px; margin-top: 14px; }
+.sol-request-latencies h3 { font-size: 15px; margin: 0; }
+.sol-request-live { font-size: 13px; margin: 10px 0; }
+.sol-request-table-scroll { max-height: 330px; overflow: auto; }
+.sol-request-latencies table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.sol-request-latencies th { text-align: left; font-weight: 600; opacity: .75; }
+.sol-request-latencies th, .sol-request-latencies td { padding: 9px 6px; border-bottom: 1px solid #e4e4dc; vertical-align: top; }
+.sol-request-latencies th:first-child, .sol-request-latencies td:first-child { padding-left: 0; }
+.sol-request-latencies .sol-latency-value { font-size: 15px; font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.sol-request-latencies details { max-width: 180px; overflow-wrap: anywhere; }
+.sol-request-latencies summary { cursor: pointer; }
+
+.inference-settings-drawer.high-level-drawer { width: min(860px, 100vw); background: #fffcf8; }
+.high-level-drawer-body { overflow-y: auto; min-height: 0; padding: 4px 2px 20px; }
+.high-level-drawer .eyebrow { margin: 0 0 7px; font-size: 11px; }
+.high-level-drawer .high-level-fields { gap: 16px; }
+.high-level-drawer .high-level-fields > div { padding: 14px 16px; border: 1px solid #e4dfd5; border-radius: 12px; background: #faf8f3; }
+.high-level-drawer .high-level-fields dd { font-size: 14px; line-height: 1.65; }
+.high-level-low-prompt { margin-top: 20px; padding-top: 20px; border-top: 1px solid #ded8cd; }
+.high-level-low-prompt h3 { margin: 0; font-size: 17px; }
+.high-level-low-prompt pre { margin: 0; max-height: 340px; overflow: auto; padding: 16px; background: #f0eee7; border-radius: 12px; font-size: 12px; line-height: 1.7; white-space: pre-wrap; overflow-wrap: anywhere; }
+.high-level-drawer .sol-request-latencies { margin-top: 24px; }

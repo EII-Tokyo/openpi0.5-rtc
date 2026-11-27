@@ -1,8 +1,9 @@
 """Build the rinse prompt from the same task catalog used by low-level conditioning."""
+from math import isfinite
 from pathlib import Path
 
 from openpi.shared.completed_step_memory import SUBTASKS_BY_INDEX
-from openpi.shared.high_level_index_protocol import INDEX_MEMORY_SCHEMA
+from openpi.shared.high_level_index_protocol import INDEX_MEMORY_SCHEMA, decode_index_prediction
 
 
 def rinse_prompt(language: str = "en") -> str:
@@ -19,9 +20,48 @@ def rinse_prompt(language: str = "en") -> str:
     return instructions + "\n" + "\n".join(rows) + "\n"
 
 
+NOZZLE_CAMERAS = ("cam_high", "cam_low")
+
+
 def rinse_schema() -> dict:
-    """Use the existing index-based output shape with the rinse branch indices."""
-    return INDEX_MEMORY_SCHEMA
+    point = {
+        "type": ["object", "null"],
+        "properties": {axis: {"type": "number", "minimum": 0, "maximum": 1} for axis in ("x", "y")},
+        "required": ["x", "y"],
+        "additionalProperties": False,
+    }
+    return {
+        **INDEX_MEMORY_SCHEMA,
+        "properties": {
+            **INDEX_MEMORY_SCHEMA["properties"],
+            "nozzle_tips": {
+                "type": "object",
+                "properties": {camera: point for camera in NOZZLE_CAMERAS},
+                "required": list(NOZZLE_CAMERAS),
+                "additionalProperties": False,
+            },
+        },
+        "required": [*INDEX_MEMORY_SCHEMA["required"], "nozzle_tips"],
+    }
+
+
+def rinse_memory(payload):
+    """Use the existing memory-only decoder for both live and archived replies."""
+    return decode_index_prediction({key: value for key, value in payload.items() if key != "nozzle_tips"})
+
+
+def nozzle_tips(payload):
+    """Treat missing or invalid coordinates as a missed detection for that view."""
+    tips = payload.get("nozzle_tips")
+    result = dict.fromkeys(NOZZLE_CAMERAS)
+    if isinstance(tips, dict):
+        for camera in NOZZLE_CAMERAS:
+            point = tips.get(camera)
+            if (isinstance(point, dict) and set(point) == {"x", "y"}
+                    and all(type(value) in (int, float) and 0 <= value <= 1 and isfinite(value)
+                            for value in point.values())):
+                result[camera] = point
+    return result
 
 
 class InsertionDwell:

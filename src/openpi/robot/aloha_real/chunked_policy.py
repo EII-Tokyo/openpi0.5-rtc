@@ -42,6 +42,7 @@ class ChunkedPolicy(_base_policy.BasePolicy):
         self._last_origin_actions: np.ndarray | None = None
         self._background_results: Dict[str, np.ndarray] | None = None
         self._background_running: bool = False
+        self._background_waiting = False
         # Reset may be requested by a live prompt update while an RTC RPC runs.
         # Normal action playback does not acquire this lock.
         self._reset_lock = threading.Lock()
@@ -94,6 +95,12 @@ class ChunkedPolicy(_base_policy.BasePolicy):
             with self._reset_lock:
                 try:
                     self._background_infer_once()
+                except _base_policy.PolicyWaitingForObservation:
+                    self._background_waiting = True
+                    self._background_results = None
+                except RuntimeError:
+                    logging.exception("RTC request failed")
+                    self._background_results = None
                 finally:
                     self._background_running = False
             time.sleep(0.01)
@@ -103,6 +110,7 @@ class ChunkedPolicy(_base_policy.BasePolicy):
             if self._cur_step == self._rtc_replan_start_step:
                 total_start = time.monotonic()
                 self._background_running = True
+                self._background_waiting = False
 
                 # flip, normalize joint actions
                 # norm_action = (np.array([1, -1, -1, 1, 1, 1, 1, 1, -1, -1, 1, 1, 1, 1]) * self._last_results["actions"] - np.array([1, -1, -1, 1, 1, 1, 1, 1, -1, -1, 1, 1, 1, 1]) * self._obs["state"][:14] - np.array(self._norm_stats["actions"]["mean"])[:14]) / (np.array(self._norm_stats["actions"]["std"])[:14] + 1e-6)
@@ -200,11 +208,19 @@ class ChunkedPolicy(_base_policy.BasePolicy):
             if self._cur_step == self._rtc_replan_start_step + self._rtc_handoff_delay_steps:
                 while self._background_running:
                     time.sleep(0.01)
+                if self._background_waiting:
+                    # Start a fresh chunk from the held pose when Sol is ready.
+                    # The in-flight high-level request and episode memory remain live.
+                    self._clear_actions()
+                    raise _base_policy.PolicyWaitingForObservation("Waiting for fresh Sol conditioning at RTC handoff")
+                if self._background_results is None:
+                    raise RuntimeError("No fresh RTC action chunk at the handoff")
                 self._task_phase = self._background_results.get("task_phase")
                 self._last_origin_actions = self._background_results["origin_actions"]
                 self._last_state = self._background_results["state"]
                 self._last_results = {"actions": self._background_results["actions"]}
                 self._cur_step -= self._rtc_replan_start_step
+                self._background_results = None
             # print(results)
             return results
         else:
@@ -231,13 +247,17 @@ class ChunkedPolicy(_base_policy.BasePolicy):
     def reset(self) -> None:
         with self._reset_lock:
             self._policy.reset()
-            self._last_results = None
-            self._last_origin_actions = None
-            self._background_results = None
-            self._obs = None
-            self._cur_step = 0
-            self._inference_prompt = None
-            self._task_phase = None
+            self._clear_actions()
+
+    def _clear_actions(self):
+        self._last_results = None
+        self._last_origin_actions = None
+        self._background_results = None
+        self._background_waiting = False
+        self._obs = None
+        self._cur_step = 0
+        self._inference_prompt = None
+        self._task_phase = None
 
     @property
     def inference_prompt(self) -> str | None:

@@ -32,7 +32,7 @@ class PaligemmaTokenizer:
         rating_is_valid=None,
         camera_low_position=None,
         long_memory: str | None = None,
-        nozzle_tip_pixels: tuple[tuple[int, int], tuple[int, int]] | None = None,
+        nozzle_tip_pixels: tuple[tuple[int, int] | None, tuple[int, int] | None] | None = None,
         joint_position_history=None,
         joint_history_settings=None,
         insert_action_quality: str | None = None,
@@ -41,9 +41,14 @@ class PaligemmaTokenizer:
         cleaned_text = camera_low_prompt(cleaned_text, camera_low_position)
         cleaned_text += prompt_metadata_suffix(operator, rating, rating_is_valid)
         if nozzle_tip_pixels is not None:
-            (high_x, high_y), (low_x, low_y) = nozzle_tip_pixels
-            cleaned_text += "\nI marked the nozzle tip with a circle in both camera images."
-            cleaned_text += f"\nNozzle tip pixels (448x448): cam_high {high_x} {high_y}; cam_low {low_x} {low_y}."
+            points = [(camera, pixel) for camera, pixel in zip(
+                ("cam_high", "cam_low"), nozzle_tip_pixels, strict=True
+            ) if pixel is not None]
+            if points:
+                marked_images = "both camera images" if len(points) == 2 else f"the {points[0][0]} image"
+                coordinates = "; ".join(f"{camera} {x} {y}" for camera, (x, y) in points)
+                cleaned_text += f"\nI marked the nozzle tip with a circle in {marked_images}."
+                cleaned_text += f"\nNozzle tip pixels (448x448): {coordinates}."
         if long_memory is not None:
             from openpi.shared.long_memory import decode_memory, memory_prompt
             cleaned_text += "\n" + memory_prompt(decode_memory(long_memory))

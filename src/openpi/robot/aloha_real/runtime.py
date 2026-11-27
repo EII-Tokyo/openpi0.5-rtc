@@ -174,6 +174,11 @@ class Runtime:
             logging.error(f"Redis连接失败: {e}")
             raise
 
+    def _revoke_sol_grant(self, grant=None):
+        if os.getenv("OPENPI_RINSE_RUNTIME") == "1" and self._redis_client is not None:
+            from openpi.shared import sol_run_grant
+            sol_run_grant.revoke(self._redis_client, grant)
+
     def _redis_listener(self) -> None:
         """Redis pub/sub监听线程"""
         pubsub = self._redis_client.pubsub()
@@ -191,6 +196,7 @@ class Runtime:
                             # Latch stop before an in-flight inference dispatches its next action.
                             if data.get("action") == "stop":
                                 self._recording_hold.set()
+                                self._revoke_sol_grant()
                             with self._task_lock:
                                 if len(self._recording_commands) < 16:
                                     self._recording_commands.append(data)
@@ -204,6 +210,9 @@ class Runtime:
                             logging.info("Inference conditioning update queued: %s", metadata)
                             continue
                         task_num = data.get('task')
+                        if task_num in {"3", "4", "5", "6"} and os.getenv("OPENPI_RINSE_RUNTIME") == "1":
+                            self._recording_hold.set()
+                            self._revoke_sol_grant()
                         task_name = data.get('task_name', '未知任务')
                         timestamp = data.get('timestamp', time.time())
                         
@@ -215,6 +224,7 @@ class Runtime:
                                 'task_name': task_name,
                                 'timestamp': timestamp,
                                 'command_id': data.get('command_id'),
+                                'sol_run_grant': data.get('sol_run_grant'),
                             }
                             self._latest_task.update({key: data[key] for key in METADATA_KEYS if key in data})
                             
@@ -320,6 +330,9 @@ class Runtime:
     def stop(self) -> None:
         """Request the runtime loop to stop."""
         self._stop = True
+        grant = self._current_task.get("sol_run_grant") if self._current_task else None
+        if grant:
+            self._revoke_sol_grant(grant)
 
     def _recording_status(self):
         """Expose file finalization and command acknowledgements independently."""
@@ -332,6 +345,9 @@ class Runtime:
     def _pause_recording(self):
         """Hold the last commanded pose, without home, sleep or torque-off commands."""
         self._recording_hold.set()
+        grant = self._current_task.get("sol_run_grant") if self._current_task else None
+        if grant:
+            self._revoke_sol_grant(grant)
         self._pending_task = None
         if getattr(self, "_task_cycle", None) is not None:
             self._task_cycle.stable_since = None
@@ -366,6 +382,8 @@ class Runtime:
                         raise ValueError("No paused policy task to resume")
                     if self._recording.snapshot()["status"] in {"recording", "saving", "error"}:
                         raise ValueError("Wait until recording is saved; resolve any recording error first")
+                    if os.getenv("OPENPI_RINSE_RUNTIME") == "1":
+                        raise ValueError("Click Start rinse to resume paid Sol inference")
                     self._policy.reset()
                     self._recording_paused = False
                     self._recording_hold.clear()
@@ -380,6 +398,9 @@ class Runtime:
             self._pause_recording()
 
     def _enter_waiting(self) -> None:
+        grant = self._current_task.get("sol_run_grant") if self._current_task else None
+        if grant:
+            self._revoke_sol_grant(grant)
         self._pending_task = None
         if getattr(self, "_task_cycle", None) is not None:
             self._task_cycle.reset()
@@ -390,7 +411,9 @@ class Runtime:
     def _run(self) -> None:
         """Runs a single episode."""
         logging.info("Starting episode...")
-        self._environment.reset()
+        self._defer_initial_home = os.getenv("OPENPI_DEFER_INITIAL_HOME") == "1" and self._task_cycle is None
+        if not self._defer_initial_home:
+            self._environment.reset()
         self._policy.reset()
         if self._task_cycle is not None:
             self._task_cycle.set_home(self._environment.get_joint_feedback()["qpos"])
@@ -430,7 +453,27 @@ class Runtime:
                     time.sleep(0.05)
                 else:
                     # 有任务时正常执行step
-                    self._step()
+                    try:
+                        self._step()
+                    except _base_policy.PolicyWaitingForObservation:
+                        now = time.monotonic()
+                        if self._sol_wait_started is None:
+                            self._sol_wait_started = now
+                        if now - self._sol_wait_started >= 25.0:
+                            logging.warning("No fresh Sol result for 25 seconds; ending the rinse run.")
+                            self._recording_hold.set()
+                            self._recording.finish()
+                            self._enter_waiting()
+                        else:
+                            self._publish_runtime_state(mode="waiting_high_level")
+                            time.sleep(0.15)
+                    except RuntimeError:
+                        if self._is_waiting_for_task or os.getenv("OPENPI_RINSE_RUNTIME") != "1":
+                            raise
+                        logging.exception("Policy update failed. Waiting for another explicit command.")
+                        self._recording_hold.set()
+                        self._recording.finish()
+                        self._enter_waiting()
                     # Sleep to maintain the desired frame rate
                     now = time.time()
                     dt = now - last_step_time
@@ -568,10 +611,15 @@ class Runtime:
             logging.warning("Unknown task for the current runtime mode: %s", task_num)
             return
 
-        if getattr(self, "_recording_paused", False) and task_num in (self._model_task_nums | {"6"}):
+        if (getattr(self, "_recording_paused", False) and task_num in (self._model_task_nums | {"6"})
+                and not task_data.get("sol_run_grant")):
             self._recording_command_error = "Recording paused the robot; use Resume execution first"
             self._publish_runtime_state(mode="paused")
             return
+        if task_num in {"3", "4", "5", "6"}:
+            grant = self._current_task.get("sol_run_grant") if self._current_task else None
+            if grant:
+                self._revoke_sol_grant(grant)
         cycle = getattr(self, "_task_cycle", None)
         if cycle is not None:
             if task_num in self._model_task_nums:
@@ -595,6 +643,18 @@ class Runtime:
             self._recording_hold.clear()
         
         if task_num in self._model_task_nums:
+            if os.getenv("OPENPI_RINSE_RUNTIME") == "1":
+                from openpi.shared import sol_run_grant
+                if not sol_run_grant.active(self._redis_client, task_data.get("sol_run_grant")):
+                    logging.info("Use the web Start rinse button to start paid Sol inference")
+                    return
+                self._sol_renew_at = 0.
+                self._sol_wait_started = None
+                self._recording_paused = False
+            self._recording_hold.clear()
+            if getattr(self, "_defer_initial_home", False):
+                self._environment.reset()
+                self._defer_initial_home = False
             task_data = dict(task_data)
             with self._task_lock:
                 self._pending_inference_settings = None
@@ -774,7 +834,8 @@ class Runtime:
             return
         self._apply_pending_inference_settings()
         step_started = time.monotonic()
-        observation = self._environment.get_observation()
+        # Refresh after idle and at every tick without issuing a motor command.
+        observation = self._environment.refresh_observation()
         if self._advance_home_cycle(observation):
             return
         observation_done = time.monotonic()
@@ -795,7 +856,17 @@ class Runtime:
         }
 
         infer_started = time.monotonic()
+        if os.getenv("OPENPI_RINSE_RUNTIME") == "1":
+            from openpi.shared import sol_run_grant
+            grant = self._current_task.get("sol_run_grant")
+            if infer_started >= self._sol_renew_at:
+                if not grant or not sol_run_grant.renew(self._redis_client, grant):
+                    raise RuntimeError("Sol start authorization expired")
+                self._sol_renew_at = infer_started + 2.
+            observation_with_task["sol_run_grant"] = grant
         action = self._policy.infer(observation_with_task)
+        if os.getenv("OPENPI_RINSE_RUNTIME") == "1":
+            self._sol_wait_started = None
         if getattr(self, "_task_cycle", None) is not None:
             try:
                 self._task_cycle.observe_phase(action.get("task_phase"))

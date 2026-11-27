@@ -1,5 +1,10 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { AppLanguage, translations } from '../i18n'
+import { apiBase } from '../services/api'
+
+type NozzleCamera = 'cam_high' | 'cam_low'
+type Point = { x: number; y: number }
+export type NozzleTips = Record<NozzleCamera, Point | null>
 
 const CAMERAS = [
   { key: 'cam_high', labelKey: 'high' },
@@ -18,7 +23,7 @@ type Props = {
   onCameraViewChange: (view: 'focus' | 'quad') => void
 }
 
-async function drawJpegB64ToCanvas(b64: string, canvas: HTMLCanvasElement | null) {
+async function drawJpegB64ToCanvas(b64: string, canvas: HTMLCanvasElement | null, tip?: Point | null) {
   if (!canvas || !b64) return
   try {
     const bytes = Uint8Array.from(atob(b64), (char) => char.charCodeAt(0))
@@ -34,6 +39,13 @@ async function drawJpegB64ToCanvas(b64: string, canvas: HTMLCanvasElement | null
       canvas.height = bmp.height
     }
     ctx.drawImage(bmp, 0, 0)
+    if (tip) {
+      ctx.beginPath()
+      ctx.arc(tip.x * canvas.width, tip.y * canvas.height, 8, 0, 2 * Math.PI)
+      ctx.lineWidth = 3
+      ctx.strokeStyle = '#ffdb38'
+      ctx.stroke()
+    }
     bmp.close()
   } catch (error) {
     console.error('Failed to decode camera frame', error)
@@ -60,11 +72,38 @@ export function CameraGrid({
   const primaryCamera = 'cam_high'
   const secondaryCameras = CAMERAS.filter((camera) => camera.key !== primaryCamera)
 
+  const [tips, setTips] = useState<NozzleTips | null>(null)
+  useEffect(() => {
+    const controller = new AbortController()
+    let timer: number | undefined
+    async function poll() {
+      try {
+        const response = await fetch(`${apiBase}/api/high-level/status`, { cache: 'no-store', signal: controller.signal })
+        if (response.ok) {
+          const state = await response.json()
+          if (!controller.signal.aborted) setTips(state.nozzle_tips ?? null)
+        }
+      } catch {
+        if (!controller.signal.aborted) setTips(null)
+      } finally {
+        if (!controller.signal.aborted) timer = window.setTimeout(poll, 1000)
+      }
+    }
+    void poll()
+    return () => {
+      controller.abort()
+      window.clearTimeout(timer)
+    }
+  }, [])
+
   useEffect(() => {
     void Promise.all(
-      Object.entries(cameraFrames).map(([name, b64]) => drawJpegB64ToCanvas(b64, canvasRefs.current[name] ?? null)),
+      Object.entries(cameraFrames).map(([name, b64]) =>
+        drawJpegB64ToCanvas(b64, canvasRefs.current[name] ?? null,
+          name === 'cam_high' || name === 'cam_low' ? tips?.[name] : null),
+      ),
     )
-  }, [cameraFrames])
+  }, [cameraFrames, tips])
 
   const bindCanvas = (name: string) => (element: HTMLCanvasElement | null) => {
     canvasRefs.current[name] = element
@@ -73,7 +112,9 @@ export function CameraGrid({
   const renderOverlay = (cameraKey: (typeof CAMERAS)[number]['key'], label: string) => (
     <div className="camera-overlay-chip">
       <div className="camera-overlay-head">
-        <span>{label}</span>
+        <span>{label}{(cameraKey === 'cam_high' || cameraKey === 'cam_low') && tips?.[cameraKey] === null
+          ? ` · ${language === 'zh' ? '喷嘴未识别' : language === 'ja' ? 'ノズル未検出' : 'Nozzle not detected'}`
+          : ''}</span>
         <span className={cameraStatus[cameraKey] ? 'dot live' : 'dot offline'} />
       </div>
       <div className="camera-overlay-meta">

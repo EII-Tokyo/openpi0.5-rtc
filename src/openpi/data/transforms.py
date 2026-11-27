@@ -226,11 +226,18 @@ class ResizeImages(DataTransformFn):
             ):
                 data["image"] = resized_images
                 return data
-            points = np.asarray(tips, dtype=np.float64)
-            if points.shape != (2, 2) or not np.all(np.isfinite(points) & (points >= 0) & (points <= 1)):
-                raise ValueError("nozzle_tips must contain two normalized [x, y] pairs")
+            if not isinstance(tips, (list, tuple, np.ndarray)) or (isinstance(tips, np.ndarray) and tips.ndim == 0) or len(tips) != 2:
+                raise ValueError("nozzle_tips must contain one entry per camera")
             pixels = []
-            for camera, (x, y) in zip(("cam_high", "cam_low"), points, strict=True):
+            for camera, point in zip(("cam_high", "cam_low"), tips, strict=True):
+                if point is None:
+                    pixels.append(None)
+                    continue
+                xy_normalized = np.asarray(point, dtype=np.float64)
+                if xy_normalized.shape != (2,) or not np.all(np.isfinite(xy_normalized) &
+                                                            (xy_normalized >= 0) & (xy_normalized <= 1)):
+                    raise ValueError("Each visible nozzle tip must contain normalized [x, y]")
+                x, y = xy_normalized
                 image = images[camera]
                 src_h, src_w = image.shape[-3:-1]
                 resized_h, resized_w, pad_y, pad_x = _resize_with_pad_geometry(src_h, src_w, self.height, self.width)
@@ -248,7 +255,8 @@ class ResizeImages(DataTransformFn):
                 draw.ellipse((px - 9, py - 9, px + 9, py + 9), outline="#181818", width=5)
                 draw.ellipse((px - 8, py - 8, px + 8, py + 8), outline="#ffcd44", width=3)
                 resized_images[camera] = np.asarray(marked)
-            data["nozzle_tip_pixels"] = pixels
+            if any(pixel is not None for pixel in pixels):
+                data["nozzle_tip_pixels"] = pixels
         data["image"] = resized_images
         return data
 

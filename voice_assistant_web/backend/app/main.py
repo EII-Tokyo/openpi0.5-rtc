@@ -124,6 +124,42 @@ async def voice_text(request: VoiceRequest) -> VoiceResponse:
     return await voice_engine.process_text(request.text, language=request.language)
 
 
+@app.get("/api/high-level/status")
+def high_level_status() -> dict:
+    raw = redis_client.get("aloha:sol_high_level:status")
+    if not raw:
+        return {"enabled": False, "status": "not_configured"}
+    from openpi.shared import sol_run_grant
+    state = json.loads(raw)
+    calibration = json.loads(redis_client.get(sol_run_grant.CALIBRATION_KEY) or "{}")
+    state["nozzle_tips"] = calibration.get("tips") if sol_run_grant.active(redis_client, calibration.get("grant")) else None
+    robot = json.loads(redis_client.get("aloha_recording_state") or "{}")
+    if time.time() - robot.get("timestamp", 0) <= 3:
+        if robot.get("mode") == "waiting_high_level":
+            state["status"] = "waiting_result"
+        elif robot.get("mode") in ("waiting", "paused") and not state["nozzle_tips"]:
+            if state.get("status") == "running":
+                state["status"] = "idle"
+    return state
+
+
+@app.get("/api/high-level/prompts")
+def high_level_prompts() -> dict:
+    from openpi.serving.sol_rinse_protocol import rinse_prompt
+
+    return {language: rinse_prompt(language) for language in ("zh", "en")}
+
+
+@app.post("/api/high-level/confirm-dwell/{token}")
+def confirm_rinse_dwell(token: str) -> dict:
+    status = high_level_status()
+    if (not token or token != status.get("dwell_token") or not status.get("updated_unix")
+            or time.time() - status["updated_unix"] > 8 or status.get("status") != "running"):
+        raise HTTPException(409, "There is no current insertion to confirm")
+    redis_client.set("aloha:rinse:dwell:" + token, "1", ex=30)
+    return {"confirmed": True}
+
+
 @app.get("/api/inference-settings")
 def inference_settings() -> dict:
     return {**read_inference_settings(redis_client).model_dump(), "operators": OPERATORS}
@@ -139,10 +175,29 @@ def update_inference_settings(request: InferenceSettings) -> dict:
     return {**request.model_dump(), "operators": OPERATORS}
 
 
+@app.post("/api/sol-rinse/start")
+def start_sol_rinse() -> dict:
+    from openpi.shared import sol_run_grant
+
+    raw = redis_client.get("aloha_recording_state")
+    state = json.loads(raw) if raw else {}
+    if state.get("mode") not in ("waiting", "paused") or time.time() - state.get("timestamp", 0) > 3:
+        raise HTTPException(409, "Robot must be waiting before starting Sol")
+    if not redis_client.set(sol_run_grant.KEY, "starting", ex=2, nx=True):
+        raise HTTPException(409, "Sol is already starting or running")
+    message = publish_task(redis_client, "2", authorize_sol=True)
+    return {"status": "ok", "command_id": message["command_id"]}
+
+
 @app.post("/api/tasks/{task_number}")
 def dispatch_task(task_number: str) -> dict[str, str]:
     if task_number not in TASK_MAPPING:
         raise HTTPException(status_code=404, detail=f"Unknown task {task_number}")
+    if task_number in {"1", "2"} and high_level_status().get("enabled"):
+        raise HTTPException(409, "Use the Start rinse button to enable paid Sol requests")
+    if task_number in {"3", "4", "5", "6"}:
+        from openpi.shared import sol_run_grant
+        sol_run_grant.revoke(redis_client)
     publish_task(redis_client, task_number)
     return {
         "status": "ok",
@@ -175,6 +230,9 @@ def control_recording(request: RecordingCommand) -> dict:
     if request.action == "stop" and state.get("status") not in {"recording", "saving"}:
         raise HTTPException(409, "There is no active recording to finish")
     command_id = str(uuid.uuid4())
+    if request.action == "stop":
+        from openpi.shared import sol_run_grant
+        sol_run_grant.revoke(redis_client)
     listeners = redis_client.publish("aloha_voice_commands", json.dumps({
         "type": "recording_control", "command_id": command_id, **request.model_dump()
     }))

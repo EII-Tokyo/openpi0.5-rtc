@@ -6,7 +6,7 @@ type Props = {
   mode: string
   inferencePrompt: string | null
   language: AppLanguage
-  dispatchTask: (taskNumber: string) => Promise<void>
+  dispatchTask: (taskNumber: string, explicitClick?: boolean) => Promise<void>
   dispatchError: string
 }
 
@@ -296,7 +296,12 @@ export function VoicePanel({ mode, inferencePrompt, language, dispatchTask, disp
           <h2>{t.voiceTitle}</h2>
         </div>
         <div className="voice-toolbar">
-          <span className="status-pill mode" title={`${t.runtime}: ${mode}`}>{t.runtime}: {mode}</span>
+          <span className="status-pill mode" role="status">
+            {mode === 'waiting_high_level'
+              ? (language === 'zh' ? '等待 Sol 回复 · 保持当前位置' : language === 'ja'
+                  ? 'Sol の応答待ち · 現在位置を保持' : 'Waiting for Sol · holding position')
+              : `${t.runtime}: ${mode}`}
+          </span>
         </div>
       </div>
 
@@ -322,7 +327,7 @@ export function VoicePanel({ mode, inferencePrompt, language, dispatchTask, disp
                   key={taskNumber}
                   type="button"
                   className="task-card compact"
-                  onClick={() => void dispatchTask(taskNumber)}
+                  onClick={() => void dispatchTask(taskNumber, true)}
                   title={t.taskDescriptions[taskNumber]}
                 >
                   <span className="task-key">{t.taskKey(taskNumber)}</span>

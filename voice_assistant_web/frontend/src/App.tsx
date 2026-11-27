@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { ActionDrawer } from './components/ActionDrawer'
 import { InferenceSettingsPanel } from './InferenceSettingsPanel'
 import { RecordingPanel } from './RecordingPanel'
+import { HighLevelPanel } from './HighLevelPanel'
 import { CameraGrid } from './components/CameraGrid'
 import { MotorDrawer } from './components/MotorDrawer'
 import { RobotViewer } from './components/RobotViewer'
@@ -61,6 +62,7 @@ export default function App() {
   const [actionDrawerOpen, setActionDrawerOpen] = useState(false)
   const [conditioningDrawerOpen, setConditioningDrawerOpen] = useState(false)
   const [recordingDrawerOpen, setRecordingDrawerOpen] = useState(false)
+  const [highLevelDrawerOpen, setHighLevelDrawerOpen] = useState(false)
   const t = translations[language]
 
   useEffect(() => {
@@ -104,21 +106,24 @@ export default function App() {
     return age < 1 ? t.live : t.stale(age.toFixed(1))
   }, [state.robot.timestamp, t])
 
-  const dispatchTask = async (taskNumber: string) => {
+  const dispatchTask = async (taskNumber: string, explicitClick = false) => {
     setDispatchError('')
     try {
-      const response = await fetch(`${apiBase}/api/tasks/${taskNumber}`, { method: 'POST' })
+      const route = explicitClick && taskNumber === '2' ? '/api/sol-rinse/start' : `/api/tasks/${taskNumber}`
+      const response = await fetch(`${apiBase}${route}`, { method: 'POST' })
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`)
+        const result = await response.json().catch(() => null)
+        throw new Error(result?.detail || `HTTP ${response.status}`)
       }
-    } catch {
-      setDispatchError(t.dispatchFailed)
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : ''
+      setDispatchError(detail ? `${t.dispatchFailed} ${detail}` : t.dispatchFailed)
     }
   }
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (conditioningDrawerOpen || recordingDrawerOpen) return
+      if (conditioningDrawerOpen || recordingDrawerOpen || highLevelDrawerOpen) return
       if (event.metaKey || event.ctrlKey || event.altKey || event.repeat) return
       const active = document.activeElement
       if (
@@ -145,7 +150,7 @@ export default function App() {
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [t.dispatchFailed, conditioningDrawerOpen, recordingDrawerOpen, state.robot.task_mode])
+  }, [t.dispatchFailed, conditioningDrawerOpen, recordingDrawerOpen, highLevelDrawerOpen, state.robot.task_mode])
 
   return (
     <main className="app-shell">
@@ -169,11 +174,14 @@ export default function App() {
           </button>
           <button className="ghost-button" type="button" aria-haspopup="dialog"
               aria-expanded={recordingDrawerOpen} onClick={() => setRecordingDrawerOpen(true)}>录制 / Recording</button>
+          <button className="ghost-button" type="button" aria-haspopup="dialog" aria-controls="high-level-results"
+            aria-expanded={highLevelDrawerOpen} onClick={() => setHighLevelDrawerOpen(true)}>{language === 'ja' ? '上位モデルの結果' : language === 'zh' ? '高层结果' : 'High-level results'}</button>
           <label className="language-switch">
             <span>{t.language}</span>
             <select value={language} onChange={(event) => setLanguage(event.target.value as AppLanguage)}>
               <option value="en">{t.english}</option>
               <option value="ja">{t.japanese}</option>
+              <option value="zh">中文</option>
             </select>
           </label>
         </div>
@@ -202,8 +210,11 @@ export default function App() {
             dispatchTask={dispatchTask}
             dispatchError={dispatchError}
           />
+
         </aside>
       </section>
+      <HighLevelPanel language={language} open={highLevelDrawerOpen} onClose={() => setHighLevelDrawerOpen(false)}
+        inferencePrompt={state.robot.inference_prompt} runtimeMode={state.robot.mode} />
       <InferenceSettingsPanel open={conditioningDrawerOpen} onClose={() => setConditioningDrawerOpen(false)}
         operator={state.robot.operator ?? null} rating={state.robot.rating ?? null}
         camera_low_position={state.robot.camera_low_position ?? null} />
