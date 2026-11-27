@@ -47,6 +47,14 @@ docker compose exec -it openpi_server /bin/bash
 uv run scripts/serve_policy.py --env ALOHA
 ```
 
+### Sol 请求间隔
+
+八任务实机启用 Sol 时，可在根目录 `.env` 中设置
+`OPENPI_SOL_REQUEST_INTERVAL_SECONDS=1`。单位是秒，支持小数，例如 `2.5`。
+机器人执行任务期间，独立定时器按此间隔读取四路新图并并行发送请求。
+超过 4 秒或已经被更新回复覆盖的结果会留档，但不会更新控制输入。
+参数留空时沿用 checkpoint 的串行调度配置。
+
 ### Redis Cleanup
 
 ```bash

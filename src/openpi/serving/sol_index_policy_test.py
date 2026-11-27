@@ -129,3 +129,32 @@ def test_reset_reconnect_rejects_server_without_required_protocol():
     new=Mock();client._wait_for_server=Mock(return_value=(new,{}))
     with pytest.raises(RuntimeError,match='no longer supports'):client.reset()
     new.send.assert_not_called()
+
+
+def test_configured_sol_interval_reaches_scheduler_and_status(tmp_path, monkeypatch):
+    from openpi.serving.high_level_status import RedisHighLevelStatus
+
+    monkeypatch.setenv('OPENAI_API_KEY', 'mock')
+    monkeypatch.setenv('OPENPI_HIGH_LEVEL_DATASET_DIR', str(tmp_path))
+    monkeypatch.setenv('OPENPI_SOL_REQUEST_INTERVAL_SECONDS', '2.5')
+    monkeypatch.setenv('OPENPI_HIGH_LEVEL_STATUS_REDIS', 'true')
+    publish = Mock()
+    monkeypatch.setattr(RedisHighLevelStatus, 'from_environment', publish)
+    m = metadata()
+    m['runtime']['video_input']['checkpoint_step'] = '10000'
+    wrapped = install(Mock(), m)
+    try:
+        assert wrapped.supervisor.interval_seconds == 2.5
+        assert m['runtime']['high_level']['request_interval_seconds'] == 2.5
+        assert m['runtime']['high_level']['reply_expiry_seconds'] == 4
+        assert publish.call_args.kwargs['interval_seconds'] == 2.5
+        assert not list(tmp_path.rglob('request.json'))
+    finally:
+        wrapped.supervisor.close()
+
+
+@pytest.mark.parametrize('value', ['0', '-1', 'nan', 'inf', 'bad'])
+def test_invalid_sol_interval_rejected_before_backend_setup(monkeypatch, value):
+    monkeypatch.setenv('OPENPI_SOL_REQUEST_INTERVAL_SECONDS', value)
+    with pytest.raises(ValueError, match='OPENPI_SOL_REQUEST_INTERVAL_SECONDS'):
+        install(Mock(), metadata())

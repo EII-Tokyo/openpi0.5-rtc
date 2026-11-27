@@ -14,15 +14,18 @@ from openpi.shared.sol_eight_task_prompt import PROMPT_VERSION, SYSTEM_PROMPT
 KEY = 'aloha:sol_high_level:status'
 
 class RedisHighLevelStatus:
-    def __init__(self, client, *, model, checkpoint_step, interval_seconds=3., clock=time.time):
+    def __init__(self, client, *, model, checkpoint_step, interval_seconds=3., reply_expiry=None, clock=time.time):
         self.client, self.clock = client, clock
         self.lock = threading.RLock()
         self.history = deque(maxlen=20)
         self.pending_outcomes = {}
         self.session = None
+        self.reply_expiry = reply_expiry
+        self.inflight = {}
         self.state = {'enabled': True, 'status': 'ready', 'model': model,
                       'checkpoint_step': checkpoint_step, 'request_interval_seconds': interval_seconds,
-                      'request_schedule': 'single_inflight_on_policy_observations',
+                      'request_schedule': ('periodic_parallel' if reply_expiry is not None
+                                           else 'single_inflight_on_policy_observations'),
                       'submitted': 0, 'completed': 0, 'inflight': 0, 'discarded': 0,
                       'error': None, 'current_task': '', 'bottle_description': '', 'memory': '',
                       'current_task_index': None, 'result_from_previous_episode': False,
@@ -39,7 +42,7 @@ class RedisHighLevelStatus:
                                    'memory': '<complete previous memory>',
                                    'current_task': '<previous canonical task sentence>'}},
             'camera_keys': ['cam_high', 'cam_low', 'cam_left_wrist', 'cam_right_wrist'],
-            'reply_expiry': None,
+            'reply_expiry': reply_expiry,
         }
         try:
             old = json.loads(client.get(KEY) or '{}')
@@ -55,12 +58,12 @@ class RedisHighLevelStatus:
             logging.warning('Could not restore prior high-level display history')
 
     @classmethod
-    def from_environment(cls, *, model, checkpoint_step, interval_seconds):
+    def from_environment(cls, *, model, checkpoint_step, interval_seconds, reply_expiry=None):
         import redis
         client = redis.Redis(host=os.environ.get('REDIS_HOST', 'localhost'),
                              port=int(os.environ.get('REDIS_PORT', '6379')),
                              socket_connect_timeout=.2, socket_timeout=.2)
-        return cls(client, model=model, checkpoint_step=checkpoint_step, interval_seconds=interval_seconds)
+        return cls(client, model=model, checkpoint_step=checkpoint_step, interval_seconds=interval_seconds, reply_expiry=reply_expiry)
 
     def _display(self, result):
         if result.get('status') == 'error':return
@@ -72,6 +75,7 @@ class RedisHighLevelStatus:
         """Accept only explicit display fields; never serialize requests or credentials."""
         with self.lock:
             if kind == 'reset':
+                self.inflight.clear()
                 self.state.update(status='ready', inflight=0, error=None, request_started_unix=None,
                                   active_request_seq=None, result_from_previous_episode=bool(self.history))
             elif kind == 'submitted':
@@ -79,10 +83,14 @@ class RedisHighLevelStatus:
                                   request_started_unix=record.get('requested_unix', self.clock()),
                                   active_request_seq=record.get('seq'))
                 self.state['submitted'] += 1
+                if self.reply_expiry is not None:
+                    self.inflight[str(directory)] = (self.state['active_request_seq'], self.state['request_started_unix'])
+                    self.state['inflight'] = len(self.inflight)
             elif kind == 'finished':
                 self.state['completed'] += 1
-                self.state['inflight'] = 0
-                self.state.update(request_started_unix=None, active_request_seq=None)
+                self.inflight.pop(str(directory), None)
+                active, started = next(reversed(self.inflight.values()), (None, None))
+                self.state.update(inflight=len(self.inflight), request_started_unix=started, active_request_seq=active)
                 timing = {key: record.get(key) for key in
                           ('requested_unix', 'returned_unix', 'latency_seconds')}
                 if record.get('status') != 'completed':
@@ -91,7 +99,8 @@ class RedisHighLevelStatus:
                                          'epoch': record.get('epoch'), 'status': 'error',
                                          'error': record.get('error_type', 'High-level request failed'),
                                          'applied': False, 'reason': 'request_or_parse_failed', **timing})
-                    self.state.update(status='error', error=record.get('error_type', 'High-level request failed'))
+                    if self.reply_expiry is None:
+                        self.state.update(status='error', error=record.get('error_type', 'High-level request failed'))
                 else:
                     prediction = decode_index_prediction(record['prediction'])
                     stamps = record.get('camera_timestamps', {})
@@ -106,8 +115,10 @@ class RedisHighLevelStatus:
                             'latency_seconds': record.get('latency_seconds'), 'observation_unix': observed,
                             'applied': None, 'reason': 'awaiting_application'}
                     item.update(self.pending_outcomes.pop(str(directory), {}))
-                    self.history.append(item);self._display(item)
-                    self.state.update(status='running', error=None, result_from_previous_episode=False)
+                    self.history.append(item)
+                    if self.reply_expiry is None:
+                        self._display(item)
+                        self.state.update(status='running', error=None, result_from_previous_episode=False)
             elif kind == 'outcome':
                 value = {key:record.get(key) for key in ('applied', 'reason')}
                 match = next((x for x in reversed(self.history) if x['id'] == str(directory)), None)
@@ -118,8 +129,10 @@ class RedisHighLevelStatus:
                     previously_discarded = match.get('applied') is False
                     match.update(value)
                     if record['applied'] is False and not previously_discarded:self.state['discarded'] += 1
-                    if match is self.history[-1]:self._display(match)
-                    if record['applied']:self.state.update(status='running', error=None)
+                    if (self.reply_expiry is None and match is self.history[-1]) or record['applied']:
+                        self._display(match)
+                    if record['applied']:
+                        self.state.update(status='running', error=None, result_from_previous_episode=False)
             elif kind == 'waiting':
                 self.state.update(status='waiting_result')
             elif kind == 'error':
